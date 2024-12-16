@@ -8,6 +8,7 @@ use crate::prelude::*;
 pub struct ProvisionalSecurifiedTransactionQueued {
     /// The FactorInstances we are changing to.
     pub factor_instances: SecurityStructureOfFactorInstances,
+
     /// The ID of the queued transaction which is changing the security structure
     /// to `factor_instances`.
     pub txid: TransactionIntentHash,

@@ -47,12 +47,111 @@ impl HasProvisionalSecurifiedConfig for EntitySecurityState {
     }
 }
 
+impl<'de> Deserialize<'de> for EntitySecurityState {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn deserialize<D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<Self, D::Error> {
+        // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
+        #[derive(Deserialize, Serialize)]
+        struct Wrapper {
+            #[serde(flatten, with = "EntitySecurityState")]
+            value: EntitySecurityState,
+        }
+        Wrapper::deserialize(deserializer).map(|w| w.value)
+    }
+}
+
+impl Serialize for EntitySecurityState {
+    #[cfg(not(tarpaulin_include))] // false negative
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state =
+            serializer.serialize_struct("EntitySecurityState", 2)?;
+        match self {
+            EntitySecurityState::Unsecured { value } => {
+                state.serialize_field("discriminator", "unsecured")?;
+                state.serialize_field("unsecuredEntityControl", value)?;
+            }
+            EntitySecurityState::Securified { value } => {
+                state.serialize_field("discriminator", "securified")?;
+                state.serialize_field("securedEntityControl", value)?;
+            }
+        }
+        state.end()
+    }
+}
+
+impl From<UnsecuredEntityControl> for EntitySecurityState {
+    fn from(value: UnsecuredEntityControl) -> Self {
+        Self::Unsecured { value }
+    }
+}
+
+impl From<SecuredEntityControl> for EntitySecurityState {
+    fn from(value: SecuredEntityControl) -> Self {
+        Self::Securified { value }
+    }
+}
+
+impl HasSampleValues for EntitySecurityState {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::Unsecured {
+            value: UnsecuredEntityControl::sample(),
+        }
+    }
+
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::Unsecured {
+            value: UnsecuredEntityControl::sample_other(),
+        }
+    }
+}
+
+impl HasFactorInstances for EntitySecurityState {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        match self {
+            EntitySecurityState::Unsecured { value } => {
+                value.unique_tx_signing_factor_instances()
+            }
+            EntitySecurityState::Securified { value } => {
+                value.unique_tx_signing_factor_instances()
+            }
+        }
+    }
+    fn unique_all_factor_instances(&self) -> IndexSet<FactorInstance> {
+        match self {
+            EntitySecurityState::Unsecured { value } => {
+                value.unique_all_factor_instances()
+            }
+            EntitySecurityState::Securified { value } => {
+                value.unique_all_factor_instances()
+            }
+        }
+    }
+}
+
 #[cfg(test)]
-mod has_provisional_securified_config_tests {
+mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = EntitySecurityState;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
     fn set_provisional_is_err_when_provisional_is_tx_queued(sut: SUT) {
         let mut sut = sut;
@@ -216,113 +315,6 @@ mod has_provisional_securified_config_tests {
         cancel_when_no_tx_queued_is_err(SUT::from(
             SecuredEntityControl::sample_other(),
         ))
-    }
-}
-
-impl<'de> Deserialize<'de> for EntitySecurityState {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn deserialize<D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<Self, D::Error> {
-        // https://github.com/serde-rs/serde/issues/1343#issuecomment-409698470
-        #[derive(Deserialize, Serialize)]
-        struct Wrapper {
-            #[serde(flatten, with = "EntitySecurityState")]
-            value: EntitySecurityState,
-        }
-        Wrapper::deserialize(deserializer).map(|w| w.value)
-    }
-}
-
-impl Serialize for EntitySecurityState {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut state =
-            serializer.serialize_struct("EntitySecurityState", 2)?;
-        match self {
-            EntitySecurityState::Unsecured { value } => {
-                state.serialize_field("discriminator", "unsecured")?;
-                state.serialize_field("unsecuredEntityControl", value)?;
-            }
-            EntitySecurityState::Securified { value } => {
-                state.serialize_field("discriminator", "securified")?;
-                state.serialize_field("securedEntityControl", value)?;
-            }
-        }
-        state.end()
-    }
-}
-
-impl From<UnsecuredEntityControl> for EntitySecurityState {
-    fn from(value: UnsecuredEntityControl) -> Self {
-        Self::Unsecured { value }
-    }
-}
-
-impl From<SecuredEntityControl> for EntitySecurityState {
-    fn from(value: SecuredEntityControl) -> Self {
-        Self::Securified { value }
-    }
-}
-
-impl HasSampleValues for EntitySecurityState {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::Unsecured {
-            value: UnsecuredEntityControl::sample(),
-        }
-    }
-
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        Self::Unsecured {
-            value: UnsecuredEntityControl::sample_other(),
-        }
-    }
-}
-
-impl HasFactorInstances for EntitySecurityState {
-    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
-        match self {
-            EntitySecurityState::Unsecured { value } => {
-                value.unique_tx_signing_factor_instances()
-            }
-            EntitySecurityState::Securified { value } => {
-                value.unique_tx_signing_factor_instances()
-            }
-        }
-    }
-    fn unique_all_factor_instances(&self) -> IndexSet<FactorInstance> {
-        match self {
-            EntitySecurityState::Unsecured { value } => {
-                value.unique_all_factor_instances()
-            }
-            EntitySecurityState::Securified { value } => {
-                value.unique_all_factor_instances()
-            }
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = EntitySecurityState;
-
-    #[test]
-    fn equality() {
-        assert_eq!(SUT::sample(), SUT::sample());
-        assert_eq!(SUT::sample_other(), SUT::sample_other());
-    }
-
-    #[test]
-    fn inequality() {
-        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
     #[test]
