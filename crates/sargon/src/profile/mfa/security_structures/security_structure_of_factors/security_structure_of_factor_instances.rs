@@ -127,6 +127,17 @@ mod tests {
     }
 
     #[test]
+    fn unique_all_factor_instances() {
+        let sut = SUT::sample();
+        assert!(sut
+            .unique_all_factor_instances()
+            .into_iter()
+            .map(|f| f.try_as_hd_factor_instances().unwrap())
+            .any(|f| f.derivation_path().get_key_kind()
+                == CAP26KeyKind::AuthenticationSigning));
+    }
+
+    #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
@@ -135,6 +146,38 @@ mod tests {
     fn timed_recovery_delay_in_minutes() {
         let sut = SUT::sample();
         assert_eq!(sut.timed_recovery_delay_in_minutes(), 20160);
+    }
+
+    #[test]
+    fn wrong_entity_kind_of_auth_signing_factor() {
+        let res = SUT::new(SecurityStructureID::sample(), MatrixOfFactorInstances::sample(), HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(NetworkID::Mainnet, CAP26KeyKind::AuthenticationSigning, CAP26EntityKind::Identity, Hardened::Securified(SecurifiedU30::ZERO)));
+        assert!(matches!(
+            res,
+            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
+        ));
+    }
+
+    #[test]
+    fn id() {
+        assert_eq!(SUT::sample().id(), SUT::sample().security_structure_id);
+    }
+
+    #[test]
+    fn wrong_key_kind_of_auth_signing_factor() {
+        let res = SUT::new(SecurityStructureID::sample(), MatrixOfFactorInstances::sample(), HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(NetworkID::Mainnet, CAP26KeyKind::TransactionSigning, CAP26EntityKind::Account, Hardened::Securified(SecurifiedU30::ZERO)));
+        assert!(matches!(
+            res,
+            Err(CommonError::WrongKeyKindOfAuthenticationSigningFactorInstance)
+        ));
+    }
+
+    #[test]
+    fn auth_signing_factor_not_signing() {
+        let res = SUT::new(SecurityStructureID::sample(), MatrixOfFactorInstances::sample(), HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(NetworkID::Mainnet, CAP26KeyKind::AuthenticationSigning, CAP26EntityKind::Account, Hardened::Unsecurified(UnsecurifiedHardened::ZERO)));
+        assert!(matches!(
+            res,
+            Err(CommonError::AuthenticationSigningFactorInstanceNotSecurified)
+        ));
     }
 
     #[test]

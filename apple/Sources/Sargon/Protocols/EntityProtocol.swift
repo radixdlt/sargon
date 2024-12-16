@@ -41,31 +41,25 @@ extension EntityBaseProtocol {
 		flags.contains(.hiddenByUser)
 	}
 
+	// TODO: MOVE TO SARGON
 	public var virtualHierarchicalDeterministicFactorInstances: Set<HierarchicalDeterministicFactorInstance> {
 		var factorInstances = Set<HierarchicalDeterministicFactorInstance>()
 		switch securityState {
 		case let .unsecured(unsecuredEntityControl):
 			factorInstances.insert(unsecuredEntityControl.transactionSigning)
-			if let authSigning = unsecuredEntityControl.authenticationSigning {
-				factorInstances.insert(authSigning)
-			}
 			return factorInstances
-			// TODO: Handle when MFA is integrated
-//		case .securified(value: let value):
-//			return []
 		}
 	}
 
+	// TODO: MOVE TO SARGON
 	public var hasAuthenticationSigningKey: Bool {
 		switch securityState {
 		case let .unsecured(unsecuredEntityControl):
-			unsecuredEntityControl.authenticationSigning != nil
-			// TODO: Handle when MFA is integrated
-//		case .securified(value: let value):
-//			false // TODO handle that in the future
+			false
 		}
 	}
 
+	// TODO: MOVE TO SARGON
 	public var deviceFactorSourceID: FactorSourceIDFromHash? {
 		switch self.securityState {
 		case let .unsecured(control):
@@ -75,9 +69,6 @@ extension EntityBaseProtocol {
 			}
 
 			return factorSourceID
-			// TODO: Handle when MFA is integrated
-//		case .securified(value: _):
-//			return nil // TODO handle that in the future
 		}
 	}
 }
@@ -155,7 +146,7 @@ extension EntityProtocol {
 		self.init(
 			networkID: networkID,
 			address: address,
-			securityState: .unsecured(value: .init(transactionSigning: factorInstance, authenticationSigning: nil)),
+			securityState: .unsecured(value: .init(transactionSigning: factorInstance, provisional: nil)),
 			displayName: displayName,
 			extraProperties: extraProperties
 		)
