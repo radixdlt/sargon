@@ -851,6 +851,14 @@ pub enum CommonError {
         entity_kind_of_entity: CAP26EntityKind,
         entity_kind_of_factor_instances: CAP26EntityKind,
     } = 10239,
+
+    #[error(
+        "Cannot securify entity it is already securified according to profile"
+    )]
+    CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile = 10240,
+
+    #[error("Cannot securify entity that has provisional security config")]
+    CannotSecurifyEntityHasProvisionalSecurityConfig = 10241,
 }
 
 impl CommonError {

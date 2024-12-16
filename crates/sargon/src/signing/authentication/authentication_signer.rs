@@ -155,7 +155,7 @@ mod test {
             result,
             WalletToDappInteractionAuthProof::new(
                 factor_instance.clone().public_key.public_key,
-                "9c0745dbfb85926a18936a3d7fde45b21fc9915f2361bde8f4149468f2cc857a6c8dca0bf202cd2d037eeb21ce57cbd5a52440bfdc73a8b5d70284f5cb64fc03".parse::<Signature>().unwrap()
+                "be359ca8edf8dccb2155e841952e88591fe42903da7e9a1560e863fe2fea94ed412d9eed282d201d48e5602fcde9a1dc201f440e86cb5f919b493bafc0ba2002".parse::<Signature>().unwrap()
             )
         );
     }

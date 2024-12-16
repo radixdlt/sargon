@@ -8,11 +8,13 @@ impl TransactionManifest {
         security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
     ) -> Result<Self> {
         let Ok(unsecurified) = entity.security_state().into_unsecured() else {
-            return Err(CommonError::Unknown);
+            return Err(CommonError::CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile);
         };
 
         if unsecurified.provisional.is_some() {
-            return Err(CommonError::Unknown);
+            return Err(
+                CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig,
+            );
         };
 
         Self::_securify_unsecurified_entity(
@@ -104,31 +106,103 @@ mod tests {
     use super::*;
 
     #[test]
+    fn cannot_securify_entity_it_is_already_securified_according_to_profile() {
+        let account = Account::sample_at(2);
+        assert!(account.is_securified());
+        let res = TransactionManifest::securify_unsecurified_entity(
+            account,
+            SecurityStructureOfFactorInstances::sample(),
+        );
+        assert_eq!(res, Err(CommonError::CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile));
+    }
+
+    #[test]
+    fn cannot_securify_entity_with_provisional() {
+        let mut account = Account::sample_alice();
+        assert!(!account.is_securified());
+        account
+            .security_state
+            .set_provisional(ProvisionalSecurifiedConfig::ShieldSelected {
+                value: SecurityStructureID::sample(),
+            })
+            .unwrap();
+        let res = TransactionManifest::securify_unsecurified_entity(
+            account,
+            SecurityStructureOfFactorInstances::sample(),
+        );
+        assert_eq!(
+            res,
+            Err(CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig)
+        );
+    }
+
+    #[test]
     fn test_securify_unsecurified_account() {
-        let expected_manifest = include_str!(concat!(
+        let expected_manifest_str = include_str!(concat!(
             env!("FIXTURES_TX"),
             "create_access_controller_for_account.rtm"
         ));
+        let entity = Account::sample();
+        let security_structure_of_factor_instances =
+            SecurityStructureOfFactorInstances::sample();
         let manifest = TransactionManifest::securify_unsecurified_entity(
-            Account::sample(),
-            SecurityStructureOfFactorInstances::sample(),
+            entity.clone(),
+            security_structure_of_factor_instances.clone(),
         )
         .unwrap();
-        manifest_eq(manifest, expected_manifest);
+        manifest_eq(manifest, expected_manifest_str);
+        assert!(expected_manifest_str.contains("securify"));
+        assert!(expected_manifest_str.contains(
+            &security_structure_of_factor_instances
+                .timed_recovery_delay_in_minutes()
+                .to_string()
+        ));
+
+        for fi in security_structure_of_factor_instances
+            .unique_all_factor_instances()
+            .into_iter()
+            .filter_map(|f| f.try_as_hd_factor_instances().ok())
+        {
+            assert!(expected_manifest_str
+                .contains(&PublicKeyHash::hash(fi.public_key()).to_string()));
+        }
+
+        assert!(expected_manifest_str.contains(&entity.address.to_string()));
     }
 
     #[test]
     fn test_securify_unsecurified_persona() {
-        let expected_manifest = include_str!(concat!(
+        let expected_manifest_str = include_str!(concat!(
             env!("FIXTURES_TX"),
             "create_access_controller_for_persona.rtm"
         ));
+        let entity = Persona::sample_other();
+        let security_structure_of_factor_instances =
+            SecurityStructureOfFactorInstances::sample_other();
         let manifest = TransactionManifest::securify_unsecurified_entity(
-            Persona::sample_other(),
-            SecurityStructureOfFactorInstances::sample_other(),
+            entity.clone(),
+            security_structure_of_factor_instances.clone(),
         )
         .unwrap();
-        manifest_eq(manifest, expected_manifest);
+        manifest_eq(manifest, expected_manifest_str);
+
+        assert!(expected_manifest_str.contains("securify"));
+        assert!(expected_manifest_str.contains(
+            &security_structure_of_factor_instances
+                .timed_recovery_delay_in_minutes()
+                .to_string()
+        ));
+
+        for fi in security_structure_of_factor_instances
+            .unique_all_factor_instances()
+            .into_iter()
+            .filter_map(|f| f.try_as_hd_factor_instances().ok())
+        {
+            assert!(expected_manifest_str
+                .contains(&PublicKeyHash::hash(fi.public_key()).to_string()));
+        }
+
+        assert!(expected_manifest_str.contains(&entity.address.to_string()));
     }
 
     #[test]

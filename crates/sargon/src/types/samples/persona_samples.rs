@@ -204,6 +204,10 @@ impl Persona {
         let address =
             IdentityAddress::new(veci.public_key(), NetworkID::Mainnet);
 
+        let rola_index = u32::from(
+            veci.derivation_entity_index().index_in_local_key_space(),
+        );
+
         let security_structure_of_factor_instances =
             SecurityStructureOfFactorInstances::new(
                 SecurityStructureID::sample(),
@@ -212,8 +216,8 @@ impl Persona {
                     NetworkID::Mainnet,
                     CAP26KeyKind::AuthenticationSigning,
                     CAP26EntityKind::Identity,
-                    SecurifiedU30::ZERO,
-                ), // TODO: Remove hard coding?
+                    SecurifiedU30::try_from(rola_index).unwrap(),
+                ),
             )
             .unwrap();
 

@@ -227,7 +227,10 @@ impl HierarchicalDeterministicFactorInstance {
 
     /// Account | Mainnet
     /// A sample used to facilitate unit tests.
-    fn sample_with_key_kind(key_kind: CAP26KeyKind, index: u32) -> Self {
+    pub(crate) fn sample_with_key_kind(
+        key_kind: CAP26KeyKind,
+        index: u32,
+    ) -> Self {
         Self::sample_with_key_kind_entity_kind(
             key_kind,
             CAP26EntityKind::Account,

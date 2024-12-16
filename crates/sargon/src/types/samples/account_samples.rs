@@ -171,6 +171,10 @@ impl Account {
                 .collect_vec(),
         );
 
+        let rola_index = u32::from(
+            veci.derivation_entity_index().index_in_local_key_space(),
+        );
+
         let network_id = NetworkID::Mainnet;
         let address =
             AccountAddress::new(veci.public_key(), NetworkID::Mainnet);
@@ -183,8 +187,8 @@ impl Account {
                     NetworkID::Mainnet,
                     CAP26KeyKind::AuthenticationSigning,
                     CAP26EntityKind::Account,
-                    SecurifiedU30::ZERO,
-                ),// TODO: Remove hard coding?
+                    SecurifiedU30::try_from(rola_index).unwrap(),
+                ),
             )
             .unwrap();
 

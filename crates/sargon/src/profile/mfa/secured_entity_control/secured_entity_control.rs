@@ -195,6 +195,17 @@ mod tests {
     }
 
     #[test]
+    fn unique_all_factor_instances_includes_rola() {
+        let sut = SUT::sample();
+        assert!(sut
+            .unique_all_factor_instances()
+            .into_iter()
+            .map(|f| f.try_as_hd_factor_instances().unwrap())
+            .any(|f| f.derivation_path().get_key_kind()
+                == CAP26KeyKind::AuthenticationSigning));
+    }
+
+    #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
