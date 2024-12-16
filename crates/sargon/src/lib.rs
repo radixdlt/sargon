@@ -331,7 +331,7 @@ pub mod prelude {
             DetailedManifestClass as RetDetailedManifestClass,
             DynamicAnalysis as RetDynamicAnalysis, FeeSummary as RetFeeSummary,
             FungibleResourceIndicator as RetFungibleResourceIndicator,
-            NewEntities as RetNewEntities,
+            ManifestClass as RetManifestClass, NewEntities as RetNewEntities,
             NonFungibleResourceIndicator as RetNonFungibleResourceIndicator,
             Operation as RetOperation, Predicted as RetPredicted,
             ReservedInstruction as RetReservedInstruction,

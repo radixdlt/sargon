@@ -8,6 +8,10 @@ pub enum ReservedInstruction {
     AccountSecurify,
     IdentitySecurify,
     AccessControllerMethod,
+    AccountLockOwnerKeysMetadataField,
+    AccountUpdateOwnerKeysMetadataField,
+    IdentityLockOwnerKeysMetadataField,
+    IdentityUpdateOwnerKeysMetadataField,
 }
 
 impl From<RetReservedInstruction> for ReservedInstruction {
@@ -18,6 +22,18 @@ impl From<RetReservedInstruction> for ReservedInstruction {
             RetReservedInstruction::IdentitySecurify => Self::IdentitySecurify,
             RetReservedInstruction::AccessControllerMethod => {
                 Self::AccessControllerMethod
+            }
+            RetReservedInstruction::AccountLockOwnerKeysMetadataField => {
+                Self::AccountLockOwnerKeysMetadataField
+            }
+            RetReservedInstruction::AccountUpdateOwnerKeysMetadataField => {
+                Self::AccountUpdateOwnerKeysMetadataField
+            }
+            RetReservedInstruction::IdentityLockOwnerKeysMetadataField => {
+                Self::IdentityLockOwnerKeysMetadataField
+            }
+            RetReservedInstruction::IdentityUpdateOwnerKeysMetadataField => {
+                Self::IdentityUpdateOwnerKeysMetadataField
             }
         }
     }

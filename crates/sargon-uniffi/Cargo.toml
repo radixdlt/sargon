@@ -21,7 +21,7 @@ required-features = ["build-binary"]
 sargon = { path = "../sargon" }
 sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" }
 
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "9f58ddfc6e0edb06cb35f8422044522bc0387d14" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "2ab5b35a6cb96c9faeb98ed8df67b870336e6873" }
 
 # zeroize = "1.7.0"
 zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [

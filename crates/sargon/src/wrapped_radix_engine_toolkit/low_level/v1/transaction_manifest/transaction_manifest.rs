@@ -474,6 +474,7 @@ BURN_RESOURCE
                 [AccountAddress::sample()],
                 [],
                 Vec::<_>::sample(),
+                [RetManifestClass::Transfer, RetManifestClass::General],
             )
         );
     }
@@ -522,6 +523,7 @@ BURN_RESOURCE
                 [a],
                 [],
                 Vec::<_>::sample(),
+                [RetManifestClass::Transfer, RetManifestClass::General],
             )
         );
     }

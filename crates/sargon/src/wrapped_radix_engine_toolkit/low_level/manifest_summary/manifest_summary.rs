@@ -38,6 +38,10 @@ pub struct ManifestSummary {
     /// The set of instructions encountered in the manifest that are reserved
     /// and can only be included in the manifest by the wallet itself.
     pub reserved_instructions: Vec<ReservedInstruction>,
+
+    /// The various classifications that this manifest matched against. Note
+    /// that an empty set means that the manifest is non-conforming.
+    pub classification: IndexSet<RetManifestClass>,
 }
 
 impl ManifestSummary {
@@ -54,6 +58,7 @@ impl ManifestSummary {
         accounts_requiring_auth: impl IntoIterator<Item = AccountAddress>,
         personas_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
         reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
+        classification: impl IntoIterator<Item = RetManifestClass>,
     ) -> Self {
         Self {
             account_withdrawals: account_withdraws.into(),
@@ -85,6 +90,7 @@ impl ManifestSummary {
                 .into_iter()
                 .collect_vec(),
             reserved_instructions: reserved_instructions.into_iter().collect(),
+            classification: classification.into_iter().collect::<IndexSet<_>>(),
         }
     }
 }
@@ -176,7 +182,18 @@ impl From<(RetStaticAnalysisWithResourceMovements, NetworkID)>
             addresses_of_accounts_requiring_auth,
             addresses_of_personas_requiring_auth,
             reserved_instructions,
+            ret.classification,
         )
+    }
+}
+
+impl HasSampleValues for RetManifestClass {
+    fn sample() -> Self {
+        RetManifestClass::GeneralSubintent
+    }
+
+    fn sample_other() -> Self {
+        RetManifestClass::Transfer
     }
 }
 
@@ -192,6 +209,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample(),
             reserved_instructions: Vec::<_>::sample(),
+            classification: IndexSet::<_>::sample(),
         }
     }
 
@@ -206,6 +224,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample_other(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample_other(),
             reserved_instructions: Vec::<_>::sample_other(),
+            classification: IndexSet::<_>::sample_other(),
         }
     }
 }
@@ -232,6 +251,7 @@ mod tests {
             Vec::default(),
             Vec::default(),
             Vec::default(),
+            Vec::default(),
         );
         assert_eq!(sut.addresses_of_accounts_withdrawn_from.len(), 1);
     }
@@ -247,6 +267,7 @@ mod tests {
             Vec::default(),
             Vec::default(),
             duplicates,
+            Vec::default(),
             Vec::default(),
             Vec::default(),
             Vec::default(),
