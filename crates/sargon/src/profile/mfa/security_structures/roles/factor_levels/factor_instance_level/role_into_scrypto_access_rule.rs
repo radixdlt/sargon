@@ -45,19 +45,6 @@ impl From<MatrixOfFactorInstances> for ScryptoRuleSet {
 
 pub const MINUTES_PER_DAY: u32 = 24 * 60;
 
-impl From<SecurityStructureOfFactorInstances> for ScryptoRecoveryProposal {
-    fn from(value: SecurityStructureOfFactorInstances) -> Self {
-        let timed_recovery_delay_in_minutes =
-            value.timed_recovery_delay_in_minutes();
-        Self {
-            rule_set: value.matrix_of_factors.into(),
-            timed_recovery_delay_in_minutes: Some(
-                timed_recovery_delay_in_minutes,
-            ),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
