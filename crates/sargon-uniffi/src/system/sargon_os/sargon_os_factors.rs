@@ -136,7 +136,7 @@ impl SargonOS {
     }
 
     /// Updates the name of the corresponding `factor_source` in Profile. Throws `UpdateFactorSourceMutateFailed` error if the
-    /// factor source is not found.
+    /// factor source is not found. Returns the updated `FactorSource`.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
@@ -144,7 +144,7 @@ impl SargonOS {
         &self,
         factor_source: FactorSource,
         name: String,
-    ) -> Result<()> {
+    ) -> Result<FactorSource> {
         self.wrapped
             .update_factor_source_name(factor_source.into_internal(), name)
             .await
