@@ -342,7 +342,7 @@ mod tests {
                 &bdfs.id_from_hash(),
             )
             .unwrap();
-        assert_eq!(account_outcome.len(), 1);
+        assert_eq!(account_outcome.to_use_directly.len(), 1);
 
         // let profile = Arc::new(os.profile().unwrap());
         // let (instances_in_cache_consumer, outcome) = SUT::for_persona_mfa(
@@ -364,6 +364,6 @@ mod tests {
                 &bdfs.id_from_hash(),
             )
             .unwrap();
-        assert_eq!(persona_outcome.len(), 1);
+        assert_eq!(persona_outcome.to_use_directly.len(), 1);
     }
 }

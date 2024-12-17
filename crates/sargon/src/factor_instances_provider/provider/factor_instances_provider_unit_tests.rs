@@ -117,7 +117,7 @@ impl SargonOS {
             .for_each(|a| assert!(self.account_by_address(*a).is_ok()));
 
         let outcome = self.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            account_addresses.clone(),
+            account_addresses.clone().into_iter().map(Into::into).collect(),
                     shield.clone()).await?;
 
         let (
@@ -137,7 +137,9 @@ impl SargonOS {
             .map(|account_address| {
                 let security_structure_of_factor_instances =
                     security_structures_of_factor_instances
-                        .shift_remove(&account_address)
+                        .shift_remove(&AddressOfAccountOrPersona::from(
+                            account_address,
+                        ))
                         .unwrap();
 
                 // Production ready code should batch update accounts, submit batch transaction to
@@ -510,6 +512,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
                 .clone()
                 .into_iter()
                 .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
                 .collect(),
                 shield_0.clone()).await.unwrap();
 
@@ -581,6 +584,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
         .clone()
         .into_iter()
         .map(|a| a.address())
+        .map(AddressOfAccountOrPersona::from)
         .collect(),
         shield_0.clone()
     )
@@ -635,7 +639,7 @@ async fn test_assert_factor_instances_invalid() {
 
     let shield_0 =
         SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
-    let (security_structure_of_fis, _, _) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(IndexSet::from_iter([alice.address()]), shield_0.clone()).await.unwrap();
+    let (security_structure_of_fis, _, _) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(IndexSet::from_iter([AddressOfAccountOrPersona::from(alice.address())]), shield_0.clone()).await.unwrap();
 
     let security_structure_of_fi =
         security_structure_of_fis.values().next().unwrap().clone();
@@ -976,7 +980,7 @@ async fn test_securified_accounts() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([alice.address(), bob.address()]),
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(alice.address()), AddressOfAccountOrPersona::from(bob.address())]),
             shield_0,
         )
         .await
@@ -990,7 +994,9 @@ async fn test_securified_accounts() {
     // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
-    let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
+    let alice_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(alice.address()))
+        .unwrap();
 
     let alice_matrix = alice_sec.matrix_of_factors.clone();
     assert_eq!(alice_matrix.primary().get_threshold(), 2);
@@ -1029,7 +1035,9 @@ async fn test_securified_accounts() {
 
     // assert bob
 
-    let bob_sec = security_structures_of_fis.get(&bob.address()).unwrap();
+    let bob_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(bob.address()))
+        .unwrap();
 
     let bob_matrix = bob_sec.matrix_of_factors.clone();
     assert_eq!(bob_matrix.primary().get_threshold(), 2);
@@ -1110,7 +1118,7 @@ async fn test_securified_accounts() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, _) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([carol.address()]),
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(carol.address())]),
             shield_1.clone(),
         )
         .await
@@ -1119,7 +1127,9 @@ async fn test_securified_accounts() {
     // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
-    let carol_sec = security_structures_of_fis.get(&carol.address()).unwrap();
+    let carol_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(carol.address()))
+        .unwrap();
 
     let carol_matrix = carol_sec.matrix_of_factors.clone();
     assert_eq!(carol_matrix.primary_role.get_threshold_factors().len(), 1);
@@ -1151,7 +1161,7 @@ async fn test_securified_accounts() {
     // Update Alice's shield 1 -  only Passphrase as override factor
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        IndexSet::from_iter([alice.address()]),
+        IndexSet::from_iter([AddressOfAccountOrPersona::from(alice.address())]),
         shield_1,
     )
     .await
@@ -1165,7 +1175,9 @@ async fn test_securified_accounts() {
         "should have used cache"
     );
 
-    let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
+    let alice_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(alice.address()))
+        .unwrap();
 
     let alice_matrix = alice_sec.matrix_of_factors.clone();
 
@@ -1265,7 +1277,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        first_half_of_accounts.clone().into_iter().map(|a| a.address()).collect(),
+        first_half_of_accounts.clone().into_iter().map(|a| a.address()).map(AddressOfAccountOrPersona::from).collect(),
         shield_0.clone(),
     )
     .await
@@ -1301,7 +1313,9 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        second_half_of_accounts.clone().into_iter().map(|a| a.address()).collect(),
+        second_half_of_accounts.clone().into_iter().map(|a| a.address())
+        .map(AddressOfAccountOrPersona::from)
+        .collect(),
         shield_0.clone(),
     )
     .await
@@ -1413,7 +1427,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        first_half_of_accounts.clone().into_iter().map(|a| a.address()).collect(),
+        first_half_of_accounts.clone().into_iter().map(|a| a.address()).map(AddressOfAccountOrPersona::from).collect(),
         shield_0.clone(),
     )
     .await
@@ -1491,7 +1505,9 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        second_half_of_accounts.clone().into_iter().map(|a| a.address()).collect(),
+        second_half_of_accounts.clone().into_iter().map(|a| a.address())
+        .map(AddressOfAccountOrPersona::from)
+        .collect(),
         shield_0.clone(),
     )
     .await
@@ -1650,7 +1666,9 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        first_half_of_personas.clone().into_iter().map(|a| a.address()).collect(),
+        first_half_of_personas.clone().into_iter().map(|a| a.address())
+        .map(AddressOfAccountOrPersona::from)
+        .collect(),
         shield_0.clone(),
     )
     .await
@@ -1685,7 +1703,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        second_half_of_personas.clone().into_iter().map(|a| a.address()).collect(),
+        second_half_of_personas.clone().into_iter().map(|a| a.address()).map(AddressOfAccountOrPersona::from).collect(),
         shield_0.clone(),
     )
     .await
@@ -1762,7 +1780,7 @@ async fn create_single_account() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-       IndexSet::just(alice.address()),
+       IndexSet::just(AddressOfAccountOrPersona::from(alice.address())),
         shield_0.clone(),
     )
     .await
@@ -1776,7 +1794,9 @@ async fn create_single_account() {
         "should have used cache"
     );
 
-    let alice_sec = security_structures_of_fis.get(&alice.address()).unwrap();
+    let alice_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(alice.address()))
+        .unwrap();
 
     let alice_matrix = alice_sec.matrix_of_factors.clone();
 
@@ -1851,7 +1871,7 @@ async fn securified_personas() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([batman.address(), satoshi.address()]),
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(batman.address()), AddressOfAccountOrPersona::from(satoshi.address())]),
             shield_0,
         )
         .await
@@ -1865,7 +1885,9 @@ async fn securified_personas() {
     // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
-    let batman_sec = security_structures_of_fis.get(&batman.address()).unwrap();
+    let batman_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(batman.address()))
+        .unwrap();
 
     let batman_matrix = batman_sec.matrix_of_factors.clone();
     assert_eq!(batman_matrix.primary().get_threshold(), 2);
@@ -1904,8 +1926,9 @@ async fn securified_personas() {
 
     // assert satoshi
 
-    let satoshi_sec =
-        security_structures_of_fis.get(&satoshi.address()).unwrap();
+    let satoshi_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(satoshi.address()))
+        .unwrap();
 
     let satoshi_matrix = satoshi_sec.matrix_of_factors.clone();
     assert_eq!(satoshi_matrix.primary().get_threshold(), 2);
@@ -1989,7 +2012,7 @@ async fn securified_personas() {
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([hyde.address()]),
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(hyde.address())]),
             shield_1.clone(),
         )
         .await
@@ -2003,7 +2026,9 @@ async fn securified_personas() {
         "should have used cache"
     );
 
-    let hyde_sec = security_structures_of_fis.get(&hyde.address()).unwrap();
+    let hyde_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(hyde.address()))
+        .unwrap();
 
     let hyde_matrix = hyde_sec.matrix_of_factors.clone();
     assert_eq!(hyde_matrix.primary_role.get_threshold_factors().len(), 1);
@@ -2035,7 +2060,7 @@ async fn securified_personas() {
     // Update Batman's shield 1 -  only Passphrase as override factor
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        IndexSet::from_iter([batman.address()]),
+        IndexSet::from_iter([AddressOfAccountOrPersona::from(batman.address())]),
         shield_1,
     )
     .await
@@ -2048,7 +2073,9 @@ async fn securified_personas() {
         "should have used cache"
     );
 
-    let batman_sec = security_structures_of_fis.get(&batman.address()).unwrap();
+    let batman_sec = security_structures_of_fis
+        .get(&AddressOfAccountOrPersona::from(batman.address()))
+        .unwrap();
 
     let batman_matrix = batman_sec.matrix_of_factors.clone();
 

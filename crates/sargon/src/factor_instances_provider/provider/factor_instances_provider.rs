@@ -93,9 +93,9 @@ impl FactorInstancesProvider {
         //     FactorInstances,
         // >,
         instances_to_delete: IndexMap<
-        DerivationPreset,
-        IndexMap<FactorSourceIDFromHash, FactorInstances>,
-    >
+            DerivationPreset,
+            IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        >,
     ) -> InstancesInCacheConsumer {
         // let instances_clone = instances_per_factor_sources_to_delete.clone();
         // let cache_client_clone = self.cache_client.clone();
@@ -138,7 +138,9 @@ impl FactorInstancesProvider {
                 // will be deleted from the cache, they are still present in the cache now
                 // and will continue to be present until the `consume()` is called.
                 let instances_in_cache_consumer = self
-                    .make_instances_in_cache_consumer(enough_instances.clone().cached);
+                    .make_instances_in_cache_consumer(
+                        enough_instances.clone().cached,
+                    );
                 Ok((
                     instances_in_cache_consumer,
                     InternalFactorInstancesProviderOutcome::satisfied_by_cache(
@@ -374,8 +376,7 @@ impl FactorInstancesProvider {
                     pf_paths
                         .into_iter()
                         .map(|(fs, paths)| (fs, paths))
-                 
-                }
+                    }
             )
              .collect::<IndexMap<
             FactorSourceIDFromHash,
@@ -387,30 +388,29 @@ impl FactorInstancesProvider {
 
         let pf_derived = collector.collect_keys().await.factors_by_source;
 
-        let mut pdp_pf_instances =
-        IndexMap::<
-        DerivationPreset,
-        IndexMap<FactorSourceIDFromHash, FactorInstances>,
-    >::new();
+        let mut pdp_pf_instances = IndexMap::<
+            DerivationPreset,
+            IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        >::new();
 
-    for (preset, per_factor) in per_preset_per_factor_paths {
-        let mut pf_instances =
-        IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
-        for (factor_source_id, paths) in per_factor {
-            let derived_for_factor = pf_derived
-                .get(&factor_source_id)
-                .cloned()
-                .unwrap_or_default(); // if None -> Empty -> fail below.
-            if derived_for_factor.len() < paths.len() {
-                return Err(CommonError::FactorInstancesProviderDidNotDeriveEnoughFactors);
+        for (preset, per_factor) in per_preset_per_factor_paths {
+            let mut pf_instances =
+                IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
+            for (factor_source_id, paths) in per_factor {
+                let derived_for_factor = pf_derived
+                    .get(&factor_source_id)
+                    .cloned()
+                    .unwrap_or_default(); // if None -> Empty -> fail below.
+                if derived_for_factor.len() < paths.len() {
+                    return Err(CommonError::FactorInstancesProviderDidNotDeriveEnoughFactors);
+                }
+                pf_instances.insert(
+                    factor_source_id,
+                    derived_for_factor.into_iter().collect::<FactorInstances>(),
+                );
             }
-            pf_instances.insert(
-                factor_source_id,
-                derived_for_factor.into_iter().collect::<FactorInstances>(),
-            );
-        };
-        pdp_pf_instances.insert(preset, pf_instances);
-    }
+            pdp_pf_instances.insert(preset, pf_instances);
+        }
 
         Ok(pdp_pf_instances)
     }

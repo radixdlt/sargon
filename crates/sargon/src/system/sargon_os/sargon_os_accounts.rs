@@ -811,19 +811,20 @@ impl SargonOS {
     )> {
         let profile_snapshot = self.profile()?;
         let key_derivation_interactors = self.keys_derivation_interactor();
-      
 
         let (instances_in_cache_consumer, outcome) =
             SecurifyEntityFactorInstancesProvider::for_entity_mfa(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
-                security_structure_of_factor_sources.clone(),
+                security_structure_of_factor_sources
+                    .clone()
+                    .matrix_of_factors,
                 addresses_of_entities.clone(),
                 key_derivation_interactors,
             )
             .await?;
 
-            let matrix_of_factor_sources =
+        let matrix_of_factor_sources =
             &security_structure_of_factor_sources.matrix_of_factors;
 
         let mut instances_per_preset_per_factor_source = outcome
@@ -832,7 +833,7 @@ impl SargonOS {
             .into_iter()
             .map(|(preset, pf)| {
                 (
-                    preset, 
+                    preset,
                     pf
                     .per_factor
                     .into_iter()
@@ -844,9 +845,12 @@ impl SargonOS {
         assert_eq!(
             instances_per_preset_per_factor_source
                 .clone()
-                .into_iter().flat_map(|(_, y)| {
-                    y.into_iter().map(|(a, _)| a).collect::<HashSet<FactorSourceIDFromHash>>()
-                } )
+                .into_iter()
+                .flat_map(|(_, y)| {
+                    y.into_iter()
+                        .map(|(a, _)| a)
+                        .collect::<HashSet<FactorSourceIDFromHash>>()
+                })
                 .collect::<HashSet<FactorSourceIDFromHash>>(),
             matrix_of_factor_sources
                 .all_factors()
@@ -857,21 +861,27 @@ impl SargonOS {
 
         let security_structure_id = security_structure_of_factor_sources.id();
 
-        let mut security_structures_of_factor_instances = IndexMap::<AddressOfAccountOrPersona, SecurityStructureOfFactorInstances>::new();
+        let mut security_structures_of_factor_instances = IndexMap::<
+            AddressOfAccountOrPersona,
+            SecurityStructureOfFactorInstances,
+        >::new();
 
-        let mut distribute_instances_for_entity_of_kind_if_needed = |entity_kind: CAP26EntityKind| -> Result<()> {
-            let addresses_of_kind = addresses_of_entities
-                .iter()
-                .filter(|a| a.get_entity_kind() == entity_kind)
-                .collect::<IndexSet<_>>();
+        let mut distribute_instances_for_entity_of_kind_if_needed =
+            |entity_kind: CAP26EntityKind| -> Result<()> {
+                let addresses_of_kind = addresses_of_entities
+                    .iter()
+                    .filter(|a| a.get_entity_kind() == entity_kind)
+                    .collect::<IndexSet<_>>();
 
-            if addresses_of_kind.is_empty() { return Ok(()) };
-            let preset = DerivationPreset::mfa_entity_kind(entity_kind);
+                if addresses_of_kind.is_empty() {
+                    return Ok(());
+                };
+                let preset = DerivationPreset::mfa_entity_kind(entity_kind);
 
-            let mut instances_per_factor_source = instances_per_preset_per_factor_source.swap_remove(&preset).expect    (&format!("Expected to find instances for derivation preset: {:?}", preset));
+                let mut instances_per_factor_source = instances_per_preset_per_factor_source.swap_remove(&preset).expect    (&format!("Expected to find instances for derivation preset: {:?}", preset));
 
-            for entity_address in addresses_of_kind {
-                let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
+                for entity_address in addresses_of_kind {
+                    let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
                    let matrix_of_factor_instances =     MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
                     &mut instances_per_factor_source,
                     matrix_of_factor_sources.clone(),
@@ -886,15 +896,21 @@ impl SargonOS {
                         authentication_signing_instance,
                     )?
                 };
-                security_structures_of_factor_instances.insert(entity_address.clone(), security_structure_of_factor_instances);
-            }
+                    security_structures_of_factor_instances.insert(
+                        entity_address.clone(),
+                        security_structure_of_factor_instances,
+                    );
+                }
 
-            Ok(())
-        };
+                Ok(())
+            };
 
-        distribute_instances_for_entity_of_kind_if_needed(CAP26EntityKind::Account);
-        distribute_instances_for_entity_of_kind_if_needed(CAP26EntityKind::Identity);
-        
+        distribute_instances_for_entity_of_kind_if_needed(
+            CAP26EntityKind::Account,
+        );
+        distribute_instances_for_entity_of_kind_if_needed(
+            CAP26EntityKind::Identity,
+        );
 
         Ok((
             security_structures_of_factor_instances,
