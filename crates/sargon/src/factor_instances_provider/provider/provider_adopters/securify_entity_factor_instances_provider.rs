@@ -136,6 +136,7 @@ impl SecurifyEntityFactorInstancesProvider {
                 &addresses_of_entities,
             );
 
+        assert!(quantified_derivation_presets.len() >= 2); // at least one entity kind, and ROLA + TX: at least 2
         let (instances_in_cache_consumer, outcome) = provider
             .provide_for_presets(
                 // QuantifiedDerivationPreset::new(
@@ -331,7 +332,7 @@ mod tests {
         .await
         .unwrap();
 
-        assert_eq!(outcome.per_derivation_preset.len(), 2);
+        assert_eq!(outcome.per_derivation_preset.len(), 4);
 
         // don't forget to consume
         instances_in_cache_consumer.consume().await.unwrap();
