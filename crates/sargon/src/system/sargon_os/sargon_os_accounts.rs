@@ -800,11 +800,9 @@ impl SargonOS {
 impl SargonOS {
     #[allow(dead_code)]
     #[cfg(test)]
-    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
-        A: IsEntityAddress,
-    >(
+    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
         &self,
-        addresses_of_entities: IndexSet<A>,
+        addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
     ) -> Result<(
         IndexMap<A, SecurityStructureOfFactorInstances>,
@@ -817,7 +815,7 @@ impl SargonOS {
             &security_structure_of_factor_sources.matrix_of_factors;
 
         let (instances_in_cache_consumer, outcome) =
-            SecurifyEntityFactorInstancesProvider::for_entity_mfa::<A>(
+            SecurifyEntityFactorInstancesProvider::for_entity_mfa(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
                 matrix_of_factor_sources.clone(),
@@ -826,14 +824,20 @@ impl SargonOS {
             )
             .await?;
 
-        let mut instances_per_factor_source = outcome
+        let mut instances_per_preset_per_factor_source = outcome
             .clone()
-            .per_factor
+            .per_derivation_preset
             .into_iter()
-            .map(|(k, outcome_per_factor)| {
-                (k, outcome_per_factor.to_use_directly)
+            .map(|(preset, pf)| {
+                (
+                    preset, 
+                    pf
+                    .per_factor
+                    .into_iter()
+                    .map(|(k, v)| (k, v.to_use_directly)).collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
+                )
             })
-            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
+            .collect::<IndexMap<DerivationPreset, IndexMap<FactorSourceIDFromHash, FactorInstances>>>();
 
         assert_eq!(
             instances_per_factor_source

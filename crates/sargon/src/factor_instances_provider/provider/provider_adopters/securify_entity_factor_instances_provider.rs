@@ -23,11 +23,11 @@ impl SecurifyEntityFactorInstancesProvider {
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::for_entity_mfa::<AccountAddress>(
+        Self::for_entity_mfa(
             cache_client,
             profile,
             matrix_of_factor_sources,
-            account_addresses,
+            account_addresses.into_iter().map(Into::into).collect(),
             interactor,
         )
         .await
@@ -52,11 +52,11 @@ impl SecurifyEntityFactorInstancesProvider {
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::for_entity_mfa::<IdentityAddress>(
+        Self::for_entity_mfa(
             cache_client,
             profile,
             matrix_of_factor_sources,
-            persona_addresses,
+            persona_addresses.into_iter().map(Into::into).collect(),
             interactor,
         )
         .await
@@ -73,11 +73,11 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_entity_mfa<A: IsEntityAddress>(
+    pub async fn for_entity_mfa(
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
         matrix_of_factor_sources: MatrixOfFactorSources,
-        addresses_of_entities: IndexSet<A>,
+        addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
@@ -107,7 +107,7 @@ impl SecurifyEntityFactorInstancesProvider {
         assert!(
             addresses_of_entities
                 .iter()
-                .all(|a| profile.contains_entity_by_address::<A>(a)),
+                .all(|a| profile.contains_entity_by_address(a)),
             "unknown entity"
         );
 
@@ -119,8 +119,6 @@ impl SecurifyEntityFactorInstancesProvider {
             "wrong network"
         );
 
-        let entity_kind = A::entity_kind();
-
         let provider = FactorInstancesProvider::new(
             network_id,
             factor_sources_to_use,
@@ -129,13 +127,23 @@ impl SecurifyEntityFactorInstancesProvider {
             interactor,
         );
 
+        let purpose = DerivationPurpose::for_securifying_or_updating(
+            &addresses_of_entities,
+        );
+
+        let quantified_derivation_presets =
+            QuantifiedDerivationPreset::mfa_for_entities(
+                &addresses_of_entities,
+            );
+
         let (instances_in_cache_consumer, outcome) = provider
-            .provide(
-                QuantifiedDerivationPreset::new(
-                    DerivationPreset::mfa_entity_kind(entity_kind),
-                    addresses_of_entities.len(),
-                ),
-                DerivationPurpose::for_securifying_or_updating(entity_kind),
+            .provide_for_presets(
+                // QuantifiedDerivationPreset::new(
+                //     DerivationPreset::mfa_entity_kind(entity_kind),
+                //     addresses_of_entities.len(),
+                // ),
+                quantified_derivation_presets,
+                purpose,
             )
             .await?;
 
@@ -310,35 +318,51 @@ mod tests {
         let profile = Arc::new(os.profile().unwrap());
         let derivation_interactors = os.keys_derivation_interactor();
 
-        let (instances_in_cache_consumer, outcome) = SUT::for_account_mfa(
+        let (instances_in_cache_consumer, outcome) = SUT::for_entity_mfa(
             cache_client.clone(),
             profile,
             matrix_0.clone(),
-            IndexSet::just(alice.address()),
+            IndexSet::from_iter([
+                AddressOfAccountOrPersona::from(alice.address()),
+                AddressOfAccountOrPersona::from(batman.address()),
+            ]),
             derivation_interactors.clone(),
         )
         .await
         .unwrap();
 
-        // don't forget to consume
-        instances_in_cache_consumer.consume().await.unwrap();
-        let outcome = outcome.per_factor.get(&bdfs.id_from_hash()).unwrap();
-        assert_eq!(outcome.to_use_directly.len(), 1);
-
-        let profile = Arc::new(os.profile().unwrap());
-        let (instances_in_cache_consumer, outcome) = SUT::for_persona_mfa(
-            cache_client.clone(),
-            profile,
-            matrix_0.clone(),
-            IndexSet::just(batman.address()),
-            derivation_interactors.clone(),
-        )
-        .await
-        .unwrap();
+        assert_eq!(outcome.per_derivation_preset.len(), 2);
 
         // don't forget to consume
         instances_in_cache_consumer.consume().await.unwrap();
-        let outcome = outcome.per_factor.get(&bdfs.id_from_hash()).unwrap();
-        assert_eq!(outcome.to_use_directly.len(), 1);
+        let account_outcome = outcome
+            .get_derivation_preset_for_factor(
+                DerivationPreset::AccountMfa,
+                &bdfs.id_from_hash(),
+            )
+            .unwrap();
+        assert_eq!(account_outcome.len(), 1);
+
+        // let profile = Arc::new(os.profile().unwrap());
+        // let (instances_in_cache_consumer, outcome) = SUT::for_persona_mfa(
+        //     cache_client.clone(),
+        //     profile,
+        //     matrix_0.clone(),
+        //     IndexSet::just(batman.address()),
+        //     derivation_interactors.clone(),
+        // )
+        // .await
+        // .unwrap();
+
+        // // don't forget to consume
+        // instances_in_cache_consumer.consume().await.unwrap();
+        // // let outcome = outcome.per_factor.get(&bdfs.id_from_hash()).unwrap();
+        let persona_outcome = outcome
+            .get_derivation_preset_for_factor(
+                DerivationPreset::AccountMfa,
+                &bdfs.id_from_hash(),
+            )
+            .unwrap();
+        assert_eq!(persona_outcome.len(), 1);
     }
 }

@@ -12,11 +12,15 @@ pub enum DerivationPurpose {
     /// for identity VECIs
     CreatingNewPersona,
 
-    /// When applying a security shield to an account, initiates keys collection
+    /// When applying a security shield to accounts and personas mixed, initiates keys collection
+    /// for account MFA
+    SecurifyingAccountsAndPersonas,
+
+    /// When applying a security shield to only accounts, initiates keys collection
     /// for account MFA
     SecurifyingAccount,
 
-    /// When applying a security shield to a persona, initiates keys collection
+    /// When applying a security shield to only personas, initiates keys collection
     /// for identity MFA
     SecurifyingPersona,
 
@@ -35,10 +39,23 @@ impl DerivationPurpose {
         }
     }
 
-    pub fn for_securifying_or_updating(entity_kind: CAP26EntityKind) -> Self {
-        match entity_kind {
-            CAP26EntityKind::Account => Self::SecurifyingAccount,
-            CAP26EntityKind::Identity => Self::SecurifyingPersona,
+    pub fn for_securifying_or_updating(
+        addresses_of_entities: &IndexSet<AddressOfAccountOrPersona>,
+    ) -> Self {
+        let account_addresses = addresses_of_entities
+            .iter()
+            .filter(|a| a.is_account())
+            .collect_vec();
+        let identity_addresses = addresses_of_entities
+            .iter()
+            .filter(|a| a.is_identity())
+            .collect_vec();
+
+        match (account_addresses.is_empty(), identity_addresses.is_empty()) {
+            (true, true) => unreachable!("Incorrect implementation"), // weird!
+            (true, false) => Self::SecurifyingPersona,
+            (false, false) => Self::SecurifyingAccountsAndPersonas,
+            (false, true) => Self::SecurifyingAccount,
         }
     }
 
@@ -72,18 +89,20 @@ mod tests {
 
     #[test]
     fn test_for_securifying_account() {
-        assert_eq!(
-            SUT::for_securifying_or_updating(CAP26EntityKind::Account),
-            SUT::SecurifyingAccount
-        )
+        // assert_eq!(
+        //     SUT::for_securifying_or_updating(CAP26EntityKind::Account),
+        //     SUT::SecurifyingAccount
+        // )
+        todo!()
     }
 
     #[test]
     fn test_for_securifying_persona() {
-        assert_eq!(
-            SUT::for_securifying_or_updating(CAP26EntityKind::Identity),
-            SUT::SecurifyingPersona
-        )
+        // assert_eq!(
+        //     SUT::for_securifying_or_updating(CAP26EntityKind::Identity),
+        //     SUT::SecurifyingPersona
+        // )
+        todo!()
     }
 
     #[test]

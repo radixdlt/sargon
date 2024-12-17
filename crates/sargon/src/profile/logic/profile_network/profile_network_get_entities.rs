@@ -48,17 +48,14 @@ impl ProfileNetwork {
             .collect()
     }
 
-    pub fn contains_entity_by_address<A: IsEntityAddress>(
+    pub fn contains_entity_by_address(
         &self,
-        entity_address: &A,
+        entity_address: &AddressOfAccountOrPersona,
     ) -> bool {
-        self.get_entities_erased(A::entity_kind())
+        self.get_entities_erased(entity_address.get_entity_kind())
             .into_iter()
             .any(|e| {
-                e.address()
-                    == Into::<AddressOfAccountOrPersona>::into(
-                        entity_address.clone(),
-                    )
+                AddressOfAccountOrPersona::from(e.address()) == *entity_address
             })
     }
 }

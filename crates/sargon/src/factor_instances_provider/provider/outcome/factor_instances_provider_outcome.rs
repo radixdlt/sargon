@@ -12,6 +12,24 @@ pub struct FactorInstancesProviderOutcome {
         IndexMap<DerivationPreset, FactorInstancesProviderOutcomePerFactor>,
 }
 
+impl FactorInstancesProviderOutcome {
+    pub fn get_derivation_preset(
+        &self,
+        preset: DerivationPreset,
+    ) -> Option<&FactorInstancesProviderOutcomePerFactor> {
+        self.per_derivation_preset.get(&preset)
+    }
+
+    pub fn get_derivation_preset_for_factor(
+        &self,
+        preset: DerivationPreset,
+        factor_source_id: &FactorSourceIDFromHash,
+    ) -> Option<&FactorInstancesProviderOutcomeForFactor> {
+        self.get_derivation_preset(preset)
+            .and_then(|x| x.per_factor.get(factor_source_id))
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct FactorInstancesProviderOutcomePerFactor {
     pub per_factor: IndexMap<
