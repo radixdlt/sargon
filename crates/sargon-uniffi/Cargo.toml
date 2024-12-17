@@ -1,7 +1,7 @@
 [package]
 name = "sargon-uniffi"
 # Don't forget to update version in crates/sargon/Cargo.toml
-version = "1.1.87"
+version = "1.1.88"
 edition = "2021"
 build = "build.rs"
 
@@ -80,11 +80,11 @@ itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98eca
 # enum-as-inner = "0.6.0"
 enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
 
-# uniffi = PRE "0.29.X" + Alex Cyons unmerged JNA Kotlin binding fix
-uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "fe40d992b32103876112713cb5e8303b54647183", features = [
+# uniffi = "0.28.3"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [
     "cli",
 ] }
-
+# latest: 9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d
 # assert-json-diff = "2.0.2"
 assert-json-diff = { git = "https://github.com/davidpdrsn/assert-json-diff/", rev = "bca0d2c590808274298d939e0533da79cd09076d" }
 
@@ -127,8 +127,8 @@ security-framework-sys = "=2.10.0"
 
 
 [dev-dependencies]
-# uniffi = PRE "0.29.X" + Alex Cyons unmerged JNA Kotlin binding fix
-uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "fe40d992b32103876112713cb5e8303b54647183", features = [
+# uniffi = "0.28.3"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [
     "bindgen-tests",
 ] }
 
@@ -136,8 +136,8 @@ uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "fe40d992b3210387
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
 
 [build-dependencies]
-# uniffi = PRE "0.29.X" + Alex Cyons unmerged JNA Kotlin binding fix
-uniffi = { git = "https://github.com/sajjon/uniffi-rs/", rev = "fe40d992b32103876112713cb5e8303b54647183", features = [
+# uniffi = "0.28.3"
+uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [
     "build",
 ] }
 
