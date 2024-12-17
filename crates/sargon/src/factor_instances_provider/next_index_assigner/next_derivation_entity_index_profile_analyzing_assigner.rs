@@ -220,6 +220,8 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
             DerivationPreset::IdentityMfa => {
                 self.max_identity_mfa(factor_source_id)
             }
+            DerivationPreset::AccountRola => todo!(),
+            DerivationPreset::IdentityRola => todo!(),
         };
 
         let Some(max) = max else { return Ok(None) };
