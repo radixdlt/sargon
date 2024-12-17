@@ -118,12 +118,7 @@ impl AuthorizedPersonaSimple {
 
         let shared_accounts = self.accounts_for_display(non_hidden_accounts)?;
 
-        let has_auth_signing_key = match &persona.security_state {
-            EntitySecurityState::Unsecured { value: uec } => {
-                uec.authentication_signing.is_some()
-            }
-            _ => false, // TODO change that
-        };
+        let has_auth_signing_key = persona.is_securified();
         Ok(AuthorizedPersonaDetailed::new(
             persona.address,
             persona.display_name.clone(),

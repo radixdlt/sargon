@@ -171,9 +171,27 @@ impl Account {
                 .collect_vec(),
         );
 
+        let rola_index = u32::from(
+            veci.derivation_entity_index().index_in_local_key_space(),
+        );
+
         let network_id = NetworkID::Mainnet;
         let address =
             AccountAddress::new(veci.public_key(), NetworkID::Mainnet);
+
+        let security_structure_of_factor_instances =
+            SecurityStructureOfFactorInstances::new(
+                SecurityStructureID::sample(),
+                matrix,
+                HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+                    NetworkID::Mainnet,
+                    CAP26KeyKind::AuthenticationSigning,
+                    CAP26EntityKind::Account,
+                    SecurifiedU30::try_from(rola_index).unwrap(),
+                ),
+            )
+            .unwrap();
+
         Self {
             network_id,
             address,
@@ -181,10 +199,7 @@ impl Account {
             security_state: SecuredEntityControl::new(
                 Some(veci.clone()),
                 AccessControllerAddress::sample_from_account_address(address),
-                SecurityStructureOfFactorInstances {
-                    security_structure_id: SecurityStructureID::sample(),
-                    matrix_of_factors: matrix,
-                },
+                security_structure_of_factor_instances,
             )
             .unwrap()
             .into(),

@@ -19,6 +19,16 @@ pub enum Signature {
 }
 
 impl Signature {
+    /// Returns a `SLIP10Curve`, being the curve of the `Signature`.
+    pub fn curve(&self) -> SLIP10Curve {
+        match self {
+            Self::Ed25519 { .. } => SLIP10Curve::Curve25519,
+            Self::Secp256k1 { .. } => SLIP10Curve::Secp256k1,
+        }
+    }
+}
+
+impl Signature {
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
             Signature::Secp256k1 { value } => value.to_bytes(),
@@ -116,6 +126,12 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn curve() {
+        assert_eq!(SUT::sample().curve(), SLIP10Curve::Curve25519);
+        assert_eq!(SUT::sample_other().curve(), SLIP10Curve::Secp256k1);
     }
 
     #[test]
