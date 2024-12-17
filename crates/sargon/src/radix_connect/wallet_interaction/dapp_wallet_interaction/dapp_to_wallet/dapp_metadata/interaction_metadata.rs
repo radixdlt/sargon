@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Deserialize, Serialize, PartialEq, Clone)]
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct DappToWalletInteractionMetadata {
     pub version: WalletInteractionVersion,
@@ -37,7 +37,7 @@ impl HasSampleValues for DappToWalletInteractionMetadata {
     fn sample() -> Self {
         Self::new(
             WalletInteractionVersion::sample(),
-            NetworkID::Stokenet,
+            NetworkID::Mainnet,
             "https://example.com",
             DappDefinitionAddress::sample(),
         )
@@ -46,7 +46,7 @@ impl HasSampleValues for DappToWalletInteractionMetadata {
     fn sample_other() -> Self {
         Self::new(
             WalletInteractionVersion::sample_other(),
-            NetworkID::Stokenet,
+            NetworkID::Mainnet,
             "https://example.org",
             DappDefinitionAddress::sample_other(),
         )
