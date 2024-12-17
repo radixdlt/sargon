@@ -21,28 +21,44 @@ impl CacheFiller {
             cache_client.clone(),
             interactor,
         );
-        let quantities = IndexMap::kv(
-            factor_source.id_from_hash(),
-            DerivationPreset::all()
+
+        let not_satisfied = CacheNotSatisfied {
+            cached_and_quantities_to_derive: DerivationPreset::all()
                 .into_iter()
-                .map(|dp| (dp, CACHE_FILLING_QUANTITY))
-                .collect::<IndexMap<DerivationPreset, usize>>(),
-        );
+                .map(|preset| {
+                    (
+                        preset,
+                        IndexMap::kv(
+                            factor_source.id_from_hash(),
+                            CacheInstancesAndRemainingQuantityToDerive {
+                                instances_to_use_from_cache:
+                                    FactorInstances::default(), // TODO improve surrounding code. should not have to create CacheInstancesAndRemainingQuantityToDerive...
+                                quantity_to_derive: preset
+                                    .cache_filling_quantity(),
+                            },
+                        ),
+                    )
+                })
+                .collect::<IndexMap<_, _>>(),
+        };
+
         let derived = provider
-            .derive_more(quantities, DerivationPurpose::pre_deriving_keys())
+            .derive_more(not_satisfied, DerivationPurpose::pre_deriving_keys())
             .await?;
 
         cache_client.insert_all(&derived).await?;
 
-        let derived =
-            derived.get(&factor_source.id_from_hash()).unwrap().clone();
-        let outcome = InternalFactorInstancesProviderOutcomeForFactor::new(
-            factor_source.id_from_hash(),
-            derived.clone(),
-            FactorInstances::default(),
-            FactorInstances::default(),
-            derived,
-        );
-        Ok(outcome.into())
+        todo!("migrate me")
+
+        // let derived =
+        //     derived.get(&factor_source.id_from_hash()).unwrap().clone();
+        // let outcome = InternalFactorInstancesProviderOutcomeForFactor::new(
+        //     factor_source.id_from_hash(),
+        //     derived.clone(),
+        //     FactorInstances::default(),
+        //     FactorInstances::default(),
+        //     derived,
+        // );
+        // Ok(outcome.into())
     }
 }

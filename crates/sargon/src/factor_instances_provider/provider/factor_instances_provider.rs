@@ -88,20 +88,25 @@ impl FactorInstancesProvider {
 impl FactorInstancesProvider {
     fn make_instances_in_cache_consumer(
         &self,
-        instances_per_factor_sources_to_delete: IndexMap<
-            FactorSourceIDFromHash,
-            FactorInstances,
-        >,
+        // instances_per_factor_sources_to_delete: IndexMap<
+        //     FactorSourceIDFromHash,
+        //     FactorInstances,
+        // >,
+        instances_to_delete: IndexMap<
+        DerivationPreset,
+        IndexMap<FactorSourceIDFromHash, FactorInstances>,
+    >
     ) -> InstancesInCacheConsumer {
-        let instances_clone = instances_per_factor_sources_to_delete.clone();
-        let cache_client_clone = self.cache_client.clone();
-        InstancesInCacheConsumer::new(move || {
-            let cache_client_clone_clone = cache_client_clone.clone();
-            let instances_clone_clone = instances_clone.clone();
-            async move {
-                cache_client_clone_clone.delete(instances_clone_clone).await
-            }
-        })
+        // let instances_clone = instances_per_factor_sources_to_delete.clone();
+        // let cache_client_clone = self.cache_client.clone();
+        // InstancesInCacheConsumer::new(move || {
+        //     let cache_client_clone_clone = cache_client_clone.clone();
+        //     let instances_clone_clone = instances_clone.clone();
+        //     async move {
+        //         cache_client_clone_clone.delete(instances_clone_clone).await
+        //     }
+        // })
+        todo!()
     }
 
     async fn _provide_for_presets(
@@ -118,7 +123,7 @@ impl FactorInstancesProvider {
         let network_id = self.network_id;
         let cached = self
             .cache_client
-            .get_poly_factor_with_quantified_presets(
+            .gets(
                 &factor_sources.iter().map(|f| f.id_from_hash()).collect(),
                 quantified_derivation_presets.clone(),
                 network_id,
@@ -133,7 +138,7 @@ impl FactorInstancesProvider {
                 // will be deleted from the cache, they are still present in the cache now
                 // and will continue to be present until the `consume()` is called.
                 let instances_in_cache_consumer = self
-                    .make_instances_in_cache_consumer(enough_instances.clone());
+                    .make_instances_in_cache_consumer(enough_instances.clone().cached);
                 Ok((
                     instances_in_cache_consumer,
                     InternalFactorInstancesProviderOutcome::satisfied_by_cache(
@@ -169,7 +174,7 @@ impl FactorInstancesProvider {
         //     FactorSourceIDFromHash,
         //     IndexMap<DerivationPreset, usize>,
         // >,
-        not_satisfied: IndexMap<QuantifiedDerivationPreset, CacheNotSatisfied>,
+        not_satisfied: CacheNotSatisfied,
         derivation_purpose: DerivationPurpose,
     ) -> Result<(
         InstancesInCacheConsumer,
@@ -294,9 +299,14 @@ impl FactorInstancesProvider {
         //     FactorSourceIDFromHash,
         //     IndexMap<DerivationPreset, usize>,
         // >,
-        not_satisfied: IndexMap<QuantifiedDerivationPreset, CacheNotSatisfied>,
+        not_satisfied: CacheNotSatisfied,
         derivation_purpose: DerivationPurpose,
-    ) -> Result<IndexMap<FactorSourceIDFromHash, FactorInstances>> {
+    ) -> Result<
+        IndexMap<
+            DerivationPreset,
+            IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        >,
+    > {
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
 
@@ -307,63 +317,86 @@ impl FactorInstancesProvider {
             cache_snapshot,
         );
 
-        let pf_paths = not_satisfied
+        let per_preset_per_factor_paths = not_satisfied
+            .cached_and_quantities_to_derive
             .into_iter()
-            .flat_map(|(quantified_derivation_preset, not_satisfied)| {
-                // pf_pdp_quantity_to_derive
-                //     .into_iter()
-                not_satisfied.quantities_to_derive.into_iter().map(
-                    |(factor_source_id, pdp_quantity_to_derive)| {
-                        let paths = pdp_quantity_to_derive
-                            .into_iter()
-                            .map(|(derivation_preset, qty)| {
-                                // `qty` many paths
-                                (0..qty)
+            // .flat_map(|(derivation_preset, instances_and_qty_to_derive)| {
+            //     // pf_pdp_quantity_to_derive
+            //     //     .into_iter()
+            //     not_satisfied.quantities_to_derive.into_iter()
+            .map(|(derivation_preset, per_factor_source)| {
+                let per_factor_paths = per_factor_source
+                    .into_iter()
+                    .map(|(factor_source_id, instances_and_qty_to_derive)| {
+                        let qty =
+                            instances_and_qty_to_derive.quantity_to_derive;
+                        // `qty` many paths
+                        let paths = (0..qty)
                             .map(|_| {
                                 let index_agnostic_path = derivation_preset
                                     .index_agnostic_path_on_network(network_id);
-                                next_index_assigner
+                                let path = next_index_assigner
                                     .next(factor_source_id, index_agnostic_path)
                                     .map(|index| {
                                         DerivationPath::from((
                                             index_agnostic_path,
                                             index,
                                         ))
-                                    })
+                                    })?;
+                                Ok(path)
                             })
-                            .collect::<Result<IndexSet<DerivationPath>>>()
-                            })
-                            .collect::<Result<Vec<IndexSet<DerivationPath>>>>(
-                            )?;
-
-                        // flatten (I was unable to use `flat_map` above combined with `Result`...)
-                        let paths = paths
-                            .into_iter()
-                            .flatten()
-                            .collect::<IndexSet<_>>();
+                            .collect::<Result<IndexSet<DerivationPath>>>()?;
 
                         Ok((factor_source_id, paths))
-                    },
-                )
+                    })
+                    .collect::<Result<
+                        IndexMap<
+                            FactorSourceIDFromHash,
+                            IndexSet<DerivationPath>,
+                        >,
+                    >>()?;
+
+                Ok((derivation_preset, per_factor_paths))
             })
             .collect::<Result<
-                IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
+                // IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
+                IndexMap<
+                    DerivationPreset,
+                    IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
+                >,
             >>()?;
 
         let interactor = self.interactor.clone();
         let collector = KeysCollector::new(
             factor_sources,
-            pf_paths.clone(),
+            per_preset_per_factor_paths.clone().into_iter().flat_map(
+                |(_, pf_paths)| {
+                    pf_paths
+                        .into_iter()
+                        .map(|(fs, paths)| (fs, paths))
+                 
+                }
+            )
+             .collect::<IndexMap<
+            FactorSourceIDFromHash,
+            IndexSet<DerivationPath>,
+        >>(),
             interactor,
             derivation_purpose,
         )?;
 
         let pf_derived = collector.collect_keys().await.factors_by_source;
 
-        let mut pf_instances =
-            IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
+        let mut pdp_pf_instances =
+        IndexMap::<
+        DerivationPreset,
+        IndexMap<FactorSourceIDFromHash, FactorInstances>,
+    >::new();
 
-        for (factor_source_id, paths) in pf_paths {
+    for (preset, per_factor) in per_preset_per_factor_paths {
+        let mut pf_instances =
+        IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
+        for (factor_source_id, paths) in per_factor {
             let derived_for_factor = pf_derived
                 .get(&factor_source_id)
                 .cloned()
@@ -375,9 +408,11 @@ impl FactorInstancesProvider {
                 factor_source_id,
                 derived_for_factor.into_iter().collect::<FactorInstances>(),
             );
-        }
+        };
+        pdp_pf_instances.insert(preset, pf_instances);
+    }
 
-        Ok(pf_instances)
+        Ok(pdp_pf_instances)
     }
 }
 

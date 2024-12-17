@@ -131,19 +131,19 @@ impl VirtualEntityCreatingInstanceProvider {
             cache_client,
             interactor,
         );
+        let derivation_preset = DerivationPreset::veci_entity_kind(entity_kind);
         let (instances_in_cache_consumer, outcome) = provider
             .provide(
-                QuantifiedDerivationPreset::new(
-                    DerivationPreset::veci_entity_kind(entity_kind),
-                    count,
-                ),
+                QuantifiedDerivationPreset::new(derivation_preset, count),
                 DerivationPurpose::creation_of_new_virtual_entity(entity_kind),
             )
             .await?;
 
         let outcome = outcome
-            .per_factor
-            .get(&factor_source.id_from_hash())
+            .get_for_derivation_preset_for_factor(
+                derivation_preset,
+                factor_source.id_from_hash(),
+            )
             .cloned()
             .expect("Expected to have instances for the factor source");
 

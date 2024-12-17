@@ -8,6 +8,51 @@ pub struct InternalFactorInstancesProviderOutcome {
     >,
 }
 
+impl InternalFactorInstancesProviderOutcome {
+    /// Outcome of FactorInstances just from cache, none have been derived.
+    pub fn satisfied_by_cache(satisfied: CacheSatisfied) -> Self {
+        // Self::new(
+        //         pf_found_in_cache
+        //             .into_iter()
+        //             .map(|(k, v)| {
+        //                 (
+        //                     k,
+        //                     InternalFactorInstancesProviderOutcomeForFactor::satisfied_by_cache(k, v),
+        //                 )
+        //             })
+        //             .collect(),
+        //     )
+        todo!()
+    }
+
+    pub fn get_for_derivation_preset(
+        &self,
+        preset: DerivationPreset,
+    ) -> Option<&InternalFactorInstancesProviderOutcomePerFactor> {
+        self.per_derivation_preset.get(&preset)
+    }
+
+    pub fn get_for_derivation_preset_for_factor(
+        &self,
+        preset: DerivationPreset,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Option<&InternalFactorInstancesProviderOutcomeForFactor> {
+        self.get_for_derivation_preset(preset)
+            .and_then(|x| x.per_factor.get(&factor_source_id))
+    }
+
+    #[cfg(test)]
+    pub(crate) fn get(
+        &self,
+        preset: DerivationPreset,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> InternalFactorInstancesProviderOutcomeForFactor {
+        self.get_for_derivation_preset_for_factor(preset, factor_source_id)
+            .cloned()
+            .expect("Expected to find factor source")
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct InternalFactorInstancesProviderOutcomePerFactor {
     pub per_factor: IndexMap<
@@ -24,23 +69,6 @@ impl InternalFactorInstancesProviderOutcomePerFactor {
         >,
     ) -> Self {
         Self { per_factor }
-    }
-
-    /// Outcome of FactorInstances just from cache, none have been derived.
-    pub fn satisfied_by_cache(
-        pf_found_in_cache: IndexMap<FactorSourceIDFromHash, FactorInstances>,
-    ) -> Self {
-        Self::new(
-            pf_found_in_cache
-                .into_iter()
-                .map(|(k, v)| {
-                    (
-                        k,
-                        InternalFactorInstancesProviderOutcomeForFactor::satisfied_by_cache(k, v),
-                    )
-                })
-                .collect(),
-        )
     }
 
     /// "Transposes" a **collection** of `IndexMap<FactorSourceID, FactorInstances>` into `IndexMap<FactorSourceID, **collection** FactorInstances>` (`InternalFactorInstancesProviderOutcomeForFactor` is essentially a collection of FactorInstance)

@@ -138,12 +138,17 @@ impl FactorInstancesCacheClient {
     /// Inserts all instance in `per_factor`.
     pub async fn insert_all(
         &self,
-        per_factor: impl Borrow<IndexMap<FactorSourceIDFromHash, FactorInstances>>,
+        // per_factor: impl Borrow<IndexMap<FactorSourceIDFromHash, FactorInstances>>,
+        per_derivation_preset_per_factor: &IndexMap<
+            DerivationPreset,
+            IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        >,
     ) -> Result<()> {
-        self.update_and_persist_cache(|cache| {
-            cache.insert_all(per_factor.borrow())
-        })
-        .await
+        // self.update_and_persist_cache(|cache| {
+        //     cache.insert_all(per_factor.borrow())
+        // })
+        // .await
+        todo!()
     }
 
     /// Returns the max derivation entity index for the given `factor_source_id` and `index_agnostic_path`.
@@ -158,7 +163,7 @@ impl FactorInstancesCacheClient {
         .await
     }
 
-    pub async fn get_poly_factor_with_quantified_presets(
+    pub async fn gets(
         &self,
         factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
         quantified_derivation_presets: IdentifiedVecOf<
@@ -179,17 +184,18 @@ impl FactorInstancesCacheClient {
             is_satisfied &= part.is_satisfied();
             unaggregated.insert(quantified_preset, part);
         }
-        if is_satisfied {
-            let aggregated = IndexMap::new();
-            todo!("impl me");
-            Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(aggregated))
-        } else {
-            let aggregated = IndexMap::new();
-            todo!("impl me");
-            Ok(CachedInstancesWithQuantitiesOutcome::NotSatisfied(
-                unaggregated,
-            ))
-        }
+        todo!("migrate me")
+        // if is_satisfied {
+        //     let aggregated = IndexMap::new();
+        //     todo!("impl me");
+        //     Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(aggregated))
+        // } else {
+        //     let aggregated = IndexMap::new();
+        //     todo!("impl me");
+        //     Ok(CachedInstancesWithQuantitiesOutcome::NotSatisfied(
+        //         unaggregated,
+        //     ))
+        // }
     }
 
     /// Returns enough instances to satisfy the requested quantity for each factor source,
@@ -205,9 +211,11 @@ impl FactorInstancesCacheClient {
         network_id: NetworkID,
     ) -> Result<CachedInstancesWithQuantitiesOutcome> {
         self.access_cache_init_if_needed(|cache| {
-            cache.get_poly_factor_with_quantified_preset(
+            cache.get(
                 factor_source_ids.borrow(),
-                originally_requested_quantified_derivation_preset.borrow(),
+                &IdentifiedVecOf::just(
+                    *originally_requested_quantified_derivation_preset.borrow(),
+                ),
                 network_id,
             )
         })
@@ -350,50 +358,53 @@ mod tests {
         let max_higher_sut1 = sut1.max_index_for(fsid, path).await.unwrap();
         assert_eq!(max_higher_sut1, Some(one));
 
-        // test get_poly_factor_with_quantities
-        let poly = sut1
-            .get_poly_factor_with_quantities(
-                IndexSet::just(fsid),
-                QuantifiedDerivationPreset::new(derivation_preset, 2),
-                network,
-            )
-            .await
-            .unwrap();
-        let satisfied = IndexMap::kv(fsid, instances);
-        assert_eq!(
-            poly,
-            CachedInstancesWithQuantitiesOutcome::Satisfied(satisfied)
-        );
+        todo!("migrate me")
 
-        let snap_1 = sut1.snapshot().await.unwrap();
-        let snap_2 = sut2.snapshot().await.unwrap();
-        assert_eq!(
-            snap_1.serializable_snapshot(),
-            snap_2.serializable_snapshot(),
-        );
+        // // test get_poly_factor_with_quantities
+        // let poly = sut1
+        //     .get_poly_factor_with_quantities(
+        //         IndexSet::just(fsid),
+        //         QuantifiedDerivationPreset::new(derivation_preset, 2),
+        //         network,
+        //     )
+        //     .await
+        //     .unwrap();
+        // let satisfied = IndexMap::kv(fsid, instances);
+        // assert_eq!(
+        //     poly,
+        //     CachedInstancesWithQuantitiesOutcome::Satisfied(satisfied)
+        // );
+
+        // let snap_1 = sut1.snapshot().await.unwrap();
+        // let snap_2 = sut2.snapshot().await.unwrap();
+        // assert_eq!(
+        //     snap_1.serializable_snapshot(),
+        //     snap_2.serializable_snapshot(),
+        // );
     }
 
     #[actix_rt::test]
     async fn test_insert_all() {
-        let file_system = Arc::new(FileSystemClient::in_memory());
-        let sut = SUT::new(file_system);
+        // let file_system = Arc::new(FileSystemClient::in_memory());
+        // let sut = SUT::new(file_system);
 
-        let fs = FactorSourceIDFromHash::sample_at(0);
-        sut.insert_all(IndexMap::kv(fs, FactorInstances::sample()))
-            .await
-            .unwrap();
+        // let fs = FactorSourceIDFromHash::sample_at(0);
+        // sut.insert_all(IndexMap::kv(fs, FactorInstances::sample()))
+        //     .await
+        //     .unwrap();
 
-        let max = sut
-            .max_index_for(
-                fs,
-                DerivationPreset::AccountMfa
-                    .index_agnostic_path_on_network(NetworkID::Mainnet),
-            )
-            .await
-            .unwrap();
-        assert_eq!(
-            max.unwrap(),
-            HDPathComponent::Securified(SecurifiedU30::ONE)
-        );
+        // let max = sut
+        //     .max_index_for(
+        //         fs,
+        //         DerivationPreset::AccountMfa
+        //             .index_agnostic_path_on_network(NetworkID::Mainnet),
+        //     )
+        //     .await
+        //     .unwrap();
+        // assert_eq!(
+        //     max.unwrap(),
+        //     HDPathComponent::Securified(SecurifiedU30::ONE)
+        // );
+        todo!("migrate me")
     }
 }

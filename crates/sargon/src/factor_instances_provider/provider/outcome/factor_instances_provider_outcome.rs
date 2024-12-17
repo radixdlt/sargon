@@ -4,6 +4,16 @@ use crate::prelude::*;
 /// renamed field values to make it clear that `to_cache` instances  already have been cached.
 #[derive(Clone, Debug)]
 pub struct FactorInstancesProviderOutcome {
+    // pub per_factor: IndexMap<
+    //     FactorSourceIDFromHash,
+    //     FactorInstancesProviderOutcomeForFactor,
+    // >,
+    pub per_derivation_preset:
+        IndexMap<DerivationPreset, FactorInstancesProviderOutcomePerFactor>,
+}
+
+#[derive(Clone, Debug)]
+pub struct FactorInstancesProviderOutcomePerFactor {
     pub per_factor: IndexMap<
         FactorSourceIDFromHash,
         FactorInstancesProviderOutcomeForFactor,
@@ -14,13 +24,14 @@ impl From<InternalFactorInstancesProviderOutcome>
     for FactorInstancesProviderOutcome
 {
     fn from(value: InternalFactorInstancesProviderOutcome) -> Self {
-        Self {
-            per_factor: value
-                .per_factor
-                .into_iter()
-                .map(|(k, v)| (k, v.into()))
-                .collect(),
-        }
+        // Self {
+        //     per_factor: value
+        //         .per_factor
+        //         .into_iter()
+        //         .map(|(k, v)| (k, v.into()))
+        //         .collect(),
+        // }
+        todo!()
     }
 }
 
@@ -29,10 +40,11 @@ impl FactorInstancesProviderOutcome {
     pub fn newly_derived_instances_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
-        self.per_factor
-            .values()
-            .flat_map(|x| x.debug_was_derived.factor_instances())
-            .collect()
+        // self.per_factor
+        //     .values()
+        //     .flat_map(|x| x.debug_was_derived.factor_instances())
+        //     .collect()
+        todo!()
     }
 
     pub fn total_number_of_newly_derived_instances(&self) -> usize {
@@ -46,10 +58,11 @@ impl FactorInstancesProviderOutcome {
     pub fn instances_found_in_cache_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
-        self.per_factor
-            .values()
-            .flat_map(|x| x.debug_found_in_cache.factor_instances())
-            .collect()
+        // self.per_factor
+        //     .values()
+        //     .flat_map(|x| x.debug_found_in_cache.factor_instances())
+        //     .collect()
+        todo!()
     }
 
     pub fn total_number_of_instances_found_in_cache(&self) -> usize {
