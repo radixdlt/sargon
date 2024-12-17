@@ -32,7 +32,7 @@ impl SargonOS {
         self.sign(
             transaction_intent.clone(),
             self.sign_transactions_interactor(),
-            role_kind,
+            SigningPurpose::sign_transaction(role_kind),
         )
         .await
     }
@@ -45,7 +45,7 @@ impl SargonOS {
         self.sign(
             subintent.clone(),
             self.sign_subintents_interactor(),
-            role_kind,
+            SigningPurpose::sign_transaction(role_kind),
         )
         .await
     }
@@ -54,7 +54,7 @@ impl SargonOS {
         &self,
         signable: S,
         sign_interactor: Arc<dyn SignInteractor<S>>,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
     ) -> Result<S::Signed> {
         let profile = &self.profile_state_holder.profile()?;
 
@@ -63,7 +63,7 @@ impl SargonOS {
             vec![signable.clone()],
             sign_interactor,
             profile,
-            role_kind,
+            purpose,
         )?;
 
         let outcome = collector.collect_signatures().await?;

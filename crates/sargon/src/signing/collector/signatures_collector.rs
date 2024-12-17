@@ -32,14 +32,14 @@ impl<S: Signable> SignaturesCollector<S> {
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
         profile: &Profile,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
     ) -> Result<Self> {
         Self::with_signers_extraction(
             finish_early_strategy,
             IndexSet::from_iter(profile.factor_sources.iter()),
             transactions,
             interactor,
-            role_kind,
+            purpose,
             |i| SignableWithEntities::extracting_from_profile(&i, profile),
         )
     }
@@ -62,12 +62,12 @@ impl<S: Signable> SignaturesCollector<S> {
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
         interactor: Arc<dyn SignInteractor<S>>,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
     ) -> Self {
         debug!("Init SignaturesCollector");
         let preprocessor = SignaturesCollectorPreprocessor::new(transactions);
         let (petitions, factors) =
-            preprocessor.preprocess(profile_factor_sources, role_kind);
+            preprocessor.preprocess(profile_factor_sources, purpose);
 
         let dependencies = SignaturesCollectorDependencies::new(
             finish_early_strategy,
@@ -87,7 +87,7 @@ impl<S: Signable> SignaturesCollector<S> {
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
         extract_signers: F,
     ) -> Result<Self>
     where
@@ -104,7 +104,7 @@ impl<S: Signable> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             interactor,
-            role_kind,
+            purpose,
         );
 
         Ok(collector)
@@ -444,7 +444,7 @@ mod tests {
             )],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(IndexSet::new(), [], []),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         );
         assert!(res.is_ok());
     }
@@ -459,7 +459,7 @@ mod tests {
             )],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(IndexSet::new(), [], []),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         );
         assert!(matches!(res, Err(CommonError::UnknownPersona)));
     }
@@ -477,7 +477,7 @@ mod tests {
             )],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(factors_sources, [], [&persona]),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
         .unwrap();
         let outcome = collector.collect_signatures().await.unwrap();
@@ -510,7 +510,7 @@ mod tests {
                 ),
             )),
             &profile,
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
         .unwrap();
 
@@ -543,7 +543,7 @@ mod tests {
                     SimulatedUser::prudent_no_fail(),
                 )),
                 &profile,
-                RoleKind::Primary,
+                SigningPurpose::sign_transaction_primary(),
             )
             .unwrap();
 
@@ -615,7 +615,7 @@ mod tests {
             [t0.clone(), t1.clone(), t2.clone(), t3.clone()],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &profile,
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
         .unwrap();
 
@@ -893,7 +893,7 @@ mod tests {
                 [t0.clone(), t1.clone(), t2.clone()],
                 Arc::new(TestSignInteractor::new(sim)),
                 &profile,
-                RoleKind::Primary,
+                SigningPurpose::sign_transaction_primary(),
             )
             .unwrap();
 
@@ -1036,7 +1036,7 @@ mod tests {
                 [t0.clone(), t1.clone(), t2.clone(), t3.clone()],
                 Arc::new(TestSignInteractor::new(vector.simulated_user)),
                 &profile,
-                RoleKind::Primary,
+                SigningPurpose::sign_transaction_primary(),
             )
             .unwrap();
 
@@ -1130,7 +1130,7 @@ mod tests {
                         ),
                     )),
                     &profile,
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 )
                 .unwrap();
 
@@ -1192,7 +1192,7 @@ mod tests {
                         ),
                     )),
                     &profile,
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 )
                 .unwrap();
 
@@ -1279,7 +1279,7 @@ mod tests {
                         ]),
                     ))),
                     &profile,
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 )
                 .unwrap();
 
@@ -2080,7 +2080,7 @@ mod tests {
                             FactorSourceIDFromHash::sample_at(4),
                         ]),
                     ),
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 );
 
                 let outcome = collector.collect_signatures().await.unwrap();

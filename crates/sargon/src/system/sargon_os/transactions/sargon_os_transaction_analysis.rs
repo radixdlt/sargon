@@ -159,7 +159,7 @@ impl SargonOS {
         Ok(ExtractorOfInstancesRequiredToSignTransactions::extract(
             &profile,
             vec![signable_summary],
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )?
         .iter()
         .map(|i| i.public_key.public_key)

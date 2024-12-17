@@ -64,10 +64,11 @@ impl<ID: SignableID> PetitionForEntity<ID> {
     pub(crate) fn new_from_entity(
         payload_id: ID,
         entity: AccountOrPersona,
-        if_securified_select_role: RoleKind,
+        purpose: SigningPurpose,
     ) -> Self {
         match entity.entity_security_state() {
             EntitySecurityState::Unsecured { value } => {
+                // Transaction signing factor instance is used in both transaction and rola purposes
                 let factor_instance = value.transaction_signing;
 
                 Self::new_unsecurified(
@@ -76,18 +77,33 @@ impl<ID: SignableID> PetitionForEntity<ID> {
                     factor_instance,
                 )
             }
-            EntitySecurityState::Securified { value } => {
-                let general_role =
-                    GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
-                        (value.security_structure.matrix_of_factors, if_securified_select_role)
-                    ).unwrap();
+            EntitySecurityState::Securified { value } => match purpose {
+                SigningPurpose::SignTX { role_kind } => {
+                    let general_role =
+                            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+                                (value.security_structure.matrix_of_factors, role_kind)
+                            ).unwrap();
 
-                PetitionForEntity::new_securified(
-                    payload_id,
-                    entity.address(),
-                    general_role,
-                )
-            }
+                    PetitionForEntity::new_securified(
+                        payload_id,
+                        entity.address(),
+                        general_role,
+                    )
+                }
+                SigningPurpose::ROLA => {
+                    let threshold_factors =
+                        PetitionForFactors::<ID>::new_threshold(
+                            vec![value.authentication_signing_factor_instance()],
+                            1,
+                        );
+                    PetitionForEntity::new(
+                        payload_id,
+                        entity.address(),
+                        threshold_factors,
+                        None,
+                    )
+                }
+            },
         }
     }
 
