@@ -22,28 +22,24 @@ impl CacheFiller {
             interactor,
         );
 
-        let not_satisfied = CacheNotSatisfied {
-            cached_and_quantities_to_derive: DerivationPreset::all()
-                .into_iter()
-                .map(|preset| {
-                    (
-                        preset,
-                        IndexMap::kv(
-                            factor_source.id_from_hash(),
-                            CacheInstancesAndRemainingQuantityToDerive {
-                                instances_to_use_from_cache:
-                                    FactorInstances::default(), // TODO improve surrounding code. should not have to create CacheInstancesAndRemainingQuantityToDerive...
-                                quantity_to_derive: preset
-                                    .cache_filling_quantity(),
-                            },
-                        ),
-                    )
-                })
-                .collect::<IndexMap<_, _>>(),
-        };
+        let quantities_to_derive = DerivationPreset::all()
+            .into_iter()
+            .map(|preset| {
+                (
+                    preset,
+                    IndexMap::kv(
+                        factor_source.id_from_hash(),
+                        preset.cache_filling_quantity(),
+                    ),
+                )
+            })
+            .collect::<QuantitiesToDerive>();
 
         let derived = provider
-            .derive_more(not_satisfied, DerivationPurpose::pre_deriving_keys())
+            .derive_more(
+                quantities_to_derive,
+                DerivationPurpose::pre_deriving_keys(),
+            )
             .await?;
 
         cache_client.insert_all(&derived).await?;

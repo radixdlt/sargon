@@ -399,6 +399,22 @@ pub struct CacheNotSatisfied {
         >,
     >,
 }
+impl CacheNotSatisfied {
+    pub fn cached_instances_to_use(&self) -> CachedInstancesToUse {
+        todo!()
+    }
+
+    pub fn remaining_quantities_to_derive(&self) -> QuantitiesToDerive {
+        todo!()
+    }
+}
+pub type QuantitiesToDerive =
+    IndexMap<DerivationPreset, IndexMap<FactorSourceIDFromHash, usize>>;
+
+pub type CachedInstancesToUse = IndexMap<
+    DerivationPreset,
+    IndexMap<FactorSourceIDFromHash, FactorInstances>,
+>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CacheSatisfied {

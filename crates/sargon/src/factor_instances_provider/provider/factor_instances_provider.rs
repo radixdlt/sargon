@@ -167,25 +167,15 @@ impl FactorInstancesProvider {
 
     async fn derive_more_and_cache(
         &mut self,
-        // quantified_derivation_preset: QuantifiedDerivationPreset,
-        // pf_found_in_cache_leq_requested: IndexMap<
-        //     FactorSourceIDFromHash,
-        //     FactorInstances,
-        // >,
-        // pf_pdp_qty_to_derive: IndexMap<
-        //     FactorSourceIDFromHash,
-        //     IndexMap<DerivationPreset, usize>,
-        // >,
         not_satisfied: CacheNotSatisfied,
         derivation_purpose: DerivationPurpose,
     ) -> Result<(
         InstancesInCacheConsumer,
         InternalFactorInstancesProviderOutcome,
     )> {
-        let pf_newly_derived = self
+        let pdp_pf_newly_derived = self
             .derive_more(
-                // (pf_pdp_qty_to_derive,
-                not_satisfied,
+                not_satisfied.remaining_quantities_to_derive(),
                 derivation_purpose,
             )
             .await?;
@@ -297,11 +287,7 @@ impl FactorInstancesProvider {
 
     pub(super) async fn derive_more(
         &self,
-        // pf_pdp_quantity_to_derive: IndexMap<
-        //     FactorSourceIDFromHash,
-        //     IndexMap<DerivationPreset, usize>,
-        // >,
-        not_satisfied: CacheNotSatisfied,
+        quantities_to_derive: QuantitiesToDerive,
         derivation_purpose: DerivationPurpose,
     ) -> Result<
         IndexMap<
@@ -319,19 +305,12 @@ impl FactorInstancesProvider {
             cache_snapshot,
         );
 
-        let per_preset_per_factor_paths = not_satisfied
-            .cached_and_quantities_to_derive
+        let per_preset_per_factor_paths = quantities_to_derive
             .into_iter()
-            // .flat_map(|(derivation_preset, instances_and_qty_to_derive)| {
-            //     // pf_pdp_quantity_to_derive
-            //     //     .into_iter()
-            //     not_satisfied.quantities_to_derive.into_iter()
             .map(|(derivation_preset, per_factor_source)| {
                 let per_factor_paths = per_factor_source
                     .into_iter()
-                    .map(|(factor_source_id, instances_and_qty_to_derive)| {
-                        let qty =
-                            instances_and_qty_to_derive.quantity_to_derive;
+                    .map(|(factor_source_id, qty)| {
                         // `qty` many paths
                         let paths = (0..qty)
                             .map(|_| {
