@@ -121,6 +121,21 @@ impl SargonOS {
         Ok(ids)
     }
 
+    /// Updates the name of the corresponding `factor_source` in Profile. Throws `UpdateFactorSourceMutateFailed` error if the
+    /// factor source is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
+    pub async fn update_factor_source_name(
+        &self,
+        factor_source: FactorSource,
+        name: String,
+    ) -> Result<()> {
+        let mut factor_source = factor_source;
+        factor_source.set_name(name);
+        self.update_factor_source(factor_source).await
+    }
+
     pub async fn debug_add_all_sample_factor_sources(
         &self,
     ) -> Result<Vec<FactorSourceID>> {

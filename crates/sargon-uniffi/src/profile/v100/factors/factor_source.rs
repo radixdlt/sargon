@@ -59,16 +59,6 @@ pub fn factor_source_name(factor_source: &FactorSource) -> String {
 }
 
 #[uniffi::export]
-pub fn factor_source_set_name(
-    factor_source: FactorSource,
-    updated: String,
-) -> FactorSource {
-    let mut factor_source = factor_source.into_internal();
-    factor_source.set_name(updated);
-    factor_source.into()
-}
-
-#[uniffi::export]
 pub fn new_factor_source_sample() -> FactorSource {
     InternalFactorSource::sample().into()
 }
