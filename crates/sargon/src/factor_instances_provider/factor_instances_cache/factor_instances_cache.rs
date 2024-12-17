@@ -220,108 +220,176 @@ impl FactorInstancesCache {
             .max()
     }
 
-    /// Returns enough instances to satisfy the requested quantity for each factor source,
-    /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
-    /// must derive more, this function returns the quantities to derive for each factor source,
-    /// for each derivation preset, not only the originally requested one.
-    pub fn get_poly_factor_with_quantities(
+    /// Loads cached factor instances for the given network and factor source and
+    /// per derivation preset. The outcome is either a load from cache failure or
+    /// a `CachedInstancesWithQuantitiesOutcome` which is either a
+    /// `Satisfied` or `NotSatisfied` outcome.
+    ///
+    /// Satisfied means *fully satisfied*, i.e. all requested instances were
+    /// found in the cache.
+    ///
+    /// NotSatisfied means that the cache did not contain all the requested
+    /// instances, but it might have contained some of the quantity specified
+    /// per quantified derivation preset, and the rest must be derived, so
+    /// NotSatisfied contains the instances that were found in the cache and
+    /// the quantities to derive.
+    pub fn get_poly_factor_with_quantified_preset(
         &self,
         factor_source_ids: &IndexSet<FactorSourceIDFromHash>,
-        originally_requested_quantified_derivation_preset: &QuantifiedDerivationPreset,
+        quantified_derivation_presets: &IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
         network_id: NetworkID,
     ) -> Result<CachedInstancesWithQuantitiesOutcome> {
-        let target_quantity =
-            originally_requested_quantified_derivation_preset.quantity;
-        let mut pf_instances =
-            IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
-        let mut pf_pdp_qty_to_derive = IndexMap::<
+        let mut pf_pdp = IndexMap::<
             FactorSourceIDFromHash,
-            IndexMap<DerivationPreset, usize>,
+            IndexMap<
+                DerivationPreset,
+                CacheInstancesAndRemainingQuantityToDerive,
+            >,
         >::new();
-        let mut is_quantity_satisfied_for_all_factor_sources = true;
 
         for factor_source_id in factor_source_ids {
+            let mut pdp = IndexMap::<
+                DerivationPreset,
+                CacheInstancesAndRemainingQuantityToDerive,
+            >::new();
+
             for preset in DerivationPreset::all() {
+                let cache_filling_quantity = preset.cache_filling_quantity();
+
                 let index_agnostic_path =
                     preset.index_agnostic_path_on_network(network_id);
+
                 let for_preset = self
                     .get_mono_factor(factor_source_id, index_agnostic_path)
                     .unwrap_or_default();
+
                 let count_in_cache = for_preset.len();
-                if preset
-                    == originally_requested_quantified_derivation_preset
-                        .derivation_preset
+
+                let val = if let Some(quantified_derivation_preset) =
+                    quantified_derivation_presets.get_id(preset)
                 {
-                    let satisfies_requested_quantity =
+                    // The `preset` was part of the originally requested preset
+                    // with a target quantity.
+                    let target_quantity = quantified_derivation_preset.quantity;
+
+                    let is_quantity_satisfied =
                         count_in_cache >= target_quantity;
-                    if satisfies_requested_quantity {
+
+                    if is_quantity_satisfied {
                         // The instances in the cache can satisfy the requested quantity
                         // for this factor source for this derivation preset
-                        pf_instances.append_or_insert_to(
-                            factor_source_id,
+                        Some(CacheInstancesAndRemainingQuantityToDerive {
                             // Only take the first `target_quantity` instances
                             // to be used, the rest are not needed and should
                             // remain in the cache (later we will call delete on
                             // all those instances.)
-                            for_preset.split_at(target_quantity).0,
-                        );
+                            instances_to_use_from_cache: for_preset
+                                .split_at(target_quantity)
+                                .0,
+                            quantity_to_derive: 0,
+                        })
                     } else {
-                        // The instances in the cache cannot satisfy the requested quantity
-                        // we must derive more!
-                        is_quantity_satisfied_for_all_factor_sources = false;
                         // Since we are deriving more we might as well ensure that the
                         // cache is filled with `CACHE_FILLING_QUANTITY` **AFTER** the
                         // requested quantity is satisfied, meaning we will not only
                         // derive `CACHE_FILLING_QUANTITY - count_in_cache`, instead we
                         // derive the `target_quantity` as well.
-                        let quantity_to_derive = CACHE_FILLING_QUANTITY
+                        let quantity_to_derive = cache_filling_quantity
                             - count_in_cache
                             + target_quantity;
-                        pf_pdp_qty_to_derive.append_or_insert_element_to(
-                            factor_source_id,
-                            (preset, quantity_to_derive),
-                        );
-                        // insert all instances to be used directly
-                        pf_instances.append_or_insert_to(
-                            factor_source_id,
-                            for_preset.clone(),
-                        );
+
+                        Some(CacheInstancesAndRemainingQuantityToDerive {
+                            instances_to_use_from_cache: for_preset.clone(),
+                            quantity_to_derive,
+                        })
                     }
-                } else {
-                    // Not originally requested derivation preset, calculate number
+                } else if count_in_cache < cache_filling_quantity {
+                    // Not requested derivation preset, calculate number
                     // of instances to derive IF we are going to derive anyway,
                     // we wanna FILL the cache for those derivation presets as well.
-                    if count_in_cache < CACHE_FILLING_QUANTITY {
-                        let qty_to_derive =
-                            CACHE_FILLING_QUANTITY - count_in_cache;
-                        pf_pdp_qty_to_derive.append_or_insert_element_to(
-                            factor_source_id,
-                            (preset, qty_to_derive),
-                        );
-                    }
+                    let quantity_to_derive =
+                        cache_filling_quantity - count_in_cache;
+
+                    Some(CacheInstancesAndRemainingQuantityToDerive {
+                        instances_to_use_from_cache: FactorInstances::default(),
+                        quantity_to_derive,
+                    })
+                } else {
+                    None
+                };
+                if let Some(val) = val {
+                    pdp.insert(preset, val);
                 }
+
+                if pdp.is_empty() {
+                    continue;
+                }
+                pf_pdp.insert(factor_source_id, pdp);
             }
         }
-        let outcome = if is_quantity_satisfied_for_all_factor_sources {
-            CachedInstancesWithQuantitiesOutcome::Satisfied(pf_instances)
+
+        // The instances in the cache cannot satisfy the requested quantity
+        // we must derive more!
+        let is_quantity_satisfied_for_all = pf_pdp.iter().any(|(_, pdp)| {
+            pdp.iter()
+                .any(|(_, ci)| ci.remaining_quantity_to_derive > 0)
+        });
+
+        let outcome = if is_quantity_satisfied_for_all {
+            CachedInstancesWithQuantitiesOutcome::Satisfied(CacheSatisfied {
+                cached_and_quantities_to_derive: pf_pdp
+                    .into_iter()
+                    .map(|(k, v)| {
+                        (
+                            k,
+                            v.into_iter()
+                                .map(|x| x.instances_to_use_from_cache)
+                                .collect(),
+                        )
+                    })
+                    .collect(),
+            })
         } else {
-            CachedInstancesWithQuantitiesOutcome::NotSatisfied {
-                partial_instances: pf_instances,
-                quantities_to_derive: pf_pdp_qty_to_derive,
-            }
+            CachedInstancesWithQuantitiesOutcome::NotSatisfied(
+                CacheNotSatisfied {
+                    cached_and_quantities_to_derive: pf_pdp,
+                },
+            )
         };
         Ok(outcome)
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub struct CacheNotSatisfied {
+    /// PER FactorSourceID => PER DerivationPreset => CacheInstancesAndRemainingQuantityToDerive
+    pub cached_and_quantities_to_derive: IndexMap<
+        FactorSourceIDFromHash,
+        IndexMap<DerivationPreset, CacheInstancesAndRemainingQuantityToDerive>,
+    >,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct CacheSatisfied {
+    /// PER FactorSourceID => PER DerivationPreset => FactorInstances
+    pub cached_and_quantities_to_derive: IndexMap<
+        FactorSourceIDFromHash,
+        IndexMap<DerivationPreset, FactorInstances>,
+    >,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct CacheInstancesAndRemainingQuantityToDerive {
+    pub instances_to_use_from_cache: FactorInstances, // if empty then this was not a requested derivation preset, but we are cache filling and found `quantity_to_derive` needed to fill cache.
+    pub quantity_to_derive: usize,
+}
+
 #[derive(Debug, PartialEq, Eq, enum_as_inner::EnumAsInner)]
 pub enum CachedInstancesWithQuantitiesOutcome {
-    Satisfied(IndexMap<FactorSourceIDFromHash, FactorInstances>),
-    NotSatisfied {
-        partial_instances: IndexMap<FactorSourceIDFromHash, FactorInstances>,
-        quantities_to_derive:
-            IndexMap<FactorSourceIDFromHash, IndexMap<DerivationPreset, usize>>,
-    },
+    Satisfied(CacheSatisfied),
+    NotSatisfied(CacheNotSatisfied),
 }
 
 impl FactorInstancesCache {

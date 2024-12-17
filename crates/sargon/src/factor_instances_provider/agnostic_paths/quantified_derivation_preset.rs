@@ -7,6 +7,13 @@ pub struct QuantifiedDerivationPreset {
     pub quantity: usize,
 }
 
+impl Identifiable for QuantifiedDerivationPreset {
+    type ID = DerivationPreset;
+    fn id(&self) -> DerivationPreset {
+        self.derivation_preset.clone()
+    }
+}
+
 impl QuantifiedDerivationPreset {
     pub fn new(derivation_preset: DerivationPreset, quantity: usize) -> Self {
         Self {

@@ -158,11 +158,45 @@ impl FactorInstancesCacheClient {
         .await
     }
 
+    pub async fn get_poly_factor_with_quantified_presets(
+        &self,
+        factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
+        quantified_derivation_presets: IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
+        network_id: NetworkID,
+    ) -> Result<CachedInstancesWithQuantitiesOutcome> {
+        let mut unaggregated = IndexMap::new();
+        let mut is_satisfied = true;
+        for quantified_preset in quantified_derivation_presets.items() {
+            let part = self
+                .get_poly_factor_with_quantities(
+                    factor_source_ids.borrow(),
+                    quantified_preset,
+                    network_id,
+                )
+                .await?;
+            is_satisfied &= part.is_satisfied();
+            unaggregated.insert(quantified_preset, part);
+        }
+        if is_satisfied {
+            let aggregated = IndexMap::new();
+            todo!("impl me");
+            Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(aggregated))
+        } else {
+            let aggregated = IndexMap::new();
+            todo!("impl me");
+            Ok(CachedInstancesWithQuantitiesOutcome::NotSatisfied(
+                unaggregated,
+            ))
+        }
+    }
+
     /// Returns enough instances to satisfy the requested quantity for each factor source,
     /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
     /// must derive more, this function returns the quantities to derive for each factor source,
     /// for each derivation preset, not only the originally requested one.
-    pub async fn get_poly_factor_with_quantities(
+    async fn get_poly_factor_with_quantities(
         &self,
         factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
         originally_requested_quantified_derivation_preset: impl Borrow<
@@ -171,7 +205,7 @@ impl FactorInstancesCacheClient {
         network_id: NetworkID,
     ) -> Result<CachedInstancesWithQuantitiesOutcome> {
         self.access_cache_init_if_needed(|cache| {
-            cache.get_poly_factor_with_quantities(
+            cache.get_poly_factor_with_quantified_preset(
                 factor_source_ids.borrow(),
                 originally_requested_quantified_derivation_preset.borrow(),
                 network_id,

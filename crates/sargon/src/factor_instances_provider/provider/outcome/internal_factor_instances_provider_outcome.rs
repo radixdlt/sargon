@@ -2,13 +2,21 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug)]
 pub struct InternalFactorInstancesProviderOutcome {
+    pub per_derivation_preset: IndexMap<
+        DerivationPreset,
+        InternalFactorInstancesProviderOutcomePerFactor,
+    >,
+}
+
+#[derive(Clone, Debug)]
+pub struct InternalFactorInstancesProviderOutcomePerFactor {
     pub per_factor: IndexMap<
         FactorSourceIDFromHash,
         InternalFactorInstancesProviderOutcomeForFactor,
     >,
 }
 
-impl InternalFactorInstancesProviderOutcome {
+impl InternalFactorInstancesProviderOutcomePerFactor {
     pub fn new(
         per_factor: IndexMap<
             FactorSourceIDFromHash,
@@ -144,7 +152,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = InternalFactorInstancesProviderOutcome;
+    type SUT = InternalFactorInstancesProviderOutcomePerFactor;
 
     #[test]
     fn only_to_cache() {
