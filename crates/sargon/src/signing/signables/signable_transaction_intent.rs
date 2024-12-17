@@ -22,29 +22,6 @@ impl Signable for TransactionIntent {
     ) -> Result<Self::Signed> {
         SignedIntent::new(self.clone(), intent_signatures)
     }
-
-    fn sample_entity_addresses_with_pub_key_hashes(
-        all_addresses_with_hashes: Vec<(
-            AddressOfAccountOrPersona,
-            PublicKeyHash,
-        )>,
-        network_id: Option<NetworkID>,
-    ) -> Self {
-        let mut builder = ScryptoTransactionManifestBuilder::new();
-        let network_id = network_id.unwrap_or_default();
-
-        for (address, hash) in all_addresses_with_hashes {
-            builder = builder.set_metadata(
-                address.scrypto(),
-                MetadataKey::OwnerKeys,
-                ScryptoMetadataValue::PublicKeyHashArray(vec![hash.into()]),
-            );
-        }
-
-        let manifest = TransactionManifest::sargon_built(builder, network_id);
-
-        Self::new(TransactionHeader::sample(), manifest, Message::None).unwrap()
-    }
 }
 
 impl From<SignedIntent> for TransactionIntent {
@@ -68,6 +45,31 @@ impl IntoIterator for SignedIntent {
 }
 
 impl SignableID for TransactionIntentHash {}
+
+impl ProvidesSamplesByBuildingManifest for TransactionIntent {
+    fn sample_entity_addresses_with_pub_key_hashes(
+        all_addresses_with_hashes: Vec<(
+            AddressOfAccountOrPersona,
+            PublicKeyHash,
+        )>,
+        network_id: Option<NetworkID>,
+    ) -> Self {
+        let mut builder = ScryptoTransactionManifestBuilder::new();
+        let network_id = network_id.unwrap_or_default();
+
+        for (address, hash) in all_addresses_with_hashes {
+            builder = builder.set_metadata(
+                address.scrypto(),
+                MetadataKey::OwnerKeys,
+                ScryptoMetadataValue::PublicKeyHashArray(vec![hash.into()]),
+            );
+        }
+
+        let manifest = TransactionManifest::sargon_built(builder, network_id);
+
+        Self::new(TransactionHeader::sample(), manifest, Message::None).unwrap()
+    }
+}
 
 #[cfg(test)]
 mod test {

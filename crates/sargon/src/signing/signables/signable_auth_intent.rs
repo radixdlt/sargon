@@ -38,16 +38,6 @@ impl Signable for AuthIntent {
             intent_signatures.signatures,
         )
     }
-
-    fn sample_entity_addresses_with_pub_key_hashes(
-        _all_addresses_with_hashes: Vec<(
-            AddressOfAccountOrPersona,
-            PublicKeyHash,
-        )>,
-        _network_id: Option<NetworkID>,
-    ) -> Self {
-        todo!()
-    }
 }
 
 impl From<SignedAuthIntent> for AuthIntent {

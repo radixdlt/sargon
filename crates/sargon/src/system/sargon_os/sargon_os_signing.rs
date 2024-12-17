@@ -381,7 +381,9 @@ mod test {
         }
     }
 
-    fn get_signable_with_entities<S: Signable>(
+    fn get_signable_with_entities<
+        S: Signable + ProvidesSamplesByBuildingManifest,
+    >(
         profile: &Profile,
     ) -> (S, Vec<impl IsEntityAddress>) {
         let accounts_addresses_involved = profile

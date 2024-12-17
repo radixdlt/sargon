@@ -251,7 +251,9 @@ impl<S: Signable> Petitions<S> {
     }
 }
 
-impl<S: Signable> HasSampleValues for Petitions<S> {
+impl<S: Signable + ProvidesSamplesByBuildingManifest> HasSampleValues
+    for Petitions<S>
+{
     fn sample() -> Self {
         let p0 = PetitionForTransaction::<S>::sample();
         Self::new(

@@ -80,7 +80,9 @@ impl Signable for SignableManifestSummary {
     fn signed(&self, _: IntentSignatures) -> Result<Self::Signed> {
         panic!("Manifest summary cannot be actually signed")
     }
+}
 
+impl ProvidesSamplesByBuildingManifest for SignableManifestSummary {
     fn sample_entity_addresses_with_pub_key_hashes(
         all_addresses_with_hashes: Vec<(
             AddressOfAccountOrPersona,
