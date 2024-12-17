@@ -17,8 +17,4 @@ extension FactorSource {
 	public var name: String {
 		factorSourceName(factorSource: self)
 	}
-
-	public mutating func setName(_ updated: String) {
-		self = factorSourceSetName(factorSource: self, updated: updated)
-	}
 }
