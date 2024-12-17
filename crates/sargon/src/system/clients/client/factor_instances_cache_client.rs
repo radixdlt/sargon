@@ -107,13 +107,12 @@ impl FactorInstancesCacheClient {
 impl FactorInstancesCacheClient {
     pub async fn delete(
         &self,
-        instances_per_factor_sources_to_delete: IndexMap<
-            FactorSourceIDFromHash,
-            FactorInstances,
+        instances_to_delete: impl Borrow<
+            InstancesPerDerivationPresetPerFactorSource,
         >,
     ) -> Result<()> {
         self.update_and_persist_cache(|cache| {
-            cache.delete(instances_per_factor_sources_to_delete.borrow());
+            cache.delete(instances_to_delete.borrow());
             Ok(())
         })
         .await
@@ -160,39 +159,22 @@ impl FactorInstancesCacheClient {
         .await
     }
 
-    pub async fn gets(
+    pub async fn get(
         &self,
         factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
-        quantified_derivation_presets: IdentifiedVecOf<
-            QuantifiedDerivationPreset,
+        quantified_derivation_presets: impl Borrow<
+            IdentifiedVecOf<QuantifiedDerivationPreset>,
         >,
         network_id: NetworkID,
     ) -> Result<CachedInstancesWithQuantitiesOutcome> {
-        let mut unaggregated = IndexMap::new();
-        let mut is_satisfied = true;
-        for quantified_preset in quantified_derivation_presets.items() {
-            let part = self
-                .get_poly_factor_with_quantities(
-                    factor_source_ids.borrow(),
-                    quantified_preset,
-                    network_id,
-                )
-                .await?;
-            is_satisfied &= part.is_satisfied();
-            unaggregated.insert(quantified_preset, part);
-        }
-        todo!("migrate me")
-        // if is_satisfied {
-        //     let aggregated = IndexMap::new();
-        //     todo!("impl me");
-        //     Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(aggregated))
-        // } else {
-        //     let aggregated = IndexMap::new();
-        //     todo!("impl me");
-        //     Ok(CachedInstancesWithQuantitiesOutcome::NotSatisfied(
-        //         unaggregated,
-        //     ))
-        // }
+        self.access_cache_init_if_needed(|cache| {
+            cache.get(
+                factor_source_ids.borrow(),
+                quantified_derivation_presets.borrow(),
+                network_id,
+            )
+        })
+        .await
     }
 
     /// Returns enough instances to satisfy the requested quantity for each factor source,
@@ -345,15 +327,15 @@ mod tests {
         let five = HDPathComponent::from(five);
         assert_eq!(max_higher_sut1, Some(five));
 
-        sut2.delete(IndexMap::from_iter([(
-            fsid,
-            FactorInstances::from_iter([fi5.clone()]),
-        )]))
-        .await
-        .unwrap();
+        // sut2.delete(IndexMap::from_iter([(
+        //     fsid,
+        //     FactorInstances::from_iter([fi5.clone()]),
+        // )]))
+        // .await
+        // .unwrap();
 
-        let max_higher_sut1 = sut1.max_index_for(fsid, path).await.unwrap();
-        assert_eq!(max_higher_sut1, Some(one));
+        // let max_higher_sut1 = sut1.max_index_for(fsid, path).await.unwrap();
+        // assert_eq!(max_higher_sut1, Some(one));
 
         todo!("migrate me")
 

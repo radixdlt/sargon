@@ -90,16 +90,15 @@ impl FactorInstancesProvider {
         &self,
         instances_to_delete: CachedInstancesToUse,
     ) -> InstancesInCacheConsumer {
-        // let instances_clone = instances_per_factor_sources_to_delete.clone();
-        // let cache_client_clone = self.cache_client.clone();
-        // InstancesInCacheConsumer::new(move || {
-        //     let cache_client_clone_clone = cache_client_clone.clone();
-        //     let instances_clone_clone = instances_clone.clone();
-        //     async move {
-        //         cache_client_clone_clone.delete(instances_clone_clone).await
-        //     }
-        // })
-        todo!()
+        let instances_clone = instances_to_delete.clone();
+        let cache_client_clone = self.cache_client.clone();
+        InstancesInCacheConsumer::new(move || {
+            let cache_client_clone_clone = cache_client_clone.clone();
+            let instances_clone_clone = instances_clone.clone();
+            async move {
+                cache_client_clone_clone.delete(instances_clone_clone).await
+            }
+        })
     }
 
     async fn _provide_for_presets(
@@ -116,7 +115,7 @@ impl FactorInstancesProvider {
         let network_id = self.network_id;
         let cached = self
             .cache_client
-            .gets(
+            .get(
                 &factor_sources.iter().map(|f| f.id_from_hash()).collect(),
                 quantified_derivation_presets.clone(),
                 network_id,
