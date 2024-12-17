@@ -27,3 +27,6 @@ pub const MIN_REQUIRED_XRD_FOR_ACCOUNT_DELETION: f64 = 4.0;
 /// The delay increment among polling requests is set to 1 second.
 /// This means that there will be a 2s delay after first call, a 3s delay after second call, 4s after third and so on.
 pub const POLLING_DELAY_INCREMENT_IN_SECONDS: u64 = 1;
+
+/// Number of minutes per day.
+pub const MINUTES_PER_DAY: u32 = 24 * 60;

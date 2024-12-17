@@ -4,6 +4,9 @@ use sargon::SecurityStructureOfFactorInstances as InternalSecurityStructureOfFac
 /// A MatrixOfFactorInstances and an ID which identifies it, this is
 /// the Profile data structure representation of the owner key hashes which
 /// have been uploaded as Scrypto AccessRules on the AccessController on-ledger.
+///
+/// Also contains an authentication signing factor instance which is used for
+/// Rola.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityStructureOfFactorInstances {
     /// The ID of the `SecurityStructureOfFactorSourceIDs` in
@@ -18,7 +21,7 @@ pub struct SecurityStructureOfFactorInstances {
 
     /// The authentication signing factor instance which is used to sign
     /// proof of ownership - aka "True Rola Key". User can select which FactorSource
-    /// to use during Shield Building, but typically most users will user the
+    /// to use during Shield Building, but typically most users will use the
     /// DeviceFactorSource which is default. DerivationPath is in securified
     /// KeySpace of course.
     ///

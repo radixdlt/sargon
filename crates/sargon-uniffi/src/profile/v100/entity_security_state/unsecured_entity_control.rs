@@ -12,7 +12,7 @@ pub struct UnsecuredEntityControl {
     pub transaction_signing: HierarchicalDeterministicFactorInstance,
 
     /// The provisional security structure configuration
-    pub provisional: Option<ProvisionalSecurifiedConfig>,
+    pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
 
 #[uniffi::export]

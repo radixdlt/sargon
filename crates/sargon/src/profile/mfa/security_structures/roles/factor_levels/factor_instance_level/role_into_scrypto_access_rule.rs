@@ -43,8 +43,6 @@ impl From<MatrixOfFactorInstances> for ScryptoRuleSet {
     }
 }
 
-pub const MINUTES_PER_DAY: u32 = 24 * 60;
-
 #[cfg(test)]
 mod tests {
     use super::*;

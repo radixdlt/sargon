@@ -9,7 +9,9 @@ public protocol BaseBaseEntityProtocol: SargonModel {}
 #endif // DEBUG
 
 // MARK: - EntityBaseProtocol
-public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConvertible, Identifiable where ID == EntityAddress {
+public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConvertible, Identifiable
+	where ID == EntityAddress
+{
 	associatedtype EntityAddress: BaseEntityAddressProtocol
 	var networkId: NetworkID { get }
 	var displayName: DisplayName { get }
@@ -42,7 +44,9 @@ extension EntityBaseProtocol {
 	}
 
 	// TODO: MOVE TO SARGON
-	public var virtualHierarchicalDeterministicFactorInstances: Set<HierarchicalDeterministicFactorInstance> {
+	public var virtualHierarchicalDeterministicFactorInstances:
+		Set<HierarchicalDeterministicFactorInstance>
+	{
 		var factorInstances = Set<HierarchicalDeterministicFactorInstance>()
 		switch securityState {
 		case let .unsecured(unsecuredEntityControl):
@@ -146,7 +150,8 @@ extension EntityProtocol {
 		self.init(
 			networkID: networkID,
 			address: address,
-			securityState: .unsecured(value: .init(transactionSigning: factorInstance, provisional: nil)),
+			securityState: .unsecured(
+				value: .init(transactionSigning: factorInstance, provisionalSecurifiedConfig: nil)),
 			displayName: displayName,
 			extraProperties: extraProperties
 		)

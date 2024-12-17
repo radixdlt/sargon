@@ -34,14 +34,16 @@ impl HasProvisionalSecurifiedConfig for EntitySecurityState {
 
     fn set_provisional_unchecked(
         &mut self,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) {
         match self {
             Self::Unsecured { value } => {
-                value.set_provisional_unchecked(provisional)
+                value.set_provisional_unchecked(provisional_securified_config)
             }
             Self::Securified { value } => {
-                value.set_provisional_unchecked(provisional)
+                value.set_provisional_unchecked(provisional_securified_config)
             }
         }
     }
@@ -571,7 +573,7 @@ mod tests {
                     }
                   }
                 },
-                "provisional": {
+                "provisionalSecurifiedConfig": {
                   "discriminator": "factorInstancesDerived",
                   "value": {
                     "securityStructureId": "dededede-dede-dede-dede-dededededede",

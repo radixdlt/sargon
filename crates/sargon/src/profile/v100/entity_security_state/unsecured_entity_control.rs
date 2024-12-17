@@ -13,19 +13,22 @@ pub struct UnsecuredEntityControl {
 
     /// The provisional security structure configuration
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provisional: Option<ProvisionalSecurifiedConfig>,
+    pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
 
 impl HasProvisionalSecurifiedConfig for UnsecuredEntityControl {
     fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
-        self.provisional.clone()
+        self.provisional_securified_config.clone()
     }
 
     fn set_provisional_unchecked(
         &mut self,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) {
-        self.provisional = provisional.into();
+        self.provisional_securified_config =
+            provisional_securified_config.into();
     }
 }
 
@@ -44,14 +47,16 @@ impl UnsecuredEntityControl {
     {
         Self {
             transaction_signing: entity_creating_factor_instance.into(),
-            provisional: None,
+            provisional_securified_config: None,
         }
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
     pub fn new(
         transaction_signing: HierarchicalDeterministicFactorInstance,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) -> Result<Self> {
         let key_kind = transaction_signing.get_key_kind();
         if key_kind != CAP26KeyKind::TransactionSigning {
@@ -61,7 +66,7 @@ impl UnsecuredEntityControl {
         }
         Ok(Self {
             transaction_signing,
-            provisional: provisional.into(),
+            provisional_securified_config: provisional_securified_config.into(),
         })
     }
 

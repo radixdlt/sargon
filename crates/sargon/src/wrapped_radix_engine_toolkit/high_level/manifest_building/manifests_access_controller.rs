@@ -11,7 +11,7 @@ impl TransactionManifest {
             return Err(CommonError::CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile);
         };
 
-        if unsecurified.provisional.is_some() {
+        if unsecurified.provisional_securified_config.is_some() {
             return Err(
                 CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig,
             );
