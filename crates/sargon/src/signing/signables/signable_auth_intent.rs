@@ -12,17 +12,19 @@ impl Signable for AuthIntent {
         let entities = self
             .entities_to_sign
             .iter()
-            .map(|address| match address {
+            .filter_map(|address| match address {
                 AddressOfAccountOrPersona::Account(account_address) => profile
                     .account_by_address(*account_address)
-                    .map(AccountOrPersona::AccountEntity),
+                    .map(AccountOrPersona::AccountEntity)
+                    .ok(),
                 AddressOfAccountOrPersona::Identity(identity_address) => {
                     profile
                         .persona_by_address(*identity_address)
                         .map(AccountOrPersona::PersonaEntity)
+                        .ok()
                 }
             })
-            .collect::<Result<Vec<_>>>()?;
+            .collect_vec();
 
         Ok(IndexSet::from_iter(entities))
     }
@@ -82,16 +84,21 @@ mod tests {
         let profile = Profile::sample();
         let expected_accounts = profile.accounts_on_current_network().unwrap();
 
+        let unknown_address_to_profile = AddressOfAccountOrPersona::Account(
+            Account::sample_mainnet_bob().address,
+        );
+        let mut addresses_requested = expected_accounts
+            .clone()
+            .into_iter()
+            .map(|account| AddressOfAccountOrPersona::Account(account.address))
+            .collect_vec();
+        // Push an unknown address, this should be filtered out from the result
+        addresses_requested.push(unknown_address_to_profile);
+
         let auth_intent = SUT::new_from_request(
             DappToWalletInteractionAuthChallengeNonce::sample(),
             DappToWalletInteractionMetadata::sample(),
-            expected_accounts
-                .clone()
-                .into_iter()
-                .map(|account| {
-                    AddressOfAccountOrPersona::Account(account.address)
-                })
-                .collect_vec(),
+            addresses_requested,
         )
         .unwrap();
 
@@ -102,46 +109,6 @@ mod tests {
                     .into_iter()
                     .map(AccountOrPersona::AccountEntity)
             )
-        )
-    }
-
-    #[test]
-    fn test_get_entities_requiring_signing_fails_due_to_account_not_existing_in_profile(
-    ) {
-        let profile = Profile::sample();
-
-        let auth_intent = SUT::new_from_request(
-            DappToWalletInteractionAuthChallengeNonce::sample(),
-            DappToWalletInteractionMetadata::sample(),
-            vec![AddressOfAccountOrPersona::Account(
-                AccountAddress::sample_frank(),
-            )],
-        )
-        .unwrap();
-
-        assert_eq!(
-            auth_intent.entities_requiring_signing(&profile),
-            Err(CommonError::UnknownAccount)
-        )
-    }
-
-    #[test]
-    fn test_get_entities_requiring_signing_fails_due_to_persona_not_existing_in_profile(
-    ) {
-        let profile = Profile::sample();
-
-        let auth_intent = SUT::new_from_request(
-            DappToWalletInteractionAuthChallengeNonce::sample(),
-            DappToWalletInteractionMetadata::sample(),
-            vec![AddressOfAccountOrPersona::Identity(
-                Persona::sample_mainnet_ripley().address,
-            )],
-        )
-        .unwrap();
-
-        assert_eq!(
-            auth_intent.entities_requiring_signing(&profile),
-            Err(CommonError::UnknownPersona)
         )
     }
 
