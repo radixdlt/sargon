@@ -2,6 +2,13 @@ use indexmap::IndexSet;
 
 use crate::prelude::*;
 
+/// A structure of factors to use for certain roles, Primary, Recovery and
+/// Confirmation, as well as an authentication signing factor instance which is
+/// used for Rola.
+///
+/// This structure is identified by the `security_structure_id` which is the ID
+/// of the `SecurityStructureOfFactorSourceIDs` which was used to derive the
+/// instances in this structure.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct SecurityStructureOfFactorInstances {
@@ -49,8 +56,6 @@ impl SecurityStructureOfFactorInstances {
     ) -> Result<Self> {
         let index_agnostic_path = matrix_of_factors
             .index_agnostic_path_of_all_tx_signing_factor_instances()?;
-        let entity_kind = index_agnostic_path.entity_kind;
-        matrix_of_factors.assert_has_entity_kind(entity_kind)?;
 
         if authentication_signing.get_key_kind()
             != CAP26KeyKind::AuthenticationSigning
@@ -60,7 +65,9 @@ impl SecurityStructureOfFactorInstances {
             );
         }
 
-        if authentication_signing.get_entity_kind() != entity_kind {
+        if authentication_signing.get_entity_kind()
+            != index_agnostic_path.entity_kind
+        {
             return Err(CommonError::WrongEntityKindOfInFactorInstancesPath);
         }
 

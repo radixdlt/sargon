@@ -30,19 +30,22 @@ pub struct SecuredEntityControl {
     /// A provisional new security structure configuration which user
     /// is about to change to
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provisional: Option<ProvisionalSecurifiedConfig>,
+    pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
 
 impl HasProvisionalSecurifiedConfig for SecuredEntityControl {
     fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
-        self.provisional.clone()
+        self.provisional_securified_config.clone()
     }
 
     fn set_provisional_unchecked(
         &mut self,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) {
-        self.provisional = provisional.into();
+        self.provisional_securified_config =
+            provisional_securified_config.into();
     }
 }
 
@@ -55,9 +58,11 @@ pub trait HasProvisionalSecurifiedConfig {
     /// this type
     fn set_provisional(
         &mut self,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) -> Result<()> {
-        let provisional = provisional.into();
+        let provisional = provisional_securified_config.into();
         let maybe_existing = self.get_provisional();
         let Some(existing) = maybe_existing.as_ref() else {
             return self.set_provisional_unchecked_ok(provisional);
@@ -102,15 +107,19 @@ pub trait HasProvisionalSecurifiedConfig {
 
     fn set_provisional_unchecked_ok(
         &mut self,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) -> Result<()> {
-        self.set_provisional_unchecked(provisional);
+        self.set_provisional_unchecked(provisional_securified_config);
         Ok(())
     }
 
     fn set_provisional_unchecked(
         &mut self,
-        provisional: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     );
 }
 
@@ -145,7 +154,7 @@ impl SecuredEntityControl {
             veci,
             access_controller_address,
             security_structure,
-            provisional: None,
+            provisional_securified_config: None,
         })
     }
 
@@ -172,7 +181,8 @@ impl HasSampleValues for SecuredEntityControl {
             SecurityStructureOfFactorInstances::sample(),
         )
         .unwrap();
-        sample.provisional = Some(ProvisionalSecurifiedConfig::sample_other());
+        sample.provisional_securified_config =
+            Some(ProvisionalSecurifiedConfig::sample_other());
         sample
     }
 
@@ -430,7 +440,7 @@ mod tests {
                  }
                }
              },
-             "provisional": {
+             "provisionalSecurifiedConfig": {
                "discriminator": "factorInstancesDerived",
                "value": {
                  "securityStructureId": "dededede-dede-dede-dede-dededededede",

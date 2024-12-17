@@ -26,5 +26,5 @@ pub struct SecuredEntityControl {
 
     /// A provisional new security structure configuration which user
     /// is about to change to
-    pub provisional: Option<ProvisionalSecurifiedConfig>,
+    pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }

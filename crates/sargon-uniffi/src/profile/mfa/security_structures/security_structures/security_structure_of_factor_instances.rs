@@ -4,6 +4,9 @@ use sargon::SecurityStructureOfFactorInstances as InternalSecurityStructureOfFac
 /// A MatrixOfFactorInstances and an ID which identifies it, this is
 /// the Profile data structure representation of the owner key hashes which
 /// have been uploaded as Scrypto AccessRules on the AccessController on-ledger.
+///
+/// Also contains an authentication signing factor instance which is used for
+/// Rola.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecurityStructureOfFactorInstances {
     /// The ID of the `SecurityStructureOfFactorSourceIDs` in
