@@ -47,13 +47,19 @@ mod tests {
 
     #[test]
     fn preprocessor_init_fail() {
+        let intent_with_invalid_persona =
+            TransactionIntent::sample_entity_addresses_requiring_auth(
+                vec![],
+                vec![Persona::sample_mainnet().address],
+            );
+
         let result = ExtractorOfInstancesRequiredToSignTransactions::extract(
             &Profile::sample_other(),
-            vec![TransactionIntent::sample()],
+            vec![intent_with_invalid_persona],
             RoleKind::Primary,
         );
 
-        assert!(matches!(result, Err(CommonError::UnknownAccount)));
+        assert!(matches!(result, Err(CommonError::UnknownPersona)));
     }
 
     #[test]

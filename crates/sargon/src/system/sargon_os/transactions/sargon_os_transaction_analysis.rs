@@ -582,7 +582,11 @@ mod transaction_preview_analysis_tests {
             )
             .await;
 
-        assert_eq!(result, Err(CommonError::UnknownAccount))
+        // Just asserts that the execution path reached GW preview call
+        assert!(matches!(
+            result,
+            Err(CommonError::ExecutionSummaryFail { .. })
+        ))
     }
 
     #[actix_rt::test]

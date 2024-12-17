@@ -5,7 +5,7 @@ pub struct ExtractorOfEntitiesRequiringAuth;
 impl ExtractorOfEntitiesRequiringAuth {
     /// Matches entities requiring auth from a manifest summary with the entities in the given profile.
     /// Returns a set of `AccountOrPersona` or empty if the manifest summary does not require auth.
-    /// Returns an error if an account or persona is unknown.
+    /// Returns an error if persona is unknown.
     pub fn extract(
         profile: &Profile,
         summary: ManifestSummary,
@@ -17,7 +17,8 @@ impl ExtractorOfEntitiesRequiringAuth {
             .addresses_of_accounts_requiring_auth
             .iter()
             .map(|a| profile.account_by_address(*a))
-            .collect::<Result<Vec<_>>>()?;
+            .filter_map(|a| a.ok())
+            .collect::<Vec<_>>();
 
         entities_requiring_auth.extend(
             accounts
@@ -45,6 +46,7 @@ impl ExtractorOfEntitiesRequiringAuth {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indexmap::IndexSet;
     use radix_transactions::prelude::ManifestBuilder;
 
     #[test]
@@ -67,7 +69,7 @@ mod tests {
             manifest_summary,
         );
 
-        assert!(matches!(result, Err(CommonError::UnknownAccount)));
+        assert_eq!(result, Ok(IndexSet::new()));
     }
 
     #[test]
