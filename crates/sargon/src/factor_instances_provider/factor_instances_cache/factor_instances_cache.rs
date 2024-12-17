@@ -401,11 +401,34 @@ pub struct CacheNotSatisfied {
 }
 impl CacheNotSatisfied {
     pub fn cached_instances_to_use(&self) -> CachedInstancesToUse {
-        todo!()
+        self.cached_and_quantities_to_derive
+            .clone()
+            .into_iter()
+            .map(|(preset, v)| {
+                (
+                    preset,
+                    v.into_iter()
+                        .map(|(x, y)| (x, y.instances_to_use_from_cache))
+                        .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
+                        ,
+                )
+            })
+            .collect::<CachedInstancesToUse>()
     }
 
     pub fn remaining_quantities_to_derive(&self) -> QuantitiesToDerive {
-        todo!()
+        self.cached_and_quantities_to_derive
+            .clone()
+            .into_iter()
+            .map(|(preset, v)| {
+                (
+                    preset,
+                    v.into_iter()
+                        .map(|(x, y)| (x, y.quantity_to_derive))
+                        .collect::<IndexMap<FactorSourceIDFromHash, usize>>(),
+                )
+            })
+            .collect::<QuantitiesToDerive>()
     }
 }
 pub type QuantitiesToDerive =
@@ -565,26 +588,25 @@ impl FactorInstancesCache {
         network_id: NetworkID,
         factor_source_id: FactorSourceIDFromHash,
     ) -> bool {
-        // get.
-        // DerivationPreset::all()
-        //     .into_iter()
-        //     .map(|preset| {
-        //         self.get_poly_factor_with_quantities(
-        //             &IndexSet::just(factor_source_id),
-        //             &QuantifiedDerivationPreset::new(
-        //                 preset,
-        //                 CACHE_FILLING_QUANTITY,
-        //             ),
-        //             network_id,
-        //         )
-        //     })
-        //     .all(|outcome| {
-        //         matches!(
-        //             outcome,
-        //             Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(_))
-        //         )
-        //     })
-        todo!()
+        let cache_filling_quantities = DerivationPreset::all()
+            .into_iter()
+            .map(|preset| {
+                QuantifiedDerivationPreset::new(
+                    preset,
+                    preset.cache_filling_quantity(),
+                )
+            })
+            .collect::<IdentifiedVecOf<QuantifiedDerivationPreset>>();
+
+        let Ok(outcome) = self.get(
+            &IndexSet::just(factor_source_id),
+            &cache_filling_quantities,
+            network_id,
+        ) else {
+            return false;
+        };
+
+        outcome.is_satisfied()
     }
 
     pub fn assert_is_full(
