@@ -411,10 +411,11 @@ impl CacheNotSatisfied {
 pub type QuantitiesToDerive =
     IndexMap<DerivationPreset, IndexMap<FactorSourceIDFromHash, usize>>;
 
-pub type CachedInstancesToUse = IndexMap<
+pub type InstancesPerDerivationPresetPerFactorSource = IndexMap<
     DerivationPreset,
     IndexMap<FactorSourceIDFromHash, FactorInstances>,
 >;
+pub type CachedInstancesToUse = InstancesPerDerivationPresetPerFactorSource;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CacheSatisfied {

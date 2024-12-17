@@ -88,14 +88,7 @@ impl FactorInstancesProvider {
 impl FactorInstancesProvider {
     fn make_instances_in_cache_consumer(
         &self,
-        // instances_per_factor_sources_to_delete: IndexMap<
-        //     FactorSourceIDFromHash,
-        //     FactorInstances,
-        // >,
-        instances_to_delete: IndexMap<
-            DerivationPreset,
-            IndexMap<FactorSourceIDFromHash, FactorInstances>,
-        >,
+        instances_to_delete: CachedInstancesToUse,
     ) -> InstancesInCacheConsumer {
         // let instances_clone = instances_per_factor_sources_to_delete.clone();
         // let cache_client_clone = self.cache_client.clone();
@@ -180,109 +173,105 @@ impl FactorInstancesProvider {
             )
             .await?;
 
-        // let Split {
-        //     pf_to_use_directly,
-        //     pf_to_cache,
-        // } = self.split(
-        //     &quantified_derivation_preset,
-        //     &pf_found_in_cache_leq_requested,
-        //     &pf_newly_derived,
-        // );
+        let pdp_pf_found_in_cache_leq_requested =
+            not_satisfied.cached_instances_to_use();
 
-        // let instances_in_cache_consumer = self
-        //     .make_instances_in_cache_consumer(
-        //         pf_found_in_cache_leq_requested.clone(),
-        //     );
+        let Split {
+            pdp_pf_to_use_directly,
+            pdp_pf_to_cache,
+        } = self
+            .split(&pdp_pf_found_in_cache_leq_requested, &pdp_pf_newly_derived);
 
-        // self.cache_client.insert_all(&pf_to_cache).await?;
+        let instances_in_cache_consumer = self
+            .make_instances_in_cache_consumer(
+                pdp_pf_found_in_cache_leq_requested.clone(),
+            );
 
-        // let outcome = InternalFactorInstancesProviderOutcome::transpose(
-        //     pf_to_cache,
-        //     pf_to_use_directly,
-        //     pf_found_in_cache_leq_requested,
-        //     pf_newly_derived,
-        // );
-        // let outcome = outcome;
-        // Ok((instances_in_cache_consumer, outcome))
-        todo!()
+        self.cache_client.insert_all(&pdp_pf_to_cache).await?;
+
+        let outcome = InternalFactorInstancesProviderOutcome::transpose(
+            pdp_pf_to_cache,
+            pdp_pf_to_use_directly,
+            pdp_pf_found_in_cache_leq_requested,
+            pdp_pf_newly_derived,
+        );
+        Ok((instances_in_cache_consumer, outcome))
     }
 
     /// Per factor, split the instances into those to use directly and those to cache.
     /// based on the originally requested quantity.
     fn split(
         &self,
-        originally_requested_quantified_derivation_preset: &QuantifiedDerivationPreset,
-        pf_found_in_cache_leq_requested: &IndexMap<
-            FactorSourceIDFromHash,
-            FactorInstances,
-        >,
-        pf_newly_derived: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        pdp_pf_found_in_cache_leq_requested: &InstancesPerDerivationPresetPerFactorSource,
+        pdp_pf_newly_derived: &InstancesPerDerivationPresetPerFactorSource,
     ) -> Split {
-        // Start by merging the instances found in cache and the newly derived instances,
-        // into a single collection of instances per factor source, with the
-        // instances from cache first in the list (per factor), and then the newly derived.
-        // this is important so that we consume the instances from cache first.
-        let pf_derived_appended_to_from_cache = self
-            .factor_sources
-            .clone()
-            .into_iter()
-            .map(|f| f.id_from_hash())
-            .map(|factor_source_id| {
-                let mut merged = IndexSet::new();
-                let from_cache = pf_found_in_cache_leq_requested
-                    .get(&factor_source_id)
-                    .cloned()
-                    .unwrap_or_default();
-                let newly_derived = pf_newly_derived
-                    .get(&factor_source_id)
-                    .cloned()
-                    .unwrap_or_default();
-                // IMPORTANT: Must put instances from cache **first**...
-                merged.extend(from_cache);
-                // ... and THEN the newly derived, so we consume the ones with
-                // lower index from cache first.
-                merged.extend(newly_derived);
+        // // Start by merging the instances found in cache and the newly derived instances,
+        // // into a single collection of instances per factor source, with the
+        // // instances from cache first in the list (per factor), and then the newly derived.
+        // // this is important so that we consume the instances from cache first.
+        // let pf_derived_appended_to_from_cache = self
+        //     .factor_sources
+        //     .clone()
+        //     .into_iter()
+        //     .map(|f| f.id_from_hash())
+        //     .map(|factor_source_id| {
+        //         let mut merged = IndexSet::new();
+        //         let from_cache = pf_found_in_cache_leq_requested
+        //             .get(&factor_source_id)
+        //             .cloned()
+        //             .unwrap_or_default();
+        //         let newly_derived = pf_newly_derived
+        //             .get(&factor_source_id)
+        //             .cloned()
+        //             .unwrap_or_default();
+        //         // IMPORTANT: Must put instances from cache **first**...
+        //         merged.extend(from_cache);
+        //         // ... and THEN the newly derived, so we consume the ones with
+        //         // lower index from cache first.
+        //         merged.extend(newly_derived);
 
-                (factor_source_id, FactorInstances::from(merged))
-            })
-            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
+        //         (factor_source_id, FactorInstances::from(merged))
+        //     })
+        //     .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
 
-        let mut pf_to_use_directly = IndexMap::new();
-        let mut pf_to_cache =
-            IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
-        let quantity_originally_requested =
-            originally_requested_quantified_derivation_preset.quantity;
-        let preset_originally_requested =
-            originally_requested_quantified_derivation_preset.derivation_preset;
+        // let mut pf_to_use_directly = IndexMap::new();
+        // let mut pf_to_cache =
+        //     IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
+        // let quantity_originally_requested =
+        //     originally_requested_quantified_derivation_preset.quantity;
+        // let preset_originally_requested =
+        //     originally_requested_quantified_derivation_preset.derivation_preset;
 
-        // Using the merged map, split the instances into those to use directly and those to cache.
-        for (factor_source_id, instances) in
-            pf_derived_appended_to_from_cache.clone().into_iter()
-        {
-            let mut instances_by_derivation_preset =
-                InstancesByDerivationPreset::from(instances);
+        // // Using the merged map, split the instances into those to use directly and those to cache.
+        // for (factor_source_id, instances) in
+        //     pf_derived_appended_to_from_cache.clone().into_iter()
+        // {
+        //     let mut instances_by_derivation_preset =
+        //         InstancesByDerivationPreset::from(instances);
 
-            if let Some(instances_relevant_to_use_directly_with_abundance) =
-                instances_by_derivation_preset
-                    .remove(preset_originally_requested)
-            {
-                let (to_use_directly, to_cache) =
-                    instances_relevant_to_use_directly_with_abundance
-                        .split_at(quantity_originally_requested);
-                pf_to_use_directly.insert(factor_source_id, to_use_directly);
-                pf_to_cache.insert(factor_source_id, to_cache);
-            }
+        //     if let Some(instances_relevant_to_use_directly_with_abundance) =
+        //         instances_by_derivation_preset
+        //             .remove(preset_originally_requested)
+        //     {
+        //         let (to_use_directly, to_cache) =
+        //             instances_relevant_to_use_directly_with_abundance
+        //                 .split_at(quantity_originally_requested);
+        //         pf_to_use_directly.insert(factor_source_id, to_use_directly);
+        //         pf_to_cache.insert(factor_source_id, to_cache);
+        //     }
 
-            pf_to_cache.append_or_insert_to(
-                factor_source_id,
-                instances_by_derivation_preset.all_instances(),
-            );
-        }
+        //     pf_to_cache.append_or_insert_to(
+        //         factor_source_id,
+        //         instances_by_derivation_preset.all_instances(),
+        //     );
+        // }
 
-        Split {
-            pf_to_use_directly,
-            pf_to_cache,
-        }
+        // Split {
+        //     pf_to_use_directly,
+        //     pf_to_cache,
+        // }
+
+        todo!()
     }
 
     pub(super) async fn derive_more(
@@ -395,7 +384,12 @@ impl FactorInstancesProvider {
     }
 }
 
+/// A split of FactorInstances per DerivationPreset per FactorSource
+/// is splitting and newly derived FactorInstances and then pre-pending
+/// any instances found in cache to `pdp_pf_to_use_directly`.
 struct Split {
-    pf_to_use_directly: IndexMap<FactorSourceIDFromHash, FactorInstances>,
-    pf_to_cache: IndexMap<FactorSourceIDFromHash, FactorInstances>,
+    /// Per DerivationPreset per FactorSource instances to use directly
+    pdp_pf_to_use_directly: InstancesPerDerivationPresetPerFactorSource,
+    /// Per DerivationPreset per FactorSource instances to cache
+    pdp_pf_to_cache: InstancesPerDerivationPresetPerFactorSource,
 }

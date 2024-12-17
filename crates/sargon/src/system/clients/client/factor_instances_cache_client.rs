@@ -139,10 +139,7 @@ impl FactorInstancesCacheClient {
     pub async fn insert_all(
         &self,
         // per_factor: impl Borrow<IndexMap<FactorSourceIDFromHash, FactorInstances>>,
-        per_derivation_preset_per_factor: &IndexMap<
-            DerivationPreset,
-            IndexMap<FactorSourceIDFromHash, FactorInstances>,
-        >,
+        per_derivation_preset_per_factor: &InstancesPerDerivationPresetPerFactorSource,
     ) -> Result<()> {
         // self.update_and_persist_cache(|cache| {
         //     cache.insert_all(per_factor.borrow())
