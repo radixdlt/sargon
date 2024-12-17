@@ -232,6 +232,7 @@ mod tests {
     /// - 1 visible Account (sample_stokenet_nadia)
     /// - 1 hidden Account (sample_stokenet_olivia)
     /// - 1 visible Persona (sample_stokenet_leia_skywalker)
+    ///
     ///  And the corresponding mocked secure/unsafe storages.
     async fn boot_with_entities(
         device_mnemonic_in_secure_storage: bool,

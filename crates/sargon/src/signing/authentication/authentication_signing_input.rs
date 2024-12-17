@@ -51,11 +51,11 @@ impl AuthenticationSigningInput {
         }?;
 
         let factor_instance = match security_state {
-            EntitySecurityState::Unsecured { value } => value
-                .authentication_signing
-                .unwrap_or(value.transaction_signing),
-            EntitySecurityState::Securified { value: _ } => {
-                panic!("Authentication signing not yet implemented for securified entities.")
+            EntitySecurityState::Unsecured { value } => {
+                value.transaction_signing
+            }
+            EntitySecurityState::Securified { value } => {
+                value.authentication_signing_factor_instance()
             }
         };
 

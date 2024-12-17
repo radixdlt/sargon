@@ -85,11 +85,7 @@ impl From<AuthenticationSigningResponse> for WalletToDappInteractionAuthProof {
         let signature_with_public_key = value.signature_with_public_key;
 
         let public_key = signature_with_public_key.public_key();
-        Self::new(
-            public_key,
-            public_key.curve(),
-            signature_with_public_key.signature(),
-        )
+        Self::new(public_key, signature_with_public_key.signature())
     }
 }
 

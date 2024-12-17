@@ -827,6 +827,38 @@ pub enum CommonError {
 
     #[error("Failed to automatically build shield, reason: '{underlying}'")]
     AutomaticShieldBuildingFailure { underlying: String } = 10233,
+
+    #[error("No Transaction Signing Factor")]
+    NoTransactionSigningFactorInstance = 10234,
+
+    #[error("Authentication Signing FactorInstance not securified")]
+    AuthenticationSigningFactorInstanceNotSecurified = 10235,
+
+    #[error("SecurityEntityControl has no QueuedTransaction, unable to mark it as cancelled")]
+    SecurityEntityControlHasNoProvisionallyQueuedTransaction = 10236,
+
+    #[error("SecurityEntityControl has derived instances, which would be lost if discarded. Implement a way to put them back in the cache.")]
+    SecurityEntityControlCannotChangeProvisionalAlreadyDerivedInstances = 10237,
+
+    #[error("SecurityEntityControl has QueuedTransaction, unable override it, use `cancel_queued_transaction`")]
+    SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction =
+        10238,
+
+    #[error(
+        "Entity kind of FactorInstances does not match EntityKind of entity"
+    )]
+    SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind {
+        entity_kind_of_entity: CAP26EntityKind,
+        entity_kind_of_factor_instances: CAP26EntityKind,
+    } = 10239,
+
+    #[error(
+        "Cannot securify entity it is already securified according to profile"
+    )]
+    CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile = 10240,
+
+    #[error("Cannot securify entity that has provisional security config")]
+    CannotSecurifyEntityHasProvisionalSecurityConfig = 10241,
 }
 
 impl CommonError {

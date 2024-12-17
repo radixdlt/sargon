@@ -18,7 +18,7 @@ macro_rules! decl_tx_hash {
             #[doc = $expr]
         )*
         #[derive(
-            Clone, PartialEq, Eq, Hash, derive_more::Display, derive_more::Debug,
+            Clone, PartialEq, Eq, Hash, SerializeDisplay, DeserializeFromStr, derive_more::Display, derive_more::Debug,
         )]
         #[display("{}", self.bech32_encoded_tx_id)]
         #[debug("{}", self.bech32_encoded_tx_id)]

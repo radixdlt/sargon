@@ -15,8 +15,8 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 # zeroize = "1.7.0"
 zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [
-  "zeroize_derive",
-  "derive",
+    "zeroize_derive",
+    "derive",
 ] }
 
 log = "0.4.20"
@@ -27,22 +27,22 @@ pretty_env_logger = { git = "https://github.com/seanmonstar/pretty-env-logger/",
 
 # derive_more = "1.0.0"
 derive_more = { git = "https://github.com/JelteF/derive_more", rev = "d7f5b9e94d024790682f6fc4dcca13941cce64c8", features = [
-  "add",
-  "as_ref",
-  "debug",
-  "deref",
-  "deref_mut",
-  "display",
-  "from",
-  "from_str",
-  "mul",
+    "add",
+    "as_ref",
+    "debug",
+    "deref",
+    "deref_mut",
+    "display",
+    "from",
+    "from_str",
+    "mul",
 ] }
 
 serde = { version = "1.0.193", features = ["derive", "rc", "std"] }
 
 # serde_json = "1.0.108"
 serde_json = { git = "https://github.com/serde-rs/json/", rev = "4bc1eaa03a6160593575bc9bc60c94dba4cab1e3", features = [
-  "preserve_order",
+    "preserve_order",
 ] }
 
 # serde_with = "3.4.0"
@@ -59,29 +59,29 @@ thiserror = { git = "https://github.com/dtolnay/thiserror/", rev = "a7d220d7915f
 
 # iso8601-timestamp = "0.2.16"
 iso8601-timestamp = { git = "https://github.com/Lantern-chat/iso8601-timestamp/", rev = "e5a3f2a5911759bc6b0d8100b032a6b4dd6e12c1", features = [
-  "serde",
-  "std",
+    "serde",
+    "std",
 ] }
 
 # uuid = "1.6.1"
 uuid = { git = "https://github.com/uuid-rs/uuid/", rev = "c8891073248ddc7faa8c53ac9ceb629a341c7b9b", features = [
-  "v4",
-  "serde",
+    "v4",
+    "serde",
 ] }
 
 # strum = "0.26.1"
 strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf150112e26c00e6c8ca666d8d068d", features = [
-  "derive",
+    "derive",
 ] }
 
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
-  "serde",
+    "serde",
 ] }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
-  "serde",
-  "secp256k1_sign_and_validate",
+    "serde",
+    "secp256k1_sign_and_validate",
 ] }
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
@@ -112,10 +112,10 @@ enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c
 # SLIP10 implementation
 # iota_crypto = "0.23.2"
 iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "8c13125541e762206e2dc57b8bfde89c7f6ce8e3", features = [
-  "slip10",
-  "ed25519",
-  "secp256k1",
-  "x25519",
+    "slip10",
+    "ed25519",
+    "secp256k1",
+    "x25519",
 ] }
 # Transitive dependency of iota_crypto - used to construct PubKey from uncompressed bytes.
 # k256 = "0.13.3"
@@ -123,9 +123,9 @@ k256 = { git = "https://github.com/RustCrypto/elliptic-curves", rev = "e158ce5cf
 
 # bip39 = "2.0.0"
 bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = [
-  "serde",
-  "zeroize",
-  "french",
+    "serde",
+    "zeroize",
+    "french",
 ] }
 
 # assert-json-diff = "2.0.2"
@@ -143,8 +143,8 @@ regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac
 
 # clap = "4.5.1"
 clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = [
-  "std",
-  "derive",
+    "std",
+    "derive",
 ], optional = true }
 
 # camino = "1.0.8"
@@ -159,10 +159,10 @@ pretty_assertions = { git = "https://github.com/rust-pretty-assertions/rust-pret
 # AES for Profile Encryption
 # aes-gcm = "10.3"
 aes-gcm = { git = "https://github.com/RustCrypto/AEADs", rev = "7e82b01cd4901f6a35b5153536f11b87f5e4e622", default-features = false, features = [
-  "aes",
-  "alloc",
-  "getrandom",
-  "zeroize",
+    "aes",
+    "alloc",
+    "getrandom",
+    "zeroize",
 ] }
 
 # hkdf = "0.12.4"
@@ -172,7 +172,7 @@ base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14
 
 # reqwest = "0.12.3"
 reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
-  "native-tls-vendored",
+    "native-tls-vendored",
 ] }
 
 # async-std = "1.13.0"

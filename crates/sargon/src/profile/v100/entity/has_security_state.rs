@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-pub trait HasSecurityState: HasFactorInstances {
+pub trait HasSecurityState: HasFactorInstances + IsSecurityStateAware {
     fn security_state(&self) -> EntitySecurityState;
+
     fn try_get_secured_control(&self) -> Result<SecuredEntityControl> {
         self.security_state()
             .as_securified()
@@ -18,14 +19,7 @@ pub trait HasSecurityState: HasFactorInstances {
 }
 
 impl<T: HasSecurityState> HasFactorInstances for T {
-    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
-        match self.security_state() {
-            EntitySecurityState::Securified { value } => {
-                value.unique_factor_instances()
-            }
-            EntitySecurityState::Unsecured { value } => {
-                value.unique_factor_instances()
-            }
-        }
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_state().unique_tx_signing_factor_instances()
     }
 }

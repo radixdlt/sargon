@@ -2,12 +2,80 @@ use crate::prelude::*;
 
 pub type MatrixOfFactorInstances = AbstractMatrixBuilt<FactorInstance>;
 
+impl MatrixOfFactorInstances {
+    pub fn timed_recovery_delay_in_minutes(&self) -> u32 {
+        let timed_recovery_in_days =
+            self.number_of_days_until_auto_confirm as u32;
+        MINUTES_PER_DAY * timed_recovery_in_days
+    }
+}
 pub trait HasFactorInstances {
-    fn unique_factor_instances(&self) -> IndexSet<FactorInstance>;
+    fn assert_has_entity_kind(
+        &self,
+        entity_kind_of_entity: CAP26EntityKind,
+    ) -> Result<()> {
+        let entity_kind_of_factor_instances =
+            self.entity_kind_of_all_factors()?;
+
+        if entity_kind_of_entity != entity_kind_of_factor_instances {
+            return Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity, entity_kind_of_factor_instances });
+        }
+
+        Ok(())
+    }
+
+    fn entity_kind_of_all_factors(&self) -> Result<CAP26EntityKind> {
+        let index_agnostic_path =
+            self.index_agnostic_path_of_all_tx_signing_factor_instances()?;
+        Ok(index_agnostic_path.entity_kind)
+    }
+
+    fn index_agnostic_path_of_all_tx_signing_factor_instances(
+        &self,
+    ) -> Result<IndexAgnosticPath> {
+        let factors = self
+            .unique_tx_signing_factor_instances()
+            .into_iter()
+            .filter_map(|f| f.try_as_hd_factor_instances().ok())
+            .collect_vec();
+
+        if factors.is_empty() {
+            return Err(CommonError::NoTransactionSigningFactorInstance);
+        }
+
+        let index_agnostic_path =
+            factors.first().unwrap().derivation_path().agnostic();
+
+        if factors
+            .iter()
+            .any(|f| f.get_entity_kind() != index_agnostic_path.entity_kind)
+        {
+            return Err(CommonError::WrongEntityKindOfInFactorInstancesPath);
+        }
+
+        if factors
+            .iter()
+            .any(|f| f.get_key_kind() != CAP26KeyKind::TransactionSigning)
+        {
+            return Err(
+                CommonError::WrongKeyKindOfTransactionSigningFactorInstance,
+            );
+        }
+
+        Ok(index_agnostic_path)
+    }
+
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance>;
+
+    /// Override this method for types which has an authentication signing factor
+    /// instance, e.g. `SecurityStructureOfFactorInstances`.
+    fn unique_all_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.unique_tx_signing_factor_instances()
+    }
 
     /// Returns whether the entity is linked to the given factor source.
     fn is_linked_to_factor_source(&self, factor_source: FactorSource) -> bool {
-        self.unique_factor_instances().iter().any(|factor| {
+        self.unique_all_factor_instances().iter().any(|factor| {
             factor.factor_source_id == factor_source.factor_source_id()
         })
     }
@@ -26,7 +94,7 @@ impl HasFactorSourceKindObjectSafe for FactorSourceID {
 }
 
 impl HasFactorInstances for MatrixOfFactorInstances {
-    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
         let mut set = IndexSet::new();
         set.extend(self.primary_role.all_factors().into_iter().cloned());
         set.extend(self.recovery_role.all_factors().into_iter().cloned());
@@ -105,12 +173,17 @@ impl MnemonicWithPassphrase {
 impl MatrixOfFactorInstances {
     fn sample_from_matrix_of_sources(
         matrix_of_sources: MatrixOfFactorSources,
+        entity_kind: CAP26EntityKind,
     ) -> Self {
         let mut consuming_instances =
             MnemonicWithPassphrase::derive_instances_for_factor_sources(
                 NetworkID::Mainnet,
                 1,
-                [DerivationPreset::AccountMfa],
+                [if entity_kind == CAP26EntityKind::Account {
+                    DerivationPreset::AccountMfa
+                } else {
+                    DerivationPreset::IdentityMfa
+                }],
                 matrix_of_sources.all_factors().into_iter().cloned(),
             );
 
@@ -123,13 +196,19 @@ impl MatrixOfFactorInstances {
 }
 
 impl HasSampleValues for MatrixOfFactorInstances {
+    /// Account
     fn sample() -> Self {
-        Self::sample_from_matrix_of_sources(MatrixOfFactorSources::sample())
+        Self::sample_from_matrix_of_sources(
+            MatrixOfFactorSources::sample(),
+            CAP26EntityKind::Account,
+        )
     }
 
+    /// Persona
     fn sample_other() -> Self {
         Self::sample_from_matrix_of_sources(
             MatrixOfFactorSources::sample_other(),
+            CAP26EntityKind::Identity,
         )
     }
 }
@@ -222,11 +301,20 @@ mod tests {
     }
 
     #[test]
+    fn timed_recovery_delay_in_minutes() {
+        let sut = SUT::sample();
+        assert_eq!(
+            sut.timed_recovery_delay_in_minutes(),
+            SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM as u32 * 24 * 60
+        );
+    }
+
+    #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
         assert_ne!(
-            SUT::sample().unique_factor_instances(),
-            SUT::sample_other().unique_factor_instances()
+            SUT::sample().unique_tx_signing_factor_instances(),
+            SUT::sample_other().unique_tx_signing_factor_instances()
         );
     }
 
@@ -238,6 +326,101 @@ mod tests {
                 MatrixOfFactorSources::sample()
             ),
             Err(CommonError::MissingFactorMappingInstancesIntoRole)
+        ));
+    }
+
+    #[test]
+    fn empty_is_err() {
+        let invalid = unsafe {
+            SUT::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorInstances::unbuilt_with_factors(0, [], []),
+                RecoveryRoleWithFactorInstances::unbuilt_with_factors(
+                    0,
+                    [],
+                    [],
+                ),
+                ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
+                    0,
+                    [],
+                    [],
+                ),
+                1,
+            )
+        };
+        let res =
+            invalid.index_agnostic_path_of_all_tx_signing_factor_instances();
+        assert!(matches!(
+            res,
+            Err(CommonError::NoTransactionSigningFactorInstance)
+        ));
+    }
+
+    #[test]
+    fn wrong_entity_kind() {
+        let invalid = unsafe {
+            SUT::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorInstances::unbuilt_with_factors(0, [
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
+                    CAP26EntityKind::Account,
+                    0,
+                ).into(), HierarchicalDeterministicFactorInstance::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
+                    CAP26EntityKind::Identity, // <--- Wrong entity kind
+                    1,
+                ).into()], []),
+                RecoveryRoleWithFactorInstances::unbuilt_with_factors(
+                    0,
+                    [],
+                    [],
+                ),
+                ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
+                    0,
+                    [],
+                    [],
+                ),
+                1,
+            )
+        };
+        let res =
+            invalid.index_agnostic_path_of_all_tx_signing_factor_instances();
+        assert!(matches!(
+            res,
+            Err(CommonError::WrongEntityKindOfInFactorInstancesPath)
+        ));
+    }
+
+    #[test]
+    fn wrong_key_kind() {
+        let invalid = unsafe {
+            SUT::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorInstances::unbuilt_with_factors(0, [
+                    HierarchicalDeterministicFactorInstance::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
+                    CAP26EntityKind::Account,
+                    0,
+                ).into(),
+                HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+                    NetworkID::Mainnet,
+                    CAP26KeyKind::AuthenticationSigning, // <-- Wrong key kind
+                    CAP26EntityKind::Account,
+                    SecurifiedU30::ZERO
+                ).into()], []),
+                RecoveryRoleWithFactorInstances::unbuilt_with_factors(
+                    0,
+                    [],
+                    [],
+                ),
+                ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
+                    0,
+                    [],
+                    [],
+                ),
+                1,
+            )
+        };
+        let res =
+            invalid.index_agnostic_path_of_all_tx_signing_factor_instances();
+        assert!(matches!(
+            res,
+            Err(CommonError::WrongKeyKindOfTransactionSigningFactorInstance)
         ));
     }
 

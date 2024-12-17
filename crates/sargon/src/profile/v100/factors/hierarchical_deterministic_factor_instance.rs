@@ -6,6 +6,11 @@ pub struct HierarchicalDeterministicFactorInstance {
     pub public_key: HierarchicalDeterministicPublicKey,
 }
 
+impl HasEntityKindObjectSafe for HierarchicalDeterministicFactorInstance {
+    fn get_entity_kind(&self) -> CAP26EntityKind {
+        self.public_key.derivation_path.get_entity_kind()
+    }
+}
 impl IsKeySpaceAware for HierarchicalDeterministicFactorInstance {
     fn key_space(&self) -> KeySpace {
         self.public_key.key_space()
@@ -89,7 +94,11 @@ impl HierarchicalDeterministicFactorInstance {
         let seed = factor_source_id.sample_associated_mnemonic().to_seed();
         let hd_private_key = seed.derive_private_key(&derivation_path);
 
-        Self::new(factor_source_id, hd_private_key.public_key())
+        assert_eq!(derivation_path.get_entity_kind(), entity_kind);
+
+        let self_ = Self::new(factor_source_id, hd_private_key.public_key());
+        assert_eq!(self_.get_entity_kind(), entity_kind);
+        self_
     }
 
     /// Mainnet
@@ -218,7 +227,10 @@ impl HierarchicalDeterministicFactorInstance {
 
     /// Account | Mainnet
     /// A sample used to facilitate unit tests.
-    fn sample_with_key_kind(key_kind: CAP26KeyKind, index: u32) -> Self {
+    pub(crate) fn sample_with_key_kind(
+        key_kind: CAP26KeyKind,
+        index: u32,
+    ) -> Self {
         Self::sample_with_key_kind_entity_kind(
             key_kind,
             CAP26EntityKind::Account,
@@ -240,7 +252,7 @@ impl HierarchicalDeterministicFactorInstance {
     }
 
     /// A sample used to facilitate unit tests.
-    fn sample_with_key_kind_entity_kind(
+    pub(crate) fn sample_with_key_kind_entity_kind(
         key_kind: CAP26KeyKind,
         entity_kind: CAP26EntityKind,
         index: u32,
@@ -260,19 +272,28 @@ impl HierarchicalDeterministicFactorInstance {
         entity_kind: CAP26EntityKind,
         index: u32,
     ) -> Self {
+        Self::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+            network_id,
+            key_kind,
+            entity_kind,
+            UnsecurifiedHardened::from_local_key_space(index).unwrap(),
+        )
+    }
+
+    pub(crate) fn sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+        network_id: NetworkID,
+        key_kind: CAP26KeyKind,
+        entity_kind: CAP26EntityKind,
+        hardened: impl Into<Hardened>,
+    ) -> Self {
+        let hardened = hardened.into();
         let path = match entity_kind {
             CAP26EntityKind::Account => DerivationPath::from(AccountPath::new(
-                network_id,
-                key_kind,
-                UnsecurifiedHardened::from_local_key_space(index).unwrap(),
+                network_id, key_kind, hardened,
             )),
-            CAP26EntityKind::Identity => {
-                DerivationPath::from(IdentityPath::new(
-                    network_id,
-                    key_kind,
-                    UnsecurifiedHardened::from_local_key_space(index).unwrap(),
-                ))
-            }
+            CAP26EntityKind::Identity => DerivationPath::from(
+                IdentityPath::new(network_id, key_kind, hardened),
+            ),
         };
 
         let mwp = MnemonicWithPassphrase::sample();

@@ -770,7 +770,6 @@ mod wallet_to_dapp_interaction_tests {
                         WalletToDappInteractionAuthProof::new(
                             PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
                             .unwrap(),
-                            SLIP10Curve::Curve25519,
                             Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
                             .unwrap()
                         ),
@@ -786,7 +785,6 @@ mod wallet_to_dapp_interaction_tests {
                             WalletToDappInteractionAuthProof::new(
                                 PublicKey::from_str("11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566")
                                 .unwrap(),
-                                SLIP10Curve::Curve25519,
                                 Signature::from_str("e18617b527d4d33607a8adb6a040c26ca97642ec89dd8a6fe7a41fa724473e4cc69b0729c1df57aba77455801f2eef6f28848a5d206e3739de29ca2288957502")
                                 .unwrap(),
                             ),
@@ -796,7 +794,6 @@ mod wallet_to_dapp_interaction_tests {
                             WalletToDappInteractionAuthProof::new(
                                 PublicKey::from_str("5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d")
                                 .unwrap(),
-                                SLIP10Curve::Curve25519,
                                 Signature::from_str("0143fd941d51f531c8265b0f6b24f4cfcdfd24b40aac47dee6fb3386ce0d400563c892e3894a33840d1c7af2dd43ecd0729fd209171003765d109a04d7485605")
                                 .unwrap(),
                             ),
@@ -888,7 +885,6 @@ mod wallet_to_dapp_interaction_tests {
                         WalletToDappInteractionAuthProof::new(
                             PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
                                 .unwrap(),
-                            SLIP10Curve::Curve25519,
                             Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
                                 .unwrap()
                         ),
@@ -931,7 +927,6 @@ mod wallet_to_dapp_interaction_tests {
                         WalletToDappInteractionAuthProof::new(
                             PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
                             .unwrap(),
-                            SLIP10Curve::Curve25519,
                             Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
                             .unwrap()
                         ),
@@ -941,7 +936,6 @@ mod wallet_to_dapp_interaction_tests {
                             WalletToDappInteractionAuthProof::new(
                                 PublicKey::from_str("ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699")
                                 .unwrap(),
-                                SLIP10Curve::Curve25519,
                                 Signature::from_str("10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05")
                                 .unwrap()
                             ),
