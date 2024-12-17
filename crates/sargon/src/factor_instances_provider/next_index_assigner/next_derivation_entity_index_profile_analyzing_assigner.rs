@@ -163,6 +163,60 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
             .max()
     }
 
+    /// Returns the max index of true ROLA keys of securified accounts with
+    /// factor source matching factor_source_id - if any.
+    fn max_account_rola(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Option<HDPathComponent> {
+        self.securified_accounts_on_network
+            .clone()
+            .into_iter()
+            .map(|e: SecurifiedAccount| {
+                e.securified_entity_control
+                    .authentication_signing_factor_instance()
+            })
+            .filter(|f| f.factor_source_id() == factor_source_id)
+            .map(|fi| {
+                AssertMatches {
+                    network_id: self.network_id,
+                    key_kind: CAP26KeyKind::AuthenticationSigning,
+                    entity_kind: CAP26EntityKind::Account,
+                    key_space: KeySpace::Securified,
+                }
+                .matches(&fi.derivation_path())
+                .index()
+            })
+            .max()
+    }
+
+    /// Returns the max index of true ROLA keys of securified personas with
+    /// factor source matching factor_source_id - if any.
+    fn max_identity_rola(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Option<HDPathComponent> {
+        self.securified_personas_on_network
+            .clone()
+            .into_iter()
+            .map(|e: SecurifiedPersona| {
+                e.securified_entity_control
+                    .authentication_signing_factor_instance()
+            })
+            .filter(|f| f.factor_source_id() == factor_source_id)
+            .map(|fi| {
+                AssertMatches {
+                    network_id: self.network_id,
+                    key_kind: CAP26KeyKind::AuthenticationSigning,
+                    entity_kind: CAP26EntityKind::Identity,
+                    key_space: KeySpace::Securified,
+                }
+                .matches(&fi.derivation_path())
+                .index()
+            })
+            .max()
+    }
+
     /// Returns the Max Derivation Entity Index of Securified Persona controlled
     /// by `factor_source_id`, or `None` if no securified persona controlled by that
     /// factor source id found.
@@ -220,8 +274,12 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
             DerivationPreset::IdentityMfa => {
                 self.max_identity_mfa(factor_source_id)
             }
-            DerivationPreset::AccountRola => todo!(),
-            DerivationPreset::IdentityRola => todo!(),
+            DerivationPreset::AccountRola => {
+                self.max_account_rola(factor_source_id)
+            }
+            DerivationPreset::IdentityRola => {
+                self.max_identity_rola(factor_source_id)
+            }
         };
 
         let Some(max) = max else { return Ok(None) };
@@ -514,5 +572,60 @@ mod tests {
             )
             .ok()
         )
+    }
+
+    #[test]
+    fn test_next_account_rola_at_7_is_8() {
+        let preset = DerivationPreset::AccountRola;
+        let network_id = NetworkID::Mainnet;
+        let sut = SUT::new(
+            network_id,
+            Arc::new(Profile::sample_from(
+                FactorSource::sample_all(),
+                [
+                    &Account::sample_at(8), /* unsecurified, should not interfere */
+                    &Account::sample_at(7),
+                ],
+                [],
+            )),
+        );
+        type F = FactorSourceIDFromHash;
+        for fid in [F::sample_device()] {
+            let next = sut
+                .next(fid, preset.index_agnostic_path_on_network(network_id))
+                .unwrap();
+
+            assert_eq!(
+                next,
+                HDPathComponent::from_local_key_space(8, KeySpace::Securified)
+                    .ok()
+            );
+        }
+    }
+
+    #[test]
+    fn test_next_identity_rola_at_7_is_8() {
+        let preset = DerivationPreset::IdentityRola;
+        let network_id = NetworkID::Mainnet;
+        let sut = SUT::new(
+            network_id,
+            Arc::new(Profile::sample_from(
+                FactorSource::sample_all(),
+                [],
+                [&Persona::sample_at(7)],
+            )),
+        );
+        type F = FactorSourceIDFromHash;
+        for fid in [F::sample_device()] {
+            let next = sut
+                .next(fid, preset.index_agnostic_path_on_network(network_id))
+                .unwrap();
+
+            assert_eq!(
+                next,
+                HDPathComponent::from_local_key_space(8, KeySpace::Securified)
+                    .ok()
+            )
+        }
     }
 }

@@ -15,6 +15,7 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Ziggy | 2 | Securified { Single Threshold only }
         Persona::sample_securified_mainnet(
             "Ziggy",
+            2,
             HierarchicalDeterministicFactorInstance::sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(2),
             || {
                 let idx =
@@ -28,6 +29,7 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Superman | 3 | Securified { Single Override only }
         Persona::sample_securified_mainnet(
             "Superman",
+            3,
             HierarchicalDeterministicFactorInstance::sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(3),
             || {
                 let idx =
@@ -41,6 +43,7 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Banksy | 4 | Securified { Threshold factors only #3 }
         Persona::sample_securified_mainnet(
             "Banksy",
+            4,
             HierarchicalDeterministicFactorInstance::sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(4),
             || {
                 let idx =
@@ -54,6 +57,7 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Voltaire | 5 | Securified { Override factors only #2 }
         Persona::sample_securified_mainnet(
             "Voltaire",
+            6,
             HierarchicalDeterministicFactorInstance::sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(5),
             || {
                 let idx =
@@ -67,6 +71,7 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Kasparov | 6 | Securified { Threshold #3 and Override factors #2  }
         Persona::sample_securified_mainnet(
             "Kasparov",
+        6,
             HierarchicalDeterministicFactorInstance::sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(6),
             || {
                 let idx =
@@ -80,6 +85,7 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Pelé | 7 | Securified { Threshold only # 5/5 }
         Persona::sample_securified_mainnet(
             "Pelé",
+            7,
             HierarchicalDeterministicFactorInstance::sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(7),
             || {
                 let idx =
@@ -151,6 +157,7 @@ impl Persona {
 
     pub fn sample_securified_mainnet(
         name: impl AsRef<str>,
+        rola_index: u32,
         veci: HierarchicalDeterministicFactorInstance,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
@@ -203,10 +210,6 @@ impl Persona {
         }
         let address =
             IdentityAddress::new(veci.public_key(), NetworkID::Mainnet);
-
-        let rola_index = u32::from(
-            veci.derivation_entity_index().index_in_local_key_space(),
-        );
 
         let security_structure_of_factor_instances =
             SecurityStructureOfFactorInstances::new(
