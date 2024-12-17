@@ -322,19 +322,17 @@ impl FactorInstancesCache {
                 if let Some(val) = val {
                     pdp.insert(preset, val);
                 }
-
-                if pdp.is_empty() {
-                    continue;
-                }
-                pf_pdp.insert(factor_source_id, pdp);
             }
+            if pdp.is_empty() {
+                continue;
+            }
+            pf_pdp.insert(*factor_source_id, pdp);
         }
 
         // The instances in the cache cannot satisfy the requested quantity
         // we must derive more!
         let is_quantity_satisfied_for_all = pf_pdp.iter().any(|(_, pdp)| {
-            pdp.iter()
-                .any(|(_, ci)| ci.remaining_quantity_to_derive > 0)
+            pdp.iter().any(|(_, ci)| ci.quantity_to_derive > 0)
         });
 
         let outcome = if is_quantity_satisfied_for_all {
@@ -343,13 +341,25 @@ impl FactorInstancesCache {
                     .into_iter()
                     .map(|(k, v)| {
                         (
-                            k,
-                            v.into_iter()
-                                .map(|x| x.instances_to_use_from_cache)
-                                .collect(),
-                        )
+                                    k,
+                                    v.into_iter()
+                                        .map(|(preset, x)| {
+                                            (
+                                                preset,
+                                                x.instances_to_use_from_cache,
+                                            )
+                                        })
+                                        .collect::<IndexMap<
+                                            DerivationPreset,
+                                            FactorInstances,
+                                        >>(
+                                        ),
+                                )
                     })
-                    .collect(),
+                    .collect::<IndexMap<
+                        FactorSourceIDFromHash,
+                        IndexMap<DerivationPreset, FactorInstances>,
+                    >>(),
             })
         } else {
             CachedInstancesWithQuantitiesOutcome::NotSatisfied(
@@ -505,6 +515,19 @@ impl FactorInstancesCache {
 
 #[cfg(test)]
 impl FactorInstancesCache {
+    pub fn get_poly_factor_with_quantities(
+        &self,
+        factor_source_ids: &IndexSet<FactorSourceIDFromHash>,
+        quantified_derivation_preset: &QuantifiedDerivationPreset,
+        network_id: NetworkID,
+    ) -> Result<CachedInstancesWithQuantitiesOutcome> {
+        self.get_poly_factor_with_quantified_preset(
+            factor_source_ids,
+            &IdentifiedVecOf::just(*quantified_derivation_preset),
+            network_id,
+        )
+    }
+
     /// Queries the cache to see if the cache is full for factor_source_id for
     /// each DerivationPreset
     pub fn is_full(
@@ -512,24 +535,26 @@ impl FactorInstancesCache {
         network_id: NetworkID,
         factor_source_id: FactorSourceIDFromHash,
     ) -> bool {
-        DerivationPreset::all()
-            .into_iter()
-            .map(|preset| {
-                self.get_poly_factor_with_quantities(
-                    &IndexSet::just(factor_source_id),
-                    &QuantifiedDerivationPreset::new(
-                        preset,
-                        CACHE_FILLING_QUANTITY,
-                    ),
-                    network_id,
-                )
-            })
-            .all(|outcome| {
-                matches!(
-                    outcome,
-                    Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(_))
-                )
-            })
+        // get_poly_factor_with_quantified_preset.
+        // DerivationPreset::all()
+        //     .into_iter()
+        //     .map(|preset| {
+        //         self.get_poly_factor_with_quantities(
+        //             &IndexSet::just(factor_source_id),
+        //             &QuantifiedDerivationPreset::new(
+        //                 preset,
+        //                 CACHE_FILLING_QUANTITY,
+        //             ),
+        //             network_id,
+        //         )
+        //     })
+        //     .all(|outcome| {
+        //         matches!(
+        //             outcome,
+        //             Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(_))
+        //         )
+        //     })
+        todo!()
     }
 
     pub fn assert_is_full(

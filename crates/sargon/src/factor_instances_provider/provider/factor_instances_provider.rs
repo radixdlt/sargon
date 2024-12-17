@@ -57,12 +57,15 @@ impl FactorInstancesProvider {
         self.provide_for_presets(
             IdentifiedVecOf::just(quantified_derivation_preset),
             derivation_purpose,
-        ).await
+        )
+        .await
     }
 
     pub async fn provide_for_presets(
         self,
-        quantified_derivation_presets: IdentifiedVecOf<QuantifiedDerivationPreset>,
+        quantified_derivation_presets: IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
         derivation_purpose: DerivationPurpose,
     ) -> Result<(
         InstancesInCacheConsumer,
@@ -71,7 +74,10 @@ impl FactorInstancesProvider {
         let mut _self = self;
 
         _self
-            ._provide_for_presets(quantified_derivation_presets, derivation_purpose)
+            ._provide_for_presets(
+                quantified_derivation_presets,
+                derivation_purpose,
+            )
             .await
     }
 }
@@ -100,7 +106,9 @@ impl FactorInstancesProvider {
 
     async fn _provide_for_presets(
         &mut self,
-        quantified_derivation_presets: IdentifiedVecOf<QuantifiedDerivationPreset>,
+        quantified_derivation_presets: IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
         derivation_purpose: DerivationPurpose,
     ) -> Result<(
         InstancesInCacheConsumer,
@@ -136,7 +144,7 @@ impl FactorInstancesProvider {
             CachedInstancesWithQuantitiesOutcome::NotSatisfied(
                 // quantities_to_derive,
                 // partial_instances,
-                unsatisfied
+                unsatisfied,
             ) => {
                 self.derive_more_and_cache(
                     // quantified_derivation_preset,
@@ -168,10 +176,11 @@ impl FactorInstancesProvider {
         InternalFactorInstancesProviderOutcome,
     )> {
         let pf_newly_derived = self
-            .derive_more
-            // (pf_pdp_qty_to_derive, 
-            not_satisfied,
-                derivation_purpose)
+            .derive_more(
+                // (pf_pdp_qty_to_derive,
+                not_satisfied,
+                derivation_purpose,
+            )
             .await?;
 
         // let Split {
@@ -298,17 +307,18 @@ impl FactorInstancesProvider {
             cache_snapshot,
         );
 
-        let pf_paths = 
-        not_satisfied.into_iter().flat_map(|(quantified_derivation_preset, not_satisfied)| {
-        // pf_pdp_quantity_to_derive
-        //     .into_iter()
-        not_satisfied.quantities_to_derive.into_iter()
-            .map(|(factor_source_id, pdp_quantity_to_derive)| {
-                let paths = pdp_quantity_to_derive
-                    .into_iter()
-                    .map(|(derivation_preset, qty)| {
-                        // `qty` many paths
-                        (0..qty)
+        let pf_paths = not_satisfied
+            .into_iter()
+            .flat_map(|(quantified_derivation_preset, not_satisfied)| {
+                // pf_pdp_quantity_to_derive
+                //     .into_iter()
+                not_satisfied.quantities_to_derive.into_iter().map(
+                    |(factor_source_id, pdp_quantity_to_derive)| {
+                        let paths = pdp_quantity_to_derive
+                            .into_iter()
+                            .map(|(derivation_preset, qty)| {
+                                // `qty` many paths
+                                (0..qty)
                             .map(|_| {
                                 let index_agnostic_path = derivation_preset
                                     .index_agnostic_path_on_network(network_id);
@@ -322,16 +332,20 @@ impl FactorInstancesProvider {
                                     })
                             })
                             .collect::<Result<IndexSet<DerivationPath>>>()
-                    })
-                    .collect::<Result<Vec<IndexSet<DerivationPath>>>>()?;
+                            })
+                            .collect::<Result<Vec<IndexSet<DerivationPath>>>>(
+                            )?;
 
-                // flatten (I was unable to use `flat_map` above combined with `Result`...)
-                let paths =
-                    paths.into_iter().flatten().collect::<IndexSet<_>>();
+                        // flatten (I was unable to use `flat_map` above combined with `Result`...)
+                        let paths = paths
+                            .into_iter()
+                            .flatten()
+                            .collect::<IndexSet<_>>();
 
-                Ok((factor_source_id, paths))
+                        Ok((factor_source_id, paths))
+                    },
+                )
             })
-        })
             .collect::<Result<
                 IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
             >>()?;

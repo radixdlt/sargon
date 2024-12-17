@@ -9,11 +9,11 @@ pub const CACHE_FILLING_QUANTITY_ACCOUNT_VECI: usize = CACHE_FILLING_QUANTITY;
 /// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::AccountMfa`.
 pub const CACHE_FILLING_QUANTITY_ACCOUNT_MFA: usize = CACHE_FILLING_QUANTITY;
 
-/// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::PersonaVeci`.
-pub const CACHE_FILLING_QUANTITY_PERSONA_VECI: usize = CACHE_FILLING_QUANTITY;
+/// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::IdentityVeci`.
+pub const CACHE_FILLING_QUANTITY_IDENTITY_VECI: usize = CACHE_FILLING_QUANTITY;
 
-/// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::PersonaMfa`.
-pub const CACHE_FILLING_QUANTITY_PERSONA_MFA: usize = CACHE_FILLING_QUANTITY;
+/// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::IdentityMfa`.
+pub const CACHE_FILLING_QUANTITY_IDENTITY_MFA: usize = CACHE_FILLING_QUANTITY;
 
 impl DerivationPreset {
     /// The quantity of DerivationPreset's to fill cache with.
@@ -21,8 +21,8 @@ impl DerivationPreset {
         match self {
             Self::AccountVeci => CACHE_FILLING_QUANTITY_ACCOUNT_VECI,
             Self::AccountMfa => CACHE_FILLING_QUANTITY_ACCOUNT_MFA,
-            Self::PersonaVeci => CACHE_FILLING_QUANTITY_PERSONA_VECI,
-            Self::PersonaMfa => CACHE_FILLING_QUANTITY_PERSONA_MFA,
+            Self::IdentityVeci => CACHE_FILLING_QUANTITY_IDENTITY_VECI,
+            Self::IdentityMfa => CACHE_FILLING_QUANTITY_IDENTITY_MFA,
         }
     }
 }
