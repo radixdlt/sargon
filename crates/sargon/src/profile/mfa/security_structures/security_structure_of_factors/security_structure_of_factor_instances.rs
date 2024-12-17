@@ -24,7 +24,7 @@ pub struct SecurityStructureOfFactorInstances {
 
     /// The authentication signing factor instance which is used to sign
     /// proof of ownership - aka "True Rola Key". User can select which FactorSource
-    /// to use during Shield Building, but typically most users will user the
+    /// to use during Shield Building, but typically most users will use the
     /// DeviceFactorSource which is default. DerivationPath is in securified
     /// KeySpace of course.
     ///
