@@ -439,12 +439,6 @@ impl CacheNotSatisfied {
 
                 let per_factor = v.into_iter()
                 .filter_map(|(x, y)| {
-                    // let instances = y.instances_to_use_from_cache; 
-                    // if instances.is_empty() { 
-                    //     None 
-                    // } else {
-                    //     Some((x, instances))
-                    // }
                     extract((x, y))
                 })
                 .collect::<IndexMap<FactorSourceIDFromHash, R>>();
@@ -476,21 +470,12 @@ impl CacheNotSatisfied {
     }
 
     pub fn remaining_quantities_to_derive(&self) -> QuantitiesToDerive {
-        // self.cached_and_quantities_to_derive
-        //     .clone()
-        //     .into_iter()
-        //     .map(|(preset, v)| {
-        //         (
-        //             preset,
-        //             v.into_iter()
-        //                 .map(|(x, y)| (x, y.quantity_to_derive))
-        //                 .collect::<IndexMap<FactorSourceIDFromHash, usize>>(),
-        //         )
-        //     })
-        //     .collect::<QuantitiesToDerive>()
-
         self.map(|(x, y)| {
-          Some((x, y.quantity_to_derive))
+            if y.quantity_to_derive > 0 {
+                Some((x, y.quantity_to_derive))
+            } else {
+                None
+            }
         })
     }
 }
