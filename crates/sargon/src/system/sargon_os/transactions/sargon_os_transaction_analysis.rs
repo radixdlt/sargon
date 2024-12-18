@@ -545,47 +545,6 @@ mod transaction_preview_analysis_tests {
     }
 
     #[actix_rt::test]
-    async fn signer_entities_not_found() {
-        let responses = prepare_responses(
-            LedgerState {
-                network: "".to_string(),
-                state_version: 0,
-                proposer_round_timestamp: "".to_string(),
-                epoch: 0,
-                round: 0,
-            },
-            TransactionPreviewResponse {
-                encoded_receipt: "".to_string(),
-                radix_engine_toolkit_receipt: Some(
-                    ScryptoSerializableToolkitTransactionReceipt::Reject {
-                        reason: "Test".to_string(),
-                    },
-                ),
-                logs: vec![],
-                receipt: TransactionReceipt {
-                    status: TransactionReceiptStatus::Succeeded,
-                    error_message: None,
-                },
-            },
-        );
-        let os =
-            prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
-                .await;
-
-        let result = os
-            .analyse_transaction_preview(
-                TransactionManifest::sample().instructions_string(),
-                Blobs::sample(),
-                true,
-                Nonce::sample(),
-                PublicKey::sample(),
-            )
-            .await;
-
-        assert_eq!(result, Err(CommonError::UnknownAccount))
-    }
-
-    #[actix_rt::test]
     async fn execution_summary_parse_error() {
         let responses = prepare_responses(
             LedgerState {
@@ -729,6 +688,51 @@ mod transaction_preview_analysis_tests {
                 )
             })
         )
+    }
+
+    #[actix_rt::test]
+    async fn signer_entities_not_found() {
+        let responses = prepare_responses(
+            LedgerState {
+                network: "".to_string(),
+                state_version: 0,
+                proposer_round_timestamp: "".to_string(),
+                epoch: 0,
+                round: 0,
+            },
+            TransactionPreviewResponse {
+                encoded_receipt: "".to_string(),
+                radix_engine_toolkit_receipt: Some(
+                    ScryptoSerializableToolkitTransactionReceipt::Reject {
+                        reason: "Test".to_string(),
+                    },
+                ),
+                logs: vec![],
+                receipt: TransactionReceipt {
+                    status: TransactionReceiptStatus::Succeeded,
+                    error_message: None,
+                },
+            },
+        );
+        let os =
+            prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
+                .await;
+
+        let result = os
+            .analyse_transaction_preview(
+                TransactionManifest::sample().instructions_string(),
+                Blobs::sample(),
+                true,
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await;
+
+        // Just asserts that the execution path reached GW preview call
+        assert!(matches!(
+            result,
+            Err(CommonError::ExecutionSummaryFail { .. })
+        ))
     }
 
     #[actix_rt::test]

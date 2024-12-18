@@ -197,6 +197,45 @@ mod test {
     }
 
     #[actix_rt::test]
+    async fn test_sign_transaction_intent_only_with_irrelevant_entity() {
+        let profile = Profile::sample();
+        let sut = boot_with_profile(&profile, None).await;
+
+        let irrelevant_account = Account::sample_mainnet_third();
+        let transaction = TransactionIntent::sample_entities_requiring_auth(
+            vec![&irrelevant_account],
+            vec![],
+        );
+
+        let outcome = sut
+            .sign_transaction(transaction, RoleKind::Primary)
+            .await
+            .unwrap();
+
+        assert_eq!(outcome.intent_signatures.signatures.len(), 0);
+    }
+
+    #[actix_rt::test]
+    async fn test_sign_transaction_intent_containing_irrelevant_entity() {
+        let profile = Profile::sample();
+        let sut = boot_with_profile(&profile, None).await;
+
+        let irrelevant_account = Account::sample_mainnet_third();
+        let relevant_account = Account::sample_mainnet();
+        let transaction = TransactionIntent::sample_entities_requiring_auth(
+            vec![&irrelevant_account, &relevant_account],
+            vec![],
+        );
+
+        let outcome = sut
+            .sign_transaction(transaction, RoleKind::Primary)
+            .await
+            .unwrap();
+
+        assert_eq!(outcome.intent_signatures.signatures.len(), 1);
+    }
+
+    #[actix_rt::test]
     async fn test_sign_transaction_intent_rejected_due_to_all_factors_neglected(
     ) {
         let profile = Profile::sample();
@@ -281,29 +320,6 @@ mod test {
             .await;
 
         assert_eq!(outcome, Err(CommonError::SigningRejected));
-    }
-
-    #[actix_rt::test]
-    async fn test_sign_fail_due_to_irrelevant_entity() {
-        let profile = Profile::sample();
-        let sut = boot_with_profile(
-            &profile,
-            Some(SigningFailure::NeglectedFactorSources(vec![
-                profile.device_factor_sources().first().unwrap().id,
-            ])),
-        )
-        .await;
-
-        let irrelevant_account = Account::sample_mainnet_third();
-        let transaction = TransactionIntent::sample_entities_requiring_auth(
-            vec![&irrelevant_account],
-            vec![],
-        );
-
-        let outcome =
-            sut.sign_transaction(transaction, RoleKind::Primary).await;
-
-        assert_eq!(outcome, Err(CommonError::UnknownAccount));
     }
 
     async fn boot_with_profile(
