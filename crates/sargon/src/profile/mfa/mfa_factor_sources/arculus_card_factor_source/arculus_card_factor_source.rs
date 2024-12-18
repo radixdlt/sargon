@@ -112,6 +112,10 @@ impl BaseBaseIsFactorSource for ArculusCardFactorSource {
     fn name(&self) -> String {
         self.hint.label.clone()
     }
+
+    fn set_name(&mut self, updated: String) {
+        self.hint.label = updated;
+    }
 }
 
 #[cfg(test)]
@@ -195,6 +199,9 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(SUT::sample().name(), "Silver");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.name(), "Silver");
+        sut.set_name("Black".to_string());
+        assert_eq!(sut.name(), "Black");
     }
 }

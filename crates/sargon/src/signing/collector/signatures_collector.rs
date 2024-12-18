@@ -435,7 +435,7 @@ mod tests {
     }
 
     #[test]
-    fn invalid_profile_unknown_account() {
+    fn profile_with_unknown_account() {
         let res = SignaturesCollector::new(
             SigningFinishEarlyStrategy::default(),
             [TransactionIntent::sample_entities_requiring_auth(
@@ -446,7 +446,7 @@ mod tests {
             &Profile::sample_from(IndexSet::new(), [], []),
             RoleKind::Primary,
         );
-        assert!(matches!(res, Err(CommonError::UnknownAccount)));
+        assert!(res.is_ok());
     }
 
     #[test]

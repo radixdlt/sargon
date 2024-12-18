@@ -121,6 +121,22 @@ impl SargonOS {
         Ok(ids)
     }
 
+    /// Updates the name of the corresponding `factor_source` in Profile. Throws `UpdateFactorSourceMutateFailed` error if the
+    /// factor source is not found. Returns the updated `FactorSource`.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
+    pub async fn update_factor_source_name(
+        &self,
+        factor_source: FactorSource,
+        name: String,
+    ) -> Result<FactorSource> {
+        let mut factor_source = factor_source;
+        factor_source.set_name(name);
+        self.update_factor_source(factor_source.clone()).await?;
+        Ok(factor_source)
+    }
+
     pub async fn debug_add_all_sample_factor_sources(
         &self,
     ) -> Result<Vec<FactorSourceID>> {
@@ -848,6 +864,37 @@ mod tests {
             match f {
                 FactorSource::ArculusCard { value } => {
                     value.hint.label == *new_label
+                }
+                _ => false,
+            }
+        }));
+    }
+
+    #[actix_rt::test]
+    async fn test_update_factor_source_name() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let factor = ArculusCardFactorSource::sample();
+        os.with_timeout(|x| x.add_factor_source(factor.clone().into()))
+            .await
+            .unwrap();
+
+        // ACT
+        let new_name = "My updated name";
+        os.with_timeout(|x| {
+            x.update_factor_source_name(
+                factor.clone().into(),
+                new_name.to_owned(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert!(os.profile().unwrap().factor_sources.into_iter().any(|f| {
+            match f {
+                FactorSource::ArculusCard { value } => {
+                    value.name() == *new_name
                 }
                 _ => false,
             }
