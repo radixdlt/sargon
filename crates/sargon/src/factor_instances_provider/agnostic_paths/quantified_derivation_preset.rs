@@ -10,7 +10,7 @@ pub struct QuantifiedDerivationPreset {
 impl Identifiable for QuantifiedDerivationPreset {
     type ID = DerivationPreset;
     fn id(&self) -> DerivationPreset {
-        self.derivation_preset.clone()
+        self.derivation_preset
     }
 }
 
@@ -34,38 +34,34 @@ impl QuantifiedDerivationPreset {
             .filter(|a| a.is_identity())
             .collect_vec();
 
-        let presets =
-            match (account_addresses.is_empty(), identity_addresses.is_empty())
-            {
-                (true, true) => IdentifiedVecOf::new(), // weird!
-                (true, false) => IdentifiedVecOf::from_iter([
-                    Self::new(
-                        DerivationPreset::IdentityMfa,
-                        identity_addresses.len(),
-                    ),
-                    Self::new(DerivationPreset::IdentityRola, 1),
-                ]),
-                (false, false) => IdentifiedVecOf::from_iter([
-                    Self::new(
-                        DerivationPreset::AccountMfa,
-                        account_addresses.len(),
-                    ),
-                    Self::new(DerivationPreset::AccountRola, 1),
-                    Self::new(
-                        DerivationPreset::IdentityMfa,
-                        identity_addresses.len(),
-                    ),
-                    Self::new(DerivationPreset::IdentityRola, 1),
-                ]),
-                (false, true) => IdentifiedVecOf::from_iter([
-                    Self::new(
-                        DerivationPreset::AccountMfa,
-                        account_addresses.len(),
-                    ),
-                    Self::new(DerivationPreset::AccountRola, 1),
-                ]),
-            };
-
-        presets
+        match (account_addresses.is_empty(), identity_addresses.is_empty()) {
+            (true, true) => IdentifiedVecOf::new(), // weird!
+            (true, false) => IdentifiedVecOf::from_iter([
+                Self::new(
+                    DerivationPreset::IdentityMfa,
+                    identity_addresses.len(),
+                ),
+                Self::new(DerivationPreset::IdentityRola, 1),
+            ]),
+            (false, false) => IdentifiedVecOf::from_iter([
+                Self::new(
+                    DerivationPreset::AccountMfa,
+                    account_addresses.len(),
+                ),
+                Self::new(DerivationPreset::AccountRola, 1),
+                Self::new(
+                    DerivationPreset::IdentityMfa,
+                    identity_addresses.len(),
+                ),
+                Self::new(DerivationPreset::IdentityRola, 1),
+            ]),
+            (false, true) => IdentifiedVecOf::from_iter([
+                Self::new(
+                    DerivationPreset::AccountMfa,
+                    account_addresses.len(),
+                ),
+                Self::new(DerivationPreset::AccountRola, 1),
+            ]),
+        }
     }
 }

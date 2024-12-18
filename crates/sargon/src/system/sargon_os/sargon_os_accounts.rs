@@ -880,7 +880,7 @@ impl SargonOS {
 
                 let mut instances_per_factor_source = instances_per_preset_per_factor_source
                 .swap_remove(&preset)
-                .expect(&format!("Expected to find instances for derivation preset: {:?}", preset));
+                .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", preset));
 
                 for (i, entity_address) in
                     addresses_of_kind.clone().into_iter().enumerate()
@@ -906,7 +906,7 @@ impl SargonOS {
                     )?
                 };
                     security_structures_of_factor_instances.insert(
-                        entity_address.clone(),
+                        *entity_address,
                         security_structure_of_factor_instances,
                     );
                 }

@@ -174,7 +174,7 @@ mod tests {
         assert!(outcome.per_derivation_preset.values().all(|x| x
             .per_factor
             .values()
-            .all(|y| y.debug_found_in_cache.len() == 0)));
+            .all(|y| y.debug_found_in_cache.is_empty())));
 
         assert!(outcome.per_derivation_preset.clone().into_iter().all(
             |(preset, x)| x
@@ -307,7 +307,7 @@ mod tests {
         assert!(outcome.per_derivation_preset.values().all(|x| x
             .per_factor
             .values()
-            .all(|y| y.debug_found_in_cache.len() == 0)));
+            .all(|y| y.debug_found_in_cache.is_empty())));
 
         assert!(outcome.per_derivation_preset.clone().into_iter().all(
             |(preset, x)| x
@@ -558,14 +558,14 @@ mod tests {
             |(_, x)| x
                 .per_factor
                 .values()
-                .all(|y| y.debug_was_cached.len() == 0)
+                .all(|y| y.debug_was_cached.is_empty())
         ));
 
         assert!(outcome.per_derivation_preset.clone().into_iter().all(
             |(_, x)| x
                 .per_factor
                 .values()
-                .all(|y| y.debug_was_derived.len() == 0)
+                .all(|y| y.debug_was_derived.is_empty())
         ));
 
         let instances_used_directly = outcome
@@ -677,14 +677,14 @@ mod tests {
             |(_, x)| x
                 .per_factor
                 .values()
-                .all(|y| y.debug_was_cached.len() == 0)
+                .all(|y| y.debug_was_cached.is_empty())
         ));
 
         assert!(outcome.per_derivation_preset.clone().into_iter().all(
             |(_, x)| x
                 .per_factor
                 .values()
-                .all(|y| y.debug_was_derived.len() == 0)
+                .all(|y| y.debug_was_derived.is_empty())
         ));
 
         let cached = cache_client
@@ -730,7 +730,7 @@ mod tests {
         assert!(outcome.per_derivation_preset.values().all(|x| x
             .per_factor
             .values()
-            .all(|y| y.debug_found_in_cache.len() == 0)));
+            .all(|y| y.debug_found_in_cache.is_empty())));
 
         assert!(outcome.per_derivation_preset.clone().into_iter().all(
             |(preset, x)| x.per_factor.values().all(

@@ -590,7 +590,8 @@ mod tests {
             )),
         );
         type F = FactorSourceIDFromHash;
-        for fid in [F::sample_device()] {
+        {
+            let fid = F::sample_device();
             let next = sut
                 .next(fid, preset.index_agnostic_path_on_network(network_id))
                 .unwrap();
@@ -616,7 +617,8 @@ mod tests {
             )),
         );
         type F = FactorSourceIDFromHash;
-        for fid in [F::sample_device()] {
+        {
+            let fid = F::sample_device();
             let next = sut
                 .next(fid, preset.index_agnostic_path_on_network(network_id))
                 .unwrap();

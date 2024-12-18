@@ -54,9 +54,7 @@ impl ProfileNetwork {
     ) -> bool {
         self.get_entities_erased(entity_address.get_entity_kind())
             .into_iter()
-            .any(|e| {
-                AddressOfAccountOrPersona::from(e.address()) == *entity_address
-            })
+            .any(|e| e.address() == *entity_address)
     }
 }
 

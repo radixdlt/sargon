@@ -357,7 +357,7 @@ impl FactorInstancesProvider {
 
                     let requested_quantified_derivation_preset =
                         requested_quantified_derivation_presets
-                            .get_id(&preset)
+                            .get_id(preset)
                             .unwrap();
 
                     println!("🌮 FIP - split - requested_quantified_derivation_preset: {:?}", requested_quantified_derivation_preset);

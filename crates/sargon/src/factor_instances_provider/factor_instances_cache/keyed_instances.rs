@@ -39,6 +39,10 @@ impl<K: Eq + std::fmt::Debug + std::hash::Hash + Clone> KeyedInstances<K> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl<K: Eq + std::fmt::Debug + std::hash::Hash + Clone> IntoIterator
