@@ -862,6 +862,9 @@ pub enum CommonError {
 
     #[error("Cannot securify entity that has provisional security config")]
     CannotSecurifyEntityHasProvisionalSecurityConfig = 10241,
+
+    #[error("Too few FactorInstances derived")]
+    TooFewFactorInstancesDerived = 10242,
 }
 
 #[uniffi::export]

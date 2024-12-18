@@ -269,10 +269,9 @@ impl FactorInstancesProvider {
                     .clone()
                     .into_iter()
                     .map(|f| f.id_from_hash())
-                    .map(|factor_source_id| {
+                    .filter_map(|factor_source_id| {
                         
-                        let mut merged = IndexSet::new();
-                       
+                   
                        let from_cache = pf_found_in_cache_leq_requested
                             .get(&factor_source_id)
                             .cloned()
@@ -282,6 +281,13 @@ impl FactorInstancesProvider {
                             .get(&factor_source_id)
                             .cloned()
                             .unwrap_or_default();
+
+                        if from_cache.is_empty() && newly_derived.is_empty() {
+                            return None;
+                        }
+
+                        let mut merged = IndexSet::new();
+                       
 
                         println!("🌮 FIP - split (preset: {:?}, factor: {:?}) - `from_cache`: #{:?}", preset, factor_source_id, from_cache.len());
                         println!("🌮 FIP - split (preset: {:?}, factor: {:?}) - `newly_derived`: #{:?}", preset, factor_source_id, newly_derived.len());
@@ -303,7 +309,7 @@ impl FactorInstancesProvider {
                             )
                         );
                         assert!(!merged.is_empty());
-                            (factor_source_id, FactorInstances::from(merged))
+                            Some((factor_source_id, FactorInstances::from(merged)))
 
                     })
                     .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
@@ -499,30 +505,28 @@ impl FactorInstancesProvider {
 
         for (k, v) in per_factor_paths.iter() {
             let contains_rola_path = v.iter().any(|p| p.agnostic().key_kind == CAP26KeyKind::AuthenticationSigning);
-            println!("🌮 FIP - derive_more - 🛣️ per_factor_paths - (factor: {:?}) - v.len(): #{:?} contains_rola_path? {:?}", k, v.len(), contains_rola_path);
+            println!("🌮 FIP - derive_more - 🛣️ per_factor_paths - (factor: {:?}) - contains_rola_path? {:?}, paths: \n\n{:?}\n\n", k, contains_rola_path, v);
         }
-        println!("🛡️ #factor_sources: {:?}", factor_sources.len());
+        println!("🛡️ #factor_sources ids: {:?}", factor_sources.iter().map(|f| f.factor_source_id()).collect_vec());
 
-        // println!(
-        //     "🌮 FIP - derive_more - per_factor_paths: #{:?}",
-        //     per_factor_paths
-        //         .clone()
-        //         .values()
-        //         .fold(0, |acc, e| acc + e.len())
-        // );
 
         let interactor = self.interactor.clone();
 
         let collector = KeysCollector::new(
             factor_sources,
-            per_factor_paths,
+            per_factor_paths.clone(),
             interactor,
             derivation_purpose,
         )?;
 
         let pf_derived = collector.collect_keys().await.factors_by_source;
 
+
         for (k, v) in pf_derived.iter() {
+            let requested = per_factor_paths.get(k).unwrap();
+            if v.len() < requested.len() {
+                return Err(CommonError::TooFewFactorInstancesDerived)
+            }
             println!("🌮 FIP - derive_more - 🔮🦄🍬 derived - (factor: {:?}) - v.len(): #{:?}", k, v.len());
         }
 
