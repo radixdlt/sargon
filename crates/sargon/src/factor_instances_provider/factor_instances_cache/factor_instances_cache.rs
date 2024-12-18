@@ -285,7 +285,8 @@ impl FactorInstancesCache {
                     if is_quantity_satisfied {
                         // The instances in the cache can satisfy the requested quantity
                         // for this factor source for this derivation preset
-                        Some(CacheInstancesAndRemainingQuantityToDerive {
+                        let v =
+                            CacheInstancesAndRemainingQuantityToDerive {
                             // Only take the first `target_quantity` instances
                             // to be used, the rest are not needed and should
                             // remain in the cache (later we will call delete on
@@ -294,7 +295,11 @@ impl FactorInstancesCache {
                                 .split_at(target_quantity)
                                 .0,
                             quantity_to_derive: 0,
-                        })
+                            };
+
+                   
+                        assert!(!v.instances_to_use_from_cache.is_empty());
+                                                Some(v)
                     } else {
                         // Since we are deriving more we might as well ensure that the
                         // cache is filled with `CACHE_FILLING_QUANTITY` **AFTER** the
@@ -304,11 +309,12 @@ impl FactorInstancesCache {
                         let quantity_to_derive = cache_filling_quantity
                             - count_in_cache
                             + target_quantity;
-
-                        Some(CacheInstancesAndRemainingQuantityToDerive {
-                            instances_to_use_from_cache: for_preset.clone(),
-                            quantity_to_derive,
-                        })
+let v = CacheInstancesAndRemainingQuantityToDerive {
+    instances_to_use_from_cache: for_preset.clone(),
+    quantity_to_derive,
+};
+assert!(v.quantity_to_derive > 0 || !v.instances_to_use_from_cache.is_empty());
+                        Some(v)
                     }
                 } else if count_in_cache < cache_filling_quantity {
                     // Not requested derivation preset, calculate number
@@ -316,6 +322,8 @@ impl FactorInstancesCache {
                     // we wanna FILL the cache for those derivation presets as well.
                     let quantity_to_derive =
                         cache_filling_quantity - count_in_cache;
+
+                        assert!(quantity_to_derive > 0);
 
                     Some(CacheInstancesAndRemainingQuantityToDerive {
                         instances_to_use_from_cache: FactorInstances::default(),
@@ -416,37 +424,74 @@ pub struct CacheNotSatisfied {
     >,
 }
 impl CacheNotSatisfied {
+
+    fn map<R>(
+        &self,
+        extract: impl Fn((FactorSourceIDFromHash, CacheInstancesAndRemainingQuantityToDerive)) -> Option<(FactorSourceIDFromHash, R)>
+    ) -> IndexMap<
+    DerivationPreset,
+    IndexMap<FactorSourceIDFromHash, R>,
+> {
+        self.cached_and_quantities_to_derive
+            .clone()
+            .into_iter()
+            .filter_map(|(preset, v)| {
+
+                let per_factor = v.into_iter()
+                .filter_map(|(x, y)| {
+                    // let instances = y.instances_to_use_from_cache; 
+                    // if instances.is_empty() { 
+                    //     None 
+                    // } else {
+                    //     Some((x, instances))
+                    // }
+                    extract((x, y))
+                })
+                .collect::<IndexMap<FactorSourceIDFromHash, R>>();
+
+                if per_factor.is_empty() {
+                    None
+                } else {
+                    Some((preset, per_factor))
+                }
+            })
+            .collect::<IndexMap<
+            DerivationPreset,
+            IndexMap<FactorSourceIDFromHash, R>,
+        >>()
+    }
+
+
     pub fn cached_instances_to_use(
         &self,
     ) -> InstancesPerDerivationPresetPerFactorSource {
-        self.cached_and_quantities_to_derive
-            .clone()
-            .into_iter()
-            .map(|(preset, v)| {
-                (
-                    preset,
-                    v.into_iter()
-                        .map(|(x, y)| (x, y.instances_to_use_from_cache))
-                        .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
-                        ,
-                )
-            })
-            .collect::<InstancesPerDerivationPresetPerFactorSource>()
+      self.map(|(x, y)| {
+        let instances = y.instances_to_use_from_cache; 
+        if instances.is_empty() { 
+            None 
+        } else {
+            Some((x, instances))
+        }
+    })
     }
 
     pub fn remaining_quantities_to_derive(&self) -> QuantitiesToDerive {
-        self.cached_and_quantities_to_derive
-            .clone()
-            .into_iter()
-            .map(|(preset, v)| {
-                (
-                    preset,
-                    v.into_iter()
-                        .map(|(x, y)| (x, y.quantity_to_derive))
-                        .collect::<IndexMap<FactorSourceIDFromHash, usize>>(),
-                )
-            })
-            .collect::<QuantitiesToDerive>()
+        // self.cached_and_quantities_to_derive
+        //     .clone()
+        //     .into_iter()
+        //     .map(|(preset, v)| {
+        //         (
+        //             preset,
+        //             v.into_iter()
+        //                 .map(|(x, y)| (x, y.quantity_to_derive))
+        //                 .collect::<IndexMap<FactorSourceIDFromHash, usize>>(),
+        //         )
+        //     })
+        //     .collect::<QuantitiesToDerive>()
+
+        self.map(|(x, y)| {
+          Some((x, y.quantity_to_derive))
+        })
     }
 }
 pub type QuantitiesToDerive =

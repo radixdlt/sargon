@@ -2,11 +2,12 @@ use std::borrow::Borrow;
 
 use crate::prelude::*;
 
-pub struct KeyedInstances<K: Eq + std::hash::Hash + Clone>(
+#[derive(Debug)]
+pub struct KeyedInstances<K: Eq + std::fmt::Debug + std::hash::Hash + Clone>(
     pub IndexMap<K, FactorInstances>,
 );
 
-impl<K: Eq + std::hash::Hash + Clone> KeyedInstances<K> {
+impl<K: Eq + std::fmt::Debug + std::hash::Hash + Clone> KeyedInstances<K> {
     pub fn validate_from_source(
         &self,
         factor_source_id: impl Borrow<FactorSourceIDFromHash>,
@@ -34,9 +35,13 @@ impl<K: Eq + std::hash::Hash + Clone> KeyedInstances<K> {
     pub fn new(map: IndexMap<K, FactorInstances>) -> Self {
         Self(map)
     }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 }
 
-impl<K: Eq + std::hash::Hash + Clone> IntoIterator for KeyedInstances<K> {
+impl<K: Eq + std::fmt::Debug + std::hash::Hash + Clone> IntoIterator for KeyedInstances<K> {
     type Item = <IndexMap<K, FactorInstances> as IntoIterator>::Item;
     type IntoIter = <IndexMap<K, FactorInstances> as IntoIterator>::IntoIter;
 

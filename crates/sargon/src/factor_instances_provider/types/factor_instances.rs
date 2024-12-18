@@ -46,6 +46,7 @@ impl FactorInstances {
     pub fn first(&self) -> Option<HierarchicalDeterministicFactorInstance> {
         self.factor_instances.first().cloned()
     }
+    
     pub fn split_at(self, mid: usize) -> (Self, Self) {
         let instances = self.factor_instances.into_iter().collect_vec();
         let (head, tail) = instances.split_at(mid);

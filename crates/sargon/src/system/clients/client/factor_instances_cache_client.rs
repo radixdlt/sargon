@@ -177,29 +177,7 @@ impl FactorInstancesCacheClient {
         .await
     }
 
-    /// Returns enough instances to satisfy the requested quantity for each factor source,
-    /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
-    /// must derive more, this function returns the quantities to derive for each factor source,
-    /// for each derivation preset, not only the originally requested one.
-    async fn get_poly_factor_with_quantities(
-        &self,
-        factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
-        originally_requested_quantified_derivation_preset: impl Borrow<
-            QuantifiedDerivationPreset,
-        >,
-        network_id: NetworkID,
-    ) -> Result<CachedInstancesWithQuantitiesOutcome> {
-        self.access_cache_init_if_needed(|cache| {
-            cache.get(
-                factor_source_ids.borrow(),
-                &IdentifiedVecOf::just(
-                    *originally_requested_quantified_derivation_preset.borrow(),
-                ),
-                network_id,
-            )
-        })
-        .await
-    }
+    
 
     /// Reads out the instance of `factor_source_id` without mutating the cache.
     pub async fn peek_all_instances_of_factor_source(
@@ -222,6 +200,25 @@ impl FactorInstancesCacheClient {
 
 #[cfg(test)]
 impl FactorInstancesCacheClient {
+
+    /// Returns enough instances to satisfy the requested quantity for each factor source,
+    /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
+    /// must derive more, this function returns the quantities to derive for each factor source,
+    /// for each derivation preset, not only the originally requested one.
+    async fn get_poly_factor_with_quantities(
+        &self,
+        factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
+        originally_requested_quantified_derivation_preset: impl Borrow<
+            QuantifiedDerivationPreset,
+        >,
+        network_id: NetworkID,
+    ) -> Result<CachedInstancesWithQuantitiesOutcome> {
+        self.access_cache_init_if_needed(|cache| {
+            cache.get_poly_factor_with_quantities(factor_source_ids.borrow(), originally_requested_quantified_derivation_preset.borrow(), network_id)
+        })
+        .await
+    }
+
     pub async fn insert_single(
         &self,
         instance: impl Borrow<HierarchicalDeterministicFactorInstance>,

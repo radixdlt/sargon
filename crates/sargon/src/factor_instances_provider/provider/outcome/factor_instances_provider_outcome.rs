@@ -68,7 +68,11 @@ impl FactorInstancesProviderOutcome {
     ) -> FactorInstances {
         self.per_derivation_preset
             .values()
-            .flat_map(|x| x.per_factor.values().flat_map(|f| f.debug_was_derived.factor_instances()))
+            .flat_map(|x| {
+                x.per_factor
+                    .values()
+                    .flat_map(|f| f.debug_was_derived.factor_instances())
+            })
             .collect()
     }
 
@@ -83,11 +87,14 @@ impl FactorInstancesProviderOutcome {
     pub fn instances_found_in_cache_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
-        // self.per_factor
-        //     .values()
-        //     .flat_map(|x| x.debug_found_in_cache.factor_instances())
-        //     .collect()
-        todo!()
+        self.per_derivation_preset
+            .values()
+            .flat_map(|x| {
+                x.per_factor
+                    .values()
+                    .flat_map(|f| f.debug_found_in_cache.factor_instances())
+            })
+            .collect()
     }
 
     pub fn total_number_of_instances_found_in_cache(&self) -> usize {
