@@ -222,7 +222,7 @@ impl SargonOS {
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
-    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+    ) -> Result<FactorInstancesProviderOutcome> {
         if !factor_source.factor_source_id().is_hash() {
             panic!("Unsupported FactorSource which is not HD.")
         }
@@ -237,22 +237,12 @@ impl SargonOS {
         )
         .await?;
 
-        assert_eq!(outcome.factor_source_id, factor_source.id_from_hash());
+        assert!(outcome.per_derivation_preset.values().all(|pf| pf
+            .per_factor
+            .keys()
+            .collect_vec()
+            == vec![&factor_source.id_from_hash()]));
 
-        #[cfg(test)]
-        {
-            assert_eq!(outcome.debug_found_in_cache.len(), 0);
-
-            assert_eq!(
-                outcome.debug_was_cached.len(),
-                DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
-            );
-
-            assert_eq!(
-                outcome.debug_was_derived.len(),
-                DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
-            );
-        }
         Ok(outcome)
     }
 
