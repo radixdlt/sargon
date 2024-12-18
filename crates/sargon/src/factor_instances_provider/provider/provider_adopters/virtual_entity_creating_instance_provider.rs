@@ -318,8 +318,7 @@ mod tests {
         ));
 
         for (k, v) in outcome.per_derivation_preset.iter() {
-            for (x, y) in v.per_factor.iter() {
-                println!("🍬 preset: {:?}, factor: {:?}, debug_was_derived.len(): #{:?}", k, x, y.debug_was_derived.len());
+            for (_, y) in v.per_factor.iter() {
                 let derivation_based_offset =
                     if *k == DerivationPreset::AccountVeci {
                         1
@@ -332,14 +331,6 @@ mod tests {
                 )
             }
         }
-        // assert!(outcome.per_derivation_preset.clone().into_iter().all(
-        //     |(preset, x)| {
-        //         x.per_factor.values().all(|y| {
-        //             y.debug_was_derived.len()
-        //                 == preset.cache_filling_quantity() + 1
-        //         } /* One account created */)
-        //     }
-        // ));
 
         let instances_used_directly = outcome
             .per_derivation_preset

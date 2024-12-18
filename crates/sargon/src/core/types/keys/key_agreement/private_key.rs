@@ -156,7 +156,6 @@ mod tests {
     fn public_key() {
         let private_key = SUT::sample();
         let public_key = private_key.public_key();
-        println!("{:?}", public_key);
         assert_eq!(
             public_key,
              KeyAgreementPublicKey::from_hex("8679bc1fe3210b2ce84793668b05218fdc4c220bc05387b7d2ac0d4c7b7c5d10".to_owned())
