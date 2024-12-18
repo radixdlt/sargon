@@ -882,7 +882,9 @@ impl SargonOS {
                 .swap_remove(&preset)
                 .expect(&format!("Expected to find instances for derivation preset: {:?}", preset));
 
-                for (i, entity_address) in addresses_of_kind.clone().into_iter().enumerate() {
+                for (i, entity_address) in
+                    addresses_of_kind.clone().into_iter().enumerate()
+                {
                     let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
                    let matrix_of_factor_instances =     MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
                     &mut instances_per_factor_source,

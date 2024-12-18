@@ -11,18 +11,15 @@ pub struct InternalFactorInstancesProviderOutcome {
 impl InternalFactorInstancesProviderOutcome {
     /// Outcome of FactorInstances just from cache, none have been derived.
     pub fn satisfied_by_cache(satisfied: CacheSatisfied) -> Self {
-        // Self::new(
-        //         pf_found_in_cache
-        //             .into_iter()
-        //             .map(|(k, v)| {
-        //                 (
-        //                     k,
-        //                     InternalFactorInstancesProviderOutcomeForFactor::satisfied_by_cache(k, v),
-        //                 )
-        //             })
-        //             .collect(),
-        //     )
-        todo!()
+        Self::new(
+            satisfied.cached.into_iter().map(|(preset, x)| {
+                let per_factor = InternalFactorInstancesProviderOutcomePerFactor::satisfied_by_cache(x);
+                (preset, per_factor)
+            }).collect::<IndexMap<
+            DerivationPreset,
+            InternalFactorInstancesProviderOutcomePerFactor,
+        >>()
+        )
     }
 
     pub fn get_for_derivation_preset(
@@ -73,14 +70,83 @@ impl InternalFactorInstancesProviderOutcome {
         }
     }
 
-    /// "Transposes" a **collection** of `IndexMap<FactorSourceID, FactorInstances>` into `IndexMap<FactorSourceID, **collection** FactorInstances>` (`InternalFactorInstancesProviderOutcomeForFactor` is essentially a collection of FactorInstance)
+    /// "Transposes"
     pub fn transpose(
         pdp_pf_to_cache: InstancesPerDerivationPresetPerFactorSource,
         pdp_pf_to_use_directly: InstancesPerDerivationPresetPerFactorSource,
         pdp_pf_found_in_cache: InstancesPerDerivationPresetPerFactorSource,
         pdp_pf_newly_derived: InstancesPerDerivationPresetPerFactorSource,
     ) -> Self {
-        /*
+        let mut per_derivation_preset = IndexMap::<
+            DerivationPreset,
+            InternalFactorInstancesProviderOutcomePerFactor,
+        >::new();
+
+        for preset in DerivationPreset::all().iter() {
+            let pf_to_cache =
+                pdp_pf_to_cache.get(preset).cloned().unwrap_or_default();
+            let pf_to_use_directly = pdp_pf_to_use_directly
+                .get(preset)
+                .cloned()
+                .unwrap_or_default();
+            let pf_found_in_cache = pdp_pf_found_in_cache
+                .get(preset)
+                .cloned()
+                .unwrap_or_default();
+            let pf_newly_derived = pdp_pf_newly_derived
+                .get(preset)
+                .cloned()
+                .unwrap_or_default();
+
+            let per_factor =
+                InternalFactorInstancesProviderOutcomePerFactor::transpose(
+                    pf_to_cache,
+                    pf_to_use_directly,
+                    pf_found_in_cache,
+                    pf_newly_derived,
+                );
+
+            per_derivation_preset.insert(*preset, per_factor);
+        }
+
+        Self::new(per_derivation_preset)
+    }
+}
+
+impl InternalFactorInstancesProviderOutcomePerFactor {
+    pub fn new(
+        per_factor: IndexMap<
+            FactorSourceIDFromHash,
+            InternalFactorInstancesProviderOutcomeForFactor,
+        >,
+    ) -> Self {
+        Self { per_factor }
+    }
+
+    /// Outcome of FactorInstances just from cache, none have been derived.
+    pub fn satisfied_by_cache(
+        pf_found_in_cache: IndexMap<FactorSourceIDFromHash, FactorInstances>,
+    ) -> Self {
+        Self::new(
+                pf_found_in_cache
+                    .into_iter()
+                    .map(|(k, v)| {
+                        (
+                            k,
+                            InternalFactorInstancesProviderOutcomeForFactor::satisfied_by_cache(k, v),
+                        )
+                    })
+                    .collect(),
+            )
+    }
+
+    /// "Transposes"
+    pub fn transpose(
+        pf_to_cache: IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        pf_to_use_directly: IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        pf_found_in_cache: IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        pf_newly_derived: IndexMap<FactorSourceIDFromHash, FactorInstances>,
+    ) -> Self {
         struct Builder {
             factor_source_id: FactorSourceIDFromHash,
 
@@ -174,8 +240,6 @@ impl InternalFactorInstancesProviderOutcome {
                     InternalFactorInstancesProviderOutcomeForFactor,
                 >>(),
         )
-        */
-        todo!()
     }
 }
 

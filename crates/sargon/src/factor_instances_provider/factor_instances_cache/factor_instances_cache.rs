@@ -336,11 +336,17 @@ impl FactorInstancesCache {
 
         // The instances in the cache cannot satisfy the requested quantity
         // we must derive more!
-        let is_quantity_satisfied_for_all = per_derivation_preset
+        let is_quantity_unsatisfied_for_any = per_derivation_preset
             .iter()
             .any(|(_, pf)| pf.iter().any(|(_, ci)| ci.quantity_to_derive > 0));
 
-        let outcome = if is_quantity_satisfied_for_all {
+        let outcome = if is_quantity_unsatisfied_for_any {
+            CachedInstancesWithQuantitiesOutcome::NotSatisfied(
+                CacheNotSatisfied {
+                    cached_and_quantities_to_derive: per_derivation_preset,
+                },
+            )
+        } else {
             CachedInstancesWithQuantitiesOutcome::Satisfied(CacheSatisfied {
                 cached: per_derivation_preset
                     .into_iter()
@@ -376,13 +382,8 @@ impl FactorInstancesCache {
                         IndexMap<FactorSourceIDFromHash, FactorInstances>,
                     >>(),
             })
-        } else {
-            CachedInstancesWithQuantitiesOutcome::NotSatisfied(
-                CacheNotSatisfied {
-                    cached_and_quantities_to_derive: per_derivation_preset,
-                },
-            )
         };
+
         Ok(outcome)
     }
 }

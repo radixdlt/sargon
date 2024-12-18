@@ -38,7 +38,6 @@ impl<K: std::hash::Hash + Eq, V> JustKV<K, V> for HashMap<K, V> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -220,7 +220,6 @@ impl FactorInstancesProvider {
                         .cloned()
                         // can be nil -> empty, if no instance was found in cache for this preset!
                         .unwrap_or_default();
-                    
                     let pf_newly_derived = pdp_pf_newly_derived
                     .get(preset)
                     .cloned()
@@ -389,7 +388,7 @@ impl FactorInstancesProvider {
         )?;
 
         let pf_derived = collector.collect_keys().await.factors_by_source;
-      
+
         let pf_pdp_derived = pf_derived
             .into_iter()
             .map(|(k, v)| {
@@ -404,7 +403,7 @@ impl FactorInstancesProvider {
                 IndexMap<DerivationPreset, FactorInstances>,
             >>();
 
-            // we need to transpose the `pf_pdp_derived`
+        // we need to transpose the `pf_pdp_derived`
 
         let mut pdp_pf_instances = IndexMap::<
             DerivationPreset,
@@ -413,7 +412,13 @@ impl FactorInstancesProvider {
 
         for (factor_source_id, pdp) in pf_pdp_derived {
             for (preset, instances) in pdp {
-                pdp_pf_instances.append_or_insert_to(preset, IndexMap::<FactorSourceIDFromHash, FactorInstances>::kv(factor_source_id, instances));
+                pdp_pf_instances.append_or_insert_to(
+                    preset,
+                    IndexMap::<FactorSourceIDFromHash, FactorInstances>::kv(
+                        factor_source_id,
+                        instances,
+                    ),
+                );
             }
         }
 
