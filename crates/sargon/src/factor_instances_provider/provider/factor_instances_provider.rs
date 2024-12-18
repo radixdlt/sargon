@@ -140,15 +140,9 @@ impl FactorInstancesProvider {
                     ),
                 ))
             }
-            CachedInstancesWithQuantitiesOutcome::NotSatisfied(
-                // quantities_to_derive,
-                // partial_instances,
-                unsatisfied,
-            ) => {
+            CachedInstancesWithQuantitiesOutcome::NotSatisfied(unsatisfied) => {
                 self.derive_more_and_cache(
-                    // quantified_derivation_preset,
-                    // partial_instances,
-                    // quantities_to_derive,
+                    &quantified_derivation_presets,
                     unsatisfied,
                     derivation_purpose,
                 )
@@ -159,6 +153,9 @@ impl FactorInstancesProvider {
 
     async fn derive_more_and_cache(
         &mut self,
+        requested_quantified_derivation_presets: &IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
         not_satisfied: CacheNotSatisfied,
         derivation_purpose: DerivationPurpose,
     ) -> Result<(
@@ -178,8 +175,11 @@ impl FactorInstancesProvider {
         let Split {
             pdp_pf_to_use_directly,
             pdp_pf_to_cache,
-        } = self
-            .split(&pdp_pf_found_in_cache_leq_requested, &pdp_pf_newly_derived);
+        } = self.split(
+            requested_quantified_derivation_presets,
+            &pdp_pf_found_in_cache_leq_requested,
+            &pdp_pf_newly_derived,
+        );
 
         let instances_in_cache_consumer = self
             .make_instances_in_cache_consumer(
@@ -201,76 +201,109 @@ impl FactorInstancesProvider {
     /// based on the originally requested quantity.
     fn split(
         &self,
+        requested_quantified_derivation_presets: &IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
         pdp_pf_found_in_cache_leq_requested: &InstancesPerDerivationPresetPerFactorSource,
         pdp_pf_newly_derived: &InstancesPerDerivationPresetPerFactorSource,
     ) -> Split {
-        // // Start by merging the instances found in cache and the newly derived instances,
-        // // into a single collection of instances per factor source, with the
-        // // instances from cache first in the list (per factor), and then the newly derived.
-        // // this is important so that we consume the instances from cache first.
-        // let pf_derived_appended_to_from_cache = self
-        //     .factor_sources
-        //     .clone()
-        //     .into_iter()
-        //     .map(|f| f.id_from_hash())
-        //     .map(|factor_source_id| {
-        //         let mut merged = IndexSet::new();
-        //         let from_cache = pf_found_in_cache_leq_requested
-        //             .get(&factor_source_id)
-        //             .cloned()
-        //             .unwrap_or_default();
-        //         let newly_derived = pf_newly_derived
-        //             .get(&factor_source_id)
-        //             .cloned()
-        //             .unwrap_or_default();
-        //         // IMPORTANT: Must put instances from cache **first**...
-        //         merged.extend(from_cache);
-        //         // ... and THEN the newly derived, so we consume the ones with
-        //         // lower index from cache first.
-        //         merged.extend(newly_derived);
+        // Start by merging the instances found in cache and the newly derived instances,
+        // into a single collection of instances per factor source, with the
+        // instances from cache first in the list (per factor), and then the newly derived.
+        // this is important so that we consume the instances from cache first.
+        let pdp_pf_derived_appended_to_from_cache = DerivationPreset::all()
+            .iter()
+            .map(|preset| {
+                let pf_found_in_cache_leq_requested =
+                    pdp_pf_found_in_cache_leq_requested
+                        .get(preset)
+                        // is it correct to `expect` below? maybe we should `filter_map` and if `pdp_pf_found_in_cache_leq_requested` does not contain the preset, we should assert that neither does `pdp_pf_newly_derived`?
+                        .expect("All DerivationPresets should be present"); 
 
-        //         (factor_source_id, FactorInstances::from(merged))
-        //     })
-        //     .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
+                let pf_newly_derived = pdp_pf_newly_derived
+                    .get(preset)
+                    .expect("All DerivationPresets should be present"); // is this correct?
 
-        // let mut pf_to_use_directly = IndexMap::new();
-        // let mut pf_to_cache =
-        //     IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
-        // let quantity_originally_requested =
-        //     originally_requested_quantified_derivation_preset.quantity;
-        // let preset_originally_requested =
-        //     originally_requested_quantified_derivation_preset.derivation_preset;
+                let pf_instances = self
+                    .factor_sources
+                    .clone()
+                    .into_iter()
+                    .map(|f| f.id_from_hash())
+                    .map(|factor_source_id| {
+                        let mut merged = IndexSet::new();
+                        let from_cache = pf_found_in_cache_leq_requested
+                            .get(&factor_source_id)
+                            .cloned()
+                            .unwrap_or_default();
+                        let newly_derived = pf_newly_derived
+                            .get(&factor_source_id)
+                            .cloned()
+                            .unwrap_or_default();
+                        // IMPORTANT: Must put instances from cache **first**...
+                        merged.extend(from_cache);
+                        // ... and THEN the newly derived, so we consume the ones with
+                        // lower index from cache first.
+                        merged.extend(newly_derived);
 
-        // // Using the merged map, split the instances into those to use directly and those to cache.
-        // for (factor_source_id, instances) in
-        //     pf_derived_appended_to_from_cache.clone().into_iter()
-        // {
-        //     let mut instances_by_derivation_preset =
-        //         InstancesByDerivationPreset::from(instances);
+                        (factor_source_id, FactorInstances::from(merged))
+                    })
+                    .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
 
-        //     if let Some(instances_relevant_to_use_directly_with_abundance) =
-        //         instances_by_derivation_preset
-        //             .remove(preset_originally_requested)
-        //     {
-        //         let (to_use_directly, to_cache) =
-        //             instances_relevant_to_use_directly_with_abundance
-        //                 .split_at(quantity_originally_requested);
-        //         pf_to_use_directly.insert(factor_source_id, to_use_directly);
-        //         pf_to_cache.insert(factor_source_id, to_cache);
-        //     }
+                (*preset, pf_instances)
+            })
+            .collect::<InstancesPerDerivationPresetPerFactorSource>();
 
-        //     pf_to_cache.append_or_insert_to(
-        //         factor_source_id,
-        //         instances_by_derivation_preset.all_instances(),
-        //     );
-        // }
+        let mut pdp_pf_to_use_directly =
+            InstancesPerDerivationPresetPerFactorSource::new();
+        let mut pdp_pf_to_cache =
+            InstancesPerDerivationPresetPerFactorSource::new();
 
-        // Split {
-        //     pf_to_use_directly,
-        //     pf_to_cache,
-        // }
+        // Using the merged map, split the instances into those to use directly and those to cache.
+        for (preset, pf_derived_appended_to_from_cache) in
+            pdp_pf_derived_appended_to_from_cache
+        {
+            let mut pf_to_use_directly = IndexMap::new();
+            let mut pf_to_cache =
+                IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
 
-        todo!()
+            for (factor_source_id, instances) in
+                pf_derived_appended_to_from_cache.clone().into_iter()
+            {
+                let mut instances_by_derivation_preset =
+                    InstancesByDerivationPreset::from(instances);
+
+                if let Some(requested_quantified_derivation_preset) =
+                    requested_quantified_derivation_presets.get_id(&preset)
+                // is this correct?
+                {
+                    let instances_relevant_to_use_directly_with_abundance =
+                        instances_by_derivation_preset
+                            .remove(&preset)
+                            .expect("Should have contained the preset"); // is this correct?
+                    let (to_use_directly, to_cache) =
+                        instances_relevant_to_use_directly_with_abundance
+                            .split_at(
+                                requested_quantified_derivation_preset.quantity,
+                            );
+                    pf_to_use_directly
+                        .insert(factor_source_id, to_use_directly);
+                    pf_to_cache.insert(factor_source_id, to_cache);
+                }
+
+                pf_to_cache.append_or_insert_to(
+                    factor_source_id,
+                    instances_by_derivation_preset.all_instances(),
+                );
+            }
+
+            pdp_pf_to_use_directly.insert(preset, pf_to_use_directly);
+            pdp_pf_to_cache.insert(preset, pf_to_cache);
+        }
+
+        Split {
+            pdp_pf_to_use_directly,
+            pdp_pf_to_cache,
+        }
     }
 
     pub(super) async fn derive_more(
