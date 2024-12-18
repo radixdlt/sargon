@@ -88,7 +88,7 @@ impl FactorInstancesProvider {
 impl FactorInstancesProvider {
     fn make_instances_in_cache_consumer(
         &self,
-        instances_to_delete: CachedInstancesToUse,
+        instances_to_delete: InstancesPerDerivationPresetPerFactorSource,
     ) -> InstancesInCacheConsumer {
         let instances_clone = instances_to_delete.clone();
         let cache_client_clone = self.cache_client.clone();
@@ -217,12 +217,15 @@ impl FactorInstancesProvider {
                 let pf_found_in_cache_leq_requested =
                     pdp_pf_found_in_cache_leq_requested
                         .get(preset)
-                        // is it correct to `expect` below? maybe we should `filter_map` and if `pdp_pf_found_in_cache_leq_requested` does not contain the preset, we should assert that neither does `pdp_pf_newly_derived`?
-                        .expect("All DerivationPresets should be present"); 
-
-                let pf_newly_derived = pdp_pf_newly_derived
+                        .cloned()
+                        // can be nil -> empty, if no instance was found in cache for this preset!
+                        .unwrap_or_default();
+                    
+                    let pf_newly_derived = pdp_pf_newly_derived
                     .get(preset)
-                    .expect("All DerivationPresets should be present"); // is this correct?
+                    .cloned()
+                    // can be nil -> empty, if we did not derive any new instance for this preset!
+                    .unwrap_or_default();
 
                 let pf_instances = self
                     .factor_sources
@@ -310,12 +313,7 @@ impl FactorInstancesProvider {
         &self,
         quantities_to_derive: QuantitiesToDerive,
         derivation_purpose: DerivationPurpose,
-    ) -> Result<
-        IndexMap<
-            DerivationPreset,
-            IndexMap<FactorSourceIDFromHash, FactorInstances>,
-        >,
-    > {
+    ) -> Result<InstancesPerDerivationPresetPerFactorSource> {
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
 
@@ -368,49 +366,79 @@ impl FactorInstancesProvider {
                 >,
             >>()?;
 
+        println!(
+            "🌈 per_preset_per_factor_paths: {:#?}",
+            per_preset_per_factor_paths
+        );
+        let mut per_factor_paths =
+            IndexMap::<FactorSourceIDFromHash, IndexSet<DerivationPath>>::new();
+        for (_, pf) in per_preset_per_factor_paths.clone() {
+            for (factor_source_id, paths) in pf {
+                per_factor_paths.append_or_insert_to(factor_source_id, paths);
+            }
+        }
+
+        println!("🌈 per_factor_paths: {:#?}", per_factor_paths);
+
         let interactor = self.interactor.clone();
         let collector = KeysCollector::new(
             factor_sources,
-            per_preset_per_factor_paths.clone().into_iter().flat_map(
-                |(_, pf_paths)| {
-                    pf_paths
-                        .into_iter()
-                        .map(|(fs, paths)| (fs, paths))
-                    }
-            )
-             .collect::<IndexMap<
-            FactorSourceIDFromHash,
-            IndexSet<DerivationPath>,
-        >>(),
+            per_factor_paths,
             interactor,
             derivation_purpose,
         )?;
 
         let pf_derived = collector.collect_keys().await.factors_by_source;
+      
+        let pf_pdp_derived = pf_derived
+            .into_iter()
+            .map(|(k, v)| {
+                (
+                    k,
+                    InstancesByDerivationPreset::from(FactorInstances::from(v))
+                        .0,
+                )
+            })
+            .collect::<IndexMap<
+                FactorSourceIDFromHash,
+                IndexMap<DerivationPreset, FactorInstances>,
+            >>();
+
+            // we need to transpose the `pf_pdp_derived`
 
         let mut pdp_pf_instances = IndexMap::<
             DerivationPreset,
             IndexMap<FactorSourceIDFromHash, FactorInstances>,
         >::new();
 
-        for (preset, per_factor) in per_preset_per_factor_paths {
-            let mut pf_instances =
-                IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
-            for (factor_source_id, paths) in per_factor {
-                let derived_for_factor = pf_derived
-                    .get(&factor_source_id)
-                    .cloned()
-                    .unwrap_or_default(); // if None -> Empty -> fail below.
-                if derived_for_factor.len() < paths.len() {
-                    return Err(CommonError::FactorInstancesProviderDidNotDeriveEnoughFactors);
-                }
-                pf_instances.insert(
-                    factor_source_id,
-                    derived_for_factor.into_iter().collect::<FactorInstances>(),
-                );
+        for (factor_source_id, pdp) in pf_pdp_derived {
+            for (preset, instances) in pdp {
+                pdp_pf_instances.append_or_insert_to(preset, IndexMap::<FactorSourceIDFromHash, FactorInstances>::kv(factor_source_id, instances));
             }
-            pdp_pf_instances.insert(preset, pf_instances);
         }
+
+        // for (preset, per_factor) in per_preset_per_factor_paths {
+        //     let mut pf_instances =
+        //         IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
+
+        //     for (factor_source_id, paths) in per_factor {
+        //         let derived_for_factor = pf_derived
+        //             .get(&factor_source_id)
+        //             .cloned()
+        //             .unwrap_or_default(); // if None -> Empty -> fail below.
+
+        //         if derived_for_factor.len() < paths.len() {
+        //             return Err(CommonError::FactorInstancesProviderDidNotDeriveEnoughFactors);
+        //         }
+
+        //         pf_instances.insert(
+        //             factor_source_id,
+        //             derived_for_factor.into_iter().collect::<FactorInstances>(),
+        //         );
+        //     }
+
+        //     pdp_pf_instances.insert(preset, pf_instances);
+        // }
 
         Ok(pdp_pf_instances)
     }

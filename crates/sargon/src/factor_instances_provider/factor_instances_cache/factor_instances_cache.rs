@@ -405,7 +405,9 @@ pub struct CacheNotSatisfied {
     >,
 }
 impl CacheNotSatisfied {
-    pub fn cached_instances_to_use(&self) -> CachedInstancesToUse {
+    pub fn cached_instances_to_use(
+        &self,
+    ) -> InstancesPerDerivationPresetPerFactorSource {
         self.cached_and_quantities_to_derive
             .clone()
             .into_iter()
@@ -418,7 +420,7 @@ impl CacheNotSatisfied {
                         ,
                 )
             })
-            .collect::<CachedInstancesToUse>()
+            .collect::<InstancesPerDerivationPresetPerFactorSource>()
     }
 
     pub fn remaining_quantities_to_derive(&self) -> QuantitiesToDerive {
@@ -443,7 +445,6 @@ pub type InstancesPerDerivationPresetPerFactorSource = IndexMap<
     DerivationPreset,
     IndexMap<FactorSourceIDFromHash, FactorInstances>,
 >;
-pub type CachedInstancesToUse = InstancesPerDerivationPresetPerFactorSource;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CacheSatisfied {
@@ -986,19 +987,17 @@ mod tests {
                 .unwrap();
         }
 
-        todo!()
+        sut.delete(&IndexMap::kv(DerivationPreset::AccountVeci, to_delete));
 
-        // sut.delete(&to_delete);
-
-        // let path = &IndexAgnosticPath::new(
-        //     NetworkID::Mainnet,
-        //     CAP26EntityKind::Account,
-        //     CAP26KeyKind::TransactionSigning,
-        //     KeySpace::Unsecurified { is_hardened: true },
-        // );
-        // for (f, instances) in to_remain {
-        //     assert_eq!(sut.get_mono_factor(f, path).unwrap(), instances)
-        // }
+        let path = &IndexAgnosticPath::new(
+            NetworkID::Mainnet,
+            CAP26EntityKind::Account,
+            CAP26KeyKind::TransactionSigning,
+            KeySpace::Unsecurified { is_hardened: true },
+        );
+        for (f, instances) in to_remain {
+            assert_eq!(sut.get_mono_factor(f, path).unwrap(), instances)
+        }
     }
 
     #[test]

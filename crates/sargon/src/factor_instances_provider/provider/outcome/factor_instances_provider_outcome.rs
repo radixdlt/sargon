@@ -4,10 +4,6 @@ use crate::prelude::*;
 /// renamed field values to make it clear that `to_cache` instances  already have been cached.
 #[derive(Clone, Debug)]
 pub struct FactorInstancesProviderOutcome {
-    // pub per_factor: IndexMap<
-    //     FactorSourceIDFromHash,
-    //     FactorInstancesProviderOutcomeForFactor,
-    // >,
     pub per_derivation_preset:
         IndexMap<DerivationPreset, FactorInstancesProviderOutcomePerFactor>,
 }

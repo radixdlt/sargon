@@ -840,7 +840,7 @@ impl SargonOS {
                     .map(|(k, v)| (k, v.to_use_directly)).collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
                 )
             })
-            .collect::<IndexMap<DerivationPreset, IndexMap<FactorSourceIDFromHash, FactorInstances>>>();
+            .collect::<InstancesPerDerivationPresetPerFactorSource>();
 
         assert_eq!(
             instances_per_preset_per_factor_source
@@ -878,9 +878,11 @@ impl SargonOS {
                 };
                 let preset = DerivationPreset::mfa_entity_kind(entity_kind);
 
-                let mut instances_per_factor_source = instances_per_preset_per_factor_source.swap_remove(&preset).expect    (&format!("Expected to find instances for derivation preset: {:?}", preset));
+                let mut instances_per_factor_source = instances_per_preset_per_factor_source
+                .swap_remove(&preset)
+                .expect(&format!("Expected to find instances for derivation preset: {:?}", preset));
 
-                for entity_address in addresses_of_kind {
+                for (i, entity_address) in addresses_of_kind.clone().into_iter().enumerate() {
                     let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
                    let matrix_of_factor_instances =     MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
                     &mut instances_per_factor_source,
@@ -888,7 +890,12 @@ impl SargonOS {
                    )?;
 
                    // FIXME - TODO: this is wrong! should get from FIP!
-                   let authentication_signing_instance =    HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(entity_address.network_id(),   CAP26KeyKind::AuthenticationSigning, entity_kind, Hardened::Securified(SecurifiedU30::ZERO));
+                   let authentication_signing_instance =    HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+                        entity_address.network_id(),
+                        CAP26KeyKind::AuthenticationSigning,
+                        entity_kind,
+                        Hardened::Securified(SecurifiedU30::try_from(i as u32).unwrap())
+                    );
 
                     SecurityStructureOfFactorInstances::new(
                         security_structure_id,
