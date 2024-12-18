@@ -1,7 +1,6 @@
 use crate::prelude::*;
-use sargon::AuthenticationSigningInteractor as InternalAuthenticationSigningInteractor;
-use sargon::AuthenticationSigningRequest as InternalAuthenticationSigningInteractorRequest;
-use sargon::AuthenticationSigningResponse as InternalAuthenticationSigningResponse;
+use sargon::AuthIntent as InternalAuthIntent;
+use sargon::AuthIntentHash as InternalAuthIntentHash;
 use sargon::KeyDerivationInteractor as InternalKeyDerivationInteractor;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
@@ -20,6 +19,9 @@ type InternalSignWithFactorsOutcomeForTransactionIntent =
 type InternalSignRequestForSubintent = sargon::SignRequest<InternalSubintent>;
 type InternalSignWithFactorsOutcomeForSubintent =
     sargon::SignWithFactorsOutcome<InternalSubintentHash>;
+type InternalSignRequestForAuthIntent = sargon::SignRequest<InternalAuthIntent>;
+type InternalSignWithFactorsOutcomeForAuthIntent =
+    sargon::SignWithFactorsOutcome<InternalAuthIntentHash>;
 
 /// Sargon os
 #[uniffi::export(with_foreign)]
@@ -42,8 +44,8 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
 
     async fn sign_auth(
         &self,
-        request: AuthenticationSigningRequest,
-    ) -> Result<AuthenticationSigningResponse>;
+        request: SignRequestOfAuthIntent,
+    ) -> Result<SignWithFactorsOutcomeOfAuthIntentHash>;
 }
 
 #[derive(Debug)]
@@ -104,13 +106,13 @@ impl InternalKeyDerivationInteractor for UseFactorSourcesInteractorAdapter {
 }
 
 #[async_trait::async_trait]
-impl InternalAuthenticationSigningInteractor
+impl InternalSignInteractor<InternalAuthIntent>
     for UseFactorSourcesInteractorAdapter
 {
     async fn sign(
         &self,
-        request: InternalAuthenticationSigningInteractorRequest,
-    ) -> InternalResult<InternalAuthenticationSigningResponse> {
+        request: InternalSignRequestForAuthIntent,
+    ) -> InternalResult<InternalSignWithFactorsOutcomeForAuthIntent> {
         self.wrapped
             .sign_auth(request.into())
             .await

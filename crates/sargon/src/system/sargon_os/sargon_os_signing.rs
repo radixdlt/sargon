@@ -7,21 +7,14 @@ use std::ops::Index;
 impl SargonOS {
     pub async fn sign_auth(
         &self,
-        address_of_entity: AddressOfAccountOrPersona,
-        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
-        metadata: DappToWalletInteractionMetadata,
-    ) -> Result<WalletToDappInteractionAuthProof> {
-        let profile = &self.profile_state_holder.profile()?;
-
-        let auth_signer = AuthenticationSigner::new(
-            self.auth_signing_interactor(),
-            profile,
-            address_of_entity,
-            challenge_nonce,
-            metadata,
-        )?;
-
-        auth_signer.sign().await
+        auth_intent: AuthIntent,
+    ) -> Result<SignedAuthIntent> {
+        self.sign(
+            auth_intent.clone(),
+            self.sign_auth_interactor(),
+            SigningPurpose::ROLA,
+        )
+        .await
     }
 
     pub async fn sign_transaction(
@@ -96,7 +89,6 @@ mod test {
     async fn test_sign_auth_success() {
         let profile = Profile::sample();
         let sut = boot_with_profile(&profile, None).await;
-
         let all_accounts = profile.accounts_on_current_network().unwrap();
         let account = all_accounts.first().unwrap();
         let nonce = DappToWalletInteractionAuthChallengeNonce::sample();
@@ -106,27 +98,20 @@ mod test {
             "https://example.com",
             DappDefinitionAddress::sample(),
         );
+        let auth_intent = AuthIntent::new_from_request(
+            nonce,
+            metadata,
+            vec![AddressOfAccountOrPersona::Account(account.address)],
+        )
+        .unwrap();
 
-        let expected_challenge =
-            RolaChallenge::from_request(nonce.clone(), metadata.clone())
-                .unwrap();
+        let signed = sut.sign_auth(auth_intent.clone()).await.unwrap();
 
-        let signed = sut
-            .sign_auth(
-                AddressOfAccountOrPersona::Account(account.address),
-                nonce,
-                metadata,
-            )
-            .await
-            .unwrap();
-
-        let signature_with_public_key = SignatureWithPublicKey::from((
-            *signed.public_key.as_ed25519().unwrap(),
-            *signed.signature.as_ed25519().unwrap(),
-        ));
+        let signature_with_public_key =
+            signed.intent_signatures.signatures.first().unwrap().0;
 
         assert!(signature_with_public_key
-            .is_valid_for_hash(&expected_challenge.hash()))
+            .is_valid_for_hash(&auth_intent.auth_intent_hash().hash()))
     }
 
     #[actix_rt::test]
@@ -147,13 +132,14 @@ mod test {
             DappDefinitionAddress::sample(),
         );
 
-        let result = sut
-            .sign_auth(
-                AddressOfAccountOrPersona::Account(account.address),
-                nonce,
-                metadata,
-            )
-            .await;
+        let auth_intent = AuthIntent::new_from_request(
+            nonce,
+            metadata,
+            vec![AddressOfAccountOrPersona::Account(account.address)],
+        )
+        .unwrap();
+
+        let result = sut.sign_auth(auth_intent).await;
 
         assert_eq!(result, Err(CommonError::SigningRejected))
     }
@@ -348,7 +334,9 @@ mod test {
                     false,
                     Arc::new(clients.secure_storage.clone()),
                 )),
-                get_test_auth_interactor(&maybe_signing_failure),
+                Arc::new(TestSignInteractor::<AuthIntent>::new(
+                    get_simulated_user::<AuthIntent>(&maybe_signing_failure),
+                )),
             ));
         let interactors = Interactors::new(use_factor_sources_interactors);
         SUT::boot_with_clients_and_interactor(clients, interactors).await
@@ -369,15 +357,6 @@ mod test {
                 }
                 SigningFailure::UserRejected => SimulatedUser::<S>::rejecting(),
             },
-        }
-    }
-
-    fn get_test_auth_interactor(
-        maybe_signing_failure: &Option<SigningFailure>,
-    ) -> Arc<dyn AuthenticationSigningInteractor> {
-        match maybe_signing_failure {
-            None => Arc::new(TestAuthenticationInteractor::new_succeeding()),
-            Some(_) => Arc::new(TestAuthenticationInteractor::new_failing()),
         }
     }
 

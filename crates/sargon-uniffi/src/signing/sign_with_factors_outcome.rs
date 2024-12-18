@@ -37,3 +37,4 @@ macro_rules! decl_sign_with_factors_outcome {
 
 decl_sign_with_factors_outcome!(TransactionIntentHash);
 decl_sign_with_factors_outcome!(SubintentHash);
+decl_sign_with_factors_outcome!(AuthIntentHash);

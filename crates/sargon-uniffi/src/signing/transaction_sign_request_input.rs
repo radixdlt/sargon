@@ -38,6 +38,19 @@ macro_rules! decl_transaction_sign_request_input {
             );
         }
     };
+    (signable_and_payload: $signable:ty) => {
+        paste! {
+            use sargon::[< $signable >] as [< Internal $signable >];
+
+            type [< InternalTransactionSignRequestInputOf $signable >] =
+                sargon::TransactionSignRequestInput<[< Internal $signable >]>;
+
+            decl_transaction_sign_request_input!(
+                struct_name: [< TransactionSignRequestInputOf $signable >],
+                payload: [< $signable >],
+            );
+        }
+    };
 }
 
 decl_transaction_sign_request_input!(
@@ -47,4 +60,7 @@ decl_transaction_sign_request_input!(
 decl_transaction_sign_request_input!(
     signable: Subintent,
     payload: CompiledSubintent
+);
+decl_transaction_sign_request_input!(
+    signable_and_payload: AuthIntent
 );

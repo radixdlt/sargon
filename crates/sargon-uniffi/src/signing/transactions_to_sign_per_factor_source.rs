@@ -65,3 +65,7 @@ decl_transaction_to_sign_per_factor_source!(
     signable: Subintent,
     signable_id: SubintentHash
 );
+decl_transaction_to_sign_per_factor_source!(
+    signable: AuthIntent,
+    signable_id: AuthIntentHash
+);
