@@ -7,4 +7,10 @@ pub enum FactorSourceIntegrity {
     Device(DeviceFactorSourceIntegrity),
 
     Ledger(LedgerHardwareWalletFactorSource),
+
+    OffDeviceMnemonic(OffDeviceMnemonicFactorSource),
+
+    ArculusCard(ArculusCardFactorSource),
+
+    Password(PasswordFactorSource),
 }
