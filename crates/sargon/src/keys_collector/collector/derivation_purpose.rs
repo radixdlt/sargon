@@ -88,21 +88,34 @@ mod tests {
     }
 
     #[test]
-    fn test_for_securifying_account() {
-        // assert_eq!(
-        //     SUT::for_securifying_or_updating(CAP26EntityKind::Account),
-        //     SUT::SecurifyingAccount
-        // )
-        todo!()
+    fn test_for_securifying_account_only() {
+        assert_eq!(
+            SUT::for_securifying_or_updating(&IndexSet::from_iter([
+                AccountAddress::sample().into()
+            ])),
+            SUT::SecurifyingAccount
+        )
     }
 
     #[test]
-    fn test_for_securifying_persona() {
-        // assert_eq!(
-        //     SUT::for_securifying_or_updating(CAP26EntityKind::Identity),
-        //     SUT::SecurifyingPersona
-        // )
-        todo!()
+    fn test_for_securifying_persona_only() {
+        assert_eq!(
+            SUT::for_securifying_or_updating(&IndexSet::from_iter([
+                IdentityAddress::sample().into()
+            ])),
+            SUT::SecurifyingPersona
+        )
+    }
+
+    #[test]
+    fn test_for_securifying_account_and_persona() {
+        assert_eq!(
+            SUT::for_securifying_or_updating(&IndexSet::from_iter([
+                AccountAddress::sample().into(),
+                IdentityAddress::sample().into()
+            ])),
+            SUT::SecurifyingAccountsAndPersonas
+        )
     }
 
     #[test]

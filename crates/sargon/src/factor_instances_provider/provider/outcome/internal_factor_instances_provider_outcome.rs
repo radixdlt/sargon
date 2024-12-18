@@ -37,7 +37,6 @@ impl InternalFactorInstancesProviderOutcome {
         self.get_for_derivation_preset(preset)
             .and_then(|x| x.per_factor.get(&factor_source_id))
     }
-
 }
 
 #[derive(Clone, Debug)]

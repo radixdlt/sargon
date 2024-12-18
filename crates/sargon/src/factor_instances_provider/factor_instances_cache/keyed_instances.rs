@@ -41,7 +41,9 @@ impl<K: Eq + std::fmt::Debug + std::hash::Hash + Clone> KeyedInstances<K> {
     }
 }
 
-impl<K: Eq + std::fmt::Debug + std::hash::Hash + Clone> IntoIterator for KeyedInstances<K> {
+impl<K: Eq + std::fmt::Debug + std::hash::Hash + Clone> IntoIterator
+    for KeyedInstances<K>
+{
     type Item = <IndexMap<K, FactorInstances> as IntoIterator>::Item;
     type IntoIter = <IndexMap<K, FactorInstances> as IntoIterator>::IntoIter;
 

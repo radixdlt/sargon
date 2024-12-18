@@ -171,19 +171,24 @@ impl FactorInstancesProvider {
         InstancesInCacheConsumer,
         InternalFactorInstancesProviderOutcome,
     )> {
-
         let remaining_quantities_to_derive =
             not_satisfied.remaining_quantities_to_derive();
 
-            assert!(!remaining_quantities_to_derive.is_empty(), "❌ No instances to derive?");
-       
+        assert!(
+            !remaining_quantities_to_derive.is_empty(),
+            "❌ No instances to derive?"
+        );
+
         println!("🌮 FIP - derive_more_and_cache - deriving more, specifically: {:?}", remaining_quantities_to_derive);
 
         let pdp_pf_newly_derived = self
             .derive_more(remaining_quantities_to_derive, derivation_purpose)
             .await?;
 
-        assert!(!pdp_pf_newly_derived.is_empty(), "❌ Failed to derive instances?");
+        assert!(
+            !pdp_pf_newly_derived.is_empty(),
+            "❌ Failed to derive instances?"
+        );
 
         for (k, v) in pdp_pf_newly_derived.iter() {
             for (x, y) in v.iter() {
@@ -230,12 +235,12 @@ impl FactorInstancesProvider {
         pdp_pf_found_in_cache_leq_requested: &InstancesPerDerivationPresetPerFactorSource,
         pdp_pf_newly_derived: &InstancesPerDerivationPresetPerFactorSource,
     ) -> Split {
-
-        let derivation_presets_of_instances_to_merge = pdp_pf_found_in_cache_leq_requested
-            .keys()
-            .chain(pdp_pf_newly_derived.keys())
-            .cloned()
-            .collect::<IndexSet<DerivationPreset>>();
+        let derivation_presets_of_instances_to_merge =
+            pdp_pf_found_in_cache_leq_requested
+                .keys()
+                .chain(pdp_pf_newly_derived.keys())
+                .cloned()
+                .collect::<IndexSet<DerivationPreset>>();
 
         // Start by merging the instances found in cache and the newly derived instances,
         // into a single collection of instances per factor source, with the
@@ -250,7 +255,6 @@ impl FactorInstancesProvider {
                         .cloned()
                         // can be nil -> empty, if no instance was found in cache for this preset!
                         .unwrap_or_default();
-                    
                 let pf_newly_derived = pdp_pf_newly_derived
                     .get(preset)
                     .cloned()
@@ -269,13 +273,10 @@ impl FactorInstancesProvider {
                     .into_iter()
                     .map(|f| f.id_from_hash())
                     .filter_map(|factor_source_id| {
-                        
-                   
-                       let from_cache = pf_found_in_cache_leq_requested
+                        let from_cache = pf_found_in_cache_leq_requested
                             .get(&factor_source_id)
                             .cloned()
                             .unwrap_or_default();
-                        
                         let newly_derived = pf_newly_derived
                             .get(&factor_source_id)
                             .cloned()
@@ -286,24 +287,16 @@ impl FactorInstancesProvider {
                         }
 
                         let mut merged = IndexSet::new();
-                       
-
-                        println!("🌮 FIP - split (preset: {:?}, factor: {:?}) - `from_cache`: #{:?}", preset, factor_source_id, from_cache.len());
-                        println!("🌮 FIP - split (preset: {:?}, factor: {:?}) - `newly_derived`: #{:?}", preset, factor_source_id, newly_derived.len());
-                        println!("🌮 FIP - split (preset: {:?}, factor: {:?}) - `merged`: #{:?}", preset, factor_source_id, merged.len());
-                        
                         // IMPORTANT: Must put instances from cache **first**...
                         merged.extend(from_cache);
-                        
                         // ... and THEN the newly derived, so we consume the ones with
                         // lower index from cache first.
                         merged.extend(newly_derived);
-
                         assert!(
                             merged
                             .clone()
                             .into_iter()
-                            .all(|f| 
+                            .all(|f|
                                 DerivationPreset::try_from(f.derivation_path().agnostic()).unwrap() == *preset
                             )
                         );
@@ -324,102 +317,94 @@ impl FactorInstancesProvider {
         let mut pdp_pf_to_cache =
             InstancesPerDerivationPresetPerFactorSource::new();
 
-   
-        let originally_requested_presets = requested_quantified_derivation_presets
-            .iter()
-            .map(|qdp| qdp.derivation_preset)
-            .collect::<IndexSet<DerivationPreset>>();
+        let originally_requested_presets =
+            requested_quantified_derivation_presets
+                .iter()
+                .map(|qdp| qdp.derivation_preset)
+                .collect::<IndexSet<DerivationPreset>>();
 
         // Using the merged map, split the instances into those to use directly and those to cache.
         for (preset, pf_derived_appended_to_from_cache) in
             pdp_pf_derived_appended_to_from_cache
         {
             let mut pf_to_cache =
-            IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
+                IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
 
             let mut pf_to_use_directly = IndexMap::new();
-
 
             for (factor, instances) in
                 pf_derived_appended_to_from_cache.clone().into_iter()
             {
-                assert!(
-                    instances.factor_instances()
-                    .into_iter()
-                    .all(|f| 
-                        DerivationPreset::try_from(f.derivation_path().agnostic()).unwrap() == preset
-                    )
-                );
+                assert!(instances.factor_instances().into_iter().all(|f| {
+                    DerivationPreset::try_from(f.derivation_path().agnostic())
+                        .unwrap()
+                        == preset
+                }));
 
-                assert!(
-                    instances.factor_instances()
+                assert!(instances
+                    .factor_instances()
                     .into_iter()
-                    .all(|f| 
-                      f.factor_source_id() == factor
-                    )
-                );
+                    .all(|f| f.factor_source_id() == factor));
 
                 println!(
                     "🌮 FIP - split (preset: {:?}, factor: {:?}) - instances: #{:?}",
                     preset, factor,
                     instances.len()
                 );
-           
 
                 if originally_requested_presets.contains(&preset) {
                     // might have to split
-           
 
-                 
-    
                     let requested_quantified_derivation_preset =
-                        requested_quantified_derivation_presets.get_id(&preset).unwrap();
+                        requested_quantified_derivation_presets
+                            .get_id(&preset)
+                            .unwrap();
 
-                        println!("🌮 FIP - split - requested_quantified_derivation_preset: {:?}", requested_quantified_derivation_preset);
-    
-                        let instances_relevant_to_use_directly_with_abundance = instances;
-    
-                        println!("🌮 FIP - split - #instances_relevant_to_use_directly_with_abundance: {:?}", instances_relevant_to_use_directly_with_abundance.len());
-    
-                        let originally_requested_quantity =
-                            requested_quantified_derivation_preset.quantity;
-    
-                        println!(
-                            "🌮 FIP - split - originally_requested_quantity: {:?}",
-                            originally_requested_quantity
-                        );
+                    println!("🌮 FIP - split - requested_quantified_derivation_preset: {:?}", requested_quantified_derivation_preset);
 
-                        if originally_requested_quantity > instances_relevant_to_use_directly_with_abundance.len() {
-                            println!("🌮 FIP - split ❌❌ not enough instances to use directly! (preset: {:?}, factor: {:?}) ❌❌", preset, factor);
-                        }
-    
-                        let (to_use_directly, to_cache) =
-                            instances_relevant_to_use_directly_with_abundance
-                                .split_at(originally_requested_quantity);
-    
-                        println!(
-                            "🌮 FIP - split - to_use_directly: #{:?}",
-                            to_use_directly.len()
-                        );
-    
-                        println!(
-                            "🌮 FIP - split - to_cache: #{:?}",
-                            to_cache.len()
-                        );
-    
-                        pf_to_use_directly
-                            .insert(factor, to_use_directly);
+                    let instances_relevant_to_use_directly_with_abundance =
+                        instances;
 
-                        pf_to_cache.insert(factor, to_cache);
+                    println!("🌮 FIP - split - #instances_relevant_to_use_directly_with_abundance: {:?}", instances_relevant_to_use_directly_with_abundance.len());
 
+                    let originally_requested_quantity =
+                        requested_quantified_derivation_preset.quantity;
 
+                    println!(
+                        "🌮 FIP - split - originally_requested_quantity: {:?}",
+                        originally_requested_quantity
+                    );
+
+                    if originally_requested_quantity
+                        > instances_relevant_to_use_directly_with_abundance
+                            .len()
+                    {
+                        println!("🌮 FIP - split ❌❌ not enough instances to use directly! (preset: {:?}, factor: {:?}) ❌❌", preset, factor);
+                    }
+
+                    let (to_use_directly, to_cache) =
+                        instances_relevant_to_use_directly_with_abundance
+                            .split_at(originally_requested_quantity);
+
+                    println!(
+                        "🌮 FIP - split - to_use_directly: #{:?}",
+                        to_use_directly.len()
+                    );
+
+                    println!(
+                        "🌮 FIP - split - to_cache: #{:?}",
+                        to_cache.len()
+                    );
+
+                    pf_to_use_directly.insert(factor, to_use_directly);
+
+                    pf_to_cache.insert(factor, to_cache);
                 } else {
                     // easy case, we don't want to use this directly at all
                     // meaning all
                     pf_to_cache.insert(factor, instances);
                     // we do not add any FactorInstances to `pf_to_use_directly` for this factor
                 }
-                
             }
 
             pdp_pf_to_use_directly.insert(preset, pf_to_use_directly);
@@ -472,7 +457,7 @@ impl FactorInstancesProvider {
                             })
                             .collect::<Result<IndexSet<DerivationPath>>>()?;
 
-                            assert!(!paths.is_empty());
+                        assert!(!paths.is_empty());
 
                         Ok((factor_source_id, paths))
                     })
@@ -503,11 +488,18 @@ impl FactorInstancesProvider {
         }
 
         for (k, v) in per_factor_paths.iter() {
-            let contains_rola_path = v.iter().any(|p| p.agnostic().key_kind == CAP26KeyKind::AuthenticationSigning);
+            let contains_rola_path = v.iter().any(|p| {
+                p.agnostic().key_kind == CAP26KeyKind::AuthenticationSigning
+            });
             println!("🌮 FIP - derive_more - 🛣️ per_factor_paths - (factor: {:?}) - contains_rola_path? {:?}, paths: \n\n{:?}\n\n", k, contains_rola_path, v);
         }
-        println!("🛡️ #factor_sources ids: {:?}", factor_sources.iter().map(|f| f.factor_source_id()).collect_vec());
-
+        println!(
+            "🛡️ #factor_sources ids: {:?}",
+            factor_sources
+                .iter()
+                .map(|f| f.factor_source_id())
+                .collect_vec()
+        );
 
         let interactor = self.interactor.clone();
 
@@ -520,11 +512,10 @@ impl FactorInstancesProvider {
 
         let pf_derived = collector.collect_keys().await.factors_by_source;
 
-
         for (k, v) in pf_derived.iter() {
             let requested = per_factor_paths.get(k).unwrap();
             if v.len() < requested.len() {
-                return Err(CommonError::TooFewFactorInstancesDerived)
+                return Err(CommonError::TooFewFactorInstancesDerived);
             }
             println!("🌮 FIP - derive_more - 🔮🦄🍬 derived - (factor: {:?}) - v.len(): #{:?}", k, v.len());
         }
@@ -565,9 +556,15 @@ impl FactorInstancesProvider {
         >::new();
 
         for (factor_source_id, pdp) in pf_pdp_derived {
-            assert!(!pdp.is_empty(), "🙅🏻‍♀️ no instances for factor: {factor_source_id}");
+            assert!(
+                !pdp.is_empty(),
+                "🙅🏻‍♀️ no instances for factor: {factor_source_id}"
+            );
             for (preset, instances) in pdp {
-                assert!(!instances.is_empty(), "🙅🏻‍♀️ no instances for preset: {preset:?}");
+                assert!(
+                    !instances.is_empty(),
+                    "🙅🏻‍♀️ no instances for preset: {preset:?}"
+                );
                 pdp_pf_instances.append_or_insert_to(
                     preset,
                     IndexMap::<FactorSourceIDFromHash, FactorInstances>::kv(

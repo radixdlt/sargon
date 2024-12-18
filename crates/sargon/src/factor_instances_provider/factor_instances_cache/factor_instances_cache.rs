@@ -285,8 +285,7 @@ impl FactorInstancesCache {
                     if is_quantity_satisfied {
                         // The instances in the cache can satisfy the requested quantity
                         // for this factor source for this derivation preset
-                        let v =
-                            CacheInstancesAndRemainingQuantityToDerive {
+                        let v = CacheInstancesAndRemainingQuantityToDerive {
                             // Only take the first `target_quantity` instances
                             // to be used, the rest are not needed and should
                             // remain in the cache (later we will call delete on
@@ -295,11 +294,10 @@ impl FactorInstancesCache {
                                 .split_at(target_quantity)
                                 .0,
                             quantity_to_derive: 0,
-                            };
+                        };
 
-                   
                         assert!(!v.instances_to_use_from_cache.is_empty());
-                                                Some(v)
+                        Some(v)
                     } else {
                         // Since we are deriving more we might as well ensure that the
                         // cache is filled with `CACHE_FILLING_QUANTITY` **AFTER** the
@@ -309,11 +307,14 @@ impl FactorInstancesCache {
                         let quantity_to_derive = cache_filling_quantity
                             - count_in_cache
                             + target_quantity;
-let v = CacheInstancesAndRemainingQuantityToDerive {
-    instances_to_use_from_cache: for_preset.clone(),
-    quantity_to_derive,
-};
-assert!(v.quantity_to_derive > 0 || !v.instances_to_use_from_cache.is_empty());
+                        let v = CacheInstancesAndRemainingQuantityToDerive {
+                            instances_to_use_from_cache: for_preset.clone(),
+                            quantity_to_derive,
+                        };
+                        assert!(
+                            v.quantity_to_derive > 0
+                                || !v.instances_to_use_from_cache.is_empty()
+                        );
                         Some(v)
                     }
                 } else if count_in_cache < cache_filling_quantity {
@@ -323,7 +324,7 @@ assert!(v.quantity_to_derive > 0 || !v.instances_to_use_from_cache.is_empty());
                     let quantity_to_derive =
                         cache_filling_quantity - count_in_cache;
 
-                        assert!(quantity_to_derive > 0);
+                    assert!(quantity_to_derive > 0);
 
                     Some(CacheInstancesAndRemainingQuantityToDerive {
                         instances_to_use_from_cache: FactorInstances::default(),
@@ -346,12 +347,12 @@ assert!(v.quantity_to_derive > 0 || !v.instances_to_use_from_cache.is_empty());
             .iter()
             .map(|x| x.derivation_preset)
             .collect::<IndexSet<_>>();
-   
+
         // The instances in the cache cannot satisfy the requested quantity
         // we must derive more!
         let is_quantity_unsatisfied_for_any_requested =
             per_derivation_preset.iter().any(|(preset, pf)| {
-                originally_request_presets.contains(preset) /* Only lack of instances for originally requested presets is something which should cause the outcome of this reading from cache to be considered as `NotSatisfied` */ 
+                originally_request_presets.contains(preset) /* Only lack of instances for originally requested presets is something which should cause the outcome of this reading from cache to be considered as `NotSatisfied` */
                     && pf.iter().any(|(_, ci)| ci.quantity_to_derive > 0)
             });
 
@@ -367,7 +368,9 @@ assert!(v.quantity_to_derive > 0 || !v.instances_to_use_from_cache.is_empty());
                     .into_iter()
                     // Satisfied, but `per_derivation_preset` contains ALL Presets (in case of `NotSatisfied` - we are cache filling),
                     // so we filter out only the originally requested ones.
-                    .filter(|(preset, _)| originally_request_presets.contains(preset))
+                    .filter(|(preset, _)| {
+                        originally_request_presets.contains(preset)
+                    })
                     .map(|(preset, v)| {
                         (
                             preset,
@@ -424,14 +427,15 @@ pub struct CacheNotSatisfied {
     >,
 }
 impl CacheNotSatisfied {
-
     fn map<R>(
         &self,
-        extract: impl Fn((FactorSourceIDFromHash, CacheInstancesAndRemainingQuantityToDerive)) -> Option<(FactorSourceIDFromHash, R)>
-    ) -> IndexMap<
-    DerivationPreset,
-    IndexMap<FactorSourceIDFromHash, R>,
-> {
+        extract: impl Fn(
+            (
+                FactorSourceIDFromHash,
+                CacheInstancesAndRemainingQuantityToDerive,
+            ),
+        ) -> Option<(FactorSourceIDFromHash, R)>,
+    ) -> IndexMap<DerivationPreset, IndexMap<FactorSourceIDFromHash, R>> {
         self.cached_and_quantities_to_derive
             .clone()
             .into_iter()
@@ -455,18 +459,17 @@ impl CacheNotSatisfied {
         >>()
     }
 
-
     pub fn cached_instances_to_use(
         &self,
     ) -> InstancesPerDerivationPresetPerFactorSource {
-      self.map(|(x, y)| {
-        let instances = y.instances_to_use_from_cache; 
-        if instances.is_empty() { 
-            None 
-        } else {
-            Some((x, instances))
-        }
-    })
+        self.map(|(x, y)| {
+            let instances = y.instances_to_use_from_cache;
+            if instances.is_empty() {
+                None
+            } else {
+                Some((x, instances))
+            }
+        })
     }
 
     pub fn remaining_quantities_to_derive(&self) -> QuantitiesToDerive {
@@ -958,28 +961,30 @@ mod tests {
     #[test]
     #[should_panic]
     fn delete_panics_for_unknown() {
-        // let sut = SUT::default();
-        // let instances = FactorInstances::sample();
-        // assert_eq!(instances.len(), 2);
-        // let factor_source_ids = instances
-        //     .clone()
-        //     .into_iter()
-        //     .map(|fi| fi.factor_source_id())
-        //     .collect::<IndexSet<_>>();
-        // assert_eq!(factor_source_ids.len(), 1);
-        // let fsid = factor_source_ids.into_iter().next().unwrap();
-        // sut.insert_for_factor(
-        //     &fsid,
-        //     &instances
-        //         .clone()
-        //         .into_iter()
-        //         .take(1)
-        //         .collect::<FactorInstances>(),
-        // )
-        // .unwrap();
+        let sut = SUT::default();
+        let instances = FactorInstances::sample();
+        assert_eq!(instances.len(), 2);
+        let factor_source_ids = instances
+            .clone()
+            .into_iter()
+            .map(|fi| fi.factor_source_id())
+            .collect::<IndexSet<_>>();
+        assert_eq!(factor_source_ids.len(), 1);
+        let fsid = factor_source_ids.into_iter().next().unwrap();
+        sut.insert_for_factor(
+            &fsid,
+            &instances
+                .clone()
+                .into_iter()
+                .take(1)
+                .collect::<FactorInstances>(),
+        )
+        .unwrap();
 
-        // sut.delete(&IndexMap::kv(fsid, instances));
-        todo!()
+        sut.delete(&IndexMap::kv(
+            DerivationPreset::AccountMfa,
+            IndexMap::kv(fsid, instances),
+        ));
     }
 
     #[test]

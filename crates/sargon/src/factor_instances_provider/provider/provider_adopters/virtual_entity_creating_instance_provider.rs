@@ -184,18 +184,24 @@ mod tests {
                     == preset.cache_filling_quantity())
         ));
 
-        assert!(outcome.per_derivation_preset.clone().into_iter().all(
-            |(preset, x)| {
-                x.per_factor.values().all(|y| {
-                    y.debug_was_derived.len()
-                        == preset.cache_filling_quantity() + 1
-                } /* One account created */)
+        for (k, v) in outcome.per_derivation_preset.iter() {
+            for (_, y) in v.per_factor.iter() {
+                let derivation_based_offset =
+                    if *k == DerivationPreset::IdentityVeci {
+                        1 /* One account created */
+                    } else {
+                        0
+                    };
+                assert_eq!(
+                    y.debug_was_derived.len(),
+                    k.cache_filling_quantity() + derivation_based_offset
+                )
             }
-        ));
+        }
 
         let instances_used_directly = outcome
             .per_derivation_preset
-            .get(&DerivationPreset::AccountVeci)
+            .get(&DerivationPreset::IdentityVeci)
             .unwrap()
             .per_factor
             .get(&bdfs.id_from_hash())

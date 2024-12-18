@@ -177,8 +177,6 @@ impl FactorInstancesCacheClient {
         .await
     }
 
-    
-
     /// Reads out the instance of `factor_source_id` without mutating the cache.
     pub async fn peek_all_instances_of_factor_source(
         &self,
@@ -200,7 +198,6 @@ impl FactorInstancesCacheClient {
 
 #[cfg(test)]
 impl FactorInstancesCacheClient {
-
     /// Returns enough instances to satisfy the requested quantity for each factor source,
     /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
     /// must derive more, this function returns the quantities to derive for each factor source,
@@ -214,7 +211,11 @@ impl FactorInstancesCacheClient {
         network_id: NetworkID,
     ) -> Result<CachedInstancesWithQuantitiesOutcome> {
         self.access_cache_init_if_needed(|cache| {
-            cache.get_poly_factor_with_quantities(factor_source_ids.borrow(), originally_requested_quantified_derivation_preset.borrow(), network_id)
+            cache.get_poly_factor_with_quantities(
+                factor_source_ids.borrow(),
+                originally_requested_quantified_derivation_preset.borrow(),
+                network_id,
+            )
         })
         .await
     }
@@ -369,26 +370,28 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_insert_all() {
-        // let file_system = Arc::new(FileSystemClient::in_memory());
-        // let sut = SUT::new(file_system);
+        let file_system = Arc::new(FileSystemClient::in_memory());
+        let sut = SUT::new(file_system);
 
-        // let fs = FactorSourceIDFromHash::sample_at(0);
-        // sut.insert_all(IndexMap::kv(fs, FactorInstances::sample()))
-        //     .await
-        //     .unwrap();
+        let fs = FactorSourceIDFromHash::sample_at(0);
+        sut.insert(&IndexMap::kv(
+            DerivationPreset::AccountMfa,
+            IndexMap::kv(fs, FactorInstances::sample()),
+        ))
+        .await
+        .unwrap();
 
-        // let max = sut
-        //     .max_index_for(
-        //         fs,
-        //         DerivationPreset::AccountMfa
-        //             .index_agnostic_path_on_network(NetworkID::Mainnet),
-        //     )
-        //     .await
-        //     .unwrap();
-        // assert_eq!(
-        //     max.unwrap(),
-        //     HDPathComponent::Securified(SecurifiedU30::ONE)
-        // );
-        todo!("migrate me")
+        let max = sut
+            .max_index_for(
+                fs,
+                DerivationPreset::AccountMfa
+                    .index_agnostic_path_on_network(NetworkID::Mainnet),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            max.unwrap(),
+            HDPathComponent::Securified(SecurifiedU30::ONE)
+        );
     }
 }
