@@ -924,16 +924,17 @@ mod tests {
             wallet_aid: BagOfBytes,
         ) -> &mut Self {
             let request = BagOfBytes::sample();
+            let nfc_card_response = BagOfBytes::sample_other();
             self.csdk_driver
                 .expect_select_wallet_request()
                 .with(eq(self.wallet_pointer.clone()), eq(wallet_aid))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(request.clone()));
-            self.nfc_send_receive(request.clone());
+            self.nfc_send_receive(request, nfc_card_response.clone());
             self.csdk_driver
                 .expect_select_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(0));
@@ -1150,16 +1151,19 @@ mod tests {
             &mut self,
             seed_words_count: i64,
         ) -> &mut Self {
+            let request = BagOfBytes::sample();
+            let nfc_card_reponse = BagOfBytes::sample_other();
+
             self.csdk_driver
                 .expect_init_recover_wallet_request()
                 .with(eq(self.wallet_pointer.clone()), eq(seed_words_count))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive(request, nfc_card_reponse.clone());
             self.csdk_driver
                 .expect_init_recover_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_reponse))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(0));
@@ -1171,16 +1175,18 @@ mod tests {
             &mut self,
             seed: BagOfBytes
         ) -> &mut Self {
+            let request = BagOfBytes::sample();
+            let nfc_card_reponse = BagOfBytes::sample_other();
             self.csdk_driver
                 .expect_finish_recover_wallet_request()
                 .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive(request, nfc_card_reponse.clone());
             self.csdk_driver
                 .expect_finish_recover_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_reponse))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(0));
@@ -1202,13 +1208,13 @@ mod tests {
             self
         }
 
-        fn nfc_send_receive(&mut self, request: BagOfBytes) {
+        fn nfc_send_receive(&mut self, request: BagOfBytes, response: BagOfBytes) {
             self.nfc_tag_driver
             .expect_send_receive()
             .with(eq(request))
             .once()
             .in_sequence(&mut self.sequence)
-            .return_const(Ok(BagOfBytes::sample()));
+            .return_const(Ok(response));
         }
     }
     
