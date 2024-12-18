@@ -260,7 +260,6 @@ impl FactorInstancesProvider {
                 if pf_found_in_cache_leq_requested.is_empty()
                     && pf_newly_derived.is_empty()
                 {
-                    panic!("is this possible? apparently! remove this panic and rely on the filter_map...");
                     return None;
                 }
 

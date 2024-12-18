@@ -38,16 +38,6 @@ impl InternalFactorInstancesProviderOutcome {
             .and_then(|x| x.per_factor.get(&factor_source_id))
     }
 
-    #[cfg(test)]
-    pub(crate) fn get(
-        &self,
-        preset: DerivationPreset,
-        factor_source_id: FactorSourceIDFromHash,
-    ) -> InternalFactorInstancesProviderOutcomeForFactor {
-        self.get_for_derivation_preset_for_factor(preset, factor_source_id)
-            .cloned()
-            .expect("Expected to find factor source")
-    }
 }
 
 #[derive(Clone, Debug)]
