@@ -195,13 +195,18 @@ impl FactorInstancesCache {
         Ok(skipped_an_index_resulting_in_non_contiguity)
     }
 
-    /// Inserts all instance in `per_factor`.
-    pub fn insert_all(
+    pub fn insert(
         &self,
-        per_factor: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        per_derivation_preset_per_factor: impl Borrow<
+            InstancesPerDerivationPresetPerFactorSource,
+        >,
     ) -> Result<()> {
-        for (factor_source_id, instances) in per_factor {
-            _ = self.insert_for_factor(factor_source_id, instances)?;
+        let per_derivation_preset_per_factor =
+            per_derivation_preset_per_factor.borrow();
+        for (_, per_factor) in per_derivation_preset_per_factor {
+            for (factor_source_id, instances) in per_factor {
+                _ = self.insert_for_factor(factor_source_id, instances)?;
+            }
         }
         Ok(())
     }
@@ -689,9 +694,12 @@ mod tests {
     fn insert_all_factor_source_id_discrepancy_is_err() {
         let sut = SUT::default();
         assert!(sut
-            .insert_all(&IndexMap::kv(
-                FactorSourceIDFromHash::sample_password_other(),
-                FactorInstances::sample()
+            .insert(IndexMap::kv(
+                DerivationPreset::AccountMfa,
+                IndexMap::kv(
+                    FactorSourceIDFromHash::sample_password_other(),
+                    FactorInstances::sample()
+                )
             ))
             .is_err())
     }

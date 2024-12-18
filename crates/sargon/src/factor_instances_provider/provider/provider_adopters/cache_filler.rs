@@ -25,7 +25,7 @@ impl CacheFiller {
         factor_source: FactorSource,
         network_id: NetworkID, // typically mainnet
         interactor: Arc<dyn KeyDerivationInteractor>,
-    ) -> Result<FactorInstancesProviderOutcomeForFactor> {
+    ) -> Result<FactorInstancesProviderOutcome> {
         let provider = FactorInstancesProvider::new(
             network_id,
             IndexSet::just(factor_source.clone()),
@@ -45,10 +45,9 @@ impl CacheFiller {
             )
             .await?;
 
-        cache_client.insert_all(&derived).await?;
+        cache_client.insert(&derived).await?;
 
-        todo!("migrate me")
-
+        todo!()
         // let derived =
         //     derived.get(&factor_source.id_from_hash()).unwrap().clone();
         // let outcome = InternalFactorInstancesProviderOutcomeForFactor::new(

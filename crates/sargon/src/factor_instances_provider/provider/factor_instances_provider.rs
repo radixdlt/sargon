@@ -186,7 +186,7 @@ impl FactorInstancesProvider {
                 pdp_pf_found_in_cache_leq_requested.clone(),
             );
 
-        self.cache_client.insert_all(&pdp_pf_to_cache).await?;
+        self.cache_client.insert(&pdp_pf_to_cache).await?;
 
         let outcome = InternalFactorInstancesProviderOutcome::transpose(
             pdp_pf_to_cache,

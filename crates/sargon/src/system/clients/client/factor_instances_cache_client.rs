@@ -135,16 +135,16 @@ impl FactorInstancesCacheClient {
     }
 
     /// Inserts all instance in `per_factor`.
-    pub async fn insert_all(
+    pub async fn insert(
         &self,
-        // per_factor: impl Borrow<IndexMap<FactorSourceIDFromHash, FactorInstances>>,
-        per_derivation_preset_per_factor: &InstancesPerDerivationPresetPerFactorSource,
+        per_derivation_preset_per_factor: impl Borrow<
+            InstancesPerDerivationPresetPerFactorSource,
+        >,
     ) -> Result<()> {
-        // self.update_and_persist_cache(|cache| {
-        //     cache.insert_all(per_factor.borrow())
-        // })
-        // .await
-        todo!()
+        self.update_and_persist_cache(|cache| {
+            cache.insert(per_derivation_preset_per_factor.borrow())
+        })
+        .await
     }
 
     /// Returns the max derivation entity index for the given `factor_source_id` and `index_agnostic_path`.
