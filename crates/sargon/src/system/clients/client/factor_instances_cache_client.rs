@@ -327,39 +327,47 @@ mod tests {
         let five = HDPathComponent::from(five);
         assert_eq!(max_higher_sut1, Some(five));
 
-        // sut2.delete(IndexMap::from_iter([(
-        //     fsid,
-        //     FactorInstances::from_iter([fi5.clone()]),
-        // )]))
-        // .await
-        // .unwrap();
+        sut2.delete(IndexMap::kv(
+            DerivationPreset::AccountVeci,
+            IndexMap::from_iter([(
+                fsid,
+                FactorInstances::from_iter([fi5.clone()]),
+            )]),
+        ))
+        .await
+        .unwrap();
 
-        // let max_higher_sut1 = sut1.max_index_for(fsid, path).await.unwrap();
-        // assert_eq!(max_higher_sut1, Some(one));
+        let max_higher_sut1 = sut1.max_index_for(fsid, path).await.unwrap();
+        assert_eq!(max_higher_sut1, Some(one));
 
-        todo!("migrate me")
+        // test get_poly_factor_with_quantities
+        let poly = sut1
+            .get_poly_factor_with_quantities(
+                IndexSet::just(fsid),
+                QuantifiedDerivationPreset::new(derivation_preset, 2),
+                network,
+            )
+            .await
+            .unwrap();
 
-        // // test get_poly_factor_with_quantities
-        // let poly = sut1
-        //     .get_poly_factor_with_quantities(
-        //         IndexSet::just(fsid),
-        //         QuantifiedDerivationPreset::new(derivation_preset, 2),
-        //         network,
-        //     )
-        //     .await
-        //     .unwrap();
-        // let satisfied = IndexMap::kv(fsid, instances);
-        // assert_eq!(
-        //     poly,
-        //     CachedInstancesWithQuantitiesOutcome::Satisfied(satisfied)
-        // );
+        let satisfied = IndexMap::kv(fsid, instances);
 
-        // let snap_1 = sut1.snapshot().await.unwrap();
-        // let snap_2 = sut2.snapshot().await.unwrap();
-        // assert_eq!(
-        //     snap_1.serializable_snapshot(),
-        //     snap_2.serializable_snapshot(),
-        // );
+        pretty_assertions::assert_eq!(
+            poly.into_satisfied()
+                .unwrap()
+                .cached
+                .get(&DerivationPreset::AccountVeci)
+                .cloned()
+                .unwrap(),
+            satisfied
+        );
+
+        let snap_1 = sut1.snapshot().await.unwrap();
+        let snap_2 = sut2.snapshot().await.unwrap();
+        assert_eq!(
+            snap_1.serializable_snapshot(),
+            snap_2.serializable_snapshot(),
+        );
     }
 
     #[actix_rt::test]

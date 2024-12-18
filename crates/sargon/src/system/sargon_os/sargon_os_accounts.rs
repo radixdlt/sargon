@@ -916,10 +916,10 @@ impl SargonOS {
 
         distribute_instances_for_entity_of_kind_if_needed(
             CAP26EntityKind::Account,
-        );
+        )?;
         distribute_instances_for_entity_of_kind_if_needed(
             CAP26EntityKind::Identity,
-        );
+        )?;
 
         Ok((
             security_structures_of_factor_instances,

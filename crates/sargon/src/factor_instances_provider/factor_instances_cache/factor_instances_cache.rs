@@ -334,13 +334,20 @@ impl FactorInstancesCache {
             per_derivation_preset.insert(preset, per_factor_source);
         }
 
+        let originally_request_presets = quantified_derivation_presets
+            .iter()
+            .map(|x| x.derivation_preset)
+            .collect::<IndexSet<_>>();
+   
         // The instances in the cache cannot satisfy the requested quantity
         // we must derive more!
-        let is_quantity_unsatisfied_for_any = per_derivation_preset
-            .iter()
-            .any(|(_, pf)| pf.iter().any(|(_, ci)| ci.quantity_to_derive > 0));
+        let is_quantity_unsatisfied_for_any_requested =
+            per_derivation_preset.iter().any(|(preset, pf)| {
+                originally_request_presets.contains(preset) /* Only lack of instances for originally requested presets is something which should cause the outcome of this reading from cache to be considered as `NotSatisfied` */ 
+                    && pf.iter().any(|(_, ci)| ci.quantity_to_derive > 0)
+            });
 
-        let outcome = if is_quantity_unsatisfied_for_any {
+        let outcome = if is_quantity_unsatisfied_for_any_requested {
             CachedInstancesWithQuantitiesOutcome::NotSatisfied(
                 CacheNotSatisfied {
                     cached_and_quantities_to_derive: per_derivation_preset,
@@ -350,6 +357,9 @@ impl FactorInstancesCache {
             CachedInstancesWithQuantitiesOutcome::Satisfied(CacheSatisfied {
                 cached: per_derivation_preset
                     .into_iter()
+                    // Satisfied, but `per_derivation_preset` contains ALL Presets (in case of `NotSatisfied` - we are cache filling),
+                    // so we filter out only the originally requested ones.
+                    .filter(|(preset, _)| originally_request_presets.contains(preset))
                     .map(|(preset, v)| {
                         (
                             preset,
@@ -456,7 +466,7 @@ pub struct CacheSatisfied {
     >,
 }
 
-#[derive(Debug, PartialEq, Eq, enum_as_inner::EnumAsInner)]
+#[derive(Debug, Clone, PartialEq, Eq, enum_as_inner::EnumAsInner)]
 pub enum CachedInstancesWithQuantitiesOutcome {
     Satisfied(CacheSatisfied),
     NotSatisfied(CacheNotSatisfied),

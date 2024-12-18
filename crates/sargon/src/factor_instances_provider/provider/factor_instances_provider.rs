@@ -111,28 +111,34 @@ impl FactorInstancesProvider {
         InstancesInCacheConsumer,
         InternalFactorInstancesProviderOutcome,
     )> {
+
+        println!("🌮 FIP - _provide_for_presets: {:?}, purpose: {:?}", quantified_derivation_presets, derivation_purpose);
+        
         let factor_sources = self.factor_sources.clone();
         let network_id = self.network_id;
+        
+        println!("🌮 FIP - _provide_for_presets - calling `cache_client.get`");
         let cached = self
-            .cache_client
-            .get(
-                &factor_sources.iter().map(|f| f.id_from_hash()).collect(),
-                quantified_derivation_presets.clone(),
-                network_id,
-            )
-            .await?;
-
-        match cached {
-            CachedInstancesWithQuantitiesOutcome::Satisfied(
-                enough_instances,
-            ) => {
+        .cache_client
+        .get(
+            &factor_sources.iter().map(|f| f.id_from_hash()).collect(),
+            quantified_derivation_presets.clone(),
+            network_id,
+        )
+        .await?;
+    
+    match cached {
+        CachedInstancesWithQuantitiesOutcome::Satisfied(
+            enough_instances,
+        ) => {
+                println!("🌮 FIP - _provide_for_presets - cached outcome - ✅ SATISFIED ✅");
                 // When/if caller calls `instances_in_cache_consumer.consume()` the `enough_instances`
                 // will be deleted from the cache, they are still present in the cache now
                 // and will continue to be present until the `consume()` is called.
                 let instances_in_cache_consumer = self
-                    .make_instances_in_cache_consumer(
-                        enough_instances.clone().cached,
-                    );
+                .make_instances_in_cache_consumer(
+                    enough_instances.clone().cached,
+                );
                 Ok((
                     instances_in_cache_consumer,
                     InternalFactorInstancesProviderOutcome::satisfied_by_cache(
@@ -141,6 +147,7 @@ impl FactorInstancesProvider {
                 ))
             }
             CachedInstancesWithQuantitiesOutcome::NotSatisfied(unsatisfied) => {
+                println!("🌮 FIP - _provide_for_presets - cached outcome - 🙅🏻‍♀️ NotSatisfied => `derive_more_and_cache` 🙅🏻‍♀️ ");
                 self.derive_more_and_cache(
                     &quantified_derivation_presets,
                     unsatisfied,
@@ -162,9 +169,12 @@ impl FactorInstancesProvider {
         InstancesInCacheConsumer,
         InternalFactorInstancesProviderOutcome,
     )> {
+        let remaining_quantities_to_derive = not_satisfied.remaining_quantities_to_derive();
+        println!("🌮 FIP - derive_more_and_cache - deriving more, specifically: {:?}", remaining_quantities_to_derive);
+        
         let pdp_pf_newly_derived = self
             .derive_more(
-                not_satisfied.remaining_quantities_to_derive(),
+                remaining_quantities_to_derive,
                 derivation_purpose,
             )
             .await?;
@@ -194,6 +204,7 @@ impl FactorInstancesProvider {
             pdp_pf_found_in_cache_leq_requested,
             pdp_pf_newly_derived,
         );
+        
         Ok((instances_in_cache_consumer, outcome))
     }
 
@@ -365,19 +376,22 @@ impl FactorInstancesProvider {
                 >,
             >>()?;
 
-        println!(
-            "🌈 per_preset_per_factor_paths: {:#?}",
-            per_preset_per_factor_paths
-        );
         let mut per_factor_paths =
             IndexMap::<FactorSourceIDFromHash, IndexSet<DerivationPath>>::new();
+
         for (_, pf) in per_preset_per_factor_paths.clone() {
             for (factor_source_id, paths) in pf {
                 per_factor_paths.append_or_insert_to(factor_source_id, paths);
             }
         }
 
-        println!("🌈 per_factor_paths: {:#?}", per_factor_paths);
+        println!(
+            "🌮 FIP-derive_more - per_factor_paths: #{:?}",
+            per_factor_paths
+                .clone()
+                .values()
+                .fold(0, |acc, e| acc + e.len())
+        );
 
         let interactor = self.interactor.clone();
         let collector = KeysCollector::new(

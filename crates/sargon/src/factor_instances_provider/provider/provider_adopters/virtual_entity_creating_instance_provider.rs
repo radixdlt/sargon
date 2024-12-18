@@ -124,6 +124,7 @@ impl VirtualEntityCreatingInstanceProvider {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
+        
         let provider = FactorInstancesProvider::new(
             network_id,
             IndexSet::just(factor_source.clone()),
@@ -131,7 +132,9 @@ impl VirtualEntityCreatingInstanceProvider {
             cache_client,
             interactor,
         );
+       
         let derivation_preset = DerivationPreset::veci_entity_kind(entity_kind);
+        
         let (instances_in_cache_consumer, outcome) = provider
             .provide(
                 QuantifiedDerivationPreset::new(derivation_preset, count),

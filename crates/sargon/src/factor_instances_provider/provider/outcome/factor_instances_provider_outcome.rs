@@ -38,14 +38,26 @@ impl From<InternalFactorInstancesProviderOutcome>
     for FactorInstancesProviderOutcome
 {
     fn from(value: InternalFactorInstancesProviderOutcome) -> Self {
-        // Self {
-        //     per_factor: value
-        //         .per_factor
-        //         .into_iter()
-        //         .map(|(k, v)| (k, v.into()))
-        //         .collect(),
-        // }
-        todo!()
+        Self {
+            per_derivation_preset: value
+                .per_derivation_preset
+                .into_iter()
+                .map(|(k, v)| (k, v.into()))
+                .collect(),
+        }
+    }
+}
+impl From<InternalFactorInstancesProviderOutcomePerFactor>
+    for FactorInstancesProviderOutcomePerFactor
+{
+    fn from(value: InternalFactorInstancesProviderOutcomePerFactor) -> Self {
+        FactorInstancesProviderOutcomePerFactor {
+            per_factor: value
+                .per_factor
+                .into_iter()
+                .map(|(k, v)| (k, v.into()))
+                .collect(),
+        }
     }
 }
 
@@ -54,11 +66,10 @@ impl FactorInstancesProviderOutcome {
     pub fn newly_derived_instances_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
-        // self.per_factor
-        //     .values()
-        //     .flat_map(|x| x.debug_was_derived.factor_instances())
-        //     .collect()
-        todo!()
+        self.per_derivation_preset
+            .values()
+            .flat_map(|x| x.per_factor.values().flat_map(|f| f.debug_was_derived.factor_instances()))
+            .collect()
     }
 
     pub fn total_number_of_newly_derived_instances(&self) -> usize {
