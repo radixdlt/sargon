@@ -33,6 +33,9 @@ impl SargonOS {
                 self.device_integrity(value).await
             }
             FactorSource::Ledger { value } => Ok(value.into()),
+            FactorSource::OffDeviceMnemonic { value } => Ok(value.into()),
+            FactorSource::ArculusCard { value } => Ok(value.into()),
+            FactorSource::Password { value } => Ok(value.into()),
             _ => Err(CommonError::Unknown),
         }
     }
@@ -188,6 +191,45 @@ mod tests {
             .await
             .expect_err("Expected an error");
         assert_eq!(result, CommonError::Unknown);
+    }
+
+    #[actix_rt::test]
+    async fn integrity() {
+        // Verify the integrity for all types of factor sources not covered on above tests
+        let os = boot_with_entities(true, true).await;
+
+        let factor_source = FactorSource::sample_off_device();
+        let result = os.integrity(factor_source.clone()).await.unwrap();
+        match result {
+            FactorSourceIntegrity::OffDeviceMnemonic(integrity) => {
+                assert_eq!(
+                    integrity,
+                    *factor_source.as_off_device_mnemonic().unwrap()
+                );
+            }
+            _ => panic!("Expected OffDeviceMnemonic integrity"),
+        }
+
+        let factor_source = FactorSource::sample_arculus();
+        let result = os.integrity(factor_source.clone()).await.unwrap();
+        match result {
+            FactorSourceIntegrity::ArculusCard(integrity) => {
+                assert_eq!(
+                    integrity,
+                    *factor_source.as_arculus_card().unwrap()
+                );
+            }
+            _ => panic!("Expected ArculusCard integrity"),
+        }
+
+        let factor_source = FactorSource::sample_password();
+        let result = os.integrity(factor_source.clone()).await.unwrap();
+        match result {
+            FactorSourceIntegrity::Password(integrity) => {
+                assert_eq!(integrity, *factor_source.as_password().unwrap());
+            }
+            _ => panic!("Expected Password integrity"),
+        }
     }
 
     /// Verifies the integrity corresponds to a DeviceFactorSourceIntegrity with the expected values
