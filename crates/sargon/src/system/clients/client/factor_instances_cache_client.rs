@@ -107,13 +107,12 @@ impl FactorInstancesCacheClient {
 impl FactorInstancesCacheClient {
     pub async fn delete(
         &self,
-        instances_per_factor_sources_to_delete: IndexMap<
-            FactorSourceIDFromHash,
-            FactorInstances,
+        instances_to_delete: impl Borrow<
+            InstancesPerDerivationPresetPerFactorSource,
         >,
     ) -> Result<()> {
         self.update_and_persist_cache(|cache| {
-            cache.delete(instances_per_factor_sources_to_delete.borrow());
+            cache.delete(instances_to_delete.borrow());
             Ok(())
         })
         .await
@@ -136,12 +135,14 @@ impl FactorInstancesCacheClient {
     }
 
     /// Inserts all instance in `per_factor`.
-    pub async fn insert_all(
+    pub async fn insert(
         &self,
-        per_factor: impl Borrow<IndexMap<FactorSourceIDFromHash, FactorInstances>>,
+        per_derivation_preset_per_factor: impl Borrow<
+            InstancesPerDerivationPresetPerFactorSource,
+        >,
     ) -> Result<()> {
         self.update_and_persist_cache(|cache| {
-            cache.insert_all(per_factor.borrow())
+            cache.insert(per_derivation_preset_per_factor.borrow())
         })
         .await
     }
@@ -158,22 +159,18 @@ impl FactorInstancesCacheClient {
         .await
     }
 
-    /// Returns enough instances to satisfy the requested quantity for each factor source,
-    /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
-    /// must derive more, this function returns the quantities to derive for each factor source,
-    /// for each derivation preset, not only the originally requested one.
-    pub async fn get_poly_factor_with_quantities(
+    pub async fn get(
         &self,
         factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
-        originally_requested_quantified_derivation_preset: impl Borrow<
-            QuantifiedDerivationPreset,
+        quantified_derivation_presets: impl Borrow<
+            IdentifiedVecOf<QuantifiedDerivationPreset>,
         >,
         network_id: NetworkID,
     ) -> Result<CachedInstancesWithQuantitiesOutcome> {
         self.access_cache_init_if_needed(|cache| {
-            cache.get_poly_factor_with_quantities(
+            cache.get(
                 factor_source_ids.borrow(),
-                originally_requested_quantified_derivation_preset.borrow(),
+                quantified_derivation_presets.borrow(),
                 network_id,
             )
         })
@@ -201,6 +198,28 @@ impl FactorInstancesCacheClient {
 
 #[cfg(test)]
 impl FactorInstancesCacheClient {
+    /// Returns enough instances to satisfy the requested quantity for each factor source,
+    /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
+    /// must derive more, this function returns the quantities to derive for each factor source,
+    /// for each derivation preset, not only the originally requested one.
+    async fn get_poly_factor_with_quantities(
+        &self,
+        factor_source_ids: impl Borrow<IndexSet<FactorSourceIDFromHash>>,
+        originally_requested_quantified_derivation_preset: impl Borrow<
+            QuantifiedDerivationPreset,
+        >,
+        network_id: NetworkID,
+    ) -> Result<CachedInstancesWithQuantitiesOutcome> {
+        self.access_cache_init_if_needed(|cache| {
+            cache.get_poly_factor_with_quantities(
+                factor_source_ids.borrow(),
+                originally_requested_quantified_derivation_preset.borrow(),
+                network_id,
+            )
+        })
+        .await
+    }
+
     pub async fn insert_single(
         &self,
         instance: impl Borrow<HierarchicalDeterministicFactorInstance>,
@@ -306,10 +325,13 @@ mod tests {
         let five = HDPathComponent::from(five);
         assert_eq!(max_higher_sut1, Some(five));
 
-        sut2.delete(IndexMap::from_iter([(
-            fsid,
-            FactorInstances::from_iter([fi5.clone()]),
-        )]))
+        sut2.delete(IndexMap::kv(
+            DerivationPreset::AccountVeci,
+            IndexMap::from_iter([(
+                fsid,
+                FactorInstances::from_iter([fi5.clone()]),
+            )]),
+        ))
         .await
         .unwrap();
 
@@ -325,10 +347,17 @@ mod tests {
             )
             .await
             .unwrap();
+
         let satisfied = IndexMap::kv(fsid, instances);
-        assert_eq!(
-            poly,
-            CachedInstancesWithQuantitiesOutcome::Satisfied(satisfied)
+
+        pretty_assertions::assert_eq!(
+            poly.into_satisfied()
+                .unwrap()
+                .cached
+                .get(&DerivationPreset::AccountVeci)
+                .cloned()
+                .unwrap(),
+            satisfied
         );
 
         let snap_1 = sut1.snapshot().await.unwrap();
@@ -345,9 +374,12 @@ mod tests {
         let sut = SUT::new(file_system);
 
         let fs = FactorSourceIDFromHash::sample_at(0);
-        sut.insert_all(IndexMap::kv(fs, FactorInstances::sample()))
-            .await
-            .unwrap();
+        sut.insert(&IndexMap::kv(
+            DerivationPreset::AccountMfa,
+            IndexMap::kv(fs, FactorInstances::sample()),
+        ))
+        .await
+        .unwrap();
 
         let max = sut
             .max_index_for(

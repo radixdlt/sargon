@@ -23,6 +23,10 @@ pub enum DerivationPurpose {
     /// for identity MFA
     SecurifyingPersona,
 
+    /// When applying a security shield to accounts and personas mixed, initiates keys collection
+    /// for account MFA
+    SecurifyingAccountsAndPersonas,
+
     /// When adding a new factor source, initiates keys collection
     /// for collecting various factor instances.
     PreDerivingKeys,

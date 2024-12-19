@@ -11,12 +11,12 @@ impl Profile {
     pub fn has_any_account_on_any_network(&self) -> bool {
         self.networks.iter().any(|n| !n.accounts.is_empty())
     }
-    pub fn contains_entity_by_address<A: IsEntityAddress>(
+    pub fn contains_entity_by_address(
         &self,
-        entity_address: &A,
+        entity_address: &AddressOfAccountOrPersona,
     ) -> bool {
         self.networks.iter().any(|n: ProfileNetwork| {
-            n.contains_entity_by_address::<A>(entity_address)
+            n.contains_entity_by_address(entity_address)
         })
     }
 }

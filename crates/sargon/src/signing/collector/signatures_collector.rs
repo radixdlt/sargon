@@ -1519,16 +1519,17 @@ mod tests {
 
             fn sample_securified_mainnet<E: IsEntity + 'static>(
                 name: impl AsRef<str>,
+                rola_index: u32,
                 veci: HierarchicalDeterministicFactorInstance,
                 make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
             ) -> AccountOrPersona {
                 if TypeId::of::<Account>() == TypeId::of::<E>() {
                     AccountOrPersona::from(Account::sample_securified_mainnet(
-                        name, veci, make_role,
+                        name, rola_index, veci, make_role,
                     ))
                 } else {
                     AccountOrPersona::from(Persona::sample_securified_mainnet(
-                        name, veci, make_role,
+                        name, rola_index, veci, make_role,
                     ))
                 }
             }
@@ -1896,6 +1897,7 @@ mod tests {
                         SignableWithEntities::<TransactionIntent>::sample([
                             sample_securified_mainnet::<E>(
                                 "Alice",
+                                0,
                                 if E::entity_kind() == CAP26EntityKind::Identity
                                 {
                                     HierarchicalDeterministicFactorInstance::sample_fii10()
