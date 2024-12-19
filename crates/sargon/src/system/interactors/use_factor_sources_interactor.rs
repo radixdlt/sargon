@@ -10,7 +10,7 @@ use crate::prelude::*;
 pub trait UseFactorSourcesInteractor:
     SignInteractor<TransactionIntent>
     + SignInteractor<Subintent>
+    + SignInteractor<AuthIntent>
     + KeyDerivationInteractor
-    + AuthenticationSigningInteractor
 {
 }

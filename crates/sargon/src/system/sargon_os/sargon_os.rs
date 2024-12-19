@@ -269,18 +269,18 @@ impl SargonOS {
             as Arc<dyn SignInteractor<Subintent>>
     }
 
+    pub(crate) fn sign_auth_interactor(
+        &self,
+    ) -> Arc<dyn SignInteractor<AuthIntent>> {
+        self.interactors.use_factor_sources_interactor.clone()
+            as Arc<dyn SignInteractor<AuthIntent>>
+    }
+
     pub(crate) fn keys_derivation_interactor(
         &self,
     ) -> Arc<dyn KeyDerivationInteractor> {
         self.interactors.use_factor_sources_interactor.clone()
             as Arc<dyn KeyDerivationInteractor>
-    }
-
-    pub(crate) fn auth_signing_interactor(
-        &self,
-    ) -> Arc<dyn AuthenticationSigningInteractor> {
-        self.interactors.use_factor_sources_interactor.clone()
-            as Arc<dyn AuthenticationSigningInteractor>
     }
 
     pub fn host_id(&self) -> HostId {

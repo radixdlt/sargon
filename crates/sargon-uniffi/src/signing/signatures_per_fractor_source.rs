@@ -39,3 +39,4 @@ macro_rules! decl_signatures_per_factor_source {
 
 decl_signatures_per_factor_source!(TransactionIntentHash);
 decl_signatures_per_factor_source!(SubintentHash);
+decl_signatures_per_factor_source!(AuthIntentHash);

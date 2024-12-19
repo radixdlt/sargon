@@ -39,3 +39,4 @@ macro_rules! decl_invalid_transaction_if_neglected {
 
 decl_invalid_transaction_if_neglected!(TransactionIntentHash);
 decl_invalid_transaction_if_neglected!(SubintentHash);
+decl_invalid_transaction_if_neglected!(AuthIntentHash);

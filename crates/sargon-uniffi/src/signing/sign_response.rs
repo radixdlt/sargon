@@ -74,3 +74,4 @@ macro_rules! decl_sign_response {
 
 decl_sign_response!(TransactionIntentHash);
 decl_sign_response!(SubintentHash);
+decl_sign_response!(AuthIntentHash);

@@ -37,3 +37,4 @@ macro_rules! decl_hd_signature {
 
 decl_hd_signature!(TransactionIntentHash);
 decl_hd_signature!(SubintentHash);
+decl_hd_signature!(AuthIntentHash);

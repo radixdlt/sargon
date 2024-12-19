@@ -2,7 +2,7 @@
 public class ThrowingHostInteractor: HostInteractor {
 	public nonisolated(unsafe) static var shared: HostInteractor = ThrowingHostInteractor()
 
-	public func signAuth(request: SargonUniFFI.AuthenticationSigningRequest) async throws -> SargonUniFFI.AuthenticationSigningResponse {
+	public func signAuth(request: SargonUniFFI.SignRequestOfAuthIntent) async throws -> SargonUniFFI.SignWithFactorsOutcomeOfAuthIntentHash {
 		throw CommonError.SigningRejected
 	}
 

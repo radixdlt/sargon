@@ -42,9 +42,23 @@ pub trait Signable:
 
     fn signed(
         &self,
-        intent_signatures: IntentSignatures,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
     ) -> Result<Self::Signed>;
+}
 
+/// An identifier that is unique for each `Signable`
+pub trait SignableID:
+    Eq + StdHash + Clone + Debug + Into<Hash> + Send + Sync
+{
+}
+
+/// A trait which provides the ability to construct a `Signable` sample by building a manifest.
+pub trait ProvidesSamplesByBuildingManifest:
+    PartialEq + Eq + Clone + Send + Sync
+{
     /// Returns a sample `Signable` that its summary will involve all the
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
     /// This can be accomplished by building a manifest that constructs owner keys from these
@@ -123,10 +137,4 @@ pub trait Signable:
         )>,
         network_id: Option<NetworkID>,
     ) -> Self;
-}
-
-/// An identifier that is unique for each `Signable`
-pub trait SignableID:
-    Eq + StdHash + Clone + Debug + Into<Hash> + Send + Sync
-{
 }

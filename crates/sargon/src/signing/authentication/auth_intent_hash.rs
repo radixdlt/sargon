@@ -2,37 +2,37 @@ use crate::prelude::*;
 
 const ROLA_PREFIX: u8 = 0x52;
 
-#[derive(Debug, Clone, PartialEq, derive_more::Display)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, derive_more::Display, std::hash::Hash,
+)]
 #[display("{}", self.payload.to_hex())]
-pub struct RolaChallenge {
+pub struct AuthIntentHash {
     pub payload: BagOfBytes,
 }
 
-impl RolaChallenge {
+impl AuthIntentHash {
     pub fn hash(&self) -> Hash {
         hash_of(self.payload.clone())
     }
 }
 
-impl HasSampleValues for RolaChallenge {
-    fn sample() -> Self {
-        Self::from_request(
-            DappToWalletInteractionAuthChallengeNonce::sample(),
-            DappToWalletInteractionMetadata::sample(),
-        )
-        .unwrap()
-    }
-
-    fn sample_other() -> Self {
-        Self::from_request(
-            DappToWalletInteractionAuthChallengeNonce::sample_other(),
-            DappToWalletInteractionMetadata::sample_other(),
-        )
-        .unwrap()
+impl From<AuthIntentHash> for Hash {
+    fn from(val: AuthIntentHash) -> Self {
+        val.hash()
     }
 }
 
-impl RolaChallenge {
+impl HasSampleValues for AuthIntentHash {
+    fn sample() -> Self {
+        From::<AuthIntent>::from(AuthIntent::sample())
+    }
+
+    fn sample_other() -> Self {
+        From::<AuthIntent>::from(AuthIntent::sample_other())
+    }
+}
+
+impl From<AuthIntent> for AuthIntentHash {
     /// Constructs a payload to sign in conjunction with the `challenge_nonce` received and
     /// the `metadata` of the dApp that sent the request.
     ///
@@ -42,28 +42,22 @@ impl RolaChallenge {
     /// * Pushes 1 byte which is the length of the bech32-encoded dapp-definition address
     /// * Extends with the bytes of the bech32-encoded dapp-definition address
     /// * Extends with the bytes of the origin UTF-8 encoded.
-    ///
-    /// Fails if the `origin` Url is not a valid url
-    pub fn from_request(
-        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
-        metadata: DappToWalletInteractionMetadata,
-    ) -> Result<Self> {
-        TryInto::<Url>::try_into(metadata.origin.clone())?;
-        let mut origin_str = metadata.origin.0;
+    fn from(value: AuthIntent) -> Self {
+        let mut origin_str = value.origin.to_string();
         if origin_str.ends_with("/") {
             origin_str.truncate(origin_str.len() - 1);
         }
 
         let mut payload = Vec::<u8>::new();
         payload.push(ROLA_PREFIX);
-        payload.extend(challenge_nonce.0.bytes());
-        payload.push(metadata.dapp_definition_address.address().len() as u8);
-        payload.extend(metadata.dapp_definition_address.address().bytes());
+        payload.extend(value.challenge_nonce.bytes());
+        payload.push(value.dapp_definition_address.address().len() as u8);
+        payload.extend(value.dapp_definition_address.address().bytes());
         payload.extend(origin_str.as_bytes());
 
-        Ok(RolaChallenge {
+        Self {
             payload: BagOfBytes::from(payload),
-        })
+        }
     }
 }
 
@@ -71,9 +65,12 @@ impl RolaChallenge {
 mod tests {
     use super::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AuthIntentHash;
+
     #[derive(Debug, Clone, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    struct RolaChallengeVectorItem {
+    struct AuthIntentHashVectorItem {
         pub payload_to_hash: BagOfBytes,
         #[serde(deserialize_with = "deserialize_hash")]
         pub blake_hash_of_payload: Hash,
@@ -91,19 +88,25 @@ mod tests {
         Hash::from_str(&buf).map_err(de::Error::custom)
     }
 
-    impl TryInto<RolaChallenge> for RolaChallengeVectorItem {
+    impl TryInto<SUT> for AuthIntentHashVectorItem {
         type Error = CommonError;
 
-        fn try_into(self) -> std::result::Result<RolaChallenge, Self::Error> {
-            RolaChallenge::from_request(
+        fn try_into(self) -> std::result::Result<SUT, Self::Error> {
+            let network_id = self.d_app_definition_address.network_id();
+            let intent = AuthIntent::new_from_request(
                 DappToWalletInteractionAuthChallengeNonce(self.challenge),
                 DappToWalletInteractionMetadata::new(
                     WalletInteractionVersion::current(),
-                    self.d_app_definition_address.network_id(),
+                    network_id,
                     self.origin,
                     self.d_app_definition_address,
                 ),
-            )
+                vec![AddressOfAccountOrPersona::Account(
+                    AccountAddress::random(network_id),
+                )],
+            )?;
+
+            Ok(From::<AuthIntent>::from(intent))
         }
     }
 
@@ -114,10 +117,11 @@ mod tests {
             "rola_challenge_payload_hash_vectors.json"
         ));
         let vector =
-            serde_json::from_str::<Vec<RolaChallengeVectorItem>>(json).unwrap();
+            serde_json::from_str::<Vec<AuthIntentHashVectorItem>>(json)
+                .unwrap();
 
         vector.iter().for_each(|v| {
-            let rola_challenge: RolaChallenge = v.clone().try_into().unwrap();
+            let rola_challenge: SUT = v.clone().try_into().unwrap();
 
             assert_eq!(rola_challenge.payload, v.payload_to_hash);
 
@@ -128,11 +132,9 @@ mod tests {
     #[test]
     fn test_valid_url() {
         let nonce = Exactly32Bytes::sample();
-        let challenge = RolaChallenge::from_request(
-            DappToWalletInteractionAuthChallengeNonce(nonce),
-            metadata("https://stokenet-dashboard.radixdlt.com"),
-        )
-        .unwrap();
+        let challenge =
+            sut(nonce, metadata("https://stokenet-dashboard.radixdlt.com"))
+                .unwrap();
 
         let expected_payload_hex = "52deaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddeaddead\
         dead426163636f756e745f72647831323879366a37386d74306171763633373265767a323868727870386d6e30\
@@ -141,11 +143,9 @@ mod tests {
 
         assert_eq!(expected_payload_hex, challenge.payload.to_hex());
 
-        let challenge_with_origin_with_slash = RolaChallenge::from_request(
-            DappToWalletInteractionAuthChallengeNonce(nonce),
-            metadata("https://stokenet-dashboard.radixdlt.com/"),
-        )
-        .unwrap();
+        let challenge_with_origin_with_slash =
+            sut(nonce, metadata("https://stokenet-dashboard.radixdlt.com/"))
+                .unwrap();
 
         assert_eq!(
             expected_payload_hex,
@@ -156,10 +156,7 @@ mod tests {
     #[test]
     fn test_invalid_url() {
         let nonce = Exactly32Bytes::sample();
-        let challenge = RolaChallenge::from_request(
-            DappToWalletInteractionAuthChallengeNonce(nonce),
-            metadata("/"),
-        );
+        let challenge = sut(nonce, metadata("/"));
 
         assert_eq!(
             challenge,
@@ -167,6 +164,32 @@ mod tests {
                 bad_value: "/".to_string()
             })
         );
+    }
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    fn sut(
+        nonce: Exactly32Bytes,
+        metadata: DappToWalletInteractionMetadata,
+    ) -> Result<SUT> {
+        let intent = AuthIntent::new_from_request(
+            DappToWalletInteractionAuthChallengeNonce(nonce),
+            metadata.clone(),
+            [AddressOfAccountOrPersona::Account(AccountAddress::random(
+                metadata.network_id,
+            ))],
+        )?;
+
+        Ok(From::<AuthIntent>::from(intent))
     }
 
     fn metadata(url: impl Into<String>) -> DappToWalletInteractionMetadata {
