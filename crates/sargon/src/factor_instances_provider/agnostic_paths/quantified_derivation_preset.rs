@@ -41,26 +41,38 @@ impl QuantifiedDerivationPreset {
                     DerivationPreset::IdentityMfa,
                     identity_addresses.len(),
                 ),
-                Self::new(DerivationPreset::IdentityRola, 1),
+                Self::new(
+                    DerivationPreset::IdentityRola,
+                    identity_addresses.len(),
+                ),
             ]),
             (false, false) => IdentifiedVecOf::from_iter([
                 Self::new(
                     DerivationPreset::AccountMfa,
                     account_addresses.len(),
                 ),
-                Self::new(DerivationPreset::AccountRola, 1),
+                Self::new(
+                    DerivationPreset::AccountRola,
+                    account_addresses.len(),
+                ),
                 Self::new(
                     DerivationPreset::IdentityMfa,
                     identity_addresses.len(),
                 ),
-                Self::new(DerivationPreset::IdentityRola, 1),
+                Self::new(
+                    DerivationPreset::IdentityRola,
+                    identity_addresses.len(),
+                ),
             ]),
             (false, true) => IdentifiedVecOf::from_iter([
                 Self::new(
                     DerivationPreset::AccountMfa,
                     account_addresses.len(),
                 ),
-                Self::new(DerivationPreset::AccountRola, 1),
+                Self::new(
+                    DerivationPreset::AccountRola,
+                    account_addresses.len(),
+                ),
             ]),
         }
     }

@@ -136,10 +136,43 @@ impl SecurifyEntityFactorInstancesProvider {
                 &addresses_of_entities,
             );
 
+        println!(
+            "🌮 FIP (Sec) quantified_derivation_presets: {:?}",
+            quantified_derivation_presets
+        );
+
         assert!(quantified_derivation_presets.len() >= 2); // at least one entity kind, and ROLA + TX: at least 2
         let (instances_in_cache_consumer, outcome) = provider
             .provide_for_presets(quantified_derivation_presets, purpose)
             .await?;
+
+        if let Some(rola_accounts_outcome) = outcome
+            .get_for_derivation_preset_for_factor(
+                DerivationPreset::AccountRola,
+                security_structure_of_factor_sources
+                    .authentication_signing_factor
+                    .id_from_hash(),
+            )
+        {
+            println!(
+                "🌮 FIP (Sec) rola_accounts_outcome: {:#?}",
+                rola_accounts_outcome
+            );
+        }
+
+        if let Some(rola_personas_outcome) = outcome
+            .get_for_derivation_preset_for_factor(
+                DerivationPreset::IdentityRola,
+                security_structure_of_factor_sources
+                    .authentication_signing_factor
+                    .id_from_hash(),
+            )
+        {
+            println!(
+                "🌮 FIP (Sec) rola_personas_outcome: {:#?}",
+                rola_personas_outcome
+            );
+        }
 
         Ok((instances_in_cache_consumer, outcome.into()))
     }
@@ -311,7 +344,7 @@ mod tests {
         let shield_0 = SecurityStructureOfFactorSources::new(
             DisplayName::sample(),
             matrix_0,
-            FactorSource::sample_device(),
+            bdfs.clone(),
         );
 
         let cache_client = Arc::new(os.clients.factor_instances_cache.clone());

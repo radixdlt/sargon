@@ -578,6 +578,7 @@ mod tests {
 
         let _ = sut
             .set_name("S.H.I.E.L.D.")
+            .set_authentication_signing_factor(Some(FactorSourceID::sample_device()))
             // Primary
             .set_number_of_days_until_auto_confirm(42)
             .add_factor_source_to_primary_threshold(
@@ -983,6 +984,7 @@ mod test_invalid {
         sut.add_factor_source_to_confirmation_override(
             FactorSourceID::sample_arculus(),
         );
+        sut.set_authentication_signing_factor(Some(FactorSourceID::sample_device()));
         sut
     }
 

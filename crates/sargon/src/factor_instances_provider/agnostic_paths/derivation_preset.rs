@@ -75,6 +75,16 @@ impl DerivationPreset {
             CAP26EntityKind::Identity => Self::IdentityMfa,
         }
     }
+
+    
+    /// Selects a `DerivationPreset` for MFA based on `CAP26EntityKind`,
+    /// i.e. either `DerivationPreset::AccountRola` or `DerivationPreset::IdentityRola`.
+    pub fn rola_entity_kind(entity_kind: CAP26EntityKind) -> Self {
+        match entity_kind {
+            CAP26EntityKind::Account => Self::AccountRola,
+            CAP26EntityKind::Identity => Self::IdentityRola,
+        }
+    }
 }
 
 // =============
@@ -157,5 +167,17 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_mfa_entity_kind() {
+        assert_eq!(SUT::mfa_entity_kind(CAP26EntityKind::Account), SUT::AccountMfa);
+        assert_eq!(SUT::mfa_entity_kind(CAP26EntityKind::Identity), SUT::IdentityMfa);
+    }
+
+    #[test]
+    fn test_rola_entity_kind() {
+        assert_eq!(SUT::rola_entity_kind(CAP26EntityKind::Account), SUT::AccountRola);
+        assert_eq!(SUT::rola_entity_kind(CAP26EntityKind::Identity), SUT::IdentityRola);
     }
 }

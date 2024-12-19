@@ -865,6 +865,9 @@ pub enum CommonError {
 
     #[error("Too few FactorInstances derived")]
     TooFewFactorInstancesDerived = 10242,
+
+    #[error("Missing Authentication Signing FactorInstance mapping SecurityStructureOfFactorSources into SecurityStructureOfFactorInstances.")]
+    MissingRolaKeyForSecurityStructureOfFactorInstances = 10243,
 }
 
 #[uniffi::export]
