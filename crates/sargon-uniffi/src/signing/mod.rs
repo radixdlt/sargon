@@ -1,6 +1,7 @@
 mod authentication;
 mod hd_signature;
 mod hd_signature_input;
+mod intent_signature_of_owner;
 mod invalid_transaction_if_neglected;
 mod neglected_factors;
 mod sign_request;
@@ -13,6 +14,7 @@ mod transactions_to_sign_per_factor_source;
 pub use authentication::*;
 pub use hd_signature::*;
 pub use hd_signature_input::*;
+pub use intent_signature_of_owner::*;
 pub use invalid_transaction_if_neglected::*;
 pub use neglected_factors::*;
 pub use sign_request::*;

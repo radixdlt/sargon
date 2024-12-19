@@ -77,7 +77,13 @@ impl Signable for SignableManifestSummary {
     }
 
     #[cfg(not(tarpaulin_include))]
-    fn signed(&self, _: IntentSignatures) -> Result<Self::Signed> {
+    fn signed(
+        &self,
+        _signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
+    ) -> Result<Self::Signed> {
         panic!("Manifest summary cannot be actually signed")
     }
 }

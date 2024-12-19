@@ -19,9 +19,17 @@ impl Signable for Subintent {
 
     fn signed(
         &self,
-        intent_signatures: IntentSignatures,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
     ) -> Result<Self::Signed> {
-        SignedSubintent::new(self.clone(), intent_signatures)
+        let intent_signatures =
+            signatures_per_owner.values().cloned().collect_vec();
+        SignedSubintent::new(
+            self.clone(),
+            IntentSignatures::new(intent_signatures),
+        )
     }
 }
 

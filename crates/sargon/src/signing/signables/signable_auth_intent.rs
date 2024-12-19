@@ -31,12 +31,12 @@ impl Signable for AuthIntent {
 
     fn signed(
         &self,
-        intent_signatures: IntentSignatures,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
     ) -> Result<Self::Signed> {
-        SignedAuthIntent::with_signatures(
-            self.clone(),
-            intent_signatures.signatures,
-        )
+        SignedAuthIntent::new(self.clone(), signatures_per_owner)
     }
 }
 
@@ -51,9 +51,8 @@ impl IntoIterator for SignedAuthIntent {
     type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.intent_signatures
-            .signatures
-            .into_iter()
+        self.intent_signatures_per_owner
+            .values()
             .map(|s| s.0)
             .collect_vec()
             .into_iter()
@@ -109,8 +108,9 @@ mod tests {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures =
-            IntentSignatures::new(vec![IntentSignature(signature)]);
+        let intent_signatures = indexmap!(
+           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        );
 
         assert_eq!(
             intent.signed(intent_signatures.clone()).unwrap(),

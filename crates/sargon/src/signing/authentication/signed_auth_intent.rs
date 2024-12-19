@@ -3,29 +3,29 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SignedAuthIntent {
     pub intent: AuthIntent,
-    pub intent_signatures: IntentSignatures,
+    pub intent_signatures_per_owner:
+        IndexMap<AddressOfAccountOrPersona, IntentSignature>,
 }
 
 impl SignedAuthIntent {
     pub fn new(
         intent: AuthIntent,
-        intent_signatures: IntentSignatures,
+        intent_signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
     ) -> Result<Self> {
-        if !intent_signatures.validate(intent.auth_intent_hash()) {
+        let all_intent_signatures = IntentSignatures::new(
+            intent_signatures_per_owner.values().cloned().collect_vec(),
+        );
+        if !all_intent_signatures.validate(intent.auth_intent_hash()) {
             return Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash);
         }
 
         Ok(Self {
             intent,
-            intent_signatures,
+            intent_signatures_per_owner,
         })
-    }
-
-    pub fn with_signatures(
-        intent: AuthIntent,
-        signatures: impl IntoIterator<Item = IntentSignature>,
-    ) -> Result<Self> {
-        Self::new(intent, IntentSignatures::new(signatures))
     }
 
     pub fn intent(&self) -> &AuthIntent {
@@ -40,8 +40,9 @@ impl HasSampleValues for SignedAuthIntent {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures =
-            IntentSignatures::new(vec![IntentSignature(signature)]);
+        let intent_signatures = indexmap!(
+           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        );
 
         SignedAuthIntent::new(intent, intent_signatures).unwrap()
     }
@@ -52,8 +53,9 @@ impl HasSampleValues for SignedAuthIntent {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures =
-            IntentSignatures::new(vec![IntentSignature(signature)]);
+        let intent_signatures = indexmap!(
+           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        );
 
         SignedAuthIntent::new(intent, intent_signatures).unwrap()
     }
@@ -84,16 +86,19 @@ mod tests {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures =
-            IntentSignatures::new(vec![IntentSignature(signature)]);
-
+        let intent_signatures = indexmap!(
+           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        );
         assert!(SignedAuthIntent::new(intent, intent_signatures).is_ok())
     }
 
     #[test]
     fn test_invalid_signatures() {
+        let intent_signatures = indexmap!(
+           AddressOfAccountOrPersona::sample() => IntentSignature::sample()
+        );
         assert_eq!(
-            SUT::new(AuthIntent::sample(), IntentSignatures::sample()),
+            SUT::new(AuthIntent::sample(), intent_signatures),
             Err(CommonError::InvalidSignaturesForIntentSomeDidNotValidateIntentHash)
         )
     }
@@ -105,8 +110,9 @@ mod tests {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures =
-            IntentSignatures::new(vec![IntentSignature(signature)]);
+        let intent_signatures = indexmap!(
+           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        );
 
         assert_eq!(
             SUT::new(intent.clone(), intent_signatures)

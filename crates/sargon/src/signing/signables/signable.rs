@@ -42,7 +42,10 @@ pub trait Signable:
 
     fn signed(
         &self,
-        intent_signatures: IntentSignatures,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
     ) -> Result<Self::Signed>;
 }
 

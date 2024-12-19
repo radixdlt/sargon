@@ -63,15 +63,14 @@ impl SargonOS {
         let payload_id = signable.get_id();
 
         if outcome.successful() {
-            let intent_signatures = IndexSet::<IntentSignature>::from_iter(
-                outcome
-                    .signatures_of_successful_transactions()
-                    .iter()
-                    .filter(|hd| hd.input.payload_id == payload_id)
-                    .map(|hd| IntentSignature(hd.signature)),
-            );
+            let signatures_per_owner = outcome
+                .signatures_of_successful_transactions()
+                .iter()
+                .filter(|hd| hd.input.payload_id == payload_id)
+                .map(|hd| (hd.input.owned_factor_instance.owner, IntentSignature(hd.signature)))
+                .collect::<IndexMap<AddressOfAccountOrPersona, IntentSignature>>();
 
-            signable.signed(IntentSignatures::new(intent_signatures))
+            signable.signed(signatures_per_owner)
         } else {
             Err(CommonError::SigningRejected)
         }
@@ -107,8 +106,13 @@ mod test {
 
         let signed = sut.sign_auth(auth_intent.clone()).await.unwrap();
 
-        let signature_with_public_key =
-            signed.intent_signatures.signatures.first().unwrap().0;
+        let signature_with_public_key = signed
+            .intent_signatures_per_owner
+            .values()
+            .collect_vec()
+            .first()
+            .unwrap()
+            .0;
 
         assert!(signature_with_public_key
             .is_valid_for_hash(&auth_intent.auth_intent_hash().hash()))
