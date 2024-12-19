@@ -724,10 +724,11 @@ mod tests {
             .all(|y| y.debug_found_in_cache.is_empty())));
 
         assert!(outcome.per_derivation_preset.clone().into_iter().all(
-            |(preset, x)| x.per_factor.values().all(
-                |y| y.debug_was_cached.len() // OLD-COMMENT: `only 30, not 120...` if test fails, draw inspiration from old comment!
-                    == preset.cache_filling_quantity()
-            )
+            |(preset, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_cached.len()
+                    == preset.cache_filling_quantity())
         ));
 
         assert!(outcome.per_derivation_preset.clone().into_iter().all(

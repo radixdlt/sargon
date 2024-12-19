@@ -109,16 +109,16 @@ impl InternalFactorInstancesProviderOutcomePerFactor {
         pf_found_in_cache: IndexMap<FactorSourceIDFromHash, FactorInstances>,
     ) -> Self {
         Self::new(
-                pf_found_in_cache
-                    .into_iter()
-                    .map(|(k, v)| {
-                        (
-                            k,
-                            InternalFactorInstancesProviderOutcomeForFactor::satisfied_by_cache(k, v),
-                        )
-                    })
-                    .collect(),
-            )
+pf_found_in_cache
+           .into_iter()
+            .map(|(k, v)| {
+                (
+                    k,
+                    InternalFactorInstancesProviderOutcomeForFactor::satisfied_by_cache(k,      v),
+                )
+            })
+            .collect(),
+        )
     }
 
     /// "Transposes"
