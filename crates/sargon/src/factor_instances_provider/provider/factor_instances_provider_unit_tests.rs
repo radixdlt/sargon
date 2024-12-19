@@ -1801,7 +1801,6 @@ async fn create_single_account() {
         matrix_0,
         bdfs.clone(),
     );
-    println!("👨‍🔬 test calling `make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome` for single account Alice");
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
        IndexSet::just(AddressOfAccountOrPersona::from(alice.address())),
@@ -1809,7 +1808,6 @@ async fn create_single_account() {
     )
     .await
     .unwrap();
-    println!("👨‍🔬 ✅ `make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome` for single account Alice ✅");
 
     // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();

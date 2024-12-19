@@ -28,15 +28,6 @@ impl InternalFactorInstancesProviderOutcome {
     ) -> Option<&InternalFactorInstancesProviderOutcomePerFactor> {
         self.per_derivation_preset.get(&preset)
     }
-
-    pub fn get_for_derivation_preset_for_factor(
-        &self,
-        preset: DerivationPreset,
-        factor_source_id: FactorSourceIDFromHash,
-    ) -> Option<&InternalFactorInstancesProviderOutcomeForFactor> {
-        self.get_for_derivation_preset(preset)
-            .and_then(|x| x.per_factor.get(&factor_source_id))
-    }
 }
 
 #[derive(Clone, Debug)]
@@ -59,7 +50,8 @@ impl InternalFactorInstancesProviderOutcome {
         }
     }
 
-    /// "Transposes"
+    /// For each value of each collection, "transposes" it. For more info see
+    /// `InternalFactorInstancesProviderOutcomePerFactor::transpose`
     pub fn transpose(
         pdp_pf_to_cache: InstancesPerDerivationPresetPerFactorSource,
         pdp_pf_to_use_directly: InstancesPerDerivationPresetPerFactorSource,

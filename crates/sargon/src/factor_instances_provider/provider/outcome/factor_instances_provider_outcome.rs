@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-/// Identical to `InternalFactorInstancesProviderOutcome` but `FactorInstancesProviderOutcomeForFactor` instead of `InternalFactorInstancesProviderOutcomeForFactor`, having
-/// renamed field values to make it clear that `to_cache` instances  already have been cached.
+/// A collection of `FactorInstancesProviderOutcomePerFactor` keyed under
+/// DerivationPreset.
 #[derive(Clone, Debug)]
 pub struct FactorInstancesProviderOutcome {
     pub per_derivation_preset:
@@ -26,6 +26,8 @@ impl FactorInstancesProviderOutcome {
     }
 }
 
+/// A collection of `FactorInstancesProviderOutcomeForFactor` keyed by their
+/// FactorSourceID
 #[derive(Clone, Debug)]
 pub struct FactorInstancesProviderOutcomePerFactor {
     pub per_factor: IndexMap<

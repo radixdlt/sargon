@@ -812,10 +812,12 @@ impl SargonOS {
         let profile_snapshot = self.profile()?;
         let key_derivation_interactors = self.keys_derivation_interactor();
 
-        println!("👨‍🔬 SargonOS => SecurifyEntityFactorInstancesProvider::for_entity_mfa");
-
+        // if you need to UPDATE already securified, upgrade this to conditionally consume ROLA
+        // factors, by not using `QuantifiedDerivationPreset::securifying_unsecurified_entities`
+        // inside of SecurifyEntityFactorInstancesProvider::securifying_unsecurified. I.e. create the set of `QuantifiedDerivationPreset` which does not unconditionally
+        // specify ROLA factors.
         let (instances_in_cache_consumer, outcome) =
-            SecurifyEntityFactorInstancesProvider::for_entity_mfa(
+            SecurifyEntityFactorInstancesProvider::securifying_unsecurified(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
                 security_structure_of_factor_sources.clone(),
@@ -823,8 +825,6 @@ impl SargonOS {
                 key_derivation_interactors,
             )
             .await?;
-
-        println!("👨‍🔬 SargonOS => SecurifyEntityFactorInstancesProvider::for_entity_mfa ✅ outcome:\n🔮🔮🔮\n\n{:?}\n🔮🔮🔮🔮🔮🔮🔮🔮\n", outcome);
 
         let mut instances_per_preset_per_factor_source = outcome
             .clone()
@@ -874,50 +874,35 @@ impl SargonOS {
                     return Ok(());
                 };
 
-                let tx_preset = DerivationPreset::mfa_entity_kind(entity_kind);
-                let rola_preset =
-                    DerivationPreset::rola_entity_kind(entity_kind);
+                let mut instances_per_factor_source = {
+                    let tx_preset =
+                        DerivationPreset::mfa_entity_kind(entity_kind);
+                    let rola_preset =
+                        DerivationPreset::rola_entity_kind(entity_kind);
 
-                let instances_per_factor_source_mfa = instances_per_preset_per_factor_source
-                .swap_remove(&tx_preset)
-                .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", tx_preset));
+                    let instances_per_factor_source_mfa = instances_per_preset_per_factor_source
+                    .swap_remove(&tx_preset)
+                    .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", tx_preset));
 
-                for (k, v) in instances_per_factor_source_mfa.iter() {
-                    println!(
-                        "👨‍🔬 SargonOS 🦧 mfa - #instances: {:?} for key: {:?}",
-                        v.len(),
-                        k
-                    );
-                }
+                    let instances_per_factor_source_rola = instances_per_preset_per_factor_source
+                    .swap_remove(&rola_preset)
+                    .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", rola_preset));
 
-                let instances_per_factor_source_rola = instances_per_preset_per_factor_source
-                .swap_remove(&rola_preset)
-                .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", rola_preset));
-
-                for (k, v) in instances_per_factor_source_rola.iter() {
-                    println!("👨‍🔬 SargonOS 🦧 ROLA - #instances: {:?} for key: {:?}", v.len(), k);
-                }
-
-                let mut instances_per_factor_source =
-                    instances_per_factor_source_mfa;
-                for (k, v) in instances_per_factor_source_rola {
-                    instances_per_factor_source.append_or_insert_to(k, v);
-                }
-
-                for (k, v) in instances_per_factor_source.iter() {
-                    println!("👨‍🔬 SargonOS 🦧 MERGED 🦧 - #instances: {:?} for key: {:?}", v.len(), k);
-                }
-
-                println!("👨‍🔬 SargonOS instances_per_factor_source: \n\n{:?}\n\n🌈🌈🌈🌈\n", instances_per_factor_source);
+                    // Merge `instances_per_factor_source_mfa` and `instances_per_factor_source_rola` together
+                    let mut instances_per_factor_source =
+                        instances_per_factor_source_mfa;
+                    for (k, v) in instances_per_factor_source_rola {
+                        instances_per_factor_source.append_or_insert_to(k, v);
+                    }
+                    instances_per_factor_source
+                };
 
                 for entity_address in addresses_of_kind.clone().into_iter() {
-                    println!("👨‍🔬 SargonOS calling `SecurityStructureOfFactorInstances::fulfilling_structure_of_factor_sources_with_instances` for entity: {:?}", entity_address);
                     let security_structure_of_factor_instances = SecurityStructureOfFactorInstances::fulfilling_structure_of_factor_sources_with_instances(
                         &mut instances_per_factor_source,
                         &security_structure_of_factor_sources
                     )?;
 
-                    println!("👨‍🔬 SargonOS  `SecurityStructureOfFactorInstances::fulfilling_structure_of_factor_sources_with_instances` for entity ✅ : {:?}", entity_address);
                     security_structures_of_factor_instances.insert(
                         *entity_address,
                         security_structure_of_factor_instances,

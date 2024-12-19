@@ -23,7 +23,7 @@ impl SecurifyEntityFactorInstancesProvider {
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::for_entity_mfa(
+        Self::securifying_unsecurified(
             cache_client,
             profile,
             security_structure_of_factor_sources,
@@ -52,7 +52,7 @@ impl SecurifyEntityFactorInstancesProvider {
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::for_entity_mfa(
+        Self::securifying_unsecurified(
             cache_client,
             profile,
             security_structure_of_factor_sources,
@@ -73,7 +73,11 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_entity_mfa(
+    pub async fn securifying_unsecurified(
+        // if you need to UPDATE already securified, upgrade this to conditionally consume ROLA
+        // factors, by not using `QuantifiedDerivationPreset::securifying_unsecurified_entities`
+        // below. I.e. create the set of `QuantifiedDerivationPreset` which does not unconditionally
+        // specify ROLA factors.
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources,
@@ -132,47 +136,14 @@ impl SecurifyEntityFactorInstancesProvider {
         );
 
         let quantified_derivation_presets =
-            QuantifiedDerivationPreset::mfa_for_entities(
+            QuantifiedDerivationPreset::securifying_unsecurified_entities(
                 &addresses_of_entities,
             );
-
-        println!(
-            "🌮 FIP (Sec) quantified_derivation_presets: {:?}",
-            quantified_derivation_presets
-        );
 
         assert!(quantified_derivation_presets.len() >= 2); // at least one entity kind, and ROLA + TX: at least 2
         let (instances_in_cache_consumer, outcome) = provider
             .provide_for_presets(quantified_derivation_presets, purpose)
             .await?;
-
-        if let Some(rola_accounts_outcome) = outcome
-            .get_for_derivation_preset_for_factor(
-                DerivationPreset::AccountRola,
-                security_structure_of_factor_sources
-                    .authentication_signing_factor
-                    .id_from_hash(),
-            )
-        {
-            println!(
-                "🌮 FIP (Sec) rola_accounts_outcome: {:#?}",
-                rola_accounts_outcome
-            );
-        }
-
-        if let Some(rola_personas_outcome) = outcome
-            .get_for_derivation_preset_for_factor(
-                DerivationPreset::IdentityRola,
-                security_structure_of_factor_sources
-                    .authentication_signing_factor
-                    .id_from_hash(),
-            )
-        {
-            println!(
-                "🌮 FIP (Sec) rola_personas_outcome: {:#?}",
-                rola_personas_outcome
-            );
-        }
 
         Ok((instances_in_cache_consumer, outcome.into()))
     }
@@ -351,18 +322,19 @@ mod tests {
         let profile = Arc::new(os.profile().unwrap());
         let derivation_interactors = os.keys_derivation_interactor();
 
-        let (instances_in_cache_consumer, outcome) = SUT::for_entity_mfa(
-            cache_client.clone(),
-            profile,
-            shield_0.clone(),
-            IndexSet::from_iter([
-                AddressOfAccountOrPersona::from(alice.address()),
-                AddressOfAccountOrPersona::from(batman.address()),
-            ]),
-            derivation_interactors.clone(),
-        )
-        .await
-        .unwrap();
+        let (instances_in_cache_consumer, outcome) =
+            SUT::securifying_unsecurified(
+                cache_client.clone(),
+                profile,
+                shield_0.clone(),
+                IndexSet::from_iter([
+                    AddressOfAccountOrPersona::from(alice.address()),
+                    AddressOfAccountOrPersona::from(batman.address()),
+                ]),
+                derivation_interactors.clone(),
+            )
+            .await
+            .unwrap();
 
         assert_eq!(outcome.per_derivation_preset.len(), 4);
 

@@ -17,7 +17,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Carla | 2 | Securified { Single Threshold only }
         Account::sample_securified_mainnet(
             "Carla",
-2,
+            2,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(2),
             || {
                 let idx =

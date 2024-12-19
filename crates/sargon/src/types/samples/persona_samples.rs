@@ -71,7 +71,7 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
         // Kasparov | 6 | Securified { Threshold #3 and Override factors #2  }
         Persona::sample_securified_mainnet(
             "Kasparov",
-        6,
+            6,
             HierarchicalDeterministicFactorInstance::sample_mainnet_identity_device_factor_fs_10_unsecurified_at_index(6),
             || {
                 let idx =

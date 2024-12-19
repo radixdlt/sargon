@@ -221,30 +221,10 @@ impl SecurityStructureOfFactorInstances {
         >,
         security_structure_of_factor_sources: &SecurityStructureOfFactorSources,
     ) -> Result<Self, CommonError> {
-        for (k, v) in consuming_instances.iter() {
-            println!("\n\n 👨‍🔬 SSFI: fulfilling_structure_of_factor_sources_with_instances` consuming_instances BEFORE fulfilling matrix:");
-            println!(
-                "👨‍🔬 SSFI - BEFORE - key: {:?}, instances: #{:?}",
-                k,
-                v.len()
-            );
-            println!("\n\n 🛡️ 🛡️ 🛡️ 🛡️ 🛡️\n")
-        }
-
         let matrix_of_factors = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
         consuming_instances,
         security_structure_of_factor_sources.matrix_of_factors.clone(),
       )?;
-
-        for (k, v) in consuming_instances.iter() {
-            println!("\n\n 👨‍🔬 SSFI: fulfilling_structure_of_factor_sources_with_instances` consuming_instances AFTER fulfilling matrix:");
-            println!(
-                "👨‍🔬 SSFI - AFTER - key: {:?}, instances: #{:?}",
-                k,
-                v.len()
-            );
-            println!("\n\n 🛡️ 🛡️ 🛡️ 🛡️ 🛡️\n")
-        }
 
         let authentication_signing = if let Some(existing) = consuming_instances
             .get_mut(
@@ -253,8 +233,9 @@ impl SecurityStructureOfFactorInstances {
                     .id_from_hash(),
             ) {
             let instance = existing.first_authentication_signing().ok_or(
-            CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances,
-        ).inspect_err(|_|   println!("👨‍🔬 SSFI ❌ first_authentication_signing failed => MissingRolaKeyForSecurityStructureOfFactorInstances ❌"))?;
+                CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances,
+                )?;
+
             let _ = existing.shift_remove(&instance); // don't forget to consume it!
             Ok(instance)
         } else {
