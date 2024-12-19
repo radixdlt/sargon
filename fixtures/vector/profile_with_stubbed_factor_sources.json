@@ -1,0 +1,1029 @@
+{
+    "header": {
+      "snapshotVersion": 100,
+      "id": "323198a8-b961-4255-87ea-2e8181b56b8b",
+      "creatingDevice": {
+        "id": "8e15b6a5-65f2-5431-af47-a7324dbf00ff",
+        "date": "2024-06-11T14:47:08.000Z",
+        "description": "iPhone (iPhone)",
+        "system_version": null,
+        "host_app_version": null,
+        "host_vendor": null
+      },
+      "lastUsedOnDevice": {
+        "id": "ed94eb14-a311-4b5f-a195-574fce195361",
+        "date": "2024-05-29T07:22:10.000Z",
+        "description": "iPhone (iPhone)",
+        "system_version": "iOS 17.6.1",
+        "host_app_version": "1.11.1",
+        "host_vendor": "Apple"
+      },
+      "lastModified": "2024-12-17T13:36:06.356Z",
+      "contentHint": {
+        "numberOfAccountsOnAllNetworksInTotal": 6,
+        "numberOfPersonasOnAllNetworksInTotal": 3,
+        "numberOfNetworks": 3
+      }
+    },
+    "factorSources": [
+      {
+        "discriminator": "device",
+        "device": {
+          "id": {
+            "kind": "device",
+            "body": "fd2b1063ffadab77ed055d96d0d02e3354453c2f0fb157a8902ccb7bb3e4a279"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2024-06-11T15:58:53.922Z",
+            "lastUsedOn": "2024-06-11T15:58:53.922Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "My Phone",
+            "name": "Unknown Name",
+            "model": "iPhone",
+            "mnemonicWordCount": 24,
+            "systemVersion": null,
+            "hostAppVersion": null,
+            "hostVendor": null
+          }
+        }
+      },
+      {
+        "discriminator": "ledgerHQHardwareWallet",
+        "ledgerHQHardwareWallet": {
+          "id": {
+            "kind": "ledgerHQHardwareWallet",
+            "body": "0099c2c37153e3da8cafff459d21670c94e63cdf383f3ff8ee5ec10621140df0"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519",
+                "secp256k1"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26",
+                "bip44Olympia"
+              ]
+            },
+            "addedOn": "2024-06-11T16:47:51.854Z",
+            "lastUsedOn": "2024-06-11T16:47:51.855Z",
+            "flags": []
+          },
+          "hint": {
+            "name": "Nano S ",
+            "model": "nanoS"
+          }
+        }
+      },
+      {
+        "discriminator": "device",
+        "device": {
+          "id": {
+            "kind": "device",
+            "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "My Phone",
+            "name": "My precious",
+            "model": "iPhone SE 2nd gen",
+            "mnemonicWordCount": 24,
+            "systemVersion": "iOS 17.4.1",
+            "hostAppVersion": "1.6.4",
+            "hostVendor": "Apple"
+          }
+        }
+      },
+      {
+        "discriminator": "device",
+        "device": {
+          "id": {
+            "kind": "device",
+            "body": "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-12-24T17:13:56.123Z",
+            "lastUsedOn": "2023-12-24T17:13:56.123Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "My Phone",
+            "name": "My Pixel",
+            "model": "Pixel 8 Pro",
+            "mnemonicWordCount": 24,
+            "systemVersion": "Android 14 (API 34)",
+            "hostAppVersion": "1.6.4",
+            "hostVendor": "Google"
+          }
+        }
+      },
+      {
+        "discriminator": "device",
+        "device": {
+          "id": {
+            "kind": "device",
+            "body": "3ffc78ba2f0ce71b59480eee8e62955749a7a6f91ceb05364de69ce7e9b6dfa6"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "secp256k1"
+              ],
+              "supportedDerivationPathSchemes": [
+                "bip44Olympia"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "My Phone",
+            "name": "My Pixel",
+            "model": "Pixel 8 Pro",
+            "mnemonicWordCount": 12,
+            "systemVersion": "Android 14 (API 34)",
+            "hostAppVersion": "1.6.4",
+            "hostVendor": "Google"
+          }
+        }
+      },
+      {
+        "discriminator": "ledgerHQHardwareWallet",
+        "ledgerHQHardwareWallet": {
+          "id": {
+            "kind": "ledgerHQHardwareWallet",
+            "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "name": "Orange, scratched",
+            "model": "nanoS+"
+          }
+        }
+      },
+      {
+        "discriminator": "ledgerHQHardwareWallet",
+        "ledgerHQHardwareWallet": {
+          "id": {
+            "kind": "ledgerHQHardwareWallet",
+            "body": "52ef052a0642a94279b296d6b3b17dedc035a7ae37b76c1d60f11f2725100077"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "secp256k1"
+              ],
+              "supportedDerivationPathSchemes": [
+                "bip44Olympia"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "name": "Old cracked",
+            "model": "nanoS"
+          }
+        }
+      },
+      {
+        "discriminator": "arculusCard",
+        "arculusCard": {
+          "id": {
+            "kind": "arculusCard",
+            "body": "12f36554769cd96614776e6dbd5629825b8e87366eec5e515de32bb1ea153820"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "Silver",
+            "model": "arculusColdStorageWallet"
+          }
+        }
+      },
+      {
+        "discriminator": "arculusCard",
+        "arculusCard": {
+          "id": {
+            "kind": "arculusCard",
+            "body": "3ac064d4b40f78effe7037a12f3287efc67aa87af7c6a083738eae05e28dadaf"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "Black",
+            "model": "arculusColdStorageWallet"
+          }
+        }
+      },
+      {
+        "discriminator": "offDeviceMnemonic",
+        "offDeviceMnemonic": {
+          "id": {
+            "kind": "offDeviceMnemonic",
+            "body": "820122c9573768ab572b0c9fa492a45b7b451a2740291b3da908ad423d10e410"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "Story about a horse"
+          }
+        }
+      },
+      {
+        "discriminator": "offDeviceMnemonic",
+        "offDeviceMnemonic": {
+          "id": {
+            "kind": "offDeviceMnemonic",
+            "body": "5c308b9c3e41912d4af4c5ff088e84877aac5de01c95f32dedd280d55a6d8262"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "Thrilled with a shark"
+          }
+        }
+      },
+      {
+        "discriminator": "password",
+        "password": {
+          "id": {
+            "kind": "password",
+            "body": "181ab662e19fac3ad9f08d5c673b286d4a5ed9cd3762356dc9831dc42427c1b9"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "Password 1"
+          }
+        }
+      },
+      {
+        "discriminator": "password",
+        "password": {
+          "id": {
+            "kind": "password",
+            "body": "64e20b1ecbba92f7d2e8aedfc89c5333ef5ffa4ab6c6328f13833ca235db5a8e"
+          },
+          "common": {
+            "cryptoParameters": {
+              "supportedCurves": [
+                "curve25519"
+              ],
+              "supportedDerivationPathSchemes": [
+                "cap26"
+              ]
+            },
+            "addedOn": "2023-09-11T16:05:56.000Z",
+            "lastUsedOn": "2023-09-11T16:05:56.000Z",
+            "flags": []
+          },
+          "hint": {
+            "label": "Password 2"
+          }
+        }
+      }
+    ],
+    "appPreferences": {
+      "display": {
+        "isCurrencyAmountVisible": true,
+        "fiatCurrencyPriceTarget": "usd"
+      },
+      "gateways": {
+        "current": "https://babylon-stokenet-gateway.radixdlt.com/",
+        "saved": [
+          {
+            "network": {
+              "name": "stokenet",
+              "id": 2,
+              "displayDescription": "Stokenet"
+            },
+            "url": "https://babylon-stokenet-gateway.radixdlt.com/"
+          },
+          {
+            "network": {
+              "name": "enkinet",
+              "id": 33,
+              "displayDescription": "Enkinet (Test Network)"
+            },
+            "url": "https://enkinet-gateway.radixdlt.com/"
+          },
+          {
+            "network": {
+              "name": "mainnet",
+              "id": 1,
+              "displayDescription": "Mainnet"
+            },
+            "url": "https://mainnet.radixdlt.com/"
+          }
+        ]
+      },
+      "security": {
+        "isCloudProfileSyncEnabled": true,
+        "isDeveloperModeEnabled": true,
+        "isAdvancedLockEnabled": false,
+        "securityStructuresOfFactorSourceIDs": []
+      },
+      "transaction": {
+        "defaultDepositGuarantee": "0.99"
+      }
+    },
+    "networks": [
+      {
+        "networkID": 1,
+        "accounts": [
+          {
+            "networkID": 1,
+            "address": "account_rdx12yftd6ky75wgd3mwee3ln8g4kusfjy98wwzc8ls8d273y47fvexa57",
+            "displayName": "Ukair",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "fd2b1063ffadab77ed055d96d0d02e3354453c2f0fb157a8902ccb7bb3e4a279"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "21184827bfe77ab35e07685da25de4a867a5cd958d85e26bacacddd9c02e0d50"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/1H/525H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "appearanceID": 0,
+            "flags": [],
+            "onLedgerSettings": {
+              "thirdPartyDeposits": {
+                "depositRule": "acceptAll",
+                "assetsExceptionList": [],
+                "depositorsAllowList": []
+              }
+            }
+          },
+          {
+            "networkID": 1,
+            "address": "account_rdx12yjc00deuhjq8p6p2spcnyhr42w3m4uxdtmp087a8ew08wjz87fjnq",
+            "displayName": "Umair 2",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "ledgerHQHardwareWallet",
+                      "body": "0099c2c37153e3da8cafff459d21670c94e63cdf383f3ff8ee5ec10621140df0"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "4b37883a76fff67747666429fc97fcf0b70e4600b0fc0f256bc4bac6fa8def36"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/1H/525H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "appearanceID": 1,
+            "flags": [],
+            "onLedgerSettings": {
+              "thirdPartyDeposits": {
+                "depositRule": "acceptAll",
+                "assetsExceptionList": [],
+                "depositorsAllowList": []
+              }
+            }
+          }
+        ],
+        "personas": [
+          {
+            "networkID": 1,
+            "address": "identity_rdx122z50pxj0an533n0gs0skmguxjr23e202d37pycnkxz3wkykjyqj8l",
+            "displayName": "Dgg",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "89e8a4b06b07c9ac3eeadc944b4cb7e5540fb38f9c90cb9944e4f98cbd64719e"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "e32b6f1094a7966b6aa70367d1792e02600e3175da98d1b4138fd4a780242697"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/1H/618H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "flags": [],
+            "personaData": {
+              "name": null,
+              "phoneNumbers": [],
+              "emailAddresses": []
+            }
+          }
+        ],
+        "authorizedDapps": [
+          {
+            "networkID": 1,
+            "dAppDefinitionAddress": "account_rdx129vf97vuy4lwcz23gezjhvcflsx5mvfcaqqgy8keunfmfj3kkhhk2f",
+            "displayName": "The Radix Billboard",
+            "referencesToAuthorizedPersonas": [
+              {
+                "identityAddress": "identity_rdx122z50pxj0an533n0gs0skmguxjr23e202d37pycnkxz3wkykjyqj8l",
+                "lastLogin": "2024-12-16T14:47:20.661Z",
+                "sharedAccounts": {
+                  "request": {
+                    "quantifier": "exactly",
+                    "quantity": 1
+                  },
+                  "ids": [
+                    "account_rdx12yjc00deuhjq8p6p2spcnyhr42w3m4uxdtmp087a8ew08wjz87fjnq"
+                  ]
+                },
+                "sharedPersonaData": {
+                  "name": null,
+                  "emailAddresses": null,
+                  "phoneNumbers": null
+                }
+              }
+            ],
+            "preferences": {
+              "deposits": "visible"
+            }
+          }
+        ],
+        "resource_preferences": []
+      },
+      {
+        "networkID": 2,
+        "accounts": [
+          {
+            "networkID": 2,
+            "address": "account_tdx_2_12yvln9gws3h9kus8s6qrzfx4hmc86j98s6lul8tw20cwxapmgwha8u",
+            "displayName": "Stoke",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "fd2b1063ffadab77ed055d96d0d02e3354453c2f0fb157a8902ccb7bb3e4a279"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "35f29e28760f3d52df0e60e9ae6b89dc7795819d33f2a2debae9e03c5af3d848"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/2H/525H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "appearanceID": 0,
+            "flags": [],
+            "onLedgerSettings": {
+              "thirdPartyDeposits": {
+                "depositRule": "acceptAll",
+                "assetsExceptionList": [],
+                "depositorsAllowList": []
+              }
+            }
+          },
+          {
+            "networkID": 2,
+            "address": "account_tdx_2_12yuuepgvs9s7ch8vk20qv2m3gz27uanakmkdphvl9dtenex7dthgw3",
+            "displayName": "Stoke ledger nano s",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "ledgerHQHardwareWallet",
+                      "body": "0099c2c37153e3da8cafff459d21670c94e63cdf383f3ff8ee5ec10621140df0"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "5b787160032ef47590eb83e4c63dfb8e8c12eec9a82a4bf57777afd79fbd45e2"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/2H/525H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "appearanceID": 1,
+            "flags": [
+              "tombstonedByUser"
+            ],
+            "onLedgerSettings": {
+              "thirdPartyDeposits": {
+                "depositRule": "acceptAll",
+                "assetsExceptionList": [],
+                "depositorsAllowList": []
+              }
+            }
+          },
+          {
+            "networkID": 2,
+            "address": "account_tdx_2_1294d3fz0x4cmcn7k3rc7xk5062q3lvdg0cmgfgehngtkfjxgledgyr",
+            "displayName": "Acc",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "89e8a4b06b07c9ac3eeadc944b4cb7e5540fb38f9c90cb9944e4f98cbd64719e"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "22e7bf5db7deccb9b2c7ad761b73fa59f637477282413a68fa7afeb30c4a57c3"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/2H/525H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "appearanceID": 2,
+            "flags": [],
+            "onLedgerSettings": {
+              "thirdPartyDeposits": {
+                "depositRule": "acceptAll",
+                "assetsExceptionList": [],
+                "depositorsAllowList": []
+              }
+            }
+          }
+        ],
+        "personas": [
+          {
+            "networkID": 2,
+            "address": "identity_tdx_2_12g59au3nkfue3uakkz8xnpw6ap40k24mxslg3ed3u4xakkkqm9lwj9",
+            "displayName": "Umair",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "fd2b1063ffadab77ed055d96d0d02e3354453c2f0fb157a8902ccb7bb3e4a279"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "41c0f4e145026461d0ff2f8407cecedf63c332c21ceb0d2fc7ab04ef299138aa"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/2H/618H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "flags": [],
+            "personaData": {
+              "name": {
+                "id": "05dccd5d-58c0-4b14-8d3f-6d2550493222",
+                "value": {
+                  "variant": "western",
+                  "familyName": "",
+                  "givenNames": "",
+                  "nickname": ""
+                }
+              },
+              "phoneNumbers": [],
+              "emailAddresses": []
+            }
+          }
+        ],
+        "authorizedDapps": [
+          {
+            "networkID": 2,
+            "dAppDefinitionAddress": "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe",
+            "displayName": "Radix dApp Sandbox",
+            "referencesToAuthorizedPersonas": [
+              {
+                "identityAddress": "identity_tdx_2_12g59au3nkfue3uakkz8xnpw6ap40k24mxslg3ed3u4xakkkqm9lwj9",
+                "lastLogin": "2024-06-11T16:48:54.308Z",
+                "sharedAccounts": {
+                  "request": {
+                    "quantifier": "atLeast",
+                    "quantity": 1
+                  },
+                  "ids": [
+                    "account_tdx_2_12yvln9gws3h9kus8s6qrzfx4hmc86j98s6lul8tw20cwxapmgwha8u"
+                  ]
+                },
+                "sharedPersonaData": {
+                  "name": "05dccd5d-58c0-4b14-8d3f-6d2550493222",
+                  "emailAddresses": null,
+                  "phoneNumbers": null
+                }
+              }
+            ],
+            "preferences": {
+              "deposits": "visible"
+            }
+          },
+          {
+            "networkID": 2,
+            "dAppDefinitionAddress": "account_tdx_2_12yc4tta7glxztgyhwuc9049zt97pmyvctk6clgxth48tjf6pxrfkv2",
+            "displayName": "Dapp 1",
+            "referencesToAuthorizedPersonas": [
+              {
+                "identityAddress": "identity_tdx_2_12g59au3nkfue3uakkz8xnpw6ap40k24mxslg3ed3u4xakkkqm9lwj9",
+                "lastLogin": "2024-12-17T13:36:06.342Z",
+                "sharedAccounts": {
+                  "request": {
+                    "quantifier": "atLeast",
+                    "quantity": 1
+                  },
+                  "ids": [
+                    "account_tdx_2_12yvln9gws3h9kus8s6qrzfx4hmc86j98s6lul8tw20cwxapmgwha8u",
+                    "account_tdx_2_1294d3fz0x4cmcn7k3rc7xk5062q3lvdg0cmgfgehngtkfjxgledgyr"
+                  ]
+                },
+                "sharedPersonaData": {
+                  "name": "05dccd5d-58c0-4b14-8d3f-6d2550493222",
+                  "emailAddresses": null,
+                  "phoneNumbers": null
+                }
+              }
+            ],
+            "preferences": {
+              "deposits": "visible"
+            }
+          },
+          {
+            "networkID": 2,
+            "dAppDefinitionAddress": "account_tdx_21_12yuvhfpejvsnqtfkst9f25xnzlvmgm37rfj3t8dxs43a7qz8r29arf",
+            "displayName": null,
+            "referencesToAuthorizedPersonas": [
+              {
+                "identityAddress": "identity_tdx_2_12g59au3nkfue3uakkz8xnpw6ap40k24mxslg3ed3u4xakkkqm9lwj9",
+                "lastLogin": "2024-12-17T07:49:29.116Z",
+                "sharedAccounts": {
+                  "request": {
+                    "quantifier": "exactly",
+                    "quantity": 1
+                  },
+                  "ids": [
+                    "account_tdx_2_12yvln9gws3h9kus8s6qrzfx4hmc86j98s6lul8tw20cwxapmgwha8u"
+                  ]
+                },
+                "sharedPersonaData": {
+                  "name": null,
+                  "emailAddresses": null,
+                  "phoneNumbers": null
+                }
+              }
+            ],
+            "preferences": {
+              "deposits": "visible"
+            }
+          },
+          {
+            "networkID": 2,
+            "dAppDefinitionAddress": "account_tdx_2_12965dt6lhlzuvkpys7eec8pz3p37k2j0mwj5p3fry2y5r4fk8jq7u0",
+            "displayName": "Instruct",
+            "referencesToAuthorizedPersonas": [
+              {
+                "identityAddress": "identity_tdx_2_12g59au3nkfue3uakkz8xnpw6ap40k24mxslg3ed3u4xakkkqm9lwj9",
+                "lastLogin": "2024-12-16T14:42:56.374Z",
+                "sharedAccounts": {
+                  "request": {
+                    "quantifier": "atLeast",
+                    "quantity": 1
+                  },
+                  "ids": [
+                    "account_tdx_2_12yvln9gws3h9kus8s6qrzfx4hmc86j98s6lul8tw20cwxapmgwha8u",
+                    "account_tdx_2_1294d3fz0x4cmcn7k3rc7xk5062q3lvdg0cmgfgehngtkfjxgledgyr"
+                  ]
+                },
+                "sharedPersonaData": {
+                  "name": null,
+                  "emailAddresses": null,
+                  "phoneNumbers": null
+                }
+              }
+            ],
+            "preferences": {
+              "deposits": "visible"
+            }
+          }
+        ],
+        "resource_preferences": []
+      },
+      {
+        "networkID": 33,
+        "accounts": [
+          {
+            "networkID": 33,
+            "address": "account_tdx_21_12y20n677gc3c30tx8r0tuq9eavmya2ureth6fapdml5tsvsszsntpd",
+            "displayName": "Acc",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "89e8a4b06b07c9ac3eeadc944b4cb7e5540fb38f9c90cb9944e4f98cbd64719e"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "78e4d5f1ec2cb0fa17e1a1146678a4709c7ae7c7b205dd067b5a9ca3da178346"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/33H/525H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "appearanceID": 0,
+            "flags": [],
+            "onLedgerSettings": {
+              "thirdPartyDeposits": {
+                "depositRule": "acceptAll",
+                "assetsExceptionList": [],
+                "depositorsAllowList": []
+              }
+            }
+          }
+        ],
+        "personas": [
+          {
+            "networkID": 33,
+            "address": "identity_tdx_21_12272at9d3m4y8c2dfepn2s505jfyy202t7s9cy3z3rgn3y7c904kgv",
+            "displayName": "Hsha",
+            "securityState": {
+              "discriminator": "unsecured",
+              "unsecuredEntityControl": {
+                "transactionSigning": {
+                  "factorSourceID": {
+                    "discriminator": "fromHash",
+                    "fromHash": {
+                      "kind": "device",
+                      "body": "89e8a4b06b07c9ac3eeadc944b4cb7e5540fb38f9c90cb9944e4f98cbd64719e"
+                    }
+                  },
+                  "badge": {
+                    "discriminator": "virtualSource",
+                    "virtualSource": {
+                      "discriminator": "hierarchicalDeterministicPublicKey",
+                      "hierarchicalDeterministicPublicKey": {
+                        "publicKey": {
+                          "curve": "curve25519",
+                          "compressedData": "ca3e83fba2dd87ca36ed577f3bd0a991af95624ad8411fec9f3e2937265ec608"
+                        },
+                        "derivationPath": {
+                          "scheme": "cap26",
+                          "path": "m/44H/1022H/33H/618H/1460H/0H"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "flags": [],
+            "personaData": {
+              "name": null,
+              "phoneNumbers": [],
+              "emailAddresses": []
+            }
+          }
+        ],
+        "authorizedDapps": [
+          {
+            "networkID": 33,
+            "dAppDefinitionAddress": "account_tdx_2_12yf9gd53yfep7a669fv2t3wm7nz9zeezwd04n02a433ker8vza6rhe",
+            "displayName": null,
+            "referencesToAuthorizedPersonas": [
+              {
+                "identityAddress": "identity_tdx_21_12272at9d3m4y8c2dfepn2s505jfyy202t7s9cy3z3rgn3y7c904kgv",
+                "lastLogin": "2024-12-17T07:36:29.535Z",
+                "sharedAccounts": {
+                  "request": {
+                    "quantifier": "atLeast",
+                    "quantity": 1
+                  },
+                  "ids": [
+                    "account_tdx_21_12y20n677gc3c30tx8r0tuq9eavmya2ureth6fapdml5tsvsszsntpd"
+                  ]
+                },
+                "sharedPersonaData": {
+                  "name": null,
+                  "emailAddresses": null,
+                  "phoneNumbers": null
+                }
+              }
+            ],
+            "preferences": {
+              "deposits": "visible"
+            }
+          }
+        ],
+        "resource_preferences": []
+      }
+    ]
+  }
