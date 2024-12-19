@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::AuthIntent as InternalAuthIntent;
 use std::hash::Hasher;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct AuthIntent {
     /// The challenge nonce that with some `metadata` values are generating the `RolaChallenge`
     /// needed to be signed
@@ -28,6 +28,40 @@ pub struct AuthIntent {
 impl std::hash::Hash for AuthIntent {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.into_internal().hash(state);
+    }
+}
+
+impl AuthIntent {
+    pub fn into_internal(&self) -> InternalAuthIntent {
+        self.clone().into()
+    }
+}
+
+impl From<InternalAuthIntent> for AuthIntent {
+    fn from(value: InternalAuthIntent) -> Self {
+        Self {
+            challenge_nonce: value.challenge_nonce.into(),
+            network_id: value.network_id.into(),
+            origin: value.origin,
+            dapp_definition_address: value.dapp_definition_address.into(),
+            entities_to_sign: value
+                .entities_to_sign
+                .into_iter()
+                .map(Into::into)
+                .collect(),
+        }
+    }
+}
+
+impl From<AuthIntent> for InternalAuthIntent {
+    fn from(value: AuthIntent) -> Self {
+        Self::new(
+            value.challenge_nonce.into(),
+            value.network_id.into(),
+            value.origin,
+            value.dapp_definition_address.into(),
+            value.entities_to_sign.into_iter().map(Into::into).collect(),
+        )
     }
 }
 

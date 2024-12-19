@@ -17,7 +17,7 @@ pub struct AuthIntent {
     pub dapp_definition_address: DappDefinitionAddress,
 
     /// The entities needed to be signed.
-    pub entities_to_sign: Vec<AddressOfAccountOrPersona>,
+    pub entities_to_sign: IndexSet<AddressOfAccountOrPersona>,
 }
 
 impl AuthIntent {
@@ -40,7 +40,7 @@ impl AuthIntent {
             });
         }
 
-        let entities = entities_to_sign.into_iter().collect_vec();
+        let entities = entities_to_sign.into_iter().collect::<IndexSet<_>>();
         for entity in &entities {
             if entity.network_id() != metadata.network_id {
                 return Err(CommonError::NetworkDiscrepancy {
@@ -64,7 +64,7 @@ impl AuthIntent {
         network_id: NetworkID,
         origin: Url,
         dapp_definition_address: DappDefinitionAddress,
-        entities_to_sign: Vec<AddressOfAccountOrPersona>,
+        entities_to_sign: IndexSet<AddressOfAccountOrPersona>,
     ) -> Self {
         Self {
             challenge_nonce,
