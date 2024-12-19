@@ -2536,12 +2536,12 @@ mod tests {
             let p6 = &Persona::sample_at(6);
 
             let entities_to_sign = vec![
-                AddressOfAccountOrPersona::Account(a0.address.clone()),
-                AddressOfAccountOrPersona::Account(a1.address.clone()),
-                AddressOfAccountOrPersona::Account(a6.address.clone()),
-                AddressOfAccountOrPersona::Identity(p0.address.clone()),
-                AddressOfAccountOrPersona::Identity(p1.address.clone()),
-                AddressOfAccountOrPersona::Identity(p6.address.clone()),
+                AddressOfAccountOrPersona::Account(a0.address),
+                AddressOfAccountOrPersona::Account(a1.address),
+                AddressOfAccountOrPersona::Account(a6.address),
+                AddressOfAccountOrPersona::Identity(p0.address),
+                AddressOfAccountOrPersona::Identity(p1.address),
+                AddressOfAccountOrPersona::Identity(p6.address),
             ];
 
             let auth_intent = AuthIntent::new_from_request(
