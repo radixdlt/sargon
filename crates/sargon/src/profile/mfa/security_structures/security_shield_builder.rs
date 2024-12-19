@@ -122,9 +122,9 @@ impl SecurityShieldBuilder {
 
     pub fn set_authentication_signing_factor(
         &self,
-        new: Option<FactorSourceID>,
+        new: impl Into<Option<FactorSourceID>>,
     ) -> &Self {
-        *self.authentication_signing_factor.write().unwrap() = new;
+        *self.authentication_signing_factor.write().unwrap() = new.into();
         self
     }
 
@@ -435,10 +435,21 @@ impl SecurityShieldBuilder {
         if DisplayName::new(self.get_name()).is_err() {
             return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
         }
-        self.get(|builder| {
+
+        if let Some(matrix_invalid_reason) = self.get(|builder| {
             let r = builder.validate();
             r.as_shield_validation()
-        })
+        }) {
+            return Some(matrix_invalid_reason);
+        }
+
+        if self.get_authentication_signing_factor().is_none() {
+            return Some(
+                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+            );
+        }
+
+        None
     }
 
     /// Validates **just** the primary role **in isolation**.
@@ -578,7 +589,9 @@ mod tests {
 
         let _ = sut
             .set_name("S.H.I.E.L.D.")
-            .set_authentication_signing_factor(Some(FactorSourceID::sample_device()))
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
             // Primary
             .set_number_of_days_until_auto_confirm(42)
             .add_factor_source_to_primary_threshold(
@@ -961,6 +974,7 @@ mod test_invalid {
     #[test]
     fn valid_is_none() {
         let sut = SUT::new();
+        sut.set_authentication_signing_factor(FactorSourceID::sample_device());
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -984,7 +998,9 @@ mod test_invalid {
         sut.add_factor_source_to_confirmation_override(
             FactorSourceID::sample_arculus(),
         );
-        sut.set_authentication_signing_factor(Some(FactorSourceID::sample_device()));
+        sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device(),
+        ));
         sut
     }
 

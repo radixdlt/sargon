@@ -772,10 +772,10 @@ mod tests {
         sut.remove_factor_from_confirmation(f.clone());
         assert_eq!(xs, sut.get_confirmation_factors());
 
-        assert!(matches!(
-            sut.validate(),
-            Some(SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor)
-        ));
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
         sut.set_authentication_signing_factor(Some(
             FactorSourceID::sample_device_other(),
         ));
