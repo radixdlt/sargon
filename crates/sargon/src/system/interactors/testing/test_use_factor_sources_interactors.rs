@@ -4,7 +4,7 @@ pub struct TestUseFactorSourcesInteractors {
     transaction_signing: Arc<dyn SignInteractor<TransactionIntent>>,
     subintent_signing: Arc<dyn SignInteractor<Subintent>>,
     key_derivation: Arc<dyn KeyDerivationInteractor>,
-    auth_signing: Arc<dyn AuthenticationSigningInteractor>,
+    auth_signing: Arc<dyn SignInteractor<AuthIntent>>,
 }
 
 impl TestUseFactorSourcesInteractors {
@@ -12,7 +12,7 @@ impl TestUseFactorSourcesInteractors {
         transaction_signing: Arc<dyn SignInteractor<TransactionIntent>>,
         subintent_signing: Arc<dyn SignInteractor<Subintent>>,
         key_derivation: Arc<dyn KeyDerivationInteractor>,
-        auth_signing: Arc<dyn AuthenticationSigningInteractor>,
+        auth_signing: Arc<dyn SignInteractor<AuthIntent>>,
     ) -> Self {
         Self {
             transaction_signing,
@@ -56,11 +56,11 @@ impl KeyDerivationInteractor for TestUseFactorSourcesInteractors {
 }
 
 #[async_trait::async_trait]
-impl AuthenticationSigningInteractor for TestUseFactorSourcesInteractors {
+impl SignInteractor<AuthIntent> for TestUseFactorSourcesInteractors {
     async fn sign(
         &self,
-        request: AuthenticationSigningRequest,
-    ) -> Result<AuthenticationSigningResponse> {
+        request: SignRequest<AuthIntent>,
+    ) -> Result<SignWithFactorsOutcome<AuthIntentHash>> {
         self.auth_signing.sign(request).await
     }
 }

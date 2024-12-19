@@ -19,11 +19,43 @@ impl Signable for Subintent {
 
     fn signed(
         &self,
-        intent_signatures: IntentSignatures,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
     ) -> Result<Self::Signed> {
-        SignedSubintent::new(self.clone(), intent_signatures)
+        let intent_signatures =
+            signatures_per_owner.values().cloned().collect_vec();
+        SignedSubintent::new(
+            self.clone(),
+            IntentSignatures::new(intent_signatures),
+        )
     }
+}
 
+impl From<SignedSubintent> for Subintent {
+    fn from(val: SignedSubintent) -> Self {
+        val.subintent
+    }
+}
+
+impl IntoIterator for SignedSubintent {
+    type Item = SignatureWithPublicKey;
+    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.subintent_signatures
+            .signatures
+            .into_iter()
+            .map(|s| s.0)
+            .collect_vec()
+            .into_iter()
+    }
+}
+
+impl SignableID for SubintentHash {}
+
+impl ProvidesSamplesByBuildingManifest for Subintent {
     fn sample_entity_addresses_with_pub_key_hashes(
         all_addresses_with_hashes: Vec<(
             AddressOfAccountOrPersona,
@@ -49,28 +81,6 @@ impl Signable for Subintent {
         Self::new(IntentHeaderV2::sample(), manifest, MessageV2::None).unwrap()
     }
 }
-
-impl From<SignedSubintent> for Subintent {
-    fn from(val: SignedSubintent) -> Self {
-        val.subintent
-    }
-}
-
-impl IntoIterator for SignedSubintent {
-    type Item = SignatureWithPublicKey;
-    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.subintent_signatures
-            .signatures
-            .into_iter()
-            .map(|s| s.0)
-            .collect_vec()
-            .into_iter()
-    }
-}
-
-impl SignableID for SubintentHash {}
 
 #[cfg(test)]
 mod test {

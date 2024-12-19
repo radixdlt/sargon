@@ -32,14 +32,14 @@ impl<S: Signable> SignaturesCollector<S> {
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
         profile: &Profile,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
     ) -> Result<Self> {
         Self::with_signers_extraction(
             finish_early_strategy,
             IndexSet::from_iter(profile.factor_sources.iter()),
             transactions,
             interactor,
-            role_kind,
+            purpose,
             |i| SignableWithEntities::extracting_from_profile(&i, profile),
         )
     }
@@ -62,12 +62,12 @@ impl<S: Signable> SignaturesCollector<S> {
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
         interactor: Arc<dyn SignInteractor<S>>,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
     ) -> Self {
         debug!("Init SignaturesCollector");
         let preprocessor = SignaturesCollectorPreprocessor::new(transactions);
         let (petitions, factors) =
-            preprocessor.preprocess(profile_factor_sources, role_kind);
+            preprocessor.preprocess(profile_factor_sources, purpose);
 
         let dependencies = SignaturesCollectorDependencies::new(
             finish_early_strategy,
@@ -87,7 +87,7 @@ impl<S: Signable> SignaturesCollector<S> {
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
         extract_signers: F,
     ) -> Result<Self>
     where
@@ -104,7 +104,7 @@ impl<S: Signable> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             interactor,
-            role_kind,
+            purpose,
         );
 
         Ok(collector)
@@ -421,9 +421,9 @@ mod tests {
 
     use super::*;
 
-    impl SignaturesCollector<TransactionIntent> {
+    impl<S: Signable> SignaturesCollector<S> {
         /// Used by tests
-        pub(crate) fn petitions(self) -> Petitions<TransactionIntent> {
+        pub(crate) fn petitions(self) -> Petitions<S> {
             self.state
                 .read()
                 .expect("SignaturesCollector lock should not have been poisoned.")
@@ -431,6 +431,101 @@ mod tests {
                 .read()
                 .expect("SignaturesCollectorState lock should not have been poisoned.")
                 .clone()
+        }
+    }
+
+    fn assert_petition<S: Signable>(
+        petitions: &Petitions<S>,
+        t: &S,
+        threshold_factors: HashMap<
+            AddressOfAccountOrPersona,
+            HashSet<FactorSourceIDFromHash>,
+        >,
+        override_factors: HashMap<
+            AddressOfAccountOrPersona,
+            HashSet<FactorSourceIDFromHash>,
+        >,
+    ) {
+        let petitions_ref = petitions
+            .txid_to_petition
+            .read()
+            .expect("Petitions lock should not have been poisoned");
+        let signable_id = t.get_id();
+        let petition = petitions_ref.get(&signable_id).unwrap();
+        assert_eq!(petition.signable.get_id(), signable_id);
+
+        let mut addresses = threshold_factors.keys().collect::<HashSet<_>>();
+        addresses.extend(override_factors.keys().collect::<HashSet<_>>());
+
+        assert_eq!(
+            petition
+                .for_entities
+                .read()
+                .expect("PetitionForTransaction lock should not have been poisoned.")
+                .keys()
+                .collect::<HashSet<_>>(),
+            addresses
+        );
+
+        assert!(petition
+            .for_entities
+            .read()
+            .expect(
+                "PetitionForTransaction lock should not have been poisoned."
+            )
+            .iter()
+            .all(|(a, p)| { p.entity == *a }));
+
+        assert!(petition
+            .for_entities
+            .read()
+            .expect(
+                "PetitionForTransaction lock should not have been poisoned."
+            )
+            .iter()
+            .all(|(_, p)| { p.payload_id == t.get_id() }));
+
+        for (k, v) in petition
+            .for_entities
+            .read()
+            .expect(
+                "PetitionForTransaction lock should not have been poisoned.",
+            )
+            .iter()
+        {
+            let threshold = threshold_factors.get(k);
+            if let Some(actual_threshold) = &v.threshold_factors {
+                let threshold = threshold.unwrap().clone();
+                assert_eq!(
+                    actual_threshold
+                        .read()
+                        .expect("PetitionForEntity lock should not have been poisoned.")
+                        .factor_instances()
+                        .into_iter()
+                        .map(|f| f.factor_source_id)
+                        .collect::<HashSet<_>>(),
+                    threshold
+                );
+            } else {
+                assert!(threshold.is_none());
+            }
+
+            let override_ = override_factors.get(k);
+            if let Some(actual_override) = &v.override_factors {
+                let override_ = override_.unwrap().clone();
+                assert_eq!(
+                    actual_override
+                        .read()
+                        .expect("PetitionForEntity lock should not have been poisoned.")
+                        .factor_instances()
+                        .into_iter()
+                        .map(|f| f.factor_source_id)
+                        .collect::<HashSet<_>>(),
+                    override_
+                );
+            } else {
+                assert!(override_.is_none());
+            }
         }
     }
 
@@ -444,7 +539,7 @@ mod tests {
             )],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(IndexSet::new(), [], []),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         );
         assert!(res.is_ok());
     }
@@ -459,7 +554,7 @@ mod tests {
             )],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(IndexSet::new(), [], []),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         );
         assert!(matches!(res, Err(CommonError::UnknownPersona)));
     }
@@ -477,7 +572,7 @@ mod tests {
             )],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &Profile::sample_from(factors_sources, [], [&persona]),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
         .unwrap();
         let outcome = collector.collect_signatures().await.unwrap();
@@ -510,7 +605,7 @@ mod tests {
                 ),
             )),
             &profile,
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
         .unwrap();
 
@@ -543,7 +638,7 @@ mod tests {
                     SimulatedUser::prudent_no_fail(),
                 )),
                 &profile,
-                RoleKind::Primary,
+                SigningPurpose::sign_transaction_primary(),
             )
             .unwrap();
 
@@ -615,7 +710,7 @@ mod tests {
             [t0.clone(), t1.clone(), t2.clone(), t3.clone()],
             Arc::new(TestSignInteractor::new(SimulatedUser::prudent_no_fail())),
             &profile,
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
         .unwrap();
 
@@ -665,96 +760,8 @@ mod tests {
             );
         }
 
-        let assert_petition = |t: &TransactionIntent,
-                               threshold_factors: HashMap<
-            AddressOfAccountOrPersona,
-            HashSet<FactorSourceIDFromHash>,
-        >,
-                               override_factors: HashMap<
-            AddressOfAccountOrPersona,
-            HashSet<FactorSourceIDFromHash>,
-        >| {
-            let petitions_ref = petitions
-                .txid_to_petition
-                .read()
-                .expect("Petitions lock should not have been poisoned");
-            let petition =
-                petitions_ref.get(&t.transaction_intent_hash()).unwrap();
-            assert_eq!(
-                petition.signable.transaction_intent_hash(),
-                t.transaction_intent_hash()
-            );
-
-            let mut addresses =
-                threshold_factors.keys().collect::<HashSet<_>>();
-            addresses.extend(override_factors.keys().collect::<HashSet<_>>());
-
-            assert_eq!(
-                petition
-                    .for_entities
-                    .read()
-                    .expect("PetitionForTransaction lock should not have been poisoned.")
-                    .keys()
-                    .collect::<HashSet<_>>(),
-                addresses
-            );
-
-            assert!(petition
-                .for_entities
-                .read()
-                .expect("PetitionForTransaction lock should not have been poisoned.")
-                .iter()
-                .all(|(a, p)| { p.entity == *a }));
-
-            assert!(petition
-                .for_entities
-                .read()
-                .expect("PetitionForTransaction lock should not have been poisoned.")
-                .iter()
-                .all(|(_, p)| { p.payload_id == t.transaction_intent_hash() }));
-
-            for (k, v) in petition
-                .for_entities
-                .read()
-                .expect("PetitionForTransaction lock should not have been poisoned.")
-                .iter()
-            {
-                let threshold = threshold_factors.get(k);
-                if let Some(actual_threshold) = &v.threshold_factors {
-                    let threshold = threshold.unwrap().clone();
-                    assert_eq!(
-                        actual_threshold
-                            .read()
-                            .expect("PetitionForEntity lock should not have been poisoned.")
-                            .factor_instances()
-                            .into_iter()
-                            .map(|f| f.factor_source_id)
-                            .collect::<HashSet<_>>(),
-                        threshold
-                    );
-                } else {
-                    assert!(threshold.is_none());
-                }
-
-                let override_ = override_factors.get(k);
-                if let Some(actual_override) = &v.override_factors {
-                    let override_ = override_.unwrap().clone();
-                    assert_eq!(
-                        actual_override
-                            .read()
-                            .expect("PetitionForEntity lock should not have been poisoned.")
-                            .factor_instances()
-                            .into_iter()
-                            .map(|f| f.factor_source_id)
-                            .collect::<HashSet<_>>(),
-                        override_
-                    );
-                } else {
-                    assert!(override_.is_none());
-                }
-            }
-        };
         assert_petition(
+            &petitions,
             &t0,
             HashMap::from_iter([
                 (
@@ -778,6 +785,7 @@ mod tests {
         );
 
         assert_petition(
+            &petitions,
             &t1,
             HashMap::from_iter([
                 (
@@ -797,6 +805,7 @@ mod tests {
         );
 
         assert_petition(
+            &petitions,
             &t2,
             HashMap::from_iter([
                 (
@@ -816,6 +825,7 @@ mod tests {
         );
 
         assert_petition(
+            &petitions,
             &t3,
             HashMap::from_iter([
                 (
@@ -893,7 +903,7 @@ mod tests {
                 [t0.clone(), t1.clone(), t2.clone()],
                 Arc::new(TestSignInteractor::new(sim)),
                 &profile,
-                RoleKind::Primary,
+                SigningPurpose::sign_transaction_primary(),
             )
             .unwrap();
 
@@ -1036,7 +1046,7 @@ mod tests {
                 [t0.clone(), t1.clone(), t2.clone(), t3.clone()],
                 Arc::new(TestSignInteractor::new(vector.simulated_user)),
                 &profile,
-                RoleKind::Primary,
+                SigningPurpose::sign_transaction_primary(),
             )
             .unwrap();
 
@@ -1130,7 +1140,7 @@ mod tests {
                         ),
                     )),
                     &profile,
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 )
                 .unwrap();
 
@@ -1192,7 +1202,7 @@ mod tests {
                         ),
                     )),
                     &profile,
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 )
                 .unwrap();
 
@@ -1279,7 +1289,7 @@ mod tests {
                         ]),
                     ))),
                     &profile,
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 )
                 .unwrap();
 
@@ -2080,7 +2090,7 @@ mod tests {
                             FactorSourceIDFromHash::sample_at(4),
                         ]),
                     ),
-                    RoleKind::Primary,
+                    SigningPurpose::sign_transaction_primary(),
                 );
 
                 let outcome = collector.collect_signatures().await.unwrap();
@@ -2507,6 +2517,105 @@ mod tests {
                     building_can_succeed_even_if_one_factor_source_fails_assert_ids_of_failed_tx_e4::<E>().await
                 }
             }
+        }
+    }
+
+    mod rola {
+        use super::*;
+
+        #[actix_rt::test]
+        async fn test_petitions_for() {
+            let factor_sources = &FactorSource::sample_all();
+
+            let a0 = &Account::sample_at(0);
+            let a1 = &Account::sample_at(1);
+            let a6 = &Account::sample_at(6);
+
+            let p0 = &Persona::sample_at(0);
+            let p1 = &Persona::sample_at(1);
+            let p6 = &Persona::sample_at(6);
+
+            let entities_to_sign = vec![
+                AddressOfAccountOrPersona::Account(a0.address),
+                AddressOfAccountOrPersona::Account(a1.address),
+                AddressOfAccountOrPersona::Account(a6.address),
+                AddressOfAccountOrPersona::Identity(p0.address),
+                AddressOfAccountOrPersona::Identity(p1.address),
+                AddressOfAccountOrPersona::Identity(p6.address),
+            ];
+
+            let auth_intent = AuthIntent::new_from_request(
+                DappToWalletInteractionAuthChallengeNonce::sample(),
+                DappToWalletInteractionMetadata::sample(),
+                entities_to_sign,
+            )
+            .unwrap();
+
+            let profile = Profile::sample_from(
+                factor_sources.clone(),
+                [a0, a1, a6],
+                [p0, p1, p6],
+            );
+
+            let collector = SignaturesCollector::new(
+                SigningFinishEarlyStrategy::default(),
+                [auth_intent.clone()],
+                Arc::new(TestSignInteractor::new(
+                    SimulatedUser::prudent_no_fail(),
+                )),
+                &profile,
+                SigningPurpose::ROLA,
+            )
+            .unwrap();
+
+            let petitions = collector.petitions();
+
+            assert_eq!(
+                petitions
+                    .txid_to_petition
+                    .read()
+                    .expect("Petitions lock should not have been poisoned")
+                    .len(),
+                1
+            );
+
+            assert_petition(
+                &petitions,
+                &auth_intent,
+                HashMap::from_iter([
+                    (
+                        a0.address.into(),
+                        HashSet::just(FactorSourceIDFromHash::sample_at(0)),
+                    ),
+                    (
+                        a1.address.into(),
+                        HashSet::just(FactorSourceIDFromHash::sample_at(1)),
+                    ),
+                    (
+                        a6.address.into(),
+                        HashSet::from_iter([
+                            // Only device factor source is used for signing auth for securified entity
+                            FactorSourceIDFromHash::sample_at(0),
+                        ]),
+                    ),
+                    (
+                        p0.address.into(),
+                        HashSet::just(FactorSourceIDFromHash::sample_at(0)),
+                    ),
+                    (
+                        p1.address.into(),
+                        HashSet::just(FactorSourceIDFromHash::sample_at(1)),
+                    ),
+                    (
+                        p6.address.into(),
+                        HashSet::from_iter([
+                            // Only device factor source is used for signing auth for securified entity
+                            FactorSourceIDFromHash::sample_at(0),
+                        ]),
+                    ),
+                ]),
+                HashMap::from_iter([]),
+            );
         }
     }
 }
