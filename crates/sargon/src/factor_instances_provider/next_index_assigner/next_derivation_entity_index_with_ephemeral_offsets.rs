@@ -120,8 +120,10 @@ mod tests {
             vec![
                 HDPathComponent::unsecurified_hardened(0u32).unwrap(), // Account Veci
                 HDPathComponent::Securified(SecurifiedU30::ZERO), // Account MFA
+                HDPathComponent::Securified(SecurifiedU30::ZERO), // Account Rola
                 HDPathComponent::unsecurified_hardened(0u32).unwrap(), // Identify Veci
                 HDPathComponent::Securified(SecurifiedU30::ZERO), // Identity MFA
+                HDPathComponent::Securified(SecurifiedU30::ZERO), // Identity Rola
             ]
         );
     }

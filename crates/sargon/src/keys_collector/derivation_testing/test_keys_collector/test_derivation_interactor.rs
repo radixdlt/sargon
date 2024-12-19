@@ -54,7 +54,7 @@ impl TestDerivationInteractor {
             cloned_client,
             async move |id| {
                 id.maybe_sample_associated_mnemonic()
-                    .ok_or(CommonError::Unknown)
+                    .ok_or(CommonError::FactorSourceDiscrepancy)
             },
         )
         .await

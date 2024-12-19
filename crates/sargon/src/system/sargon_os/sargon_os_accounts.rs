@@ -800,70 +800,124 @@ impl SargonOS {
 impl SargonOS {
     #[allow(dead_code)]
     #[cfg(test)]
-    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
-        A: IsEntityAddress,
-    >(
+    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
         &self,
-        addresses_of_entities: IndexSet<A>,
+        addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
     ) -> Result<(
-        IndexMap<A, SecurityStructureOfFactorInstances>,
+        IndexMap<AddressOfAccountOrPersona, SecurityStructureOfFactorInstances>,
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcome,
     )> {
         let profile_snapshot = self.profile()?;
         let key_derivation_interactors = self.keys_derivation_interactor();
-        let matrix_of_factor_sources =
-            &security_structure_of_factor_sources.matrix_of_factors;
 
+        // if you need to UPDATE already securified, upgrade this to conditionally consume ROLA
+        // factors, by not using `QuantifiedDerivationPreset::securifying_unsecurified_entities`
+        // inside of SecurifyEntityFactorInstancesProvider::securifying_unsecurified. I.e. create the set of `QuantifiedDerivationPreset` which does not unconditionally
+        // specify ROLA factors.
         let (instances_in_cache_consumer, outcome) =
-            SecurifyEntityFactorInstancesProvider::for_entity_mfa::<A>(
+            SecurifyEntityFactorInstancesProvider::securifying_unsecurified(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
-                matrix_of_factor_sources.clone(),
+                security_structure_of_factor_sources.clone(),
                 addresses_of_entities.clone(),
                 key_derivation_interactors,
             )
             .await?;
 
-        let mut instances_per_factor_source = outcome
+        let mut instances_per_preset_per_factor_source = outcome
             .clone()
-            .per_factor
+            .per_derivation_preset
             .into_iter()
-            .map(|(k, outcome_per_factor)| {
-                (k, outcome_per_factor.to_use_directly)
+            .map(|(preset, pf)| {
+                (
+                    preset,
+                    pf
+                    .per_factor
+                    .into_iter()
+                    .map(|(k, v)| (k, v.to_use_directly)).collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
+                )
             })
-            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
+            .collect::<InstancesPerDerivationPresetPerFactorSource>();
 
         assert_eq!(
-            instances_per_factor_source
-                .keys()
-                .cloned()
+            instances_per_preset_per_factor_source
+                .clone()
+                .into_iter()
+                .flat_map(|(_, y)| {
+                    y.into_iter()
+                        .map(|(a, _)| a)
+                        .collect::<HashSet<FactorSourceIDFromHash>>()
+                })
                 .collect::<HashSet<FactorSourceIDFromHash>>(),
-            matrix_of_factor_sources
+            security_structure_of_factor_sources
                 .all_factors()
                 .into_iter()
                 .map(|f| f.id_from_hash())
                 .collect::<HashSet<FactorSourceIDFromHash>>()
         );
 
-        let security_structure_id = security_structure_of_factor_sources.id();
+        let mut security_structures_of_factor_instances = IndexMap::<
+            AddressOfAccountOrPersona,
+            SecurityStructureOfFactorInstances,
+        >::new();
 
-        let security_structures_of_factor_instances = addresses_of_entities.clone().into_iter().map(|entity_address|
-        {
-            let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
-               let matrix_of_factor_instances = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
-                &mut instances_per_factor_source,
-                matrix_of_factor_sources.clone(),
-               )?;
-                SecurityStructureOfFactorInstances::new(
-                    security_structure_id,
-                    matrix_of_factor_instances,
-                    HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(entity_address.network_id(), CAP26KeyKind::AuthenticationSigning, A::entity_kind(), Hardened::Securified(SecurifiedU30::ZERO)),
-                )?
+        let mut distribute_instances_for_entity_of_kind_if_needed =
+            |entity_kind: CAP26EntityKind| -> Result<()> {
+                let addresses_of_kind = addresses_of_entities
+                    .iter()
+                    .filter(|a| a.get_entity_kind() == entity_kind)
+                    .collect::<IndexSet<_>>();
+
+                if addresses_of_kind.is_empty() {
+                    return Ok(());
+                };
+
+                let mut instances_per_factor_source = {
+                    let tx_preset =
+                        DerivationPreset::mfa_entity_kind(entity_kind);
+                    let rola_preset =
+                        DerivationPreset::rola_entity_kind(entity_kind);
+
+                    let instances_per_factor_source_mfa = instances_per_preset_per_factor_source
+                    .swap_remove(&tx_preset)
+                    .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", tx_preset));
+
+                    let instances_per_factor_source_rola = instances_per_preset_per_factor_source
+                    .swap_remove(&rola_preset)
+                    .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", rola_preset));
+
+                    // Merge `instances_per_factor_source_mfa` and `instances_per_factor_source_rola` together
+                    let mut instances_per_factor_source =
+                        instances_per_factor_source_mfa;
+                    for (k, v) in instances_per_factor_source_rola {
+                        instances_per_factor_source.append_or_insert_to(k, v);
+                    }
+                    instances_per_factor_source
+                };
+
+                for entity_address in addresses_of_kind.clone().into_iter() {
+                    let security_structure_of_factor_instances = SecurityStructureOfFactorInstances::fulfilling_structure_of_factor_sources_with_instances(
+                        &mut instances_per_factor_source,
+                        &security_structure_of_factor_sources
+                    )?;
+
+                    security_structures_of_factor_instances.insert(
+                        *entity_address,
+                        security_structure_of_factor_instances,
+                    );
+                }
+
+                Ok(())
             };
-            Ok((entity_address, security_structure_of_factor_instances))
-        }).collect::<Result<IndexMap<A, SecurityStructureOfFactorInstances>>>()?;
+
+        distribute_instances_for_entity_of_kind_if_needed(
+            CAP26EntityKind::Account,
+        )?;
+        distribute_instances_for_entity_of_kind_if_needed(
+            CAP26EntityKind::Identity,
+        )?;
 
         Ok((
             security_structures_of_factor_instances,

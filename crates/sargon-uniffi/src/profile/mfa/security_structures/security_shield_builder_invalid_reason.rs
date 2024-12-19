@@ -8,6 +8,9 @@ use thiserror::Error as ThisError;
     Clone, Debug, ThisError, PartialEq, InternalConversion, uniffi::Error,
 )]
 pub enum SecurityShieldBuilderInvalidReason {
+    #[error("Auth Signing Factor Missing")]
+    MissingAuthSigningFactor,
+
     #[error("Shield name is invalid")]
     ShieldNameInvalid,
 

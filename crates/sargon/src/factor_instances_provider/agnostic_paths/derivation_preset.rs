@@ -25,6 +25,12 @@ pub enum DerivationPreset {
     AccountMfa,
 
     /// Used to form DerivationPaths used to derive FactorInstances
+    /// for Authentication Signing (Securified) for accounts
+    /// `(EntityKind::Account, KeySpace::Securified, KeyKind::AuthenticationSigning)`
+    #[debug("A-Rola")]
+    AccountRola,
+
+    /// Used to form DerivationPaths used to derive FactorInstances
     /// for "veci": Virtual Entity Creating (Factor)Instance for personas.
     /// `(EntityKind::Identity, KeySpace::Unsecurified, KeyKind::TransactionSigning)`
     #[debug("I-VECI")]
@@ -35,6 +41,12 @@ pub enum DerivationPreset {
     /// `(EntityKind::Identity, KeySpace::Securified, KeyKind::TransactionSigning)`
     #[debug("I-MFA")]
     IdentityMfa,
+
+    /// Used to form DerivationPaths used to derive FactorInstances
+    /// for Authentication Signing (Securified) for peresonas
+    /// `(EntityKind::Identity, KeySpace::Securified, KeyKind::AuthenticationSigning)`
+    #[debug("I-Rola")]
+    IdentityRola,
 }
 
 // =============
@@ -63,6 +75,15 @@ impl DerivationPreset {
             CAP26EntityKind::Identity => Self::IdentityMfa,
         }
     }
+
+    /// Selects a `DerivationPreset` for MFA based on `CAP26EntityKind`,
+    /// i.e. either `DerivationPreset::AccountRola` or `DerivationPreset::IdentityRola`.
+    pub fn rola_entity_kind(entity_kind: CAP26EntityKind) -> Self {
+        match entity_kind {
+            CAP26EntityKind::Account => Self::AccountRola,
+            CAP26EntityKind::Identity => Self::IdentityRola,
+        }
+    }
 }
 
 // =============
@@ -72,8 +93,12 @@ impl DerivationPreset {
     /// Returns the `CAP26EntityKind` of the `DerivationPreset`.
     pub fn entity_kind(&self) -> CAP26EntityKind {
         match self {
-            Self::AccountVeci | Self::AccountMfa => CAP26EntityKind::Account,
-            Self::IdentityVeci | Self::IdentityMfa => CAP26EntityKind::Identity,
+            Self::AccountVeci | Self::AccountMfa | Self::AccountRola => {
+                CAP26EntityKind::Account
+            }
+            Self::IdentityVeci | Self::IdentityMfa | Self::IdentityRola => {
+                CAP26EntityKind::Identity
+            }
         }
     }
 
@@ -84,6 +109,9 @@ impl DerivationPreset {
             | Self::IdentityVeci
             | Self::AccountMfa
             | Self::IdentityMfa => CAP26KeyKind::TransactionSigning,
+            Self::AccountRola | Self::IdentityRola => {
+                CAP26KeyKind::AuthenticationSigning
+            }
         }
     }
 
@@ -96,7 +124,10 @@ impl DerivationPreset {
                     is_hardened: true,
                 }
             }
-            Self::AccountMfa | Self::IdentityMfa => KeySpace::Securified,
+            Self::AccountMfa
+            | Self::IdentityMfa
+            | Self::AccountRola
+            | Self::IdentityRola => KeySpace::Securified,
         }
     }
 
@@ -135,5 +166,29 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn test_mfa_entity_kind() {
+        assert_eq!(
+            SUT::mfa_entity_kind(CAP26EntityKind::Account),
+            SUT::AccountMfa
+        );
+        assert_eq!(
+            SUT::mfa_entity_kind(CAP26EntityKind::Identity),
+            SUT::IdentityMfa
+        );
+    }
+
+    #[test]
+    fn test_rola_entity_kind() {
+        assert_eq!(
+            SUT::rola_entity_kind(CAP26EntityKind::Account),
+            SUT::AccountRola
+        );
+        assert_eq!(
+            SUT::rola_entity_kind(CAP26EntityKind::Identity),
+            SUT::IdentityRola
+        );
     }
 }

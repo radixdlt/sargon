@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Debug)]
 pub struct SecurityShieldBuilder {
     matrix_builder: RwLock<MatrixBuilder>,
+    authentication_signing_factor: RwLock<Option<FactorSourceID>>,
     name: RwLock<String>,
     // We eagerly set this, and we use it inside the `build` method, ensuring
     // that for the same *state* of `MatrixBuilder` we always have the same shield!
@@ -25,6 +26,7 @@ impl SecurityShieldBuilder {
         Self {
             matrix_builder: RwLock::new(matrix_builder),
             name,
+            authentication_signing_factor: RwLock::new(None),
             shield_id: SecurityStructureID::from(id()),
             created_on: now(),
         }
@@ -88,6 +90,10 @@ impl SecurityShieldBuilder {
         self.name.read().unwrap().clone()
     }
 
+    pub fn get_authentication_signing_factor(&self) -> Option<FactorSourceID> {
+        *self.authentication_signing_factor.read().unwrap()
+    }
+
     pub fn get_primary_threshold_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_threshold_factors())
     }
@@ -111,6 +117,14 @@ impl SecurityShieldBuilder {
 impl SecurityShieldBuilder {
     pub fn set_name(&self, name: impl AsRef<str>) -> &Self {
         *self.name.write().unwrap() = name.as_ref().to_owned();
+        self
+    }
+
+    pub fn set_authentication_signing_factor(
+        &self,
+        new: impl Into<Option<FactorSourceID>>,
+    ) -> &Self {
+        *self.authentication_signing_factor.write().unwrap() = new.into();
         self
     }
 
@@ -421,10 +435,21 @@ impl SecurityShieldBuilder {
         if DisplayName::new(self.get_name()).is_err() {
             return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
         }
-        self.get(|builder| {
+
+        if let Some(matrix_invalid_reason) = self.get(|builder| {
             let r = builder.validate();
             r.as_shield_validation()
-        })
+        }) {
+            return Some(matrix_invalid_reason);
+        }
+
+        if self.get_authentication_signing_factor().is_none() {
+            return Some(
+                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+            );
+        }
+
+        None
     }
 
     /// Validates **just** the primary role **in isolation**.
@@ -503,6 +528,10 @@ impl SecurityShieldBuilder {
         SecurityStructureOfFactorSourceIds,
         SecurityShieldBuilderInvalidReason,
     > {
+        let authentication_signing_factor =
+            self.get_authentication_signing_factor().ok_or(
+                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+            )?;
         let matrix_result = self.get(|builder| builder.build());
 
         if let Some(validation_error) = matrix_result.as_shield_validation() {
@@ -530,6 +559,7 @@ impl SecurityShieldBuilder {
         let shield = SecurityStructureOfFactorSourceIds {
             matrix_of_factors,
             metadata,
+            authentication_signing_factor,
         };
         Ok(shield)
     }
@@ -559,6 +589,9 @@ mod tests {
 
         let _ = sut
             .set_name("S.H.I.E.L.D.")
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
             // Primary
             .set_number_of_days_until_auto_confirm(42)
             .add_factor_source_to_primary_threshold(
@@ -941,6 +974,7 @@ mod test_invalid {
     #[test]
     fn valid_is_none() {
         let sut = SUT::new();
+        sut.set_authentication_signing_factor(FactorSourceID::sample_device());
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -964,6 +998,9 @@ mod test_invalid {
         sut.add_factor_source_to_confirmation_override(
             FactorSourceID::sample_arculus(),
         );
+        sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device(),
+        ));
         sut
     }
 

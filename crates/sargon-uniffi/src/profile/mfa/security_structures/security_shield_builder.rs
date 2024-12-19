@@ -109,6 +109,11 @@ impl SecurityShieldBuilder {
         self.get(|builder| builder.get_name())
     }
 
+    pub fn get_authentication_signing_factor(&self) -> Option<FactorSourceID> {
+        self.get(|builder| builder.get_authentication_signing_factor())
+            .map(|x| x.into())
+    }
+
     pub fn get_primary_threshold_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_threshold_factors())
     }
@@ -133,6 +138,17 @@ impl SecurityShieldBuilder {
 impl SecurityShieldBuilder {
     pub fn set_name(&self, name: String) {
         self.set(|builder| builder.set_name(&name));
+    }
+
+    pub fn set_authentication_signing_factor(
+        &self,
+        new: Option<FactorSourceID>,
+    ) {
+        self.set(|builder| {
+            builder.set_authentication_signing_factor(
+                new.clone().map(|x| x.into_internal()),
+            )
+        });
     }
 
     pub fn remove_factor_from_all_roles(
@@ -756,6 +772,18 @@ mod tests {
         sut.remove_factor_from_confirmation(f.clone());
         assert_eq!(xs, sut.get_confirmation_factors());
 
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+        sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device_other(),
+        ));
+        assert_eq!(
+            sut.get_authentication_signing_factor(),
+            Some(FactorSourceID::sample_device_other())
+        );
+
         let v0 = sut.validate();
         let v1 = sut.validate(); // can call validate many times!
         assert_eq!(v0, v1);
@@ -764,6 +792,10 @@ mod tests {
         let shield = sut.build().unwrap(); // can call build many times!
         assert_eq!(shield0, shield);
 
+        assert_eq!(
+            shield.authentication_signing_factor,
+            FactorSourceID::sample_device_other()
+        );
         assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
         assert_eq!(
             shield.matrix_of_factors.primary_role.override_factors,

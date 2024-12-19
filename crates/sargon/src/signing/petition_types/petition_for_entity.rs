@@ -452,6 +452,7 @@ impl<ID: SignableID + HasSampleValues> HasSampleValues
         Self::from_entity_with_role_kind(
             Account::sample_securified_mainnet(
                 "Grace",
+                6,
                 HierarchicalDeterministicFactorInstance::sample_fii10(),
                 || {
                     GeneralRoleWithHierarchicalDeterministicFactorInstances::r6(HierarchicalDeterministicFactorInstance::sample_id_to_instance(
@@ -648,6 +649,7 @@ mod tests {
         let intent_hash = TransactionIntentHash::sample();
         let entity = Account::sample_securified_mainnet(
             "Alice",
+            0,
             HierarchicalDeterministicFactorInstance::sample_fii10(),
             || {
                 let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(

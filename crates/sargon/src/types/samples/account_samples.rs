@@ -17,6 +17,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Carla | 2 | Securified { Single Threshold only }
         Account::sample_securified_mainnet(
             "Carla",
+            2,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(2),
             || {
                 let idx =
@@ -32,6 +33,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // David | 3 | Securified { Single Override only }
         Account::sample_securified_mainnet(
             "David",
+            3,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(3),
             || {
                 let idx =
@@ -47,6 +49,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Emily | 4 | Securified { Threshold factors only #3 }
         Account::sample_securified_mainnet(
             "Emily",
+            4,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(4),
             || {
                 let idx =
@@ -62,6 +65,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Frank | 5 | Securified { Override factors only #2 }
         Account::sample_securified_mainnet(
             "Frank",
+            5,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(5),
             || {
                 let idx =
@@ -77,6 +81,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Grace | 6 | Securified { Threshold #3 and Override factors #2  }
         Account::sample_securified_mainnet(
             "Grace",
+            6,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(6),
             || {
                 let idx =
@@ -92,6 +97,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Ida | 7 | Securified { Threshold only # 5/5 }
         Account::sample_securified_mainnet(
             "Ida",
+            7,
             HierarchicalDeterministicFactorInstance::sample_fia11(),
             || {
                 let idx =
@@ -112,6 +118,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Klara | 9 |  Securified { Threshold 1/1 and Override factors #1  }
         Account::sample_securified_mainnet(
             "Klara",
+            9,
             HierarchicalDeterministicFactorInstance::sample_fia12(),
             || {
                 let idx =
@@ -153,6 +160,7 @@ impl Account {
 
     pub fn sample_securified_mainnet(
         name: impl AsRef<str>,
+        rola_index: u32,
         veci: HierarchicalDeterministicFactorInstance,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
@@ -169,10 +177,6 @@ impl Account {
                 .into_iter()
                 .map(FactorInstance::from)
                 .collect_vec(),
-        );
-
-        let rola_index = u32::from(
-            veci.derivation_entity_index().index_in_local_key_space(),
         );
 
         let network_id = NetworkID::Mainnet;

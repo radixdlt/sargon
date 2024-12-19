@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 use super::{
-    proto_matrix::ProtoMatrix, quantity::Quantity,
+    proto_shield::ProtoShield, quantity::Quantity,
     CallsToAssignUnsupportedFactor,
 };
 
@@ -32,7 +32,7 @@ pub(crate) struct AutomaticShieldBuilder {
 
     /// The factors assigned to each role, including the factors originally
     /// set for the primary role.
-    proto_matrix: ProtoMatrix,
+    proto_shield: ProtoShield,
 }
 
 impl SecurityShieldBuilder {
@@ -111,14 +111,14 @@ impl SecurityShieldBuilder {
             primary_factors,
         );
 
-        let proto_matrix = auto_builder.assign()?;
+        let proto_shield = auto_builder.assign()?;
 
         assert_eq!(
-            proto_matrix.primary.clone().into_iter().collect_vec(),
+            proto_shield.primary.clone().into_iter().collect_vec(),
             self.get_primary_threshold_factors(),
             "Auto assignment should not have changed the primary factors"
         );
-        self.set_state(proto_matrix);
+        self.set_state(proto_shield);
 
         if let Some(invalid_reason) = self.validate() {
             Err(CommonError::AutomaticShieldBuildingFailure {
@@ -129,17 +129,22 @@ impl SecurityShieldBuilder {
         }
     }
 
-    /// Updates the Primary, Recovery and Confirmation roles with the factors of the given `ProtoMatrix`.
-    fn set_state(&self, proto_matrix: ProtoMatrix) {
+    /// Updates the Authentication Signing Factor,
+    /// Primary (should remain unchanged since these factor should have been set at start of auto assign),
+    /// Recovery and Confirmation roles with the factors of the given `ProtoShield`.
+    fn set_state(&self, proto_shield: ProtoShield) {
         self.reset_factors_in_roles();
-        self.set_threshold(proto_matrix.primary.len() as u8);
-        proto_matrix.primary.into_iter().for_each(|f| {
+        self.set_authentication_signing_factor(Some(
+            proto_shield.authentication_signing_factor,
+        ));
+        self.set_threshold(proto_shield.primary.len() as u8);
+        proto_shield.primary.into_iter().for_each(|f| {
             self.add_factor_source_to_primary_threshold(f);
         });
-        proto_matrix.recovery.into_iter().for_each(|f| {
+        proto_shield.recovery.into_iter().for_each(|f| {
             self.add_factor_source_to_recovery_override(f);
         });
-        proto_matrix.confirmation.into_iter().for_each(|f| {
+        proto_shield.confirmation.into_iter().for_each(|f| {
             self.add_factor_source_to_confirmation_override(f);
         });
     }
@@ -153,8 +158,22 @@ impl AutomaticShieldBuilder {
         Self {
             stats_for_testing: AutoBuildOutcomeForTesting::default(),
             remaining_available_factors: available_factors,
-            proto_matrix: ProtoMatrix::new(primary),
+            proto_shield: ProtoShield::new(primary),
         }
+    }
+
+    fn remaining_factors_matching_selector(
+        &self,
+        selector: FactorSelector,
+    ) -> IndexSet<FactorSourceID> {
+        self.remaining_available_factors
+            .iter()
+            .filter(|&f| match selector {
+                FactorSelector::Category(category) => f.category() == category,
+                FactorSelector::Kind(kind) => f.factor_source_kind() == kind,
+            })
+            .map(|f| f.id())
+            .collect::<IndexSet<_>>()
     }
 
     /// Returns `Some(n)` if any factor matching the selector was found where `n`
@@ -168,15 +187,8 @@ impl AutomaticShieldBuilder {
     ) -> Option<usize> {
         let target_role = to;
 
-        let mut factors_to_add = self
-            .remaining_available_factors
-            .iter()
-            .filter(|&f| match selector {
-                FactorSelector::Category(category) => f.category() == category,
-                FactorSelector::Kind(kind) => f.factor_source_kind() == kind,
-            })
-            .map(|f| f.id())
-            .collect::<IndexSet<_>>();
+        let mut factors_to_add =
+            self.remaining_factors_matching_selector(selector);
 
         if let Some(quantity) = quantity_to_add.as_fixed() {
             factors_to_add = factors_to_add
@@ -193,14 +205,14 @@ impl AutomaticShieldBuilder {
         self.remaining_available_factors
             .retain(|f| !factors_to_add.contains(&f.id()));
 
-        self.proto_matrix
+        self.proto_shield
             .add_factors_for_role(target_role, factors_to_add);
 
         Some(number_of_factors_added)
     }
 
     fn factors_for_role(&self, role: RoleKind) -> &IndexSet<FactorSourceID> {
-        self.proto_matrix.factors_for_role(role)
+        self.proto_shield.factors_for_role(role)
     }
 
     /// Returns `true` if any factor was assigned, `false` otherwise.
@@ -332,12 +344,22 @@ impl AutomaticShieldBuilder {
     /// Automatic assignment of factors to roles according to [this heuristics][doc].
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Automatic-Security-Shield-Construction
-    fn assign(&mut self) -> Result<ProtoMatrix> {
+    fn assign(&mut self) -> Result<ProtoShield> {
+        if let Some(authentication_signing_factor) = self
+            .remaining_factors_matching_selector(FactorSelector::Kind(
+                FactorSourceKind::Device,
+            ))
+            .first()
+        {
+            self.proto_shield.authentication_signing_factor =
+                *authentication_signing_factor
+        }
+
         // 📒 "If the user only chose 1 factor for PRIMARY, remove that factor from the list (it cannot be used elsewhere - otherwise it can)."
         {
             if self.count_factors_for_role(Primary) == 1
                 && let Some(only_primary_factor) =
-                    self.proto_matrix.primary.iter().next()
+                    self.proto_shield.primary.iter().next()
             {
                 self.remaining_available_factors
                     .retain(|f| f.id() != *only_primary_factor);
@@ -390,7 +412,7 @@ impl AutomaticShieldBuilder {
             }
         }
 
-        Ok(self.proto_matrix.clone())
+        Ok(self.proto_shield.clone())
     }
 }
 

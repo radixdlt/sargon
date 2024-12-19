@@ -119,6 +119,16 @@ impl TryFrom<IndexAgnosticPath> for DerivationPreset {
                 CAP26KeyKind::TransactionSigning,
                 KeySpace::Securified,
             ) => Ok(DerivationPreset::IdentityMfa),
+            (
+                CAP26EntityKind::Account,
+                CAP26KeyKind::AuthenticationSigning,
+                KeySpace::Securified,
+            ) => Ok(DerivationPreset::AccountRola),
+            (
+                CAP26EntityKind::Identity,
+                CAP26KeyKind::AuthenticationSigning,
+                KeySpace::Securified,
+            ) => Ok(DerivationPreset::IdentityRola),
             _ => Err(CommonError::InvalidBIP32Path {
                 bad_value:
                     "Invalid combination of entity_kind, key_kind and key_space"
@@ -333,5 +343,40 @@ mod tests {
     fn json_fails_for_invalid() {
         assert_json_value_fails::<SUT>(json!(""));
         assert_json_value_fails::<SUT>(json!("   "));
+    }
+
+    #[test]
+    fn derivation_preset_rola_valid_account() {
+        let preset = DerivationPreset::try_from(SUT::new(
+            NetworkID::Mainnet,
+            CAP26EntityKind::Account,
+            CAP26KeyKind::AuthenticationSigning,
+            KeySpace::Securified,
+        ))
+        .unwrap();
+        assert_eq!(preset, DerivationPreset::AccountRola);
+    }
+
+    #[test]
+    fn derivation_preset_rola_invalid_not_securified() {
+        let res = DerivationPreset::try_from(SUT::new(
+            NetworkID::Mainnet,
+            CAP26EntityKind::Account,
+            CAP26KeyKind::AuthenticationSigning,
+            KeySpace::Unsecurified { is_hardened: true },
+        ));
+        assert!(matches!(res, Err(CommonError::InvalidBIP32Path { .. })));
+    }
+
+    #[test]
+    fn derivation_preset_rola_valid_identity() {
+        let preset = DerivationPreset::try_from(SUT::new(
+            NetworkID::Mainnet,
+            CAP26EntityKind::Identity,
+            CAP26KeyKind::AuthenticationSigning,
+            KeySpace::Securified,
+        ))
+        .unwrap();
+        assert_eq!(preset, DerivationPreset::IdentityRola);
     }
 }

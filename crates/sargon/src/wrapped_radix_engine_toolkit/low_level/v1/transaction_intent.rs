@@ -212,7 +212,6 @@ mod tests {
         let sut =
             SUT::test_with_sbor_depth(SUT::MAX_SBOR_DEPTH, NetworkID::Stokenet)
                 .unwrap();
-        println!("{}", &sut.manifest);
         assert_eq!(sut.transaction_intent_hash().to_string(), "txid_rdx1uwcfczupvvrrtxwxx6p5jugaxvu3j83tj5nz9pnrr44jyxccg2cqhuvzhy")
     }
 

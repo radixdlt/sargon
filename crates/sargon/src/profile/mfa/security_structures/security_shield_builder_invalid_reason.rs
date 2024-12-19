@@ -179,6 +179,9 @@ impl AsShieldBuilderViolation for (RoleKind, NotYetValidReason) {
 #[repr(u32)]
 #[derive(Clone, Debug, thiserror::Error, PartialEq)]
 pub enum SecurityShieldBuilderInvalidReason {
+    #[error("Auth Signing Factor Missing")]
+    MissingAuthSigningFactor,
+
     #[error("Shield name is invalid")]
     ShieldNameInvalid,
 
