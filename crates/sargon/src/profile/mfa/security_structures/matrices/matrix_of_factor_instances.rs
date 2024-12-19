@@ -239,7 +239,6 @@ impl SecurityStructureOfFactorInstances {
             let _ = existing.shift_remove(&instance); // don't forget to consume it!
             Ok(instance)
         } else {
-            println!("👨‍🔬 SSFI ❌ get_mut failed => MissingRolaKeyForSecurityStructureOfFactorInstances ❌");
             Err(CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances)
         }?;
 

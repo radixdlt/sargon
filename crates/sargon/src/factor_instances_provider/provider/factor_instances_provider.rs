@@ -417,7 +417,6 @@ impl FactorInstancesProvider {
                 Ok((derivation_preset, per_factor_paths))
             })
             .collect::<Result<
-                // IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
                 IndexMap<
                     DerivationPreset,
                     IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
