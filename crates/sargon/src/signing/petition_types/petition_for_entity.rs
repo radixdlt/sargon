@@ -84,7 +84,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
                                 (value.security_structure.matrix_of_factors, role_kind)
                             ).unwrap();
 
-                    PetitionForEntity::new_securified(
+                    Self::new_securified(
                         payload_id,
                         entity.address(),
                         general_role,
@@ -96,7 +96,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
                             vec![value.authentication_signing_factor_instance()],
                             1,
                         );
-                    PetitionForEntity::new(
+                    Self::new(
                         payload_id,
                         entity.address(),
                         threshold_factors,

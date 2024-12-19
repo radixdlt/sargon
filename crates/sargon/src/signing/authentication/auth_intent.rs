@@ -28,7 +28,7 @@ impl AuthIntent {
     pub fn new_from_request(
         challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
         metadata: DappToWalletInteractionMetadata,
-        entities_to_sign: Vec<AddressOfAccountOrPersona>,
+        entities_to_sign: impl IntoIterator<Item = AddressOfAccountOrPersona>,
     ) -> Result<Self> {
         let origin = TryInto::<Url>::try_into(metadata.origin.clone())?;
 
@@ -40,7 +40,8 @@ impl AuthIntent {
             });
         }
 
-        for entity in &entities_to_sign {
+        let entities = entities_to_sign.into_iter().collect_vec();
+        for entity in &entities {
             if entity.network_id() != metadata.network_id {
                 return Err(CommonError::NetworkDiscrepancy {
                     expected: metadata.network_id,
@@ -54,7 +55,7 @@ impl AuthIntent {
             metadata.network_id,
             origin,
             metadata.dapp_definition_address,
-            entities_to_sign,
+            entities,
         ))
     }
 

@@ -40,7 +40,7 @@ pub fn new_auth_intent_from_request(
     InternalAuthIntent::new_from_request(
         challenge_nonce.into(),
         metadata.into(),
-        entities_to_sign.into_internal(),
+        entities_to_sign.into_iter().map(|a| a.into_internal()),
     )
     .into_result()
 }

@@ -100,7 +100,7 @@ mod test {
         let auth_intent = AuthIntent::new_from_request(
             nonce,
             metadata,
-            vec![AddressOfAccountOrPersona::Account(account.address)],
+            [AddressOfAccountOrPersona::Account(account.address)],
         )
         .unwrap();
 

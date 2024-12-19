@@ -184,7 +184,7 @@ mod tests {
         let intent = AuthIntent::new_from_request(
             DappToWalletInteractionAuthChallengeNonce(nonce),
             metadata.clone(),
-            vec![AddressOfAccountOrPersona::Account(AccountAddress::random(
+            [AddressOfAccountOrPersona::Account(AccountAddress::random(
                 metadata.network_id,
             ))],
         )?;
