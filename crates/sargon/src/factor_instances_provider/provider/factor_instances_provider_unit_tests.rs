@@ -483,8 +483,11 @@ async fn cache_is_unchanged_in_case_of_failure() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
 
     let all_accounts = os
         .profile()
@@ -637,8 +640,11 @@ async fn test_assert_factor_instances_invalid() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
     let (security_structure_of_fis, _, _) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(IndexSet::from_iter([AddressOfAccountOrPersona::from(alice.address())]), shield_0.clone()).await.unwrap();
 
     let security_structure_of_fi =
@@ -975,8 +981,11 @@ async fn test_securified_accounts() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -1113,8 +1122,11 @@ async fn test_securified_accounts() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_1 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_1);
+    let shield_1 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_1,
+        FactorSource::sample_device(),
+    );
 
     let (security_structures_of_fis, instances_in_cache_consumer, _) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -1252,8 +1264,11 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
     let profile = os.profile().unwrap();
     let all_accounts = profile
         .accounts_on_all_networks_including_hidden()
@@ -1401,8 +1416,11 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
     let all_accounts = os
         .profile()
         .unwrap()
@@ -1640,8 +1658,11 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
     let all_personas = os
         .profile()
         .unwrap()
@@ -1775,8 +1796,11 @@ async fn create_single_account() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
     .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -1866,8 +1890,11 @@ async fn securified_personas() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -2007,8 +2034,11 @@ async fn securified_personas() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_1 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_1);
+    let shield_1 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_1,
+        FactorSource::sample_device(),
+    );
 
     let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
         .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
@@ -2174,8 +2204,11 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
     let (_, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_accounts(
             unnamed_accounts
@@ -2375,8 +2408,11 @@ async fn securified_accounts_asymmetric_indices() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_0 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_0);
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        FactorSource::sample_device(),
+    );
     let (_, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_accounts(
             unnamed_accounts
@@ -2488,8 +2524,11 @@ async fn securified_accounts_asymmetric_indices() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_1 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_1);
+    let shield_1 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_1,
+        FactorSource::sample_device(),
+    );
 
     let (securified_alice, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_account(alice.address(), &shield_1)
@@ -2553,8 +2592,11 @@ async fn securified_accounts_asymmetric_indices() {
         number_of_days_until_auto_confirm: 1,
     };
 
-    let shield_2 =
-        SecurityStructureOfFactorSources::new(DisplayName::sample(), matrix_2);
+    let shield_2 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_2,
+        FactorSource::sample_device(),
+    );
 
     let (securified_bob, derivation_outcome) = os
         .__OFFLINE_ONLY_securify_account(bob.address(), &shield_2)
@@ -2663,6 +2705,7 @@ async fn securified_accounts_asymmetric_indices() {
     let shield_3fa = SecurityStructureOfFactorSources::new(
         DisplayName::sample(),
         matrix_3fa,
+        FactorSource::sample_device(),
     );
 
     let (securified_diana, derivation_outcome) = os

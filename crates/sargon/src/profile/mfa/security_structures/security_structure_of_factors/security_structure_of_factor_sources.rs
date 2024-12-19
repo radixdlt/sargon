@@ -6,12 +6,20 @@ pub type SecurityStructureOfFactorSources =
 impl HasSampleValues for SecurityStructureOfFactorSources {
     fn sample() -> Self {
         let metadata = SecurityStructureMetadata::sample();
-        Self::with_metadata(metadata, MatrixOfFactorSources::sample())
+        Self::with_metadata(
+            metadata,
+            MatrixOfFactorSources::sample(),
+            FactorSource::sample_device(),
+        )
     }
 
     fn sample_other() -> Self {
         let metadata = SecurityStructureMetadata::sample_other();
-        Self::with_metadata(metadata, MatrixOfFactorSources::sample_other())
+        Self::with_metadata(
+            metadata,
+            MatrixOfFactorSources::sample_other(),
+            FactorSource::sample_ledger(),
+        )
     }
 }
 
@@ -36,6 +44,10 @@ impl TryFrom<(&SecurityStructureOfFactorSourceIDs, &FactorSources)>
         value: (&SecurityStructureOfFactorSourceIDs, &FactorSources),
     ) -> Result<Self> {
         let (id_level, factor_sources) = value;
+        let authentication_signing_factor = factor_sources
+            .get_id(id_level.authentication_signing_factor)
+            .cloned()
+            .ok_or(CommonError::FactorSourceDiscrepancy)?;
         let matrix_of_factors = MatrixOfFactorSources::try_from((
             &id_level.matrix_of_factors,
             factor_sources,
@@ -43,6 +55,7 @@ impl TryFrom<(&SecurityStructureOfFactorSourceIDs, &FactorSources)>
         Ok(Self {
             metadata: id_level.metadata.clone(),
             matrix_of_factors,
+            authentication_signing_factor,
         })
     }
 }
@@ -54,6 +67,9 @@ impl From<SecurityStructureOfFactorSources>
         Self {
             metadata: value.metadata,
             matrix_of_factors: value.matrix_of_factors.into(),
+            authentication_signing_factor: value
+                .authentication_signing_factor
+                .factor_source_id(),
         }
     }
 }

@@ -816,9 +816,7 @@ impl SargonOS {
             SecurifyEntityFactorInstancesProvider::for_entity_mfa(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
-                security_structure_of_factor_sources
-                    .clone()
-                    .matrix_of_factors,
+                security_structure_of_factor_sources.clone(),
                 addresses_of_entities.clone(),
                 key_derivation_interactors,
             )

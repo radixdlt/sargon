@@ -9,12 +9,20 @@ pub type SecurityStructureOfFactorSourceIDs =
 impl HasSampleValues for SecurityStructureOfFactorSourceIds {
     fn sample() -> Self {
         let metadata = SecurityStructureMetadata::sample();
-        Self::with_metadata(metadata, MatrixOfFactorSourceIds::sample())
+        Self::with_metadata(
+            metadata,
+            MatrixOfFactorSourceIds::sample(),
+            FactorSourceID::sample_device(),
+        )
     }
 
     fn sample_other() -> Self {
         let metadata = SecurityStructureMetadata::sample_other();
-        Self::with_metadata(metadata, MatrixOfFactorSourceIds::sample_other())
+        Self::with_metadata(
+            metadata,
+            MatrixOfFactorSourceIds::sample_other(),
+            FactorSourceID::sample_ledger(),
+        )
     }
 }
 
@@ -41,7 +49,7 @@ mod tests {
         assert_eq_after_json_roundtrip(
             &sut,
             r#"
-                        {
+            {
               "metadata": {
                 "id": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                 "displayName": "Spending Account",
