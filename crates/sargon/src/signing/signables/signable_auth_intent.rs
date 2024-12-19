@@ -71,18 +71,37 @@ mod tests {
     #[test]
     fn test_get_entities_requiring_signing() {
         let profile = Profile::sample();
-        let expected_accounts = profile.accounts_on_current_network().unwrap();
+        let accounts_in_profile =
+            profile.accounts_on_current_network().unwrap();
+        let personas_in_profile =
+            profile.personas_on_current_network().unwrap();
 
-        let unknown_address_to_profile = AddressOfAccountOrPersona::Account(
-            Account::sample_mainnet_bob().address,
-        );
-        let mut addresses_requested = expected_accounts
+        let unknown_account_address_to_profile =
+            AddressOfAccountOrPersona::Account(
+                Account::sample_mainnet_bob().address,
+            );
+        let unknown_identity_address_to_profile =
+            AddressOfAccountOrPersona::Identity(
+                Persona::sample_mainnet_third().address,
+            );
+        let mut addresses_requested = accounts_in_profile
             .clone()
             .into_iter()
             .map(|account| AddressOfAccountOrPersona::Account(account.address))
             .collect_vec();
         // Push an unknown address, this should be filtered out from the result
-        addresses_requested.push(unknown_address_to_profile);
+        addresses_requested.push(unknown_account_address_to_profile);
+
+        addresses_requested.extend(
+            personas_in_profile
+                .clone()
+                .into_iter()
+                .map(|persona| {
+                    AddressOfAccountOrPersona::Identity(persona.address)
+                })
+                .collect_vec(),
+        );
+        addresses_requested.push(unknown_identity_address_to_profile);
 
         let auth_intent = SUT::new_from_request(
             DappToWalletInteractionAuthChallengeNonce::sample(),
@@ -91,30 +110,61 @@ mod tests {
         )
         .unwrap();
 
+        let mut expected_entities = accounts_in_profile
+            .into_iter()
+            .map(AccountOrPersona::AccountEntity)
+            .collect_vec();
+
+        expected_entities.extend(
+            personas_in_profile
+                .into_iter()
+                .map(AccountOrPersona::PersonaEntity),
+        );
+
         assert_eq!(
             auth_intent.entities_requiring_signing(&profile).unwrap(),
-            IndexSet::<AccountOrPersona>::from_iter(
-                expected_accounts
-                    .into_iter()
-                    .map(AccountOrPersona::AccountEntity)
-            )
+            IndexSet::<AccountOrPersona>::from_iter(expected_entities)
         )
     }
 
     #[test]
     fn test_signed() {
-        let intent = SUT::sample_other();
+        let sut = SUT::sample_other();
         let mnemonic_with_passphrase = MnemonicWithPassphrase::sample();
-
         let signature = mnemonic_with_passphrase
-            .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
+            .sign(&sut.auth_intent_hash().hash(), &DerivationPath::sample());
         let intent_signatures = indexmap!(
            AddressOfAccountOrPersona::sample() => IntentSignature(signature)
         );
 
+        let signed = sut.signed(intent_signatures.clone()).unwrap();
+
         assert_eq!(
-            intent.signed(intent_signatures.clone()).unwrap(),
-            SignedAuthIntent::new(intent.clone(), intent_signatures).unwrap()
+            signed,
+            SignedAuthIntent::new(sut.clone(), intent_signatures).unwrap()
+        );
+        assert_eq!(AuthIntent::from(signed), sut)
+    }
+
+    #[test]
+    fn test_signed_get_signatures() {
+        let sut = SUT::sample();
+        let mnemonic_with_passphrase = MnemonicWithPassphrase::sample();
+        let signature = mnemonic_with_passphrase
+            .sign(&sut.auth_intent_hash().hash(), &DerivationPath::sample());
+        let intent_signatures = indexmap!(
+           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        );
+
+        let signed = sut.signed(intent_signatures.clone()).unwrap();
+
+        assert_eq!(
+            signed.into_iter().collect_vec(),
+            intent_signatures
+                .values()
+                .cloned()
+                .map(|i| i.0)
+                .collect_vec()
         )
     }
 }
