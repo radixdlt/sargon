@@ -8,14 +8,14 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
         interactor: Arc<dyn SignInteractor<S>>,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
     ) -> Self {
         Self::with(
             finish_early_strategy,
             all_factor_sources_in_profile,
             transactions,
             interactor,
-            role_kind,
+            purpose,
         )
     }
     pub(crate) fn new_test(
@@ -23,14 +23,14 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
         simulated_user: SimulatedUser<S>,
-        role_kind: RoleKind,
+        purpose: SigningPurpose,
     ) -> Self {
         Self::new_test_with(
             finish_early_strategy,
             all_factor_sources_in_profile.into_iter().collect(),
             IdentifiedVecOf::from_iter(transactions),
             Arc::new(TestSignInteractor::new(simulated_user)),
-            role_kind,
+            purpose,
         )
     }
 
@@ -44,7 +44,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             SimulatedUser::prudent_no_fail(),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
     }
 
@@ -77,7 +77,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             FactorSource::sample_all(),
             transactions,
             SimulatedUser::prudent_with_failures(simulated_failures),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
     }
 
@@ -90,7 +90,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             SimulatedUser::lazy_sign_minimum([]),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
     }
 
@@ -112,7 +112,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             SimulatedUser::lazy_always_skip_no_fail(),
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         )
     }
 

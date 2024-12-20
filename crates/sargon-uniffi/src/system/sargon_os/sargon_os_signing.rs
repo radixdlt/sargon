@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::AuthIntent as InternalAuthIntent;
 use sargon::Subintent as InternalSubintent;
 use sargon::TransactionIntent as InternalTransactionIntent;
 
@@ -26,19 +27,36 @@ impl SargonOS {
             .into_result()
     }
 
-    pub async fn sign_auth(
+    pub async fn sign_auth_accounts(
         &self,
-        address_of_entity: AddressOfAccountOrPersona,
+        account_addresses: Vec<AccountAddress>,
         challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
         metadata: DappToWalletInteractionMetadata,
-    ) -> Result<WalletToDappInteractionAuthProof> {
-        self.wrapped
-            .sign_auth(
-                address_of_entity.into(),
-                challenge_nonce.into(),
-                metadata.into(),
-            )
-            .await
-            .into_result()
+    ) -> Result<SignedAuthIntent> {
+        let auth_intent = InternalAuthIntent::new_from_request(
+            challenge_nonce.into(),
+            metadata.into(),
+            account_addresses
+                .into_iter()
+                .map(|a| AddressOfAccountOrPersona::Account(a).into())
+                .collect_vec(),
+        )?;
+
+        self.wrapped.sign_auth(auth_intent).await.into_result()
+    }
+
+    pub async fn sign_auth_persona(
+        &self,
+        identity_address: IdentityAddress,
+        challenge_nonce: DappToWalletInteractionAuthChallengeNonce,
+        metadata: DappToWalletInteractionMetadata,
+    ) -> Result<SignedAuthIntent> {
+        let auth_intent = InternalAuthIntent::new_from_request(
+            challenge_nonce.into(),
+            metadata.into(),
+            vec![AddressOfAccountOrPersona::Identity(identity_address).into()],
+        )?;
+
+        self.wrapped.sign_auth(auth_intent).await.into_result()
     }
 }

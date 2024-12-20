@@ -106,3 +106,7 @@ decl_sign_request!(
     signable: Subintent,
     signable_id: SubintentHash
 );
+decl_sign_request!(
+    signable: AuthIntent,
+    signable_id: AuthIntentHash
+);

@@ -471,7 +471,7 @@ mod integration_tests {
                 transactions,
                 Arc::new(TestTransactionSignInteractor),
                 &profile,
-                RoleKind::Primary,
+                SigningPurpose::sign_transaction_primary(),
             )
             .unwrap();
 

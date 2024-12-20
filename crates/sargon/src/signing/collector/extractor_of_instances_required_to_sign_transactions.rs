@@ -10,7 +10,7 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
     pub fn extract<S: Signable>(
         profile: &Profile,
         transactions: Vec<S>,
-        for_any_securified_entity_select_role: RoleKind,
+        signing_purpose: SigningPurpose,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         let preprocessor =
             SignaturesCollectorPreprocessor::analyzing_signables(
@@ -19,7 +19,7 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
             )?;
         let (petitions, _) = preprocessor.preprocess(
             IndexSet::from_iter(profile.factor_sources.iter()),
-            for_any_securified_entity_select_role,
+            signing_purpose,
         );
 
         let factor_instances = petitions
@@ -56,7 +56,7 @@ mod tests {
         let result = ExtractorOfInstancesRequiredToSignTransactions::extract(
             &Profile::sample_other(),
             vec![intent_with_invalid_persona],
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         );
 
         assert!(matches!(result, Err(CommonError::UnknownPersona)));
@@ -113,7 +113,7 @@ mod tests {
         let result = ExtractorOfInstancesRequiredToSignTransactions::extract(
             &Profile::sample(),
             vec![intent_1, intent_2],
-            RoleKind::Primary,
+            SigningPurpose::sign_transaction_primary(),
         );
 
         let account_fi_1 = HierarchicalDeterministicFactorInstance::from(
