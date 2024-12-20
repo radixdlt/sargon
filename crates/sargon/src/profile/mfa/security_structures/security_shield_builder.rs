@@ -1406,20 +1406,11 @@ mod test_invalid {
     }
 }
 
-
-
 #[cfg(test)]
 mod lenient {
     use super::*;
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
-
-    #[derive(Clone, Debug, Copy, PartialEq, Eq)]
-enum ExpectedResult {
-    Error,
-    Ok
-}
-use ExpectedResult::*;
 
     #[test]
     fn same_factor_in_primary_roles_both_lists() {
@@ -1428,13 +1419,97 @@ use ExpectedResult::*;
             sut.add_factor_source_to_primary_override(x);
 
             sut.add_factor_source_to_primary_threshold(x);
-            assert_eq!(sut.get_primary_threshold_factors().len(), expected_threshold_count);
+            assert_eq!(
+                sut.get_primary_threshold_factors().len(),
+                expected_threshold_count
+            );
         };
         let strict = SUT::strict();
         let lenient = SUT::lenient();
 
         test(&strict, 0);
         test(&lenient, 1);
+    }
 
+    #[test]
+    fn primary_allows_two_device_factor_sources() {
+        let test = |sut: &SUT, expected_threshold_count: usize| {
+            sut.add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            );
+            sut.add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device_other(),
+            );
+
+            assert_eq!(
+                sut.get_primary_threshold_factors().len(),
+                expected_threshold_count
+            );
+        };
+        let strict = SUT::strict();
+        let lenient = SUT::lenient();
+
+        test(&strict, 1);
+        test(&lenient, 2);
+    }
+
+    #[test]
+    fn same_factor_allowed_in_primary_and_then_in_recovery_and_confirmation() {
+        let test = |sut: &SUT, expected_factors_in_non_primary: usize| {
+            let x = FactorSourceID::sample_device();
+
+            sut.add_factor_source_to_primary_override(x);
+
+            sut.add_factor_source_to_recovery_override(x);
+            sut.add_factor_source_to_confirmation_override(x);
+
+            assert_eq!(
+                sut.get_recovery_factors().len(),
+                expected_factors_in_non_primary
+            );
+
+            assert_eq!(
+                sut.get_confirmation_factors().len(),
+                expected_factors_in_non_primary
+            );
+        };
+        let strict = SUT::strict();
+        let lenient = SUT::lenient();
+
+        test(&lenient, 1);
+        test(&strict, 1); // actually it was allowed for strict too...
+    }
+
+    #[test]
+    fn same_factor_to_same_primary_list_not_allowed_even_for_lenient() {
+        let test = |factor_list: FactorListKind| {
+            let do_test = |sut: &SUT| {
+                let x = FactorSourceID::sample_ledger();
+                match factor_list {
+                    FactorListKind::Override => {
+                        sut.add_factor_source_to_primary_override(x);
+                        sut.add_factor_source_to_primary_override(x);
+                        assert_eq!(sut.get_primary_override_factors().len(), 1);
+                    }
+                    FactorListKind::Threshold => {
+                        sut.add_factor_source_to_primary_threshold(x);
+                        sut.add_factor_source_to_primary_threshold(x);
+                        assert_eq!(
+                            sut.get_primary_threshold_factors().len(),
+                            1
+                        );
+                    }
+                }
+            };
+
+            let strict = SUT::strict();
+            let lenient = SUT::lenient();
+
+            do_test(&strict);
+            do_test(&lenient);
+        };
+
+        test(FactorListKind::Threshold);
+        test(FactorListKind::Override);
     }
 }

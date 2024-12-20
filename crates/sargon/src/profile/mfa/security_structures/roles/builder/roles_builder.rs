@@ -564,6 +564,8 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
 
     /// For each factor source in the given set, return a validation status
     /// for adding it to factor list of the given kind (`factor_list_kind`)
+    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn validation_for_addition_of_factor_source_for_each(
         &self,
         factor_list_kind: FactorListKind,
@@ -576,6 +578,8 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         )
     }
 
+    /// For each factor source in the given set, return a validation status
+    /// for adding it to factor list of the given kind (`factor_list_kind`)
     pub(crate) fn validation_for_addition_of_factor_source_for_each_with_mode(
         &self,
         factor_list_kind: FactorListKind,
@@ -606,10 +610,35 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         factor_list_kind: FactorListKind,
         mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
-        if self.contains_factor_source(factor_source_id) {
-            return RoleBuilderMutateResult::forever_invalid(
-                FactorSourceAlreadyPresent,
-            );
+        let duplicates_err = RoleBuilderMutateResult::forever_invalid(
+            FactorSourceAlreadyPresent,
+        );
+
+        match mode {
+            SecurityShieldBuilderMode::Strict => {
+                if self.contains_factor_source(factor_source_id) {
+                    return duplicates_err;
+                }
+            }
+            SecurityShieldBuilderMode::Lenient => {
+                match factor_list_kind {
+                    Override => {
+                        if self
+                            .override_contains_factor_source(factor_source_id)
+                        {
+                            return duplicates_err;
+                        }
+                        // but if threshold contains it, we're good (since mode is lenient)
+                    }
+                    Threshold => {
+                        if self
+                            .threshold_contains_factor_source(factor_source_id)
+                        {
+                            return duplicates_err;
+                        }
+                    } // but if override contains it, we're good (since mode is lenient)
+                }
+            }
         }
         let factor_source_kind = factor_source_id.get_factor_source_kind();
         self._validation_add(factor_source_kind, factor_list_kind, mode)
@@ -755,7 +784,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_confirmation(
         &self,
         factor_source_kind: FactorSourceKind,
-        mode: SecurityShieldBuilderMode,
+        _mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         assert_eq!(self.role(), RoleKind::Confirmation);
         match factor_source_kind {
