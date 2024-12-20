@@ -13,8 +13,7 @@ extension SecurityShieldBuilder {
 	}
 
 	public var threshold: UInt8 {
-		get { getPrimaryThreshold() }
-		set { setThreshold(threshold: newValue) }
+		getPrimaryThreshold()
 	}
 
 	public var primaryRoleThresholdFactors: [Factor] {
@@ -35,11 +34,6 @@ extension SecurityShieldBuilder {
 
 	/// Name of the shield
 	public var name: String {
-		get {
-			getName()
-		}
-		set {
-			setName(name: newValue)
-		}
+		getName()
 	}
 }
