@@ -749,7 +749,7 @@ mod tests {
             ])
         );
 
-        assert_ne!(
+        assert_eq!( // we use lenient builder, so we say state has not changed
             sim_prim_threshold,
             sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
                 vec![
