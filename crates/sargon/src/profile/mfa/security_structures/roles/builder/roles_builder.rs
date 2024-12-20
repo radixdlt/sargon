@@ -218,9 +218,20 @@ where
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> RoleBuilderMutateResult {
+        self.add_factor_source_to_threshold_with_mode(
+            factor_source_id,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+
+    pub(crate) fn add_factor_source_to_threshold_with_mode(
+        &mut self,
+        factor_source_id: FactorSourceID,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
         let should_set_threshold_to_one = self.get_threshold() == 0
             && self.get_threshold_factors().is_empty();
-        self._add_factor_source_to_list(factor_source_id, Threshold)
+        self._add_factor_source_to_list(factor_source_id, Threshold, mode)
             .inspect(|_| {
                 if should_set_threshold_to_one {
                     let _ = self.set_threshold(1);
@@ -234,7 +245,15 @@ where
         &self,
         factor_source_kind: FactorSourceKind,
     ) -> RoleBuilderMutateResult {
-        self._validation_add(factor_source_kind, Threshold)
+        self.validation_for_addition_of_factor_source_of_kind_to_threshold_with_mode(factor_source_kind, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub(crate) fn validation_for_addition_of_factor_source_of_kind_to_threshold_with_mode(
+        &self,
+        factor_source_kind: FactorSourceKind,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
+        self._validation_add(factor_source_kind, Threshold, mode)
     }
 
     #[cfg(test)]
@@ -243,7 +262,11 @@ where
         factor_source_kind: FactorSourceKind,
         list: FactorListKind,
     ) -> RoleBuilderMutateResult {
-        self._validation_add(factor_source_kind, list)
+        self._validation_add(
+            factor_source_kind,
+            list,
+            SecurityShieldBuilderMode::Strict,
+        )
     }
 }
 
@@ -272,7 +295,18 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> RoleBuilderMutateResult {
-        self._add_factor_source_to_list(factor_source_id, Override)
+        self.add_factor_source_to_override_with_mode(
+            factor_source_id,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+
+    pub(crate) fn add_factor_source_to_override_with_mode(
+        &mut self,
+        factor_source_id: FactorSourceID,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
+        self._add_factor_source_to_list(factor_source_id, Override, mode)
     }
 
     /// ```ignore
@@ -283,10 +317,12 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &mut self,
         factor_source_id: FactorSourceID,
         factor_list_kind: FactorListKind,
+        mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         let validation = self.validation_for_addition_of_factor_source_to_list(
             &factor_source_id,
             factor_list_kind,
+            mode,
         );
         match validation.as_ref() {
             Ok(()) | Err(NotYetValid(_)) => {
@@ -306,7 +342,15 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &self,
         factor_source_kind: FactorSourceKind,
     ) -> RoleBuilderMutateResult {
-        self._validation_add(factor_source_kind, Override)
+        self.validation_for_addition_of_factor_source_of_kind_to_override_with_mode(factor_source_kind, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub(crate) fn validation_for_addition_of_factor_source_of_kind_to_override_with_mode(
+        &self,
+        factor_source_kind: FactorSourceKind,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
+        self._validation_add(factor_source_kind, Override, mode)
     }
 
     /// If we would add a factor of kind `factor_source_kind` to the list of kind `factor_list_kind`
@@ -315,12 +359,14 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &self,
         factor_source_kind: FactorSourceKind,
         factor_list_kind: FactorListKind,
+        mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         match self.role() {
             RoleKind::Primary => {
-                self.validation_for_addition_of_factor_source_of_kind_to_list_for_primary(
+                self.validation_for_addition_of_factor_source_of_kind_to_list_for_primary_with_mode(
                     factor_source_kind,
                     factor_list_kind,
+                    mode
                 )
             }
             RoleKind::Recovery | RoleKind::Confirmation => match factor_list_kind {
@@ -332,6 +378,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                 Override => {
                     self.validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(
                         factor_source_kind,
+                        mode
                     )
                 }
             },
@@ -446,8 +493,11 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
 
         // Validate threshold factors
         for f in self.get_threshold_factors() {
-            let validation =
-                simulation._add_factor_source_to_list(*f, Threshold);
+            let validation = simulation._add_factor_source_to_list(
+                *f,
+                Threshold,
+                SecurityShieldBuilderMode::Strict,
+            );
             match validation.as_ref() {
                 Ok(()) | Err(NotYetValid(_)) => continue,
                 Err(ForeverInvalid(_)) | Err(BasicViolation(_)) => {
@@ -495,6 +545,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(
         &self,
         factor_source_kind: FactorSourceKind,
+        mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         match self.role() {
             RoleKind::Primary => {
@@ -502,21 +553,38 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             }
             RoleKind::Confirmation => self
                 .validation_for_addition_of_factor_source_of_kind_to_override_for_confirmation(
-                    factor_source_kind,
+                    factor_source_kind, mode
                 ),
             RoleKind::Recovery => self
                 .validation_for_addition_of_factor_source_of_kind_to_override_for_recovery(
-                    factor_source_kind,
+                    factor_source_kind, mode
                 ),
         }
     }
 
     /// For each factor source in the given set, return a validation status
     /// for adding it to factor list of the given kind (`factor_list_kind`)
+    #[allow(dead_code)]
+    #[cfg(test)]
     pub(crate) fn validation_for_addition_of_factor_source_for_each(
         &self,
         factor_list_kind: FactorListKind,
         factor_sources: &IndexSet<FactorSourceID>,
+    ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
+        self.validation_for_addition_of_factor_source_for_each_with_mode(
+            factor_list_kind,
+            factor_sources,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+
+    /// For each factor source in the given set, return a validation status
+    /// for adding it to factor list of the given kind (`factor_list_kind`)
+    pub(crate) fn validation_for_addition_of_factor_source_for_each_with_mode(
+        &self,
+        factor_list_kind: FactorListKind,
+        factor_sources: &IndexSet<FactorSourceID>,
+        mode: SecurityShieldBuilderMode,
     ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
         factor_sources
             .iter()
@@ -525,6 +593,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                     .validation_for_addition_of_factor_source_to_list(
                         factor_source_id,
                         factor_list_kind,
+                        mode,
                     );
                 FactorSourceInRoleBuilderValidationStatus::new(
                     self.role(),
@@ -539,14 +608,40 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &self,
         factor_source_id: &FactorSourceID,
         factor_list_kind: FactorListKind,
+        mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
-        if self.contains_factor_source(factor_source_id) {
-            return RoleBuilderMutateResult::forever_invalid(
-                FactorSourceAlreadyPresent,
-            );
+        let duplicates_err = RoleBuilderMutateResult::forever_invalid(
+            FactorSourceAlreadyPresent,
+        );
+
+        match mode {
+            SecurityShieldBuilderMode::Strict => {
+                if self.contains_factor_source(factor_source_id) {
+                    return duplicates_err;
+                }
+            }
+            SecurityShieldBuilderMode::Lenient => {
+                match factor_list_kind {
+                    Override => {
+                        if self
+                            .override_contains_factor_source(factor_source_id)
+                        {
+                            return duplicates_err;
+                        }
+                        // but if threshold contains it, we're good (since mode is lenient)
+                    }
+                    Threshold => {
+                        if self
+                            .threshold_contains_factor_source(factor_source_id)
+                        {
+                            return duplicates_err;
+                        }
+                    } // but if override contains it, we're good (since mode is lenient)
+                }
+            }
         }
         let factor_source_kind = factor_source_id.get_factor_source_kind();
-        self._validation_add(factor_source_kind, factor_list_kind)
+        self._validation_add(factor_source_kind, factor_list_kind, mode)
     }
 
     fn contains_factor_source(
@@ -607,17 +702,28 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         Ok(())
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative
+    #[allow(dead_code)]
     fn validation_for_addition_of_factor_source_of_kind_to_list_for_primary(
         &self,
         factor_source_kind: FactorSourceKind,
         factor_list_kind: FactorListKind,
     ) -> RoleBuilderMutateResult {
+        self.validation_for_addition_of_factor_source_of_kind_to_list_for_primary_with_mode(factor_source_kind, factor_list_kind, SecurityShieldBuilderMode::Strict)
+    }
+
+    fn validation_for_addition_of_factor_source_of_kind_to_list_for_primary_with_mode(
+        &self,
+        factor_source_kind: FactorSourceKind,
+        factor_list_kind: FactorListKind,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
         match factor_source_kind {
             FactorSourceKind::Password => {
-                return self.validation_for_addition_of_password_to_primary(
-                    factor_list_kind,
-                )
+                return self
+                    .validation_for_addition_of_password_to_primary_with_mode(
+                        factor_list_kind,
+                        mode,
+                    )
             }
             FactorSourceKind::SecurityQuestions => {
                 return RoleBuilderMutateResult::forever_invalid(
@@ -629,14 +735,18 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                     PrimaryCannotContainTrustedContact,
                 );
             }
-            FactorSourceKind::Device => {
-                if self.contains_factor_source_of_kind(FactorSourceKind::Device)
-                {
-                    return RoleBuilderMutateResult::forever_invalid(
-                        PrimaryCannotHaveMultipleDevices,
-                    );
+            FactorSourceKind::Device => match mode {
+                SecurityShieldBuilderMode::Strict => {
+                    if self.contains_factor_source_of_kind(
+                        FactorSourceKind::Device,
+                    ) {
+                        return RoleBuilderMutateResult::forever_invalid(
+                            PrimaryCannotHaveMultipleDevices,
+                        );
+                    }
                 }
-            }
+                SecurityShieldBuilderMode::Lenient => {}
+            },
             FactorSourceKind::LedgerHQHardwareWallet
             | FactorSourceKind::ArculusCard
             | FactorSourceKind::OffDeviceMnemonic => {}
@@ -648,6 +758,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_recovery(
         &self,
         factor_source_kind: FactorSourceKind,
+        _mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         assert_eq!(self.role(), RoleKind::Recovery);
         match factor_source_kind {
@@ -673,6 +784,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_confirmation(
         &self,
         factor_source_kind: FactorSourceKind,
+        _mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         assert_eq!(self.role(), RoleKind::Confirmation);
         match factor_source_kind {
@@ -699,12 +811,26 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &self,
         factor_list_kind: FactorListKind,
     ) -> RoleBuilderMutateResult {
+        self.validation_for_addition_of_password_to_primary_with_mode(
+            factor_list_kind,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+    fn validation_for_addition_of_password_to_primary_with_mode(
+        &self,
+        factor_list_kind: FactorListKind,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
         assert_eq!(self.role(), RoleKind::Primary);
 
         if factor_list_kind != Threshold {
             return RoleBuilderMutateResult::forever_invalid(
                 PrimaryCannotHavePasswordInOverrideList,
             );
+        }
+
+        if mode == SecurityShieldBuilderMode::Lenient {
+            return Ok(());
         }
 
         let factor_source_kind = FactorSourceKind::Password;
@@ -758,13 +884,18 @@ pub(crate) fn test_duplicates_not_allowed<const ROLE: u8>(
     // Arrange
     let mut sut = sut;
 
-    sut._add_factor_source_to_list(factor_source_id, list)
-        .unwrap();
+    sut._add_factor_source_to_list(
+        factor_source_id,
+        list,
+        SecurityShieldBuilderMode::Strict,
+    )
+    .unwrap();
 
     // Act
     let res = sut._add_factor_source_to_list(
         factor_source_id, // oh no, duplicate!
         list,
+        SecurityShieldBuilderMode::Strict,
     );
 
     // Assert
@@ -819,6 +950,7 @@ mod tests {
         let res = sut._add_factor_source_to_list(
             FactorSourceID::sample_ledger(),
             Threshold,
+            SecurityShieldBuilderMode::Strict,
         );
         assert_eq!(
             res,
@@ -832,6 +964,7 @@ mod tests {
         let res = sut._add_factor_source_to_list(
             FactorSourceID::sample_ledger(),
             Threshold,
+            SecurityShieldBuilderMode::Strict,
         );
         assert_eq!(
             res,
@@ -844,7 +977,11 @@ mod tests {
     #[test]
     fn recovery_validation_add_is_err_for_threshold() {
         let sut = RecoveryRoleBuilder::new();
-        let res = sut._validation_add(FactorSourceKind::Device, Threshold);
+        let res = sut._validation_add(
+            FactorSourceKind::Device,
+            Threshold,
+            SecurityShieldBuilderMode::Strict,
+        );
         assert_eq!(
             res,
             RoleBuilderMutateResult::basic_violation(
@@ -858,7 +995,11 @@ mod tests {
     #[test]
     fn confirmation_validation_add_is_err_for_threshold() {
         let sut = ConfirmationRoleBuilder::new();
-        let res = sut._validation_add(FactorSourceKind::Device, Threshold);
+        let res = sut._validation_add(
+            FactorSourceKind::Device,
+            Threshold,
+            SecurityShieldBuilderMode::Strict,
+        );
         assert_eq!(
             res,
             RoleBuilderMutateResult::basic_violation(
