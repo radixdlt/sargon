@@ -346,15 +346,20 @@ impl FactorInstancesCache {
             .map(|quantified_preset| quantified_preset.derivation_preset)
             .collect::<IndexSet<_>>();
 
-        // The instances in the cache cannot satisfy the requested quantity
-        // we must derive more!
         let is_quantity_unsatisfied_for_any_requested =
-            per_derivation_preset.iter().any(|(preset, pf)| {
-                originally_request_presets.contains(preset) /* Only lack of instances for originally requested presets is something which should cause the outcome of this reading from cache to be considered as `NotSatisfied` */
-                    && pf.iter().any(|(_, ci)| ci.quantity_to_derive > 0)
+            per_derivation_preset
+            .iter()
+            .any(|(preset, pf)| {
+                /* Only lack of instances for originally requested presets is something which should cause the outcome of this reading from cache to be considered as `NotSatisfied` */
+                    let was_preset_originally_requested =  originally_request_presets.contains(preset);
+                    let need_to_derive_more = pf.iter().any(|(_, instances_and_remaining_qty_to_derive)| instances_and_remaining_qty_to_derive.quantity_to_derive > 0);
+                    // We need to derive more instances for this derivation preset
+                    was_preset_originally_requested && need_to_derive_more
             });
 
         let outcome = if is_quantity_unsatisfied_for_any_requested {
+            // The instances in the cache cannot satisfy the requested quantity
+            // we must derive more!
             CachedInstancesWithQuantitiesOutcome::NotSatisfied(
                 CacheNotSatisfied {
                     cached_and_quantities_to_derive: per_derivation_preset,
@@ -421,12 +426,10 @@ impl CacheNotSatisfied {
             .clone()
             .into_iter()
             .filter_map(|(preset, v)| {
-
-                let per_factor = v.into_iter()
-                .filter_map(|(x, y)| {
-                    extract((x, y))
-                })
-                .collect::<IndexMap<FactorSourceIDFromHash, R>>();
+                let per_factor = v
+                    .into_iter()
+                    .filter_map(|(x, y)| extract((x, y)))
+                    .collect::<IndexMap<FactorSourceIDFromHash, R>>();
 
                 if per_factor.is_empty() {
                     None
@@ -434,10 +437,7 @@ impl CacheNotSatisfied {
                     Some((preset, per_factor))
                 }
             })
-            .collect::<IndexMap<
-            DerivationPreset,
-            IndexMap<FactorSourceIDFromHash, R>,
-        >>()
+            .collect()
     }
 
     pub fn cached_instances_to_use(

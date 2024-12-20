@@ -184,17 +184,17 @@ mod tests {
                     == preset.cache_filling_quantity())
         ));
 
-        for (k, v) in outcome.per_derivation_preset.iter() {
-            for (_, y) in v.per_factor.iter() {
+        for (preset, per_factor) in outcome.per_derivation_preset.iter() {
+            for (_, for_factor) in per_factor.per_factor.iter() {
                 let derivation_based_offset =
-                    if *k == DerivationPreset::IdentityVeci {
-                        1 /* One account created */
+                    if *preset == DerivationPreset::IdentityVeci {
+                        1 /* One persona created */
                     } else {
                         0
                     };
                 assert_eq!(
-                    y.debug_was_derived.len(),
-                    k.cache_filling_quantity() + derivation_based_offset
+                    for_factor.debug_was_derived.len(),
+                    preset.cache_filling_quantity() + derivation_based_offset
                 )
             }
         }
