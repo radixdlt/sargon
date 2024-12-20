@@ -151,7 +151,7 @@ struct ShieldTests {
 			.addFactorSourceToPrimaryOverride(factorSourceId: factor)
 			.addFactorSourceToPrimaryThreshold(factorSourceId: other)
 		#expect(builder.primaryRoleThresholdFactors == [other])
-		#expect(builder.primaryRoleOverrideFactors == [factor])
+		#expect(builder.primaryRoleOverrideFactors == [other, factor])
 
 		// But when validated/built is err
 		#expect(builder.validate() != nil)
