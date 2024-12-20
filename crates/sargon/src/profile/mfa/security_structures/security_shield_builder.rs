@@ -85,6 +85,44 @@ impl SecurityShieldBuilder {
             created_on: now(),
         }
     }
+
+    pub fn with_details(
+        matrix_builder: RwLock<MatrixBuilder>,
+        name: RwLock<String>,
+        shield_id: SecurityStructureID,
+        created_on: Timestamp,
+    ) -> Self {
+        Self {
+            matrix_builder,
+            name,
+            shield_id,
+            created_on,
+        }
+    }
+}
+
+impl HasSampleValues for SecurityShieldBuilder {
+    fn sample() -> Self {
+        let matrix_builder = MatrixBuilder::new();
+        let name = RwLock::new("My Shield".to_owned());
+        Self::with_details(
+            RwLock::new(matrix_builder),
+            name,
+            SecurityStructureID::sample(),
+            Timestamp::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        let matrix_builder = MatrixBuilder::new();
+        let name = RwLock::new("My Shield Other".to_owned());
+        Self::with_details(
+            RwLock::new(matrix_builder),
+            name,
+            SecurityStructureID::sample_other(),
+            Timestamp::sample_other(),
+        )
+    }
 }
 
 impl SecurityShieldBuilder {
@@ -598,6 +636,23 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn clone() {
+        assert_eq!(SUT::sample(), SUT::sample().clone());
+        assert_eq!(SUT::sample_other(), SUT::sample_other().clone());
+    }
 
     #[test]
     fn add_factor_to_primary_threshold_does_not_change_already_set_threshold() {
