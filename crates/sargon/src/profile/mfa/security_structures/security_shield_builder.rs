@@ -18,6 +18,62 @@ impl Default for SecurityShieldBuilder {
     }
 }
 
+impl PartialEq for SecurityShieldBuilder {
+    fn eq(&self, other: &Self) -> bool {
+        let (matrix, name) = (
+            self.matrix_builder
+                .read()
+                .expect("Failed to read matrix_builder"),
+            self.name.read().expect("Failed to read name"),
+        );
+        let (other_matrix, other_name) = (
+            other
+                .matrix_builder
+                .read()
+                .expect("Failed to read other matrix_builder"),
+            other.name.read().expect("Failed to read other name"),
+        );
+
+        *matrix == *other_matrix
+            && *name == *other_name
+            && self.shield_id == other.shield_id
+            && self.created_on == other.created_on
+    }
+}
+
+impl Clone for SecurityShieldBuilder {
+    fn clone(&self) -> Self {
+        Self {
+            matrix_builder: RwLock::new(
+                self.matrix_builder
+                    .read()
+                    .expect("Failed to read matrix_builder")
+                    .clone(),
+            ),
+            name: RwLock::new(
+                self.name.read().expect("Failed to read name").clone(),
+            ),
+            shield_id: self.shield_id,
+            created_on: self.created_on,
+        }
+    }
+}
+
+impl std::hash::Hash for SecurityShieldBuilder {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        let (matrix, name) = (
+            self.matrix_builder
+                .read()
+                .expect("Failed to read matrix_builder"),
+            self.name.read().expect("Failed to read name"),
+        );
+        matrix.hash(state);
+        name.hash(state);
+        self.shield_id.hash(state);
+        self.created_on.hash(state);
+    }
+}
+
 impl SecurityShieldBuilder {
     pub fn new() -> Self {
         let matrix_builder = MatrixBuilder::new();
