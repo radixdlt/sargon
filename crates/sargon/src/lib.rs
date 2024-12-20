@@ -199,6 +199,7 @@ pub mod prelude {
         },
         manifest::{
             compile as scrypto_compile,
+            compile_error_diagnostics as scrypto_compile_error_diagnostics,
             compile_manifest as scrypto_compile_manifest,
             decompile as scrypto_decompile,
             generator::{GeneratorError, GeneratorErrorKind},
@@ -214,6 +215,7 @@ pub mod prelude {
             },
             token::{Position, Span},
             CompileError as ScryptoCompileError,
+            CompileErrorDiagnosticsStyle as ScryptoCompileErrorDiagnosticsStyle,
             KnownManifestObjectNames as ScryptoKnownManifestObjectNames,
             ManifestObjectNames as ScryptoManifestObjectNames,
             MockBlobProvider as ScryptoMockBlobProvider,
