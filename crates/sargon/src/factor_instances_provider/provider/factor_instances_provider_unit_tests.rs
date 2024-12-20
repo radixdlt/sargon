@@ -2868,89 +2868,57 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .nth(index)
             .unwrap();
 
-        let offset = (index + 1) as u32;
-        if securified_entity.is_account_entity() {
-            assert_eq!(
-                securified_entity
-                    .try_get_secured_control()
-                    .unwrap()
-                    .security_structure
-                    .matrix_of_factors
-                    .primary_role
-                    .all_hd_factors()
-                    .into_iter()
-                    .map(|f| (f.factor_source_id, f.derivation_entity_index()))
-                    .collect::<IndexMap<_, _>>(),
-                [
-                    (
-                        bdfs.id_from_hash(),
-                        HDPathComponent::Securified(
-                            SecurifiedU30::try_from(diana_mfa_device + offset)
-                                .unwrap()
-                        )
-                    ),
-                    (
-                        arculus.id_from_hash(),
-                        HDPathComponent::Securified(
-                            SecurifiedU30::try_from(diana_mfa_arculus + offset)
-                                .unwrap()
-                        )
-                    ),
-                    (
-                        ledger.id_from_hash(),
-                        HDPathComponent::Securified(
-                            SecurifiedU30::try_from(diana_mfa_ledger + offset)
-                                .unwrap()
-                        )
-                    ),
-                ]
-                .into_iter()
-                .collect::<IndexMap<_, _>>()
-            );
+        let (index_device, index_arculus, index_ledger) = if securified_entity
+            .is_account_entity()
+        {
+            let offset = (index + 1) as u32;
+            (
+                diana_mfa_device + offset,
+                diana_mfa_arculus + offset,
+                diana_mfa_ledger + offset,
+            )
         } else {
-            pretty_assertions::assert_eq!(
-                securified_entity
-                    .try_get_secured_control()
-                    .unwrap()
-                    .security_structure
-                    .matrix_of_factors
-                    .primary_role
-                    .all_hd_factors()
-                    .into_iter()
-                    .map(|f| (f.factor_source_id, f.derivation_entity_index()))
-                    .collect::<IndexMap<_, _>>(),
-                [
-                    (
-                        bdfs.id_from_hash(),
-                        HDPathComponent::Securified(
-                            SecurifiedU30::try_from(
-                                offset - more_unnamed_accounts.len() as u32
-                            )
-                            .unwrap()
-                        )
-                    ),
-                    (
-                        arculus.id_from_hash(),
-                        HDPathComponent::Securified(
-                            SecurifiedU30::try_from(
-                                offset - more_unnamed_accounts.len() as u32
-                            )
-                            .unwrap()
-                        )
-                    ),
-                    (
-                        ledger.id_from_hash(),
-                        HDPathComponent::Securified(
-                            SecurifiedU30::try_from(
-                                offset - more_unnamed_accounts.len() as u32
-                            )
-                            .unwrap()
-                        )
-                    ),
-                ]
+            let index_device = (unnamed_personas.len() + index
+                - more_unnamed_accounts.len())
+                as u32;
+            let index_arculus = (index - more_unnamed_accounts.len()) as u32;
+            let index_ledger = (index - more_unnamed_accounts.len()) as u32;
+            (index_device, index_arculus, index_ledger)
+        };
+
+        pretty_assertions::assert_eq!(
+            securified_entity
+                .try_get_secured_control()
+                .unwrap()
+                .security_structure
+                .matrix_of_factors
+                .primary_role
+                .all_hd_factors()
                 .into_iter()
-                .collect::<IndexMap<_, _>>()
-            );
-        }
+                .map(|f| (f.factor_source_id, f.derivation_entity_index()))
+                .collect::<IndexMap<_, _>>(),
+            [
+                (
+                    bdfs.id_from_hash(),
+                    HDPathComponent::Securified(
+                        SecurifiedU30::try_from(index_device).unwrap()
+                    )
+                ),
+                (
+                    arculus.id_from_hash(),
+                    HDPathComponent::Securified(
+                        SecurifiedU30::try_from(index_arculus).unwrap()
+                    )
+                ),
+                (
+                    ledger.id_from_hash(),
+                    HDPathComponent::Securified(
+                        SecurifiedU30::try_from(index_ledger).unwrap()
+                    )
+                )
+            ]
+            .into_iter()
+            .collect::<IndexMap<_, _>>()
+        );
     }
 }
