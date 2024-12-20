@@ -195,13 +195,18 @@ impl FactorInstancesCache {
         Ok(skipped_an_index_resulting_in_non_contiguity)
     }
 
-    /// Inserts all instance in `per_factor`.
-    pub fn insert_all(
+    pub fn insert(
         &self,
-        per_factor: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        per_derivation_preset_per_factor: impl Borrow<
+            InstancesPerDerivationPresetPerFactorSource,
+        >,
     ) -> Result<()> {
-        for (factor_source_id, instances) in per_factor {
-            _ = self.insert_for_factor(factor_source_id, instances)?;
+        let per_derivation_preset_per_factor =
+            per_derivation_preset_per_factor.borrow();
+        for (_, per_factor) in per_derivation_preset_per_factor {
+            for (factor_source_id, instances) in per_factor {
+                _ = self.insert_for_factor(factor_source_id, instances)?;
+            }
         }
         Ok(())
     }
@@ -220,108 +225,265 @@ impl FactorInstancesCache {
             .max()
     }
 
-    /// Returns enough instances to satisfy the requested quantity for each factor source,
-    /// **OR LESS**, never more, and if less, it means we MUST derive more, and if we
-    /// must derive more, this function returns the quantities to derive for each factor source,
-    /// for each derivation preset, not only the originally requested one.
-    pub fn get_poly_factor_with_quantities(
+    /// Loads cached factor instances for the given network and factor source and
+    /// per derivation preset. The outcome is either a load from cache failure or
+    /// a `CachedInstancesWithQuantitiesOutcome` which is either a
+    /// `Satisfied` or `NotSatisfied` outcome.
+    ///
+    /// Satisfied means *fully satisfied*, i.e. all requested instances were
+    /// found in the cache.
+    ///
+    /// NotSatisfied means that the cache did not contain all the requested
+    /// instances, but it might have contained some of the quantity specified
+    /// per quantified derivation preset, and the rest must be derived, so
+    /// NotSatisfied contains the instances that were found in the cache and
+    /// the quantities to derive.
+    pub fn get(
         &self,
         factor_source_ids: &IndexSet<FactorSourceIDFromHash>,
-        originally_requested_quantified_derivation_preset: &QuantifiedDerivationPreset,
+        quantified_derivation_presets: &IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
         network_id: NetworkID,
     ) -> Result<CachedInstancesWithQuantitiesOutcome> {
-        let target_quantity =
-            originally_requested_quantified_derivation_preset.quantity;
-        let mut pf_instances =
-            IndexMap::<FactorSourceIDFromHash, FactorInstances>::new();
-        let mut pf_pdp_qty_to_derive = IndexMap::<
-            FactorSourceIDFromHash,
-            IndexMap<DerivationPreset, usize>,
+        let mut per_derivation_preset = IndexMap::<
+            DerivationPreset,
+            IndexMap<
+                FactorSourceIDFromHash,
+                CacheInstancesAndRemainingQuantityToDerive,
+            >,
         >::new();
-        let mut is_quantity_satisfied_for_all_factor_sources = true;
 
-        for factor_source_id in factor_source_ids {
-            for preset in DerivationPreset::all() {
-                let index_agnostic_path =
-                    preset.index_agnostic_path_on_network(network_id);
+        for preset in DerivationPreset::all() {
+            let mut per_factor_source = IndexMap::<
+                FactorSourceIDFromHash,
+                CacheInstancesAndRemainingQuantityToDerive,
+            >::new();
+
+            let cache_filling_quantity = preset.cache_filling_quantity();
+
+            let index_agnostic_path =
+                preset.index_agnostic_path_on_network(network_id);
+
+            for factor_source_id in factor_source_ids {
                 let for_preset = self
                     .get_mono_factor(factor_source_id, index_agnostic_path)
                     .unwrap_or_default();
+
                 let count_in_cache = for_preset.len();
-                if preset
-                    == originally_requested_quantified_derivation_preset
-                        .derivation_preset
-                {
-                    let satisfies_requested_quantity =
-                        count_in_cache >= target_quantity;
-                    if satisfies_requested_quantity {
-                        // The instances in the cache can satisfy the requested quantity
-                        // for this factor source for this derivation preset
-                        pf_instances.append_or_insert_to(
-                            factor_source_id,
-                            // Only take the first `target_quantity` instances
-                            // to be used, the rest are not needed and should
-                            // remain in the cache (later we will call delete on
-                            // all those instances.)
-                            for_preset.split_at(target_quantity).0,
-                        );
+
+                let maybe_instances_with_remaining_qty_to_derive =
+                    if let Some(quantified_derivation_preset) =
+                        quantified_derivation_presets.get_id(preset)
+                    {
+                        // The `preset` was part of the originally requested preset
+                        // with a target quantity.
+                        let target_quantity =
+                            quantified_derivation_preset.quantity;
+
+                        let is_quantity_satisfied =
+                            count_in_cache >= target_quantity;
+
+                        if is_quantity_satisfied {
+                            // The instances in the cache can satisfy the requested quantity
+                            // for this factor source for this derivation preset
+                            let instances_to_use_from_cache =
+                                for_preset.split_at(target_quantity).0;
+                            assert!(!instances_to_use_from_cache.is_empty());
+                            Some(CacheInstancesAndRemainingQuantityToDerive {
+                                // Only take the first `target_quantity` instances
+                                // to be used, the rest are not needed and should
+                                // remain in the cache (later we will call delete on
+                                // all those instances.)
+                                instances_to_use_from_cache,
+                                quantity_to_derive: 0,
+                            })
+                        } else {
+                            // Since we are deriving more we might as well ensure that the
+                            // cache is filled with `CACHE_FILLING_QUANTITY` **AFTER** the
+                            // requested quantity is satisfied, meaning we will not only
+                            // derive `CACHE_FILLING_QUANTITY - count_in_cache`, instead we
+                            // derive the `target_quantity` as well.
+                            let quantity_to_derive = cache_filling_quantity
+                                - count_in_cache
+                                + target_quantity;
+                            Some(CacheInstancesAndRemainingQuantityToDerive {
+                                instances_to_use_from_cache: for_preset.clone(),
+                                quantity_to_derive,
+                            })
+                        }
+                    } else if count_in_cache < cache_filling_quantity {
+                        // Not requested derivation preset, calculate number
+                        // of instances to derive IF we are going to derive anyway,
+                        // we wanna FILL the cache for those derivation presets as well.
+                        let quantity_to_derive =
+                            cache_filling_quantity - count_in_cache;
+
+                        Some(CacheInstancesAndRemainingQuantityToDerive {
+                            instances_to_use_from_cache:
+                                FactorInstances::default(),
+                            quantity_to_derive,
+                        })
                     } else {
-                        // The instances in the cache cannot satisfy the requested quantity
-                        // we must derive more!
-                        is_quantity_satisfied_for_all_factor_sources = false;
-                        // Since we are deriving more we might as well ensure that the
-                        // cache is filled with `CACHE_FILLING_QUANTITY` **AFTER** the
-                        // requested quantity is satisfied, meaning we will not only
-                        // derive `CACHE_FILLING_QUANTITY - count_in_cache`, instead we
-                        // derive the `target_quantity` as well.
-                        let quantity_to_derive = CACHE_FILLING_QUANTITY
-                            - count_in_cache
-                            + target_quantity;
-                        pf_pdp_qty_to_derive.append_or_insert_element_to(
-                            factor_source_id,
-                            (preset, quantity_to_derive),
-                        );
-                        // insert all instances to be used directly
-                        pf_instances.append_or_insert_to(
-                            factor_source_id,
-                            for_preset.clone(),
-                        );
-                    }
-                } else {
-                    // Not originally requested derivation preset, calculate number
-                    // of instances to derive IF we are going to derive anyway,
-                    // we wanna FILL the cache for those derivation presets as well.
-                    if count_in_cache < CACHE_FILLING_QUANTITY {
-                        let qty_to_derive =
-                            CACHE_FILLING_QUANTITY - count_in_cache;
-                        pf_pdp_qty_to_derive.append_or_insert_element_to(
-                            factor_source_id,
-                            (preset, qty_to_derive),
-                        );
-                    }
+                        None
+                    };
+                if let Some(instances_with_remaining_qty_to_derive) =
+                    maybe_instances_with_remaining_qty_to_derive
+                {
+                    per_factor_source.insert(
+                        *factor_source_id,
+                        instances_with_remaining_qty_to_derive,
+                    );
                 }
             }
-        }
-        let outcome = if is_quantity_satisfied_for_all_factor_sources {
-            CachedInstancesWithQuantitiesOutcome::Satisfied(pf_instances)
-        } else {
-            CachedInstancesWithQuantitiesOutcome::NotSatisfied {
-                partial_instances: pf_instances,
-                quantities_to_derive: pf_pdp_qty_to_derive,
+            if !per_factor_source.is_empty() {
+                per_derivation_preset.insert(preset, per_factor_source);
             }
+        }
+
+        let originally_request_presets = quantified_derivation_presets
+            .iter()
+            .map(|quantified_preset| quantified_preset.derivation_preset)
+            .collect::<IndexSet<_>>();
+
+        let is_quantity_unsatisfied_for_any_requested =
+            per_derivation_preset
+            .iter()
+            .any(|(preset, pf)| {
+                /* Only lack of instances for originally requested presets is something which should cause the outcome of this reading from cache to be considered as `NotSatisfied` */
+                    let was_preset_originally_requested =  originally_request_presets.contains(preset);
+                    let need_to_derive_more = pf.iter().any(|(_, instances_and_remaining_qty_to_derive)| instances_and_remaining_qty_to_derive.quantity_to_derive > 0);
+                    // We need to derive more instances for this derivation preset
+                    was_preset_originally_requested && need_to_derive_more
+            });
+
+        let outcome = if is_quantity_unsatisfied_for_any_requested {
+            // The instances in the cache cannot satisfy the requested quantity
+            // we must derive more!
+            CachedInstancesWithQuantitiesOutcome::NotSatisfied(
+                CacheNotSatisfied {
+                    cached_and_quantities_to_derive: per_derivation_preset,
+                },
+            )
+        } else {
+            CachedInstancesWithQuantitiesOutcome::Satisfied(CacheSatisfied {
+                cached: per_derivation_preset
+                    .into_iter()
+                    // Satisfied, but `per_derivation_preset` contains ALL Presets (in case of `NotSatisfied` - we are cache filling),
+                    // so we filter out only the originally requested ones.
+                    .filter(|(preset, _)| {
+                        originally_request_presets.contains(preset)
+                    })
+                    .map(|(preset, per_factor)| {
+                        (
+                            preset,
+                            per_factor.into_iter()
+                                .map(|(fsid, instances_and_remaining_qty_to_derive)| {
+                                    (fsid, instances_and_remaining_qty_to_derive.instances_to_use_from_cache)
+                                })
+                                .collect::<IndexMap<
+                                    FactorSourceIDFromHash,
+                                    FactorInstances,
+                                >>(),
+                        )
+                    })
+                    .collect::<InstancesPerDerivationPresetPerFactorSource>(),
+            })
         };
+
         Ok(outcome)
     }
 }
 
-#[derive(Debug, PartialEq, Eq, enum_as_inner::EnumAsInner)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CacheInstancesAndRemainingQuantityToDerive {
+    pub instances_to_use_from_cache: FactorInstances, // if empty then this was not a requested derivation preset, but we are cache filling and found `quantity_to_derive` needed to fill cache.
+    pub quantity_to_derive: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CacheNotSatisfied {
+    /// PER DerivationPreset => PER FactorSourceID => CacheInstancesAndRemainingQuantityToDerive
+    pub cached_and_quantities_to_derive: IndexMap<
+        DerivationPreset,
+        IndexMap<
+            FactorSourceIDFromHash,
+            CacheInstancesAndRemainingQuantityToDerive,
+        >,
+    >,
+}
+impl CacheNotSatisfied {
+    fn map<R>(
+        &self,
+        extract: impl Fn(
+            (
+                FactorSourceIDFromHash,
+                CacheInstancesAndRemainingQuantityToDerive,
+            ),
+        ) -> Option<(FactorSourceIDFromHash, R)>,
+    ) -> IndexMap<DerivationPreset, IndexMap<FactorSourceIDFromHash, R>> {
+        self.cached_and_quantities_to_derive
+            .clone()
+            .into_iter()
+            .filter_map(|(preset, v)| {
+                let per_factor = v
+                    .into_iter()
+                    .filter_map(|(x, y)| extract((x, y)))
+                    .collect::<IndexMap<FactorSourceIDFromHash, R>>();
+
+                if per_factor.is_empty() {
+                    None
+                } else {
+                    Some((preset, per_factor))
+                }
+            })
+            .collect()
+    }
+
+    pub fn cached_instances_to_use(
+        &self,
+    ) -> InstancesPerDerivationPresetPerFactorSource {
+        self.map(|(x, y)| {
+            let instances = y.instances_to_use_from_cache;
+            if instances.is_empty() {
+                None
+            } else {
+                Some((x, instances))
+            }
+        })
+    }
+
+    pub fn remaining_quantities_to_derive(&self) -> QuantitiesToDerive {
+        self.map(|(x, y)| {
+            if y.quantity_to_derive > 0 {
+                Some((x, y.quantity_to_derive))
+            } else {
+                None
+            }
+        })
+    }
+}
+pub type QuantitiesToDerive =
+    IndexMap<DerivationPreset, IndexMap<FactorSourceIDFromHash, usize>>;
+
+pub type InstancesPerDerivationPresetPerFactorSource = IndexMap<
+    DerivationPreset,
+    IndexMap<FactorSourceIDFromHash, FactorInstances>,
+>;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CacheSatisfied {
+    /// PER DerivationPreset => PER FactorSourceID => FactorInstances
+    pub cached: IndexMap<
+        DerivationPreset,
+        IndexMap<FactorSourceIDFromHash, FactorInstances>,
+    >,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, enum_as_inner::EnumAsInner)]
 pub enum CachedInstancesWithQuantitiesOutcome {
-    Satisfied(IndexMap<FactorSourceIDFromHash, FactorInstances>),
-    NotSatisfied {
-        partial_instances: IndexMap<FactorSourceIDFromHash, FactorInstances>,
-        quantities_to_derive:
-            IndexMap<FactorSourceIDFromHash, IndexMap<DerivationPreset, usize>>,
-    },
+    Satisfied(CacheSatisfied),
+    NotSatisfied(CacheNotSatisfied),
 }
 
 impl FactorInstancesCache {
@@ -338,43 +500,50 @@ impl FactorInstancesCache {
 
     pub fn delete(
         &self,
-        pf_instances: &IndexMap<FactorSourceIDFromHash, FactorInstances>,
+        pdp_pf_instances: &InstancesPerDerivationPresetPerFactorSource,
     ) {
-        for (factor_source_id, instances_to_delete) in pf_instances {
-            if instances_to_delete.is_empty() {
-                continue;
-            }
-            let mut binding = self.map.write().unwrap();
-            let existing_for_factor = binding
-                .get_mut(factor_source_id)
-                .expect("expected to delete factors");
-
-            let instances_to_delete_by_path =
-                InstancesByAgnosticPath::from(instances_to_delete.clone());
-            for (index_agnostic_path, instances_to_delete) in
-                instances_to_delete_by_path
-            {
-                let instances_to_delete = IndexSet::<
-                    HierarchicalDeterministicFactorInstance,
-                >::from_iter(
-                    instances_to_delete.into_iter()
-                );
-
-                let existing_for_path = existing_for_factor
-                    .get(&index_agnostic_path)
-                    .expect("expected to delete")
-                    .factor_instances();
-
-                if !existing_for_path.is_superset(&instances_to_delete) {
-                    panic!("Programmer error! Some of the factors to delete were not in cache!");
+        for (preset, pf_instances) in pdp_pf_instances {
+            for (factor_source_id, instances_to_delete) in pf_instances {
+                if instances_to_delete.is_empty() {
+                    continue;
                 }
-                let to_keep = existing_for_path
-                    .symmetric_difference(&instances_to_delete)
-                    .cloned()
-                    .collect::<FactorInstances>();
+                let mut binding = self.map.write().unwrap();
+                let existing_for_factor = binding
+                    .get_mut(factor_source_id)
+                    .expect("expected to delete factors");
 
-                // replace
-                existing_for_factor.insert(index_agnostic_path, to_keep);
+                let instances_to_delete_by_path =
+                    InstancesByAgnosticPath::from(instances_to_delete.clone());
+                for (index_agnostic_path, instances_to_delete) in
+                    instances_to_delete_by_path
+                {
+                    assert_eq!(
+                        DerivationPreset::try_from(index_agnostic_path)
+                            .unwrap(),
+                        *preset
+                    );
+                    let instances_to_delete = IndexSet::<
+                        HierarchicalDeterministicFactorInstance,
+                    >::from_iter(
+                        instances_to_delete.into_iter()
+                    );
+
+                    let existing_for_path = existing_for_factor
+                        .get(&index_agnostic_path)
+                        .expect("expected to delete")
+                        .factor_instances();
+
+                    if !existing_for_path.is_superset(&instances_to_delete) {
+                        panic!("Programmer error! Some of the factors to delete were not in cache!");
+                    }
+                    let to_keep = existing_for_path
+                        .symmetric_difference(&instances_to_delete)
+                        .cloned()
+                        .collect::<FactorInstances>();
+
+                    // replace
+                    existing_for_factor.insert(index_agnostic_path, to_keep);
+                }
             }
         }
 
@@ -437,6 +606,19 @@ impl FactorInstancesCache {
 
 #[cfg(test)]
 impl FactorInstancesCache {
+    pub fn get_poly_factor_with_quantities(
+        &self,
+        factor_source_ids: &IndexSet<FactorSourceIDFromHash>,
+        quantified_derivation_preset: &QuantifiedDerivationPreset,
+        network_id: NetworkID,
+    ) -> Result<CachedInstancesWithQuantitiesOutcome> {
+        self.get(
+            factor_source_ids,
+            &IdentifiedVecOf::just(*quantified_derivation_preset),
+            network_id,
+        )
+    }
+
     /// Queries the cache to see if the cache is full for factor_source_id for
     /// each DerivationPreset
     pub fn is_full(
@@ -444,24 +626,25 @@ impl FactorInstancesCache {
         network_id: NetworkID,
         factor_source_id: FactorSourceIDFromHash,
     ) -> bool {
-        DerivationPreset::all()
+        let cache_filling_quantities = DerivationPreset::all()
             .into_iter()
             .map(|preset| {
-                self.get_poly_factor_with_quantities(
-                    &IndexSet::just(factor_source_id),
-                    &QuantifiedDerivationPreset::new(
-                        preset,
-                        CACHE_FILLING_QUANTITY,
-                    ),
-                    network_id,
+                QuantifiedDerivationPreset::new(
+                    preset,
+                    preset.cache_filling_quantity(),
                 )
             })
-            .all(|outcome| {
-                matches!(
-                    outcome,
-                    Ok(CachedInstancesWithQuantitiesOutcome::Satisfied(_))
-                )
-            })
+            .collect::<IdentifiedVecOf<QuantifiedDerivationPreset>>();
+
+        let Ok(outcome) = self.get(
+            &IndexSet::just(factor_source_id),
+            &cache_filling_quantities,
+            network_id,
+        ) else {
+            return false;
+        };
+
+        outcome.is_satisfied()
     }
 
     pub fn assert_is_full(
@@ -537,9 +720,12 @@ mod tests {
     fn insert_all_factor_source_id_discrepancy_is_err() {
         let sut = SUT::default();
         assert!(sut
-            .insert_all(&IndexMap::kv(
-                FactorSourceIDFromHash::sample_password_other(),
-                FactorInstances::sample()
+            .insert(IndexMap::kv(
+                DerivationPreset::AccountMfa,
+                IndexMap::kv(
+                    FactorSourceIDFromHash::sample_password_other(),
+                    FactorInstances::sample()
+                )
             ))
             .is_err())
     }
@@ -776,7 +962,10 @@ mod tests {
         )
         .unwrap();
 
-        sut.delete(&IndexMap::kv(fsid, instances));
+        sut.delete(&IndexMap::kv(
+            DerivationPreset::AccountMfa,
+            IndexMap::kv(fsid, instances),
+        ));
     }
 
     #[test]
@@ -825,7 +1014,7 @@ mod tests {
                 .unwrap();
         }
 
-        sut.delete(&to_delete);
+        sut.delete(&IndexMap::kv(DerivationPreset::AccountVeci, to_delete));
 
         let path = &IndexAgnosticPath::new(
             NetworkID::Mainnet,

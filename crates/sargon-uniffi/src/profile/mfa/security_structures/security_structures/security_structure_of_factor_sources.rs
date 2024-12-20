@@ -12,6 +12,9 @@ pub struct SecurityStructureOfFactorSources {
     /// The structure of factors to use for certain roles, Primary, Recovery
     /// and Confirmation role.
     pub matrix_of_factors: MatrixOfFactorSources,
+
+    /// The factor to use for authentication signing aka true Rola Key.
+    pub authentication_signing_factor: FactorSource,
 }
 
 #[uniffi::export]

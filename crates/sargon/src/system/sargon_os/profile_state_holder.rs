@@ -86,6 +86,13 @@ impl ProfileStateHolder {
         })
     }
 
+    pub fn entity_by_address(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<AccountOrPersona> {
+        self.try_access_profile_with(|p| p.entity_by_address(entity_address))
+    }
+
     /// Looks up the account by account address, returns Err if the account is
     /// unknown, will return a hidden account if queried for.
     pub fn account_by_address(

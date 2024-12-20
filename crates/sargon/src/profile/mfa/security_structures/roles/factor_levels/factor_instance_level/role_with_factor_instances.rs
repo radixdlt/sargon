@@ -42,9 +42,10 @@ impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
         from.iter()
             .map(|f| {
                 if let Some(existing) = instances.get(&f.id_from_hash()) {
-                    let hd_instance = existing.first().ok_or(
-                        CommonError::MissingFactorMappingInstancesIntoRole,
-                    )?;
+                    let hd_instance =
+                        existing.first_transaction_signing().ok_or(
+                            CommonError::MissingFactorMappingInstancesIntoRole,
+                        )?;
                     let instance = FactorInstance::from(hd_instance);
                     Ok(instance)
                 } else {

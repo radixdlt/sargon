@@ -290,10 +290,22 @@ impl Profile {
         &self,
         entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
-        let instances_of_new_entities = entities
+        let entities = entities
             .items()
             .into_iter()
             .map(Into::<AccountOrPersona>::into)
+            .collect::<IdentifiedVecOf<AccountOrPersona>>();
+
+        self.assert_new_factor_instances_not_already_used_erased(entities)
+    }
+
+    pub fn assert_new_factor_instances_not_already_used_erased(
+        &self,
+        entities: IdentifiedVecOf<AccountOrPersona>,
+    ) -> Result<()> {
+        let instances_of_new_entities = entities
+            .items()
+            .into_iter()
             .map(|e| (e.clone(), e.unique_all_factor_instances()))
             .collect::<IndexMap<AccountOrPersona, IndexSet<_>>>();
 
@@ -392,7 +404,16 @@ impl Profile {
         &mut self,
         updated_entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
-        self.networks.update_entities(updated_entities)
+        self.update_entities_erased(
+            updated_entities.into_iter().map(Into::into).collect(),
+        )
+    }
+
+    pub fn update_entities_erased(
+        &mut self,
+        updated_entities: IdentifiedVecOf<AccountOrPersona>,
+    ) -> Result<()> {
+        self.networks.update_entities_erased(updated_entities)
     }
 
     /// Returns a clone of the updated account if found, else None.

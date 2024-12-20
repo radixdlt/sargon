@@ -213,6 +213,43 @@ impl HasSampleValues for MatrixOfFactorInstances {
     }
 }
 
+impl SecurityStructureOfFactorInstances {
+    pub fn fulfilling_structure_of_factor_sources_with_instances(
+        consuming_instances: &mut IndexMap<
+            FactorSourceIDFromHash,
+            FactorInstances,
+        >,
+        security_structure_of_factor_sources: &SecurityStructureOfFactorSources,
+    ) -> Result<Self, CommonError> {
+        let matrix_of_factors = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
+        consuming_instances,
+        security_structure_of_factor_sources.matrix_of_factors.clone(),
+      )?;
+
+        let authentication_signing = if let Some(existing) = consuming_instances
+            .get_mut(
+                &security_structure_of_factor_sources
+                    .authentication_signing_factor
+                    .id_from_hash(),
+            ) {
+            let instance = existing.first_authentication_signing().ok_or(
+                CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances,
+                )?;
+
+            let _ = existing.shift_remove(&instance); // don't forget to consume it!
+            Ok(instance)
+        } else {
+            Err(CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances)
+        }?;
+
+        Self::new(
+            security_structure_of_factor_sources.id(),
+            matrix_of_factors,
+            authentication_signing,
+        )
+    }
+}
+
 impl MatrixOfFactorInstances {
     /// Maps `MatrixOfFactorSources -> MatrixOfFactorInstances` by
     /// "assigning" FactorInstances to each MatrixOfFactorInstances from
@@ -226,7 +263,7 @@ impl MatrixOfFactorInstances {
     /// However, the same FactorInstance is NEVER used in two different MatrixOfFactorInstances.
     ///
     ///
-    pub fn fulfilling_matrix_of_factor_sources_with_instances(
+    fn fulfilling_matrix_of_factor_sources_with_instances(
         consuming_instances: &mut IndexMap<
             FactorSourceIDFromHash,
             FactorInstances,

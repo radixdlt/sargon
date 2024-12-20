@@ -31,18 +31,28 @@ impl Profile {
         let count = count as usize;
 
         let fsid = factor_source.factor_source_id();
+        let entity_kind = E::entity_kind();
 
         let (instances_in_cache_consumer, outcome) =
             VirtualEntityCreatingInstanceProvider::for_many_entity_vecis(
                 count,
-                E::entity_kind(),
+                entity_kind,
                 factor_instances_cache_client,
                 Arc::new(self.clone()),
-                factor_source,
+                factor_source.clone(),
                 network_id,
                 key_derivation_interactor,
             )
             .await?;
+
+        let outcome = outcome
+            .per_derivation_preset
+            .get(&DerivationPreset::veci_entity_kind(entity_kind))
+            .unwrap()
+            .per_factor
+            .get(&factor_source.id_from_hash())
+            .cloned()
+            .unwrap();
 
         let instances_to_use_directly = outcome.clone().to_use_directly;
 
