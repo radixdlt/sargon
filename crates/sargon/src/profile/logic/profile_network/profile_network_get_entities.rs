@@ -48,13 +48,24 @@ impl ProfileNetwork {
             .collect()
     }
 
+    pub fn entity_by_address(
+        &self,
+        entity_address: &AddressOfAccountOrPersona,
+    ) -> Option<AccountOrPersona> {
+        let entities = self
+            .get_entities_erased(entity_address.get_entity_kind())
+            .into_iter()
+            .filter(|e| e.address() == *entity_address)
+            .collect_vec();
+        assert!(entities.len() <= 1);
+        entities.first().cloned()
+    }
+
     pub fn contains_entity_by_address(
         &self,
         entity_address: &AddressOfAccountOrPersona,
     ) -> bool {
-        self.get_entities_erased(entity_address.get_entity_kind())
-            .into_iter()
-            .any(|e| e.address() == *entity_address)
+        self.entity_by_address(entity_address).is_some()
     }
 }
 

@@ -865,6 +865,9 @@ pub enum CommonError {
 
     #[error("Missing Authentication Signing FactorInstance mapping SecurityStructureOfFactorSources into SecurityStructureOfFactorInstances.")]
     MissingRolaKeyForSecurityStructureOfFactorInstances = 10243,
+
+    #[error("SecurityStateAccessController address mismatch")]
+    SecurityStateAccessControllerAddressMismatch = 10244,
 }
 
 impl CommonError {

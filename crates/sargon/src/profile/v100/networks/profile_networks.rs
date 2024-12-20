@@ -24,10 +24,19 @@ impl ProfileNetworks {
         &mut self,
         updated_entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
+        self.update_entities_erased(
+            updated_entities.into_iter().map(Into::into).collect(),
+        )
+    }
+
+    pub fn update_entities_erased(
+        &mut self,
+        updated_entities: IdentifiedVecOf<AccountOrPersona>,
+    ) -> Result<()> {
         let network =
             updated_entities.assert_elements_not_empty_and_on_same_network()?;
         self.try_try_update_with(&network, |n| {
-            n.update_entities(updated_entities.clone())
+            n.update_entities_erased(updated_entities.clone())
         })
     }
 

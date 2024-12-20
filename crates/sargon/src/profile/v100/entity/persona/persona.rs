@@ -75,6 +75,9 @@ impl HasSecurityState for Persona {
     fn security_state(&self) -> EntitySecurityState {
         self.security_state.clone()
     }
+    fn set_security_state_unchecked(&mut self, new_state: EntitySecurityState) {
+        self.security_state = new_state;
+    }
 }
 impl IsBaseEntity for Persona {
     type Address = IdentityAddress;

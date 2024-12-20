@@ -31,6 +31,13 @@ impl SargonOS {
         self.profile_state_holder.account_by_address(address)
     }
 
+    pub fn entity_by_address(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<AccountOrPersona> {
+        self.profile_state_holder.entity_by_address(entity_address)
+    }
+
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
     /// index of the next account for the BDFS.
     ///
@@ -604,18 +611,56 @@ impl SargonOS {
         &self,
         updated: IdentifiedVecOf<E>,
     ) -> Result<()> {
+        self.update_entities_erased(
+            updated.into_iter().map(Into::into).collect(),
+        )
+        .await
+    }
+
+    pub async fn update_entities_erased(
+        &self,
+        updated: IdentifiedVecOf<AccountOrPersona>,
+    ) -> Result<()> {
         let addresses = updated
             .clone()
             .into_iter()
             .map(|e| e.address())
             .collect::<IndexSet<_>>();
-        self.update_profile_with(|p| p.update_entities(updated.clone()))
+
+        let account_addresses = addresses
+            .iter()
+            .filter_map(|e| e.as_account())
+            .cloned()
+            .collect::<IndexSet<_>>();
+        let identity_addresses = addresses
+            .iter()
+            .filter_map(|e| e.as_identity())
+            .cloned()
+            .collect::<IndexSet<_>>();
+
+        let modified_any_account = !account_addresses.is_empty();
+        let modified_any_persona = !identity_addresses.is_empty();
+
+        self.update_profile_with(|p| p.update_entities_erased(updated.clone()))
             .await?;
 
-        if let Some(event) = E::profile_modified_event(true, addresses) {
-            self.event_bus
-                .emit(EventNotification::profile_modified(event))
-                .await;
+        if modified_any_account {
+            if let Some(event) =
+                Account::profile_modified_event(true, account_addresses)
+            {
+                self.event_bus
+                    .emit(EventNotification::profile_modified(event))
+                    .await;
+            }
+        }
+        if modified_any_persona {
+            if let Some(event) =
+                Persona::profile_modified_event(true, identity_addresses)
+            {
+                self.event_bus
+                    .emit(EventNotification::profile_modified(event))
+                    .await;
+            }
         }
         Ok(())
     }
