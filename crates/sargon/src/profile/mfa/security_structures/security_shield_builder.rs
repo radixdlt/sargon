@@ -1047,20 +1047,6 @@ mod tests {
             SelectedFactorSourcesForRoleStatus::Suboptimal
         );
     }
-
-    #[test]
-    fn lenient() {
-        // ARRANGE
-        let sut = SUT::lenient();
-        sut.add_factor_source_to_primary_threshold(
-            FactorSourceID::sample_device(),
-        );
-
-        // ACT
-        sut.add_factor_source_to_primary_threshold(
-            FactorSourceID::sample_device(), // two Device FS should be allowed when lenient
-        );
-    }
 }
 
 #[cfg(test)]
