@@ -11,6 +11,7 @@ use crate::prelude::*;
     Eq,
     Hash,
     PartialOrd,
+    enum_iterator::Sequence,
     Ord,
 )]
 pub enum FactorSourceKind {
@@ -94,6 +95,13 @@ pub enum FactorSourceKind {
 }
 
 impl FactorSourceKind {
+    /// All FactorSourceKind
+    pub fn all() -> IndexSet<Self> {
+        enum_iterator::all::<Self>().collect()
+    }
+}
+
+impl FactorSourceKind {
     pub fn discriminant(&self) -> String {
         // We do `to_value.as_str` instead of `to_string(_pretty)` to avoid unwanted quotation marks around the string.
         serde_json::to_value(self)
@@ -169,6 +177,15 @@ mod tests {
     type SUT = FactorSourceKind;
 
     #[test]
+    fn ord() {
+        assert!(SUT::Device < SUT::TrustedContact);
+        let unsorted = SUT::all(); // is in fact sorted
+        let mut sorted = unsorted.clone();
+        sorted.sort();
+        assert_eq!(unsorted, sorted);
+    }
+
+    #[test]
     fn string_roundtrip() {
         use FactorSourceKind::*;
         let eq = |f: SUT, s| {
@@ -212,11 +229,6 @@ mod tests {
             BTreeSet::from_iter([SUT::Device, SUT::Device].into_iter()).len(),
             1
         );
-    }
-
-    #[test]
-    fn ord() {
-        assert!(SUT::Device < SUT::TrustedContact);
     }
 
     #[test]

@@ -120,11 +120,26 @@ impl SecurityShieldBuilder {
         self
     }
 
+    /// Sets the ROLA (authentication signing) factor to `new` if and only if
+    /// `new` is not Some(invalid), where invalid is defined by `allowed_factor_source_kinds_for_authentication_signing`,
+    /// that is, it checks the `FactorSourceKind` of the factor, according to the
+    /// rules defined in [doc][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shield
     pub fn set_authentication_signing_factor(
         &self,
         new: impl Into<Option<FactorSourceID>>,
     ) -> &Self {
-        *self.authentication_signing_factor.write().unwrap() = new.into();
+        let new = new.into();
+        if let Some(new) = new.as_ref() {
+            if !Self::is_allowed_factor_source_kind_for_authentication_signing(
+                new.get_factor_source_kind(),
+            ) {
+                warn!("Invalid FactorSourceKind for ROLA");
+                return self;
+            }
+        }
+        *self.authentication_signing_factor.write().unwrap() = new;
         self
     }
 
@@ -295,6 +310,30 @@ impl SecurityShieldBuilder {
 }
 
 impl SecurityShieldBuilder {
+    pub fn disallowed_factor_source_kinds_for_authentication_signing(
+    ) -> IndexSet<FactorSourceKind> {
+        IndexSet::from_iter([
+            FactorSourceKind::Password,
+            FactorSourceKind::SecurityQuestions,
+            FactorSourceKind::TrustedContact,
+        ])
+    }
+
+    pub fn allowed_factor_source_kinds_for_authentication_signing(
+    ) -> IndexSet<FactorSourceKind> {
+        let all = FactorSourceKind::all();
+        let disallowed =
+            Self::disallowed_factor_source_kinds_for_authentication_signing();
+        all.difference(&disallowed).cloned().collect()
+    }
+
+    pub fn is_allowed_factor_source_kind_for_authentication_signing(
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        Self::allowed_factor_source_kinds_for_authentication_signing()
+            .contains(&factor_source_kind)
+    }
+
     /// Returns `true` for `Ok` and `Err(NotYetValid)`.
     pub fn addition_of_factor_source_of_kind_to_primary_threshold_is_valid_or_can_be(
         &self,
@@ -581,6 +620,49 @@ mod tests {
             FactorSourceID::sample_device(),
         );
         assert_eq!(sut.get_threshold(), 42);
+    }
+
+    #[test]
+    fn allowed_rola() {
+        let allowed =
+            SUT::allowed_factor_source_kinds_for_authentication_signing();
+        assert_eq!(
+            allowed,
+            IndexSet::<FactorSourceKind>::from_iter([
+                FactorSourceKind::LedgerHQHardwareWallet,
+                FactorSourceKind::ArculusCard,
+                FactorSourceKind::OffDeviceMnemonic,
+                FactorSourceKind::Device,
+            ])
+        );
+    }
+
+    #[test]
+    fn is_allowed_rola() {
+        let disallowed =
+            SUT::disallowed_factor_source_kinds_for_authentication_signing();
+        assert!(disallowed.iter().all(|k| {
+            !SUT::is_allowed_factor_source_kind_for_authentication_signing(*k)
+        }));
+    }
+
+    #[test]
+    fn test_invalid_rola_kind_does_not_change_rola() {
+        let sut = SUT::new();
+        assert!(sut.get_authentication_signing_factor().is_none());
+        let valid = FactorSourceID::sample_device();
+        sut.set_authentication_signing_factor(valid);
+        assert_eq!(sut.get_authentication_signing_factor().unwrap(), valid);
+
+        let invalid_factors = vec![
+            FactorSourceID::sample_password(),
+            FactorSourceID::sample_security_questions(),
+            FactorSourceID::sample_trusted_contact(),
+        ];
+        for invalid in invalid_factors {
+            sut.set_authentication_signing_factor(invalid); // should not have changed anything
+        }
+        assert_eq!(sut.get_authentication_signing_factor().unwrap(), valid);
     }
 
     #[test]

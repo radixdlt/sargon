@@ -252,6 +252,29 @@ impl SecurityShieldBuilder {
 
 #[uniffi::export]
 impl SecurityShieldBuilder {
+    /// "Statically" queries which FactorSourceKinds are disallowed for authentication signing.
+    pub fn disallowed_factor_source_kinds_for_authentication_signing(
+        &self,
+    ) -> Vec<FactorSourceKind> {
+        sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().into_type()
+    }
+
+    /// "Statically" queries which FactorSourceKinds are allowed for authentication signing.
+    pub fn allowed_factor_source_kinds_for_authentication_signing(
+        &self,
+    ) -> Vec<FactorSourceKind> {
+        sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().into_type()
+    }
+
+    /// "Statically" queries if `factor_source_kind`` is allowed for authentication signing.
+    pub fn is_allowed_factor_source_kind_for_authentication_signing(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        sargon::SecurityShieldBuilder::is_allowed_factor_source_kind_for_authentication_signing(
+                factor_source_kind.clone().into())
+    }
+
     pub fn addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
         &self,
         factor_source_kind: FactorSourceKind,
@@ -560,6 +583,35 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
+
+    #[test]
+    fn rola() {
+        let sut = SUT::new();
+        assert_eq!(sut.disallowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().len());
+
+        assert_eq!(sut.allowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().len());
+
+        assert!(
+            sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::Device
+            )
+        );
+        assert!(
+            !sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::Password
+            )
+        );
+        assert!(
+            !sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::TrustedContact
+            )
+        );
+        assert!(
+            !sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::SecurityQuestions
+            )
+        );
+    }
 
     #[test]
     fn test() {
