@@ -464,7 +464,7 @@ mod tests {
             SecurityStructureOfFactorSourceIDs,
             AutoBuildOutcomeForTesting,
         )> {
-            let shield_builder = SecurityShieldBuilder::new();
+            let shield_builder = SecurityShieldBuilder::default();
             shield_builder.set_threshold(pick_primary_role_factors.len() as u8);
             pick_primary_role_factors.into_iter().for_each(|f| {
                 shield_builder.add_factor_source_to_primary_threshold(f);

@@ -95,7 +95,10 @@ struct ShieldTests {
 		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
 			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice) // did not get added, duplicates are not allowed
 		#expect(builder.primaryRoleThresholdFactors == [.sampleDevice])
-		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDeviceOther)
+
+		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDeviceOther) // actually this is added
+		#expect(builder.validate() == .PrimaryCannotHaveMultipleDevices)
+		builder = builder.removeFactorFromPrimary(factorSourceId: .sampleDeviceOther)
 
 		#expect(builder.validate() == .RecoveryRoleMustHaveAtLeastOneFactor)
 		builder = builder.removeFactorFromPrimary(factorSourceId: .sampleDeviceOther)
@@ -134,7 +137,7 @@ struct ShieldTests {
 		#expect(builder.confirmationRoleFactors.isEmpty)
 	}
 
-	@Test("Primary can only contain one DeviceFactorSource")
+	@Test("Primary can contain two DeviceFactorSource while building - but is never valid")
 	func primaryCanOnlyContainOneDeviceFactorSourceThreshold() throws {
 		let factor = FactorSourceId.sampleDevice
 		let other = FactorSourceId.sampleDeviceOther
@@ -142,13 +145,17 @@ struct ShieldTests {
 			.addFactorSourceToPrimaryThreshold(factorSourceId: factor)
 			.addFactorSourceToPrimaryOverride(factorSourceId: other)
 		#expect(builder.primaryRoleThresholdFactors == [factor])
-		#expect(builder.primaryRoleOverrideFactors == [])
+		#expect(builder.primaryRoleOverrideFactors == [other])
 
 		builder = builder.removeFactorFromPrimary(factorSourceId: factor)
 			.addFactorSourceToPrimaryOverride(factorSourceId: factor)
 			.addFactorSourceToPrimaryThreshold(factorSourceId: other)
-		#expect(builder.primaryRoleThresholdFactors == [])
+		#expect(builder.primaryRoleThresholdFactors == [other])
 		#expect(builder.primaryRoleOverrideFactors == [factor])
+
+		// But when validated/built is err
+		#expect(builder.validate() != nil)
+		#expect((try? builder.build()) == nil)
 	}
 
 	@Test("Primary password never alone")
@@ -158,8 +165,9 @@ struct ShieldTests {
 		#expect(builder.primaryRoleOverrideFactors.isEmpty)
 
 		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .samplePassword)
-		#expect(builder.validate() == .PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero)
+		#expect(builder.validate() == .PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor)
 		builder = builder.setThreshold(threshold: 0)
+
 		#expect(builder.validate() == .PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero)
 		builder = builder.setThreshold(threshold: 1)
 		#expect(builder.validate() == .PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor)
