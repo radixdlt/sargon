@@ -2868,23 +2868,19 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .nth(index)
             .unwrap();
 
-        let (index_device, index_arculus, index_ledger) = if securified_entity
-            .is_account_entity()
-        {
-            let offset = (index + 1) as u32;
-            (
-                diana_mfa_device + offset,
-                diana_mfa_arculus + offset,
-                diana_mfa_ledger + offset,
-            )
-        } else {
-            let index_device = (unnamed_personas.len() + index
-                - more_unnamed_accounts.len())
-                as u32;
-            let index_arculus = (index - more_unnamed_accounts.len()) as u32;
-            let index_ledger = (index - more_unnamed_accounts.len()) as u32;
-            (index_device, index_arculus, index_ledger)
-        };
+        let (index_device, index_arculus, index_ledger) =
+            if securified_entity.is_account_entity() {
+                let offset = (index + 1) as u32;
+                (
+                    diana_mfa_device + offset,
+                    diana_mfa_arculus + offset,
+                    diana_mfa_ledger + offset,
+                )
+            } else {
+                let base =
+                    (index as i32 - more_unnamed_accounts.len() as i32) as u32;
+                (base + unnamed_personas.len() as u32, base, base)
+            };
 
         pretty_assertions::assert_eq!(
             securified_entity
