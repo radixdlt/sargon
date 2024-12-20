@@ -1,13 +1,47 @@
 use crate::prelude::*;
 
+/// The mode of the shield builder, either `Lenient` or `Strict`, this has
+/// no effect on the validation or building of the shield, which is always
+/// strict. It only affects the incremental changing of the state before
+/// the builder tries to build the shield (or validate the builders state).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SecurityShieldBuilderMode {
+    /// The most strict mode of the shield builder, which forbids many
+    /// mutations, e.g. adding same factor two primary threshold and override,
+    /// or adding multiple device factor sources to the primary etc.
+    Strict,
+
+    /// The lenient mode of the shield builder, which allows many otherwise
+    /// forbidden mutations. Host might wanna use this if they wanna defer
+    /// validation of the shield to the last point.
+    ///
+    /// This does NOT mean that the shield will be lenient, only that the
+    /// incremental changes to the builder are lenient.
+    Lenient,
+}
+
 #[derive(Debug)]
 pub struct SecurityShieldBuilder {
+    /// If the builder is acting in lenient or strict mode. This does not
+    /// have any affect on the validation or building of the shield, which is
+    /// always strict. It only affects the incremental changing of the state.
+    mode: SecurityShieldBuilderMode,
+
+    /// The underlying matrix builder
     matrix_builder: RwLock<MatrixBuilder>,
+
+    /// The "ROLA" factor, used to sign authentication requests, it is always single
+    /// factor - therefore not part of the matrix_builder. When built it must be set,
+    /// and adhere to validation of `Self::is_allowed_factor_source_kind_for_authentication_signing`.
     authentication_signing_factor: RwLock<Option<FactorSourceID>>,
+
+    /// The name of the shield, defaults to some valid value
     name: RwLock<String>,
+
     // We eagerly set this, and we use it inside the `build` method, ensuring
     // that for the same *state* of `MatrixBuilder` we always have the same shield!
     shield_id: SecurityStructureID,
+
     // We eagerly set this, and we use it inside the `build` method, ensuring
     // that for the same *state* of `MatrixBuilder` we always have the same shield!
     created_on: Timestamp,
@@ -15,15 +49,16 @@ pub struct SecurityShieldBuilder {
 
 impl Default for SecurityShieldBuilder {
     fn default() -> Self {
-        Self::new()
+        Self::lenient()
     }
 }
 
 impl SecurityShieldBuilder {
-    pub fn new() -> Self {
+    pub fn new(mode: SecurityShieldBuilderMode) -> Self {
         let matrix_builder = MatrixBuilder::new();
         let name = RwLock::new("My Shield".to_owned());
         Self {
+            mode,
             matrix_builder: RwLock::new(matrix_builder),
             name,
             authentication_signing_factor: RwLock::new(None),
@@ -152,8 +187,10 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            let res = builder
-                .add_factor_source_to_primary_threshold(factor_source_id);
+            let res = builder.add_factor_source_to_primary_threshold_with_mode(
+                factor_source_id,
+                self.mode,
+            );
             debug!(
                 "Add FactorSource to PrimaryRole (threshold) result: {:?}",
                 res
@@ -166,8 +203,10 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            let res =
-                builder.add_factor_source_to_primary_override(factor_source_id);
+            let res = builder.add_factor_source_to_primary_override_with_mode(
+                factor_source_id,
+                self.mode,
+            );
             debug!(
                 "Add FactorSource to PrimaryRole (override) result: {:?}",
                 res
@@ -233,8 +272,10 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            let res = builder
-                .add_factor_source_to_recovery_override(factor_source_id);
+            let res = builder.add_factor_source_to_recovery_override_with_mode(
+                factor_source_id,
+                self.mode,
+            );
             debug!("Add FactorSource to RecoveryRole result: {:?}", res);
         })
     }
@@ -245,7 +286,10 @@ impl SecurityShieldBuilder {
     ) -> &Self {
         self.set(|builder| {
             let res = builder
-                .add_factor_source_to_confirmation_override(factor_source_id);
+                .add_factor_source_to_confirmation_override_with_mode(
+                    factor_source_id,
+                    self.mode,
+                );
             debug!("Add FactorSource to ConfirmationRole result: {:?}", res);
         })
     }
@@ -423,7 +467,7 @@ impl SecurityShieldBuilder {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
-                builder.validation_for_addition_of_factor_source_to_primary_threshold_for_each(input)
+                builder.validation_for_addition_of_factor_source_to_primary_threshold_for_each_with_mode(input, self.mode)
             },
         )
     }
@@ -435,7 +479,7 @@ impl SecurityShieldBuilder {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
-                builder.validation_for_addition_of_factor_source_to_primary_override_for_each(input)
+                builder.validation_for_addition_of_factor_source_to_primary_override_for_each_with_mode(input, self.mode)
             },
         )
     }
@@ -448,7 +492,7 @@ impl SecurityShieldBuilder {
             factor_sources,
             |builder, input| {
                 builder
-                    .validation_for_addition_of_factor_source_to_recovery_override_for_each(input)
+                    .validation_for_addition_of_factor_source_to_recovery_override_for_each_with_mode(input, self.mode)
             },
         )
     }
@@ -460,8 +504,9 @@ impl SecurityShieldBuilder {
         self.validation_for_addition_of_factor_source_by_calling(
             factor_sources,
             |builder, input| {
-                builder.validation_for_addition_of_factor_source_to_confirmation_override_for_each(
+                builder.validation_for_addition_of_factor_source_to_confirmation_override_for_each_with_mode(
                     input,
+                    self.mode
                 )
             },
         )
@@ -604,6 +649,16 @@ impl SecurityShieldBuilder {
     }
 }
 
+impl SecurityShieldBuilder {
+    pub fn strict() -> Self {
+        Self::new(SecurityShieldBuilderMode::Strict)
+    }
+
+    pub fn lenient() -> Self {
+        Self::new(SecurityShieldBuilderMode::Strict)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -613,8 +668,13 @@ mod tests {
     type SUT = SecurityShieldBuilder;
 
     #[test]
+    fn default_is_lenient() {
+        assert_eq!(SUT::default().mode, SecurityShieldBuilderMode::Lenient);
+    }
+
+    #[test]
     fn add_factor_to_primary_threshold_does_not_change_already_set_threshold() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         sut.set_threshold(42);
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
@@ -648,7 +708,7 @@ mod tests {
 
     #[test]
     fn test_invalid_rola_kind_does_not_change_rola() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         assert!(sut.get_authentication_signing_factor().is_none());
         let valid = FactorSourceID::sample_device();
         sut.set_authentication_signing_factor(valid);
@@ -729,7 +789,7 @@ mod tests {
         can_be: impl Fn(&SUT, FactorSourceKind) -> bool,
         add: impl Fn(&SUT, FactorSourceID) -> &SUT,
     ) {
-        let sut_owned = SUT::new();
+        let sut_owned = SUT::strict();
         let sut = &sut_owned;
         assert!(can_be(sut, FactorSourceKind::Device));
 
@@ -785,7 +845,7 @@ mod tests {
 
     #[test]
     fn test_addition_of_factor_source_of_kind_to_recovery_is_fully_valid() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         let result = sut
             .addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
@@ -802,7 +862,7 @@ mod tests {
 
     #[test]
     fn test_addition_of_factor_source_of_kind_to_confirmation_is_fully_valid() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         let result = sut
             .addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
@@ -820,7 +880,7 @@ mod tests {
     #[test]
     fn test_validation_for_addition_of_factor_source_to_primary_threshold_for_each(
     ) {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
@@ -853,7 +913,7 @@ mod tests {
     #[test]
     fn test_validation_for_addition_of_factor_source_to_recovery_override_for_each(
     ) {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         let xs = sut.validation_for_addition_of_factor_source_to_recovery_override_for_each(
             vec![
@@ -890,7 +950,7 @@ mod tests {
     #[test]
     fn test_validation_for_addition_of_factor_source_to_confirmation_override_for_each(
     ) {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         let xs = sut
             .validation_for_addition_of_factor_source_to_confirmation_override_for_each(
                 vec![
@@ -918,7 +978,7 @@ mod tests {
 
     #[test]
     fn test_sorted_factor_sources_for_primary_threshold_selection() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         let factor_sources = FactorSource::sample_values_all();
         let expected = vec![
             FactorSource::sample_device_babylon(),
@@ -977,6 +1037,20 @@ mod tests {
             SelectedFactorSourcesForRoleStatus::Suboptimal
         );
     }
+
+    #[test]
+    fn lenient() {
+        // ARRANGE
+        let sut = SUT::lenient();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+
+        // ACT
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(), // two Device FS should be allowed when lenient
+        );
+    }
 }
 
 #[cfg(test)]
@@ -988,7 +1062,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_must_have_at_least_one_factor() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
@@ -1001,7 +1075,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_threshold_cannot_be_zero_with_factors() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         sut.add_factor_source_to_primary_threshold(
             // bumped threshold
             FactorSourceID::sample_device(),
@@ -1020,7 +1094,7 @@ mod test_invalid {
 
     #[test]
     fn recovery_role_must_have_at_least_one_factor() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1036,7 +1110,7 @@ mod test_invalid {
 
     #[test]
     fn confirmation_role_must_have_at_least_one_factor() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1055,7 +1129,7 @@ mod test_invalid {
 
     #[test]
     fn valid_is_none() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         sut.set_authentication_signing_factor(FactorSourceID::sample_device());
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
@@ -1070,7 +1144,7 @@ mod test_invalid {
     }
 
     fn valid() -> SUT {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1121,7 +1195,7 @@ mod test_invalid {
 
     #[test]
     fn recovery_and_confirmation_factors_overlap() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1140,7 +1214,7 @@ mod test_invalid {
     #[test]
     fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_recovery(
     ) {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         let same = FactorSourceID::sample_ledger();
         sut.add_factor_source_to_primary_override(same);
 
@@ -1159,7 +1233,7 @@ mod test_invalid {
     #[test]
     fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_confirmation(
     ) {
-        let sut = SUT::new();
+        let sut = SUT::strict();
         let same = FactorSourceID::sample_ledger();
         sut.add_factor_source_to_primary_override(same);
 
@@ -1178,7 +1252,7 @@ mod test_invalid {
     #[test]
     fn primary_role_with_password_in_threshold_list_must_threshold_greater_than_one(
     ) {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1207,7 +1281,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_password_in_threshold_list_must_have_another_factor() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1233,7 +1307,7 @@ mod test_invalid {
 
     #[test]
     fn two_different_password_only_not_valid_for_primary() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1258,7 +1332,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_password_in_override_does_not_get_added() {
-        let sut = SUT::new();
+        let sut = SUT::strict();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),

@@ -91,10 +91,19 @@ impl MatrixBuilder {
         &self,
         factor_sources: &IndexSet<FactorSourceID>,
     ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
+        self.validation_for_addition_of_factor_source_to_primary_threshold_for_each_with_mode(factor_sources, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub fn validation_for_addition_of_factor_source_to_primary_threshold_for_each_with_mode(
+        &self,
+        factor_sources: &IndexSet<FactorSourceID>,
+        mode: SecurityShieldBuilderMode,
+    ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
         self.primary_role
-            .validation_for_addition_of_factor_source_for_each(
+            .validation_for_addition_of_factor_source_for_each_with_mode(
                 FactorListKind::Threshold,
                 factor_sources,
+                mode,
             )
     }
 
@@ -102,10 +111,19 @@ impl MatrixBuilder {
         &self,
         factor_sources: &IndexSet<FactorSourceID>,
     ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
+        self.validation_for_addition_of_factor_source_to_primary_override_for_each_with_mode(factor_sources, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub fn validation_for_addition_of_factor_source_to_primary_override_for_each_with_mode(
+        &self,
+        factor_sources: &IndexSet<FactorSourceID>,
+        mode: SecurityShieldBuilderMode,
+    ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
         self.primary_role
-            .validation_for_addition_of_factor_source_for_each(
+            .validation_for_addition_of_factor_source_for_each_with_mode(
                 FactorListKind::Override,
                 factor_sources,
+                mode,
             )
     }
 
@@ -113,9 +131,18 @@ impl MatrixBuilder {
         &self,
         factor_source_kind: FactorSourceKind,
     ) -> RoleBuilderMutateResult {
+        self.validation_for_addition_of_factor_source_of_kind_to_recovery_override_with_mode(factor_source_kind, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub fn validation_for_addition_of_factor_source_of_kind_to_recovery_override_with_mode(
+        &self,
+        factor_source_kind: FactorSourceKind,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
         self.recovery_role
-            .validation_for_addition_of_factor_source_of_kind_to_override(
+            .validation_for_addition_of_factor_source_of_kind_to_override_with_mode(
                 factor_source_kind,
+                mode
             )
     }
 
@@ -123,10 +150,19 @@ impl MatrixBuilder {
         &self,
         factor_sources: &IndexSet<FactorSourceID>,
     ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
+        self.validation_for_addition_of_factor_source_to_recovery_override_for_each_with_mode(factor_sources, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub fn validation_for_addition_of_factor_source_to_recovery_override_for_each_with_mode(
+        &self,
+        factor_sources: &IndexSet<FactorSourceID>,
+        mode: SecurityShieldBuilderMode,
+    ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
         self.recovery_role
-            .validation_for_addition_of_factor_source_for_each(
+            .validation_for_addition_of_factor_source_for_each_with_mode(
                 FactorListKind::Override,
                 factor_sources,
+                mode,
             )
     }
 
@@ -134,9 +170,18 @@ impl MatrixBuilder {
         &self,
         factor_source_kind: FactorSourceKind,
     ) -> RoleBuilderMutateResult {
+        self.validation_for_addition_of_factor_source_of_kind_to_confirmation_override_with_mode(factor_source_kind, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub fn validation_for_addition_of_factor_source_of_kind_to_confirmation_override_with_mode(
+        &self,
+        factor_source_kind: FactorSourceKind,
+        mode: SecurityShieldBuilderMode,
+    ) -> RoleBuilderMutateResult {
         self.confirmation_role
-            .validation_for_addition_of_factor_source_of_kind_to_override(
+            .validation_for_addition_of_factor_source_of_kind_to_override_with_mode(
                 factor_source_kind,
+                mode
             )
     }
 
@@ -144,10 +189,19 @@ impl MatrixBuilder {
         &self,
         factor_sources: &IndexSet<FactorSourceID>,
     ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
+        self.validation_for_addition_of_factor_source_to_confirmation_override_for_each_with_mode(factor_sources, SecurityShieldBuilderMode::Strict)
+    }
+
+    pub fn validation_for_addition_of_factor_source_to_confirmation_override_for_each_with_mode(
+        &self,
+        factor_sources: &IndexSet<FactorSourceID>,
+        mode: SecurityShieldBuilderMode,
+    ) -> IndexSet<FactorSourceInRoleBuilderValidationStatus> {
         self.confirmation_role
-            .validation_for_addition_of_factor_source_for_each(
+            .validation_for_addition_of_factor_source_for_each_with_mode(
                 FactorListKind::Override,
                 factor_sources,
+                mode,
             )
     }
 
@@ -199,8 +253,19 @@ impl MatrixBuilder {
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> MatrixBuilderMutateResult {
+        self.add_factor_source_to_primary_threshold_with_mode(
+            factor_source_id,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+
+    pub fn add_factor_source_to_primary_threshold_with_mode(
+        &mut self,
+        factor_source_id: FactorSourceID,
+        mode: SecurityShieldBuilderMode,
+    ) -> MatrixBuilderMutateResult {
         self.primary_role
-            .add_factor_source_to_threshold(factor_source_id)
+            .add_factor_source_to_threshold_with_mode(factor_source_id, mode)
             .into_matrix_err(RoleKind::Primary)
     }
 
@@ -219,8 +284,20 @@ impl MatrixBuilder {
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> MatrixBuilderMutateResult {
+        self.add_factor_source_to_primary_override_with_mode(
+            factor_source_id,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+
+    /// Adds the factor source to the primary role override list.
+    pub fn add_factor_source_to_primary_override_with_mode(
+        &mut self,
+        factor_source_id: FactorSourceID,
+        mode: SecurityShieldBuilderMode,
+    ) -> MatrixBuilderMutateResult {
         self.primary_role
-            .add_factor_source_to_override(factor_source_id)
+            .add_factor_source_to_override_with_mode(factor_source_id, mode)
             .into_matrix_err(RoleKind::Primary)
     }
 
@@ -228,8 +305,19 @@ impl MatrixBuilder {
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> MatrixBuilderMutateResult {
+        self.add_factor_source_to_recovery_override_with_mode(
+            factor_source_id,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+
+    pub fn add_factor_source_to_recovery_override_with_mode(
+        &mut self,
+        factor_source_id: FactorSourceID,
+        mode: SecurityShieldBuilderMode,
+    ) -> MatrixBuilderMutateResult {
         self.recovery_role
-            .add_factor_source_to_override(factor_source_id)
+            .add_factor_source_to_override_with_mode(factor_source_id, mode)
             .into_matrix_err(RoleKind::Recovery)
     }
 
@@ -237,8 +325,19 @@ impl MatrixBuilder {
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> MatrixBuilderMutateResult {
+        self.add_factor_source_to_confirmation_override_with_mode(
+            factor_source_id,
+            SecurityShieldBuilderMode::Strict,
+        )
+    }
+
+    pub fn add_factor_source_to_confirmation_override_with_mode(
+        &mut self,
+        factor_source_id: FactorSourceID,
+        mode: SecurityShieldBuilderMode,
+    ) -> MatrixBuilderMutateResult {
         self.confirmation_role
-            .add_factor_source_to_override(factor_source_id)
+            .add_factor_source_to_override_with_mode(factor_source_id, mode)
             .into_matrix_err(RoleKind::Confirmation)
     }
 

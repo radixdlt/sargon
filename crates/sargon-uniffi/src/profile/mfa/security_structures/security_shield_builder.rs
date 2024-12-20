@@ -28,7 +28,7 @@ impl SecurityShieldBuilder {
     #[uniffi::constructor]
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
-            wrapped: RwLock::new(sargon::SecurityShieldBuilder::new()),
+            wrapped: RwLock::new(sargon::SecurityShieldBuilder::lenient()),
         })
     }
 }
