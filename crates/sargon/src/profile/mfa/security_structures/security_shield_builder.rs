@@ -53,6 +53,81 @@ impl Default for SecurityShieldBuilder {
     }
 }
 
+impl PartialEq for SecurityShieldBuilder {
+    fn eq(&self, other: &Self) -> bool {
+        let (matrix, name, authentication_signing_factor) = (
+            self.matrix_builder
+                .read()
+                .expect("Failed to read matrix_builder"),
+            self.name.read().expect("Failed to read name"),
+            self.authentication_signing_factor
+                .read()
+                .expect("Failed to read authentication_signing_factor"),
+        );
+        let (other_matrix, other_name, other_authentication_signing_factor) = (
+            other
+                .matrix_builder
+                .read()
+                .expect("Failed to read other matrix_builder"),
+            other.name.read().expect("Failed to read other name"),
+            other
+                .authentication_signing_factor
+                .read()
+                .expect("Failed to read other authentication_signing_factor"),
+        );
+
+        self.mode == other.mode
+            && *matrix == *other_matrix
+            && *name == *other_name
+            && *authentication_signing_factor
+                == *other_authentication_signing_factor
+            && self.shield_id == other.shield_id
+            && self.created_on == other.created_on
+    }
+}
+
+impl Eq for SecurityShieldBuilder {}
+
+impl Clone for SecurityShieldBuilder {
+    fn clone(&self) -> Self {
+        Self {
+            mode: self.mode,
+            matrix_builder: RwLock::new(
+                self.matrix_builder
+                    .read()
+                    .expect("Failed to read matrix_builder")
+                    .clone(),
+            ),
+            name: RwLock::new(
+                self.name.read().expect("Failed to read name").clone(),
+            ),
+            authentication_signing_factor: RwLock::new(
+                *self
+                    .authentication_signing_factor
+                    .read()
+                    .expect("Failed to read authentication_signing_factor"),
+            ),
+            shield_id: self.shield_id,
+            created_on: self.created_on,
+        }
+    }
+}
+
+impl std::hash::Hash for SecurityShieldBuilder {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        let (matrix, name) = (
+            self.matrix_builder
+                .read()
+                .expect("Failed to read matrix_builder"),
+            self.name.read().expect("Failed to read name"),
+        );
+        matrix.hash(state);
+        name.hash(state);
+        self.shield_id.hash(state);
+        self.created_on.hash(state);
+    }
+}
+
 impl SecurityShieldBuilder {
     pub fn new(mode: SecurityShieldBuilderMode) -> Self {
         let matrix_builder = MatrixBuilder::new();
@@ -65,6 +140,52 @@ impl SecurityShieldBuilder {
             shield_id: SecurityStructureID::from(id()),
             created_on: now(),
         }
+    }
+
+    pub fn with_details(
+        mode: SecurityShieldBuilderMode,
+        matrix_builder: RwLock<MatrixBuilder>,
+        name: RwLock<String>,
+        authentication_signing_factor: RwLock<Option<FactorSourceID>>,
+        shield_id: SecurityStructureID,
+        created_on: Timestamp,
+    ) -> Self {
+        Self {
+            mode,
+            matrix_builder,
+            name,
+            authentication_signing_factor,
+            shield_id,
+            created_on,
+        }
+    }
+}
+
+impl HasSampleValues for SecurityShieldBuilder {
+    fn sample() -> Self {
+        let matrix_builder = MatrixBuilder::new();
+        let name = RwLock::new("My Shield".to_owned());
+        Self::with_details(
+            SecurityShieldBuilderMode::Strict,
+            RwLock::new(matrix_builder),
+            name,
+            RwLock::new(None),
+            SecurityStructureID::sample(),
+            Timestamp::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        let matrix_builder = MatrixBuilder::new();
+        let name = RwLock::new("My Shield Other".to_owned());
+        Self::with_details(
+            SecurityShieldBuilderMode::Lenient,
+            RwLock::new(matrix_builder),
+            name,
+            RwLock::new(None),
+            SecurityStructureID::sample_other(),
+            Timestamp::sample_other(),
+        )
     }
 }
 
@@ -668,6 +789,36 @@ mod tests {
     type SUT = SecurityShieldBuilder;
 
     #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            radix_rust::hashset![
+                SUT::sample(),
+                SUT::sample(),
+                SUT::sample_other(),
+                SUT::sample_other(),
+            ]
+            .len(),
+            2
+        )
+    }
+
+    #[test]
+    fn clone() {
+        assert_eq!(SUT::sample(), SUT::sample().clone());
+        assert_eq!(SUT::sample_other(), SUT::sample_other().clone());
+    }
+
     fn default_is_lenient() {
         assert_eq!(SUT::default().mode, SecurityShieldBuilderMode::Lenient);
     }
