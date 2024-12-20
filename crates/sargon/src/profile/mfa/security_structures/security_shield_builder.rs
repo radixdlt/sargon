@@ -51,6 +51,8 @@ impl PartialEq for SecurityShieldBuilder {
     }
 }
 
+impl Eq for SecurityShieldBuilder {}
+
 impl Clone for SecurityShieldBuilder {
     fn clone(&self) -> Self {
         Self {
@@ -734,6 +736,20 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            radix_rust::hashset![
+                SUT::sample(),
+                SUT::sample(),
+                SUT::sample_other(),
+                SUT::sample_other(),
+            ]
+            .len(),
+            2
+        )
     }
 
     #[test]
