@@ -72,7 +72,13 @@ impl Instructions {
             &network_definition,
             blob_provider,
         )
-        .map_err(|e| CommonError::from_scrypto_compile_error(e, network_id))
+        .map_err(|e| {
+            CommonError::from_scrypto_compile_error(
+                instructions_string.as_ref(),
+                e,
+                network_id,
+            )
+        })
         .and_then(|manifest| {
             Self::try_from((manifest.instructions.as_ref(), network_id))
         })
