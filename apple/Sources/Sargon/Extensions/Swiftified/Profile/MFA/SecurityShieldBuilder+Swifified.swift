@@ -5,11 +5,7 @@ extension SecurityShieldBuilder {
 
 	/// Confirmation Role
 	public var numberOfDaysUntilAutoConfirm: UInt16 {
-		get { getNumberOfDaysUntilAutoConfirm() }
-		set {
-			precondition(newValue > 0, "Number of days until auto confirm must be greater than zero.")
-			setNumberOfDaysUntilAutoConfirm(numberOfDays: UInt16(newValue))
-		}
+		getNumberOfDaysUntilAutoConfirm()
 	}
 
 	public var threshold: UInt8 {

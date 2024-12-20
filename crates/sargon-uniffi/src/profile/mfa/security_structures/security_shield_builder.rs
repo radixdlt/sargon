@@ -18,32 +18,10 @@ use crate::prelude::*;
 /// A builder of `SecurityStructureOfFactorSourceIds` a.k.a. `SecurityShield`,
 /// which contains a MatrixOfFactorSourceIds - with primary, recovery, and
 /// confirmation roles.
-#[derive(Debug, uniffi::Object)]
+#[derive(Debug, Hash, PartialEq, Clone, uniffi::Object)]
 #[uniffi::export(Hash, Eq)]
 pub struct SecurityShieldBuilder {
-    wrapped: RwLock<sargon::SecurityShieldBuilder>,
-}
-
-impl std::hash::Hash for SecurityShieldBuilder {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.wrapped.read().unwrap().hash(state);
-    }
-}
-
-impl PartialEq for SecurityShieldBuilder {
-    fn eq(&self, other: &Self) -> bool {
-        let wrapped = self.wrapped.read().unwrap();
-        let other_wrapped = other.wrapped.read().unwrap();
-        *wrapped == *other_wrapped
-    }
-}
-
-impl Clone for SecurityShieldBuilder {
-    fn clone(&self) -> Self {
-        Self {
-            wrapped: RwLock::new(self.wrapped.read().unwrap().clone()),
-        }
-    }
+    wrapped: Arc<sargon::SecurityShieldBuilder>,
 }
 
 #[uniffi::export]
@@ -51,7 +29,7 @@ impl SecurityShieldBuilder {
     #[uniffi::constructor]
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
-            wrapped: RwLock::new(sargon::SecurityShieldBuilder::new()),
+            wrapped: Arc::new(sargon::SecurityShieldBuilder::new()),
         })
     }
 }
@@ -61,19 +39,18 @@ impl SecurityShieldBuilder {
         &self,
         access: impl Fn(&sargon::SecurityShieldBuilder) -> R,
     ) -> R {
-        let binding = self.wrapped.read().unwrap();
+        let binding = self.wrapped.clone();
         access(&binding)
     }
 
     fn set(
         self: Arc<Self>,
-        mut write: impl FnMut(
-            &mut sargon::SecurityShieldBuilder,
+        write: impl Fn(
+            &Arc<sargon::SecurityShieldBuilder>,
         ) -> &sargon::SecurityShieldBuilder,
     ) -> Arc<Self> {
         builder_arc_map(self, |builder| {
-            let mut binding = builder.wrapped.write().expect("No poison");
-            _ = write(&mut binding);
+            _ = write(&builder.wrapped);
         })
     }
 
@@ -422,8 +399,7 @@ impl SecurityShieldBuilder {
         all_factors: Vec<FactorSource>,
     ) -> Arc<Self> {
         builder_arc_map(self, |builder| {
-            let binding = builder.wrapped.write().expect("No poison");
-            let _ = binding
+            let _ = builder.wrapped
                 .auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
                     all_factors.into_internal(),
                 );
