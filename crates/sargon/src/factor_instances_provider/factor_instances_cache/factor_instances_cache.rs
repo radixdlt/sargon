@@ -272,80 +272,78 @@ impl FactorInstancesCache {
 
                 let count_in_cache = for_preset.len();
 
-                let val = if let Some(quantified_derivation_preset) =
-                    quantified_derivation_presets.get_id(preset)
-                {
-                    // The `preset` was part of the originally requested preset
-                    // with a target quantity.
-                    let target_quantity = quantified_derivation_preset.quantity;
+                let maybe_instances_with_remaining_qty_to_derive =
+                    if let Some(quantified_derivation_preset) =
+                        quantified_derivation_presets.get_id(preset)
+                    {
+                        // The `preset` was part of the originally requested preset
+                        // with a target quantity.
+                        let target_quantity =
+                            quantified_derivation_preset.quantity;
 
-                    let is_quantity_satisfied =
-                        count_in_cache >= target_quantity;
+                        let is_quantity_satisfied =
+                            count_in_cache >= target_quantity;
 
-                    if is_quantity_satisfied {
-                        // The instances in the cache can satisfy the requested quantity
-                        // for this factor source for this derivation preset
-                        let v = CacheInstancesAndRemainingQuantityToDerive {
-                            // Only take the first `target_quantity` instances
-                            // to be used, the rest are not needed and should
-                            // remain in the cache (later we will call delete on
-                            // all those instances.)
-                            instances_to_use_from_cache: for_preset
-                                .split_at(target_quantity)
-                                .0,
-                            quantity_to_derive: 0,
-                        };
+                        if is_quantity_satisfied {
+                            // The instances in the cache can satisfy the requested quantity
+                            // for this factor source for this derivation preset
+                            let instances_to_use_from_cache =
+                                for_preset.split_at(target_quantity).0;
+                            assert!(!instances_to_use_from_cache.is_empty());
+                            Some(CacheInstancesAndRemainingQuantityToDerive {
+                                // Only take the first `target_quantity` instances
+                                // to be used, the rest are not needed and should
+                                // remain in the cache (later we will call delete on
+                                // all those instances.)
+                                instances_to_use_from_cache,
+                                quantity_to_derive: 0,
+                            })
+                        } else {
+                            // Since we are deriving more we might as well ensure that the
+                            // cache is filled with `CACHE_FILLING_QUANTITY` **AFTER** the
+                            // requested quantity is satisfied, meaning we will not only
+                            // derive `CACHE_FILLING_QUANTITY - count_in_cache`, instead we
+                            // derive the `target_quantity` as well.
+                            let quantity_to_derive = cache_filling_quantity
+                                - count_in_cache
+                                + target_quantity;
+                            Some(CacheInstancesAndRemainingQuantityToDerive {
+                                instances_to_use_from_cache: for_preset.clone(),
+                                quantity_to_derive,
+                            })
+                        }
+                    } else if count_in_cache < cache_filling_quantity {
+                        // Not requested derivation preset, calculate number
+                        // of instances to derive IF we are going to derive anyway,
+                        // we wanna FILL the cache for those derivation presets as well.
+                        let quantity_to_derive =
+                            cache_filling_quantity - count_in_cache;
 
-                        assert!(!v.instances_to_use_from_cache.is_empty());
-                        Some(v)
-                    } else {
-                        // Since we are deriving more we might as well ensure that the
-                        // cache is filled with `CACHE_FILLING_QUANTITY` **AFTER** the
-                        // requested quantity is satisfied, meaning we will not only
-                        // derive `CACHE_FILLING_QUANTITY - count_in_cache`, instead we
-                        // derive the `target_quantity` as well.
-                        let quantity_to_derive = cache_filling_quantity
-                            - count_in_cache
-                            + target_quantity;
-                        let v = CacheInstancesAndRemainingQuantityToDerive {
-                            instances_to_use_from_cache: for_preset.clone(),
+                        Some(CacheInstancesAndRemainingQuantityToDerive {
+                            instances_to_use_from_cache:
+                                FactorInstances::default(),
                             quantity_to_derive,
-                        };
-                        assert!(
-                            v.quantity_to_derive > 0
-                                || !v.instances_to_use_from_cache.is_empty()
-                        );
-                        Some(v)
-                    }
-                } else if count_in_cache < cache_filling_quantity {
-                    // Not requested derivation preset, calculate number
-                    // of instances to derive IF we are going to derive anyway,
-                    // we wanna FILL the cache for those derivation presets as well.
-                    let quantity_to_derive =
-                        cache_filling_quantity - count_in_cache;
-
-                    assert!(quantity_to_derive > 0);
-
-                    Some(CacheInstancesAndRemainingQuantityToDerive {
-                        instances_to_use_from_cache: FactorInstances::default(),
-                        quantity_to_derive,
-                    })
-                } else {
-                    None
-                };
-                if let Some(val) = val {
-                    per_factor_source.insert(*factor_source_id, val);
+                        })
+                    } else {
+                        None
+                    };
+                if let Some(instances_with_remaining_qty_to_derive) =
+                    maybe_instances_with_remaining_qty_to_derive
+                {
+                    per_factor_source.insert(
+                        *factor_source_id,
+                        instances_with_remaining_qty_to_derive,
+                    );
                 }
             }
-            if per_factor_source.is_empty() {
-                continue;
+            if !per_factor_source.is_empty() {
+                per_derivation_preset.insert(preset, per_factor_source);
             }
-            per_derivation_preset.insert(preset, per_factor_source);
         }
 
         let originally_request_presets = quantified_derivation_presets
             .iter()
-            .map(|x| x.derivation_preset)
+            .map(|quantified_preset| quantified_preset.derivation_preset)
             .collect::<IndexSet<_>>();
 
         // The instances in the cache cannot satisfy the requested quantity
@@ -371,26 +369,12 @@ impl FactorInstancesCache {
                     .filter(|(preset, _)| {
                         originally_request_presets.contains(preset)
                     })
-                    .map(|(preset, v)| {
+                    .map(|(preset, per_factor)| {
                         (
                             preset,
-                            v.into_iter()
-                                .map(|(fsid, x)| {
-                                    assert_eq!(x.quantity_to_derive, 0);
-                                    let instances =
-                                        x.instances_to_use_from_cache;
-                                    assert!(instances.clone().into_iter().all(
-                                        |fi| {
-                                            fi.factor_source_id() == fsid
-                                                && DerivationPreset::try_from(
-                                                    fi.derivation_path()
-                                                        .agnostic(),
-                                                )
-                                                .unwrap()
-                                                    == preset
-                                        }
-                                    ));
-                                    (fsid, instances)
+                            per_factor.into_iter()
+                                .map(|(fsid, instances_and_remaining_qty_to_derive)| {
+                                    (fsid, instances_and_remaining_qty_to_derive.instances_to_use_from_cache)
                                 })
                                 .collect::<IndexMap<
                                     FactorSourceIDFromHash,
@@ -398,10 +382,7 @@ impl FactorInstancesCache {
                                 >>(),
                         )
                     })
-                    .collect::<IndexMap<
-                        DerivationPreset,
-                        IndexMap<FactorSourceIDFromHash, FactorInstances>,
-                    >>(),
+                    .collect::<InstancesPerDerivationPresetPerFactorSource>(),
             })
         };
 
