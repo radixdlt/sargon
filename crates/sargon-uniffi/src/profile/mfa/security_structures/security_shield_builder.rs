@@ -111,6 +111,11 @@ impl SecurityShieldBuilder {
         self.get(|builder| builder.get_name())
     }
 
+    pub fn get_authentication_signing_factor(&self) -> Option<FactorSourceID> {
+        self.get(|builder| builder.get_authentication_signing_factor())
+            .map(|x| x.into())
+    }
+
     pub fn get_primary_threshold_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_threshold_factors())
     }
@@ -135,6 +140,17 @@ impl SecurityShieldBuilder {
 impl SecurityShieldBuilder {
     pub fn set_name(self: Arc<Self>, name: String) -> Arc<Self> {
         self.set(|builder| builder.set_name(&name))
+    }
+
+    pub fn set_authentication_signing_factor(
+        self: Arc<Self>,
+        new: Option<FactorSourceID>,
+    ) -> Arc<Self> {
+        self.set(|builder| {
+            builder.set_authentication_signing_factor(
+                new.clone().map(|x| x.into_internal()),
+            )
+        })
     }
 
     pub fn remove_factor_from_all_roles(
@@ -246,6 +262,29 @@ impl SecurityShieldBuilder {
 
 #[uniffi::export]
 impl SecurityShieldBuilder {
+    /// "Statically" queries which FactorSourceKinds are disallowed for authentication signing.
+    pub fn disallowed_factor_source_kinds_for_authentication_signing(
+        &self,
+    ) -> Vec<FactorSourceKind> {
+        sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().into_type()
+    }
+
+    /// "Statically" queries which FactorSourceKinds are allowed for authentication signing.
+    pub fn allowed_factor_source_kinds_for_authentication_signing(
+        &self,
+    ) -> Vec<FactorSourceKind> {
+        sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().into_type()
+    }
+
+    /// "Statically" queries if `factor_source_kind`` is allowed for authentication signing.
+    pub fn is_allowed_factor_source_kind_for_authentication_signing(
+        &self,
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        sargon::SecurityShieldBuilder::is_allowed_factor_source_kind_for_authentication_signing(
+                factor_source_kind.clone().into())
+    }
+
     pub fn addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
         &self,
         factor_source_kind: FactorSourceKind,
@@ -556,6 +595,35 @@ mod tests {
     type SUT = SecurityShieldBuilder;
 
     #[test]
+    fn rola() {
+        let sut = SUT::new();
+        assert_eq!(sut.disallowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().len());
+
+        assert_eq!(sut.allowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().len());
+
+        assert!(
+            sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::Device
+            )
+        );
+        assert!(
+            !sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::Password
+            )
+        );
+        assert!(
+            !sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::TrustedContact
+            )
+        );
+        assert!(
+            !sut.is_allowed_factor_source_kind_for_authentication_signing(
+                FactorSourceKind::SecurityQuestions
+            )
+        );
+    }
+
+    #[test]
     fn test() {
         let mut sut = SUT::new();
 
@@ -784,14 +852,30 @@ mod tests {
             .remove_factor_from_confirmation(f.clone());
         assert_eq!(xs, sut.clone().get_confirmation_factors());
 
-        let v0 = sut.clone().validate();
-        let v1 = sut.clone().validate(); // can call validate many times!
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+        sut = sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device_other(),
+        ));
+        assert_eq!(
+            sut.get_authentication_signing_factor(),
+            Some(FactorSourceID::sample_device_other())
+        );
+
+        let v0 = sut.validate();
+        let v1 = sut.validate(); // can call validate many times!
         assert_eq!(v0, v1);
 
         let shield0 = sut.clone().build().unwrap();
         let shield = sut.clone().build().unwrap(); // can call build many times!
         assert_eq!(shield0, shield);
 
+        assert_eq!(
+            shield.authentication_signing_factor,
+            FactorSourceID::sample_device_other()
+        );
         assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
         assert_eq!(
             shield.matrix_of_factors.primary_role.override_factors,

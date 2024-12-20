@@ -43,9 +43,28 @@ impl FactorInstances {
         self.shift_remove_index(idx)
     }
 
-    pub fn first(&self) -> Option<HierarchicalDeterministicFactorInstance> {
-        self.factor_instances.first().cloned()
+    fn first_of_key_kind(
+        &self,
+        key_kind: CAP26KeyKind,
+    ) -> Option<HierarchicalDeterministicFactorInstance> {
+        self.factor_instances
+            .iter()
+            .find(|i| i.get_key_kind() == key_kind)
+            .cloned()
     }
+
+    pub fn first_transaction_signing(
+        &self,
+    ) -> Option<HierarchicalDeterministicFactorInstance> {
+        self.first_of_key_kind(CAP26KeyKind::TransactionSigning)
+    }
+
+    pub fn first_authentication_signing(
+        &self,
+    ) -> Option<HierarchicalDeterministicFactorInstance> {
+        self.first_of_key_kind(CAP26KeyKind::AuthenticationSigning)
+    }
+
     pub fn split_at(self, mid: usize) -> (Self, Self) {
         let instances = self.factor_instances.into_iter().collect_vec();
         let (head, tail) = instances.split_at(mid);

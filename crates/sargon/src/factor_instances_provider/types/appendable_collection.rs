@@ -34,7 +34,7 @@ pub trait AppendableMap {
     }
 }
 
-/// A collection which we can append to, primlary used as a generic
+/// A collection which we can append to, primarily used as a generic
 /// constraint for `AppendableMap`.
 pub trait AppendableCollection: FromIterator<Self::Element> {
     type Element;

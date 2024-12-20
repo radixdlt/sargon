@@ -859,6 +859,15 @@ pub enum CommonError {
 
     #[error("Cannot securify entity that has provisional security config")]
     CannotSecurifyEntityHasProvisionalSecurityConfig = 10241,
+
+    #[error("Too few FactorInstances derived")]
+    TooFewFactorInstancesDerived = 10242,
+
+    #[error("Missing Authentication Signing FactorInstance mapping SecurityStructureOfFactorSources into SecurityStructureOfFactorInstances.")]
+    MissingRolaKeyForSecurityStructureOfFactorInstances = 10243,
+
+    #[error("SecurityStateAccessController address mismatch")]
+    SecurityStateAccessControllerAddressMismatch = 10244,
 }
 
 impl CommonError {

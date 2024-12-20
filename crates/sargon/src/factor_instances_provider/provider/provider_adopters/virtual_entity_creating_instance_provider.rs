@@ -21,10 +21,8 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactor: Arc<dyn KeyDerivationInteractor>,
-    ) -> Result<(
-        InstancesInCacheConsumer,
-        FactorInstancesProviderOutcomeForFactor,
-    )> {
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
         Self::for_entity_veci(
             CAP26EntityKind::Account,
             cache_client,
@@ -52,10 +50,8 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactor: Arc<dyn KeyDerivationInteractor>,
-    ) -> Result<(
-        InstancesInCacheConsumer,
-        FactorInstancesProviderOutcomeForFactor,
-    )> {
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
         Self::for_entity_veci(
             CAP26EntityKind::Identity,
             cache_client,
@@ -84,10 +80,8 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactor: Arc<dyn KeyDerivationInteractor>,
-    ) -> Result<(
-        InstancesInCacheConsumer,
-        FactorInstancesProviderOutcomeForFactor,
-    )> {
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
         Self::for_many_entity_vecis(
             1,
             entity_kind,
@@ -120,10 +114,8 @@ impl VirtualEntityCreatingInstanceProvider {
         factor_source: FactorSource,
         network_id: NetworkID,
         interactor: Arc<dyn KeyDerivationInteractor>,
-    ) -> Result<(
-        InstancesInCacheConsumer,
-        FactorInstancesProviderOutcomeForFactor,
-    )> {
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
         let provider = FactorInstancesProvider::new(
             network_id,
             IndexSet::just(factor_source.clone()),
@@ -131,21 +123,15 @@ impl VirtualEntityCreatingInstanceProvider {
             cache_client,
             interactor,
         );
+
+        let derivation_preset = DerivationPreset::veci_entity_kind(entity_kind);
+
         let (instances_in_cache_consumer, outcome) = provider
             .provide(
-                QuantifiedDerivationPreset::new(
-                    DerivationPreset::veci_entity_kind(entity_kind),
-                    count,
-                ),
+                QuantifiedDerivationPreset::new(derivation_preset, count),
                 DerivationPurpose::creation_of_new_virtual_entity(entity_kind),
             )
             .await?;
-
-        let outcome = outcome
-            .per_factor
-            .get(&factor_source.id_from_hash())
-            .cloned()
-            .expect("Expected to have instances for the factor source");
 
         Ok((instances_in_cache_consumer, outcome.into()))
     }
@@ -176,23 +162,55 @@ mod tests {
         .unwrap();
         consumer.consume().await.unwrap();
 
-        assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
-
-        assert_eq!(outcome.debug_found_in_cache.len(), 0);
-
         assert_eq!(
-            outcome.debug_was_cached.len(),
-            DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+            outcome
+                .per_derivation_preset
+                .values()
+                .flat_map(|x| x.per_factor.keys().cloned().collect_vec())
+                .collect::<HashSet<_>>(),
+            HashSet::<FactorSourceIDFromHash>::from_iter([bdfs.id_from_hash()])
         );
 
-        assert_eq!(
-            outcome.debug_was_derived.len(),
-            DerivationPreset::all().len() * CACHE_FILLING_QUANTITY + 1
-        );
+        assert!(outcome.per_derivation_preset.values().all(|x| x
+            .per_factor
+            .values()
+            .all(|y| y.debug_found_in_cache.is_empty())));
 
-        let instances_used_directly =
-            outcome.to_use_directly.factor_instances();
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(preset, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_cached.len()
+                    == preset.cache_filling_quantity())
+        ));
+
+        for (preset, per_factor) in outcome.per_derivation_preset.iter() {
+            for (_, for_factor) in per_factor.per_factor.iter() {
+                let derivation_based_offset =
+                    if *preset == DerivationPreset::IdentityVeci {
+                        1 /* One persona created */
+                    } else {
+                        0
+                    };
+                assert_eq!(
+                    for_factor.debug_was_derived.len(),
+                    preset.cache_filling_quantity() + derivation_based_offset
+                )
+            }
+        }
+
+        let instances_used_directly = outcome
+            .per_derivation_preset
+            .get(&DerivationPreset::IdentityVeci)
+            .unwrap()
+            .per_factor
+            .get(&bdfs.id_from_hash())
+            .unwrap()
+            .to_use_directly
+            .factor_instances();
+
         assert_eq!(instances_used_directly.len(), 1);
+
         let instances_used_directly = instances_used_directly.first().unwrap();
 
         assert_eq!(
@@ -264,6 +282,7 @@ mod tests {
         let network = NetworkID::Mainnet;
         let bdfs = FactorSource::sample();
         let cache_client = Arc::new(FactorInstancesCacheClient::in_memory());
+
         let (consumer, outcome) = SUT::for_account_veci(
             cache_client.clone(),
             None,
@@ -273,24 +292,56 @@ mod tests {
         )
         .await
         .unwrap();
+
         consumer.consume().await.unwrap();
 
-        assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
-
-        assert_eq!(outcome.debug_found_in_cache.len(), 0);
-
         assert_eq!(
-            outcome.debug_was_cached.len(),
-            DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
+            outcome
+                .per_derivation_preset
+                .values()
+                .flat_map(|x| x.per_factor.keys().cloned().collect_vec())
+                .collect::<HashSet<_>>(),
+            HashSet::<FactorSourceIDFromHash>::from_iter([bdfs.id_from_hash()])
         );
 
-        assert_eq!(
-            outcome.debug_was_derived.len(),
-            DerivationPreset::all().len() * CACHE_FILLING_QUANTITY + 1
-        );
+        assert!(outcome.per_derivation_preset.values().all(|x| x
+            .per_factor
+            .values()
+            .all(|y| y.debug_found_in_cache.is_empty())));
 
-        let instances_used_directly =
-            outcome.to_use_directly.factor_instances();
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(preset, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_cached.len()
+                    == preset.cache_filling_quantity())
+        ));
+
+        for (k, v) in outcome.per_derivation_preset.iter() {
+            for (_, y) in v.per_factor.iter() {
+                let derivation_based_offset =
+                    if *k == DerivationPreset::AccountVeci {
+                        1
+                    } else {
+                        0
+                    };
+                assert_eq!(
+                    y.debug_was_derived.len(),
+                    k.cache_filling_quantity() + derivation_based_offset
+                )
+            }
+        }
+
+        let instances_used_directly = outcome
+            .per_derivation_preset
+            .get(&DerivationPreset::AccountVeci)
+            .unwrap()
+            .per_factor
+            .get(&bdfs.id_from_hash())
+            .unwrap()
+            .to_use_directly
+            .factor_instances();
+
         assert_eq!(instances_used_directly.len(), 1);
         let instances_used_directly = instances_used_directly.first().unwrap();
 
@@ -480,13 +531,44 @@ mod tests {
         .unwrap();
         consumer.consume().await.unwrap();
 
-        assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
-        assert_eq!(outcome.debug_found_in_cache.len(), 1); // This time we found in cache
-        assert_eq!(outcome.debug_was_cached.len(), 0);
-        assert_eq!(outcome.debug_was_derived.len(), 0);
+        assert_eq!(
+            outcome
+                .per_derivation_preset
+                .values()
+                .flat_map(|x| x.per_factor.keys().cloned().collect_vec())
+                .collect::<HashSet<_>>(),
+            HashSet::<FactorSourceIDFromHash>::from_iter([bdfs.id_from_hash()])
+        );
 
-        let instances_used_directly =
-            outcome.to_use_directly.factor_instances();
+        assert!(outcome.per_derivation_preset.values().all(|x| x
+            .per_factor
+            .values()
+            .all(|y| y.debug_found_in_cache.len() == 1))); // This time we found in cache
+
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(_, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_cached.is_empty())
+        ));
+
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(_, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_derived.is_empty())
+        ));
+
+        let instances_used_directly = outcome
+            .per_derivation_preset
+            .get(&DerivationPreset::AccountVeci)
+            .unwrap()
+            .per_factor
+            .get(&bdfs.id_from_hash())
+            .unwrap()
+            .to_use_directly
+            .factor_instances();
+
         assert_eq!(instances_used_directly.len(), 1);
         let instances_used_directly = instances_used_directly.first().unwrap();
 
@@ -568,11 +650,33 @@ mod tests {
         .unwrap();
         consumer.consume().await.unwrap();
 
-        assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
+        assert_eq!(
+            outcome
+                .per_derivation_preset
+                .values()
+                .flat_map(|x| x.per_factor.keys().cloned().collect_vec())
+                .collect::<HashSet<_>>(),
+            HashSet::<FactorSourceIDFromHash>::from_iter([bdfs.id_from_hash()])
+        );
 
-        assert_eq!(outcome.debug_found_in_cache.len(), 29);
-        assert_eq!(outcome.debug_was_cached.len(), 0);
-        assert_eq!(outcome.debug_was_derived.len(), 0);
+        assert!(outcome.per_derivation_preset.values().all(|x| x
+            .per_factor
+            .values()
+            .all(|y| y.debug_found_in_cache.len() == 29)));
+
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(_, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_cached.is_empty())
+        ));
+
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(_, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_derived.is_empty())
+        ));
 
         let cached = cache_client
             .peek_all_instances_of_factor_source(bdfs.id_from_hash())
@@ -605,14 +709,47 @@ mod tests {
         .unwrap();
         consumer.consume().await.unwrap();
 
-        assert_eq!(outcome.factor_source_id, bdfs.id_from_hash());
+        assert_eq!(
+            outcome
+                .per_derivation_preset
+                .values()
+                .flat_map(|x| x.per_factor.keys().cloned().collect_vec())
+                .collect::<HashSet<_>>(),
+            HashSet::<FactorSourceIDFromHash>::from_iter([bdfs.id_from_hash()])
+        );
 
-        assert_eq!(outcome.debug_found_in_cache.len(), 0);
-        assert_eq!(outcome.debug_was_cached.len(), CACHE_FILLING_QUANTITY); // ONLY 30, not 120...
-        assert_eq!(outcome.debug_was_derived.len(), CACHE_FILLING_QUANTITY + 1);
+        assert!(outcome.per_derivation_preset.values().all(|x| x
+            .per_factor
+            .values()
+            .all(|y| y.debug_found_in_cache.is_empty())));
 
-        let instances_used_directly =
-            outcome.to_use_directly.factor_instances();
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(preset, x)| x
+                .per_factor
+                .values()
+                .all(|y| y.debug_was_cached.len()
+                    == preset.cache_filling_quantity())
+        ));
+
+        assert!(outcome.per_derivation_preset.clone().into_iter().all(
+            |(preset, x)| {
+                x.per_factor.values().all(|y| {
+                    y.debug_was_derived.len()
+                        == preset.cache_filling_quantity() + 1
+                } /* One account created */)
+            }
+        ));
+
+        let instances_used_directly = outcome
+            .per_derivation_preset
+            .get(&DerivationPreset::AccountVeci)
+            .unwrap()
+            .per_factor
+            .get(&bdfs.id_from_hash())
+            .unwrap()
+            .to_use_directly
+            .factor_instances();
+
         assert_eq!(instances_used_directly.len(), 1);
         let instances_used_directly = instances_used_directly.first().unwrap();
 

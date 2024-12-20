@@ -3,6 +3,7 @@ use crate::prelude::*;
 #[derive(Debug)]
 pub struct SecurityShieldBuilder {
     matrix_builder: RwLock<MatrixBuilder>,
+    authentication_signing_factor: RwLock<Option<FactorSourceID>>,
     name: RwLock<String>,
     // We eagerly set this, and we use it inside the `build` method, ensuring
     // that for the same *state* of `MatrixBuilder` we always have the same shield!
@@ -20,22 +21,31 @@ impl Default for SecurityShieldBuilder {
 
 impl PartialEq for SecurityShieldBuilder {
     fn eq(&self, other: &Self) -> bool {
-        let (matrix, name) = (
+        let (matrix, name, authentication_signing_factor) = (
             self.matrix_builder
                 .read()
                 .expect("Failed to read matrix_builder"),
             self.name.read().expect("Failed to read name"),
+            self.authentication_signing_factor
+                .read()
+                .expect("Failed to read authentication_signing_factor"),
         );
-        let (other_matrix, other_name) = (
+        let (other_matrix, other_name, other_authentication_signing_factor) = (
             other
                 .matrix_builder
                 .read()
                 .expect("Failed to read other matrix_builder"),
             other.name.read().expect("Failed to read other name"),
+            other
+                .authentication_signing_factor
+                .read()
+                .expect("Failed to read other authentication_signing_factor"),
         );
 
         *matrix == *other_matrix
             && *name == *other_name
+            && *authentication_signing_factor
+                == *other_authentication_signing_factor
             && self.shield_id == other.shield_id
             && self.created_on == other.created_on
     }
@@ -52,6 +62,12 @@ impl Clone for SecurityShieldBuilder {
             ),
             name: RwLock::new(
                 self.name.read().expect("Failed to read name").clone(),
+            ),
+            authentication_signing_factor: RwLock::new(
+                *self
+                    .authentication_signing_factor
+                    .read()
+                    .expect("Failed to read authentication_signing_factor"),
             ),
             shield_id: self.shield_id,
             created_on: self.created_on,
@@ -81,6 +97,7 @@ impl SecurityShieldBuilder {
         Self {
             matrix_builder: RwLock::new(matrix_builder),
             name,
+            authentication_signing_factor: RwLock::new(None),
             shield_id: SecurityStructureID::from(id()),
             created_on: now(),
         }
@@ -89,12 +106,14 @@ impl SecurityShieldBuilder {
     pub fn with_details(
         matrix_builder: RwLock<MatrixBuilder>,
         name: RwLock<String>,
+        authentication_signing_factor: RwLock<Option<FactorSourceID>>,
         shield_id: SecurityStructureID,
         created_on: Timestamp,
     ) -> Self {
         Self {
             matrix_builder,
             name,
+            authentication_signing_factor,
             shield_id,
             created_on,
         }
@@ -108,6 +127,7 @@ impl HasSampleValues for SecurityShieldBuilder {
         Self::with_details(
             RwLock::new(matrix_builder),
             name,
+            RwLock::new(None),
             SecurityStructureID::sample(),
             Timestamp::sample(),
         )
@@ -119,6 +139,7 @@ impl HasSampleValues for SecurityShieldBuilder {
         Self::with_details(
             RwLock::new(matrix_builder),
             name,
+            RwLock::new(None),
             SecurityStructureID::sample_other(),
             Timestamp::sample_other(),
         )
@@ -182,6 +203,10 @@ impl SecurityShieldBuilder {
         self.name.read().unwrap().clone()
     }
 
+    pub fn get_authentication_signing_factor(&self) -> Option<FactorSourceID> {
+        *self.authentication_signing_factor.read().unwrap()
+    }
+
     pub fn get_primary_threshold_factors(&self) -> Vec<FactorSourceID> {
         self.get_factors(|builder| builder.get_primary_threshold_factors())
     }
@@ -205,6 +230,29 @@ impl SecurityShieldBuilder {
 impl SecurityShieldBuilder {
     pub fn set_name(&self, name: impl AsRef<str>) -> &Self {
         *self.name.write().unwrap() = name.as_ref().to_owned();
+        self
+    }
+
+    /// Sets the ROLA (authentication signing) factor to `new` if and only if
+    /// `new` is not Some(invalid), where invalid is defined by `allowed_factor_source_kinds_for_authentication_signing`,
+    /// that is, it checks the `FactorSourceKind` of the factor, according to the
+    /// rules defined in [doc][doc].
+    ///
+    /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shield
+    pub fn set_authentication_signing_factor(
+        &self,
+        new: impl Into<Option<FactorSourceID>>,
+    ) -> &Self {
+        let new = new.into();
+        if let Some(new) = new.as_ref() {
+            if !Self::is_allowed_factor_source_kind_for_authentication_signing(
+                new.get_factor_source_kind(),
+            ) {
+                warn!("Invalid FactorSourceKind for ROLA");
+                return self;
+            }
+        }
+        *self.authentication_signing_factor.write().unwrap() = new;
         self
     }
 
@@ -375,6 +423,30 @@ impl SecurityShieldBuilder {
 }
 
 impl SecurityShieldBuilder {
+    pub fn disallowed_factor_source_kinds_for_authentication_signing(
+    ) -> IndexSet<FactorSourceKind> {
+        IndexSet::from_iter([
+            FactorSourceKind::Password,
+            FactorSourceKind::SecurityQuestions,
+            FactorSourceKind::TrustedContact,
+        ])
+    }
+
+    pub fn allowed_factor_source_kinds_for_authentication_signing(
+    ) -> IndexSet<FactorSourceKind> {
+        let all = FactorSourceKind::all();
+        let disallowed =
+            Self::disallowed_factor_source_kinds_for_authentication_signing();
+        all.difference(&disallowed).cloned().collect()
+    }
+
+    pub fn is_allowed_factor_source_kind_for_authentication_signing(
+        factor_source_kind: FactorSourceKind,
+    ) -> bool {
+        Self::allowed_factor_source_kinds_for_authentication_signing()
+            .contains(&factor_source_kind)
+    }
+
     /// Returns `true` for `Ok` and `Err(NotYetValid)`.
     pub fn addition_of_factor_source_of_kind_to_primary_threshold_is_valid_or_can_be(
         &self,
@@ -515,10 +587,21 @@ impl SecurityShieldBuilder {
         if DisplayName::new(self.get_name()).is_err() {
             return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
         }
-        self.get(|builder| {
+
+        if let Some(matrix_invalid_reason) = self.get(|builder| {
             let r = builder.validate();
             r.as_shield_validation()
-        })
+        }) {
+            return Some(matrix_invalid_reason);
+        }
+
+        if self.get_authentication_signing_factor().is_none() {
+            return Some(
+                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+            );
+        }
+
+        None
     }
 
     /// Validates **just** the primary role **in isolation**.
@@ -597,6 +680,10 @@ impl SecurityShieldBuilder {
         SecurityStructureOfFactorSourceIds,
         SecurityShieldBuilderInvalidReason,
     > {
+        let authentication_signing_factor =
+            self.get_authentication_signing_factor().ok_or(
+                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+            )?;
         let matrix_result = self.get(|builder| builder.build());
 
         if let Some(validation_error) = matrix_result.as_shield_validation() {
@@ -624,6 +711,7 @@ impl SecurityShieldBuilder {
         let shield = SecurityStructureOfFactorSourceIds {
             matrix_of_factors,
             metadata,
+            authentication_signing_factor,
         };
         Ok(shield)
     }
@@ -665,11 +753,57 @@ mod tests {
     }
 
     #[test]
+    fn allowed_rola() {
+        let allowed =
+            SUT::allowed_factor_source_kinds_for_authentication_signing();
+        assert_eq!(
+            allowed,
+            IndexSet::<FactorSourceKind>::from_iter([
+                FactorSourceKind::LedgerHQHardwareWallet,
+                FactorSourceKind::ArculusCard,
+                FactorSourceKind::OffDeviceMnemonic,
+                FactorSourceKind::Device,
+            ])
+        );
+    }
+
+    #[test]
+    fn is_allowed_rola() {
+        let disallowed =
+            SUT::disallowed_factor_source_kinds_for_authentication_signing();
+        assert!(disallowed.iter().all(|k| {
+            !SUT::is_allowed_factor_source_kind_for_authentication_signing(*k)
+        }));
+    }
+
+    #[test]
+    fn test_invalid_rola_kind_does_not_change_rola() {
+        let sut = SUT::new();
+        assert!(sut.get_authentication_signing_factor().is_none());
+        let valid = FactorSourceID::sample_device();
+        sut.set_authentication_signing_factor(valid);
+        assert_eq!(sut.get_authentication_signing_factor().unwrap(), valid);
+
+        let invalid_factors = vec![
+            FactorSourceID::sample_password(),
+            FactorSourceID::sample_security_questions(),
+            FactorSourceID::sample_trusted_contact(),
+        ];
+        for invalid in invalid_factors {
+            sut.set_authentication_signing_factor(invalid); // should not have changed anything
+        }
+        assert_eq!(sut.get_authentication_signing_factor().unwrap(), valid);
+    }
+
+    #[test]
     fn test() {
         let sut = SUT::default();
 
         let _ = sut
             .set_name("S.H.I.E.L.D.")
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
             // Primary
             .set_number_of_days_until_auto_confirm(42)
             .add_factor_source_to_primary_threshold(
@@ -1052,6 +1186,7 @@ mod test_invalid {
     #[test]
     fn valid_is_none() {
         let sut = SUT::new();
+        sut.set_authentication_signing_factor(FactorSourceID::sample_device());
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1075,6 +1210,9 @@ mod test_invalid {
         sut.add_factor_source_to_confirmation_override(
             FactorSourceID::sample_arculus(),
         );
+        sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device(),
+        ));
         sut
     }
 

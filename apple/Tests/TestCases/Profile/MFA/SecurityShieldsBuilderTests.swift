@@ -103,6 +103,8 @@ struct ShieldTests {
 
 		#expect(builder.validate() == .ConfirmationRoleMustHaveAtLeastOneFactor)
 		builder = builder.addFactorSourceToConfirmationOverride(factorSourceId: .sampleArculus)
+			.setAuthenticationSigningFactor(new: .sampleDevice)
+
 		#expect(builder.validate() == nil)
 		#expect((try? builder.build()) != nil)
 	}
@@ -168,6 +170,8 @@ struct ShieldTests {
 		builder = builder.addFactorSourceToRecoveryOverride(factorSourceId: .sampleArculus)
 			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleArculusOther)
 
+		builder.setAuthenticationSigningFactor(new: .sampleDevice)
+
 		let shield = try! builder.build()
 
 		#expect(shield.matrixOfFactors.primaryRole.overrideFactors.isEmpty)
@@ -197,6 +201,8 @@ struct ShieldTests {
 			// Remove
 			.removeFactorFromPrimary(factorSourceId: .sampleArculusOther)
 			.removeFactorFromRecovery(factorSourceId: .sampleLedgerOther)
+
+		builder.setAuthenticationSigningFactor(new: .sampleDevice)
 
 		// Validate
 		#expect(builder.validate() == nil)

@@ -31,6 +31,13 @@ impl SargonOS {
         self.profile_state_holder.account_by_address(address)
     }
 
+    pub fn entity_by_address(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<AccountOrPersona> {
+        self.profile_state_holder.entity_by_address(entity_address)
+    }
+
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
     /// index of the next account for the BDFS.
     ///
@@ -604,18 +611,56 @@ impl SargonOS {
         &self,
         updated: IdentifiedVecOf<E>,
     ) -> Result<()> {
+        self.update_entities_erased(
+            updated.into_iter().map(Into::into).collect(),
+        )
+        .await
+    }
+
+    pub async fn update_entities_erased(
+        &self,
+        updated: IdentifiedVecOf<AccountOrPersona>,
+    ) -> Result<()> {
         let addresses = updated
             .clone()
             .into_iter()
             .map(|e| e.address())
             .collect::<IndexSet<_>>();
-        self.update_profile_with(|p| p.update_entities(updated.clone()))
+
+        let account_addresses = addresses
+            .iter()
+            .filter_map(|e| e.as_account())
+            .cloned()
+            .collect::<IndexSet<_>>();
+        let identity_addresses = addresses
+            .iter()
+            .filter_map(|e| e.as_identity())
+            .cloned()
+            .collect::<IndexSet<_>>();
+
+        let modified_any_account = !account_addresses.is_empty();
+        let modified_any_persona = !identity_addresses.is_empty();
+
+        self.update_profile_with(|p| p.update_entities_erased(updated.clone()))
             .await?;
 
-        if let Some(event) = E::profile_modified_event(true, addresses) {
-            self.event_bus
-                .emit(EventNotification::profile_modified(event))
-                .await;
+        if modified_any_account {
+            if let Some(event) =
+                Account::profile_modified_event(true, account_addresses)
+            {
+                self.event_bus
+                    .emit(EventNotification::profile_modified(event))
+                    .await;
+            }
+        }
+        if modified_any_persona {
+            if let Some(event) =
+                Persona::profile_modified_event(true, identity_addresses)
+            {
+                self.event_bus
+                    .emit(EventNotification::profile_modified(event))
+                    .await;
+            }
         }
         Ok(())
     }
@@ -800,70 +845,124 @@ impl SargonOS {
 impl SargonOS {
     #[allow(dead_code)]
     #[cfg(test)]
-    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome<
-        A: IsEntityAddress,
-    >(
+    pub(crate) async fn make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
         &self,
-        addresses_of_entities: IndexSet<A>,
+        addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
     ) -> Result<(
-        IndexMap<A, SecurityStructureOfFactorInstances>,
+        IndexMap<AddressOfAccountOrPersona, SecurityStructureOfFactorInstances>,
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcome,
     )> {
         let profile_snapshot = self.profile()?;
         let key_derivation_interactors = self.keys_derivation_interactor();
-        let matrix_of_factor_sources =
-            &security_structure_of_factor_sources.matrix_of_factors;
 
+        // if you need to UPDATE already securified, upgrade this to conditionally consume ROLA
+        // factors, by not using `QuantifiedDerivationPreset::securifying_unsecurified_entities`
+        // inside of SecurifyEntityFactorInstancesProvider::securifying_unsecurified. I.e. create the set of `QuantifiedDerivationPreset` which does not unconditionally
+        // specify ROLA factors.
         let (instances_in_cache_consumer, outcome) =
-            SecurifyEntityFactorInstancesProvider::for_entity_mfa::<A>(
+            SecurifyEntityFactorInstancesProvider::securifying_unsecurified(
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
-                matrix_of_factor_sources.clone(),
+                security_structure_of_factor_sources.clone(),
                 addresses_of_entities.clone(),
                 key_derivation_interactors,
             )
             .await?;
 
-        let mut instances_per_factor_source = outcome
+        let mut instances_per_preset_per_factor_source = outcome
             .clone()
-            .per_factor
+            .per_derivation_preset
             .into_iter()
-            .map(|(k, outcome_per_factor)| {
-                (k, outcome_per_factor.to_use_directly)
+            .map(|(preset, pf)| {
+                (
+                    preset,
+                    pf
+                    .per_factor
+                    .into_iter()
+                    .map(|(k, v)| (k, v.to_use_directly)).collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
+                )
             })
-            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>();
+            .collect::<InstancesPerDerivationPresetPerFactorSource>();
 
         assert_eq!(
-            instances_per_factor_source
-                .keys()
-                .cloned()
+            instances_per_preset_per_factor_source
+                .clone()
+                .into_iter()
+                .flat_map(|(_, y)| {
+                    y.into_iter()
+                        .map(|(a, _)| a)
+                        .collect::<HashSet<FactorSourceIDFromHash>>()
+                })
                 .collect::<HashSet<FactorSourceIDFromHash>>(),
-            matrix_of_factor_sources
+            security_structure_of_factor_sources
                 .all_factors()
                 .into_iter()
                 .map(|f| f.id_from_hash())
                 .collect::<HashSet<FactorSourceIDFromHash>>()
         );
 
-        let security_structure_id = security_structure_of_factor_sources.id();
+        let mut security_structures_of_factor_instances = IndexMap::<
+            AddressOfAccountOrPersona,
+            SecurityStructureOfFactorInstances,
+        >::new();
 
-        let security_structures_of_factor_instances = addresses_of_entities.clone().into_iter().map(|entity_address|
-        {
-            let security_structure_of_factor_instances: SecurityStructureOfFactorInstances = {
-               let matrix_of_factor_instances = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
-                &mut instances_per_factor_source,
-                matrix_of_factor_sources.clone(),
-               )?;
-                SecurityStructureOfFactorInstances::new(
-                    security_structure_id,
-                    matrix_of_factor_instances,
-                    HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(entity_address.network_id(), CAP26KeyKind::AuthenticationSigning, A::entity_kind(), Hardened::Securified(SecurifiedU30::ZERO)),
-                )?
+        let mut distribute_instances_for_entity_of_kind_if_needed =
+            |entity_kind: CAP26EntityKind| -> Result<()> {
+                let addresses_of_kind = addresses_of_entities
+                    .iter()
+                    .filter(|a| a.get_entity_kind() == entity_kind)
+                    .collect::<IndexSet<_>>();
+
+                if addresses_of_kind.is_empty() {
+                    return Ok(());
+                };
+
+                let mut instances_per_factor_source = {
+                    let tx_preset =
+                        DerivationPreset::mfa_entity_kind(entity_kind);
+                    let rola_preset =
+                        DerivationPreset::rola_entity_kind(entity_kind);
+
+                    let instances_per_factor_source_mfa = instances_per_preset_per_factor_source
+                    .swap_remove(&tx_preset)
+                    .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", tx_preset));
+
+                    let instances_per_factor_source_rola = instances_per_preset_per_factor_source
+                    .swap_remove(&rola_preset)
+                    .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", rola_preset));
+
+                    // Merge `instances_per_factor_source_mfa` and `instances_per_factor_source_rola` together
+                    let mut instances_per_factor_source =
+                        instances_per_factor_source_mfa;
+                    for (k, v) in instances_per_factor_source_rola {
+                        instances_per_factor_source.append_or_insert_to(k, v);
+                    }
+                    instances_per_factor_source
+                };
+
+                for entity_address in addresses_of_kind.clone().into_iter() {
+                    let security_structure_of_factor_instances = SecurityStructureOfFactorInstances::fulfilling_structure_of_factor_sources_with_instances(
+                        &mut instances_per_factor_source,
+                        &security_structure_of_factor_sources
+                    )?;
+
+                    security_structures_of_factor_instances.insert(
+                        *entity_address,
+                        security_structure_of_factor_instances,
+                    );
+                }
+
+                Ok(())
             };
-            Ok((entity_address, security_structure_of_factor_instances))
-        }).collect::<Result<IndexMap<A, SecurityStructureOfFactorInstances>>>()?;
+
+        distribute_instances_for_entity_of_kind_if_needed(
+            CAP26EntityKind::Account,
+        )?;
+        distribute_instances_for_entity_of_kind_if_needed(
+            CAP26EntityKind::Identity,
+        )?;
 
         Ok((
             security_structures_of_factor_instances,
@@ -1310,26 +1409,64 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn update_account_updates_in_memory_profile() {
+    async fn update_account_and_persona_updates_in_memory_profile() {
         // ARRANGE
-        let os = SUT::fast_boot().await;
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.new_wallet(false).await.unwrap();
 
         let mut account = Account::sample();
         os.with_timeout(|x| x.add_account(account.clone()))
             .await
             .unwrap();
 
-        // ACT
-        account.display_name = DisplayName::random();
-        os.with_timeout(|x| x.update_account(account.clone()))
+        let mut persona = Persona::sample();
+        os.with_timeout(|x| x.add_persona(persona.clone()))
             .await
             .unwrap();
 
+        // ACT
+        account.display_name = DisplayName::random();
+        persona.display_name = DisplayName::random();
+        os.with_timeout(|x| {
+            x.update_entities_erased(IdentifiedVecOf::from_iter([
+                AccountOrPersona::from(account.clone()),
+                AccountOrPersona::from(persona.clone()),
+            ]))
+        })
+        .await
+        .unwrap();
+
         // ASSERT
+        assert_eq!(os.profile().unwrap().networks[0].accounts[0], account);
+        assert_eq!(os.profile().unwrap().networks[0].personas[0], persona);
+        use EventKind::*;
         assert_eq!(
-            os.profile().unwrap().networks[0].accounts[0],
-            account.clone()
-        )
+            event_bus_driver
+                .recorded()
+                .into_iter()
+                .map(|e| e.event.kind())
+                .collect_vec(),
+            vec![
+                Booted,
+                ProfileSaved,
+                ProfileSaved,
+                AccountAdded,
+                ProfileSaved,
+                PersonaAdded,
+                ProfileSaved,
+                AccountUpdated,
+                PersonaUpdated
+            ]
+        );
     }
 
     #[actix_rt::test]

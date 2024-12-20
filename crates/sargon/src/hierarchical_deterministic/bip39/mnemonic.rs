@@ -424,9 +424,6 @@ mod tests {
     fn find_off_device_sample_other() {
         let s = "off device sign source sample other off sample other off sample other off sample other off sample other off device sample other off";
         let mnemonics = calculate_last_mnemonic_word_from_phrase(s);
-        for mnemonic in mnemonics.iter() {
-            println!("{}", mnemonic.words.iter().last().unwrap().word);
-        }
         assert!(mnemonics.iter().contains(&SUT::sample_off_device_other()));
     }
 

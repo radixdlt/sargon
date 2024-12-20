@@ -378,6 +378,7 @@ mod integration_tests {
 
             let alice = Account::sample_securified_mainnet(
                 "Alice",
+                0,
                 HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0),
                 || {
                     let i = Hardened::from_local_key_space(0u32, IsSecurified(true))
@@ -397,6 +398,7 @@ mod integration_tests {
 
             let bob = Account::sample_securified_mainnet(
                 "Bob",
+                1,
                 HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(1),
                 || {
                     let i = Hardened::from_local_key_space(1u32, IsSecurified(true))
@@ -415,6 +417,7 @@ mod integration_tests {
 
             let carol = Account::sample_securified_mainnet(
                 "Carol",
+                3,
                 HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(2),
                 || {
                     let i = Hardened::from_local_key_space(2u32, IsSecurified(true))

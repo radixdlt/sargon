@@ -1,9 +1,35 @@
 use crate::prelude::*;
 
-/// Identical to `InternalFactorInstancesProviderOutcome` but `FactorInstancesProviderOutcomeForFactor` instead of `InternalFactorInstancesProviderOutcomeForFactor`, having
-/// renamed field values to make it clear that `to_cache` instances  already have been cached.
+/// A collection of `FactorInstancesProviderOutcomePerFactor` keyed under
+/// DerivationPreset.
 #[derive(Clone, Debug)]
 pub struct FactorInstancesProviderOutcome {
+    pub per_derivation_preset:
+        IndexMap<DerivationPreset, FactorInstancesProviderOutcomePerFactor>,
+}
+
+impl FactorInstancesProviderOutcome {
+    pub fn get_derivation_preset(
+        &self,
+        preset: DerivationPreset,
+    ) -> Option<&FactorInstancesProviderOutcomePerFactor> {
+        self.per_derivation_preset.get(&preset)
+    }
+
+    pub fn get_derivation_preset_for_factor(
+        &self,
+        preset: DerivationPreset,
+        factor_source_id: &FactorSourceIDFromHash,
+    ) -> Option<&FactorInstancesProviderOutcomeForFactor> {
+        self.get_derivation_preset(preset)
+            .and_then(|x| x.per_factor.get(factor_source_id))
+    }
+}
+
+/// A collection of `FactorInstancesProviderOutcomeForFactor` keyed by their
+/// FactorSourceID
+#[derive(Clone, Debug)]
+pub struct FactorInstancesProviderOutcomePerFactor {
     pub per_factor: IndexMap<
         FactorSourceIDFromHash,
         FactorInstancesProviderOutcomeForFactor,
@@ -15,6 +41,19 @@ impl From<InternalFactorInstancesProviderOutcome>
 {
     fn from(value: InternalFactorInstancesProviderOutcome) -> Self {
         Self {
+            per_derivation_preset: value
+                .per_derivation_preset
+                .into_iter()
+                .map(|(k, v)| (k, v.into()))
+                .collect(),
+        }
+    }
+}
+impl From<InternalFactorInstancesProviderOutcomePerFactor>
+    for FactorInstancesProviderOutcomePerFactor
+{
+    fn from(value: InternalFactorInstancesProviderOutcomePerFactor) -> Self {
+        FactorInstancesProviderOutcomePerFactor {
             per_factor: value
                 .per_factor
                 .into_iter()
@@ -29,9 +68,13 @@ impl FactorInstancesProviderOutcome {
     pub fn newly_derived_instances_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
-        self.per_factor
+        self.per_derivation_preset
             .values()
-            .flat_map(|x| x.debug_was_derived.factor_instances())
+            .flat_map(|x| {
+                x.per_factor
+                    .values()
+                    .flat_map(|f| f.debug_was_derived.factor_instances())
+            })
             .collect()
     }
 
@@ -46,9 +89,13 @@ impl FactorInstancesProviderOutcome {
     pub fn instances_found_in_cache_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
-        self.per_factor
+        self.per_derivation_preset
             .values()
-            .flat_map(|x| x.debug_found_in_cache.factor_instances())
+            .flat_map(|x| {
+                x.per_factor
+                    .values()
+                    .flat_map(|f| f.debug_found_in_cache.factor_instances())
+            })
             .collect()
     }
 
