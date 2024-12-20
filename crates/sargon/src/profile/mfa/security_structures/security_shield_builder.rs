@@ -655,7 +655,7 @@ impl SecurityShieldBuilder {
     }
 
     pub fn lenient() -> Self {
-        Self::new(SecurityShieldBuilderMode::Strict)
+        Self::new(SecurityShieldBuilderMode::Lenient)
     }
 }
 
@@ -670,6 +670,16 @@ mod tests {
     #[test]
     fn default_is_lenient() {
         assert_eq!(SUT::default().mode, SecurityShieldBuilderMode::Lenient);
+    }
+
+    #[test]
+    fn mode_of_lenient() {
+        assert_eq!(SUT::lenient().mode, SecurityShieldBuilderMode::Lenient);
+    }
+
+    #[test]
+    fn mode_of_strict() {
+        assert_eq!(SUT::strict().mode, SecurityShieldBuilderMode::Strict);
     }
 
     #[test]
@@ -1393,5 +1403,38 @@ mod test_invalid {
             status,
             SelectedFactorSourcesForRoleStatus::Invalid
         );
+    }
+}
+
+
+
+#[cfg(test)]
+mod lenient {
+    use super::*;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurityShieldBuilder;
+
+    #[derive(Clone, Debug, Copy, PartialEq, Eq)]
+enum ExpectedResult {
+    Error,
+    Ok
+}
+use ExpectedResult::*;
+
+    #[test]
+    fn same_factor_in_primary_roles_both_lists() {
+        let test = |sut: &SUT, expected_threshold_count: usize| {
+            let x = FactorSourceID::sample_ledger();
+            sut.add_factor_source_to_primary_override(x);
+
+            sut.add_factor_source_to_primary_threshold(x);
+            assert_eq!(sut.get_primary_threshold_factors().len(), expected_threshold_count);
+        };
+        let strict = SUT::strict();
+        let lenient = SUT::lenient();
+
+        test(&strict, 0);
+        test(&lenient, 1);
+
     }
 }

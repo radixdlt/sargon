@@ -673,6 +673,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         Ok(())
     }
 
+    #[allow(dead_code)]
     fn validation_for_addition_of_factor_source_of_kind_to_list_for_primary(
         &self,
         factor_source_kind: FactorSourceKind,
@@ -728,7 +729,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_recovery(
         &self,
         factor_source_kind: FactorSourceKind,
-        mode: SecurityShieldBuilderMode,
+        _mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         assert_eq!(self.role(), RoleKind::Recovery);
         match factor_source_kind {
