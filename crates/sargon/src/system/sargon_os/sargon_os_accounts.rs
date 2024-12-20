@@ -1409,26 +1409,64 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn update_account_updates_in_memory_profile() {
+    async fn update_account_and_persona_updates_in_memory_profile() {
         // ARRANGE
-        let os = SUT::fast_boot().await;
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.new_wallet(false).await.unwrap();
 
         let mut account = Account::sample();
         os.with_timeout(|x| x.add_account(account.clone()))
             .await
             .unwrap();
 
-        // ACT
-        account.display_name = DisplayName::random();
-        os.with_timeout(|x| x.update_account(account.clone()))
+        let mut persona = Persona::sample();
+        os.with_timeout(|x| x.add_persona(persona.clone()))
             .await
             .unwrap();
 
+        // ACT
+        account.display_name = DisplayName::random();
+        persona.display_name = DisplayName::random();
+        os.with_timeout(|x| {
+            x.update_entities_erased(IdentifiedVecOf::from_iter([
+                AccountOrPersona::from(account.clone()),
+                AccountOrPersona::from(persona.clone()),
+            ]))
+        })
+        .await
+        .unwrap();
+
         // ASSERT
+        assert_eq!(os.profile().unwrap().networks[0].accounts[0], account);
+        assert_eq!(os.profile().unwrap().networks[0].personas[0], persona);
+        use EventKind::*;
         assert_eq!(
-            os.profile().unwrap().networks[0].accounts[0],
-            account.clone()
-        )
+            event_bus_driver
+                .recorded()
+                .into_iter()
+                .map(|e| e.event.kind())
+                .collect_vec(),
+            vec![
+                Booted,
+                ProfileSaved,
+                ProfileSaved,
+                AccountAdded,
+                ProfileSaved,
+                PersonaAdded,
+                ProfileSaved,
+                AccountUpdated,
+                PersonaUpdated
+            ]
+        );
     }
 
     #[actix_rt::test]
