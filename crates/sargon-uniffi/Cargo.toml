@@ -118,13 +118,6 @@ base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14
 # preinterpret = "0.2.0"
 preinterpret = { git = "https://github.com/dhedey/preinterpret", rev = "6754b92bdead0ddd6f69fbee7d782180d6351605" }
 
-# Fixes nasty iOS bug "_kSecMatchSubjectWholeString", see https://github.com/kornelski/rust-security-framework/issues/203
-# This is a workaround to fix a bug with version 2.11.0 that added some symbols that are not available on iOS
-# The bug is fixed already but the fix is not released yet. https://github.com/kornelski/rust-security-framework/pull/204
-[target.'cfg(target_os = "ios")'.dependencies]
-security-framework = { version = "=2.10" }
-security-framework-sys = "=2.10.0"
-
 
 [dev-dependencies]
 # uniffi = "0.28.3"
@@ -140,9 +133,6 @@ actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d
 uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [
     "build",
 ] }
-
-# cargo_toml = "0.15.3"
-cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
 
 [features]
 build-binary = ["camino", "clap", "regex"]
