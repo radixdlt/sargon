@@ -93,7 +93,8 @@ NONE
 -   `uuid` ??
 </details>
 
-> [!IMPORTANT] > **All** crates below depend on `core`
+> [!IMPORTANT]
+> **All** crates below depend on `core`
 > but it should be the only sargon crate that ALL crates depend on.
 
 ## `testing`[^](#toc)
