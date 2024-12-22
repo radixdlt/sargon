@@ -4,7 +4,7 @@ Strategy is to use [cargo-modules](https://github.com/regexident/cargo-modules) 
 
 Goal is a _broad_ and **not** a _deep_ tree.
 
-# [TOC](#thetoc)
+# [TOC](#toc)
 
 <!-- MarkdownTOC levels="2" autolink=true -->
 
@@ -35,7 +35,7 @@ Goal is a _broad_ and **not** a _deep_ tree.
 > [!NOTE]
 > We might prefix all crates with `sargon-`, but omitted here for clarity.
 
-## `core`[^](#thetoc)
+## `core`[^](#toc)
 
 Lowest level possible modules
 
@@ -96,7 +96,7 @@ NONE
 > [!IMPORTANT] > **All** crates below depend on `core`
 > but it should be the only sargon crate that ALL crates depend on.
 
-## `testing`[^](#thetoc)
+## `testing`[^](#toc)
 
 Testing utils.
 
@@ -122,7 +122,7 @@ Testing utils.
 -   `pretty_assertions`
 </details>
 
-## `collections`[^](#thetoc)
+## `collections`[^](#toc)
 
 Collection datatypes
 
@@ -147,7 +147,7 @@ Collection datatypes
 -   `indexmap`
 </details>
 
-## `bytes`[^](#thetoc)
+## `bytes`[^](#toc)
 
 Fixed size byte arrays.
 
@@ -175,7 +175,7 @@ Fixed size byte arrays.
 -   `hex`
 </details>
 
-## `hash`[^](#thetoc)
+## `hash`[^](#toc)
 
 Blake hash
 
@@ -183,7 +183,7 @@ Blake hash
   <summary>Click me</summary>
 </details>
 
-## `bip39`[^](#thetoc)
+## `bip39`[^](#toc)
 
 <details>
   <summary>Click me</summary>
@@ -199,25 +199,13 @@ Blake hash
 -   `mnemonic_with_passphrase`
 </details>
 
-## `bip32`[^](#thetoc)
+## `bip32`[^](#toc)
 
 <details>
   <summary>Click me</summary>
 </details>
 
-## `bip44-like-path`[^](#thetoc)
-
-<details>
-  <summary>Click me</summary>
-
-### Dependencies
-
-#### Internal
-
--   `bip32`
-</details>
-
-## `cap26-core`[^](#thetoc)
+## `bip44-like-path`[^](#toc)
 
 <details>
   <summary>Click me</summary>
@@ -229,7 +217,19 @@ Blake hash
 -   `bip32`
 </details>
 
-## `account-path`[^](#thetoc)
+## `cap26-core`[^](#toc)
+
+<details>
+  <summary>Click me</summary>
+
+### Dependencies
+
+#### Internal
+
+-   `bip32`
+</details>
+
+## `account-path`[^](#toc)
 
 <details>
   <summary>Click me</summary>
@@ -241,7 +241,7 @@ Blake hash
 -   `cap26-core`
 </details>
 
-## `identity-path`[^](#thetoc)
+## `identity-path`[^](#toc)
 
 <details>
   <summary>Click me</summary>
@@ -253,7 +253,7 @@ Blake hash
 -   `cap26-core`
 </details>
 
-## `derivation-path`[^](#thetoc)
+## `derivation-path`[^](#toc)
 
 <details>
   <summary>Click me</summary>
@@ -267,7 +267,7 @@ Blake hash
 -   `identity-path`
 </details>
 
-## `derivation`[^](#thetoc)
+## `derivation`[^](#toc)
 
 <details>
   <summary>Click me</summary>
@@ -282,7 +282,7 @@ Blake hash
 -   `derivation-path`
 </details>
 
-## `decimal192`[^](#thetoc)
+## `decimal192`[^](#toc)
 
 <details>
   <summary>Click me</summary>
@@ -305,7 +305,7 @@ Blake hash
 
 </details>
 
-## `addresses`[^](#thetoc)
+## `addresses`[^](#toc)
 
 All address types.
 
@@ -322,7 +322,7 @@ All address types.
 
 </details>
 
-## `factor-source-id`[^](#thetoc)
+## `factor-source-id`[^](#toc)
 
 ID of FactorSources
 
@@ -346,7 +346,7 @@ ID of FactorSources
 
 </details>
 
-## `factor-sources`[^](#thetoc)
+## `factor-sources`[^](#toc)
 
 All different FactorSource types and the `FactorSource` enum.
 
@@ -374,7 +374,7 @@ All different FactorSource types and the `FactorSource` enum.
 
 </details>
 
-## `keys-collector`[^](#thetoc)
+## `keys-collector`[^](#toc)
 
 Multi-factor-multi-path derivation
 
@@ -400,7 +400,7 @@ Multi-factor-multi-path derivation
 
 -   [radix_common]: https://github.com/radixdlt/radixdlt-scrypto/tree/main/radix-common
 
-## `TEMPLATE`[^](#thetoc)
+## `TEMPLATE`[^](#toc)
 
 DESCRIPTION
 
