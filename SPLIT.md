@@ -39,6 +39,10 @@ Goal is a _broad_ and **not** a _deep_ tree.
 
 Lowest level possible modules
 
+> [!IMPORTANT]
+> **All** crates below depend on `core`
+> but it should be the only sargon crate that ALL crates depend on.
+
 <details>
   <summary>Click me</summary>
 
@@ -92,10 +96,6 @@ NONE
 -   `thiserror`
 -   `uuid` ??
 </details>
-
-> [!IMPORTANT]
-> **All** crates below depend on `core`
-> but it should be the only sargon crate that ALL crates depend on.
 
 ## `testing`[^](#toc)
 
@@ -182,6 +182,109 @@ Blake hash
 
 <details>
   <summary>Click me</summary>
+### Modules
+- `hash`
+- `blake_hash`
+- `public_key_hash` (???)
+
+### Dependencies
+
+#### Internal
+
+#### External
+
+-   [`radix_common` (scrypto)](https://github.com/radixdlt/radixdlt-scrypto/tree/main/radix-common)
+
+</details>
+
+## `elliptic-curve-cryptography-core`[^](#toc)
+
+Common traits and models used by `secp256k1`, `curve25519` and `elliptic-curve-cryptography` crates.
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `is_private_key`
+- `is_public_key`
+- `curve`
+
+### Dependencies
+
+#### Internal
+
+-   `bytes`
+
+#### External
+
+</details>
+
+## `secp256k1`[^](#toc)
+
+Secp256k1 ECC
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `secp256k1_private_key`
+- `secp256k1_public_key`
+- `secp256k1_signature`
+
+### Dependencies
+
+#### Internal
+
+-   `elliptic-curve-cryptography-core`
+
+#### External
+
+-   [`radix_common` (scrypto)](https://github.com/radixdlt/radixdlt-scrypto/tree/main/radix-common)
+
+</details>
+
+## `curve25519`[^](#toc)
+
+Curve25519 ECC
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `curve25519_private_key`
+- `curve25519_public_key`
+- `curve25519_signature`
+
+### Dependencies
+
+#### Internal
+
+-   `elliptic-curve-cryptography-core`
+
+#### External
+
+-   [`radix_common` (scrypto)](https://github.com/radixdlt/radixdlt-scrypto/tree/main/radix-common)
+
+</details>
+
+## `elliptic-curve-cryptography`[^](#toc)
+
+ECC models
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `private_key`
+- `public_key`
+- `signature`
+- `signature_with_public_key`
+
+### Dependencies
+
+#### Internal
+
+-   `curve25519`
+-   `secp256k1`
+
+#### External
+
 </details>
 
 ## `bip39`[^](#toc)
@@ -268,7 +371,46 @@ Blake hash
 -   `identity-path`
 </details>
 
+## `hd-elliptic-curve-cryptography`[^](#toc)
+
+Hierarchical Deterministic Elliptic Curve Cryptography, HD ECC models such as `HDPublicKey`, `HDPrivateKey` and `HDSignature`
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `hd_private_key`
+- `hd_public_key`
+- `hd_signature`
+
+### Dependencies
+
+#### Internal
+
+-   `elliptic-curve-cryptography`
+-   `derivation-path`
+
+#### External
+
+</details>
+
+## `factor-source-kind`[^](#toc)
+
+Enum with FactorSourceKind
+
+<details>
+  <summary>Click me</summary>
+
+### Modules
+
+### Dependencies
+
+#### Internal
+
+</details>
+
 ## `derivation`[^](#toc)
+
+Hierarchical Deterministic derivation HDPrivateKey and HDPublicKey
 
 <details>
   <summary>Click me</summary>
@@ -280,7 +422,7 @@ Blake hash
 #### Internal
 
 -   `bip39`
--   `derivation-path`
+-   `hd-elliptic-curve-cryptography`
 </details>
 
 ## `decimal192`[^](#toc)
@@ -342,6 +484,7 @@ ID of FactorSources
 
 -   `hash`
 -   `addresses`
+-   `factor-source-kind`
 
 #### External
 
@@ -400,6 +543,86 @@ Multi-factor-multi-path derivation
 </details>
 
 -   [radix_common]: https://github.com/radixdlt/radixdlt-scrypto/tree/main/radix-common
+
+## `transaction-manifest-core`[^](#toc)
+
+TransactionManifests models, this does NOT include the logic of building/declaring Transaction manifests.
+
+<details>
+  <summary>Click me</summary>
+### Modules
+ 
+### Dependencies
+
+#### Internal
+
+-   `core`
+
+#### External
+
+</details>
+
+## `transaction-core`[^](#toc)
+
+Radix Engine transaction models **except** TransactionManifest which is a lower level crate this crate depends on (split in two for smaller size). And note that **building** TransactionManifests is a third crate/
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `transaction_intent`
+- `transaction_header`
+ 
+### Dependencies
+
+#### Internal
+
+-   `transaction-manifest-core`
+
+#### External
+
+</details>
+
+## `transaction-manifest-building`[^](#toc)
+
+Building of TransactionManifests.
+
+<details>
+  <summary>Click me</summary>
+### Modules
+ 
+### Dependencies
+
+#### Internal
+
+-   `transaction-manifest-core`
+
+#### External
+
+-   [`radix-transactions` (scrypto)](https://github.com/radixdlt/radixdlt-scrypto/tree/main/radix-transactions)
+
+</details>
+
+## `signatures-collector`[^](#toc)
+
+Multi-tx-multi-entity-multi-factor signing coordinator.
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `signatures_collector`
+- `sign_request`
+- `sign_response`
+- `sign_interactor`
+ 
+### Dependencies
+
+#### Internal
+
+-   `transaction`
+
+#### External
+
+</details>
 
 ## `TEMPLATE`[^](#toc)
 
