@@ -1,6 +1,9 @@
 use std::any::TypeId;
 
 use crate::prelude::*;
+use serde::de::Error;
+use serde::de::*;
+use serde::ser::*;
 
 use super::{export_identified_vec_of, import_identified_vec_of_from};
 
@@ -30,7 +33,7 @@ where
         deserializer: D,
     ) -> Result<Self, D::Error> {
         let items = Vec::<V>::deserialize(deserializer)?;
-        import_identified_vec_of_from(items).map_err(de::Error::custom)
+        import_identified_vec_of_from(items).map_err(Error::custom)
     }
 }
 

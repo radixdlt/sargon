@@ -91,10 +91,7 @@ pub enum CommonError {
     InvalidEntityKind { bad_value: u32 } = 10023,
 
     #[error("Wrong entity kind, (expected {expected}, found {found})")]
-    WrongEntityKind {
-        expected: CAP26EntityKind,
-        found: CAP26EntityKind,
-    } = 10024,
+    WrongEntityKind { expected: String, found: String } = 10024,
 
     #[error(
         "InvalidKeyKind, got: '{bad_value}', expected any of: [1460H, 1678H, 1391H]."
@@ -191,10 +188,7 @@ pub enum CommonError {
     #[error(
         "Accounts on different networks, expected: {expected}, found: {found}"
     )]
-    AccountOnWrongNetwork {
-        expected: NetworkID,
-        found: NetworkID,
-    } = 10053,
+    AccountOnWrongNetwork { expected: String, found: String } = 10053,
 
     #[error("FactorSources must not be empty.")]
     FactorSourcesMustNotBeEmpty = 10054,
@@ -203,10 +197,7 @@ pub enum CommonError {
     UpdateFactorSourceMutateFailed = 10055,
 
     #[error("Failed to cast factor source, wrong kind, , expected: {expected}, found: {found}")]
-    CastFactorSourceWrongKind {
-        expected: FactorSourceKind,
-        found: FactorSourceKind,
-    } = 10056,
+    CastFactorSourceWrongKind { expected: String, found: String } = 10056,
 
     #[error("Length check failed, expected: {expected}, found: {found}, data: {data:?}")]
     InvalidLength {
@@ -232,8 +223,8 @@ pub enum CommonError {
 
     #[error("Failed to access secure storage due to \"{error_message}\" for key {} ", key.identifier())]
     SecureStorageAccessError {
-        key: SecureStorageKey,
-        error_kind: SecureStorageAccessErrorKind,
+        key: String,
+        error_kind: String,
         error_message: String,
     } = 10063,
 
@@ -269,27 +260,24 @@ pub enum CommonError {
     FailedToLoadProfileHeadersList = 10072,
 
     #[error("FactorSource with ID not found in Profile: {bad_value:?}")]
-    ProfileDoesNotContainFactorSourceWithID { bad_value: FactorSourceID } =
-        10073,
+    ProfileDoesNotContainFactorSourceWithID { bad_value: String } = 10073,
 
     #[error("Account Already Present {bad_value}")]
-    AccountAlreadyPresent { bad_value: AccountAddress } = 10074,
+    AccountAlreadyPresent { bad_value: String } = 10074,
 
     #[error("Unable to acquire write lock for Profile.")]
     UnableToAcquireWriteLockForProfile = 10075,
 
     #[error("Failed save Mnemonic to SecureStorageDriver with FactorSourceID: {bad_value}")]
-    UnableToSaveMnemonicToSecureStorage { bad_value: FactorSourceIDFromHash } =
-        10076,
+    UnableToSaveMnemonicToSecureStorage { bad_value: String } = 10076,
 
     #[error(
         "Failed load Mnemonic from SecureStorageDriver with FactorSourceID: {bad_value}"
     )]
-    UnableToLoadMnemonicFromSecureStorage { bad_value: FactorSourceIDFromHash } =
-        10077,
+    UnableToLoadMnemonicFromSecureStorage { bad_value: String } = 10077,
 
     #[error("Failed save FactorSource to SecureStorageDriver, FactorSourceID: {bad_value}")]
-    UnableToSaveFactorSourceToProfile { bad_value: FactorSourceID } = 10078,
+    UnableToSaveFactorSourceToProfile { bad_value: String } = 10078,
 
     #[error("Expected IdentityPath but got something else.")]
     ExpectedIdentityPathButGotSomethingElse = 10079,
@@ -315,7 +303,7 @@ pub enum CommonError {
     #[error("Failed to create Address (via RetAddress) from node_id (hex): {node_id_as_hex}, network_id: {network_id}")]
     FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID {
         node_id_as_hex: String,
-        network_id: NetworkID,
+        network_id: String,
     } = 10086,
 
     #[error("Invalid Olympia address string: {bad_value}")]
@@ -342,8 +330,8 @@ pub enum CommonError {
 
     #[error("Invalid Manifest Instructions String, found network in instructions {found_in_instructions}, but specified to constructor: {specified_to_instructions_ctor}")]
     InvalidInstructionsWrongNetwork {
-        found_in_instructions: NetworkID,
-        specified_to_instructions_ctor: NetworkID,
+        found_in_instructions: String,
+        specified_to_instructions_ctor: String,
     } = 10093,
 
     #[error("Failed to decode bytes into Transaction Manifest Instructions")]
@@ -462,19 +450,16 @@ pub enum CommonError {
     RadixMobileInvalidInteractionID { bad_value: String } = 10128,
 
     #[error("Network discrepancy, expected : {expected}, actual: {actual}")]
-    NetworkDiscrepancy {
-        expected: NetworkID,
-        actual: NetworkID,
-    } = 10129,
+    NetworkDiscrepancy { expected: String, actual: String } = 10129,
 
     #[error("Discrepancy, Authorized Dapp references Persona which does not exist {address}")]
     DiscrepancyAuthorizedDappReferencedPersonaWhichDoesNotExist {
-        address: IdentityAddress,
+        address: String,
     } = 10130,
 
     #[error("Discrepancy, Authorized Dapp references Account which does not exist {address}")]
     DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
-        address: AccountAddress,
+        address: String,
     } = 10131,
 
     #[error("AuthorizedDapp references field id that does not exist")]
@@ -508,15 +493,13 @@ pub enum CommonError {
     InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10139,
 
     #[error("RadixConnectMobileSession not found, session id: {session_id}")]
-    RadixConnectMobileSessionNotFound { session_id: SessionID } = 10140,
+    RadixConnectMobileSessionNotFound { session_id: String } = 10140,
 
     #[error("RadixConnectMobileDappRequest not found, interaction id: {interaction_id}")]
-    RadixConnectMobileDappRequestNotFound {
-        interaction_id: WalletInteractionId,
-    } = 10141,
+    RadixConnectMobileDappRequestNotFound { interaction_id: String } = 10141,
 
     #[error("RadixConnectMobileDappCallbackPath not found, origin: {origin}")]
-    RadixConnectMobileDappCallbackPathNotFound { origin: Url } = 10142,
+    RadixConnectMobileDappCallbackPathNotFound { origin: String } = 10142,
 
     #[error("Failed to create Ed25519 Signature from String {bad_value}.")]
     InvalidEd25519SignatureFromString { bad_value: String } = 10143,
@@ -559,7 +542,7 @@ pub enum CommonError {
     #[error(
         "Failed to load Profile from secure storage, profile id: {profile_id}"
     )]
-    UnableToLoadProfileFromSecureStorage { profile_id: ProfileID } = 10155,
+    UnableToLoadProfileFromSecureStorage { profile_id: String } = 10155,
 
     #[error("Failed to save HostId to secure storage")]
     UnableToSaveHostIdToSecureStorage = 10156,
@@ -584,8 +567,8 @@ pub enum CommonError {
 
     #[error("Profile last used on other device {other_device_id} (this device: {this_device_id})")]
     ProfileUsedOnOtherDevice {
-        other_device_id: DeviceID,
-        this_device_id: DeviceID,
+        other_device_id: String,
+        this_device_id: String,
     } = 10163,
 
     #[error("Failed To create DeviceID (UUID) from string: {bad_value}")]
@@ -644,7 +627,7 @@ pub enum CommonError {
     #[error("Failed to create Address from global_address (hex): {global_address_as_hex}, network_id: {network_id}")]
     FailedToCreateAddressFromGlobalAddressAndNetworkID {
         global_address_as_hex: String,
-        network_id: NetworkID,
+        network_id: String,
     } = 10181,
 
     #[error(
@@ -653,7 +636,7 @@ pub enum CommonError {
     EntitiesNotDerivedByFactorSource = 10182,
 
     #[error("The network {network_id} does not exist in profile")]
-    NoNetworkInProfile { network_id: NetworkID } = 10183,
+    NoNetworkInProfile { network_id: String } = 10183,
 
     #[error("Empty FactorSources list")]
     FactorSourcesOfKindEmptyFactors = 10184,
@@ -737,7 +720,7 @@ pub enum CommonError {
     MaxTransfersPerTransactionReached { amount: u64 } = 10208,
 
     #[error("Transaction Manifest class is reserved: {class}")]
-    ReservedManifestClass { class: DetailedManifestClassKind } = 10209,
+    ReservedManifestClass { class: String } = 10209,
 
     #[error("FactorInstancesProvider did not derive enough factors")]
     FactorInstancesProviderDidNotDeriveEnoughFactors = 10210,
@@ -763,8 +746,8 @@ pub enum CommonError {
     )]
     EntityOnWrongNetwork {
         entity_kind: String,
-        wrong_network: NetworkID,
-        expected_network: NetworkID,
+        wrong_network: String,
+        expected_network: String,
     } = 10215,
 
     #[error("SecurityState not securified")]
@@ -848,8 +831,8 @@ pub enum CommonError {
         "Entity kind of FactorInstances does not match EntityKind of entity"
     )]
     SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind {
-        entity_kind_of_entity: CAP26EntityKind,
-        entity_kind_of_factor_instances: CAP26EntityKind,
+        entity_kind_of_entity: String,
+        entity_kind_of_factor_instances: String,
     } = 10239,
 
     #[error(

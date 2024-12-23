@@ -25,11 +25,16 @@ where
     V: Debug + Eq + Clone + Identifiable + 'static,
 {
     if id_vec.is_empty() {
-        if TypeId::of::<V>() == TypeId::of::<FactorSource>() {
-            return Err(CommonError::FactorSourcesMustNotBeEmpty);
-        }
         if TypeId::of::<V>() == TypeId::of::<SLIP10Curve>() {
             return Err(CommonError::SupportedCurvesMustNotBeEmpty);
+        }
+
+        // `FactorSource` is not declared in this crate, so we
+        // cannot use `TypeId`, but this should be good enough.
+        if std::any::type_name::<V>().split("::").last().unwrap()
+            == "FactorSource"
+        {
+            return Err(CommonError::FactorSourcesMustNotBeEmpty);
         }
     }
 

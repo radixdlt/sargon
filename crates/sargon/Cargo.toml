@@ -14,11 +14,7 @@ crate-type = ["staticlib", "cdylib", "lib"]
 [dependencies]
 sargon-core = { path = "../sargon-core" }
 
-# zeroize = "1.7.0"
-zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8eef04ba32e2af55bacb41375", features = [
-    "zeroize_derive",
-    "derive",
-] }
+zeroize = { workspace = true }
 
 log = { workspace = true }
 # pretty_env_logger = "0.5.0"
@@ -28,37 +24,21 @@ derive_more = { workspace = true }
 
 serde = { workspace = true }
 
-# serde_json = "1.0.108"
 serde_json = { workspace = true }
 
-# serde_with = "3.4.0"
-serde_with = { git = "https://github.com/jonasbb/serde_with/", rev = "1e8e4e75398c6a9de29386473ae7c3157be031c2" }
+serde_with = { workspace = true }
 
-# serde_repr = "0.1.17"
-serde_repr = { git = "https://github.com/dtolnay/serde-repr/", rev = "94cce18a51bc169869f2cdcea6549b3ed81b3b2e" }
+serde_repr = { workspace = true }
 
-# once_cell = "1.19.0"
-once_cell = { git = "https://github.com/matklad/once_cell/", rev = "c48d3c2c01de926228aea2ac1d03672b4ce160c1" }
+once_cell = { workspace = true }
 
 thiserror = { workspace = true }
 
-# iso8601-timestamp = "0.2.16"
-iso8601-timestamp = { git = "https://github.com/Lantern-chat/iso8601-timestamp/", rev = "e5a3f2a5911759bc6b0d8100b032a6b4dd6e12c1", features = [
-    "serde",
-    "std",
-] }
+iso8601-timestamp = { workspace = true }
 
-# uuid = "1.6.1"
-uuid = { git = "https://github.com/uuid-rs/uuid/", rev = "c8891073248ddc7faa8c53ac9ceb629a341c7b9b", features = [
-    "v4",
-    "serde",
-] }
+uuid = { workspace = true }
 
-# strum = "0.26.1"
-strum = { git = "https://github.com/Peternator7/strum/", rev = "f746c3699acf150112e26c00e6c8ca666d8d068d", features = [
-    "derive",
-] }
-
+strum = { workspace = true }
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-rust = { workspace = true }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
@@ -74,22 +54,18 @@ radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag
 
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "2ab5b35a6cb96c9faeb98ed8df67b870336e6873" }
 
-# enum-iterator = "1.4.1"
-enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
+enum-iterator = { workspace = true }
 
 rand = { workspace = true }
 
-# hex = "0.4.3"
-hex = { git = "https://github.com/KokaKiwi/rust-hex/", rev = "b2b4370b5bf021b98ee7adc92233e8de3f2de792" }
+hex = { workspace = true }
 
 # delegate = "0.12.0"
 delegate = { git = "https://github.com/Kobzol/rust-delegate/", rev = "ac852be64f3e4b5f9b58be910d09921488d2845d" }
 
-# itertools = "0.12.0"
-itertools = { git = "https://github.com/rust-itertools/itertools/", rev = "98ecabb47d7147dae06fc3fa400ec758947194f3" }
+itertools = { workspace = true }
 
-# enum-as-inner = "0.6.0"
-enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2" }
+enum-as-inner = { workspace = true }
 
 # SLIP10 implementation
 iota-crypto = { workspace = true }
@@ -105,12 +81,9 @@ bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac2
 
 assert-json-diff = { workspace = true }
 
-# url = "2.5.0"
-# url = { git = "https://github.com/servo/rust-url", rev = "00e9e18ce6504e0e9157816c593afec8e69cb9e3", features = ["serde"] } # BROKEN compat with reqwest: the trait bound `url::Url: IntoUrl` is not satisfied --> tests/integration/network_antenna_reqwest.rs:31:50
-url = { version = "2.5.0", features = ["serde"] }
+url = { workspace = true }
 
-# paste = "1.0.14"
-paste = { git = "https://github.com/dtolnay/paste", rev = "1e0cc1025af5388397c67fa4389ad7ad24814df8" }
+paste = { workspace = true }
 
 # camino = "1.0.8"
 camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }

@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use k256::ecdsa::VerifyingKey as K256PublicKey;
+use serde_with::{serde_as, DeserializeFromStr, SerializeDisplay};
 
 /// A `secp256k1` public key used to verify cryptographic signatures (ECDSA signatures).
 #[serde_as]
@@ -200,6 +201,7 @@ impl FromStr for Secp256k1PublicKey {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Secp256k1PublicKey;

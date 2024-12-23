@@ -1,6 +1,6 @@
 use crate::prelude::*;
-
 use crypto::signatures::ed25519 as IotaSlip10Ed25519;
+use serde_with::{serde_as, DeserializeFromStr, SerializeDisplay};
 
 /// An Ed25519 public key used to verify cryptographic signatures (EdDSA signatures).
 #[serde_as]
@@ -152,7 +152,7 @@ impl Ed25519PublicKey {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
+    use serde_json::json;
 
     #[test]
     fn equality() {
