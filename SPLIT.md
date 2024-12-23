@@ -31,6 +31,13 @@ Goal is a _broad_ and **not** a _deep_ tree.
 -   [`addresses`](#addresses)
 -   [`factor-source-id`](#factor-source-id)
 -   [`factor-sources`](#factor-sources)
+-   [`factor-instance`](#factor-instance)
+-   [`security-shields`](#security-shields)
+-   [`entity-security-state`](#entity-security-state)
+-   [`entity-core`](#entity-core)
+-   [`account`](#account)
+-   [`persona-data`](#persona-data)
+-   [`persona`](#persona)
 -   [`keys-collector`](#keys-collector)
 -   [`transaction-manifest-core`](#transaction-manifest-core)
 -   [`transaction-core`](#transaction-core)
@@ -65,10 +72,12 @@ Lowest level possible modules
 -   `u11`
 -   `u30`
 -   `u31`
--   `network_id`
--   `factor_source_kind`
--   `key_kind`
--   `entity_kind`
+-   `network_id` (move to a crate on top of `core`, `essentials`?)
+-   `factor_source_kind` (move to a crate on top of `core`, `essentials`?)
+-   `factor_source_list_kind` (move to a crate on top of `core`, `essentials`?)
+-   `role_kind` (move to a crate on top of `core`, `essentials`?)
+-   `key_kind` (move to a crate on top of `core`, `essentials`?)
+-   `entity_kind` (move to a crate on top of `core`, `essentials`?)
 -   `string_utils`
 -   `unsafe_id_stepper`
 -   `constants` - split out only non-radix specific ones, e.g. time
@@ -522,6 +531,269 @@ All different FactorSource types and the `FactorSource` enum.
 
 -   `core`
 -   `factor-source-id`
+
+#### External
+
+</details>
+
+## `factor-instance`[^](#toc)
+
+`FactorInstance` and `HDFactorInstance
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `factor_instance
+- `hd_factor_instance
+ 
+### Dependencies
+
+#### Internal
+
+-   `factor-source-id`
+-   `hd-elliptic-curve-cryptography`
+
+#### External
+
+</details>
+
+## `security-shields`[^](#toc)
+
+MatrixOfFactors, SecurityStructureOf and builders
+
+<details>
+  <summary>Click me</summary>
+### Modules
+ - `primary_role_with_factor_source_ids`
+ - `recovery_role_with_factor_source_ids`
+ - `confirmation_role_with_factor_source_ids`
+ - `primary_role_with_factor_sources`
+ - `recovery_role_with_factor_sources`
+ - `confirmation_role_with_factor_sources`
+ - `primary_role_with_factor_instances`
+ - `recovery_role_with_factor_instances`
+ - `confirmation_role_with_factor_instances`
+ - `matrix_of_factor_source_ids`
+ - `matrix_of_factor_sources`
+ - `matrix_of_factor_instances`
+ - `security_structure_of_factor_instances`
+ - `security_structure_of_factor_sources`
+ - `security_structure_of_factor_source_ids`
+ - `matrix_builder`
+ - `security_shield_builder`
+
+### Dependencies
+
+#### Internal
+
+-   `factor-sources`
+-   `factor-instances`
+
+#### External
+
+</details>
+
+## `entity-security-state`[^](#toc)
+
+Entity SecurityState models
+
+<details>
+  <summary>Click me</summary>
+### Modules
+ - `unsecured_entity_control`
+ - `securified_entity_control`
+ - `provisional_security_config`
+ - `access_controller`
+
+### Dependencies
+
+#### Internal
+
+-   `security-shields`
+
+#### External
+
+</details>
+
+## `entity-core`[^](#toc)
+
+Account and Persona shared type `BaseEntity` which we can use `serde(flatten)` with to flat
+out into `Account` and `Persona`, something like:
+
+```rust
+
+pub trait IsEntity {
+    fn address(&self) -> &String;
+    fn display_name(&self) -> &String;
+
+    fn set_display_name(&mut self, new: String);
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BaseEntity {
+    address: String,
+    display_name: String,
+}
+
+impl IsEntity for BaseEntity {
+    fn address(&self) -> &String {
+        &self.address
+    }
+
+    fn display_name(&self) -> &String {
+        &self.display_name
+    }
+
+    fn set_display_name(&mut self, new: String) {
+        self.display_name = new;
+    }
+}
+
+#[macro_export]
+macro_rules! forward_is_entity {
+    ($entity: ty) => {
+        impl IsEntity for $entity {
+            delegate::delegate! {
+                to self.base {
+                    fn address(&self) -> &String;
+                    fn display_name(&self) -> &String;
+                    fn set_display_name(&mut self, new: String);
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_deref_base_entity_for {
+    ($entity: ty) => {
+        impl Deref for $entity {
+            type Target = BaseEntity;
+
+            fn deref(&self) -> &Self::Target {
+                &self.base
+            }
+        }
+        impl DerefMut for $entity {
+            fn deref_mut(&mut self) -> &mut Self::Target {
+                &mut self.base
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! as_entity {
+    ($entity: ty) => {
+        $crate::forward_is_entity!($entity);
+        $crate::impl_deref_base_entity_for!($entity);
+    };
+}
+
+```
+
+Later, In the `account` crate
+
+```rust
+// NOT IN `entity-core` crate!
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Account {
+    #[serde(flatten)]
+    base: BaseEntity, // <-- imbue BaseEntity fields
+
+    // === Extra Fields ===
+    pub appearance_id: u8,
+}
+
+// impl `IsEntity` and `Deref`/`DerefMut` (as BaseEntity) for `Account`
+as_entity!(Account);
+```
+
+Later, In the `persona` crate
+
+```rust
+// NOT IN `entity-core` crate!
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Persona {
+    #[serde(flatten)]
+    base: BaseEntity, // <-- imbue BaseEntity fields
+
+    // === Extra Fields ===
+    pub persona_data: PersonaData,
+}
+
+// impl `IsEntity` and `Deref`/`DerefMut` (as BaseEntity) for `Persona`
+as_entity!(Persona);
+```
+
+<details>
+  <summary>Click me</summary>
+### Modules
+ 
+### Dependencies
+
+#### Internal
+
+-   `addresses`
+
+#### External
+
+-   `delegate`
+
+</details>
+
+## `account`[^](#toc)
+
+Account entity
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `account`
+- `appearance_id`
+
+### Dependencies
+
+#### Internal
+
+-   `entity-core`
+
+#### External
+
+</details>
+
+## `persona-data`[^](#toc)
+
+Persona Data models
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `persona_data`
+
+### Dependencies
+
+#### Internal
+
+#### External
+
+</details>
+
+## `persona`[^](#toc)
+
+Persona entity
+
+<details>
+  <summary>Click me</summary>
+### Modules
+- `persona`
+
+### Dependencies
+
+#### Internal
+
+-   `entity-core`
+-   `persona-data`
 
 #### External
 
