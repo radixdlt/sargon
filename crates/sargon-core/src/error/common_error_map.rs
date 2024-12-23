@@ -1,4 +1,4 @@
-use de::StdError;
+use serde::de::StdError;
 
 use crate::prelude::*;
 

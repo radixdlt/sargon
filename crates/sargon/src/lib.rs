@@ -9,7 +9,6 @@
 #![feature(generic_const_exprs)]
 #![feature(trait_upcasting)]
 
-mod core;
 mod factor_instances_provider;
 mod gateway_api;
 mod hierarchical_deterministic;
@@ -22,16 +21,19 @@ mod signing;
 mod system;
 mod types;
 mod wrapped_radix_engine_toolkit;
+mod error_from;
+
 
 pub mod prelude {
+    pub use sargon_core::prelude::*;
 
-    pub use crate::core::*;
     pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
+    pub use crate::error_from::*;
     pub use crate::radix_connect::*;
     pub use crate::security_center::*;
     pub use crate::signing::*;

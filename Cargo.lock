@@ -2798,6 +2798,7 @@ dependencies = [
  "radix-transactions",
  "rand",
  "reqwest",
+ "sargon-core",
  "sbor",
  "security-framework",
  "security-framework-sys",
@@ -2810,6 +2811,24 @@ dependencies = [
  "url",
  "uuid 1.6.1",
  "zeroize 1.7.0",
+]
+
+[[package]]
+name = "sargon-core"
+version = "0.0.0"
+dependencies = [
+ "assert-json-diff",
+ "derive_more 1.0.0",
+ "hkdf",
+ "iota-crypto",
+ "k256 0.13.3",
+ "log",
+ "pretty_assertions",
+ "radix-rust",
+ "rand",
+ "serde",
+ "serde_json 1.0.108",
+ "thiserror 1.0.50",
 ]
 
 [[package]]
