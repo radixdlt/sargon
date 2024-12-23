@@ -17,6 +17,18 @@ inherits = "release"
 debug = true
 
 [workspace.dependencies]
+
+# ===== RADIX DEPENDENCIES ========
+radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
+    "serde",
+    "secp256k1_sign_and_validate",
+] }
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
+    "serde",
+] }
+
+# ===== EXTERNAL DEPENDENCIES ========
 # hkdf = "0.12.4"
 hkdf = { git = "https://github.com/RustCrypto/KDFs/", rev = "1ac16e8b9d4ee7a67613c9396c6cc1327652eaba" }
 # thiserror = "1.0.50"
@@ -44,6 +56,9 @@ enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c
 enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
 
 
+# delegate = "0.12.0"
+delegate = { git = "https://github.com/Kobzol/rust-delegate/", rev = "ac852be64f3e4b5f9b58be910d09921488d2845d" }
+
 # hex = "0.4.3"
 hex = { git = "https://github.com/KokaKiwi/rust-hex/", rev = "b2b4370b5bf021b98ee7adc92233e8de3f2de792" }
 
@@ -67,10 +82,6 @@ log = "0.4.20"
 rand = { git = "https://github.com/rust-random/rand/", rev = "937320cbfeebd4352a23086d9c6e68f067f74644" }
 
 
-
-radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
-    "serde",
-] }
 # serde_with = "3.4.0"
 serde_with = { git = "https://github.com/jonasbb/serde_with/", rev = "1e8e4e75398c6a9de29386473ae7c3157be031c2" }
 

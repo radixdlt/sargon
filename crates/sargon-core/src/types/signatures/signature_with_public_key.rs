@@ -27,25 +27,7 @@ pub enum SignatureWithPublicKey {
     },
 }
 
-impl From<SignatureWithPublicKey> for ScryptoSignatureWithPublicKey {
-    fn from(value: SignatureWithPublicKey) -> Self {
-        match value {
-            SignatureWithPublicKey::Secp256k1 {
-                public_key: _,
-                signature,
-            } => Self::Secp256k1 {
-                signature: signature.into(),
-            },
-            SignatureWithPublicKey::Ed25519 {
-                public_key,
-                signature,
-            } => Self::Ed25519 {
-                public_key: public_key.into(),
-                signature: signature.into(),
-            },
-        }
-    }
-}
+
 
 impl From<SignatureWithPublicKey> for Signature {
     fn from(value: SignatureWithPublicKey) -> Self {
@@ -57,41 +39,6 @@ impl SignatureWithPublicKey {
     pub fn is_valid_for_hash(&self, hash: &impl ScryptoIsHash) -> bool {
         self.public_key()
             .is_valid_signature_for_hash(self.signature(), hash)
-    }
-}
-
-impl TryFrom<(ScryptoSignatureWithPublicKey, Hash)> for SignatureWithPublicKey {
-    type Error = crate::CommonError;
-
-    fn try_from(
-        value: (ScryptoSignatureWithPublicKey, Hash),
-    ) -> Result<Self, Self::Error> {
-        match value.0 {
-            ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
-                let hash: radix_common::crypto::Hash = value.1.into();
-                let scrypto_public_key = Scrypto_verify_and_recover_secp256k1(
-                    &hash, &signature,
-                )
-                .ok_or(
-                    CommonError::FailedToRecoverSecp256k1PublicKeyFromSignature,
-                )?;
-                TryInto::<Secp256k1PublicKey>::try_into(scrypto_public_key).map(
-                    |public_key| Self::Secp256k1 {
-                        public_key,
-                        signature: signature.into(),
-                    },
-                )
-            }
-            ScryptoSignatureWithPublicKey::Ed25519 {
-                public_key: scrypto_public_key,
-                signature,
-            } => TryInto::<Ed25519PublicKey>::try_into(scrypto_public_key).map(
-                |public_key| Self::Ed25519 {
-                    public_key,
-                    signature: signature.into(),
-                },
-            ),
-        }
     }
 }
 
@@ -207,80 +154,4 @@ mod tests {
         ));
     }
 
-    #[test]
-    fn to_scrypto() {
-        match ScryptoSignatureWithPublicKey::from(SUT::sample()) {
-            ScryptoSignatureWithPublicKey::Ed25519 {
-                signature,
-                public_key: _,
-            } => {
-                assert_eq!(
-                    Ed25519Signature::from(signature),
-                    Ed25519Signature::sample()
-                );
-            }
-            ScryptoSignatureWithPublicKey::Secp256k1 { signature: _ } => {
-                panic!("wrong curve")
-            }
-        }
-    }
-
-    #[test]
-    fn to_scrypto_other() {
-        match ScryptoSignatureWithPublicKey::from(SUT::sample_other()) {
-            ScryptoSignatureWithPublicKey::Secp256k1 { signature } => {
-                assert_eq!(
-                    Secp256k1Signature::from(signature),
-                    Secp256k1Signature::sample()
-                )
-            }
-            ScryptoSignatureWithPublicKey::Ed25519 {
-                public_key: _,
-                signature: _,
-            } => panic!("wrong curve"),
-        }
-    }
-
-    #[test]
-    fn try_from_scrypto_invalid_ed25519() {
-        assert_eq!(
-            TryInto::<SUT>::try_into((
-                ScryptoSignatureWithPublicKey::Ed25519 {
-                    public_key: ScryptoEd25519PublicKey([4u8; 32]),
-                    signature: ScryptoEd25519Signature([2u8; 64])
-                },
-                Hash::sample()
-            )),
-            Err(CommonError::InvalidEd25519PublicKeyPointNotOnCurve)
-        );
-    }
-
-    #[test]
-    fn try_from_scrypto_invalid_secp256k1_public_key() {
-        assert_eq!(
-            TryInto::<SUT>::try_into((
-                ScryptoSignatureWithPublicKey::Secp256k1 {
-                    signature: ScryptoSecp256k1Signature([2u8; 65])
-                },
-                Hash::sample()
-            )),
-            Err(CommonError::FailedToRecoverSecp256k1PublicKeyFromSignature)
-        );
-    }
-
-    // This is unfortunate, but it is how ECDSA recoverable signatures work, a
-    // WRONG hash will produce the WRONG publickey instead of error, given a
-    // secp256k1 signature
-    #[test]
-    fn try_from_scrypto_invalid_secp256k1_ok_even_for_wrong_hash() {
-        assert_eq!(
-            TryInto::<SUT>::try_into((
-                ScryptoSignatureWithPublicKey::Secp256k1 {
-                    signature: ScryptoSecp256k1Signature::from_str("0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12").unwrap()
-                },
-                Hash::sample()
-            )).unwrap().into_secp256k1().unwrap().0,
-            Secp256k1PublicKey::from_str("0395679954e3c312cab9905070effb4935e4b1e5b82f987396cabdb8faf9e554d0").unwrap()
-        );
-    }
 }

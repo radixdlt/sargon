@@ -218,13 +218,14 @@ mod tests {
 
     #[test]
     fn from_str_persona() {
-        assert!(matches!(
-            SUT::from_str("m/44H/1022H/1H/618H/1460H/0H"),
-            Err(CommonError::WrongEntityKind {
-                expected: CAP26EntityKind::Account,
-                found: CAP26EntityKind::Identity
-            })
-        ))
+        // assert!(matches!(
+        //     SUT::from_str("m/44H/1022H/1H/618H/1460H/0H"),
+        //     Err(CommonError::WrongEntityKind {
+        //         expected: CAP26EntityKind::Account,
+        //         found: CAP26EntityKind::Identity
+        //     })
+        // ))
+        todo!()
     }
 
     #[test]
@@ -362,13 +363,14 @@ mod tests {
 
     #[test]
     fn fails_when_entity_type_identity() {
-        assert_eq!(
-            AccountPath::from_str("m/44H/1022H/1H/618H/1460H/0H"),
-            Err(CommonError::WrongEntityKind {
-                expected: CAP26EntityKind::Account,
-                found: CAP26EntityKind::Identity
-            })
-        )
+        // assert_eq!(
+        //     AccountPath::from_str("m/44H/1022H/1H/618H/1460H/0H"),
+        //     Err(CommonError::WrongEntityKind {
+        //         expected: CAP26EntityKind::Account,
+        //         found: CAP26EntityKind::Identity
+        //     })
+        // )
+        todo!()
     }
 
     #[test]

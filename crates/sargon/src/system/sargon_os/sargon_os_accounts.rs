@@ -702,8 +702,13 @@ impl SargonOS {
     }
 }
 
-impl<E: IsEntity> IdentifiedVecOf<E> {
-    pub fn to_accounts(self) -> Result<Accounts> {
+pub trait ToEntityConverting {
+    fn to_accounts(self) -> Result<Accounts>;
+    fn to_personas(self) -> Result<Personas>;
+}
+
+impl<E: IsEntity> ToEntityConverting for IdentifiedVecOf<E> {
+    fn to_accounts(self) -> Result<Accounts> {
         self.into_iter()
             .map(|e| {
                 Account::try_from(Into::<AccountOrPersona>::into(e.clone()))
@@ -714,7 +719,7 @@ impl<E: IsEntity> IdentifiedVecOf<E> {
             .collect::<Result<Accounts>>()
     }
 
-    pub fn to_personas(self) -> Result<Personas> {
+    fn to_personas(self) -> Result<Personas> {
         self.into_iter()
             .map(|e| {
                 Persona::try_from(Into::<AccountOrPersona>::into(e.clone()))

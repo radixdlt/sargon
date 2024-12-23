@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon_core::decl_version_type;
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct DappToWalletInteractionTransactionItems {

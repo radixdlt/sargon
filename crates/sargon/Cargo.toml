@@ -42,12 +42,9 @@ strum = { workspace = true }
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-rust = { workspace = true }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
-    "serde",
-    "secp256k1_sign_and_validate",
-] }
+radix-common = { workspace = true }
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-engine-interface = { workspace = true}
 radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 
 radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
@@ -60,8 +57,7 @@ rand = { workspace = true }
 
 hex = { workspace = true }
 
-# delegate = "0.12.0"
-delegate = { git = "https://github.com/Kobzol/rust-delegate/", rev = "ac852be64f3e4b5f9b58be910d09921488d2845d" }
+delegate = { workspace = true }
 
 itertools = { workspace = true }
 

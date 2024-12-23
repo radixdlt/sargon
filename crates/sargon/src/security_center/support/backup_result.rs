@@ -1,3 +1,5 @@
+use sargon_core::decl_bool_type;
+
 use crate::prelude::*;
 
 /// A struct that represents the result of a given backup.

@@ -1,3 +1,5 @@
+use sargon_core::decl_version_type;
+
 use crate::prelude::*;
 
 decl_version_type!(Subintent);

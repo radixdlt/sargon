@@ -7,15 +7,15 @@ decl_identified_vec_of!(
     ResourceOrNonFungible
 );
 
-impl HasSampleValues for DepositorsAllowList {
-    fn sample() -> Self {
-        Self::from_iter([
-            ResourceOrNonFungible::sample(),
-            ResourceOrNonFungible::sample_other(),
-        ])
-    }
+// impl HasSampleValues for DepositorsAllowList {
+//     fn sample() -> Self {
+//         Self::from_iter([
+//             ResourceOrNonFungible::sample(),
+//             ResourceOrNonFungible::sample_other(),
+//         ])
+//     }
 
-    fn sample_other() -> Self {
-        Self::from_iter([ResourceOrNonFungible::sample_other()])
-    }
-}
+//     fn sample_other() -> Self {
+//         Self::from_iter([ResourceOrNonFungible::sample_other()])
+//     }
+// }

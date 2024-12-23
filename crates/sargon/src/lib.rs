@@ -63,7 +63,7 @@ pub mod prelude {
     //     AsRef, Debug as MoreDebug, Deref, Display,
     // };
     pub(crate) use futures::future::join_all;
-    pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
+    // pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
     // pub(crate) use std::cell::RefCell;
     // pub(crate) use std::cmp::Ordering;
     // pub(crate) use std::collections::BTreeMap;

@@ -1,4 +1,5 @@
-use crate::{decl_secret_bytes, prelude::*};
+use crate::prelude::*;
+use sargon_core::decl_secret_bytes;
 
 macro_rules! entropy_with_byte_counts {
     (

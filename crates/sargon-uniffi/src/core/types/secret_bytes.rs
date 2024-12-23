@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[macro_export]
 macro_rules! decl_secret_bytes {
     (
         $(

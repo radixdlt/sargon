@@ -20,7 +20,7 @@ impl Profile {
         let current_network_id = self.current_network_id();
         self.networks.get_id(current_network_id).ok_or(
             CommonError::NoNetworkInProfile {
-                network_id: current_network_id,
+                network_id: current_network_id.to_string(),
             },
         )
     }

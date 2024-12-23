@@ -44,47 +44,41 @@ impl<K: std::hash::Hash + Eq, V> JustKV<K, V> for HashMap<K, V> {
 mod tests {
     use super::*;
 
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    enum BlackOrWhite {
+        Black,
+        White,
+    }
+
     #[test]
     fn test_index_set() {
         assert_eq!(
-            IndexSet::just(FactorSourceKind::Device),
-            IndexSet::<FactorSourceKind>::from_iter([FactorSourceKind::Device])
+            IndexSet::just(BlackOrWhite::Black),
+            IndexSet::<_>::from_iter([BlackOrWhite::Black])
         )
     }
 
     #[test]
     fn test_hash_set() {
         assert_eq!(
-            HashSet::just(FactorSourceKind::Device),
-            HashSet::<FactorSourceKind>::from_iter([FactorSourceKind::Device])
+            HashSet::just(BlackOrWhite::Black),
+            HashSet::<_>::from_iter([BlackOrWhite::Black])
         )
     }
 
     #[test]
     fn test_index_map() {
         assert_eq!(
-            IndexMap::just((
-                FactorSourceKind::Device,
-                FactorSource::sample_device()
-            )),
-            IndexMap::<FactorSourceKind, FactorSource>::from_iter([(
-                FactorSourceKind::Device,
-                FactorSource::sample_device()
-            )])
+            IndexMap::just((1u8, BlackOrWhite::Black)),
+            IndexMap::<_, _>::from_iter([(1u8, BlackOrWhite::Black)])
         )
     }
 
     #[test]
     fn test_hash_map() {
         assert_eq!(
-            HashMap::just((
-                FactorSourceKind::Device,
-                FactorSource::sample_device()
-            )),
-            HashMap::<FactorSourceKind, FactorSource>::from_iter([(
-                FactorSourceKind::Device,
-                FactorSource::sample_device()
-            )])
+            HashMap::just((1u8, BlackOrWhite::Black)),
+            HashMap::<_, _>::from_iter([(1u8, BlackOrWhite::Black)])
         )
     }
 }

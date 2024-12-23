@@ -9,20 +9,21 @@ impl Profile {
     where
         F: IsFactorSource,
     {
-        let id = id.into();
-        self.factor_sources
-            .get_id(id)
-            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: id,
-            })
-            .and_then(|f| {
-                f.clone().try_into().map_err(|_| {
-                    CommonError::CastFactorSourceWrongKind {
-                        expected: <F as IsFactorSource>::kind(),
-                        found: f.factor_source_kind(),
-                    }
-                })
-            })
+        // let id = id.into();
+        // self.factor_sources
+        //     .get_id(id)
+        //     .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
+        //         bad_value: id,
+        //     })
+        //     .and_then(|f| {
+        //         f.clone().try_into().map_err(|_| {
+        //             CommonError::CastFactorSourceWrongKind {
+        //                 expected: <F as IsFactorSource>::kind(),
+        //                 found: f.factor_source_kind(),
+        //             }
+        //         })
+        //     })
+        todo!()
     }
 
     pub fn device_factor_source_by_id(

@@ -3,6 +3,7 @@ use core::fmt::Debug;
 use pretty_assertions::{assert_eq, assert_ne};
 use serde::de::DeserializeOwned;
 use serde_json::Value;
+use std::str::FromStr;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
@@ -14,8 +15,9 @@ pub enum TestingError {
     FailedToDeserialize(serde_json::Error),
 }
 
+use serde::Deserialize;
+use serde::Serialize;
 /// `name` is file name without extension, assuming it is json file
-#[cfg(not(tarpaulin_include))]
 pub fn fixture_and_json<'a, T>(
     vector: &str,
 ) -> Result<(T, serde_json::Value), TestingError>
@@ -32,7 +34,6 @@ where
 }
 
 /// `name` is file name without extension, assuming it is json file
-#[cfg(not(tarpaulin_include))]
 #[allow(unused)]
 pub fn fixture<'a, T>(vector: &str) -> Result<T, TestingError>
 where
@@ -41,7 +42,6 @@ where
     fixture_and_json(vector).map(|t| t.0)
 }
 
-#[cfg(not(tarpaulin_include))]
 fn base_assert_equality_after_json_roundtrip<T>(
     model: &T,
     json: Value,
@@ -64,7 +64,6 @@ fn base_assert_equality_after_json_roundtrip<T>(
 /// Asserts that (pseudocode) `model.to_json() == json_string` (serialization)
 /// and also asserts the associative property:
 /// `Model::from_json(json_string) == model` (deserialization)
-#[cfg(not(tarpaulin_include))]
 pub fn assert_eq_after_json_roundtrip<T>(model: &T, json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -73,7 +72,6 @@ where
     base_assert_equality_after_json_roundtrip(model, json, true)
 }
 
-#[cfg(not(tarpaulin_include))]
 pub fn print_json<T>(model: &T)
 where
     T: Serialize,
@@ -89,7 +87,6 @@ where
 /// Asserts that (pseudocode) `model.to_json() == json` (serialization)
 /// and also asserts the associative property:
 /// `Model::from_json(json) == model` (deserialization)
-#[cfg(not(tarpaulin_include))]
 pub fn assert_json_value_eq_after_roundtrip<T>(model: &T, json: Value)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -100,7 +97,6 @@ where
 /// Asserts that (pseudocode) `model.to_json() != json_string` (serialization)
 /// and also asserts the associative property:
 /// `Model::from_json(json_string) != model` (deserialization)
-#[cfg(not(tarpaulin_include))]
 pub fn assert_ne_after_json_roundtrip<T>(model: &T, json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -112,7 +108,6 @@ where
 /// Asserts that (pseudocode) `model.to_json() != json` (serialization)
 /// and also asserts the associative property:
 /// `Model::from_json(json) != model` (deserialization)
-#[cfg(not(tarpaulin_include))]
 pub fn assert_json_value_ne_after_roundtrip<T>(model: &T, json: Value)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -122,7 +117,6 @@ where
 
 /// Asserts that (pseudocode) `Model::from_json(model.to_json()) == model`,
 /// i.e. that a model after JSON roundtripping remain unchanged.
-#[cfg(not(tarpaulin_include))]
 pub fn assert_json_roundtrip<T>(model: &T)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -134,7 +128,6 @@ where
 
 /// Creates JSON from `json_str` and tries to decode it, then encode the decoded,
 /// value and compare it to the JSON value of the json_str.
-#[cfg(not(tarpaulin_include))]
 pub fn assert_json_str_roundtrip<T>(json_str: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -145,7 +138,6 @@ where
     assert_eq!(value, serialized);
 }
 
-#[cfg(not(tarpaulin_include))]
 pub fn assert_json_value_fails<T>(json: Value)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -162,7 +154,6 @@ where
     // all good, expected fail.
 }
 
-#[cfg(not(tarpaulin_include))]
 pub fn assert_json_fails<T>(json_string: &str)
 where
     T: Serialize + DeserializeOwned + PartialEq + Debug,
@@ -171,7 +162,6 @@ where
     assert_json_value_fails::<T>(json)
 }
 
-#[cfg(not(tarpaulin_include))]
 pub fn assert_json_eq_ignore_whitespace(json1: &str, json2: &str) {
     let value1: Value =
         serde_json::from_str(json1).expect("Invalid JSON in json1");

@@ -225,8 +225,12 @@ impl Profile {
     }
 }
 
-impl<T: IsEntity> IdentifiedVecOf<T> {
-    pub fn erased(&self) -> IdentifiedVecOf<AccountOrPersona> {
+pub trait EntitiesErased {
+    fn erased(&self) -> IdentifiedVecOf<AccountOrPersona>;
+}
+
+impl<T: IsEntity> EntitiesErased for IdentifiedVecOf<T> {
+    fn erased(&self) -> IdentifiedVecOf<AccountOrPersona> {
         self.items()
             .into_iter()
             .map(Into::<AccountOrPersona>::into)
@@ -482,17 +486,18 @@ impl Profile {
         S: IsFactorSource,
         M: FnMut(S) -> Result<S>,
     {
-        self.factor_sources
-            .maybe_update_with(factor_source_id, |f| {
-                S::try_from(f.clone())
-                    .map_err(|_| CommonError::CastFactorSourceWrongKind {
-                        expected: S::kind(),
-                        found: f.factor_source_kind(),
-                    })
-                    .and_then(|element| {
-                        mutate(element).map(|modified| modified.into())
-                    })
-            })
+        todo!()
+        // self.factor_sources
+        //     .maybe_update_with(factor_source_id, |f| {
+        //         S::try_from(f.clone())
+        //             .map_err(|_| CommonError::CastFactorSourceWrongKind {
+        //                 expected: S::kind(),
+        //                 found: f.factor_source_kind(),
+        //             })
+        //             .and_then(|element| {
+        //                 mutate(element).map(|modified| modified.into())
+        //             })
+        //     })
     }
 
     pub fn update_any_factor_source<F>(

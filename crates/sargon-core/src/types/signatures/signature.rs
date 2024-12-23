@@ -37,25 +37,6 @@ impl Signature {
     }
 }
 
-impl From<ScryptoSignature> for Signature {
-    fn from(value: ScryptoSignature) -> Self {
-        match value {
-            ScryptoSignature::Secp256k1(s) => {
-                Self::Secp256k1 { value: s.into() }
-            }
-            ScryptoSignature::Ed25519(s) => Self::Ed25519 { value: s.into() },
-        }
-    }
-}
-impl From<Signature> for ScryptoSignature {
-    fn from(value: Signature) -> Self {
-        match value {
-            Signature::Secp256k1 { value } => Self::Secp256k1(value.into()),
-            Signature::Ed25519 { value } => Self::Ed25519(value.into()),
-        }
-    }
-}
-
 impl From<Secp256k1Signature> for Signature {
     fn from(signature: Secp256k1Signature) -> Self {
         Self::Secp256k1 { value: signature }
@@ -191,10 +172,4 @@ mod tests {
         assert_eq!(SUT::try_from(bytes).unwrap(), SUT::sample_other());
     }
 
-    #[test]
-    fn to_from_scrypto() {
-        let roundtrip = |s: SUT| SUT::from(ScryptoSignature::from(s));
-        roundtrip(SUT::sample());
-        roundtrip(SUT::sample_other());
-    }
 }

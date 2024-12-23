@@ -1,5 +1,9 @@
 use crate::prelude::*;
 
+pub fn profile_id() -> ProfileID {
+    ProfileID(id())
+}
+
 /// A stable and globally unique identifier of a Profile.
 #[derive(
     Serialize,

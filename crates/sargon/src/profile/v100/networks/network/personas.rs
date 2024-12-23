@@ -5,21 +5,21 @@ decl_identified_vec_of!(
     Persona
 );
 
-impl HasSampleValues for Personas {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::sample_mainnet()
-    }
+// impl HasSampleValues for Personas {
+//     /// A sample used to facilitate unit tests.
+//     fn sample() -> Self {
+//         Self::sample_mainnet()
+//     }
 
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        Self::sample_stokenet()
-    }
-}
+//     /// A sample used to facilitate unit tests.
+//     fn sample_other() -> Self {
+//         Self::sample_stokenet()
+//     }
+// }
 
-impl Personas {
+impl HasSampleValuesOnNetworks for Personas {
     /// A sample used to facilitate unit tests.
-    pub fn sample_mainnet() -> Self {
+    fn sample_mainnet() -> Self {
         Self::from_iter([
             Persona::sample_mainnet_satoshi(),
             Persona::sample_mainnet_batman(),
@@ -27,7 +27,7 @@ impl Personas {
     }
 
     /// A sample used to facilitate unit tests.
-    pub fn sample_stokenet() -> Self {
+    fn sample_stokenet() -> Self {
         Self::from_iter([
             Persona::sample_stokenet_leia_skywalker(),
             Persona::sample_stokenet_hermione(),

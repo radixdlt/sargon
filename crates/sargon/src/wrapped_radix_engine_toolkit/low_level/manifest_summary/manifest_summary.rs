@@ -187,15 +187,15 @@ impl From<(RetStaticAnalysisWithResourceMovements, NetworkID)>
     }
 }
 
-impl HasSampleValues for RetManifestClass {
-    fn sample() -> Self {
-        RetManifestClass::GeneralSubintent
-    }
+// impl HasSampleValues for RetManifestClass {
+//     fn sample() -> Self {
+//         RetManifestClass::GeneralSubintent
+//     }
 
-    fn sample_other() -> Self {
-        RetManifestClass::Transfer
-    }
-}
+//     fn sample_other() -> Self {
+//         RetManifestClass::Transfer
+//     }
+// }
 
 impl HasSampleValues for ManifestSummary {
     fn sample() -> Self {

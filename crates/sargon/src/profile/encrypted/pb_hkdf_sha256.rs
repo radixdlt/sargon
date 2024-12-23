@@ -1,5 +1,11 @@
 use hkdf::Hkdf;
 use k256::sha2::Sha256;
+use sargon_core::Exactly32Bytes;
+
+use super::{
+    PasswordBasedKeyDerivationSchemeVersion, VersionOfAlgorithm,
+    VersionedPasswordBasedKeyDerivation,
+};
 
 /// A simple `HKDF` based scheme using UTF8 encoding of the password as input.
 #[derive(

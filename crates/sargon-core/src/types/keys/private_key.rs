@@ -58,30 +58,7 @@ impl PrivateKey {
         }
     }
 
-    pub fn sign_intent_hash(
-        &self,
-        transaction: &TransactionIntentHash,
-    ) -> IntentSignature {
-        match self {
-            PrivateKey::Ed25519(key) => SignatureWithPublicKey::Ed25519 {
-                public_key: key.public_key(),
-                signature: key.sign(&transaction.hash),
-            },
-            PrivateKey::Secp256k1(key) => SignatureWithPublicKey::Secp256k1 {
-                public_key: key.public_key(),
-                signature: key.sign(&transaction.hash),
-            },
-        }
-        .into()
-    }
-
-    pub fn notarize_hash(
-        &self,
-        signed_transaction_intent_hash: &SignedTransactionIntentHash,
-    ) -> NotarySignature {
-        self.sign(&signed_transaction_intent_hash.hash).into()
-    }
-
+    
     /// Returns the hex representation of the inner private key's bytes as a `Vec`.
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {

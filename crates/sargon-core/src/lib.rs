@@ -1,7 +1,6 @@
 #![feature(core_intrinsics)]
 
 mod assert_json;
-mod assert_network_request;
 mod error;
 mod has_sample_values;
 mod hash;
@@ -12,7 +11,6 @@ mod utils;
 
 pub mod prelude {
     pub use crate::assert_json::*;
-    pub use crate::assert_network_request::*;
     pub use crate::error::*;
     pub use crate::has_sample_values::*;
     pub use crate::hash::*;
@@ -59,4 +57,31 @@ pub mod prelude {
 
     pub use enum_as_inner::EnumAsInner;
     pub use paste::*;
+
+    pub(crate) use radix_common::{
+        crypto::{
+            blake2b_256_hash, verify_ed25519 as scrypto_verify_ed25519,
+            verify_secp256k1 as scrypto_verify_secp256k1,
+            Ed25519PrivateKey as ScryptoEd25519PrivateKey,
+            Ed25519PublicKey as ScryptoEd25519PublicKey,
+            Ed25519PublicKeyHash as ScryptoEd25519PublicKeyHash,
+            Ed25519Signature as ScryptoEd25519Signature, Hash as ScryptoHash,
+            IsHash as ScryptoIsHash, PublicKey as ScryptoPublicKey,
+            PublicKeyHash as ScryptoPublicKeyHash,
+            Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
+            Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
+            Secp256k1PublicKeyHash as ScryptoSecp256k1PublicKeyHash,
+            Secp256k1Signature as ScryptoSecp256k1Signature,
+        },
+        data::scrypto::model::BytesNonFungibleLocalId as ScryptoBytesNonFungibleLocalId,
+        math::{
+            traits::CheckedMul as ScryptoCheckedMul,
+            Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,
+        },
+        prelude::Instant as ScryptoInstant,
+    };
+
+    pub(crate) use radix_engine_interface::prelude::Epoch as ScryptoEpoch;
 }
+
+pub use prelude::*;

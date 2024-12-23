@@ -219,13 +219,14 @@ mod tests {
 
     #[test]
     fn from_str_account() {
-        assert!(matches!(
-            SUT::from_str("m/44H/1022H/1H/525H/1460H/0H"),
-            Err(CommonError::WrongEntityKind {
-                expected: CAP26EntityKind::Identity,
-                found: CAP26EntityKind::Account
-            })
-        ))
+        // assert!(matches!(
+        //     SUT::from_str("m/44H/1022H/1H/525H/1460H/0H"),
+        //     Err(CommonError::WrongEntityKind {
+        //         expected: CAP26EntityKind::Identity,
+        //         found: CAP26EntityKind::Account
+        //     })
+        // ))
+        todo!()
     }
 
     #[test]

@@ -8,38 +8,44 @@ decl_identified_vec_of!(
     ResourceAppPreference
 );
 
-impl HasSampleValues for ResourcePreferences {
-    fn sample() -> Self {
-        Self::sample_mainnet()
-    }
+// impl HasSampleValues for ResourcePreferences {
+//     fn sample() -> Self {
+//         Self::sample_mainnet()
+//     }
 
-    fn sample_other() -> Self {
-        Self::sample_stokenet()
-    }
-}
+//     fn sample_other() -> Self {
+//         Self::sample_stokenet()
+//     }
+// }
 
-impl ResourcePreferences {
-    pub(crate) fn sample_mainnet() -> Self {
+impl HasSampleValuesOnNetworks for ResourcePreferences {
+    fn sample_mainnet() -> Self {
         Self::from_iter([
             ResourceAppPreference::sample_fungible_mainnet(),
             ResourceAppPreference::sample_non_fungible_mainnet(),
         ])
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    fn sample_stokenet() -> Self {
         Self::from_iter([ResourceAppPreference::sample_non_fungible_stokenet()])
     }
 }
 
-impl ResourcePreferences {
-    pub fn get_hidden_resources(&self) -> HiddenResources {
+pub trait ResourceHiding {
+    fn get_hidden_resources(&self) -> HiddenResources;
+    fn hide_resource(&mut self, resource: ResourceIdentifier);
+    fn unhide_resource(&mut self, resource: ResourceIdentifier);
+}
+
+impl ResourceHiding for ResourcePreferences {
+    fn get_hidden_resources(&self) -> HiddenResources {
         self.iter()
             .filter(|x| x.visibility == ResourceVisibility::Hidden)
             .map(|x| x.resource)
             .collect()
     }
 
-    pub fn hide_resource(&mut self, resource: ResourceIdentifier) {
+    fn hide_resource(&mut self, resource: ResourceIdentifier) {
         if !self.update_with(resource.id(), |x| {
             x.visibility = ResourceVisibility::Hidden
         }) {
@@ -51,7 +57,7 @@ impl ResourcePreferences {
         }
     }
 
-    pub fn unhide_resource(&mut self, resource: ResourceIdentifier) {
+    fn unhide_resource(&mut self, resource: ResourceIdentifier) {
         if !self.update_with(resource.id(), |x| {
             x.visibility = ResourceVisibility::Visible
         }) {

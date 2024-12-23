@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+#[macro_export]
+
 macro_rules! decl_bool_type {
     ($name:ident, $default_value:expr) => {
         #[derive(

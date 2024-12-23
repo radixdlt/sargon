@@ -27,21 +27,22 @@ impl<T: IsNetworkAware, U: Clone + IntoIterator<Item = T>>
     }
 
     fn assert_elements_on_same_network(&self) -> Result<Option<NetworkID>> {
-        if self.is_empty() {
-            return Ok(None);
-        }
-        let network_id = self.clone().into_iter().next().unwrap().network_id();
-        self.clone().into_iter().try_for_each(|e| {
-            if e.network_id() == network_id {
-                Ok(())
-            } else {
-                Err(CommonError::NetworkDiscrepancy {
-                    expected: network_id,
-                    actual: e.network_id(),
-                })
-            }
-        })?;
+        todo!()
+        // if self.is_empty() {
+        //     return Ok(None);
+        // }
+        // let network_id = self.clone().into_iter().next().unwrap().network_id();
+        // self.clone().into_iter().try_for_each(|e| {
+        //     if e.network_id() == network_id {
+        //         Ok(())
+        //     } else {
+        //         Err(CommonError::NetworkDiscrepancy {
+        //             expected: network_id,
+        //             actual: e.network_id(),
+        //         })
+        //     }
+        // })?;
 
-        Ok(Some(network_id))
+        // Ok(Some(network_id))
     }
 }

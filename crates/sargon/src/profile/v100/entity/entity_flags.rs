@@ -15,31 +15,39 @@ impl Identifiable for EntityFlag {
     }
 }
 
-impl EntityFlags {
+pub trait FlagInserting {
+    fn insert_flag(&mut self, flag: EntityFlag) -> bool;
+}
+pub trait FlagRemoving {
+    fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag>;
+}
+
+impl FlagInserting for EntityFlags {
     /// Adds a flag to the set of flags.
     ///
     /// Returns whether the flag was newly inserted. That is:
     ///
     /// If the set did not previously contain an equal flag, true is returned.
     /// If the set already contained an equal flag, false is returned, and the entry is not updated.
-    pub fn insert_flag(&mut self, flag: EntityFlag) -> bool {
+    fn insert_flag(&mut self, flag: EntityFlag) -> bool {
         self.append(flag).0
     }
-
-    pub fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {
+}
+impl FlagRemoving for EntityFlags {
+    fn remove_flag(&mut self, flag: &EntityFlag) -> Option<EntityFlag> {
         self.remove_id(&flag.id())
     }
 }
 
-impl HasSampleValues for EntityFlags {
-    fn sample() -> Self {
-        Self::from_iter([EntityFlag::sample()])
-    }
+// impl HasSampleValues for EntityFlags {
+//     fn sample() -> Self {
+//         Self::from_iter([EntityFlag::sample()])
+//     }
 
-    fn sample_other() -> Self {
-        Self::new()
-    }
-}
+//     fn sample_other() -> Self {
+//         Self::new()
+//     }
+// }
 
 #[cfg(test)]
 mod tests {

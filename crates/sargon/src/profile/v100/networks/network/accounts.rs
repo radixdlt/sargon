@@ -7,35 +7,35 @@ decl_identified_vec_of!(
     Account
 );
 
-impl HasSampleValues for Accounts {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::sample_mainnet()
-    }
+// impl HasSampleValues for Accounts {
+//     /// A sample used to facilitate unit tests.
+//     fn sample() -> Self {
+//         Self::sample_mainnet()
+//     }
 
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        Self::sample_stokenet()
-    }
-}
+//     /// A sample used to facilitate unit tests.
+//     fn sample_other() -> Self {
+//         Self::sample_stokenet()
+//     }
+// }
 
-impl Accounts {
-    /// A sample used to facilitate unit tests.
-    pub fn sample_mainnet() -> Self {
-        Self::from_iter([
-            Account::sample_mainnet(),
-            Account::sample_mainnet_other(),
-        ])
-    }
+// impl Accounts {
+//     /// A sample used to facilitate unit tests.
+//     pub fn sample_mainnet() -> Self {
+//         Self::from_iter([
+//             Account::sample_mainnet(),
+//             Account::sample_mainnet_other(),
+//         ])
+//     }
 
-    /// A sample used to facilitate unit tests.
-    pub fn sample_stokenet() -> Self {
-        Self::from_iter([
-            Account::sample_stokenet_nadia(),
-            Account::sample_stokenet_olivia(),
-        ])
-    }
-}
+//     /// A sample used to facilitate unit tests.
+//     pub fn sample_stokenet() -> Self {
+//         Self::from_iter([
+//             Account::sample_stokenet_nadia(),
+//             Account::sample_stokenet_olivia(),
+//         ])
+//     }
+// }
 
 #[cfg(test)]
 mod tests {

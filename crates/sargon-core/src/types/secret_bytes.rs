@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[macro_export]
 macro_rules! decl_secret_bytes {
     (
         $(
@@ -19,11 +20,13 @@ macro_rules! decl_secret_bytes {
 
            impl $struct_name {
                 pub fn to_bytes(&self) -> &[u8] {
-                    &self.0.as_slice()
+                    // &self.0.as_slice()
+                    todo!()
                 }
 
                 pub fn to_vec(&self) -> Vec<u8> {
-                    self.0.to_vec()
+                    // self.0.to_vec()
+                    todo!()
                 }
            }
 
@@ -47,13 +50,13 @@ macro_rules! decl_secret_bytes {
             impl $struct_name {
                 pub const LENGTH: usize = $byte_count;
 
-                pub fn new(bytes: [u8; Self::LENGTH]) -> Self {
+                pub fn new(bytes: [u8; $byte_count]) -> Self {
                     Self(Box::new(bytes))
                 }
 
                 #[allow(unused)]
                 pub(crate) fn is_zeroized(&self) -> bool {
-                    *self.0 == [0; Self::LENGTH]
+                    *self.0 == [0; $byte_count]
                 }
             }
 
@@ -66,10 +69,11 @@ macro_rules! decl_secret_bytes {
 
                 #[test]
                 fn zeroize() {
-                    let mut sut = SUT::sample();
-                    assert!(!sut.is_zeroized());
-                    sut.zeroize();
-                    assert!(sut.is_zeroized());
+                    // let mut sut = SUT::sample();
+                    // assert!(!sut.is_zeroized());
+                    // sut.zeroize();
+                    // assert!(sut.is_zeroized());
+                    todo!()
                 }
 
                 #[test]
@@ -89,4 +93,4 @@ macro_rules! decl_secret_bytes {
     };
 }
 
-pub(crate) use decl_secret_bytes;
+pub use decl_secret_bytes;

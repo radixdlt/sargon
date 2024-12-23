@@ -43,7 +43,8 @@ pub struct P2PLink {
 
 impl SafeToLog for P2PLink {
     fn non_sensitive(&self) -> impl std::fmt::Debug {
-        self.to_obfuscated_string()
+        // self.to_obfuscated_string()
+        todo!()
     }
 }
 

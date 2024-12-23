@@ -136,6 +136,12 @@ decl_non_empty_max_n_bytes!(
     64
 );
 
+impl From<ScryptoBytesNonFungibleLocalId> for NonEmptyMax64Bytes {
+    fn from(value: ScryptoBytesNonFungibleLocalId) -> Self {
+        Self::try_from(value.value()).expect("Should not be possible, since ScryptoBytesNonFungibleLocalId have validated length")
+    }
+}
+
 decl_non_empty_max_n_bytes!(
     /// 32 bytes, typically used as entropy for Mnemonics.
     32

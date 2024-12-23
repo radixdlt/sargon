@@ -6,30 +6,35 @@ decl_identified_vec_of!(
     FactorSource
 );
 
-impl FactorSources {
+pub trait FactorSourcesWithBDFS {
+    fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self;
+}
+
+impl FactorSourcesWithBDFS for FactorSources {
     /// Panics if `device_factor_source` is not using Babylon crypto parameters
     /// AND marked "main".
-    pub fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
+    fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
         assert!(device_factor_source.is_main_bdfs());
         Self::just(device_factor_source.into())
     }
 }
 
-impl HasSampleValues for FactorSources {
-    fn sample() -> Self {
-        Self::from_iter([
-            FactorSource::sample_device(),
-            FactorSource::sample_ledger(),
-        ])
-    }
+// impl HasSampleValues for FactorSources {
+//     fn sample() -> Self {
+//         Self::from_iter([
+//             FactorSource::sample_device(),
+//             FactorSource::sample_ledger(),
+//         ])
+//     }
 
-    fn sample_other() -> Self {
-        Self::from_iter([
-            FactorSource::sample_device_olympia(),
-            FactorSource::sample_device_babylon(),
-        ])
-    }
-}
+//     fn sample_other() -> Self {
+//         Self::from_iter([
+//             FactorSource::sample_device_olympia(),
+//             FactorSource::sample_device_babylon(),
+//         ])
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
 

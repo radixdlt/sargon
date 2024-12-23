@@ -2799,8 +2799,10 @@ name = "sargon-core"
 version = "0.0.0"
 dependencies = [
  "assert-json-diff",
+ "delegate",
  "derive_more",
  "enum-as-inner",
+ "enum-iterator",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "hkdf",
  "iota-crypto",
@@ -2810,6 +2812,8 @@ dependencies = [
  "log",
  "paste 1.0.14",
  "pretty_assertions",
+ "radix-common",
+ "radix-engine-interface",
  "radix-rust",
  "rand",
  "serde",

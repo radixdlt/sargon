@@ -249,23 +249,54 @@ impl HasSampleValues for FactorSource {
         Self::sample_ledger()
     }
 }
-impl FactorSources {
-    pub fn sample_values_all_with_filter(
+
+pub trait FactorSourcesWithExtraSampleValues {
+    fn sample_values_all_with_filter(
+        filter: impl Fn(&FactorSource) -> bool,
+    ) -> Self;
+
+    fn sample_values_all() -> Self {
+        Self::sample_values_all_with_filter(|_| true)
+    }
+
+    fn sample_values_all_hd() -> Self {
+        Self::sample_values_all_with_filter(|f| f.factor_source_id().is_hash())
+    }
+}
+
+impl FactorSourcesWithExtraSampleValues for FactorSources {
+    fn sample_values_all_with_filter(
         filter: impl Fn(&FactorSource) -> bool,
     ) -> Self {
         Self::from_iter(
             FactorSource::sample_values_all().into_iter().filter(filter),
         )
     }
-    pub fn sample_values_all() -> Self {
-        Self::sample_values_all_with_filter(|_| true)
-    }
-    pub fn sample_values_all_hd() -> Self {
-        Self::sample_values_all_with_filter(|f| f.factor_source_id().is_hash())
-    }
 }
-impl FactorSource {
-    pub fn sample_values_all() -> Vec<Self> {
+
+pub trait FactorSourceWithExtraSampleValues: Sized {
+    fn sample_device() -> Self;
+    fn sample_device_babylon() -> Self;
+    fn sample_device_babylon_other() -> Self;
+    fn sample_device_olympia() -> Self;
+    fn sample_ledger() -> Self;
+    fn sample_ledger_other() -> Self;
+    fn sample_arculus() -> Self;
+    fn sample_arculus_other() -> Self;
+    fn sample_off_device() -> Self;
+    fn sample_off_device_other() -> Self;
+    fn sample_trusted_contact_frank() -> Self;
+    fn sample_trusted_contact_grace() -> Self;
+    fn sample_trusted_contact_judy() -> Self;
+    fn sample_trusted_contact_oscar() -> Self;
+    fn sample_trusted_contact_trudy() -> Self;
+    fn sample_trusted_contact_radix() -> Self;
+    fn sample_security_questions() -> Self;
+    fn sample_security_questions_other() -> Self;
+    fn sample_password() -> Self;
+    fn sample_password_other() -> Self;
+
+    fn sample_values_all() -> Vec<Self> {
         vec![
             Self::sample_device_babylon(),
             Self::sample_device_babylon_other(),
@@ -288,75 +319,78 @@ impl FactorSource {
             Self::sample_password_other(),
         ]
     }
-    pub fn sample_device() -> Self {
+}
+
+impl FactorSourceWithExtraSampleValues for FactorSource {
+    fn sample_device() -> Self {
         Self::sample_device_babylon()
     }
 
-    pub fn sample_device_babylon() -> Self {
+    fn sample_device_babylon() -> Self {
         Self::from(DeviceFactorSource::sample_babylon())
     }
 
-    pub fn sample_device_babylon_other() -> Self {
+    fn sample_device_babylon_other() -> Self {
         Self::from(DeviceFactorSource::sample_babylon_other())
     }
-    pub fn sample_device_olympia() -> Self {
+    fn sample_device_olympia() -> Self {
         Self::from(DeviceFactorSource::sample_olympia())
     }
 
-    pub fn sample_ledger() -> Self {
+    fn sample_ledger() -> Self {
         Self::from(LedgerHardwareWalletFactorSource::sample())
     }
-    pub fn sample_ledger_other() -> Self {
+    fn sample_ledger_other() -> Self {
         Self::from(LedgerHardwareWalletFactorSource::sample_other())
     }
 
-    pub fn sample_arculus() -> Self {
+    fn sample_arculus() -> Self {
         Self::from(ArculusCardFactorSource::sample())
     }
-    pub fn sample_arculus_other() -> Self {
+    fn sample_arculus_other() -> Self {
         Self::from(ArculusCardFactorSource::sample_other())
     }
 
-    pub fn sample_off_device() -> Self {
+    fn sample_off_device() -> Self {
         Self::from(OffDeviceMnemonicFactorSource::sample())
     }
-    pub fn sample_off_device_other() -> Self {
+    fn sample_off_device_other() -> Self {
         Self::from(OffDeviceMnemonicFactorSource::sample_other())
     }
 
-    pub fn sample_trusted_contact_frank() -> Self {
+    fn sample_trusted_contact_frank() -> Self {
         Self::from(TrustedContactFactorSource::sample_frank())
     }
-    pub fn sample_trusted_contact_grace() -> Self {
+    fn sample_trusted_contact_grace() -> Self {
         Self::from(TrustedContactFactorSource::sample_grace())
     }
-    pub fn sample_trusted_contact_judy() -> Self {
+    fn sample_trusted_contact_judy() -> Self {
         Self::from(TrustedContactFactorSource::sample_judy())
     }
-    pub fn sample_trusted_contact_oscar() -> Self {
+    fn sample_trusted_contact_oscar() -> Self {
         Self::from(TrustedContactFactorSource::sample_oscar())
     }
-    pub fn sample_trusted_contact_trudy() -> Self {
+    fn sample_trusted_contact_trudy() -> Self {
         Self::from(TrustedContactFactorSource::sample_trudy())
     }
-    pub fn sample_trusted_contact_radix() -> Self {
+    fn sample_trusted_contact_radix() -> Self {
         Self::from(TrustedContactFactorSource::sample_radix())
     }
 
-    pub fn sample_security_questions() -> Self {
+    fn sample_security_questions() -> Self {
         Self::from(SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample())
     }
-    pub fn sample_security_questions_other() -> Self {
+    fn sample_security_questions_other() -> Self {
         Self::from(
             SecurityQuestions_NOT_PRODUCTION_READY_FactorSource::sample_other(),
         )
     }
 
-    pub fn sample_password() -> Self {
+    fn sample_password() -> Self {
         Self::from(PasswordFactorSource::sample())
     }
 
-    pub fn sample_password_other() -> Self {
+    fn sample_password_other() -> Self {
         Self::from(PasswordFactorSource::sample_other())
     }
 }

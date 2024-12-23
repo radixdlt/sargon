@@ -15,6 +15,15 @@ macro_rules! decl_identified_vec_of {
             #[allow(non_camel_case_types)]
 			pub type $collection_type = IdentifiedVecOf<$element_type>;
 
+            impl HasSampleValues for $collection_type {
+                fn sample() -> Self {
+                    Self::from_iter([$element_type::sample(), $element_type::sample_other()])
+                }
+                fn sample_other() -> Self {
+                    Self::from_iter([$element_type::sample_other()])
+                }
+            }
+
             #[cfg(test)]
             mod [< $collection_type:snake _tests >] {
                 use super::*;

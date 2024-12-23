@@ -2,18 +2,18 @@ use crate::prelude::*;
 
 decl_identified_vec_of!(HiddenResources, ResourceIdentifier);
 
-impl HasSampleValues for HiddenResources {
-    fn sample() -> Self {
-        Self::from_iter([
-            ResourceIdentifier::sample(),
-            ResourceIdentifier::sample_other(),
-        ])
-    }
+// impl HasSampleValues for HiddenResources {
+//     fn sample() -> Self {
+//         Self::from_iter([
+//             ResourceIdentifier::sample(),
+//             ResourceIdentifier::sample_other(),
+//         ])
+//     }
 
-    fn sample_other() -> Self {
-        Self::from_iter([ResourceIdentifier::sample_other()])
-    }
-}
+//     fn sample_other() -> Self {
+//         Self::from_iter([ResourceIdentifier::sample_other()])
+//     }
+// }
 
 #[cfg(test)]
 mod tests {

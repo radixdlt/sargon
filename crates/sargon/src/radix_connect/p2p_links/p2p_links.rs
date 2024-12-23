@@ -6,17 +6,17 @@ decl_identified_vec_of!(
     P2PLink
 );
 
-impl HasSampleValues for P2PLinks {
-    /// A sample used to facilitate unit tests.
-    fn sample() -> Self {
-        Self::from_iter([P2PLink::sample_brave(), P2PLink::sample_chrome()])
-    }
+// impl HasSampleValues for P2PLinks {
+//     /// A sample used to facilitate unit tests.
+//     fn sample() -> Self {
+//         Self::from_iter([P2PLink::sample_brave(), P2PLink::sample_chrome()])
+//     }
 
-    /// A sample used to facilitate unit tests.
-    fn sample_other() -> Self {
-        Self::from_iter([P2PLink::sample_arc(), P2PLink::sample_duckduckgo()])
-    }
-}
+//     /// A sample used to facilitate unit tests.
+//     fn sample_other() -> Self {
+//         Self::from_iter([P2PLink::sample_arc(), P2PLink::sample_duckduckgo()])
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
