@@ -16,8 +16,8 @@ impl FromAddressError for CommonError {
         };
         if network_id != expected_network {
             CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: network_id,
-                specified_to_instructions_ctor: expected_network,
+                found_in_instructions: network_id.to_string(),
+                specified_to_instructions_ctor: expected_network.to_string(),
             }
         } else {
             CommonError::InvalidInstructionsString {

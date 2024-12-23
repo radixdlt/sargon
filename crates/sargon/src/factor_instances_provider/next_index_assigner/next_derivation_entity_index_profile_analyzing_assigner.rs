@@ -255,8 +255,8 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     ) -> Result<Option<HDPathComponent>> {
         if agnostic_path.network_id != self.network_id {
             return Err(CommonError::NetworkDiscrepancy {
-                expected: self.network_id,
-                actual: agnostic_path.network_id,
+                expected: self.network_id.to_string(),
+                actual: agnostic_path.network_id.to_string(),
             });
         }
         let derivation_preset = DerivationPreset::try_from(agnostic_path)?;
@@ -297,17 +297,17 @@ mod tests {
     #[test]
     fn test_network_discrepancy() {
         let sut = SUT::new(NetworkID::Mainnet, None);
-        assert!(matches!(
+        assert_eq!(
             sut.next(
                 FactorSourceIDFromHash::sample_at(0),
                 DerivationPreset::AccountVeci
                     .index_agnostic_path_on_network(NetworkID::Stokenet),
             ),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Mainnet,
-                actual: NetworkID::Stokenet
+                expected: NetworkID::Mainnet.to_string(),
+                actual: NetworkID::Stokenet.to_string()
             })
-        ));
+        );
     }
 
     #[test]

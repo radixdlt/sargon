@@ -125,8 +125,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_send_wallet_interaction_response() {
-        let mock_antenna =
-            MockNetworkingDriver::with_spy(200, (), |request, _| {
+        let mock_antenna = MockNetworkingDriver::with_spy(
+            200,
+            BagOfBytes::new(),
+            |request, _| {
                 // Prepare encryption keys
                 let mut encryption_key = Session::sample().encryption_key;
                 let mut decryption_key = encryption_key;
@@ -188,7 +190,8 @@ mod tests {
                     decoded_payload,
                     wallet_to_dapp_interaction_response
                 )
-            });
+            },
+        );
 
         let service =
             Service::new_with_networking_driver(Arc::new(mock_antenna));

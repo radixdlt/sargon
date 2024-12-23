@@ -106,7 +106,7 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUt
         let hkdf = Hkdf::<Sha256>::new(None, &ikm);
         let mut okm = [0u8; 32];
         hkdf.expand(&info, &mut okm).unwrap();
-        Ok(X25519PrivateKey::from(Exactly32Bytes::from(&okm)))
+        Ok(X25519PrivateKey::from_bytes(okm))
     }
 
 

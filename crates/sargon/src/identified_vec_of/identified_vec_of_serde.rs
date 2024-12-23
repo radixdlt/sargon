@@ -40,7 +40,7 @@ where
 #[cfg(test)]
 mod tests {
 
-    use super::super::super::User;
+      use crate::identified_vec_of::User;
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

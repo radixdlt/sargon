@@ -30,10 +30,14 @@ pub enum SLIP10Curve {
     Secp256k1,
 }
 
-impl Identifiable for SLIP10Curve {
-    type ID = String;
+impl Display for SLIP10Curve {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.string())
+    }
+}
 
-    fn id(&self) -> Self::ID {
+impl SLIP10Curve {
+    pub fn string(&self) -> String {
         match self {
             Self::Curve25519 => "curve25519".to_string(),
             Self::Secp256k1 => "secp256k1".to_string(),
@@ -41,20 +45,13 @@ impl Identifiable for SLIP10Curve {
     }
 }
 
-impl Display for SLIP10Curve {
-    #[cfg(not(tarpaulin_include))] // false negative
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.id())
-    }
-}
-
 impl FromStr for SLIP10Curve {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s == Self::Curve25519.id() {
+        if s == Self::Curve25519.string() {
             Ok(Self::Curve25519)
-        } else if s == Self::Secp256k1.id() {
+        } else if s == Self::Secp256k1.string() {
             Ok(Self::Secp256k1)
         } else {
             Err(CommonError::UnknownSLIP10Curve {
@@ -109,9 +106,9 @@ mod tests {
     }
 
     #[test]
-    fn id() {
-        assert_eq!(SUT::Curve25519.id(), "curve25519");
-        assert_eq!(SUT::Secp256k1.id(), "secp256k1");
+    fn string() {
+        assert_eq!(SUT::Curve25519.string(), "curve25519");
+        assert_eq!(SUT::Secp256k1.string(), "secp256k1");
     }
 
     #[test]

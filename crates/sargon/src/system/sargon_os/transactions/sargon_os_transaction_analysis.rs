@@ -196,7 +196,7 @@ impl SargonOS {
             && !are_instructions_originating_from_host
         {
             return Err(CommonError::ReservedManifestClass {
-                class: reserved_manifest_class.kind().clone(),
+                class: reserved_manifest_class.kind().to_string(),
             });
         }
 
@@ -614,6 +614,7 @@ mod transaction_preview_analysis_tests {
         )
     }
 
+
     #[actix_rt::test]
     async fn success() {
         let responses = prepare_responses(
@@ -667,7 +668,7 @@ mod transaction_preview_analysis_tests {
                 PublicKey::sample(),
             )
             .await;
-
+            
         pretty_assertions::assert_eq!(
             result,
             Ok(TransactionToReview {

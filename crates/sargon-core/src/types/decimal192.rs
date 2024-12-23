@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::prelude::*;
 use delegate::delegate;
 use enum_iterator::reverse_all;
@@ -654,11 +656,18 @@ impl HasSampleValues for Decimal192 {
     }
 }
 
-#[cfg(test)]
 impl From<&str> for Decimal192 {
     /// TEST ONLY
     fn from(value: &str) -> Self {
-        value.parse().unwrap_or_else(|_| panic!("Test failed since the passed in str is not a valid Decimal192: '{}'", value))
+        #[cfg(not(test))]
+        {
+            panic!("not allowed to use From<&str> outside of tests")
+        }
+
+        #[cfg(test)]
+        {
+            return value.parse().unwrap_or_else(|_| panic!("Test failed since the passed in str is not a valid Decimal192: '{}'", value));
+        }
     }
 }
 

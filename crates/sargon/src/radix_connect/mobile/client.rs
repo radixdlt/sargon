@@ -294,7 +294,7 @@ mod tests {
                     Some(encoded_session.into())
                 })
                 .ok_or(CommonError::RadixConnectMobileSessionNotFound {
-                    session_id,
+                    session_id: session_id.to_string(),
                 })
         }
     }

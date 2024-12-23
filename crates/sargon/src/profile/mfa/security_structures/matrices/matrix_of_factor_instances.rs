@@ -18,7 +18,7 @@ pub trait HasFactorInstances {
             self.entity_kind_of_all_factors()?;
 
         if entity_kind_of_entity != entity_kind_of_factor_instances {
-            return Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity, entity_kind_of_factor_instances });
+            return Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity: entity_kind_of_entity.to_string(), entity_kind_of_factor_instances: entity_kind_of_factor_instances.to_string() });
         }
 
         Ok(())

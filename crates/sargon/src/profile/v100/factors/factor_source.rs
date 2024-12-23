@@ -250,7 +250,7 @@ impl HasSampleValues for FactorSource {
     }
 }
 
-pub trait FactorSourcesWithExtraSampleValues {
+pub trait FactorSourcesWithExtraSampleValues: Sized {
     fn sample_values_all_with_filter(
         filter: impl Fn(&FactorSource) -> bool,
     ) -> Self;

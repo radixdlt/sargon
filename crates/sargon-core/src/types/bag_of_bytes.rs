@@ -24,6 +24,13 @@ pub struct BagOfBytes {
     pub(crate) bytes: Vec<u8>,
 }
 
+#[cfg(test)]
+impl From<()> for BagOfBytes {
+    fn from(_value: ()) -> Self {
+        Self::new()
+    }
+}
+
 impl AsRef<[u8]> for BagOfBytes {
     fn as_ref(&self) -> &[u8] {
         self.bytes.as_ref()

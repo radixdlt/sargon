@@ -32,14 +32,13 @@ pub trait NewEntityPathCheckingEntityKind: NewEntityPath {
 
 impl<T: HasEntityKind + NewEntityPath> NewEntityPathCheckingEntityKind for T {
     fn try_from_unvalidated(path: UnvalidatedCAP26Path) -> Result<Self> {
-        // let entity_kind = path.entity_kind;
-        // if entity_kind != Self::entity_kind() {
-        //     return Err(CommonError::WrongEntityKind {
-        //         expected: Self::entity_kind(),
-        //         found: entity_kind,
-        //     });
-        // }
-        // Ok(Self::new(path.network_id, path.key_kind, path.index))
-        todo!()
+        let entity_kind = path.entity_kind;
+        if entity_kind != Self::entity_kind() {
+            return Err(CommonError::WrongEntityKind {
+                expected: Self::entity_kind().to_string(),
+                found: entity_kind.to_string(),
+            });
+        }
+        Ok(Self::new(path.network_id, path.key_kind, path.index))
     }
 }

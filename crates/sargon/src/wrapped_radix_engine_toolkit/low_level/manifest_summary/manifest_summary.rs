@@ -187,16 +187,6 @@ impl From<(RetStaticAnalysisWithResourceMovements, NetworkID)>
     }
 }
 
-// impl HasSampleValues for RetManifestClass {
-//     fn sample() -> Self {
-//         RetManifestClass::GeneralSubintent
-//     }
-
-//     fn sample_other() -> Self {
-//         RetManifestClass::Transfer
-//     }
-// }
-
 impl HasSampleValues for ManifestSummary {
     fn sample() -> Self {
         Self {
@@ -209,7 +199,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample(),
             reserved_instructions: Vec::<_>::sample(),
-            classification: IndexSet::<_>::sample(),
+            classification: IndexSet::just(RetManifestClass::GeneralSubintent),
         }
     }
 
@@ -224,7 +214,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample_other(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample_other(),
             reserved_instructions: Vec::<_>::sample_other(),
-            classification: IndexSet::<_>::sample_other(),
+            classification: IndexSet::just(RetManifestClass::Transfer),
         }
     }
 }

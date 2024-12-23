@@ -14,6 +14,7 @@ mod factor_instances_provider;
 mod gateway_api;
 mod hierarchical_deterministic;
 mod home_cards;
+mod identified_vec_of;
 mod keys_collector;
 mod profile;
 mod radix_connect;
@@ -31,6 +32,7 @@ pub mod prelude {
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
+    pub use crate::identified_vec_of::*;
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
@@ -71,7 +73,6 @@ pub mod prelude {
     // pub(crate) use std::fs;
     // pub(crate) use std::hash::Hash as StdHash;
     // pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
-    // pub(crate) use std::str::FromStr;
     // pub(crate) use std::sync::{Arc, RwLock};
 
     // pub(crate) use strum::FromRepr;
@@ -363,19 +364,45 @@ pub fn android_notarize_hash_with_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
     signed_transaction_intent_hash: &SignedTransactionIntentHash,
 ) -> Result<NotarySignature> {
-    let ed25519_private_key =
-        Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
+    // let ed25519_private_key =
+    //     Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
 
-    let private_key = PrivateKey::from(ed25519_private_key);
-    let signature = private_key.notarize_hash(signed_transaction_intent_hash);
+    // let private_key = PrivateKey::from(ed25519_private_key);
+    // let signature = private_key.notarize_hash(signed_transaction_intent_hash);
 
-    Ok(signature)
+    // Ok(signature)
+    todo!()
 }
 
 pub fn android_sign_hash_with_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
     hash: &Hash,
 ) -> Result<Ed25519Signature> {
-    Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
-        .map(|pk| pk.sign(hash))
+    // Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
+    //     .map(|pk| pk.sign(hash))
+    todo!()
+}
+
+
+#[cfg(test)]
+mod helper_tests {
+    use super::*;
+
+    #[test]
+    fn test_android_notarize_hash_with_private_key_bytes() {
+        assert!(android_notarize_hash_with_private_key_bytes(
+            Exactly32Bytes::sample(),
+            &SignedTransactionIntentHash::sample()
+        )
+        .is_ok());
+    }
+
+    #[test]
+    fn test_android_sign_hash_with_private_key_bytes() {
+        assert!(android_sign_hash_with_private_key_bytes(
+            Exactly32Bytes::sample(),
+            &Hash::sample()
+        )
+        .is_ok());
+    }
 }

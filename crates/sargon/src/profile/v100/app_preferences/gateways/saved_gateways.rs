@@ -124,16 +124,16 @@ impl Default for SavedGateways {
     }
 }
 
-// impl HasSampleValues for SavedGateways {
-//     fn sample() -> Self {
-//         SavedGateways::default()
-//     }
+impl HasSampleValues for SavedGateways {
+    fn sample() -> Self {
+        SavedGateways::default()
+    }
 
-//     fn sample_other() -> Self {
-//         Self::new_with_other(Gateway::stokenet(), [Gateway::mainnet()])
-//             .expect("Stokenet and Mainnet should have different NetworkIDs.")
-//     }
-// }
+    fn sample_other() -> Self {
+        Self::new_with_other(Gateway::stokenet(), [Gateway::mainnet()])
+            .expect("Stokenet and Mainnet should have different NetworkIDs.")
+    }
+}
 
 // impl HasSampleValues for Gateways {
 //     fn sample() -> Self {

@@ -19,23 +19,23 @@ decl_identified_vec_of!(
 //     }
 // }
 
-// impl Accounts {
-//     /// A sample used to facilitate unit tests.
-//     pub fn sample_mainnet() -> Self {
-//         Self::from_iter([
-//             Account::sample_mainnet(),
-//             Account::sample_mainnet_other(),
-//         ])
-//     }
+impl HasSampleValuesOnNetworks for Accounts {
+    /// A sample used to facilitate unit tests.
+    fn sample_mainnet() -> Self {
+        Self::from_iter([
+            Account::sample_mainnet(),
+            Account::sample_mainnet_other(),
+        ])
+    }
 
-//     /// A sample used to facilitate unit tests.
-//     pub fn sample_stokenet() -> Self {
-//         Self::from_iter([
-//             Account::sample_stokenet_nadia(),
-//             Account::sample_stokenet_olivia(),
-//         ])
-//     }
-// }
+    /// A sample used to facilitate unit tests.
+    fn sample_stokenet() -> Self {
+        Self::from_iter([
+            Account::sample_stokenet_nadia(),
+            Account::sample_stokenet_olivia(),
+        ])
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -101,8 +101,8 @@ mod tests {
             ])
             .assert_elements_not_empty_and_on_same_network(),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Mainnet,
-                actual: NetworkID::Stokenet
+                expected: NetworkID::Mainnet.to_string(),
+                actual: NetworkID::Stokenet.to_string()
             })
         )
     }
@@ -116,8 +116,8 @@ mod tests {
             ])
             .assert_elements_not_empty_and_on_same_network(),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Stokenet,
-                actual: NetworkID::Mainnet
+                expected: NetworkID::Stokenet.to_string(),
+                actual: NetworkID::Mainnet.to_string()
             })
         )
     }

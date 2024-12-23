@@ -215,8 +215,8 @@ pub enum IdentifiableVecOfUpdateItemsOutcome {
 #[cfg(test)]
 mod tests {
 
-    use super::super::super::User;
     use super::*;
+    use crate::identified_vec_of::User;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = IdentifiedVecOf<User>;

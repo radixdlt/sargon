@@ -9,7 +9,7 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 // }
 impl From<X25519PublicKey> for EncryptionKey {
     fn from(value: X25519PublicKey) -> EncryptionKey {
-        EncryptionKey::from(Exactly32Bytes::from(value))
+        EncryptionKey(Exactly32Bytes::from(&value.to_bytes()))
     }
 }
 

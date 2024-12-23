@@ -89,7 +89,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_invalid_url() {
-        let mock_networking_driver = MockNetworkingDriver::new(200, ());
+        let mock_networking_driver = MockNetworkingDriver::new(200, BagOfBytes::new());
         let base = "http://example.com";
         let sut = SUT::with_gateway(
             Arc::new(mock_networking_driver),
@@ -109,7 +109,7 @@ mod tests {
     async fn execute_network_request_bad_status_code() {
         let mock_networking_driver = MockNetworkingDriver::new(
             404, // bad code
-            (),
+            BagOfBytes::new(),
         );
         let sut =
             SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);

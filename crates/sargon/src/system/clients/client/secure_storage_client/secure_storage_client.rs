@@ -187,7 +187,7 @@ impl SecureStorageClient {
                 factor_source_id: *id,
             },
             CommonError::UnableToLoadMnemonicFromSecureStorage {
-                bad_value: *id,
+                bad_value: id.to_string(),
             },
         )
         .await

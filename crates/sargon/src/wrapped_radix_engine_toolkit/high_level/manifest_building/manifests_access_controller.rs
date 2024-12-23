@@ -211,7 +211,7 @@ mod tests {
             Account::sample_other(),
             SecurityStructureOfFactorInstances::sample_other(),
         );
-        assert_eq!(manifest, Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity: CAP26EntityKind::Account, entity_kind_of_factor_instances: CAP26EntityKind::Identity }));
+        assert_eq!(manifest, Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity: CAP26EntityKind::Account.to_string(), entity_kind_of_factor_instances: CAP26EntityKind::Identity.to_string() }));
     }
 
     #[test]

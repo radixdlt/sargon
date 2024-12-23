@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[macro_export]
 macro_rules! decl_identified_vec_of {
     (
         $(
@@ -13,9 +14,9 @@ macro_rules! decl_identified_vec_of {
                 #[doc = $expr]
             )*
             #[allow(non_camel_case_types)]
-			pub type $collection_type = IdentifiedVecOf<$element_type>;
+			pub type $collection_type = $crate::IdentifiedVecOf<$element_type>;
 
-            impl HasSampleValues for $collection_type {
+            impl sargon_core::HasSampleValues for $collection_type {
                 fn sample() -> Self {
                     Self::from_iter([$element_type::sample(), $element_type::sample_other()])
                 }
@@ -56,4 +57,4 @@ macro_rules! decl_identified_vec_of {
 	};
 }
 
-pub(crate) use decl_identified_vec_of;
+pub use decl_identified_vec_of;
