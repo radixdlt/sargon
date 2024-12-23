@@ -976,7 +976,6 @@ impl SargonOS {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use futures::future::Shared;
     use std::{future::join, future::Future, time::Duration};
 
     #[allow(clippy::upper_case_acronyms)]

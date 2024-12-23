@@ -138,15 +138,6 @@ url = { version = "2.5.0", features = ["serde"] }
 # paste = "1.0.14"
 paste = { git = "https://github.com/dtolnay/paste", rev = "1e0cc1025af5388397c67fa4389ad7ad24814df8" }
 
-# regex = "1.9.3"
-regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88", optional = true }
-
-# clap = "4.5.1"
-clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = [
-    "std",
-    "derive",
-], optional = true }
-
 # camino = "1.0.8"
 camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
 
@@ -175,7 +166,6 @@ reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f
     "native-tls-vendored",
 ] }
 
-# async-std = "1.13.0"
 async-std = "1.13.0"
 futures = "0.3.31"
 
@@ -186,7 +176,6 @@ futures = "0.3.31"
 security-framework = { version = "=2.10" }
 security-framework-sys = "=2.10.0"
 
-
 [dev-dependencies]
 
 # actix-rt = "3.3.0"
@@ -196,9 +185,6 @@ actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d
 
 # cargo_toml = "0.15.3"
 cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
-
-[features]
-build-binary = ["camino", "clap", "regex"]
 
 [lints.rust]
 unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(tarpaulin_include)'] }
