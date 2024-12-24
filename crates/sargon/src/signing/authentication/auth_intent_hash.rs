@@ -43,17 +43,12 @@ impl From<AuthIntent> for AuthIntentHash {
     /// * Extends with the bytes of the bech32-encoded dapp-definition address
     /// * Extends with the bytes of the origin UTF-8 encoded.
     fn from(value: AuthIntent) -> Self {
-        let mut origin_str = value.origin.to_string();
-        if origin_str.ends_with("/") {
-            origin_str.truncate(origin_str.len() - 1);
-        }
-
         let mut payload = Vec::<u8>::new();
         payload.push(ROLA_PREFIX);
         payload.extend(value.challenge_nonce.bytes());
         payload.push(value.dapp_definition_address.address().len() as u8);
         payload.extend(value.dapp_definition_address.address().bytes());
-        payload.extend(origin_str.as_bytes());
+        payload.extend(value.origin.0.as_bytes());
 
         Self {
             payload: BagOfBytes::from(payload),
@@ -142,15 +137,6 @@ mod tests {
         626f6172642e7261646978646c742e636f6d";
 
         assert_eq!(expected_payload_hex, challenge.payload.to_hex());
-
-        let challenge_with_origin_with_slash =
-            sut(nonce, metadata("https://stokenet-dashboard.radixdlt.com/"))
-                .unwrap();
-
-        assert_eq!(
-            expected_payload_hex,
-            challenge_with_origin_with_slash.payload.to_hex()
-        );
     }
 
     #[test]
