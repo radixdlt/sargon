@@ -34,11 +34,10 @@ impl WellKnownClient {
         &self,
         origin: Url,
     ) -> Result<DappWellKnownData> {
-        todo!()
-        // let network_request = NetworkRequest::get_well_known(origin);
-        // self.http_client
-        //     .execute_request_with_decoding(network_request)
-        //     .await
+        let network_request = NetworkRequest::get_well_known(origin);
+        self.http_client
+            .execute_request_with_decoding(network_request)
+            .await
     }
 }
 

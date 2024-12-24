@@ -20,13 +20,11 @@ macro_rules! decl_secret_bytes {
 
            impl $struct_name {
                 pub fn to_bytes(&self) -> &[u8] {
-                    // &self.0.as_slice()
-                    todo!()
+                    &self.0.as_slice()
                 }
 
                 pub fn to_vec(&self) -> Vec<u8> {
-                    // self.0.to_vec()
-                    todo!()
+                    self.0.to_vec()
                 }
            }
 
@@ -69,11 +67,10 @@ macro_rules! decl_secret_bytes {
 
                 #[test]
                 fn zeroize() {
-                    // let mut sut = SUT::sample();
-                    // assert!(!sut.is_zeroized());
-                    // sut.zeroize();
-                    // assert!(sut.is_zeroized());
-                    todo!()
+                    let mut sut = SUT::sample();
+                    assert!(!sut.is_zeroized());
+                    sut.zeroize();
+                    assert!(sut.is_zeroized());
                 }
 
                 #[test]

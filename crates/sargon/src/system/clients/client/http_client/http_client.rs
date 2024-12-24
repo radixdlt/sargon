@@ -142,7 +142,7 @@ mod tests {
     #[actix_rt::test]
     async fn spy_headers() {
         let mock_networking_driver =
-            MockNetworkingDriver::with_spy(200, (), |request, _| {
+            MockNetworkingDriver::with_spy(200, BagOfBytes::new(), |request, _| {
                 assert_eq!(
                     request
                         .headers

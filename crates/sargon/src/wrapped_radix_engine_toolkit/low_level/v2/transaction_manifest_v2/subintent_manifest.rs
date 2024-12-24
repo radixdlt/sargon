@@ -247,7 +247,6 @@ impl HasSampleValues for SubintentManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
         BlobProvider, CallMethod, DropAllProofs, DropAuthZoneProofs,

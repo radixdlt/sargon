@@ -200,7 +200,6 @@ impl PublicKey {
 }
 
 impl<'de> Deserialize<'de> for PublicKey {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {
@@ -233,7 +232,6 @@ impl<'de> Deserialize<'de> for PublicKey {
 }
 
 impl Serialize for PublicKey {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

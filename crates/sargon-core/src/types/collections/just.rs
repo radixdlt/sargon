@@ -47,7 +47,6 @@ mod tests {
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     enum BlackOrWhite {
         Black,
-        White,
     }
 
     #[test]

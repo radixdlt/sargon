@@ -28,55 +28,54 @@ impl Profile {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        todo!()
-        // let count = count as usize;
+        let count = count as usize;
 
-        // let fsid = factor_source.factor_source_id();
-        // let entity_kind = E::entity_kind();
+        let fsid = factor_source.factor_source_id();
+        let entity_kind = E::entity_kind();
 
-        // let (instances_in_cache_consumer, outcome) =
-        //     VirtualEntityCreatingInstanceProvider::for_many_entity_vecis(
-        //         count,
-        //         entity_kind,
-        //         factor_instances_cache_client,
-        //         Arc::new(self.clone()),
-        //         factor_source.clone(),
-        //         network_id,
-        //         key_derivation_interactor,
-        //     )
-        //     .await?;
+        let (instances_in_cache_consumer, outcome) =
+            VirtualEntityCreatingInstanceProvider::for_many_entity_vecis(
+                count,
+                entity_kind,
+                factor_instances_cache_client,
+                Arc::new(self.clone()),
+                factor_source.clone(),
+                network_id,
+                key_derivation_interactor,
+            )
+            .await?;
 
-        // let outcome = outcome
-        //     .per_derivation_preset
-        //     .get(&DerivationPreset::veci_entity_kind(entity_kind))
-        //     .unwrap()
-        //     .per_factor
-        //     .get(&factor_source.id_from_hash())
-        //     .cloned()
-        //     .unwrap();
+        let outcome = outcome
+            .per_derivation_preset
+            .get(&DerivationPreset::veci_entity_kind(entity_kind))
+            .unwrap()
+            .per_factor
+            .get(&factor_source.id_from_hash())
+            .cloned()
+            .unwrap();
 
-        // let instances_to_use_directly = outcome.clone().to_use_directly;
+        let instances_to_use_directly = outcome.clone().to_use_directly;
 
-        // assert_eq!(instances_to_use_directly.len(), count);
+        assert_eq!(instances_to_use_directly.len(), count);
 
-        // let entities = instances_to_use_directly
-        //     .into_iter()
-        //     .map(|f| {
-        //         HDFactorInstanceTransactionSigning::<E::Path>::new(f).unwrap()
-        //     })
-        //     .map(|veci| {
-        //         let idx = u32::from(
-        //             veci.path
-        //                 .derivation_path()
-        //                 .index()
-        //                 .index_in_local_key_space(),
-        //         );
-        //         let name = get_name(idx);
+        let entities = instances_to_use_directly
+            .into_iter()
+            .map(|f| {
+                HDFactorInstanceTransactionSigning::<E::Path>::new(f).unwrap()
+            })
+            .map(|veci| {
+                let idx = u32::from(
+                    veci.path
+                        .derivation_path()
+                        .index()
+                        .index_in_local_key_space(),
+                );
+                let name = get_name(idx);
 
-        //         E::with_veci_and_name(veci, name)
-        //     })
-        //     .collect::<IdentifiedVecOf<E>>();
+                E::with_veci_and_name(veci, name)
+            })
+            .collect::<IdentifiedVecOf<E>>();
 
-        // Ok((fsid, entities, instances_in_cache_consumer, outcome))
+        Ok((fsid, entities, instances_in_cache_consumer, outcome))
     }
 }

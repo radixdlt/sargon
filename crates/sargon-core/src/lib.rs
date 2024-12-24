@@ -1,3 +1,4 @@
+#![allow(internal_features)]
 #![feature(core_intrinsics)]
 
 mod assert_json;
@@ -64,13 +65,10 @@ pub mod prelude {
             verify_secp256k1 as scrypto_verify_secp256k1,
             Ed25519PrivateKey as ScryptoEd25519PrivateKey,
             Ed25519PublicKey as ScryptoEd25519PublicKey,
-            Ed25519PublicKeyHash as ScryptoEd25519PublicKeyHash,
             Ed25519Signature as ScryptoEd25519Signature, Hash as ScryptoHash,
             IsHash as ScryptoIsHash, PublicKey as ScryptoPublicKey,
-            PublicKeyHash as ScryptoPublicKeyHash,
             Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
             Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
-            Secp256k1PublicKeyHash as ScryptoSecp256k1PublicKeyHash,
             Secp256k1Signature as ScryptoSecp256k1Signature,
         },
         data::scrypto::model::BytesNonFungibleLocalId as ScryptoBytesNonFungibleLocalId,
@@ -81,7 +79,12 @@ pub mod prelude {
         prelude::Instant as ScryptoInstant,
     };
 
-    pub(crate) use radix_engine_interface::prelude::Epoch as ScryptoEpoch;
+    pub use radix_engine_interface::prelude::Epoch as ScryptoEpoch;
+
+    pub use radix_transactions::model::{
+        SignatureV1 as ScryptoSignature,
+        SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey,
+    };
 }
 
 pub use prelude::*;

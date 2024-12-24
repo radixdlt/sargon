@@ -68,7 +68,6 @@ impl HasSampleValues for Instant {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
     use std::time::Duration;
 
     #[test]

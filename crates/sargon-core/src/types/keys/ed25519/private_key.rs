@@ -170,7 +170,6 @@ impl Ed25519PrivateKey {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[test]
     fn equality() {

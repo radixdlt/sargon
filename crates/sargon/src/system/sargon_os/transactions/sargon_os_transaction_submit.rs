@@ -43,7 +43,7 @@ mod tests {
                 );
                 let sent_body = serde_json::to_vec(&sent_request).unwrap();
 
-                assert_eq!(request.body.bytes, sent_body);
+                assert_eq!(request.body.to_vec(), sent_body);
             });
 
         let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));

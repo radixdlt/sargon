@@ -209,7 +209,6 @@ impl TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
     use radix_common::prelude::ManifestBucket;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{

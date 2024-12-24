@@ -202,7 +202,6 @@ impl HasSampleValues for TransactionManifestV2 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
         CallMethod, DropAllProofs, DropAuthZoneProofs,

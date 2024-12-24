@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use delegate::delegate;
 use paste::*;
-use radix_common::crypto::{Hash, IsHash};
 
 macro_rules! decl_non_empty_max_n_bytes {
     (

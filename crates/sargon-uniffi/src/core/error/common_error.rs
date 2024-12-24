@@ -222,7 +222,7 @@ pub enum CommonError {
     #[error("Invalid DisplayName cannot be empty.")]
     InvalidDisplayNameEmpty = 10062,
 
-    #[error("Failed to access secure storage due to \"{error_message}\" for key {} ", key.identifier())]
+    #[error("Failed to access secure storage due to \"{error_message}\" for key {} ", key)]
     SecureStorageAccessError {
         key: String,
         error_kind: String,

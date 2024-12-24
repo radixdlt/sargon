@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use delegate::delegate;
 
 macro_rules! decl_exactly_n_bytes {
     (

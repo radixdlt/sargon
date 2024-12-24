@@ -1,6 +1,6 @@
 use assert_json_diff::assert_json_include;
 use core::fmt::Debug;
-use pretty_assertions::{assert_eq, assert_ne};
+use pretty_assertions::assert_eq;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 use std::str::FromStr;

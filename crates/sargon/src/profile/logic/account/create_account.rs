@@ -15,34 +15,33 @@ impl Profile {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        todo!()
-        // let (
-        //     factor_source_id,
-        //     accounts,
-        //     instances_in_cache_consumer,
-        //     derivation_outcome,
-        // ) = self
-        //     .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
-        //         factor_source,
-        //         network_id,
-        //         1,
-        //         factor_instances_cache_client,
-        //         key_derivation_interactor,
-        //         |_| name.clone(),
-        //     )
-        //     .await?;
+        let (
+            factor_source_id,
+            accounts,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = self
+            .create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                1,
+                factor_instances_cache_client,
+                key_derivation_interactor,
+                |_| name.clone(),
+            )
+            .await?;
 
-        // let account = accounts
-        //     .into_iter()
-        //     .last()
-        //     .expect("Should have created one account");
+        let account = accounts
+            .into_iter()
+            .last()
+            .expect("Should have created one account");
 
-        // Ok((
-        //     factor_source_id,
-        //     account,
-        //     instances_in_cache_consumer,
-        //     derivation_outcome,
-        // ))
+        Ok((
+            factor_source_id,
+            account,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ))
     }
 
     pub async fn create_unsaved_accounts_with_factor_source(
@@ -54,17 +53,16 @@ impl Profile {
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
         get_name: impl Fn(u32) -> DisplayName, // name of account at index
     ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)> {
-        // self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
-        //     factor_source,
-        //     network_id,
-        //     count,
-        //     factor_instances_cache_client,
-        //     key_derivation_interactor,
-        //     get_name,
-        // )
-        // .await
-        // .map(|(x, y, z, _)| (x, y, z))
-        todo!()
+        self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+            factor_source,
+            network_id,
+            count,
+            factor_instances_cache_client,
+            key_derivation_interactor,
+            get_name,
+        )
+        .await
+        .map(|(x, y, z, _)| (x, y, z))
     }
 
     pub async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
@@ -81,44 +79,43 @@ impl Profile {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        todo!()
-        // let number_of_accounts_on_network = self
-        //     .networks
-        //     .get_id(network_id)
-        //     .map(|n| n.accounts.len())
-        //     .unwrap_or(0);
+        let number_of_accounts_on_network = self
+            .networks
+            .get_id(network_id)
+            .map(|n| n.accounts.len())
+            .unwrap_or(0);
 
-        // let (factor_source_id, accounts, instances_in_cache_consumer, derivation_outcome) = self
-        //     .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
-        //         factor_source,
-        //         network_id,
-        //         count,
-        //         factor_instances_cache_client,
-        //         key_derivation_interactor,
-        //         get_name,
-        //     )
-        //     .await?;
+        let (factor_source_id, accounts, instances_in_cache_consumer, derivation_outcome) = self
+            .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
+                factor_source,
+                network_id,
+                count,
+                factor_instances_cache_client,
+                key_derivation_interactor,
+                get_name,
+            )
+            .await?;
 
-        // let accounts_with_appearance_ids_set = accounts
-        //     .into_iter()
-        //     .enumerate()
-        //     .map(|(offset, account)| {
-        //         let mut account = account;
-        //         let appearance_id =
-        //             AppearanceID::from_number_of_accounts_on_network(
-        //                 number_of_accounts_on_network + offset,
-        //             );
-        //         account.appearance_id = appearance_id;
-        //         account
-        //     })
-        //     .collect::<Accounts>();
+        let accounts_with_appearance_ids_set = accounts
+            .into_iter()
+            .enumerate()
+            .map(|(offset, account)| {
+                let mut account = account;
+                let appearance_id =
+                    AppearanceID::from_number_of_accounts_on_network(
+                        number_of_accounts_on_network + offset,
+                    );
+                account.appearance_id = appearance_id;
+                account
+            })
+            .collect::<Accounts>();
 
-        // Ok((
-        //     factor_source_id,
-        //     accounts_with_appearance_ids_set,
-        //     instances_in_cache_consumer,
-        //     derivation_outcome,
-        // ))
+        Ok((
+            factor_source_id,
+            accounts_with_appearance_ids_set,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ))
     }
 }
 

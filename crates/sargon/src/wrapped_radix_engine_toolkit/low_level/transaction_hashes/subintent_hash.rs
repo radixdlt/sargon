@@ -14,7 +14,6 @@ impl HasSampleValues for SubintentHash {
 mod tests {
 
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SubintentHash;

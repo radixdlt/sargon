@@ -92,7 +92,6 @@ mod tests {
     use enum_iterator::all;
 
     use super::*;
-    use crate::prelude::*;
 
     #[test]
     fn rounding_mode_conversion() {

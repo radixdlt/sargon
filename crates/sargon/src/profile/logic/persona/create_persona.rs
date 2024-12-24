@@ -14,34 +14,33 @@ impl Profile {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        todo!()
-        // let (
-        //     factor_source_id,
-        //     personas,
-        //     instances_in_cache_consumer,
-        //     derivation_outcome,
-        // ) = self
-        //     .create_unsaved_personas_with_factor_source_with_derivation_outcome(
-        //         factor_source,
-        //         network_id,
-        //         1,
-        //         factor_instances_cache_client,
-        //         key_derivation_interactor,
-        //         |_| name.clone(),
-        //     )
-        //     .await?;
+        let (
+            factor_source_id,
+            personas,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = self
+            .create_unsaved_personas_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                1,
+                factor_instances_cache_client,
+                key_derivation_interactor,
+                |_| name.clone(),
+            )
+            .await?;
 
-        // let persona = personas
-        //     .into_iter()
-        //     .last()
-        //     .expect("Should have created one persona");
+        let persona = personas
+            .into_iter()
+            .last()
+            .expect("Should have created one persona");
 
-        // Ok((
-        //     factor_source_id,
-        //     persona,
-        //     instances_in_cache_consumer,
-        //     derivation_outcome,
-        // ))
+        Ok((
+            factor_source_id,
+            persona,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ))
     }
 
     pub async fn create_unsaved_personas_with_factor_source_with_derivation_outcome(
@@ -58,15 +57,14 @@ impl Profile {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        todo!()
-        // self.create_unsaved_entities_with_factor_source_with_derivation_outcome::<Persona>(
-        //     factor_source,
-        //     network_id,
-        //     count,
-        //     factor_instances_cache_client,
-        //     key_derivation_interactor,
-        //     get_name,
-        // )
-        // .await
+        self.create_unsaved_entities_with_factor_source_with_derivation_outcome::<Persona>(
+            factor_source,
+            network_id,
+            count,
+            factor_instances_cache_client,
+            key_derivation_interactor,
+            get_name,
+        )
+        .await
     }
 }

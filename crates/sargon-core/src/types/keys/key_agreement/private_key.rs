@@ -109,8 +109,6 @@ impl HasSampleValues for KeyAgreementPrivateKey {
 #[cfg(test)]
 mod tests {
 
-    use hex::ToHex;
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

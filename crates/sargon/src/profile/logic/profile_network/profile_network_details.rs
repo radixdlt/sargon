@@ -5,34 +5,33 @@ impl AuthorizedPersonaSimple {
         &self,
         non_hidden_accounts: &Accounts,
     ) -> Result<Option<AccountsForDisplay>> {
-        todo!()
-        // let shared_accounts = self
-        //     .shared_accounts
-        //     .as_ref().map(|s| s.ids.clone())
-        //     .unwrap_or_default()
-        //     .iter()
-        //     .map(|account_address| {
-        //         let Some(account) = non_hidden_accounts
-        //             .iter().find(|x| x.address == account_address)
-        //         else {
-        //                 // This is a sign that Profile is in a bad state somehow...
-        //                 warn!("Discrepancy! AuthorizedDapp references account which does not exist {}", account_address);
-        //                 return Err(CommonError::DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
-        //                     address: account_address.to_owned()
-        //                 })
-        //         };
-        //         Ok(AccountForDisplay::new(
-        //             account.address,
-        //             account.display_name.clone(),
-        //             account.appearance_id
-        //         ))
-        //     }).collect::<Result<AccountsForDisplay>>()?;
+        let shared_accounts = self
+            .shared_accounts
+            .as_ref().map(|s| s.ids.clone())
+            .unwrap_or_default()
+            .iter()
+            .map(|account_address| {
+                let Some(account) = non_hidden_accounts
+                    .iter().find(|x| x.address == account_address)
+                else {
+                        // This is a sign that Profile is in a bad state somehow...
+                        warn!("Discrepancy! AuthorizedDapp references account which does not exist {}", account_address);
+                        return Err(CommonError::DiscrepancyAuthorizedDappReferencedAccountWhichDoesNotExist {
+                            address: account_address.to_owned().to_string()
+                        })
+                };
+                Ok(AccountForDisplay::new(
+                    account.address,
+                    account.display_name.clone(),
+                    account.appearance_id
+                ))
+            }).collect::<Result<AccountsForDisplay>>()?;
 
-        // if shared_accounts.is_empty() {
-        //     Ok(None)
-        // } else {
-        //     Ok(Some(shared_accounts))
-        // }
+        if shared_accounts.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(shared_accounts))
+        }
     }
 
     fn pick_persona_data_from_full(

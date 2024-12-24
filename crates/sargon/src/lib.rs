@@ -1,11 +1,11 @@
+#![allow(unused_imports)]
+#![allow(internal_features)]
+#![allow(incomplete_features)]
 #![feature(async_closure)]
 #![feature(let_chains)]
 #![feature(core_intrinsics)]
-#![allow(unused_imports)]
-#![allow(internal_features)]
 #![feature(iter_repeat_n)]
 #![feature(future_join)]
-#![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
 #![feature(trait_upcasting)]
 
@@ -177,7 +177,6 @@ pub mod prelude {
         AccessRule as ScryptoAccessRule,
         BasicRequirement as ScryptoBasicRequirement,
         CompositeRequirement as ScryptoCompositeRequirement,
-        Epoch as ScryptoEpoch,
         FungibleResourceRoles as ScryptoFungibleResourceRoles,
         MetadataInit as ScryptoMetadataInit,
         MetadataValue as ScryptoMetadataValue,
@@ -244,8 +243,6 @@ pub mod prelude {
             NotarySignatureV1 as ScryptoNotarySignature,
             PartialTransactionV2 as ScryptoPartialTransaction,
             PlaintextMessageV1 as ScryptoPlaintextMessage,
-            SignatureV1 as ScryptoSignature,
-            SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey,
             SignedIntentV1 as ScryptoSignedIntent,
             SignedPartialTransactionV2 as ScryptoSignedPartialTransaction,
             SignedTransactionIntentHash as ScryptoSignedTransactionIntentHash,
@@ -364,25 +361,22 @@ pub fn android_notarize_hash_with_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
     signed_transaction_intent_hash: &SignedTransactionIntentHash,
 ) -> Result<NotarySignature> {
-    // let ed25519_private_key =
-    //     Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
+    let ed25519_private_key =
+        Ed25519PrivateKey::try_from(private_key_bytes.as_ref())?;
 
-    // let private_key = PrivateKey::from(ed25519_private_key);
-    // let signature = private_key.notarize_hash(signed_transaction_intent_hash);
+    let private_key = PrivateKey::from(ed25519_private_key);
+    let signature = private_key.notarize_hash(signed_transaction_intent_hash);
 
-    // Ok(signature)
-    todo!()
+    Ok(signature)
 }
 
 pub fn android_sign_hash_with_private_key_bytes(
     private_key_bytes: Exactly32Bytes,
     hash: &Hash,
 ) -> Result<Ed25519Signature> {
-    // Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
-    //     .map(|pk| pk.sign(hash))
-    todo!()
+    Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
+        .map(|pk| pk.sign(hash))
 }
-
 
 #[cfg(test)]
 mod helper_tests {

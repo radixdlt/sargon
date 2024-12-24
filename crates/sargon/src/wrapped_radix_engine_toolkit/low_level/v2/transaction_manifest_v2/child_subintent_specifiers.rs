@@ -83,7 +83,6 @@ impl HasSampleValues for ChildSubintentSpecifiers {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ChildSubintentSpecifiers;

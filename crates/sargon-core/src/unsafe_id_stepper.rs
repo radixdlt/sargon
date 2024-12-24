@@ -4,7 +4,6 @@ use std::borrow::BorrowMut;
 use std::marker::PhantomData;
 use std::ops::AddAssign;
 use std::sync::Mutex;
-use std::sync::MutexGuard;
 
 /// An UNSAFE IDStepper, which `next` returns the consecutive next ID,
 /// should only be used by tests and sample value creation.

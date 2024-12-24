@@ -70,13 +70,11 @@ impl FactorInstancesProviderOutcomeForFactor {
     }
 
     fn debug_string(&self) -> String {
-        // #[cfg(test)]
-        // return self.debug_string_for_tests();
+        #[cfg(test)]
+        return self.debug_string_for_tests();
 
-        // #[cfg(not(test))]
-        // return self.debug_string_no_test();
-
-        todo!()
+        #[cfg(not(test))]
+        return self.debug_string_no_test();
     }
 }
 

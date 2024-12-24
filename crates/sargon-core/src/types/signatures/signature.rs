@@ -18,6 +18,25 @@ pub enum Signature {
     Ed25519 { value: Ed25519Signature },
 }
 
+impl From<ScryptoSignature> for Signature {
+    fn from(value: ScryptoSignature) -> Self {
+        match value {
+            ScryptoSignature::Secp256k1(s) => {
+                Self::Secp256k1 { value: s.into() }
+            }
+            ScryptoSignature::Ed25519(s) => Self::Ed25519 { value: s.into() },
+        }
+    }
+}
+impl From<Signature> for ScryptoSignature {
+    fn from(value: Signature) -> Self {
+        match value {
+            Signature::Secp256k1 { value } => Self::Secp256k1(value.into()),
+            Signature::Ed25519 { value } => Self::Ed25519(value.into()),
+        }
+    }
+}
+
 impl Signature {
     /// Returns a `SLIP10Curve`, being the curve of the `Signature`.
     pub fn curve(&self) -> SLIP10Curve {
@@ -116,6 +135,13 @@ mod tests {
     }
 
     #[test]
+    fn to_from_scrypto() {
+        let roundtrip = |s: SUT| SUT::from(ScryptoSignature::from(s));
+        roundtrip(SUT::sample());
+        roundtrip(SUT::sample_other());
+    }
+
+    #[test]
     fn enum_as_inner() {
         assert_eq!(
             SUT::sample().as_ed25519().unwrap(),
@@ -171,5 +197,4 @@ mod tests {
         let bytes: BagOfBytes = "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12".parse().unwrap();
         assert_eq!(SUT::try_from(bytes).unwrap(), SUT::sample_other());
     }
-
 }

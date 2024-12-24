@@ -2815,6 +2815,7 @@ dependencies = [
  "radix-common",
  "radix-engine-interface",
  "radix-rust",
+ "radix-transactions",
  "rand",
  "serde",
  "serde_json 1.0.108",

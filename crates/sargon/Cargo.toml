@@ -44,10 +44,10 @@ radix-rust = { workspace = true }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-common = { workspace = true }
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine-interface = { workspace = true}
+radix-engine-interface = { workspace = true }
 radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 
-radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-transactions = { workspace = true }
 
 radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "2ab5b35a6cb96c9faeb98ed8df67b870336e6873" }
 

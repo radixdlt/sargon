@@ -72,7 +72,6 @@ impl HasSampleValues for Epoch {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
 
     #[test]
     fn into_from_scrypto() {

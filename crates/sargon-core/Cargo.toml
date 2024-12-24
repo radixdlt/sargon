@@ -6,12 +6,14 @@ edition = "2021"
 [dependencies]
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }
+radix-engine-interface = { workspace = true }
 radix-rust = { workspace = true }
-radix-engine-interface = { workspace = true}
+radix-transactions = { workspace = true }
+
 
 # ==== EXTERNAL DEPENDENCIES ====
 assert-json-diff = { workspace = true }
-delegate = { workspace = true}
+delegate = { workspace = true }
 enum-as-inner = { workspace = true }
 enum-iterator = { workspace = true }
 hkdf = { workspace = true }

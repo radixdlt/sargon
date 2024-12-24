@@ -93,64 +93,65 @@ impl RadixConnectMobile {
         &self,
         wallet_response: RadixConnectMobileWalletResponse,
     ) -> Result<()> {
-        todo!()
-        // let session_id = wallet_response.session_id;
-        // let interaction_id = wallet_response.response.interaction_id();
+        let session_id = wallet_response.session_id;
+        let interaction_id = wallet_response.response.interaction_id();
 
-        // // Get the in flight session, if any, that required validation from the user.
-        // // Not removed at this stage, as the user might retry the interaction.
-        // let in_flight_session =
-        //     self.new_sessions.read().ok().and_then(|sessions| {
-        //         let sessions_for_id = sessions.get(&session_id).cloned();
+        // Get the in flight session, if any, that required validation from the user.
+        // Not removed at this stage, as the user might retry the interaction.
+        let in_flight_session =
+            self.new_sessions.read().ok().and_then(|sessions| {
+                let sessions_for_id = sessions.get(&session_id).cloned();
 
-        //         sessions_for_id.and_then(|session| {
-        //             session
-        //                 .get(&wallet_response.response.interaction_id())
-        //                 .cloned()
-        //         })
-        //     });
+                sessions_for_id.and_then(|session| {
+                    session
+                        .get(&wallet_response.response.interaction_id())
+                        .cloned()
+                })
+            });
 
-        // // Get the existing session, if any.
-        // let existing_session =
-        //     self.load_session(wallet_response.session_id).await.ok();
+        // Get the existing session, if any.
+        let existing_session =
+            self.load_session(wallet_response.session_id).await.ok();
 
-        // let is_in_flight_session = in_flight_session.is_some();
-        // let session = existing_session.or(in_flight_session).ok_or(
-        //     CommonError::RadixConnectMobileSessionNotFound { session_id },
-        // )?;
+        let is_in_flight_session = in_flight_session.is_some();
+        let session = existing_session.or(in_flight_session).ok_or(
+            CommonError::RadixConnectMobileSessionNotFound {
+                session_id: session_id.to_string(),
+            },
+        )?;
 
-        // let is_success_response = wallet_response.response.is_success();
+        let is_success_response = wallet_response.response.is_success();
 
-        // // Send the wallet interaction response to the dApp through the transport.
-        // self.wallet_interactions_transport
-        //     .send_wallet_interaction_response(
-        //         session.clone(),
-        //         wallet_response.response,
-        //     )
-        //     .await?;
+        // Send the wallet interaction response to the dApp through the transport.
+        self.wallet_interactions_transport
+            .send_wallet_interaction_response(
+                session.clone(),
+                wallet_response.response,
+            )
+            .await?;
 
-        // // Remove the in flight session from the in flight sessions only after it was successfully saved.
-        // _ = self.new_sessions.try_write().map(|mut new_sessions| {
-        //     let sessions_for_interaction_id = new_sessions
-        //         .get_mut(&session_id)
-        //         .map(|sessions_for_interaction_id| {
-        //             sessions_for_interaction_id.remove(&interaction_id);
-        //             sessions_for_interaction_id.clone()
-        //         });
+        // Remove the in flight session from the in flight sessions only after it was successfully saved.
+        _ = self.new_sessions.try_write().map(|mut new_sessions| {
+            let sessions_for_interaction_id = new_sessions
+                .get_mut(&session_id)
+                .map(|sessions_for_interaction_id| {
+                    sessions_for_interaction_id.remove(&interaction_id);
+                    sessions_for_interaction_id.clone()
+                });
 
-        //     if sessions_for_interaction_id
-        //         .is_some_and(|sessions| sessions.is_empty())
-        //     {
-        //         new_sessions.remove(&session_id);
-        //     }
-        // });
+            if sessions_for_interaction_id
+                .is_some_and(|sessions| sessions.is_empty())
+            {
+                new_sessions.remove(&session_id);
+            }
+        });
 
-        // if is_in_flight_session && is_success_response {
-        //     // We do consider a session to be validated once user did send a successful interaction back.
-        //     self.save_session(session).await?;
-        // }
+        if is_in_flight_session && is_success_response {
+            // We do consider a session to be validated once user did send a successful interaction back.
+            self.save_session(session).await?;
+        }
 
-        // Ok(())
+        Ok(())
     }
 }
 
@@ -204,12 +205,13 @@ impl RadixConnectMobile {
 
 impl RadixConnectMobile {
     async fn load_session(&self, session_id: SessionID) -> Result<Session> {
-        // let session_bytes =
-        //     self.session_storage.load_session(session_id).await?.ok_or(
-        //         CommonError::RadixConnectMobileSessionNotFound { session_id },
-        //     )?;
-        // session_bytes.deserialize()
-        todo!()
+        let session_bytes =
+            self.session_storage.load_session(session_id).await?.ok_or(
+                CommonError::RadixConnectMobileSessionNotFound {
+                    session_id: session_id.to_string(),
+                },
+            )?;
+        session_bytes.deserialize()
     }
 
     async fn save_session(&self, session: Session) -> Result<()> {

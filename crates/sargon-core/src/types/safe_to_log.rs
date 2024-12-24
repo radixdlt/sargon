@@ -1,6 +1,3 @@
-use crate::prelude::*;
-use log::LevelFilter;
-
 /// A trait used to mark that a values is safe to (debug) log, and
 /// which debug representation of it to use.
 ///

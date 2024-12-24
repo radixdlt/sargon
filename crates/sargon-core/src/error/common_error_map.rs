@@ -1,5 +1,3 @@
-use serde::de::StdError;
-
 use crate::prelude::*;
 
 pub trait MapToFailedToDeserializeJSONToValue<R> {

@@ -27,6 +27,8 @@ radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto",
 radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
     "serde",
 ] }
+radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+
 
 # ===== EXTERNAL DEPENDENCIES ========
 # hkdf = "0.12.4"

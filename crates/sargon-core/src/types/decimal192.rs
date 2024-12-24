@@ -658,6 +658,7 @@ impl HasSampleValues for Decimal192 {
 
 impl From<&str> for Decimal192 {
     /// TEST ONLY
+    #[allow(unused_variables)]
     fn from(value: &str) -> Self {
         #[cfg(not(test))]
         {

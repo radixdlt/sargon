@@ -24,7 +24,7 @@ mod version_type;
 
 pub use appearance_id::*;
 pub use bag_of_bytes::*;
-pub use bool_type::*;
+pub(crate) use bool_type::*;
 pub use collections::*;
 pub use decimal192::*;
 pub use entity_kind::*;
@@ -44,4 +44,4 @@ pub use safe_to_log::*;
 pub use secret_bytes::*;
 pub use signatures::*;
 pub use vector_image_type::*;
-pub use version_type::*;
+pub(crate) use version_type::*;
