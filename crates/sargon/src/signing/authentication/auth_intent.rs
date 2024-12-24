@@ -172,8 +172,8 @@ mod tests {
                 vec![AddressOfAccountOrPersona::sample()]
             ),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Mainnet,
-                actual: NetworkID::Stokenet,
+                expected: NetworkID::Mainnet.to_string(),
+                actual: NetworkID::Stokenet.to_string(),
             })
         )
     }

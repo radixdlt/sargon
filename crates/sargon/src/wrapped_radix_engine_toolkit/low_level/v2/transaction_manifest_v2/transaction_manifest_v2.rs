@@ -416,8 +416,8 @@ DROP_AUTH_ZONE_PROOFS;
                 ChildSubintentSpecifiers::empty()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Simulator,
-                specified_to_instructions_ctor: NetworkID::Mainnet
+                found_in_instructions: NetworkID::Simulator.to_string(),
+                specified_to_instructions_ctor: NetworkID::Mainnet.to_string()
             })
         );
     }
@@ -438,8 +438,8 @@ DROP_AUTH_ZONE_PROOFS;
                 ChildSubintentSpecifiers::empty()
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Mainnet,
-                specified_to_instructions_ctor: NetworkID::Stokenet
+                found_in_instructions: NetworkID::Mainnet.to_string(),
+                specified_to_instructions_ctor: NetworkID::Stokenet.to_string()
             })
         );
     }
