@@ -7,6 +7,12 @@ impl Profile {
         self.current_network().map(|n| n.accounts.visible())
     }
 
+    /// Returns the hidden accounts on the current network, empty if no hidden accounts
+    /// on the network
+    pub fn hidden_accounts_on_current_network(&self) -> Result<Accounts> {
+        self.current_network().map(|n| n.accounts.hidden())
+    }
+
     /// Returns **ALL** accounts - including hidden/deleted ones, on **ALL** networks.
     pub fn accounts_on_all_networks_including_hidden(&self) -> Accounts {
         self.networks
@@ -39,6 +45,20 @@ impl Profile {
             }
         }
         Err(CommonError::UnknownAccount)
+    }
+
+    pub fn entity_by_address(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<AccountOrPersona> {
+        self.networks
+            .get_id(entity_address.network_id())
+            .and_then(|n| n.entity_by_address(&entity_address))
+            .ok_or(if entity_address.is_account() {
+                CommonError::UnknownAccount
+            } else {
+                CommonError::UnknownPersona
+            })
     }
 
     pub fn get_entities_of_kind_on_network_in_key_space(
@@ -139,6 +159,15 @@ mod tests {
         assert_eq!(
             sut.accounts_on_current_network().unwrap(),
             Accounts::just(Account::sample_stokenet_nadia()) // olivia is hidden
+        );
+    }
+
+    #[test]
+    fn hidden_accounts_on_current_network() {
+        let sut = SUT::sample_other();
+        assert_eq!(
+            sut.hidden_accounts_on_current_network().unwrap(),
+            Accounts::just(Account::sample_stokenet_olivia()) // nadia is visible
         );
     }
 

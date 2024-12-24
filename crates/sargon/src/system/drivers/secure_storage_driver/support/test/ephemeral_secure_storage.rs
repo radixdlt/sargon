@@ -53,4 +53,14 @@ impl SecureStorageDriver for EphemeralSecureStorage {
         storage.remove_entry(&key);
         Ok(())
     }
+
+    async fn contains_data_for_key(
+        &self,
+        key: SecureStorageKey,
+    ) -> Result<bool> {
+        self.storage
+            .try_read()
+            .map_err(|_| CommonError::SecureStorageReadError)
+            .map(|s| s.contains_key(&key))
+    }
 }

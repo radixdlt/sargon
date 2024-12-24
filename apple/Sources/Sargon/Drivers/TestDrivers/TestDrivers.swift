@@ -11,6 +11,7 @@ extension BIOS {
 		BIOS(
 			bundle: bundle,
 			userDefaultsSuite: userDefaultsSuite,
+			unsafeStorageKeyMapping: [:],
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
 				keychainService: "test"
 			)

@@ -15,6 +15,18 @@ pub enum SignWithFactorsOutcome<ID: SignableID> {
     Neglected(NeglectedFactors),
 }
 
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for SignWithFactorsOutcome<ID>
+{
+    fn sample() -> Self {
+        Self::signed(SignResponse::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::Neglected(NeglectedFactors::sample_other())
+    }
+}
+
 impl<ID: SignableID> SignWithFactorsOutcome<ID> {
     #[allow(unused)]
     pub fn signed(produced_signatures: SignResponse<ID>) -> Self {
@@ -59,5 +71,24 @@ impl<ID: SignableID> SignWithFactorsOutcome<ID> {
                 .map(|f| *f.factor_source_id().as_hash().unwrap()) // TODO ask that
                 .collect(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SignWithFactorsOutcome<TransactionIntentHash>;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

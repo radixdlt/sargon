@@ -18,17 +18,17 @@ impl SecurifyEntityFactorInstancesProvider {
     pub async fn for_account_mfa(
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
-        matrix_of_factor_sources: MatrixOfFactorSources,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources,
         account_addresses: IndexSet<AccountAddress>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::for_entity_mfa::<AccountAddress>(
+        Self::securifying_unsecurified(
             cache_client,
             profile,
-            matrix_of_factor_sources,
-            account_addresses,
-            interactors,
+            security_structure_of_factor_sources,
+            account_addresses.into_iter().map(Into::into).collect(),
+            interactor,
         )
         .await
     }
@@ -47,17 +47,17 @@ impl SecurifyEntityFactorInstancesProvider {
     pub async fn for_persona_mfa(
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
-        matrix_of_factor_sources: MatrixOfFactorSources,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources,
         persona_addresses: IndexSet<IdentityAddress>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::for_entity_mfa::<IdentityAddress>(
+        Self::securifying_unsecurified(
             cache_client,
             profile,
-            matrix_of_factor_sources,
-            persona_addresses,
-            interactors,
+            security_structure_of_factor_sources,
+            persona_addresses.into_iter().map(Into::into).collect(),
+            interactor,
         )
         .await
     }
@@ -73,15 +73,19 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn for_entity_mfa<A: IsEntityAddress>(
+    pub async fn securifying_unsecurified(
+        // if you need to UPDATE already securified, upgrade this to conditionally consume ROLA
+        // factors, by not using `QuantifiedDerivationPreset::securifying_unsecurified_entities`
+        // below. I.e. create the set of `QuantifiedDerivationPreset` which does not unconditionally
+        // specify ROLA factors.
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
-        matrix_of_factor_sources: MatrixOfFactorSources,
-        addresses_of_entities: IndexSet<A>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources,
+        addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        let factor_sources_to_use = matrix_of_factor_sources
+        let factor_sources_to_use = security_structure_of_factor_sources
             .all_factors()
             .into_iter()
             .map(|x| x.to_owned())
@@ -107,7 +111,7 @@ impl SecurifyEntityFactorInstancesProvider {
         assert!(
             addresses_of_entities
                 .iter()
-                .all(|a| profile.contains_entity_by_address::<A>(a)),
+                .all(|a| profile.contains_entity_by_address(a)),
             "unknown entity"
         );
 
@@ -119,21 +123,26 @@ impl SecurifyEntityFactorInstancesProvider {
             "wrong network"
         );
 
-        let entity_kind = A::entity_kind();
-
         let provider = FactorInstancesProvider::new(
             network_id,
             factor_sources_to_use,
             profile,
             cache_client,
-            interactors,
+            interactor,
         );
 
+        let purpose = DerivationPurpose::for_securifying_or_updating(
+            &addresses_of_entities,
+        );
+
+        let quantified_derivation_presets =
+            QuantifiedDerivationPreset::securifying_unsecurified_entities(
+                &addresses_of_entities,
+            );
+
+        assert!(quantified_derivation_presets.len() >= 2); // at least one entity kind, and ROLA + TX: at least 2
         let (instances_in_cache_consumer, outcome) = provider
-            .provide(QuantifiedDerivationPreset::new(
-                DerivationPreset::mfa_entity_kind(entity_kind),
-                addresses_of_entities.len(),
-            ))
+            .provide_for_presets(quantified_derivation_presets, purpose)
             .await?;
 
         Ok((instances_in_cache_consumer, outcome.into()))
@@ -158,17 +167,9 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            SecurityStructureOfFactorSources::sample(),
             IndexSet::<AccountAddress>::new(), // <---- EMPTY => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -180,21 +181,12 @@ mod tests {
         let fs = FactorSource::sample_at(0);
         let a = Account::sample();
         let cache_client = FactorInstancesCacheClient::in_memory();
-
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(Profile::sample_from([fs.clone()], [&a], [])),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            SecurityStructureOfFactorSources::sample(),
             IndexSet::just(Account::sample_other().address()), // <---- unknown => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -225,17 +217,9 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(profile),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            SecurityStructureOfFactorSources::sample(),
             IndexSet::from_iter([mainnet_account.address()]),
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -279,20 +263,12 @@ mod tests {
         let _ = SUT::for_account_mfa(
             Arc::new(cache_client),
             Arc::new(profile),
-            MatrixOfFactorSources::new(
-                PrimaryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                RecoveryRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-                ConfirmationRoleWithFactorSources::override_only([fs.clone()])
-                    .unwrap(),
-            )
-            .unwrap(),
+            SecurityStructureOfFactorSources::sample(),
             IndexSet::from_iter([
                 mainnet_account.address(),
                 stokenet_account.address(),
             ]), // <---- wrong network => should_panic
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
         )
         .await
         .unwrap();
@@ -322,49 +298,63 @@ mod tests {
             .unwrap();
         assert!(derivation_outcome.debug_was_derived.is_empty());
 
-        let matrix_0 = MatrixOfFactorSources::new(
-            PrimaryRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-            RecoveryRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-            ConfirmationRoleWithFactorSources::override_only([bdfs.clone()])
-                .unwrap(),
-        )
-        .unwrap();
+        os.add_factor_source(FactorSource::sample_ledger())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_password())
+            .await
+            .unwrap();
+        let factor_sources = &os.profile().unwrap().factor_sources;
+        let matrix_ids = MatrixTemplate::config_1_4()
+            .materialize(factor_sources.items())
+            .unwrap();
+
+        let matrix_0 =
+            MatrixOfFactorSources::new(matrix_ids, factor_sources).unwrap();
+
+        let shield_0 = SecurityStructureOfFactorSources::new(
+            DisplayName::sample(),
+            matrix_0,
+            bdfs.clone(),
+        );
 
         let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
         let profile = Arc::new(os.profile().unwrap());
-        let derivation_interactors = os.keys_derivation_interactors();
+        let derivation_interactors = os.keys_derivation_interactor();
 
-        let (instances_in_cache_consumer, outcome) = SUT::for_account_mfa(
-            cache_client.clone(),
-            profile,
-            matrix_0.clone(),
-            IndexSet::just(alice.address()),
-            derivation_interactors.clone(),
-        )
-        .await
-        .unwrap();
+        let (instances_in_cache_consumer, outcome) =
+            SUT::securifying_unsecurified(
+                cache_client.clone(),
+                profile,
+                shield_0.clone(),
+                IndexSet::from_iter([
+                    AddressOfAccountOrPersona::from(alice.address()),
+                    AddressOfAccountOrPersona::from(batman.address()),
+                ]),
+                derivation_interactors.clone(),
+            )
+            .await
+            .unwrap();
 
-        // don't forget to consume
-        instances_in_cache_consumer.consume().await.unwrap();
-        let outcome = outcome.per_factor.get(&bdfs.id_from_hash()).unwrap();
-        assert_eq!(outcome.to_use_directly.len(), 1);
-
-        let profile = Arc::new(os.profile().unwrap());
-        let (instances_in_cache_consumer, outcome) = SUT::for_persona_mfa(
-            cache_client.clone(),
-            profile,
-            matrix_0.clone(),
-            IndexSet::just(batman.address()),
-            derivation_interactors.clone(),
-        )
-        .await
-        .unwrap();
+        assert_eq!(outcome.per_derivation_preset.len(), 4);
 
         // don't forget to consume
         instances_in_cache_consumer.consume().await.unwrap();
-        let outcome = outcome.per_factor.get(&bdfs.id_from_hash()).unwrap();
-        assert_eq!(outcome.to_use_directly.len(), 1);
+
+        let account_outcome = outcome
+            .get_derivation_preset_for_factor(
+                DerivationPreset::AccountMfa,
+                &bdfs.id_from_hash(),
+            )
+            .unwrap();
+        assert_eq!(account_outcome.to_use_directly.len(), 1);
+
+        let persona_outcome = outcome
+            .get_derivation_preset_for_factor(
+                DerivationPreset::AccountMfa,
+                &bdfs.id_from_hash(),
+            )
+            .unwrap();
+        assert_eq!(persona_outcome.to_use_directly.len(), 1);
     }
 }

@@ -11,8 +11,8 @@ pub struct UnsecuredEntityControl {
     // /// also controls this entity and is used for signing transactions.
     pub transaction_signing: HierarchicalDeterministicFactorInstance,
 
-    /// The factor instance which can be used for ROLA.
-    pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+    /// The provisional security structure configuration
+    pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
 
 #[uniffi::export]

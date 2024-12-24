@@ -10,4 +10,5 @@ internal interface DatastoreKeyMapping {
 
     suspend fun remove(): Result<Unit>
 
+    suspend fun keyExist(): Boolean
 }

@@ -291,6 +291,10 @@ impl BaseBaseIsFactorSource
             .join(", ");
         format!("Questions: {}", ids)
     }
+
+    fn set_name(&mut self, _updated: String) {
+        unreachable!("SecurityQuestions cannot be renamed");
+    }
 }
 
 #[cfg(test)]
@@ -497,5 +501,11 @@ mod tests {
     #[test]
     fn name() {
         assert_eq!(SUT::sample().name(), "Questions: #0, #1, #2, #3, #4, #5");
+    }
+
+    #[should_panic(expected = "SecurityQuestions cannot be renamed")]
+    #[test]
+    fn set_name() {
+        SUT::sample().set_name("whatever".to_string())
     }
 }

@@ -21,10 +21,9 @@ impl SargonOS {
     /// header
     pub async fn claim_profile(&self, profile: &mut Profile) -> Result<()> {
         debug!("Claiming profile, id: {}", &profile.id());
-        let host_id = self.host_id().await?;
         let host_info = self.host_info().await;
         let claiming_device_info =
-            DeviceInfo::new_from_info(&host_id, &host_info);
+            DeviceInfo::new_from_info(&self.host_id, &host_info);
 
         Self::claim_provided_profile(profile, claiming_device_info);
         info!(
@@ -289,11 +288,15 @@ mod tests {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let bios = Bios::new(drivers);
+        let clients = Clients::new(Bios::new(drivers));
+        let interactors = Interactors::new_from_clients(&clients);
 
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, SUT::boot(bios))
-            .await
-            .unwrap();
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
 
         let p = Profile::sample();
 
@@ -341,7 +344,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        let host_id = os.host_id().await.unwrap();
+        let host_id = os.host_id;
         let host_info = os.host_info().await;
         assert_eq!(
             os.profile().unwrap().header.last_used_on_device,
@@ -495,8 +498,11 @@ mod tests {
     async fn test_set_profile_when_no_profile_exists() {
         // ARRANGE
         let test_drivers = Drivers::test();
-        let bios = Bios::new(test_drivers);
-        let os = SargonOS::boot(bios).await;
+        let clients = Clients::new(Bios::new(test_drivers));
+        let interactors = Interactors::new_from_clients(&clients);
+        let os =
+            SargonOS::boot_with_clients_and_interactor(clients, interactors)
+                .await;
 
         // ACT
         let _ = os.with_timeout(|x| x.set_profile(Profile::sample())).await;

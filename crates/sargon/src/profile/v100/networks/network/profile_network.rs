@@ -163,22 +163,28 @@ impl ProfileNetwork {
         &mut self,
         updated_entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
-        match E::entity_kind() {
-            CAP26EntityKind::Account => {
-                updated_entities.to_accounts().and_then(|xs| {
-                    self.accounts
-                        .update_items(xs)
-                        .map_err(|_| CommonError::UnknownAccount)
-                })
-            }
-            CAP26EntityKind::Identity => {
-                updated_entities.to_personas().and_then(|xs| {
-                    self.personas
-                        .update_items(xs)
-                        .map_err(|_| CommonError::UnknownPersona)
-                })
-            }
+        self.update_entities_erased(
+            updated_entities.into_iter().map(Into::into).collect(),
+        )
+    }
+
+    pub fn update_entities_erased(
+        &mut self,
+        updated_entities: IdentifiedVecOf<AccountOrPersona>,
+    ) -> Result<()> {
+        for entity in updated_entities {
+            match entity {
+                AccountOrPersona::AccountEntity(account) => self
+                    .accounts
+                    .try_update_with(&account.id(), |a| *a = account.clone())
+                    .map_err(|_| CommonError::UnknownAccount),
+                AccountOrPersona::PersonaEntity(persona) => self
+                    .personas
+                    .try_update_with(&persona.id(), |p| *p = persona.clone())
+                    .map_err(|_| CommonError::UnknownPersona),
+            }?;
         }
+        Ok(())
     }
 
     /// Returns a clone of the updated account if found, else None.

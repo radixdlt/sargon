@@ -11,6 +11,7 @@ use crate::prelude::*;
     Eq,
     Hash,
     PartialOrd,
+    enum_iterator::Sequence,
     Ord,
 )]
 pub enum FactorSourceKind {
@@ -94,6 +95,13 @@ pub enum FactorSourceKind {
 }
 
 impl FactorSourceKind {
+    /// All FactorSourceKind
+    pub fn all() -> IndexSet<Self> {
+        enum_iterator::all::<Self>().collect()
+    }
+}
+
+impl FactorSourceKind {
     pub fn discriminant(&self) -> String {
         // We do `to_value.as_str` instead of `to_string(_pretty)` to avoid unwanted quotation marks around the string.
         serde_json::to_value(self)
@@ -101,6 +109,34 @@ impl FactorSourceKind {
             .as_str()
             .expect("Representation should always be string")
             .to_owned()
+    }
+}
+
+impl FactorSourceKind {
+    pub fn category(&self) -> FactorSourceCategory {
+        use FactorSourceCategory::*;
+        match self {
+            Self::LedgerHQHardwareWallet | Self::ArculusCard => Hardware,
+            Self::Password
+            | Self::SecurityQuestions
+            | Self::OffDeviceMnemonic => Information,
+            Self::Device => Identity,
+            Self::TrustedContact => Contact,
+        }
+    }
+}
+
+impl FactorSourceKind {
+    pub fn display_order_for_primary_threshold_selection(&self) -> u8 {
+        match self {
+            FactorSourceKind::Device => 0,
+            FactorSourceKind::ArculusCard => 1,
+            FactorSourceKind::LedgerHQHardwareWallet => 2,
+            FactorSourceKind::Password => 3,
+            FactorSourceKind::OffDeviceMnemonic => 4,
+            FactorSourceKind::TrustedContact => 5,
+            FactorSourceKind::SecurityQuestions => 6,
+        }
     }
 }
 
@@ -139,6 +175,15 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = FactorSourceKind;
+
+    #[test]
+    fn ord() {
+        assert!(SUT::Device < SUT::TrustedContact);
+        let unsorted = SUT::all(); // is in fact sorted
+        let mut sorted = unsorted.clone();
+        sorted.sort();
+        assert_eq!(unsorted, sorted);
+    }
 
     #[test]
     fn string_roundtrip() {
@@ -187,11 +232,6 @@ mod tests {
     }
 
     #[test]
-    fn ord() {
-        assert!(SUT::Device < SUT::TrustedContact);
-    }
-
-    #[test]
     fn discriminant() {
         assert_eq!(SUT::Device.discriminant(), "device");
         assert_eq!(SUT::SecurityQuestions.discriminant(), "securityQuestions");
@@ -203,6 +243,64 @@ mod tests {
 
         assert_eq!(SUT::TrustedContact.discriminant(), "trustedContact");
         assert_eq!(SUT::Password.discriminant(), "password");
+    }
+
+    #[test]
+    fn category() {
+        assert_eq!(
+            SUT::LedgerHQHardwareWallet.category(),
+            FactorSourceCategory::Hardware
+        );
+        assert_eq!(SUT::ArculusCard.category(), FactorSourceCategory::Hardware);
+        assert_eq!(SUT::Password.category(), FactorSourceCategory::Information);
+        assert_eq!(
+            SUT::SecurityQuestions.category(),
+            FactorSourceCategory::Information
+        );
+        assert_eq!(
+            SUT::OffDeviceMnemonic.category(),
+            FactorSourceCategory::Information
+        );
+        assert_eq!(SUT::Device.category(), FactorSourceCategory::Identity);
+        assert_eq!(
+            SUT::TrustedContact.category(),
+            FactorSourceCategory::Contact
+        );
+    }
+
+    #[test]
+    fn display_order_for_primary_threshold_selection() {
+        assert_eq!(
+            SUT::Device.display_order_for_primary_threshold_selection(),
+            0
+        );
+        assert_eq!(
+            SUT::ArculusCard.display_order_for_primary_threshold_selection(),
+            1
+        );
+        assert_eq!(
+            SUT::LedgerHQHardwareWallet
+                .display_order_for_primary_threshold_selection(),
+            2
+        );
+        assert_eq!(
+            SUT::Password.display_order_for_primary_threshold_selection(),
+            3
+        );
+        assert_eq!(
+            SUT::OffDeviceMnemonic
+                .display_order_for_primary_threshold_selection(),
+            4
+        );
+        assert_eq!(
+            SUT::TrustedContact.display_order_for_primary_threshold_selection(),
+            5
+        );
+        assert_eq!(
+            SUT::SecurityQuestions
+                .display_order_for_primary_threshold_selection(),
+            6
+        );
     }
 
     #[test]

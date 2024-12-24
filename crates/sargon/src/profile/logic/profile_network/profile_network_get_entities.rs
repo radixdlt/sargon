@@ -1,12 +1,20 @@
 use crate::prelude::*;
 
 impl ProfileNetwork {
+    pub fn accounts_non_hidden(&self) -> Accounts {
+        self.accounts.visible()
+    }
+
+    pub fn accounts_hidden(&self) -> Accounts {
+        self.accounts.hidden()
+    }
+
     pub fn personas_non_hidden(&self) -> Personas {
         self.personas.non_hidden()
     }
 
-    pub fn accounts_non_hidden(&self) -> Accounts {
-        self.accounts.visible()
+    pub fn personas_hidden(&self) -> Personas {
+        self.personas.hidden()
     }
 
     pub fn get_entities_erased(
@@ -40,18 +48,24 @@ impl ProfileNetwork {
             .collect()
     }
 
-    pub fn contains_entity_by_address<A: IsEntityAddress>(
+    pub fn entity_by_address(
         &self,
-        entity_address: &A,
-    ) -> bool {
-        self.get_entities_erased(A::entity_kind())
+        entity_address: &AddressOfAccountOrPersona,
+    ) -> Option<AccountOrPersona> {
+        let entities = self
+            .get_entities_erased(entity_address.get_entity_kind())
             .into_iter()
-            .any(|e| {
-                e.address()
-                    == Into::<AddressOfAccountOrPersona>::into(
-                        entity_address.clone(),
-                    )
-            })
+            .filter(|e| e.address() == *entity_address)
+            .collect_vec();
+        assert!(entities.len() <= 1);
+        entities.first().cloned()
+    }
+
+    pub fn contains_entity_by_address(
+        &self,
+        entity_address: &AddressOfAccountOrPersona,
+    ) -> bool {
+        self.entity_by_address(entity_address).is_some()
     }
 }
 

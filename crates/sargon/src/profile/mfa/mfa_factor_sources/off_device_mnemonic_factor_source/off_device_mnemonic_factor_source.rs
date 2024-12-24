@@ -112,6 +112,10 @@ impl BaseBaseIsFactorSource for OffDeviceMnemonicFactorSource {
     fn name(&self) -> String {
         self.hint.label.value.clone()
     }
+
+    fn set_name(&mut self, updated: String) {
+        self.hint.label.value = updated;
+    }
 }
 
 #[cfg(test)]
@@ -158,6 +162,9 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(SUT::sample().name(), "Story about a horse");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.name(), "Story about a horse");
+        sut.set_name("Thrilled with a shark".to_string());
+        assert_eq!(sut.name(), "Thrilled with a shark");
     }
 }

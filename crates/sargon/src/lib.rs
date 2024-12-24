@@ -5,6 +5,9 @@
 #![allow(internal_features)]
 #![feature(iter_repeat_n)]
 #![feature(future_join)]
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+#![feature(trait_upcasting)]
 
 mod arculus_card;
 mod core;
@@ -15,6 +18,7 @@ mod home_cards;
 mod keys_collector;
 mod profile;
 mod radix_connect;
+mod security_center;
 mod signing;
 mod system;
 mod types;
@@ -31,14 +35,15 @@ pub mod prelude {
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
+    pub use crate::security_center::*;
     pub use crate::signing::*;
     pub use crate::system::*;
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
-
     pub use radix_rust::prelude::{
         indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
     };
+    pub(crate) use std::marker::PhantomData;
 
     pub(crate) use ::hex::decode as hex_decode;
     pub(crate) use ::hex::encode as hex_encode;
@@ -143,7 +148,8 @@ pub mod prelude {
             NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
             NonFungibleIdType as ScryptoNonFungibleIdType,
             UpperBound as ScryptoUpperBound,
-            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE, XRD,
+            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
+            IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE, XRD,
         },
         types::{
             ComponentAddress as ScryptoComponentAddress,
@@ -153,11 +159,18 @@ pub mod prelude {
         },
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };
+
     pub(crate) use radix_engine_interface::blueprints::{
+        access_controller::{
+            RecoveryProposal as ScryptoRecoveryProposal,
+            RuleSet as ScryptoRuleSet,
+        },
         account::{
             DefaultDepositRule as ScryptoDefaultDepositRule,
             ResourcePreference as ScryptoResourcePreference,
+            ACCOUNT_SECURIFY_IDENT as SCRYPTO_ACCOUNT_SECURIFY_IDENT,
         },
+        identity::IDENTITY_SECURIFY_IDENT as SCRYPTO_IDENTITY_SECURIFY_IDENT,
         resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
     };
     pub(crate) use radix_engine_interface::prelude::{
@@ -188,6 +201,7 @@ pub mod prelude {
         },
         manifest::{
             compile as scrypto_compile,
+            compile_error_diagnostics as scrypto_compile_error_diagnostics,
             compile_manifest as scrypto_compile_manifest,
             decompile as scrypto_decompile,
             generator::{GeneratorError, GeneratorErrorKind},
@@ -203,6 +217,7 @@ pub mod prelude {
             },
             token::{Position, Span},
             CompileError as ScryptoCompileError,
+            CompileErrorDiagnosticsStyle as ScryptoCompileErrorDiagnosticsStyle,
             KnownManifestObjectNames as ScryptoKnownManifestObjectNames,
             ManifestObjectNames as ScryptoManifestObjectNames,
             MockBlobProvider as ScryptoMockBlobProvider,
@@ -328,7 +343,7 @@ pub mod prelude {
             DetailedManifestClass as RetDetailedManifestClass,
             DynamicAnalysis as RetDynamicAnalysis, FeeSummary as RetFeeSummary,
             FungibleResourceIndicator as RetFungibleResourceIndicator,
-            NewEntities as RetNewEntities,
+            ManifestClass as RetManifestClass, NewEntities as RetNewEntities,
             NonFungibleResourceIndicator as RetNonFungibleResourceIndicator,
             Operation as RetOperation, Predicted as RetPredicted,
             ReservedInstruction as RetReservedInstruction,

@@ -17,6 +17,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Carla | 2 | Securified { Single Threshold only }
         Account::sample_securified_mainnet(
             "Carla",
+            2,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(2),
             || {
                 let idx =
@@ -32,6 +33,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // David | 3 | Securified { Single Override only }
         Account::sample_securified_mainnet(
             "David",
+            3,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(3),
             || {
                 let idx =
@@ -47,6 +49,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Emily | 4 | Securified { Threshold factors only #3 }
         Account::sample_securified_mainnet(
             "Emily",
+            4,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(4),
             || {
                 let idx =
@@ -62,6 +65,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Frank | 5 | Securified { Override factors only #2 }
         Account::sample_securified_mainnet(
             "Frank",
+            5,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(5),
             || {
                 let idx =
@@ -77,6 +81,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Grace | 6 | Securified { Threshold #3 and Override factors #2  }
         Account::sample_securified_mainnet(
             "Grace",
+            6,
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(6),
             || {
                 let idx =
@@ -92,6 +97,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Ida | 7 | Securified { Threshold only # 5/5 }
         Account::sample_securified_mainnet(
             "Ida",
+            7,
             HierarchicalDeterministicFactorInstance::sample_fia11(),
             || {
                 let idx =
@@ -112,6 +118,7 @@ static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
         // Klara | 9 |  Securified { Threshold 1/1 and Override factors #1  }
         Account::sample_securified_mainnet(
             "Klara",
+            9,
             HierarchicalDeterministicFactorInstance::sample_fia12(),
             || {
                 let idx =
@@ -153,47 +160,42 @@ impl Account {
 
     pub fn sample_securified_mainnet(
         name: impl AsRef<str>,
+        rola_index: u32,
         veci: HierarchicalDeterministicFactorInstance,
         make_role: impl Fn() -> GeneralRoleWithHierarchicalDeterministicFactorInstances,
     ) -> Self {
         let role = make_role();
+        assert_eq!(role.get_role_kind(), RoleKind::Primary, "If this tests fails you can update the code below to not be hardcoded to set the primary role...");
+        let mut matrix = MatrixOfFactorInstances::sample();
+        matrix.primary_role = PrimaryRoleWithFactorInstances::with_factors(
+            role.get_threshold(),
+            role.get_threshold_factors()
+                .into_iter()
+                .map(FactorInstance::from)
+                .collect_vec(),
+            role.get_override_factors()
+                .into_iter()
+                .map(FactorInstance::from)
+                .collect_vec(),
+        );
 
-        let threshold_factors = role
-            .threshold_factors
-            .iter()
-            .map(|hd| hd.factor_instance())
-            .collect::<Vec<FactorInstance>>();
-
-        let override_factors = role
-            .override_factors
-            .iter()
-            .map(|hd| hd.factor_instance())
-            .collect::<Vec<FactorInstance>>();
-
-        let matrix = MatrixOfFactorInstances::new(
-            PrimaryRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                role.threshold,
-                override_factors.clone(),
-            )
-            .unwrap(),
-            RecoveryRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                role.threshold,
-                override_factors.clone(),
-            )
-            .unwrap(),
-            ConfirmationRoleWithFactorInstances::new(
-                threshold_factors.clone(),
-                role.threshold,
-                override_factors.clone(),
-            )
-            .unwrap(),
-        )
-        .unwrap();
         let network_id = NetworkID::Mainnet;
         let address =
             AccountAddress::new(veci.public_key(), NetworkID::Mainnet);
+
+        let security_structure_of_factor_instances =
+            SecurityStructureOfFactorInstances::new(
+                SecurityStructureID::sample(),
+                matrix,
+                HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+                    NetworkID::Mainnet,
+                    CAP26KeyKind::AuthenticationSigning,
+                    CAP26EntityKind::Account,
+                    SecurifiedU30::try_from(rola_index).unwrap(),
+                ),
+            )
+            .unwrap();
+
         Self {
             network_id,
             address,
@@ -201,10 +203,7 @@ impl Account {
             security_state: SecuredEntityControl::new(
                 Some(veci.clone()),
                 AccessControllerAddress::sample_from_account_address(address),
-                SecurityStructureOfFactorInstances {
-                    security_structure_id: SecurityStructureID::sample(),
-                    matrix_of_factors: matrix,
-                },
+                security_structure_of_factor_instances,
             )
             .unwrap()
             .into(),

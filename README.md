@@ -37,11 +37,14 @@ xcode-select --install
 Or install `Xcode` from App Store
 
 After installing, you should run the following command to verify the SDK path is set to the Xcode app under `Applications`.
+
 ```sh
 $ xcrun --show-sdk-path
 /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 ```
+
 If it doesn't point to the expected path (and instead points to something like `/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk`), make sure you have the PATH exported on your profile (e.g. `.zshrc`):
+
 ```
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 ```
@@ -161,131 +164,138 @@ Alternatively if you wanna skip code cove
 ## Android
 
 ### Prerequisites
+
 <details>
 <summary>MacOs</summary>
 
-* #### Install `jenv`
-  ```sh
-  brew install jenv
-  ```
-  Dont forget to add to eval to zsh
-  ```sh
-  export PATH="$HOME/.jenv/bin:$PATH"
-  eval "$(jenv init -)"
-  ```
+-   #### Install `jenv`
 
-* #### Install Java (openjdk@17)
-  ```sh
-  brew install openjdk@17
-  ```
-  #### Add `openjdk` version to `jenv`
-  ```sh
-  jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Home/
-  ```
-* #### `cargo-ndk`
-  ```sh
-  cargo install cargo-ndk
-  ```
-* Download the Command Line tools [here](https://developer.android.com/studio#command-tools) and unzip
-  ```sh
-  mkdir -p ~/Library/Android/sdk/cmdline-tools
-  mv <download/path>/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
-  ```
-  ```sh
-  ## In your profile (like .zshrc)
-  export ANDROID_HOME=$HOME/Library/Android/sdk
-  export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-  export PATH=$PATH:$ANDROID_HOME/platform-tools
-  # Make sure to also include the SDK ROOT in order to build the mac os desktop binaries
-  export SDKROOT="`xcrun --show-sdk-path`
-  ```
-  ```sh
-  ## Source your profile 
-  source ~/.zshrc
-  ```
-  ```sh
-  ## Assert that it works with
-  sdkmanager --version
-  ```
-* Download the latest ndk
-  ```sh
-  ## Print the list of available ANDKs
-  sdkmanager --list | grep ndk
-  ```
-  ```sh
-  ## Install the latest ndk like ndk;27.1.12297006 
-  sdkmanager --install "ndk;<version.of.ndk>"
-  ```
-  ```sh
-  ## Export ndk 
-  ## In your profile (like .bashrc, or .zshrc etc)
-  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk
-  ```
-</details>
+    ```sh
+    brew install jenv
+    ```
+
+    Dont forget to add to eval to zsh
+
+    ```sh
+    export PATH="$HOME/.jenv/bin:$PATH"
+    eval "$(jenv init -)"
+    ```
+
+-   #### Install Java (openjdk@17)
+    ```sh
+    brew install openjdk@17
+    ```
+    #### Add `openjdk` version to `jenv`
+    ```sh
+    jenv add /opt/homebrew/Cellar/openjdk@17/17.0.10/libexec/openjdk.jdk/Contents/Home/
+    ```
+-   #### `cargo-ndk`
+    ```sh
+    cargo install cargo-ndk
+    ```
+-   Download the Command Line tools [here](https://developer.android.com/studio#command-tools) and unzip
+    ```sh
+    mkdir -p ~/Library/Android/sdk/cmdline-tools
+    mv <download/path>/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
+    ```
+    ```sh
+    ## In your profile (like .zshrc)
+    export ANDROID_HOME=$HOME/Library/Android/sdk
+    export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+    export PATH=$PATH:$ANDROID_HOME/platform-tools
+    # Make sure to also include the SDK ROOT in order to build the mac os desktop binaries
+    export SDKROOT="`xcrun --show-sdk-path`
+    ```
+    ```sh
+    ## Source your profile
+    source ~/.zshrc
+    ```
+    ```sh
+    ## Assert that it works with
+    sdkmanager --version
+    ```
+-   Download the latest ndk
+    ```sh
+    ## Print the list of available ANDKs
+    sdkmanager --list | grep ndk
+    ```
+    ```sh
+    ## Install the latest ndk like ndk;27.1.12297006
+    sdkmanager --install "ndk;<version.of.ndk>"
+    ```
+    ```sh
+    ## Export ndk
+    ## In your profile (like .bashrc, or .zshrc etc)
+    export ANDROID_NDK_HOME=$ANDROID_HOME/ndk
+    ```
+    </details>
 
 <details>
 <summary>Linux</summary>
 
-* #### (Optional) Install build essentials 
-  ```sh
-  apt-get install build-essential
-  apt-get install cmake
-  ```
-* #### Install Java (openjdk-17)
-  ```sh
-  apt-get install openjdk-17-jre
-  ```
-* #### `cargo-ndk`
-  ```sh
-  cargo install cargo-ndk
-  ```
-* Download the Command Line tools [here](https://developer.android.com/studio#command-tools) and unzip
-  ```sh
-  mkdir -p ~/Library/Android/sdk/cmdline-tools
-  mv <download/path>/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
-  ```
-  ```sh
-  ## In your profile (like .zshrc)
-  export ANDROID_HOME=$HOME/Library/Android/sdk
-  export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
-  export PATH=$PATH:$ANDROID_HOME/platform-tools
-  ```
-  ```sh
-  ## Source your profile 
-  source ~/.bashrc
-  ```
-  ```sh
-  ## Assert that it works with
-  sdkmanager --version
-  ```
-* Download the latest ndk
-  ```sh
-  ## Print the list of available ANDKs
-  sdkmanager --list | grep ndk
-  ```
-  ```sh
-  ## Install the latest ndk like ndk;27.1.12297006 
-  sdkmanager --install "ndk;<version.of.ndk>"
-  ```
-  ```sh
-  ## Export ndk 
-  ## In your profile (like .bashrc, or .zshrc etc)
-  export ANDROID_NDK_HOME=$ANDROID_HOME/ndk
-  ```
-</details>
+-   #### (Optional) Install build essentials
+    ```sh
+    apt-get install build-essential
+    apt-get install cmake
+    ```
+-   #### Install Java (openjdk-17)
+    ```sh
+    apt-get install openjdk-17-jre
+    ```
+-   #### `cargo-ndk`
+    ```sh
+    cargo install cargo-ndk
+    ```
+-   Download the Command Line tools [here](https://developer.android.com/studio#command-tools) and unzip
+    ```sh
+    mkdir -p ~/Library/Android/sdk/cmdline-tools
+    mv <download/path>/cmdline-tools ~/Library/Android/sdk/cmdline-tools/latest
+    ```
+    ```sh
+    ## In your profile (like .zshrc)
+    export ANDROID_HOME=$HOME/Library/Android/sdk
+    export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
+    export PATH=$PATH:$ANDROID_HOME/platform-tools
+    ```
+    ```sh
+    ## Source your profile
+    source ~/.bashrc
+    ```
+    ```sh
+    ## Assert that it works with
+    sdkmanager --version
+    ```
+-   Download the latest ndk
+    ```sh
+    ## Print the list of available ANDKs
+    sdkmanager --list | grep ndk
+    ```
+    ```sh
+    ## Install the latest ndk like ndk;27.1.12297006
+    sdkmanager --install "ndk;<version.of.ndk>"
+    ```
+    ```sh
+    ## Export ndk
+    ## In your profile (like .bashrc, or .zshrc etc)
+    export ANDROID_NDK_HOME=$ANDROID_HOME/ndk
+    ```
+    </details>
 
 ### Install Rust targets (Android)
+
 ```sh
 rustup target add aarch64-linux-android armv7-linux-androideabi
 ```
 
 ### Install Rust targets (Desktop Binaries)
+
 <details>
 <summary>MacOs</summary>
 
 ```sh
 rustup target add aarch64-apple-darwin
 ```
+
 </details>
 
 <details>
@@ -294,9 +304,11 @@ rustup target add aarch64-apple-darwin
 ```sh
 rustup target add x86_64-unknown-linux-gnu
 ```
+
 </details>
 
 ### Build
+
 ```sh
 cd jvm
 # (Debug)
@@ -306,10 +318,13 @@ cd jvm
 ```
 
 ### Unit Tests (Running locally)
+
 ```sh
 ./gradlew sargon-android:testDebugUnitTest
 ```
+
 ### Instrumentation Tests (Running on a device)
+
 ```sh
 # Make sure you have a device or emulator is connected to ADB
 ./gradlew sargon-android:connectedDebugAndroidTest
@@ -320,6 +335,9 @@ cd jvm
 ## iOS
 
 ### Locally
+
+> [!TIP]
+> We really recommend you release using CD.
 
 #### Prerequisites
 
@@ -379,22 +397,28 @@ See [`.github/workflows/release.yml`](.github/workflows/release.yml)
 ## Android
 
 ### Locally
-In order to build sargon for local development we will leverage the local maven repository. Instead of publishing the package in a maven server, we can publish it locally. 
 
-In order to publish both android and desktop binaries with a simple command run  
+In order to build sargon for local development we will leverage the local maven repository. Instead of publishing the package in a maven server, we can publish it locally.
+
+In order to publish both android and desktop binaries with a simple command run
+
 ```sh
 cd jvm/
 ./gradlew sargon-android:buildForLocalDev  // This builds both sargon-android and sargon-desktop-bins
 ```
+
 This will produce the following message when successfully finished
+
 ```txt
 > Task :sargon-android:buildForLocalDev
 ✅ Library is published in maven local with version:
 1.1.19-c74d9cbf-SNAPSHOT
 ```
+
 Note that such local maven builds are in debug mode and have a `-SNAPSHOT` suffix.
 
-Copy the version name to your project but make sure that `mavenLocal()` is included in your project's `settings.gradle` 
+Copy the version name to your project but make sure that `mavenLocal()` is included in your project's `settings.gradle`
+
 ```gradle
 dependencyResolutionManagement {
     ...
@@ -404,8 +428,10 @@ dependencyResolutionManagement {
     }
 }
 ```
+
 > [!TIP]
 > The libraries that are published in local maven will reside in:
+>
 > ```
 > $HOME/.m2/repository/com/radixdlt/sargon
 > ```
@@ -414,29 +440,29 @@ dependencyResolutionManagement {
 
 Two modules are published in [Github's maven](https://github.com/radixdlt/sargon/packages/).
 
-- `sargon-android`
+-   `sargon-android`
 
-  (See [`.github/workflows/release-android.yml`](.github/workflows/release-android.yml))
+    (See [`.github/workflows/release-android.yml`](.github/workflows/release-android.yml))
 
-  Contains the generated UniFFi Kotlin code and the runtime sargon binaries, in different architectures. It also contains the JNA dependency.
+    Contains the generated UniFFi Kotlin code and the runtime sargon binaries, in different architectures. It also contains the JNA dependency.
 
-  Import with:
+    Import with:
 
-  ```
-  implementation("com.radixdlt.sargon:sargon-android:<version>")
-  ```
+    ```
+    implementation("com.radixdlt.sargon:sargon-android:<version>")
+    ```
 
-- `sargon-desktop-bins`
+-   `sargon-desktop-bins`
 
-  (See [`.github/workflows/release-desktop-bins.yml`](.github/workflows/release-desktop.yml))
+    (See [`.github/workflows/release-desktop-bins.yml`](.github/workflows/release-desktop.yml))
 
-  Contains only the runtime sargon binaries, built for desktop. Used when running Unit tests.
+    Contains only the runtime sargon binaries, built for desktop. Used when running Unit tests.
 
-  Import with:
+    Import with:
 
-  ```
-  testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
-  ```
+    ```
+    testRuntimeOnly("com.radixdlt.sargon:sargon-desktop-bins:<version>")
+    ```
 
 > [!IMPORTANT]  
 > Currently only supporting `aarch64-apple-darwin` (apple silicon) and `x86_64-unknown-linux-gnu`. So when running Unit tests for your client app, make sure to run them on an apple silicon or linux machine. We can add more architectures in the future, if requested.

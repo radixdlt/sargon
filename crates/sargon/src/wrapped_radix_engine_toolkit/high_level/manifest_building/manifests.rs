@@ -38,12 +38,29 @@ impl TransactionManifest {
         address_of_account_or_persona: &AddressOfAccountOrPersona,
         owner_key_hashes: Vec<PublicKeyHash>,
     ) -> Self {
-        Self::set_metadata(
+        let builder = Self::set_owner_keys_hashes_on_builder(
+            address_of_account_or_persona,
+            owner_key_hashes,
+            ScryptoTransactionManifestBuilder::new(),
+        );
+        TransactionManifest::sargon_built(
+            builder,
+            address_of_account_or_persona.network_id(),
+        )
+    }
+
+    pub fn set_owner_keys_hashes_on_builder(
+        address_of_account_or_persona: &AddressOfAccountOrPersona,
+        owner_key_hashes: Vec<PublicKeyHash>,
+        builder: ScryptoTransactionManifestBuilder,
+    ) -> ScryptoTransactionManifestBuilder {
+        Self::set_metadata_on_builder(
             address_of_account_or_persona,
             MetadataKey::OwnerKeys,
             ScryptoMetadataValue::PublicKeyHashArray(
                 owner_key_hashes.into_iter().map(|h| h.into()).collect_vec(),
             ),
+            builder,
         )
     }
 
@@ -126,13 +143,25 @@ impl TransactionManifest {
     where
         A: IntoScryptoAddress,
     {
-        let builder = ScryptoTransactionManifestBuilder::new().set_metadata(
-            address.scrypto(),
+        let builder = Self::set_metadata_on_builder(
+            address,
             key,
             value,
+            ScryptoTransactionManifestBuilder::new(),
         );
-
         TransactionManifest::sargon_built(builder, address.network_id())
+    }
+
+    fn set_metadata_on_builder<A>(
+        address: &A,
+        key: MetadataKey,
+        value: impl ScryptoToMetadataEntry,
+        builder: ScryptoTransactionManifestBuilder,
+    ) -> ScryptoTransactionManifestBuilder
+    where
+        A: IntoScryptoAddress,
+    {
+        builder.set_metadata(address.scrypto(), key, value)
     }
 }
 

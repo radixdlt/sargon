@@ -5,11 +5,13 @@ import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.preferencesOf
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.extensions.toUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retryWhen
@@ -65,6 +67,10 @@ suspend fun <T> DataStore<Preferences>.remove(key: Preferences.Key<T>) = runCatc
         preferences.remove(key)
     }
 }.toUnit()
+
+suspend fun <T> DataStore<Preferences>.keyExist(key: Preferences.Key<T>) = this.data.map { preference ->
+    preference.contains(key)
+}.first()
 
 @KoverIgnore
 internal fun Flow<Preferences>.catchIOException() = catch { exception ->

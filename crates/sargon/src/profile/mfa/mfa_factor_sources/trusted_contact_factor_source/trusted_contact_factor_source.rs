@@ -91,6 +91,10 @@ impl BaseBaseIsFactorSource for TrustedContactFactorSource {
     fn name(&self) -> String {
         self.contact.name.value.clone()
     }
+
+    fn set_name(&mut self, updated: String) {
+        self.contact.name.value = updated;
+    }
 }
 impl TrustedContactFactorSource {
     fn new_sample(name: &str, email: &str, address: AccountAddress) -> Self {
@@ -215,6 +219,9 @@ mod tests {
 
     #[test]
     fn name() {
-        assert_eq!(SUT::sample().name(), "Spending Account");
+        let mut sut = SUT::sample();
+        assert_eq!(sut.name(), "Spending Account");
+        sut.set_name("Savings Account".to_string());
+        assert_eq!(sut.name(), "Savings Account");
     }
 }

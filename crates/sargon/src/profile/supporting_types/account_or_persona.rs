@@ -27,6 +27,12 @@ impl HasSecurityState for AccountOrPersona {
             Self::PersonaEntity(p) => p.security_state(),
         }
     }
+    fn set_security_state_unchecked(&mut self, new_state: EntitySecurityState) {
+        match self {
+            Self::AccountEntity(a) => a.set_security_state_unchecked(new_state),
+            Self::PersonaEntity(p) => p.set_security_state_unchecked(new_state),
+        }
+    }
 }
 
 impl IsKeySpaceAware for AccountOrPersona {

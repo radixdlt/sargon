@@ -43,12 +43,6 @@ final class AccountTests: EntityProtocolTest<Account> {
 		XCTAssertNil(sut.deviceFactorSourceID)
 	}
 
-	func test_virtual_hd_deterministic_factor_instances_includes_auth_signing_if_set() {
-		var sut = SUT.sample
-		sut.securityState = .unsecured(value: .init(transactionSigning: .sample, authenticationSigning: .sampleOther))
-		XCTAssertEqual(sut.virtualHierarchicalDeterministicFactorInstances.count, 2)
-	}
-
 	func test_new() {
 		let fi: HierarchicalDeterministicFactorInstance = .sample
 		let sut = SUT(networkID: .sample, factorInstance: fi, displayName: .sample, extraProperties: .sample)

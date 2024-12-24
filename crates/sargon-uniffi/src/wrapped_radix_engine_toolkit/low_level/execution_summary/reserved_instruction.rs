@@ -9,4 +9,8 @@ pub enum ReservedInstruction {
     AccountSecurify,
     IdentitySecurify,
     AccessControllerMethod,
+    AccountLockOwnerKeysMetadataField,
+    AccountUpdateOwnerKeysMetadataField,
+    IdentityLockOwnerKeysMetadataField,
+    IdentityUpdateOwnerKeysMetadataField,
 }

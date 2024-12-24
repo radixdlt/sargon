@@ -1,6 +1,7 @@
 package com.radixdlt.sargon.os
 
 import com.radixdlt.sargon.Bios
+import com.radixdlt.sargon.HostInteractor
 import com.radixdlt.sargon.SargonOs
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -13,6 +14,7 @@ import kotlinx.coroutines.withContext
 
 class SargonOsManager internal constructor(
     bios: Bios,
+    hostInteractor: HostInteractor,
     applicationScope: CoroutineScope,
     defaultDispatcher: CoroutineDispatcher
 ) {
@@ -25,7 +27,7 @@ class SargonOsManager internal constructor(
     init {
         applicationScope.launch {
             withContext(defaultDispatcher) {
-                val os = SargonOs.boot(bios)
+                val os = SargonOs.boot(bios, hostInteractor)
                 _sargonState.update { SargonOsState.Booted(os) }
             }
         }
@@ -37,10 +39,16 @@ class SargonOsManager internal constructor(
 
         fun factory(
             bios: Bios,
+            hostInteractor: HostInteractor,
             applicationScope: CoroutineScope,
             defaultDispatcher: CoroutineDispatcher
         ): SargonOsManager = instance ?: synchronized(this) {
-            instance ?: SargonOsManager(bios, applicationScope, defaultDispatcher).also {
+            instance ?: SargonOsManager(
+                bios = bios,
+                hostInteractor = hostInteractor,
+                applicationScope = applicationScope,
+                defaultDispatcher = defaultDispatcher
+            ).also {
                 instance = it
             }
         }

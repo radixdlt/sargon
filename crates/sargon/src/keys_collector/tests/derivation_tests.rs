@@ -126,7 +126,8 @@ mod key_derivation_tests {
                     Hardened::Securified(SecurifiedU30::ZERO),
                 ))),
             )),
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
+            DerivationPurpose::CreatingNewAccount,
         );
         assert!(matches!(
             res,
@@ -155,7 +156,8 @@ mod key_derivation_tests {
             [(factor_source.id_from_hash(), paths.clone())]
                 .into_iter()
                 .collect::<IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>>(),
-            Arc::new(TestDerivationInteractors::fail()),
+            Arc::new(TestDerivationInteractor::fail()),
+            DerivationPurpose::CreatingNewAccount
         )
         .unwrap();
         let outcome = collector.collect_keys().await;
@@ -178,10 +180,10 @@ mod key_derivation_tests {
                     )
                 })
                 .collect::<IndexSet<_>>();
-            let collector = KeysCollector::new_test([(
-                factor_source.id_from_hash(),
-                paths.clone(),
-            )]);
+            let collector = KeysCollector::new_test(
+                [(factor_source.id_from_hash(), paths.clone())],
+                DerivationPurpose::CreatingNewAccount,
+            );
             let outcome = collector.collect_keys().await;
             assert_eq!(
                 outcome
@@ -212,6 +214,7 @@ mod key_derivation_tests {
                     .iter()
                     .map(|f| (f.id_from_hash(), paths.clone()))
                     .collect_vec(),
+                DerivationPurpose::CreatingNewAccount,
             );
             let outcome = collector.collect_keys().await;
             assert_eq!(
@@ -257,6 +260,7 @@ mod key_derivation_tests {
                     .iter()
                     .map(|f| (f.id_from_hash(), paths.clone()))
                     .collect_vec(),
+                DerivationPurpose::CreatingNewAccount,
             );
             let outcome = collector.collect_keys().await;
 
@@ -517,6 +521,7 @@ mod key_derivation_tests {
                     .iter()
                     .map(|f| (f.id_from_hash(), paths.clone()))
                     .collect_vec(),
+                DerivationPurpose::CreatingNewAccount,
             );
             let outcome = collector.collect_keys().await;
 

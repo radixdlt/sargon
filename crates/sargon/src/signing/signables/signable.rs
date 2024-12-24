@@ -4,7 +4,7 @@ use std::hash::Hasher;
 /// Any type conforming to `Signable` can be used with `SignaturesCollector` and collect
 /// signatures from all involved entities according to their security structure.
 pub trait Signable:
-    std::hash::Hash + PartialEq + Eq + Clone + Debug + HasSampleValues
+    std::hash::Hash + PartialEq + Eq + Clone + Debug + Send + Sync
 {
     /// A stable identifier for this `Signable`.
     type ID: SignableID;
@@ -17,7 +17,13 @@ pub trait Signable:
         + std::hash::Hash
         + Into<Self::ID>
         + From<Self>
-        + HasSampleValues;
+        + Send
+        + Sync;
+
+    type Signed: Clone
+        + Debug
+        + Into<Self>
+        + IntoIterator<Item = SignatureWithPublicKey>;
 
     /// A function that extracts the involved entities that require signing.
     fn entities_requiring_signing(
@@ -34,6 +40,25 @@ pub trait Signable:
         self.get_payload().into()
     }
 
+    fn signed(
+        &self,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
+    ) -> Result<Self::Signed>;
+}
+
+/// An identifier that is unique for each `Signable`
+pub trait SignableID:
+    Eq + StdHash + Clone + Debug + Into<Hash> + Send + Sync
+{
+}
+
+/// A trait which provides the ability to construct a `Signable` sample by building a manifest.
+pub trait ProvidesSamplesByBuildingManifest:
+    PartialEq + Eq + Clone + Send + Sync
+{
     /// Returns a sample `Signable` that its summary will involve all the
     /// `accounts_requiring_auth` and `personas_requiring_auth` in entities requiring auth.
     /// This can be accomplished by building a manifest that constructs owner keys from these
@@ -112,10 +137,4 @@ pub trait Signable:
         )>,
         network_id: Option<NetworkID>,
     ) -> Self;
-}
-
-/// An identifier that is unique for each `Signable`
-pub trait SignableID:
-    Eq + StdHash + Clone + Debug + Into<Hash> + HasSampleValues
-{
 }

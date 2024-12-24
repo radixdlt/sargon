@@ -816,8 +816,61 @@ pub enum CommonError {
     #[error("Failed to encode transaction preview v2 - '{underlying}'")]
     FailedToEncodeTransactionPreviewV2 { underlying: String } = 10229,
 
+    #[error("Could not validate signature for the given input.")]
+    InvalidHDSignature = 10230,
+
+    #[error("Could not validate signature for the given rola challenge.")]
+    InvalidSignatureForRolaChallenge = 10231,
+
+    #[error("Signing was rejected by the user")]
+    SigningRejected = 10232,
+
+    #[error("Failed to automatically build shield, reason: '{underlying}'")]
+    AutomaticShieldBuildingFailure { underlying: String } = 10233,
+
+    #[error("No Transaction Signing Factor")]
+    NoTransactionSigningFactorInstance = 10234,
+
+    #[error("Authentication Signing FactorInstance not securified")]
+    AuthenticationSigningFactorInstanceNotSecurified = 10235,
+
+    #[error("SecurityEntityControl has no QueuedTransaction, unable to mark it as cancelled")]
+    SecurityEntityControlHasNoProvisionallyQueuedTransaction = 10236,
+
+    #[error("SecurityEntityControl has derived instances, which would be lost if discarded. Implement a way to put them back in the cache.")]
+    SecurityEntityControlCannotChangeProvisionalAlreadyDerivedInstances = 10237,
+
+    #[error("SecurityEntityControl has QueuedTransaction, unable override it, use `cancel_queued_transaction`")]
+    SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction =
+        10238,
+
+    #[error(
+        "Entity kind of FactorInstances does not match EntityKind of entity"
+    )]
+    SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind {
+        entity_kind_of_entity: CAP26EntityKind,
+        entity_kind_of_factor_instances: CAP26EntityKind,
+    } = 10239,
+
+    #[error(
+        "Cannot securify entity it is already securified according to profile"
+    )]
+    CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile = 10240,
+
+    #[error("Cannot securify entity that has provisional security config")]
+    CannotSecurifyEntityHasProvisionalSecurityConfig = 10241,
+
+    #[error("Too few FactorInstances derived")]
+    TooFewFactorInstancesDerived = 10242,
+
+    #[error("Missing Authentication Signing FactorInstance mapping SecurityStructureOfFactorSources into SecurityStructureOfFactorInstances.")]
+    MissingRolaKeyForSecurityStructureOfFactorInstances = 10243,
+
+    #[error("SecurityStateAccessController address mismatch")]
+    SecurityStateAccessControllerAddressMismatch = 10244,
+
     #[error("Unknown response status code: {status_code}")]
-    ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10230,
+    ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10245,
 }
 
 impl CommonError {
@@ -829,7 +882,11 @@ impl CommonError {
         matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
     }
 
-    pub fn from_address_error(s: String, expected_network: NetworkID) -> Self {
+    pub fn from_address_error(
+        s: String,
+        expected_network: NetworkID,
+        fallback_underlying: String,
+    ) -> Self {
         use radix_engine_toolkit::functions::address::decode as RET_decode_address;
         let Some(Some(network_id)) = RET_decode_address(&s)
             .map(|t| t.0)
@@ -846,13 +903,13 @@ impl CommonError {
             }
         } else {
             CommonError::InvalidInstructionsString {
-                underlying: "Failed to determine why an address was invalid"
-                    .to_owned(),
+                underlying: fallback_underlying,
             }
         }
     }
 
     pub fn from_scrypto_compile_error(
+        manifest_string: &str,
         err: ScryptoCompileError,
         expected_network: NetworkID,
     ) -> Self {
@@ -861,16 +918,28 @@ impl CommonError {
         use GeneratorError;
         use GeneratorErrorKind::*;
         let n = expected_network;
+
+        let pretty_diagnostics = scrypto_compile_error_diagnostics(
+            manifest_string,
+            err.clone(),
+            ScryptoCompileErrorDiagnosticsStyle::PlainText,
+        );
         match err {
             ScryptoCompileError::GeneratorError(GeneratorError {
                 error_kind: gen_err,
                 ..
             }) => match gen_err {
-                InvalidPackageAddress(a) => Self::from_address_error(a, n),
-                InvalidResourceAddress(a) => Self::from_address_error(a, n),
-                InvalidGlobalAddress(a) => Self::from_address_error(a, n),
+                InvalidPackageAddress(a) => {
+                    Self::from_address_error(a, n, pretty_diagnostics)
+                }
+                InvalidResourceAddress(a) => {
+                    Self::from_address_error(a, n, pretty_diagnostics)
+                }
+                InvalidGlobalAddress(a) => {
+                    Self::from_address_error(a, n, pretty_diagnostics)
+                }
                 _ => CommonError::InvalidInstructionsString {
-                    underlying: format!("GeneratorError: {:?}", gen_err),
+                    underlying: pretty_diagnostics,
                 },
             },
             ScryptoCompileError::ParserError(ParserError {
@@ -880,7 +949,7 @@ impl CommonError {
                 max: max as u16,
             },
             _ => CommonError::InvalidInstructionsString {
-                underlying: format!("{:?}", err),
+                underlying: pretty_diagnostics,
             },
         }
     }

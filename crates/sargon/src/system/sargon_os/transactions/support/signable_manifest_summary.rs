@@ -31,6 +31,16 @@ impl HasSampleValues for SignableManifestSummary {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
+impl IntoIterator for SignableManifestSummary {
+    type Item = SignatureWithPublicKey;
+    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        panic!("Manifest summary cannot be actually signed")
+    }
+}
+
 impl SignableID for Exactly32Bytes {}
 
 impl From<SignableManifestSummary> for Exactly32Bytes {
@@ -48,6 +58,7 @@ impl std::hash::Hash for SignableManifestSummary {
 impl Signable for SignableManifestSummary {
     type ID = Exactly32Bytes;
     type Payload = Self;
+    type Signed = Self;
 
     fn entities_requiring_signing(
         &self,
@@ -60,10 +71,24 @@ impl Signable for SignableManifestSummary {
         self.id
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn get_payload(&self) -> Self::Payload {
         panic!("Manifest summary cannot be actually signed")
     }
 
+    #[cfg(not(tarpaulin_include))]
+    fn signed(
+        &self,
+        _signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
+    ) -> Result<Self::Signed> {
+        panic!("Manifest summary cannot be actually signed")
+    }
+}
+
+impl ProvidesSamplesByBuildingManifest for SignableManifestSummary {
     fn sample_entity_addresses_with_pub_key_hashes(
         all_addresses_with_hashes: Vec<(
             AddressOfAccountOrPersona,

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 pub(crate) struct KeysCollectorDependencies {
-    /// A collection of "interactors" used to sign with factor sources.
-    pub(super) interactors: Arc<dyn KeysDerivationInteractors>,
+    /// The "interactor" which we use to derive public keys from relevant factor sources
+    pub(super) interactor: Arc<dyn KeyDerivationInteractor>,
 
     /// Factor sources grouped by kind, sorted according to "friction order",
     /// that is, we want to control which FactorSourceKind users sign with
@@ -14,16 +14,21 @@ pub(crate) struct KeysCollectorDependencies {
     /// computer and thus unable to make a connection between the Radix Wallet
     /// and a Ledger device.
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
+
+    /// The reason that the collection of keys was initiated
+    pub(super) derivation_purpose: DerivationPurpose,
 }
 
 impl KeysCollectorDependencies {
     pub(crate) fn new(
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
+        derivation_purpose: DerivationPurpose,
     ) -> Self {
         Self {
-            interactors,
+            interactor,
             factors_of_kind,
+            derivation_purpose,
         }
     }
 }

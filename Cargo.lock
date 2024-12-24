@@ -186,47 +186,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
-name = "askama"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b79091df18a97caea757e28cd2d5fda49c6cd4bd01ddffd7ff01ace0c0ad2c28"
-dependencies = [
- "askama_derive",
- "askama_escape",
-]
-
-[[package]]
-name = "askama_derive"
-version = "0.12.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19fe8d6cb13c4714962c072ea496f3392015f0989b1a2847bb4b2d9effd71d83"
-dependencies = [
- "askama_parser",
- "basic-toml",
- "mime",
- "mime_guess",
- "proc-macro2",
- "quote",
- "serde",
- "syn 2.0.85",
-]
-
-[[package]]
-name = "askama_escape"
-version = "0.10.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "619743e34b5ba4e9703bba34deac3427c72507c7159f5fd030aea8cac0cfe341"
-
-[[package]]
-name = "askama_parser"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acb1161c6b64d1c3d83108213c2a2533a342ac225aabd0bda218278c2ddb00c0"
-dependencies = [
- "nom",
-]
-
-[[package]]
 name = "assert-json-diff"
 version = "2.0.2"
 source = "git+https://github.com/davidpdrsn/assert-json-diff/?rev=bca0d2c590808274298d939e0533da79cd09076d#bca0d2c590808274298d939e0533da79cd09076d"
@@ -992,12 +951,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "downcast"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1435fa1053d8b2fbbe9be7e97eca7f33d37b28409959813daefc1446a14247f1"
-
-[[package]]
 name = "downcast-rs"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1243,12 +1196,6 @@ checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
 ]
-
-[[package]]
-name = "fragile"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c2141d6d6c8512188a7891b4b01590a45f6dac67afb4f255c4124dbb86d4eaa"
 
 [[package]]
 name = "fs-err"
@@ -1924,32 +1871,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mockall"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39a6bfcc6c8c7eed5ee98b9c3e33adc726054389233e201c95dab2d41a3839d2"
-dependencies = [
- "cfg-if",
- "downcast",
- "fragile",
- "mockall_derive",
- "predicates",
- "predicates-tree",
-]
-
-[[package]]
-name = "mockall_derive"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "25ca3004c2efe9011bd4e461bd8256445052b9615405b4f7ea43fc8ca5c20898"
-dependencies = [
- "cfg-if",
- "proc-macro2",
- "quote",
- "syn 2.0.85",
-]
-
-[[package]]
 name = "moka"
 version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2019,17 +1940,6 @@ name = "num-conv"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
-
-[[package]]
-name = "num-derive"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed3955f1a9c7c0c15e092f9c887db08b1fc683305fdf6eb6684f22555355e202"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.85",
-]
 
 [[package]]
 name = "num-integer"
@@ -2273,29 +2183,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "predicates"
-version = "3.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e9086cc7640c29a356d1a29fd134380bee9d8f79a17410aa76e7ad295f42c97"
+name = "preinterpret"
+version = "0.2.0"
+source = "git+https://github.com/dhedey/preinterpret?rev=6754b92bdead0ddd6f69fbee7d782180d6351605#6754b92bdead0ddd6f69fbee7d782180d6351605"
 dependencies = [
- "anstyle",
- "predicates-core",
-]
-
-[[package]]
-name = "predicates-core"
-version = "1.0.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae8177bee8e75d6846599c6b9ff679ed51e882816914eec639944d7c9aa11931"
-
-[[package]]
-name = "predicates-tree"
-version = "1.0.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41b740d195ed3166cd147c8047ec98db0e22ec019eb8eeb76d343b795304fb13"
-dependencies = [
- "predicates-core",
- "termtree",
+ "proc-macro2",
+ "syn 2.0.85",
 ]
 
 [[package]]
@@ -2347,8 +2240,8 @@ dependencies = [
 
 [[package]]
 name = "radix-blueprint-schema-init"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "bitflags 1.3.2",
  "radix-common",
@@ -2358,8 +2251,8 @@ dependencies = [
 
 [[package]]
 name = "radix-common"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "bech32",
  "blake2",
@@ -2384,8 +2277,8 @@ dependencies = [
 
 [[package]]
 name = "radix-common-derive"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "paste 1.0.15",
  "proc-macro2",
@@ -2396,8 +2289,8 @@ dependencies = [
 
 [[package]]
 name = "radix-engine"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "bitflags 1.3.2",
  "colored",
@@ -2427,8 +2320,8 @@ dependencies = [
 
 [[package]]
 name = "radix-engine-interface"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "bitflags 1.3.2",
  "const-sha1",
@@ -2448,16 +2341,16 @@ dependencies = [
 
 [[package]]
 name = "radix-engine-profiling"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "fixedstr",
 ]
 
 [[package]]
 name = "radix-engine-profiling-derive"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2468,7 +2361,7 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit"
 version = "2.2.0-dev2"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=9f58ddfc6e0edb06cb35f8422044522bc0387d14#9f58ddfc6e0edb06cb35f8422044522bc0387d14"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=2ab5b35a6cb96c9faeb98ed8df67b870336e6873#2ab5b35a6cb96c9faeb98ed8df67b870336e6873"
 dependencies = [
  "bech32",
  "cargo_toml 0.15.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2493,8 +2386,8 @@ dependencies = [
 
 [[package]]
 name = "radix-engine-toolkit-common"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "radix-common",
  "radix-engine",
@@ -2507,8 +2400,8 @@ dependencies = [
 
 [[package]]
 name = "radix-native-sdk"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "radix-common",
  "radix-engine-interface",
@@ -2518,8 +2411,8 @@ dependencies = [
 
 [[package]]
 name = "radix-rust"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "indexmap 2.6.0",
  "serde",
@@ -2527,8 +2420,8 @@ dependencies = [
 
 [[package]]
 name = "radix-sbor-derive"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2538,8 +2431,8 @@ dependencies = [
 
 [[package]]
 name = "radix-substate-store-impls"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.10.5",
@@ -2551,8 +2444,8 @@ dependencies = [
 
 [[package]]
 name = "radix-substate-store-interface"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.10.5",
@@ -2563,8 +2456,8 @@ dependencies = [
 
 [[package]]
 name = "radix-substate-store-queries"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.10.5",
@@ -2580,8 +2473,8 @@ dependencies = [
 
 [[package]]
 name = "radix-transactions"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "annotate-snippets",
  "bech32",
@@ -2758,10 +2651,55 @@ dependencies = [
 ]
 
 [[package]]
+name = "rinja"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3dc4940d00595430b3d7d5a01f6222b5e5b51395d1120bdb28d854bb8abb17a5"
+dependencies = [
+ "itoa",
+ "rinja_derive",
+]
+
+[[package]]
+name = "rinja_derive"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08d9ed0146aef6e2825f1b1515f074510549efba38d71f4554eec32eb36ba18b"
+dependencies = [
+ "basic-toml",
+ "memchr",
+ "mime",
+ "mime_guess",
+ "proc-macro2",
+ "quote",
+ "rinja_parser",
+ "rustc-hash",
+ "serde",
+ "syn 2.0.85",
+]
+
+[[package]]
+name = "rinja_parser"
+version = "0.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93f9a866e2e00a7a1fb27e46e9e324a6f7c0e7edc4543cae1d38f4e4a100c610"
+dependencies = [
+ "memchr",
+ "nom",
+ "serde",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "719b953e2095829ee67db738b3bfa9fa368c94900df327b3f07fe6e794d2fe1f"
+
+[[package]]
+name = "rustc-hash"
+version = "2.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7fb8039b3032c191086b10f11f319a6e99e1e82889c5cc6046f515c9db1d497"
 
 [[package]]
 name = "rustc_version"
@@ -2823,7 +2761,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.1.70"
+version = "1.1.97"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -2847,7 +2785,6 @@ dependencies = [
  "itertools 0.12.0",
  "k256 0.13.3",
  "log",
- "mockall",
  "once_cell 1.19.0",
  "paste 1.0.14",
  "pretty_assertions",
@@ -2879,7 +2816,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi"
-version = "1.1.70"
+version = "1.1.97"
 dependencies = [
  "actix-rt",
  "assert-json-diff",
@@ -2897,6 +2834,7 @@ dependencies = [
  "itertools 0.12.0",
  "log",
  "paste 1.0.14",
+ "preinterpret",
  "pretty_assertions",
  "pretty_env_logger",
  "radix-engine-toolkit",
@@ -2925,8 +2863,8 @@ dependencies = [
 
 [[package]]
 name = "sbor"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "const-sha1",
  "hex 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2939,8 +2877,8 @@ dependencies = [
 
 [[package]]
 name = "sbor-derive"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "proc-macro2",
  "sbor-derive-common",
@@ -2949,8 +2887,8 @@ dependencies = [
 
 [[package]]
 name = "sbor-derive-common"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "const-sha1",
  "indexmap 2.6.0",
@@ -2963,7 +2901,7 @@ dependencies = [
 [[package]]
 name = "sbor-json"
 version = "2.2.0-dev2"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=9f58ddfc6e0edb06cb35f8422044522bc0387d14#9f58ddfc6e0edb06cb35f8422044522bc0387d14"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=2ab5b35a6cb96c9faeb98ed8df67b870336e6873#2ab5b35a6cb96c9faeb98ed8df67b870336e6873"
 dependencies = [
  "bech32",
  "radix-common",
@@ -3021,8 +2959,8 @@ dependencies = [
 
 [[package]]
 name = "scrypto"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "bech32",
  "const-sha1",
@@ -3042,8 +2980,8 @@ dependencies = [
 
 [[package]]
 name = "scrypto-derive"
-version = "1.3.0-dev"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=423e26abcfbb631d8e7f64ae748cab6f57151bb3#423e26abcfbb631d8e7f64ae748cab6f57151bb3"
+version = "1.3.0"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?tag=v1.3.0#57309755e1fe81ba802e0bf92bbcaf4f116b9b62"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3494,12 +3432,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "termtree"
-version = "0.4.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3369f5ac52d5eb6ab48c6b4ffdc8efbcad6b89c765749064ba298f2c68a16a76"
-
-[[package]]
 name = "textwrap"
 version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3755,11 +3687,12 @@ checksum = "ebc1c04c71510c7f702b52b7c350734c9ff1295c464a03335b00bb84fc54f853"
 
 [[package]]
 name = "uniffi"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
  "camino 1.1.9",
+ "cargo_metadata 0.15.4",
  "clap 4.5.20",
  "uniffi_bindgen",
  "uniffi_build",
@@ -3769,20 +3702,19 @@ dependencies = [
 
 [[package]]
 name = "uniffi_bindgen"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
- "askama",
  "camino 1.1.9",
  "cargo_metadata 0.15.4",
- "clap 4.5.20",
  "fs-err",
  "glob",
  "goblin",
  "heck 0.5.0",
  "once_cell 1.20.2",
  "paste 1.0.15",
+ "rinja",
  "serde",
  "textwrap",
  "toml 0.5.11",
@@ -3793,8 +3725,8 @@ dependencies = [
 
 [[package]]
 name = "uniffi_build"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
  "camino 1.1.9",
@@ -3803,8 +3735,8 @@ dependencies = [
 
 [[package]]
 name = "uniffi_checksum_derive"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "quote",
  "syn 2.0.85",
@@ -3812,13 +3744,11 @@ dependencies = [
 
 [[package]]
 name = "uniffi_core"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
  "bytes",
- "camino 1.1.9",
- "log",
  "once_cell 1.20.2",
  "paste 1.0.15",
  "static_assertions",
@@ -3826,8 +3756,8 @@ dependencies = [
 
 [[package]]
 name = "uniffi_macros"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "bincode",
  "camino 1.1.9",
@@ -3843,8 +3773,8 @@ dependencies = [
 
 [[package]]
 name = "uniffi_meta"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
  "bytes",
@@ -3854,8 +3784,8 @@ dependencies = [
 
 [[package]]
 name = "uniffi_testing"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
  "camino 1.1.9",
@@ -3866,13 +3796,12 @@ dependencies = [
 
 [[package]]
 name = "uniffi_udl"
-version = "0.27.1"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+version = "0.28.3"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
  "textwrap",
  "uniffi_meta",
- "uniffi_testing",
  "weedle2",
 ]
 
@@ -4043,42 +3972,46 @@ dependencies = [
 
 [[package]]
 name = "wasmi"
-version = "0.35.0"
+version = "0.39.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbaac6e702fa7b52258e5ac90d6e20a40afb37a1fbe7c645d0903ee42c5f85f4"
+checksum = "fc7a1acc721dd73e4fff2dc3796cc3efda6e008369e859a20fdbe058bddeebc3"
 dependencies = [
  "arrayvec",
  "multi-stash",
- "num-derive",
- "num-traits",
  "smallvec",
  "spin",
  "wasmi_collections",
  "wasmi_core",
+ "wasmi_ir",
  "wasmparser-nostd",
 ]
 
 [[package]]
 name = "wasmi_collections"
-version = "0.35.0"
+version = "0.39.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ff59e30e550a509cc689ec638e5042be4d78ec9f6dd8a71fd02ee28776a74fd"
+checksum = "142fda775f9cda587681ff0ec63c7a7e5679dc95da75f3f9b7e3979ce3506a5b"
 dependencies = [
- "ahash",
- "hashbrown 0.14.5",
  "string-interner",
 ]
 
 [[package]]
 name = "wasmi_core"
-version = "0.35.0"
+version = "0.39.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13e10c674add0f92f47bf8ad57c55ee3ac1762a0d9baf07535e27e22b758a916"
+checksum = "281a49ca3c12c8efa052cb67758454fc861d80ab5a03def352e04eb08c20beb2"
 dependencies = [
  "downcast-rs",
  "libm",
- "num-traits",
- "paste 1.0.15",
+]
+
+[[package]]
+name = "wasmi_ir"
+version = "0.39.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6bbadcf529808086a74bacd3ce8aedece444a847292198a56dcde920d1fb213c"
+dependencies = [
+ "wasmi_core",
 ]
 
 [[package]]
@@ -4134,7 +4067,7 @@ dependencies = [
 [[package]]
 name = "weedle2"
 version = "5.0.0"
-source = "git+https://github.com/mozilla/uniffi-rs/?rev=6f33088e8100a2ea9586c8c3ecf98ab51d5aba62#6f33088e8100a2ea9586c8c3ecf98ab51d5aba62"
+source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "nom",
 ]

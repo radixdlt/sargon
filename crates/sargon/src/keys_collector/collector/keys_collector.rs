@@ -24,7 +24,8 @@ impl KeysCollector {
         derivation_paths: impl Into<
             IndexMap<FactorSourceIDFromHash, IndexSet<DerivationPath>>,
         >,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<Self> {
         let derivation_paths = derivation_paths.into();
         let preprocessor = KeysCollectorPreprocessor::new(derivation_paths);
@@ -32,15 +33,17 @@ impl KeysCollector {
             all_factor_sources_in_profile
                 .into_iter()
                 .collect::<IndexSet<_>>(),
-            interactors,
+            interactor,
             preprocessor,
+            derivation_purpose,
         )
     }
 
     fn with_preprocessor(
         all_factor_sources_in_profile: impl Into<IndexSet<FactorSource>>,
-        interactors: Arc<dyn KeysDerivationInteractors>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
         preprocessor: KeysCollectorPreprocessor,
+        derivation_purpose: DerivationPurpose,
     ) -> Result<Self> {
         debug!("Init KeysCollector");
         let all_factor_sources_in_profile =
@@ -49,7 +52,11 @@ impl KeysCollector {
         preprocessor
             .preprocess(all_factor_sources_in_profile)
             .map(|(s, f)| Self {
-                dependencies: KeysCollectorDependencies::new(interactors, f),
+                dependencies: KeysCollectorDependencies::new(
+                    interactor,
+                    f,
+                    derivation_purpose,
+                ),
                 state: RwLock::new(s),
             })
     }
@@ -73,45 +80,36 @@ impl KeysCollector {
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> Result<()> {
-        let interactor = self
-            .dependencies
-            .interactors
-            .interactor_for(factor_sources_of_kind.kind);
+        let interactor = self.dependencies.interactor.clone();
         let factor_sources = factor_sources_of_kind.factor_sources();
-        match interactor {
-            KeyDerivationInteractor::PolyFactor(interactor) => {
+
+        if factor_sources_of_kind.kind == FactorSourceKind::Device {
+            for factor_source in factor_sources {
                 // Prepare the request for the interactor
-                trace!("Creating poly request for interactor");
-                let request = self.request_for_parallel_interactor(
-                    factor_sources
-                        .into_iter()
-                        .map(|f| f.id_from_hash())
-                        .collect(),
+                trace!("Creating mono request for interactor");
+                let request = self.request_for_serial_interactor(
+                    &factor_source.id_from_hash(),
                 )?;
-                trace!("Dispatching poly request to interactor: {:?}", request);
+
+                trace!("Dispatching mono request to interactor: {:?}", request);
+                // Produce the results from the interactor
                 let response = interactor.derive(request).await?;
+
+                // Report the results back to the collector
                 self.process_batch_response(response)?;
             }
-
-            KeyDerivationInteractor::MonoFactor(interactor) => {
-                for factor_source in factor_sources {
-                    // Prepare the request for the interactor
-                    trace!("Creating mono request for interactor");
-                    let request = self.request_for_serial_interactor(
-                        &factor_source.id_from_hash(),
-                    )?;
-
-                    trace!(
-                        "Dispatching mono request to interactor: {:?}",
-                        request
-                    );
-                    // Produce the results from the interactor
-                    let response = interactor.derive(request).await?;
-
-                    // Report the results back to the collector
-                    self.process_batch_response(response)?;
-                }
-            }
+        } else {
+            // Prepare the request for the interactor
+            trace!("Creating poly request for interactor");
+            let request = self.request_for_parallel_interactor(
+                factor_sources
+                    .into_iter()
+                    .map(|f| f.id_from_hash())
+                    .collect(),
+            )?;
+            trace!("Dispatching poly request to interactor: {:?}", request);
+            let response = interactor.derive(request).await?;
+            self.process_batch_response(response)?;
         }
         Ok(())
     }
@@ -132,7 +130,7 @@ impl KeysCollector {
     fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> Result<MonoFactorKeyDerivationRequest> {
+    ) -> Result<(FactorSourceIDFromHash, IndexSet<DerivationPath>)> {
         let keyring = self
             .state
             .try_read()
@@ -140,33 +138,38 @@ impl KeysCollector {
             .keyring_for(factor_source_id)?;
         assert_eq!(keyring.factors().len(), 0);
         let paths = keyring.paths.clone();
-        Ok(MonoFactorKeyDerivationRequest::new(
-            *factor_source_id,
-            paths,
-        ))
+        Ok((*factor_source_id, paths))
     }
 
     fn request_for_parallel_interactor(
         &self,
         factor_sources_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> Result<PolyFactorKeyDerivationRequest> {
-        let per_factor_source = factor_sources_ids
-            .into_iter()
-            .map(|f| self.input_for_interactor(&f))
-            .collect::<Result<Vec<MonoFactorKeyDerivationRequest>>>()?;
-        Ok(PolyFactorKeyDerivationRequest::new(
-            per_factor_source
+    ) -> Result<KeyDerivationRequest> {
+        let per_factor_source =
+            factor_sources_ids
                 .into_iter()
-                .map(|r| (r.factor_source_id, r))
-                .collect(),
+                .map(|f| self.input_for_interactor(&f))
+                .collect::<Result<
+                    Vec<(FactorSourceIDFromHash, IndexSet<DerivationPath>)>,
+                >>()?;
+        Ok(KeyDerivationRequest::new(
+            self.dependencies.derivation_purpose.clone(),
+            per_factor_source.into_iter().collect(),
         ))
     }
 
     fn request_for_serial_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> Result<MonoFactorKeyDerivationRequest> {
-        self.input_for_interactor(factor_source_id)
+    ) -> Result<KeyDerivationRequest> {
+        let (id, derivation_paths) =
+            self.input_for_interactor(factor_source_id)?;
+
+        Ok(KeyDerivationRequest::new_mono_factor(
+            self.dependencies.derivation_purpose.clone(),
+            id,
+            derivation_paths,
+        ))
     }
 
     fn process_batch_response(
@@ -251,7 +254,8 @@ mod tests {
         let collector = KeysCollector::new(
             [f0, f1, f2, f3],
             paths.clone(),
-            Arc::new(TestDerivationInteractors::default()),
+            Arc::new(TestDerivationInteractor::default()),
+            DerivationPurpose::PreDerivingKeys,
         )
         .unwrap();
 

@@ -60,8 +60,8 @@ impl Profile {
             value: UnsecuredEntityControl::new(hd_fi, None).unwrap(),
         };
         assert_eq!(
-            account.unique_factor_instances(),
-            persona.unique_factor_instances()
+            account.unique_tx_signing_factor_instances(),
+            persona.unique_tx_signing_factor_instances()
         );
         sut.networks = ProfileNetworks::just(ProfileNetwork::new(
             NetworkID::Mainnet,
@@ -103,45 +103,12 @@ impl Profile {
         };
 
         assert_eq!(
-            account.unique_factor_instances(),
-            account2.unique_factor_instances()
+            account.unique_tx_signing_factor_instances(),
+            account2.unique_tx_signing_factor_instances()
         );
         sut.networks = ProfileNetworks::just(ProfileNetwork::new(
             NetworkID::Mainnet,
             Accounts::from_iter([account, account2]),
-            Personas::default(),
-            AuthorizedDapps::default(),
-            ResourcePreferences::default(),
-        ));
-        sut
-    }
-
-    fn with_instance_collision_authentication_signing_key_kind() -> Self {
-        let mwp = MnemonicWithPassphrase::sample_device();
-        let mut sut = Profile::from_mnemonic_with_passphrase(
-            mwp.clone(),
-            HostId::sample(),
-            HostInfo::sample(),
-        );
-        let mut account1 = Account::sample();
-        let mut account2 = Account::sample_other();
-        let mut uec1 = account1.try_get_unsecured_control().unwrap();
-        uec1.authentication_signing = Some(
-            HierarchicalDeterministicFactorInstance::sample_auth_signing(),
-        );
-        account1.security_state =
-            EntitySecurityState::Unsecured { value: uec1 };
-
-        let mut uec2 = account1.try_get_unsecured_control().unwrap();
-        uec2.authentication_signing = Some(
-            HierarchicalDeterministicFactorInstance::sample_auth_signing(),
-        );
-        account2.security_state =
-            EntitySecurityState::Unsecured { value: uec2 };
-
-        sut.networks = ProfileNetworks::just(ProfileNetwork::new(
-            NetworkID::Mainnet,
-            Accounts::from_iter([account1, account2]),
             Personas::default(),
             AuthorizedDapps::default(),
             ResourcePreferences::default(),
@@ -208,8 +175,8 @@ impl Profile {
         };
 
         assert_eq!(
-            persona1.unique_factor_instances(),
-            persona2.unique_factor_instances()
+            persona1.unique_tx_signing_factor_instances(),
+            persona2.unique_tx_signing_factor_instances()
         );
         sut.networks = ProfileNetworks::just(ProfileNetwork::new(
             NetworkID::Mainnet,
@@ -245,7 +212,7 @@ mod tests {
         let accounts = sut.accounts_on_current_network().unwrap();
         let acc = accounts.first().unwrap();
         let factor_instance = acc
-            .unique_factor_instances()
+            .unique_tx_signing_factor_instances()
             .into_iter()
             .next()
             .clone()
@@ -292,17 +259,6 @@ mod tests {
     }
 
     #[test]
-    fn instance_detection_auth_sign() {
-        let sut =
-            SUT::with_instance_collision_authentication_signing_key_kind();
-        let accounts = sut.accounts_on_current_network().unwrap();
-        let acc1 = accounts.clone().first().unwrap().clone();
-        let acc2 = accounts.items().into_iter().next_back().unwrap();
-
-        instance_detection(sut, acc1, acc2)
-    }
-
-    #[test]
     fn instance_detection_both_personas() {
         let sut = SUT::with_instance_collision_both_personas();
         let personas = sut.personas_on_current_network().unwrap();
@@ -330,7 +286,7 @@ mod tests {
 
         let e1 = e1.into();
         let factor_instance = e1
-            .unique_factor_instances()
+            .unique_tx_signing_factor_instances()
             .into_iter()
             .next()
             .clone()

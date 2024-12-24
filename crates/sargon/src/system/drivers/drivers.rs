@@ -106,6 +106,23 @@ impl Drivers {
         )
     }
 
+    pub fn with_storages(
+        secure_storage: Arc<dyn SecureStorageDriver>,
+        unsafe_storage: Arc<dyn UnsafeStorageDriver>,
+    ) -> Arc<Self> {
+        Drivers::new(
+            RustNetworkingDriver::new(),
+            secure_storage,
+            RustEntropyDriver::new(),
+            RustHostInfoDriver::new(),
+            RustLoggingDriver::new(),
+            RustEventBusDriver::new(),
+            Self::file_system(),
+            unsafe_storage,
+            RustProfileStateChangeDriver::new(),
+        )
+    }
+
     pub fn with_entropy_provider(
         entropy_provider: Arc<dyn EntropyProviderDriver>,
     ) -> Arc<Self> {

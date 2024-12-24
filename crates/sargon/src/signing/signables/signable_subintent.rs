@@ -6,6 +6,8 @@ impl Signable for Subintent {
 
     type Payload = CompiledSubintent;
 
+    type Signed = SignedSubintent;
+
     fn entities_requiring_signing(
         &self,
         profile: &Profile,
@@ -15,6 +17,45 @@ impl Signable for Subintent {
         ExtractorOfEntitiesRequiringAuth::extract(profile, summary)
     }
 
+    fn signed(
+        &self,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
+    ) -> Result<Self::Signed> {
+        let intent_signatures =
+            signatures_per_owner.values().cloned().collect_vec();
+        SignedSubintent::new(
+            self.clone(),
+            IntentSignatures::new(intent_signatures),
+        )
+    }
+}
+
+impl From<SignedSubintent> for Subintent {
+    fn from(val: SignedSubintent) -> Self {
+        val.subintent
+    }
+}
+
+impl IntoIterator for SignedSubintent {
+    type Item = SignatureWithPublicKey;
+    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.subintent_signatures
+            .signatures
+            .into_iter()
+            .map(|s| s.0)
+            .collect_vec()
+            .into_iter()
+    }
+}
+
+impl SignableID for SubintentHash {}
+
+impl ProvidesSamplesByBuildingManifest for Subintent {
     fn sample_entity_addresses_with_pub_key_hashes(
         all_addresses_with_hashes: Vec<(
             AddressOfAccountOrPersona,
@@ -40,8 +81,6 @@ impl Signable for Subintent {
         Self::new(IntentHeaderV2::sample(), manifest, MessageV2::None).unwrap()
     }
 }
-
-impl SignableID for SubintentHash {}
 
 #[cfg(test)]
 mod test {
@@ -77,5 +116,30 @@ mod test {
                 .sorted()
                 .collect_vec()
         );
+    }
+
+    #[test]
+    fn from_signed_subintent() {
+        let signed_subintent = SignedSubintent::sample();
+
+        assert_eq!(
+            <Subintent as From::<SignedSubintent>>::from(signed_subintent),
+            Subintent::sample()
+        )
+    }
+
+    #[test]
+    fn signed_subintent_into_signatures() {
+        let signed_subintent = SignedSubintent::sample();
+
+        assert_eq!(
+            signed_subintent.clone().into_iter().collect_vec(),
+            signed_subintent
+                .subintent_signatures
+                .signatures
+                .into_iter()
+                .map(|s| s.0)
+                .collect_vec()
+        )
     }
 }

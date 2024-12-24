@@ -819,8 +819,61 @@ pub enum CommonError {
     #[error("Failed to encode transaction preview v2 - '{underlying}'")]
     FailedToEncodeTransactionPreviewV2 { underlying: String } = 10229,
 
+    #[error("Could not validate signature for the given input.")]
+    InvalidHDSignature = 10230,
+
+    #[error("Could not validate signature for the given rola challenge.")]
+    InvalidSignatureForRolaChallenge = 10231,
+
+    #[error("Signing was rejected by the user")]
+    SigningRejected = 10232,
+
+    #[error("Failed to automatically build shield, reason: '{underlying}'")]
+    AutomaticShieldBuildingFailure { underlying: String } = 10233,
+
+    #[error("No Transaction Signing Factor")]
+    NoTransactionSigningFactorInstance = 10234,
+
+    #[error("Authentication Signing FactorInstance not securified")]
+    AuthenticationSigningFactorInstanceNotSecurified = 10235,
+
+    #[error("SecurityEntityControl has no QueuedTransaction, unable to mark it as cancelled")]
+    SecurityEntityControlHasNoProvisionallyQueuedTransaction = 10236,
+
+    #[error("SecurityEntityControl has derived instances, which would be lost if discarded. Implement a way to put them back in the cache.")]
+    SecurityEntityControlCannotChangeProvisionalAlreadyDerivedInstances = 10237,
+
+    #[error("SecurityEntityControl has QueuedTransaction, unable override it, use `cancel_queued_transaction`")]
+    SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction =
+        10238,
+
+    #[error(
+        "Entity kind of FactorInstances does not match EntityKind of entity"
+    )]
+    SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind {
+        entity_kind_of_entity: CAP26EntityKind,
+        entity_kind_of_factor_instances: CAP26EntityKind,
+    } = 10239,
+
+    #[error(
+        "Cannot securify entity it is already securified according to profile"
+    )]
+    CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile = 10240,
+
+    #[error("Cannot securify entity that has provisional security config")]
+    CannotSecurifyEntityHasProvisionalSecurityConfig = 10241,
+
+    #[error("Too few FactorInstances derived")]
+    TooFewFactorInstancesDerived = 10242,
+
+    #[error("Missing Authentication Signing FactorInstance mapping SecurityStructureOfFactorSources into SecurityStructureOfFactorInstances.")]
+    MissingRolaKeyForSecurityStructureOfFactorInstances = 10243,
+
+    #[error("SecurityStateAccessController address mismatch")]
+    SecurityStateAccessControllerAddressMismatch = 10244,
+
     #[error("Unknown response status code: {status_code}")]
-    ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10230,
+    ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10245,
 }
 
 #[uniffi::export]

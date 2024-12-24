@@ -5,6 +5,8 @@ impl Signable for TransactionIntent {
 
     type Payload = CompiledTransactionIntent;
 
+    type Signed = SignedIntent;
+
     fn entities_requiring_signing(
         &self,
         profile: &Profile,
@@ -14,6 +16,45 @@ impl Signable for TransactionIntent {
         ExtractorOfEntitiesRequiringAuth::extract(profile, summary)
     }
 
+    fn signed(
+        &self,
+        signatures_per_owner: IndexMap<
+            AddressOfAccountOrPersona,
+            IntentSignature,
+        >,
+    ) -> Result<Self::Signed> {
+        let intent_signatures =
+            signatures_per_owner.values().cloned().collect_vec();
+        SignedIntent::new(
+            self.clone(),
+            IntentSignatures::new(intent_signatures),
+        )
+    }
+}
+
+impl From<SignedIntent> for TransactionIntent {
+    fn from(val: SignedIntent) -> Self {
+        val.intent
+    }
+}
+
+impl IntoIterator for SignedIntent {
+    type Item = SignatureWithPublicKey;
+    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.intent_signatures
+            .signatures
+            .into_iter()
+            .map(|s| s.0)
+            .collect_vec()
+            .into_iter()
+    }
+}
+
+impl SignableID for TransactionIntentHash {}
+
+impl ProvidesSamplesByBuildingManifest for TransactionIntent {
     fn sample_entity_addresses_with_pub_key_hashes(
         all_addresses_with_hashes: Vec<(
             AddressOfAccountOrPersona,
@@ -37,8 +78,6 @@ impl Signable for TransactionIntent {
         Self::new(TransactionHeader::sample(), manifest, Message::None).unwrap()
     }
 }
-
-impl SignableID for TransactionIntentHash {}
 
 #[cfg(test)]
 mod test {
@@ -77,5 +116,30 @@ mod test {
                 .sorted()
                 .collect_vec()
         );
+    }
+
+    #[test]
+    fn from_signed_intent() {
+        let signed_intent = SignedIntent::sample();
+
+        assert_eq!(
+            <TransactionIntent as From::<SignedIntent>>::from(signed_intent),
+            TransactionIntent::sample_other()
+        )
+    }
+
+    #[test]
+    fn signed_subintent_into_signatures() {
+        let signed_intent = SignedIntent::sample();
+
+        assert_eq!(
+            signed_intent.clone().into_iter().collect_vec(),
+            signed_intent
+                .intent_signatures
+                .signatures
+                .into_iter()
+                .map(|s| s.0)
+                .collect_vec()
+        )
     }
 }

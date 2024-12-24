@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 
-#[derive(derive_more::Debug, PartialEq, Eq)]
+#[derive(derive_more::Debug)]
 #[debug("{}", self.debug_str())]
 pub(crate) struct Petitions<S: Signable> {
     /// Lookup from factor to TXID.
@@ -22,8 +22,42 @@ pub(crate) struct Petitions<S: Signable> {
     /// Lookup from TXID to signatures builders, sorted according to the order of
     /// transactions passed to the SignaturesBuilder.
     pub(crate) txid_to_petition:
-        RefCell<IndexMap<S::ID, PetitionForTransaction<S>>>,
+        RwLock<IndexMap<S::ID, PetitionForTransaction<S>>>,
 }
+
+impl<S: Signable> Clone for Petitions<S> {
+    fn clone(&self) -> Self {
+        Self {
+            factor_source_to_signable_id: self
+                .factor_source_to_signable_id
+                .clone(),
+            txid_to_petition: RwLock::new(
+                self.txid_to_petition
+                    .read()
+                    .expect("Petitions lock should not have been poisoned.")
+                    .clone(),
+            ),
+        }
+    }
+}
+
+impl<S: Signable> PartialEq for Petitions<S> {
+    fn eq(&self, other: &Self) -> bool {
+        self.factor_source_to_signable_id == other.factor_source_to_signable_id
+            && self
+                .txid_to_petition
+                .read()
+                .expect("Petitions lock should not have been poisoned")
+                .deref()
+                == other
+                    .txid_to_petition
+                    .read()
+                    .expect("Petitions lock should not have been poisoned")
+                    .deref()
+    }
+}
+
+impl<S: Signable> Eq for Petitions<S> {}
 
 impl<S: Signable> Petitions<S> {
     pub(crate) fn new(
@@ -35,18 +69,19 @@ impl<S: Signable> Petitions<S> {
     ) -> Self {
         Self {
             factor_source_to_signable_id: factor_source_to_signable_ids,
-            txid_to_petition: RefCell::new(txid_to_petition),
+            txid_to_petition: RwLock::new(txid_to_petition),
         }
     }
 
-    pub(crate) fn outcome(self) -> SignaturesOutcome<S::ID> {
-        let txid_to_petition = self.txid_to_petition.into_inner();
+    pub(crate) fn outcome(&self) -> SignaturesOutcome<S::ID> {
+        let txid_to_petition = self
+            .txid_to_petition
+            .read()
+            .expect("Petitions lock should not have been poisoned.");
         let mut failed_transactions = MaybeSignedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
         let mut neglected_factor_sources = IndexSet::<NeglectedFactor>::new();
-        for (intent_hash, petition_of_transaction) in
-            txid_to_petition.into_iter()
-        {
+        for (intent_hash, petition_of_transaction) in txid_to_petition.clone() {
             let outcome = petition_of_transaction.outcome();
             let signatures = outcome.signatures;
 
@@ -80,7 +115,9 @@ impl<S: Signable> Petitions<S> {
                     .expect("Should be able to lookup intent hash for each factor source, did you call this method with irrelevant factor sources? Or did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `factor_source_to_intent_hash`.map")
                     .iter()
                     .map(|intent_hash| {
-                        let binding = self.txid_to_petition.borrow();
+                        let binding = self.txid_to_petition
+                            .read()
+                            .expect("Petitions lock should not have been poisoned.");
                         let value = binding.get(intent_hash).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
                         each(value)
                     })
@@ -132,7 +169,7 @@ impl<S: Signable> Petitions<S> {
     pub(crate) fn input_for_interactor(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> MonoFactorSignRequestInput<S> {
+    ) -> IndexSet<TransactionSignRequestInput<S>> {
         self.each_petition(
             IndexSet::just(*factor_source_id),
             |p| {
@@ -142,12 +179,7 @@ impl<S: Signable> Petitions<S> {
                     Some(p.input_for_interactor(factor_source_id))
                 }
             },
-            |i| {
-                MonoFactorSignRequestInput::new(
-                    *factor_source_id,
-                    i.into_iter().flatten().collect::<IndexSet<_>>(),
-                )
-            },
+            |i| i.into_iter().flatten().collect::<IndexSet<_>>(),
         )
     }
 
@@ -160,7 +192,10 @@ impl<S: Signable> Petitions<S> {
     }
 
     fn add_signature(&self, signature: &HDSignature<S::ID>) {
-        let binding = self.txid_to_petition.borrow();
+        let binding = self
+            .txid_to_petition
+            .read()
+            .expect("Petitions lock should not have been poisoned.");
         let petition = binding.get(signature.payload_id()).expect("Should have a petition for each transaction, did you recently change the preprocessor logic of the SignaturesCollector, if you did you've missed adding an entry for `txid_to_petition`.map");
         petition.add_signature(signature.clone())
     }
@@ -208,14 +243,17 @@ impl<S: Signable> Petitions<S> {
     #[allow(unused)]
     fn debug_str(&self) -> String {
         self.txid_to_petition
-            .borrow()
+            .read()
+            .expect("Petitions lock should not have been poisoned.")
             .iter()
             .map(|p| format!("Petitions({:#?}: {:#?})", p.0, p.1))
             .join(" + ")
     }
 }
 
-impl<S: Signable> HasSampleValues for Petitions<S> {
+impl<S: Signable + ProvidesSamplesByBuildingManifest> HasSampleValues
+    for Petitions<S>
+{
     fn sample() -> Self {
         let p0 = PetitionForTransaction::<S>::sample();
         Self::new(

@@ -16,7 +16,8 @@ final class SargonOSTests: OSTest {
 		let _ = await SUT.boot(
 			bios: .init(
 				drivers: .test()
-			)
+			),
+			interactor: ThrowingHostInteractor.shared
 		)
 	}
 

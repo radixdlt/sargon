@@ -7,25 +7,34 @@ use crate::prelude::*;
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct UnsecuredEntityControl {
-    // /// The factor instance which was used to create this unsecured entity, which
-    // /// also controls this entity and is used for signing transactions.
+    /// The factor instance which was used to create this unsecured entity, which
+    /// also controls this entity and is used for signing transactions.
     pub transaction_signing: HierarchicalDeterministicFactorInstance,
 
-    /// The factor instance which can be used for ROLA.
+    /// The provisional security structure configuration
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+    pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
+}
+
+impl HasProvisionalSecurifiedConfig for UnsecuredEntityControl {
+    fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
+        self.provisional_securified_config.clone()
+    }
+
+    fn set_provisional_unchecked(
+        &mut self,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
+    ) {
+        self.provisional_securified_config =
+            provisional_securified_config.into();
+    }
 }
 
 impl HasFactorInstances for UnsecuredEntityControl {
-    fn unique_factor_instances(&self) -> IndexSet<FactorInstance> {
-        let mut set = IndexSet::new();
-        set.insert(self.transaction_signing.factor_instance());
-        if let Some(authentication_signing) =
-            self.authentication_signing.as_ref()
-        {
-            set.insert(authentication_signing.factor_instance());
-        }
-        set
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        IndexSet::just(self.transaction_signing.factor_instance())
     }
 }
 
@@ -38,28 +47,17 @@ impl UnsecuredEntityControl {
     {
         Self {
             transaction_signing: entity_creating_factor_instance.into(),
-            authentication_signing: None,
+            provisional_securified_config: None,
         }
     }
 
     #[cfg(not(tarpaulin_include))] // false negative
     pub fn new(
         transaction_signing: HierarchicalDeterministicFactorInstance,
-        authentication_signing: Option<HierarchicalDeterministicFactorInstance>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) -> Result<Self> {
-        let is_invalid_auth_signing_key = authentication_signing
-            .as_ref()
-            .map(|auth| {
-                auth.get_key_kind() != CAP26KeyKind::AuthenticationSigning
-            })
-            .unwrap_or(false);
-
-        if is_invalid_auth_signing_key {
-            return Err(
-                CommonError::WrongKeyKindOfAuthenticationSigningFactorInstance,
-            );
-        }
-
         let key_kind = transaction_signing.get_key_kind();
         if key_kind != CAP26KeyKind::TransactionSigning {
             return Err(
@@ -68,7 +66,7 @@ impl UnsecuredEntityControl {
         }
         Ok(Self {
             transaction_signing,
-            authentication_signing,
+            provisional_securified_config: provisional_securified_config.into(),
         })
     }
 
@@ -112,15 +110,6 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn with_auth_signing() {
-        let tx_sign = HierarchicalDeterministicFactorInstance::sample();
-        let auth_sign =
-            HierarchicalDeterministicFactorInstance::sample_auth_signing();
-        let control = SUT::new(tx_sign, Some(auth_sign.clone())).unwrap();
-        assert_eq!(control.authentication_signing, Some(auth_sign));
     }
 
     #[test]

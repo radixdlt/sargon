@@ -72,7 +72,13 @@ impl Instructions {
             &network_definition,
             blob_provider,
         )
-        .map_err(|e| CommonError::from_scrypto_compile_error(e, network_id))
+        .map_err(|e| {
+            CommonError::from_scrypto_compile_error(
+                instructions_string.as_ref(),
+                e,
+                network_id,
+            )
+        })
         .and_then(|manifest| {
             Self::try_from((manifest.instructions.as_ref(), network_id))
         })
@@ -255,7 +261,8 @@ mod tests {
         assert_eq!(
             CommonError::from_address_error(
                 "foo".to_owned(),
-                NetworkID::Simulator
+                NetworkID::Simulator,
+                "fallback".to_owned()
             ),
             CommonError::InvalidInstructionsString {
                 underlying: "Failed to get NetworkID from address".to_owned()
@@ -266,8 +273,8 @@ mod tests {
     fn extract_error_from_addr_uses_invalid_instructions_string_if_same_network(
     ) {
         assert_eq!(
-            CommonError::from_address_error("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".to_owned(), NetworkID::Mainnet),
-            CommonError::InvalidInstructionsString { underlying: "Failed to determine why an address was invalid".to_owned() }
+            CommonError::from_address_error("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".to_owned(), NetworkID::Mainnet, "fallback".to_owned()),
+            CommonError::InvalidInstructionsString { underlying: "fallback".to_owned() }
         );
     }
 
@@ -275,6 +282,7 @@ mod tests {
     fn extract_error_from_error_non_gen_err() {
         assert_eq!(
             CommonError::from_scrypto_compile_error(
+                "invalid_manifest",
                 ScryptoCompileError::LexerError(LexerError {
                     error_kind: LexerErrorKind::UnexpectedEof,
                     span: Span {
@@ -293,7 +301,7 @@ mod tests {
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsString {
-                underlying: "LexerError(LexerError { error_kind: UnexpectedEof, span: Span { start: Position { full_index: 0, line_idx: 0, line_char_index: 0 }, end: Position { full_index: 0, line_idx: 0, line_char_index: 0 } } })".to_owned()
+                underlying: "error: unexpected end of file\n  |\n1 | invalid_manifest\n  | ^ unexpected end of file\n  |".to_owned()
             }
         );
     }
@@ -320,6 +328,7 @@ mod tests {
     fn extract_error_from_error_gen_non_addr_err() {
         assert_eq!(
             CommonError::from_scrypto_compile_error(
+                "invalid_manifest",
                 ScryptoCompileError::GeneratorError(GeneratorError {
                     error_kind: GeneratorErrorKind::BlobNotFound(
                         "dead".to_owned()
@@ -340,7 +349,7 @@ mod tests {
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsString {
-                underlying: "GeneratorError: BlobNotFound(\"dead\")".to_owned()
+                underlying: "error: blob with hash 'dead' not found\n  |\n1 | invalid_manifest\n  | ^ blob not found\n  |".to_owned()
             }
         );
     }
@@ -349,6 +358,7 @@ mod tests {
     fn extract_error_from_error_gen_err_package_addr() {
         assert_eq!(
             CommonError::from_scrypto_compile_error(
+                "invalid_manifest",
                 ScryptoCompileError::GeneratorError(GeneratorError {
                     error_kind: GeneratorErrorKind::InvalidPackageAddress(
                         PackageAddress::sample().to_string()
@@ -379,6 +389,7 @@ mod tests {
     fn extract_error_from_error_gen_err_resource_addr() {
         assert_eq!(
             CommonError::from_scrypto_compile_error(
+                "invalid_manifest",
                 ScryptoCompileError::GeneratorError(GeneratorError {
                     error_kind: GeneratorErrorKind::InvalidResourceAddress(
                         ResourceAddress::sample().to_string()

@@ -10,6 +10,7 @@ extension Drivers {
 		Drivers(
 			appVersion: "0.0.1",
 			userDefaultsSuite: "works.rdx",
+			unsafeStorageKeyMapping: [:],
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
 				keychainService: "test"
 			)
@@ -27,6 +28,9 @@ final class DriversTests: TestCase {
 	}
 
 	func test_bios_insecure() async throws {
-		let _ = await SargonOS.boot(bios: BIOS.insecure())
+		let _ = await SargonOS.boot(
+			bios: BIOS.insecure(),
+			interactor: ThrowingHostInteractor.shared
+		)
 	}
 }

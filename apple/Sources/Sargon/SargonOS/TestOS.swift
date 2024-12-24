@@ -7,11 +7,13 @@ extension BIOS {
 	public static func test(
 		bundle: Bundle = .main,
 		userDefaultsSuite: String = "Test",
+		unsafeStorageKeyMapping: UnsafeStorageKeyMapping = [:],
 		secureStorageDriver: SecureStorageDriver
 	) -> BIOS {
 		BIOS(
 			bundle: bundle,
 			userDefaultsSuite: userDefaultsSuite,
+			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
 			secureStorageDriver: secureStorageDriver
 		)
 	}
@@ -25,7 +27,10 @@ public final class TestOS {
 	}
 
 	public convenience init(bios: BIOS) async {
-		let os = await SargonOS.boot(bios: bios)
+		let os = await SargonOS.boot(
+			bios: bios,
+			interactor: ThrowingHostInteractor.shared
+		)
 		self.init(os: os)
 	}
 }

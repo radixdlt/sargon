@@ -12,7 +12,7 @@ use crate::prelude::*;
 /// m / purpose' / coin_type' / network' / entity_kind' / key_kind' / entity_index'
 /// ```
 ///
-/// The `IdentityPath` struct is parametrized by Radix network id and entity index, but fixes the other
+/// The `IdentityPath` struct is parameterized by Radix network id and entity index, but fixes the other
 /// constants in the path as follows:
 ///
 /// ```text
