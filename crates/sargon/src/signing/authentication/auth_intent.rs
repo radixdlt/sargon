@@ -11,7 +11,7 @@ pub struct AuthIntent {
     pub network_id: NetworkID,
 
     /// The origin `Url` of the dApp from which the request was made
-    pub origin: Url,
+    pub origin: DappOrigin,
 
     /// The dApp's definition address
     pub dapp_definition_address: DappDefinitionAddress,
@@ -30,7 +30,7 @@ impl AuthIntent {
         metadata: DappToWalletInteractionMetadata,
         entities_to_sign: impl IntoIterator<Item = AddressOfAccountOrPersona>,
     ) -> Result<Self> {
-        let origin = TryInto::<Url>::try_into(metadata.origin.clone())?;
+        TryInto::<Url>::try_into(metadata.origin.clone())?;
 
         if metadata.network_id != metadata.dapp_definition_address.network_id()
         {
@@ -56,7 +56,7 @@ impl AuthIntent {
         Ok(Self::new(
             challenge_nonce.0,
             metadata.network_id,
-            origin,
+            metadata.origin,
             metadata.dapp_definition_address,
             entities,
         ))
@@ -65,7 +65,7 @@ impl AuthIntent {
     pub fn new(
         challenge_nonce: Exactly32Bytes,
         network_id: NetworkID,
-        origin: Url,
+        origin: DappOrigin,
         dapp_definition_address: DappDefinitionAddress,
         entities_to_sign: IndexSet<AddressOfAccountOrPersona>,
     ) -> Self {

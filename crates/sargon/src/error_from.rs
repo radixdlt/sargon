@@ -1,10 +1,18 @@
 use crate::prelude::*;
 pub trait FromAddressError {
-    fn from_address_error(s: String, expected_network: NetworkID) -> Self;
+    fn from_address_error(
+        s: String,
+        expected_network: NetworkID,
+        fallback_underlying: String,
+    ) -> Self;
 }
 
 impl FromAddressError for CommonError {
-    fn from_address_error(s: String, expected_network: NetworkID) -> Self {
+    fn from_address_error(
+        s: String,
+        expected_network: NetworkID,
+        fallback_underlying: String,
+    ) -> Self {
         use radix_engine_toolkit::functions::address::decode as RET_decode_address;
         let Some(Some(network_id)) = RET_decode_address(&s)
             .map(|t| t.0)
@@ -21,8 +29,7 @@ impl FromAddressError for CommonError {
             }
         } else {
             CommonError::InvalidInstructionsString {
-                underlying: "Failed to determine why an address was invalid"
-                    .to_owned(),
+                underlying: fallback_underlying,
             }
         }
     }
@@ -30,6 +37,7 @@ impl FromAddressError for CommonError {
 
 pub trait FromScryptoCompileError {
     fn from_scrypto_compile_error(
+        manifest_string: &str,
         err: ScryptoCompileError,
         expected_network: NetworkID,
     ) -> Self;
@@ -37,6 +45,7 @@ pub trait FromScryptoCompileError {
 
 impl FromScryptoCompileError for CommonError {
     fn from_scrypto_compile_error(
+        manifest_string: &str,
         err: ScryptoCompileError,
         expected_network: NetworkID,
     ) -> Self {
@@ -45,16 +54,28 @@ impl FromScryptoCompileError for CommonError {
         use GeneratorError;
         use GeneratorErrorKind::*;
         let n = expected_network;
+
+        let pretty_diagnostics = scrypto_compile_error_diagnostics(
+            manifest_string,
+            err.clone(),
+            ScryptoCompileErrorDiagnosticsStyle::PlainText,
+        );
         match err {
             ScryptoCompileError::GeneratorError(GeneratorError {
                 error_kind: gen_err,
                 ..
             }) => match gen_err {
-                InvalidPackageAddress(a) => Self::from_address_error(a, n),
-                InvalidResourceAddress(a) => Self::from_address_error(a, n),
-                InvalidGlobalAddress(a) => Self::from_address_error(a, n),
+                InvalidPackageAddress(a) => {
+                    Self::from_address_error(a, n, pretty_diagnostics)
+                }
+                InvalidResourceAddress(a) => {
+                    Self::from_address_error(a, n, pretty_diagnostics)
+                }
+                InvalidGlobalAddress(a) => {
+                    Self::from_address_error(a, n, pretty_diagnostics)
+                }
                 _ => CommonError::InvalidInstructionsString {
-                    underlying: format!("GeneratorError: {:?}", gen_err),
+                    underlying: pretty_diagnostics,
                 },
             },
             ScryptoCompileError::ParserError(ParserError {
@@ -64,7 +85,7 @@ impl FromScryptoCompileError for CommonError {
                 max: max as u16,
             },
             _ => CommonError::InvalidInstructionsString {
-                underlying: format!("{:?}", err),
+                underlying: pretty_diagnostics,
             },
         }
     }

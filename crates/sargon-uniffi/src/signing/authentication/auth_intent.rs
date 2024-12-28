@@ -12,7 +12,7 @@ pub struct AuthIntent {
     pub network_id: NetworkID,
 
     /// The origin `Url` of the dApp from which the request was made
-    pub origin: Url,
+    pub origin: DappOrigin,
 
     /// The dApp's definition address
     pub dapp_definition_address: DappDefinitionAddress,
@@ -42,7 +42,7 @@ impl From<InternalAuthIntent> for AuthIntent {
         Self {
             challenge_nonce: value.challenge_nonce.into(),
             network_id: value.network_id.into(),
-            origin: value.origin,
+            origin: value.origin.into(),
             dapp_definition_address: value.dapp_definition_address.into(),
             entities_to_sign: value
                 .entities_to_sign
@@ -58,7 +58,7 @@ impl From<AuthIntent> for InternalAuthIntent {
         Self::new(
             value.challenge_nonce.into(),
             value.network_id.into(),
-            value.origin,
+            value.origin.into(),
             value.dapp_definition_address.into(),
             value.entities_to_sign.into_iter().map(Into::into).collect(),
         )
