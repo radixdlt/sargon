@@ -332,7 +332,7 @@ cd jvm
 
 # Release
 
-## Tagging
+## Bumping Version
 Install [cargo-workspaces](https://crates.io/crates/cargo-workspaces)
 
 ```sh
