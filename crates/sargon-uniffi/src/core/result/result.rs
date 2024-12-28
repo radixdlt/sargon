@@ -58,9 +58,8 @@ where
     Element: From<InternalElement>, // Ensures `Type` can be constructed from `InternalType`
 {
     fn into_iter_result(self) -> Result<Vec<Element>> {
-        // self.map(|vec| vec.into_type()) // Converts Ok variant using From trait
-        //     .map_err(Into::into) // Converts Err variant using Into
-        todo!()
+        self.map(|xs| xs.into_iter().map(Element::from).collect_vec())
+            .map_err(Into::into) // Converts Err variant using Into
     }
 }
 // `core::result::result::FromInternalResult<P2PLinks, Vec<p2p_link::P2PLink>>`
