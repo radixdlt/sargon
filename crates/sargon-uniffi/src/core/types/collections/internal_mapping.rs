@@ -51,20 +51,7 @@ where
     }
 }
 
-// === IdentifiedVec ====
-// impl<InternalElement, Element>
-//     FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
-//     for IdentifiedVecOf<InternalElement>
-// where
-//     InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-//     Element: From<InternalElement>,
-// {
-//     fn into_type(self) -> Vec<Element> {
-//         self.into_iter().map(Element::from).collect()
-//     }
-// }
-
-// === IdentifiedVec ====
+// === IdentifiedVecOf ====
 impl<InternalElement, Element>
     IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
     for Vec<Element>

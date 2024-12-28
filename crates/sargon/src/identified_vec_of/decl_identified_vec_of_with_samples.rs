@@ -52,14 +52,6 @@ macro_rules! decl_identified_vec_of {
                 }
             }
 
-            // impl $collection_type {
-            //     #[inline]
-            //     pub fn iter(&self) -> IdentifiedVecOfIterator<$element_type> {
-            //         self.0.iter()
-            //     }
-            // }
-
-
             impl FromIterator<$element_type> for $collection_type
             {
                 fn from_iter<T: IntoIterator<Item = $element_type>>(iter: T) -> Self {
@@ -67,52 +59,43 @@ macro_rules! decl_identified_vec_of {
                 }
             }
 
+            impl<'a> IntoIterator for &'a $collection_type {
+                type Item = $element_type;
+                type IntoIter = IdentifiedVecOfIterator<'a, $element_type>;
+
+                fn into_iter(self) -> Self::IntoIter {
+                    IdentifiedVecOfIterator {
+                        ordered_map: self,
+                        index: 0,
+                    }
+                }
+            }
+
+            impl IntoIterator for $collection_type {
+                type Item = $element_type;
+                type IntoIter = OwnedIdentifiedVecOfIterator<$element_type>;
+
+                fn into_iter(self) -> Self::IntoIter {
+                    OwnedIdentifiedVecOfIterator {
+                        ordered_map: self.0,
+                        index: 0,
+                    }
+                }
+            }
 
 
-            impl<'a> IntoIterator
-    for &'a $collection_type
-{
-    type Item = $element_type;
-    type IntoIter = IdentifiedVecOfIterator<'a, $element_type>;
+            #[cfg(test)]
+            mod [< $collection_type:snake _tests >] {
+                use super::*;
 
-    fn into_iter(self) -> Self::IntoIter {
-        IdentifiedVecOfIterator {
-            ordered_map: self,
-            index: 0,
-        }
-    }
-}
+                #[allow(clippy::upper_case_acronyms)]
+                type SUT = $collection_type;
 
-impl IntoIterator
-    for $collection_type
-{
-    type Item = $element_type;
-    type IntoIter = OwnedIdentifiedVecOfIterator<$element_type>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        OwnedIdentifiedVecOfIterator {
-            ordered_map: self.0,
-            index: 0,
-        }
-    }
-}
-
-
-
-
-
-            // #[cfg(test)]
-            // mod [< $collection_type:snake _tests >] {
-            //     use super::*;
-
-            //     #[allow(clippy::upper_case_acronyms)]
-            //     type SUT = $collection_type;
-
-            //     #[test]
-            //     fn test_ids() {
-            //         assert_eq!(SUT::sample().ids().into_iter().cloned().collect_vec(), SUT::sample().get_all().into_iter().map(|i| i.id()).collect_vec());
-            //     }
-            // }
+                #[test]
+                fn test_ids() {
+                    assert_eq!(SUT::sample().ids().into_iter().cloned().collect_vec(), SUT::sample().get_all().into_iter().map(|i| i.id()).collect_vec());
+                }
+            }
         }
 	};
     (

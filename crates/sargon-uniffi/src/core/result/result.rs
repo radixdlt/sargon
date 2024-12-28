@@ -50,7 +50,6 @@ where
     }
 }
 
-/// Implementation for InternalResult<Vec<InternalType>>
 impl<T, InternalElement, Element> FromInternalIterResult<T, Vec<Element>>
     for InternalResult<T>
 where
@@ -62,5 +61,3 @@ where
             .map_err(Into::into) // Converts Err variant using Into
     }
 }
-// `core::result::result::FromInternalResult<P2PLinks, Vec<p2p_link::P2PLink>>`
-// impl<T> From<>
