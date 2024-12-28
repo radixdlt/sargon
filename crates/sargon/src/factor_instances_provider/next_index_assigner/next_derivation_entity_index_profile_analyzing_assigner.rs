@@ -609,15 +609,9 @@ mod tests {
         let preset = DerivationPreset::IdentityRola;
         let network_id = NetworkID::Mainnet;
         let persona = Persona::sample_at(7);
-        let profile = Profile::sample_from(
-            FactorSource::sample_all(),
-            [],
-            [&persona],
-        );
-        let sut = SUT::new(
-            network_id,
-            Arc::new(profile),
-        );
+        let profile =
+            Profile::sample_from(FactorSource::sample_all(), [], [&persona]);
+        let sut = SUT::new(network_id, Arc::new(profile));
         type F = FactorSourceIDFromHash;
         {
             let fid = F::sample_device();

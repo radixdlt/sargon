@@ -31,7 +31,6 @@ pub struct P2PLink {
     pub display_name: String,
 }
 
-
 json_data_convertible!(P2PLink);
 
 #[uniffi::export]

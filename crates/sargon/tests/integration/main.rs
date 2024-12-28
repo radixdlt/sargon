@@ -186,7 +186,8 @@ mod integration_tests {
 
         let intent_hash = intent.transaction_intent_hash();
         println!("✨ intent hash: {}", &intent_hash);
-        let intent_signature = private_key.sign_transaction_intent_hash(&intent_hash);
+        let intent_signature =
+            private_key.sign_transaction_intent_hash(&intent_hash);
 
         let signed_intent = SignedIntent::new(
             intent,

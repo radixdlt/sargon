@@ -614,7 +614,6 @@ mod transaction_preview_analysis_tests {
         )
     }
 
-
     #[actix_rt::test]
     async fn success() {
         let responses = prepare_responses(
@@ -668,7 +667,7 @@ mod transaction_preview_analysis_tests {
                 PublicKey::sample(),
             )
             .await;
-            
+
         pretty_assertions::assert_eq!(
             result,
             Ok(TransactionToReview {
@@ -684,7 +683,7 @@ mod transaction_preview_analysis_tests {
                     [],
                     [],
                     FeeLocks::default(),
-                    FeeSummary::new("0", "0", "0", 0,),
+                    FeeSummary::new(0, 0, 0, 0,),
                     NewEntities::default()
                 )
             })
@@ -856,7 +855,7 @@ mod transaction_preview_analysis_tests {
                     [],
                     [DetailedManifestClass::General],
                     FeeLocks::default(),
-                    FeeSummary::new("0", "0", "0", 0,),
+                    FeeSummary::new(0, 0, 0, 0,),
                     NewEntities::default()
                 )
             })

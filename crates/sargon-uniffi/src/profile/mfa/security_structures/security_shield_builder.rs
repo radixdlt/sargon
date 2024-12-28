@@ -9,7 +9,9 @@ use std::{
 };
 
 use sargon::{
-    FactorSourceWithExtraSampleValues, SecurityShieldBuilder as InternalSecurityShieldBuilder, SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus
+    FactorSourceWithExtraSampleValues,
+    SecurityShieldBuilder as InternalSecurityShieldBuilder,
+    SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus,
 };
 
 use crate::prelude::*;

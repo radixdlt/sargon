@@ -80,8 +80,8 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable>
 #[cfg(test)]
 mod tests {
 
-      use crate::identified_vec_of::User;
     use super::*;
+    use crate::identified_vec_of::User;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = IdentifiedVecOf<User>;

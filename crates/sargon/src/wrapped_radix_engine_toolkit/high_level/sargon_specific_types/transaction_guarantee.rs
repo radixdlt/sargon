@@ -75,17 +75,17 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
-    use std::str::FromStr;
+
     #[test]
     fn rounding() {
         let sut = SUT::new(
-            Decimal192::from("0.12344"),
+            "0.12344".parse::<Decimal>().unwrap(),
             90,
             2,
             ResourceAddress::sample_mainnet_candy(),
             4,
         );
 
-        assert_eq!(sut.rounded_amount(), "0.1234".into());
+        assert_eq!(sut.rounded_amount(), "0.1234".parse().unwrap());
     }
 }

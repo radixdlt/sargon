@@ -89,7 +89,8 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_invalid_url() {
-        let mock_networking_driver = MockNetworkingDriver::new(200, BagOfBytes::new());
+        let mock_networking_driver =
+            MockNetworkingDriver::new(200, BagOfBytes::new());
         let base = "http://example.com";
         let sut = SUT::with_gateway(
             Arc::new(mock_networking_driver),
@@ -141,8 +142,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn spy_headers() {
-        let mock_networking_driver =
-            MockNetworkingDriver::with_spy(200, BagOfBytes::new(), |request, _| {
+        let mock_networking_driver = MockNetworkingDriver::with_spy(
+            200,
+            BagOfBytes::new(),
+            |request, _| {
                 assert_eq!(
                     request
                         .headers
@@ -160,7 +163,8 @@ mod tests {
                     .map(|s| s.to_owned())
                     .collect::<BTreeSet<String>>()
                 )
-            });
+            },
+        );
         let sut =
             SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req = sut.current_epoch();

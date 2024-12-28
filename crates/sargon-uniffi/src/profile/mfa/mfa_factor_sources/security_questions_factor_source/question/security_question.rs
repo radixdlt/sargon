@@ -2,7 +2,10 @@ use crate::prelude::*;
 use sargon::SecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat as InternalSecurityQuestion_NOT_PRODUCTION_READY_ExpectedAnswerFormat;
 use sargon::Security_NOT_PRODUCTION_READY_Question as InternalSecurity_NOT_PRODUCTION_READY_Question;
 
-decl_vec_samples_for!(Security_NOT_PRODUCTION_READY_Questions, Security_NOT_PRODUCTION_READY_Question);
+decl_vec_samples_for!(
+    Security_NOT_PRODUCTION_READY_Questions,
+    Security_NOT_PRODUCTION_READY_Question
+);
 
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A security question

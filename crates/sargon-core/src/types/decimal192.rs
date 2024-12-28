@@ -656,22 +656,6 @@ impl HasSampleValues for Decimal192 {
     }
 }
 
-impl From<&str> for Decimal192 {
-    /// TEST ONLY
-    #[allow(unused_variables)]
-    fn from(value: &str) -> Self {
-        #[cfg(not(test))]
-        {
-            panic!("not allowed to use From<&str> outside of tests")
-        }
-
-        #[cfg(test)]
-        {
-            return value.parse().unwrap_or_else(|_| panic!("Test failed since the passed in str is not a valid Decimal192: '{}'", value));
-        }
-    }
-}
-
 impl Decimal192 {
     pub const MACHINE_READABLE_DECIMAL_SEPARATOR: &'static str = ".";
 
@@ -1161,7 +1145,7 @@ mod test_decimal {
     #[test]
     fn display() {
         let s = "3138550867693340381917894711603833208051.177722232017256447";
-        let a: Decimal192 = s.into();
+        let a: Decimal192 = s.parse().unwrap();
         assert_eq!(format!("{}", a), s);
     }
 
@@ -1169,7 +1153,8 @@ mod test_decimal {
     fn json_roundtrip() {
         let a: Decimal192 =
             "3138550867693340381917894711603833208051.177722232017256447"
-                .into();
+                .parse()
+                .unwrap();
 
         assert_json_value_eq_after_roundtrip(
             &a,
@@ -1277,7 +1262,7 @@ mod test_decimal {
             assert_eq!(actual, expected);
         };
         let test = |x: &str, n: u8, expected: &str| {
-            test_(Decimal192::from(x), n, expected)
+            test_(x.parse().unwrap(), n, expected)
         };
         test("111222111222111222333.222333", 18, "1.11222111222111222e20");
         test("111222111222111222333.222333", 8, "1.1122211e20");
@@ -1346,7 +1331,7 @@ mod test_decimal {
     #[test]
     fn round() {
         let test = |x: SUT, d: u8, y: &str| {
-            assert_eq!(x.round(d), y.into());
+            assert_eq!(x.round(d), y.parse().unwrap());
         };
 
         let mut x = SUT::max();
@@ -1403,27 +1388,35 @@ mod test_decimal {
         test(x, 1, "3138550867693340381917894711603833208051.1");
         test(x, 0, "3138550867693340381917894711603833208051");
 
-        x = "3138550867693340381917894711603833208051.14".into();
+        x = "3138550867693340381917894711603833208051.14"
+            .parse()
+            .unwrap();
         test(x, 0, "3138550867693340381917894711603833208051");
         test(x, 1, "3138550867693340381917894711603833208051.1");
         test(x, 2, "3138550867693340381917894711603833208051.14");
         test(x, 3, "3138550867693340381917894711603833208051.14");
 
-        x = "3138550867693340381917894711603833208051.148".into();
+        x = "3138550867693340381917894711603833208051.148"
+            .parse()
+            .unwrap();
         test(x, 0, "3138550867693340381917894711603833208051");
         test(x, 1, "3138550867693340381917894711603833208051.1");
         test(x, 2, "3138550867693340381917894711603833208051.15");
         test(x, 3, "3138550867693340381917894711603833208051.148");
         test(x, 4, "3138550867693340381917894711603833208051.148");
 
-        x = "3138550867693340381917894711603833208051.149".into();
+        x = "3138550867693340381917894711603833208051.149"
+            .parse()
+            .unwrap();
         test(x, 0, "3138550867693340381917894711603833208051");
         test(x, 1, "3138550867693340381917894711603833208051.1");
         test(x, 2, "3138550867693340381917894711603833208051.15");
         test(x, 3, "3138550867693340381917894711603833208051.149");
         test(x, 4, "3138550867693340381917894711603833208051.149");
 
-        x = "3138550867693340381917894711603833208051.1499".into();
+        x = "3138550867693340381917894711603833208051.1499"
+            .parse()
+            .unwrap();
         test(x, 0, "3138550867693340381917894711603833208051");
         test(x, 1, "3138550867693340381917894711603833208051.1");
         test(x, 2, "3138550867693340381917894711603833208051.15");
@@ -1431,7 +1424,9 @@ mod test_decimal {
         test(x, 4, "3138550867693340381917894711603833208051.1499");
         test(x, 5, "3138550867693340381917894711603833208051.1499");
 
-        x = "3138550867693340381917894711603833208051.15".into();
+        x = "3138550867693340381917894711603833208051.15"
+            .parse()
+            .unwrap();
         test(x, 0, "3138550867693340381917894711603833208051");
         test(x, 1, "3138550867693340381917894711603833208051.1");
         test(x, 2, "3138550867693340381917894711603833208051.15");
@@ -1439,7 +1434,9 @@ mod test_decimal {
         test(x, 4, "3138550867693340381917894711603833208051.15");
         test(x, 5, "3138550867693340381917894711603833208051.15");
 
-        x = "3138550867693340381917894711603833208051.15999".into();
+        x = "3138550867693340381917894711603833208051.15999"
+            .parse()
+            .unwrap();
         test(x, 0, "3138550867693340381917894711603833208051");
         test(x, 1, "3138550867693340381917894711603833208051.1");
         test(x, 2, "3138550867693340381917894711603833208051.16");
@@ -1520,7 +1517,7 @@ mod test_decimal {
     #[test]
     fn test_digits() {
         let test = |s: &str, e: &str| {
-            let x = Decimal192::from(s);
+            let x: Decimal192 = s.parse().unwrap();
             assert_eq!(x.digits(), e);
         };
         test("1", "1000000000000000000");
@@ -1536,7 +1533,7 @@ mod test_decimal {
     fn format_grouping_separator() {
         let test = |x: &str, exp: &str| {
             let locale = LocaleConfig::english_united_states();
-            let decimal: Decimal192 = x.into();
+            let decimal: Decimal192 = x.parse().unwrap();
             let actual = decimal.formatted(locale, 8, true);
             assert_eq!(actual, exp);
         };
@@ -1563,7 +1560,7 @@ mod test_decimal {
             let actual = decimal.formatted(locale, 8, false);
             assert_eq!(actual, exp);
         };
-        let test = |x: &str, exp: &str| test_(SUT::from(x), exp);
+        let test = |x: &str, exp: &str| test_(x.parse().unwrap(), exp);
 
         test_(SUT::max(), "3.138e39");
         test("0.009999999999999", "0.01");

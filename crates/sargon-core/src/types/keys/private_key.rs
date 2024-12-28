@@ -58,7 +58,6 @@ impl PrivateKey {
         }
     }
 
-    
     /// Returns the hex representation of the inner private key's bytes as a `Vec`.
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
