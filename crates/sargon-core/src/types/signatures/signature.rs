@@ -112,6 +112,8 @@ impl FromStr for Signature {
 
 #[cfg(test)]
 mod tests {
+    use hex::ToHex;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -183,13 +185,15 @@ mod tests {
     #[test]
     fn ed25519_from_bag_of_bytes() {
         let bytes: BagOfBytes = "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103".parse().unwrap();
-        assert_eq!(SUT::try_from(bytes).unwrap(), SUT::sample());
+        assert_eq!(SUT::try_from(bytes.clone()).unwrap(), SUT::sample());
+        assert_eq!(SUT::sample().to_bytes(), bytes.to_vec());
     }
 
     #[test]
     fn secp256k1_from_str() {
-        assert_eq!(
-            "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12".parse::<SUT>().unwrap(), SUT::sample_other());
+        let s = "0001598e989470d125dafac276b95bb1ba21e2ee8e0beb0547599335f83b48a0a830cd6a956a54421039cef5fb7e492ebaa315f751a2dd5b74bd9cebbda997ec12";
+        assert_eq!(s.parse::<SUT>().unwrap(), SUT::sample_other());
+        assert_eq!(hex_encode(SUT::sample_other().to_bytes()), s);
     }
 
     #[test]

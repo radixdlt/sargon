@@ -196,6 +196,17 @@ mod tests {
     }
 
     #[test]
+    fn signature_from_sut() {
+        assert_eq!(
+            Signature::from(SUT::sample()),
+            "fc6a4a15516b886b10f26777094cb1abdccb213c9ebdea7a4bceb83b6fcba50fea181b0136ee5659c3dfae5f771e5b6e6f9abbaa3f0435df0be1f732be965103"
+            .parse::<Ed25519Signature>()
+            .unwrap()
+            .into()
+        );
+    }
+
+    #[test]
     fn signature() {
         let pubkey: Ed25519PublicKey =
             "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"

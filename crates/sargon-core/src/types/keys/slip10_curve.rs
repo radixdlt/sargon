@@ -108,7 +108,9 @@ mod tests {
     #[test]
     fn string() {
         assert_eq!(SUT::Curve25519.string(), "curve25519");
+        assert_eq!(SUT::Curve25519.to_string(), "curve25519");
         assert_eq!(SUT::Secp256k1.string(), "secp256k1");
+        assert_eq!(SUT::Secp256k1.to_string(), "secp256k1");
     }
 
     #[test]
