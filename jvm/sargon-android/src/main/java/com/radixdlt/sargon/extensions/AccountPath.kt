@@ -24,8 +24,8 @@ fun AccountPath.Companion.init(path: String): AccountPath =
     when (val derivationPath = DerivationPath.init(path)) {
         is DerivationPath.Account -> derivationPath.value
         is DerivationPath.Bip44Like, is DerivationPath.Identity -> throw CommonException.WrongEntityKind(
-            expected = Cap26EntityKind.ACCOUNT,
-            found = Cap26EntityKind.IDENTITY
+            expected = Cap26EntityKind.ACCOUNT.discriminant(),
+            found = Cap26EntityKind.IDENTITY.discriminant()
         )
     }
 

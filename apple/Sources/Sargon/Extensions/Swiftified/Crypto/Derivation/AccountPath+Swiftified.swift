@@ -10,7 +10,10 @@ extension AccountPath {
 		case let .account(value):
 			self = value
 		case .identity, .bip44Like:
-			throw SargonError.WrongEntityKind(expected: "account", found: "identity")
+			throw SargonError.WrongEntityKind(
+				expected: Cap26EntityKind.account.description,
+				found: Cap26EntityKind.identity.description
+			)
 		}
 	}
 

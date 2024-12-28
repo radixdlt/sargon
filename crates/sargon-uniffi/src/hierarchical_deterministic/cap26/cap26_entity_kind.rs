@@ -13,3 +13,8 @@ pub enum CAP26EntityKind {
 }
 
 delegate_display_debug_into!(CAP26EntityKind, InternalCAP26EntityKind);
+
+#[uniffi::export]
+pub fn cap26_entity_kind_to_string(kind: CAP26EntityKind) -> String {
+    kind.into_internal().to_string()
+}
