@@ -135,15 +135,15 @@ impl HasSampleValues for SavedGateways {
     }
 }
 
-// impl HasSampleValues for Gateways {
-//     fn sample() -> Self {
-//         Self::from_iter([Gateway::stokenet()])
-//     }
+impl HasSampleValues for Gateways {
+    fn sample() -> Self {
+        Self::from_iter([Gateway::stokenet()])
+    }
 
-//     fn sample_other() -> Self {
-//         Self::from_iter([Gateway::stokenet(), Gateway::hammunet()])
-//     }
-// }
+    fn sample_other() -> Self {
+        Self::from_iter([Gateway::stokenet(), Gateway::hammunet()])
+    }
+}
 
 #[cfg(test)]
 mod tests {

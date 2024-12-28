@@ -8,6 +8,8 @@
 #![feature(future_join)]
 #![feature(generic_const_exprs)]
 #![feature(trait_upcasting)]
+#![feature(trivial_bounds)]
+#![allow(trivial_bounds)]
 
 mod error_from;
 mod factor_instances_provider;

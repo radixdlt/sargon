@@ -8,15 +8,15 @@ decl_identified_vec_of!(
     ResourceAppPreference
 );
 
-// impl HasSampleValues for ResourcePreferences {
-//     fn sample() -> Self {
-//         Self::sample_mainnet()
-//     }
+impl HasSampleValues for ResourcePreferences {
+    fn sample() -> Self {
+        Self::sample_mainnet()
+    }
 
-//     fn sample_other() -> Self {
-//         Self::sample_stokenet()
-//     }
-// }
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
+    }
+}
 
 impl HasSampleValuesOnNetworks for ResourcePreferences {
     fn sample_mainnet() -> Self {

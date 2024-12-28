@@ -292,10 +292,9 @@ impl Profile {
             + Identifiable,
     >(
         &self,
-        entities: IdentifiedVecOf<E>,
+        entities: impl IntoIterator<Item = E>,
     ) -> Result<()> {
         let entities = entities
-            .items()
             .into_iter()
             .map(Into::<AccountOrPersona>::into)
             .collect::<IdentifiedVecOf<AccountOrPersona>>();
@@ -305,10 +304,9 @@ impl Profile {
 
     pub fn assert_new_factor_instances_not_already_used_erased(
         &self,
-        entities: IdentifiedVecOf<AccountOrPersona>,
+        entities: impl IntoIterator<Item = AccountOrPersona>,
     ) -> Result<()> {
         let instances_of_new_entities = entities
-            .items()
             .into_iter()
             .map(|e| (e.clone(), e.unique_all_factor_instances()))
             .collect::<IndexMap<AccountOrPersona, IndexSet<_>>>();
@@ -613,7 +611,7 @@ mod tests {
     fn not_allowed_to_create_profile_with_empty_factor_source() {
         let _ = SUT::with(
             Header::sample(),
-            IdentifiedVecOf::new(),
+            FactorSources::new(),
             AppPreferences::sample(),
             ProfileNetworks::sample(),
         );

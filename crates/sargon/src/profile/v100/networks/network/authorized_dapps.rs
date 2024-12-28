@@ -18,17 +18,17 @@ impl ReferencedAccountRemoving for AuthorizedDapps {
     }
 }
 
-// impl HasSampleValues for AuthorizedDapps {
-//     /// A sample used to facilitate unit tests.
-//     fn sample() -> Self {
-//         Self::sample_mainnet()
-//     }
+impl HasSampleValues for AuthorizedDapps {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
+    }
 
-//     /// A sample used to facilitate unit tests.
-//     fn sample_other() -> Self {
-//         Self::sample_stokenet()
-//     }
-// }
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
+    }
+}
 
 impl HasSampleValuesOnNetworks for AuthorizedDapps {
     /// A sample used to facilitate unit tests.

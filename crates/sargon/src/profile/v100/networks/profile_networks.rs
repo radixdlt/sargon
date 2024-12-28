@@ -139,20 +139,20 @@ impl EntityOnNetworkHandling for ProfileNetworks {
     }
 }
 
-// impl HasSampleValues for ProfileNetworks {
-//     /// A sample used to facilitate unit tests.
-//     fn sample() -> Self {
-//         Self::from_iter([
-//             ProfileNetwork::sample_mainnet(),
-//             ProfileNetwork::sample_stokenet(),
-//         ])
-//     }
+impl HasSampleValues for ProfileNetworks {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::from_iter([
+            ProfileNetwork::sample_mainnet(),
+            ProfileNetwork::sample_stokenet(),
+        ])
+    }
 
-//     /// A sample used to facilitate unit tests.
-//     fn sample_other() -> Self {
-//         Self::just(ProfileNetwork::sample_other())
-//     }
-// }
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::just(ProfileNetwork::sample_other())
+    }
+}
 
 #[cfg(test)]
 mod tests {

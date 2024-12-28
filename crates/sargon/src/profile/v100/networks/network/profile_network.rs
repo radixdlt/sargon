@@ -81,14 +81,14 @@ impl ProfileNetwork {
     /// and same for `personas` and `authorized_dapps`.
     pub fn new(
         network_id: impl Into<NetworkID>,
-        accounts: impl Into<Accounts>,
-        personas: impl Into<Personas>,
+        accounts: impl IntoIterator<Item = Account>,
+        personas: impl IntoIterator<Item = Persona>,
         authorized_dapps: impl Into<AuthorizedDapps>,
         resource_preferences: impl Into<ResourcePreferences>,
     ) -> Self {
         let network_id = network_id.into();
-        let accounts = accounts.into();
-        let personas = personas.into();
+        let accounts = accounts.into_iter().collect::<Accounts>();
+        let personas = personas.into_iter().collect::<Personas>();
         let authorized_dapps = authorized_dapps.into();
         let resource_preferences = resource_preferences.into();
         assert!(
@@ -146,7 +146,7 @@ impl ProfileNetwork {
     /// the rest i.e. Personas, AuthorizedDapps all being empty.
     pub fn new_with_accounts(
         network_id: impl Into<NetworkID>,
-        accounts: impl Into<Accounts>,
+        accounts: impl IntoIterator<Item = Account>,
     ) -> Self {
         Self::new(
             network_id,

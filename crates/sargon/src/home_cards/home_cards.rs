@@ -2,18 +2,18 @@ use crate::prelude::*;
 
 decl_identified_vec_of!(HomeCard);
 
-// impl HasSampleValues for HomeCards {
-//     fn sample() -> Self {
-//         Self::from_iter([HomeCard::sample(), HomeCard::Connector])
-//     }
+impl HasSampleValues for HomeCards {
+    fn sample() -> Self {
+        Self::from_iter([HomeCard::sample(), HomeCard::Connector])
+    }
 
-//     fn sample_other() -> Self {
-//         Self::from_iter([
-//             HomeCard::sample_other(),
-//             HomeCard::Dapp { icon_url: (None) },
-//         ])
-//     }
-// }
+    fn sample_other() -> Self {
+        Self::from_iter([
+            HomeCard::sample_other(),
+            HomeCard::Dapp { icon_url: (None) },
+        ])
+    }
+}
 
 pub trait Sortable {
     fn sort(&self) -> Self;

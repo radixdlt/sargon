@@ -6,17 +6,17 @@ decl_identified_vec_of!(
     AccountOrPersona
 );
 
-// impl HasSampleValues for AccountsOrPersonas {
-//     /// A sample used to facilitate unit tests.
-//     fn sample() -> Self {
-//         Self::sample_mainnet()
-//     }
+impl HasSampleValues for AccountsOrPersonas {
+    /// A sample used to facilitate unit tests.
+    fn sample() -> Self {
+        Self::sample_mainnet()
+    }
 
-//     /// A sample used to facilitate unit tests.
-//     fn sample_other() -> Self {
-//         Self::sample_stokenet()
-//     }
-// }
+    /// A sample used to facilitate unit tests.
+    fn sample_other() -> Self {
+        Self::sample_stokenet()
+    }
+}
 
 pub trait HasSampleValuesOnNetworks {
     fn sample_mainnet() -> Self;

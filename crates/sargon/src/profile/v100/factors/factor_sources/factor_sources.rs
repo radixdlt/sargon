@@ -19,21 +19,21 @@ impl FactorSourcesWithBDFS for FactorSources {
     }
 }
 
-// impl HasSampleValues for FactorSources {
-//     fn sample() -> Self {
-//         Self::from_iter([
-//             FactorSource::sample_device(),
-//             FactorSource::sample_ledger(),
-//         ])
-//     }
+impl HasSampleValues for FactorSources {
+    fn sample() -> Self {
+        Self::from_iter([
+            FactorSource::sample_device(),
+            FactorSource::sample_ledger(),
+        ])
+    }
 
-//     fn sample_other() -> Self {
-//         Self::from_iter([
-//             FactorSource::sample_device_olympia(),
-//             FactorSource::sample_device_babylon(),
-//         ])
-//     }
-// }
+    fn sample_other() -> Self {
+        Self::from_iter([
+            FactorSource::sample_device_olympia(),
+            FactorSource::sample_device_babylon(),
+        ])
+    }
+}
 
 #[cfg(test)]
 mod tests {

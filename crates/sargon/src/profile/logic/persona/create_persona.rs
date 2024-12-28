@@ -65,6 +65,6 @@ impl Profile {
             key_derivation_interactor,
             get_name,
         )
-        .await
+        .await.map(|(a, b, c, d)| (a, b.into_iter().collect(), c, d))
     }
 }

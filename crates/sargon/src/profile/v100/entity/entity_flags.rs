@@ -39,15 +39,15 @@ impl FlagRemoving for EntityFlags {
     }
 }
 
-// impl HasSampleValues for EntityFlags {
-//     fn sample() -> Self {
-//         Self::from_iter([EntityFlag::sample()])
-//     }
+impl HasSampleValues for EntityFlags {
+    fn sample() -> Self {
+        Self::from_iter([EntityFlag::sample()])
+    }
 
-//     fn sample_other() -> Self {
-//         Self::new()
-//     }
-// }
+    fn sample_other() -> Self {
+        Self::new()
+    }
+}
 
 #[cfg(test)]
 mod tests {

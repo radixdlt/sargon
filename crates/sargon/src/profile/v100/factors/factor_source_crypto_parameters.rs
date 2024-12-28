@@ -116,18 +116,18 @@ impl Default for FactorSourceCryptoParameters {
     }
 }
 
-// impl HasSampleValues for SupportedCurves {
-//     fn sample() -> Self {
-//         SupportedCurves::just(SLIP10Curve::Curve25519)
-//     }
+impl HasSampleValues for SupportedCurves {
+    fn sample() -> Self {
+        SupportedCurves::just(SLIP10Curve::Curve25519)
+    }
 
-//     fn sample_other() -> Self {
-//         SupportedCurves::from_iter([
-//             SLIP10Curve::Curve25519,
-//             SLIP10Curve::Secp256k1,
-//         ])
-//     }
-// }
+    fn sample_other() -> Self {
+        SupportedCurves::from_iter([
+            SLIP10Curve::Curve25519,
+            SLIP10Curve::Secp256k1,
+        ])
+    }
+}
 
 #[cfg(test)]
 mod tests {

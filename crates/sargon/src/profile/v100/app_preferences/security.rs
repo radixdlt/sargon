@@ -8,17 +8,17 @@ decl_identified_vec_of!(
     SecurityStructureOfFactorSourceIDs
 );
 
-// impl HasSampleValues for SecurityStructuresOfFactorSourceIDs {
-//     fn sample() -> Self {
-//         Self::from_iter([
-//             SecurityStructureOfFactorSourceIDs::sample(),
-//             SecurityStructureOfFactorSourceIDs::sample_other(),
-//         ])
-//     }
-//     fn sample_other() -> Self {
-//         Self::from_iter([SecurityStructureOfFactorSourceIDs::sample_other()])
-//     }
-// }
+impl HasSampleValues for SecurityStructuresOfFactorSourceIDs {
+    fn sample() -> Self {
+        Self::from_iter([
+            SecurityStructureOfFactorSourceIDs::sample(),
+            SecurityStructureOfFactorSourceIDs::sample_other(),
+        ])
+    }
+    fn sample_other() -> Self {
+        Self::from_iter([SecurityStructureOfFactorSourceIDs::sample_other()])
+    }
+}
 
 /// Controls e.g. if Profile Snapshot gets synced to iCloud or not, and whether
 /// developer mode is enabled or not. In future (MFA) we will also save a list of
