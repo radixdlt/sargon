@@ -51,22 +51,22 @@ impl FactorSourceID {
 }
 
 #[allow(dead_code)]
-pub static ALL_FACTOR_SOURCE_ID_SAMPLES_INC_NON_HD: Lazy<[FactorSourceID; 0]> =
+pub static ALL_FACTOR_SOURCE_ID_SAMPLES_INC_NON_HD: Lazy<[FactorSourceID; 14]> =
     Lazy::new(|| {
         [
-            // FactorSourceID::sample_device(),
-            // FactorSourceID::sample_ledger(),
-            // FactorSourceID::sample_ledger_other(),
-            // FactorSourceID::sample_arculus(),
-            // FactorSourceID::sample_arculus_other(),
-            // FactorSourceID::sample_password(),
-            // FactorSourceID::sample_password_other(),
-            // FactorSourceID::sample_off_device(),
-            // FactorSourceID::sample_off_device_other(),
-            // FactorSourceID::sample_security_questions(),
-            // FactorSourceID::sample_device_other(),
-            // FactorSourceID::sample_security_questions_other(),
-            // FactorSourceID::sample_trusted_contact(),
-            // FactorSourceID::sample_trusted_contact_other(),
+            FactorSourceID::sample_device(),
+            FactorSourceID::sample_ledger(),
+            FactorSourceID::sample_ledger_other(),
+            FactorSourceID::sample_arculus(),
+            FactorSourceID::sample_arculus_other(),
+            FactorSourceID::sample_password(),
+            FactorSourceID::sample_password_other(),
+            FactorSourceID::sample_off_device(),
+            FactorSourceID::sample_off_device_other(),
+            FactorSourceID::sample_security_questions(),
+            FactorSourceID::sample_device_other(),
+            FactorSourceID::sample_security_questions_other(),
+            FactorSourceID::sample_trusted_contact(),
+            FactorSourceID::sample_trusted_contact_other(),
         ]
     });

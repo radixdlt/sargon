@@ -16,13 +16,9 @@ macro_rules! decl_vec_samples_for {
             impl
                 IntoInternal<Vec<$element_type>, [< Internal $collection_type >]>
                 for Vec<$element_type>
-            // where
-            //     InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-            //     $element_type: Into<InternalElement>,
             {
                 fn into_internal(self) -> [< Internal $collection_type >] {
-                    // self.into_iter().map(Into::into).collect()
-                    todo!()
+                    self.into_iter().map(Into::into).collect()
                 }
             }
 
@@ -30,8 +26,7 @@ macro_rules! decl_vec_samples_for {
             impl FromInternal<[< Internal $collection_type >], Vec<$element_type>> for [< Internal $collection_type >]
             {
                 fn into_type(self) -> Vec<$element_type> {
-                    // self.into_iter().map(Element::from).collect()
-                    todo!()
+                    self.into_iter().map($element_type::from).collect()
                 }
             }
 

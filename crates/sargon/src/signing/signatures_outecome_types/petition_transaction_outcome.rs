@@ -44,7 +44,7 @@ mod tests {
 
     #[test]
     #[should_panic(
-        expected = "Discprenacy! Mismatching intent hash found in a signature."
+        expected = "Discrepancy! Mismatching intent hash found in a signature."
     )]
     fn panic() {
         SUT::new(

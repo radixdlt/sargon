@@ -608,13 +608,15 @@ mod tests {
     fn test_next_identity_rola_at_7_is_8() {
         let preset = DerivationPreset::IdentityRola;
         let network_id = NetworkID::Mainnet;
+        let persona = Persona::sample_at(7);
+        let profile = Profile::sample_from(
+            FactorSource::sample_all(),
+            [],
+            [&persona],
+        );
         let sut = SUT::new(
             network_id,
-            Arc::new(Profile::sample_from(
-                FactorSource::sample_all(),
-                [],
-                [&Persona::sample_at(7)],
-            )),
+            Arc::new(profile),
         );
         type F = FactorSourceIDFromHash;
         {

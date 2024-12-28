@@ -57,8 +57,8 @@ pub struct IdentifiedVecOfIterator<
     'a,
     V: Debug + PartialEq + Eq + Clone + Identifiable,
 > {
-    ordered_map: &'a IdentifiedVecOf<V>,
-    index: usize,
+    pub ordered_map: &'a IdentifiedVecOf<V>,
+    pub index: usize,
 }
 
 impl<'a, V: Debug + PartialEq + Eq + Clone + Identifiable> Iterator
@@ -81,8 +81,8 @@ impl<'a, V: Debug + PartialEq + Eq + Clone + Identifiable> Iterator
 pub struct OwnedIdentifiedVecOfIterator<
     V: Debug + PartialEq + Eq + Clone + Identifiable,
 > {
-    ordered_map: IdentifiedVecOf<V>,
-    index: usize,
+    pub ordered_map: IdentifiedVecOf<V>,
+    pub index: usize,
 }
 
 impl<V: Debug + PartialEq + Eq + Clone + Identifiable> Iterator

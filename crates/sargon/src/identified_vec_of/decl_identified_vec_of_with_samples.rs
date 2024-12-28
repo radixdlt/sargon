@@ -34,7 +34,7 @@ macro_rules! decl_identified_vec_of {
                     write!(f, "{}", self.0.description())
                 }
             }
-            
+
             impl $collection_type {
                 pub fn new() -> Self {
                     Self($crate::IdentifiedVecOf::new())
@@ -69,35 +69,33 @@ macro_rules! decl_identified_vec_of {
 
 
 
-            impl<'a> IntoIterator for &'a $collection_type
-            {
-                type Item = $element_type;
-                type IntoIter = IdentifiedVecOfIterator<'a, $element_type>;
-            
-                fn into_iter(self) -> Self::IntoIter {
-                    // IdentifiedVecOfIterator {
-                    //     ordered_map: &self.0,
-                    //     index: 0,
-                    // }
-                    todo!()
-                }
-            }
+            impl<'a> IntoIterator
+    for &'a $collection_type
+{
+    type Item = $element_type;
+    type IntoIter = IdentifiedVecOfIterator<'a, $element_type>;
 
-            impl IntoIterator
-                for $collection_type
-            {
-                type Item = $element_type;
-                type IntoIter = OwnedIdentifiedVecOfIterator<$element_type>;
-            
-                fn into_iter(self) -> Self::IntoIter {
-                    // OwnedIdentifiedVecOfIterator {
-                    //     ordered_map: self.0,
-                    //     index: 0,
-                    // }
-                    todo!()
-                }
-            }
+    fn into_iter(self) -> Self::IntoIter {
+        IdentifiedVecOfIterator {
+            ordered_map: self,
+            index: 0,
+        }
+    }
+}
 
+impl IntoIterator
+    for $collection_type
+{
+    type Item = $element_type;
+    type IntoIter = OwnedIdentifiedVecOfIterator<$element_type>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        OwnedIdentifiedVecOfIterator {
+            ordered_map: self.0,
+            index: 0,
+        }
+    }
+}
 
 
 
