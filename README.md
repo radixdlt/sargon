@@ -332,6 +332,19 @@ cd jvm
 
 # Release
 
+## Tagging
+Install [cargo-workspaces](https://crates.io/crates/cargo-workspaces)
+
+```sh
+cargo install cargo-workspaces
+```
+
+```sh
+cargo ws version patch --allow-branch $(git_current_branch) --yes --no-git-tag
+```
+
+To `patch` bump all crates
+
 ## iOS
 
 ### Locally
