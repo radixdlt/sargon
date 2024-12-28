@@ -3,8 +3,6 @@
 #![feature(core_intrinsics)]
 #![allow(unused_imports)]
 #![allow(internal_features)]
-#![allow(incomplete_features)]
-#![feature(specialization)]
 
 mod core;
 mod hierarchical_deterministic;

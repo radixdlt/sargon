@@ -22,15 +22,6 @@ macro_rules! decl_vec_samples_for {
                 }
             }
 
-
-            impl FromInternal<[< Internal $collection_type >], Vec<$element_type>> for [< Internal $collection_type >]
-            {
-                fn into_type(self) -> Vec<$element_type> {
-                    self.into_iter().map($element_type::from).collect()
-                }
-            }
-
-
             #[uniffi::export]
             pub fn [< new_ $collection_type:snake _sample >]() -> Vec<$element_type> {
                 [< Internal $collection_type >]::sample().into_type()

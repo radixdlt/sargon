@@ -15,7 +15,7 @@ where
     T: IntoIterator<Item = InternalElement>,
     Element: From<InternalElement>,
 {
-    default fn into_type(self) -> Vec<Element> {
+    fn into_type(self) -> Vec<Element> {
         self.into_iter().map(Element::from).collect()
     }
 }
