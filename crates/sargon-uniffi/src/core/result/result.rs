@@ -33,6 +33,11 @@ pub trait FromInternalResult<InternalType, Type> {
     fn into_result(self) -> Result<Type>;
 }
 
+/// Utility trait to map `InternalResult` to `Result`
+pub trait FromInternalIterResult<InternalType, Type> {
+    fn into_iter_result(self) -> Result<Type>;
+}
+
 /// Implementation for InternalResult<InternalType>
 impl<InternalType, Type> FromInternalResult<InternalType, Type>
     for InternalResult<InternalType>
@@ -46,28 +51,17 @@ where
 }
 
 /// Implementation for InternalResult<Vec<InternalType>>
-impl<InternalType, Type> FromInternalResult<InternalType, Vec<Type>>
-    for InternalResult<Vec<InternalType>>
+impl<T, InternalElement, Element> FromInternalIterResult<T, Vec<Element>>
+    for InternalResult<T>
 where
-    Type: From<InternalType>, // Ensures `Type` can be constructed from `InternalType`
+    T: IntoIterator<Item = InternalElement>,
+    Element: From<InternalElement>, // Ensures `Type` can be constructed from `InternalType`
 {
-    fn into_result(self) -> Result<Vec<Type>> {
-        self.map(|vec| vec.into_type()) // Converts Ok variant using From trait
-            .map_err(Into::into) // Converts Err variant using Into
+    fn into_iter_result(self) -> Result<Vec<Element>> {
+        // self.map(|vec| vec.into_type()) // Converts Ok variant using From trait
+        //     .map_err(Into::into) // Converts Err variant using Into
+        todo!()
     }
 }
-
-/// Implementation for InternalResult<IdentifiedVecOf<InternalType>>
-impl<
-        InternalType: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-        Type,
-    > FromInternalResult<InternalType, Vec<Type>>
-    for InternalResult<IdentifiedVecOf<InternalType>>
-where
-    Type: From<InternalType>, // Ensures `Type` can be constructed from `InternalType`
-{
-    fn into_result(self) -> Result<Vec<Type>> {
-        self.map(|vec| vec.into_type()) // Converts Ok variant using From trait
-            .map_err(Into::into) // Converts Err variant using Into
-    }
-}
+// `core::result::result::FromInternalResult<P2PLinks, Vec<p2p_link::P2PLink>>`
+// impl<T> From<>

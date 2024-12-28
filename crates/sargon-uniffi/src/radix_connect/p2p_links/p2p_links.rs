@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use sargon::P2PLinks as InternalP2PLinks;
 
+
 #[uniffi::export]
 pub fn new_p2p_links_from_json_bytes(
     json_bytes: &BagOfBytes,
@@ -8,7 +9,7 @@ pub fn new_p2p_links_from_json_bytes(
     json_bytes
         .to_vec()
         .deserialize::<InternalP2PLinks>()
-        .into_result()
+        .into_iter_result()
 }
 
 #[uniffi::export]

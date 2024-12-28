@@ -50,7 +50,7 @@ impl SargonOS {
 
     /// Returns all the factor sources
     pub fn factor_sources(&self) -> Result<Vec<FactorSource>> {
-        self.wrapped.factor_sources().into_result()
+        self.wrapped.factor_sources().into_iter_result()
     }
 
     pub async fn __debug_factor_instances_in_cache(
@@ -132,7 +132,7 @@ impl SargonOS {
         self.wrapped
             .add_factor_sources(factor_sources.into_internal())
             .await
-            .into_result()
+            .into_iter_result()
     }
 
     /// Updates the name of the corresponding `factor_source` in Profile. Throws `UpdateFactorSourceMutateFailed` error if the
@@ -157,7 +157,7 @@ impl SargonOS {
         self.wrapped
             .debug_add_all_sample_factor_sources()
             .await
-            .into_result()
+            .into_iter_result()
     }
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,

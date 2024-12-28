@@ -1,5 +1,7 @@
 #![allow(internal_features)]
 #![feature(core_intrinsics)]
+#![feature(trivial_bounds)]
+#![allow(trivial_bounds)]
 
 mod assert_json;
 mod error;
