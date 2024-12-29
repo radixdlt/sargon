@@ -158,7 +158,6 @@ impl HierarchicalDeterministicFactorInstance {
 }
 
 impl Serialize for HierarchicalDeterministicFactorInstance {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(
         &self,
         serializer: S,
@@ -171,7 +170,6 @@ impl Serialize for HierarchicalDeterministicFactorInstance {
 }
 
 impl<'de> serde::Deserialize<'de> for HierarchicalDeterministicFactorInstance {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         d: D,
     ) -> Result<HierarchicalDeterministicFactorInstance, D::Error> {
@@ -227,10 +225,7 @@ impl HierarchicalDeterministicFactorInstance {
 
     /// Account | Mainnet
     /// A sample used to facilitate unit tests.
-    pub(crate) fn sample_with_key_kind(
-        key_kind: CAP26KeyKind,
-        index: u32,
-    ) -> Self {
+    pub fn sample_with_key_kind(key_kind: CAP26KeyKind, index: u32) -> Self {
         Self::sample_with_key_kind_entity_kind(
             key_kind,
             CAP26EntityKind::Account,
@@ -252,7 +247,7 @@ impl HierarchicalDeterministicFactorInstance {
     }
 
     /// A sample used to facilitate unit tests.
-    pub(crate) fn sample_with_key_kind_entity_kind(
+    pub fn sample_with_key_kind_entity_kind(
         key_kind: CAP26KeyKind,
         entity_kind: CAP26EntityKind,
         index: u32,
@@ -266,7 +261,7 @@ impl HierarchicalDeterministicFactorInstance {
     }
 
     /// A sample used to facilitate unit tests.
-    pub(crate) fn sample_with_key_kind_entity_kind_on_network(
+    pub fn sample_with_key_kind_entity_kind_on_network(
         network_id: NetworkID,
         key_kind: CAP26KeyKind,
         entity_kind: CAP26EntityKind,
@@ -280,7 +275,7 @@ impl HierarchicalDeterministicFactorInstance {
         )
     }
 
-    pub(crate) fn sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+    pub fn sample_with_key_kind_entity_kind_on_network_and_hardened_index(
         network_id: NetworkID,
         key_kind: CAP26KeyKind,
         entity_kind: CAP26EntityKind,

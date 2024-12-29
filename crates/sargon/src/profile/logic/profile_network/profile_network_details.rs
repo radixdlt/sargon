@@ -266,7 +266,10 @@ mod tests {
         );
         assert_eq!(&details.network_id, &dapp.network_id);
 
-        assert_eq!(&details.display_name.map(|x| x.value), &dapp.display_name);
+        assert_eq!(
+            &details.display_name.map(|x| x.value()),
+            &dapp.display_name
+        );
 
         assert_eq!(
             &details

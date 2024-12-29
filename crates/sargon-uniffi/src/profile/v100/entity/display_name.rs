@@ -23,9 +23,27 @@ use sargon::DisplayName as InternalDisplayName;
 /// assert_eq!("A very big name that is over than 30 characters long".parse::<SUT>().unwrap().to_string(), "A very big name that is over t");
 /// ```
 ///
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
 pub struct DisplayName {
     pub value: String,
+}
+
+impl DisplayName {
+    pub fn into_internal(&self) -> InternalDisplayName {
+        self.clone().into()
+    }
+}
+impl From<InternalDisplayName> for DisplayName {
+    fn from(display_name: InternalDisplayName) -> Self {
+        Self {
+            value: display_name.value(),
+        }
+    }
+}
+impl From<DisplayName> for InternalDisplayName {
+    fn from(display_name: DisplayName) -> Self {
+        Self::new(display_name.value.as_str()).unwrap()
+    }
 }
 
 json_string_convertible!(DisplayName);

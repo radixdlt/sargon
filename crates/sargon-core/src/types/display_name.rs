@@ -31,28 +31,22 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     Hash,
-    SerializeDisplay,
+    Serialize,
     DeserializeFromStr,
     derive_more::Display,
 )]
 #[display("{}", self.value())]
-pub struct DisplayName {
-    value: arraystring::MaxString,
-}
+pub struct DisplayName(ShortString);
 
 impl DisplayName {
     pub const MAX_LEN: usize = 30;
+
     pub fn value(&self) -> String {
-        self.value.clone().as_str().to_owned()
+        self.0.value()
     }
 
     pub fn update(&mut self, new_value: impl AsRef<str>) {
-        let maxstring = arraystring::MaxString::try_from_str(prefix_str(
-            Self::MAX_LEN,
-            new_value.as_ref(),
-        ))
-        .unwrap();
-        self.value = maxstring;
+        *self = Self::new(new_value).unwrap();
     }
 
     pub fn new(value: impl AsRef<str>) -> Result<Self> {
@@ -61,13 +55,7 @@ impl DisplayName {
             return Err(CommonError::InvalidDisplayNameEmpty);
         }
 
-        let maxstring = arraystring::MaxString::try_from_str(prefix_str(
-            Self::MAX_LEN,
-            value,
-        ))
-        .unwrap();
-
-        Ok(Self { value: maxstring })
+        ShortString::new(prefix_str(Self::MAX_LEN, value)).map(Self)
     }
 }
 
@@ -95,7 +83,6 @@ impl HasSampleValues for DisplayName {
     }
 }
 
-#[cfg(test)]
 impl DisplayName {
     pub fn random() -> Self {
         Self::new(format!(
@@ -128,7 +115,7 @@ mod tests {
     fn invalid() {
         let s = "this is a much much too long display name";
         assert_eq!(
-            SUT::new(s).unwrap().value,
+            SUT::new(s).unwrap().value(),
             "this is a much much too long d"
         );
     }
@@ -155,7 +142,7 @@ mod tests {
 
     #[test]
     fn inner() {
-        assert_eq!(SUT::new("Main account").unwrap().value, "Main account");
+        assert_eq!(SUT::new("Main account").unwrap().value(), "Main account");
     }
 
     #[test]

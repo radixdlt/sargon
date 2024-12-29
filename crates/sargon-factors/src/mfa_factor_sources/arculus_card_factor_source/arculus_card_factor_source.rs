@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::prelude::*;
 
 /// An Arculus card, a hierarchal deterministic wallet capable of CAP26 derivation
 /// which users interact with by placing it near their host device, which

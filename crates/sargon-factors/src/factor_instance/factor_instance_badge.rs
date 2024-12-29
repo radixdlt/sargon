@@ -66,27 +66,27 @@ impl From<HierarchicalDeterministicPublicKey> for FactorInstanceBadge {
 //     }
 // }
 
-// impl From<FactorInstanceBadge> for ScryptoResourceOrNonFungible {
-//     fn from(value: FactorInstanceBadge) -> Self {
-//         match value {
-//             FactorInstanceBadge::Virtual {
-//                 value:
-//                     FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
-//                         value,
-//                     },
-//             } => ScryptoResourceOrNonFungible::NonFungible(
-//                 ScryptoNonFungibleGlobalId::from_public_key(
-//                     &ScryptoPublicKey::from(value.public_key),
-//                 ),
-//             ),
-//             FactorInstanceBadge::Physical { value } => {
-//                 ScryptoResourceOrNonFungible::Resource(
-//                     ScryptoResourceAddress::new_or_panic(value.0.node_id().0),
-//                 )
-//             }
-//         }
-//     }
-// }
+impl From<FactorInstanceBadge> for ScryptoResourceOrNonFungible {
+    fn from(value: FactorInstanceBadge) -> Self {
+        match value {
+            FactorInstanceBadge::Virtual {
+                value:
+                    FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                        value,
+                    },
+            } => ScryptoResourceOrNonFungible::NonFungible(
+                ScryptoNonFungibleGlobalId::from_public_key(
+                    &ScryptoPublicKey::from(value.public_key),
+                ),
+            ),
+            // FactorInstanceBadge::Physical { value } => {
+            //     ScryptoResourceOrNonFungible::Resource(
+            //         ScryptoResourceAddress::new_or_panic(value.0.node_id().0),
+            //     )
+            // }
+        }
+    }
+}
 
 impl<'de> Deserialize<'de> for FactorInstanceBadge {
     fn deserialize<D: Deserializer<'de>>(

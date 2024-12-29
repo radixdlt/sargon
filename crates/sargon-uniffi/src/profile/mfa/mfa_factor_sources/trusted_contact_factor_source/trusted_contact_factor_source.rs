@@ -34,7 +34,7 @@ fn new_trusted_contact_factor_source_from_address_and_contact(
     contact: TrustedContactFactorSourceContact,
 ) -> TrustedContactFactorSource {
     InternalTrustedContactFactorSource::new(
-        account_address.into_internal(),
+        account_address.to_string(),
         contact.into_internal(),
     )
     .into()

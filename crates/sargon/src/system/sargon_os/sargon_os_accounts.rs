@@ -1279,7 +1279,7 @@ mod tests {
         let names = os.profile().unwrap().networks[0]
             .accounts
             .iter()
-            .map(|x| x.display_name.value.clone())
+            .map(|x| x.display_name.value())
             .collect_vec();
 
         assert_eq!(

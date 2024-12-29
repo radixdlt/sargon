@@ -15,18 +15,16 @@ use crate::prelude::*;
     derive_more::Display,
     derive_more::Debug,
 )]
-#[display("{email}")]
-#[debug("{email}")]
+#[display("{}", self.0.to_string())]
+#[debug("{:?}", self.0.to_string())]
 #[serde(transparent)]
-pub struct EmailAddress {
-    pub email: arraystring::MaxString,
-}
+pub struct EmailAddress(ShortString);
 
 impl Identifiable for EmailAddress {
     type ID = String;
 
     fn id(&self) -> Self::ID {
-        self.email.clone().as_str().to_owned()
+        self.0.value()
     }
 }
 
@@ -44,8 +42,7 @@ impl EmailAddress {
         if email.is_empty() {
             return Err(CommonError::EmailAddressEmpty);
         }
-        let maxstring = arraystring::MaxString::try_from_str(email).unwrap();
-        Ok(Self { email: maxstring })
+        ShortString::new(email).map(Self)
     }
 }
 
@@ -87,10 +84,10 @@ mod tests {
     }
 
     #[test]
-    fn id_is_email() {
+    fn id_is_display() {
         assert_eq!(
             EmailAddress::sample().id(),
-            EmailAddress::sample().email.as_str().to_owned()
+            EmailAddress::sample().to_string()
         );
     }
 

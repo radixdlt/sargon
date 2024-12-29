@@ -48,6 +48,13 @@ pub mod prelude {
     pub use crate::is_factor_source::*;
     pub use crate::mfa_factor_sources::*;
     pub use crate::samples::*;
+
+    pub(crate) use radix_common::{
+        crypto::PublicKey as ScryptoPublicKey,
+        prelude::NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
+        types::FromPublicKey as _,
+    };
+    pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
 }
 
 pub use prelude::*;

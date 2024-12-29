@@ -40,7 +40,6 @@ impl From<HierarchicalDeterministicPublicKey>
 }
 
 impl<'de> Deserialize<'de> for FactorInstanceBadgeVirtualSource {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {
@@ -55,7 +54,6 @@ impl<'de> Deserialize<'de> for FactorInstanceBadgeVirtualSource {
 }
 
 impl Serialize for FactorInstanceBadgeVirtualSource {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

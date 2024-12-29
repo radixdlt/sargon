@@ -22,11 +22,8 @@ pub mod prelude {
     pub use crate::decl_identified_vec_of_with_samples::*;
     pub use crate::identifiable::*;
     pub use crate::identified_vec_of::*;
-    pub use crate::identified_vec_of_display_debug::*;
     pub use crate::identified_vec_of_iterator::*;
     pub use crate::identified_vec_of_modify::*;
-    pub use crate::identified_vec_of_query::*;
-    pub use crate::identified_vec_of_serde::*;
     pub use crate::identified_vec_of_validation_import_export::*;
 
     pub use itertools::Itertools;
@@ -35,6 +32,6 @@ pub mod prelude {
 }
 
 #[cfg(test)]
-pub use user::*;
+pub(crate) use user::*;
 
 pub use prelude::*;

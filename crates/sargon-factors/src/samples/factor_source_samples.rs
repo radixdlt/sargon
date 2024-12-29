@@ -11,13 +11,12 @@ pub(crate) static ALL_FACTOR_SOURCE_SAMPLES: Lazy<[FactorSource; 12]> =
             .unwrap()
     });
 
-#[allow(dead_code)]
 impl FactorSource {
-    pub(crate) fn sample_at(index: usize) -> FactorSource {
+    pub fn sample_at(index: usize) -> FactorSource {
         ALL_FACTOR_SOURCE_SAMPLES[index].clone()
     }
 
-    pub(crate) fn sample_all() -> IndexSet<FactorSource> {
+    pub fn sample_all() -> IndexSet<FactorSource> {
         IndexSet::from_iter(ALL_FACTOR_SOURCE_SAMPLES.clone())
     }
 

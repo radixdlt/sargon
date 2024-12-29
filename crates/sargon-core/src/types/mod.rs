@@ -24,6 +24,7 @@ mod vector_image_type;
 mod version_type;
 mod display_name;
 mod email_address;
+mod short_string;
 
 pub use appearance_id::*;
 pub use bag_of_bytes::*;
@@ -31,6 +32,7 @@ pub(crate) use bool_type::*;
 pub use collections::*;
 pub use decimal192::*;
 pub use email_address::*;
+pub use short_string::*;
 pub use entity_kind::*;
 pub use display_name::*;
 pub use epoch::*;

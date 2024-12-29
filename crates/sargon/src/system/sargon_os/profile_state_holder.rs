@@ -314,7 +314,7 @@ mod tests {
                                     &first_mainnet_account.address,
                                     |account| {
                                         let display_name =
-                                            account.display_name.value.clone();
+                                            account.display_name.value();
                                         account.display_name = DisplayName::new(
                                             display_name
                                                 + i.to_string().as_str(),
@@ -347,12 +347,12 @@ mod tests {
                     .first()
                     .unwrap()
                     .display_name
-                    .value
-                    .clone()
+                    .value()
             })
             .unwrap();
 
-        let expected_name = first_mainnet_account.display_name.value + "01234";
+        let expected_name =
+            first_mainnet_account.display_name.value() + "01234";
 
         pretty_assertions::assert_eq!(expected_name, result_name)
     }

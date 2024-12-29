@@ -1,5 +1,3 @@
-use itertools::join;
-
 use crate::prelude::*;
 
 /// FactorSourceID from the blake2b hash of the special HD public key derived at `CAP26::GetID`,

@@ -470,9 +470,9 @@ mod tests {
     #[test]
     fn update() {
         let mut account = SUT::sample();
-        assert_eq!(account.display_name.value, "Alice");
+        assert_eq!(account.display_name.value(), "Alice");
         account.display_name = DisplayName::new("Satoshi").unwrap();
-        assert_eq!(account.display_name.value, "Satoshi");
+        assert_eq!(account.display_name.value(), "Satoshi");
     }
 
     #[test]
@@ -802,7 +802,7 @@ mod tests {
             "#,
         ).unwrap();
         let account = serde_json::from_value::<Account>(json).unwrap();
-        assert_eq!(account.display_name.value, "Olympia|Soft|0".to_string()); // soundness
+        assert_eq!(account.display_name.value(), "Olympia|Soft|0".to_string()); // soundness
         assert_eq!(account.flags.len(), 0); // assert Default value is empty flags.
     }
 

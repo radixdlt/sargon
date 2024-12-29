@@ -840,7 +840,7 @@ mod tests {
             .unwrap()
             .clone();
 
-        assert_eq!(account.display_name.value, "Alice");
+        assert_eq!(account.display_name.value(), "Alice");
         assert!(sut
             .update_account(&account.address, |a| a.display_name =
                 DisplayName::new("Bob").unwrap())
@@ -854,7 +854,7 @@ mod tests {
                 .get_at_index(0)
                 .unwrap()
                 .display_name
-                .value,
+                .value(),
             "Bob"
         );
     }
@@ -871,7 +871,7 @@ mod tests {
             .unwrap()
             .clone();
 
-        assert_eq!(persona.display_name.value, "Satoshi");
+        assert_eq!(persona.display_name.value(), "Satoshi");
         assert!(sut
             .update_persona(&persona.address, |a| a.display_name =
                 DisplayName::new("Batman").unwrap())
@@ -885,7 +885,7 @@ mod tests {
                 .get_at_index(0)
                 .unwrap()
                 .display_name
-                .value,
+                .value(),
             "Batman"
         );
     }

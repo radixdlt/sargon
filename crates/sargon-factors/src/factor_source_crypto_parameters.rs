@@ -32,7 +32,6 @@ pub struct FactorSourceCryptoParameters {
 }
 
 impl FactorSourceCryptoParameters {
-    #[cfg(not(tarpaulin_include))] // false negative
     pub fn new<I, J>(curves: I, schemes: J) -> Result<Self>
     where
         I: IntoIterator<Item = SLIP10Curve>,

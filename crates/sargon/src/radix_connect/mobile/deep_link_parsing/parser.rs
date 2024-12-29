@@ -4,6 +4,7 @@ use base64::engine::general_purpose::URL_SAFE;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use crypto::signatures::ed25519::Signature;
+use sargon_core::parse_url;
 use url::form_urlencoded;
 use url::Url;
 
@@ -217,6 +218,7 @@ impl SampleRequestParams {
 mod tests {
     use hex::ToHex;
     use rand::random;
+    use sargon_core::parse_url;
 
     use super::*;
 

@@ -17,7 +17,7 @@ path = "src/bindgen/bin.rs"
 required-features = ["build-binary"]
 
 [dependencies]
-
+sargon-core = { path = "../sargon-core" }
 sargon = { path = "../sargon" }
 sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" }
 

@@ -2998,6 +2998,7 @@ dependencies = [
  "rand",
  "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
  "sargon",
+ "sargon-core",
  "sargon-uniffi-conversion-macros",
  "strum 0.26.1",
  "thiserror 1.0.50",

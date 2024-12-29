@@ -19,18 +19,16 @@ pub struct FactorSourceIDFromAddress {
     pub kind: FactorSourceKind,
 
     /// An account address which the FactorSource this ID refers uses/needs.
-    pub body: arraystring::MaxString, // actually `AccountAddress` - TODO split out addresses into separate crate and add it dependency in this crate...?
+    pub body: ShortString, // actually `AccountAddress` - TODO split out addresses into separate crate and add it dependency in this crate...?
 }
 
 impl FactorSourceIDFromAddress {
     pub fn new(kind: FactorSourceKind, body: impl AsRef<str>) -> Self {
         assert!(kind == FactorSourceKind::TrustedContact, "Only supported FactorSourceKind to be used with  FactorSourceIDFromAddress is `trustedContact` at this moment.");
-        let maxstring = arraystring::MaxString::try_from_str(prefix_str(
-            100, // with margin longer than any account address on any network
-            body.as_ref(),
-        ))
-        .unwrap();
-        Self { kind, body: maxstring }
+        Self {
+            kind,
+            body: ShortString::new(body).unwrap(),
+        }
     }
 }
 

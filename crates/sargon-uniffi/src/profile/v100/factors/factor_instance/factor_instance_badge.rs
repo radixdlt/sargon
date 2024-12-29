@@ -9,9 +9,9 @@ pub enum FactorInstanceBadge {
     Virtual {
         value: FactorInstanceBadgeVirtualSource,
     },
-    Physical {
-        value: ResourceAddress,
-    },
+    // Physical {
+    //     value: ResourceAddress,
+    // },
 }
 
 delegate_debug_into!(FactorInstanceBadge, InternalFactorInstanceBadge);

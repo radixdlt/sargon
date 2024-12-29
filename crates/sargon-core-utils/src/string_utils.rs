@@ -1,5 +1,4 @@
 use url::form_urlencoded;
-use url::Url;
 
 /// Returns the last `n` chars of the &str `s`. If `s` is shorter than `n`
 /// we panic.
@@ -43,7 +42,6 @@ impl StrExt for str {
         }
     }
 }
-
 
 pub fn url_encode(s: impl AsRef<str>) -> String {
     form_urlencoded::byte_serialize(s.as_ref().as_bytes()).collect()
@@ -102,7 +100,6 @@ mod tests {
         assert_eq!("Foobar".remove_last(), "Fooba");
     }
 
-
     #[test]
     fn test_url_encode() {
         let url = "https://svgshare.com/i/U7z.svg";
@@ -118,6 +115,7 @@ mod tests {
         );
     }
 
+    #[test]
     fn test_typename() {
         struct GreatStruct {}
         assert_eq!(type_name::<GreatStruct>(), "GreatStruct");

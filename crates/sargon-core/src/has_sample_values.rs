@@ -5,6 +5,16 @@ pub trait HasSampleValues {
     fn sample_other() -> Self;
 }
 
+impl HasSampleValues for CommonError {
+    fn sample() -> Self {
+        CommonError::UnknownAccount
+    }
+
+    fn sample_other() -> Self {
+        CommonError::UnknownPersona
+    }
+}
+
 impl HasSampleValues for String {
     fn sample() -> Self {
         "sample".to_string()
@@ -53,7 +63,6 @@ impl HasSampleValues for Timestamp {
         Self::parse("2023-12-24T17:13:56.123Z").unwrap()
     }
 }
-
 
 impl HasSampleValues for u32 {
     fn sample() -> Self {

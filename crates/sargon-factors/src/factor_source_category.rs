@@ -20,7 +20,7 @@ pub enum FactorSourceCategory {
 }
 
 impl FactorSourceCategory {
-    fn is_supported(&self) -> bool {
+    pub fn is_supported(&self) -> bool {
         use FactorSourceCategory::*;
         match self {
             Identity | Hardware | Contact | Information => true,
