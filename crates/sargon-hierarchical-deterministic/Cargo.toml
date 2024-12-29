@@ -45,3 +45,10 @@ url = { workspace = true }
 thiserror = { workspace = true }
 
 uuid = { workspace = true }
+
+# bip39 = "2.0.0"
+bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = [
+    "serde",
+    "zeroize",
+    "french",
+] }

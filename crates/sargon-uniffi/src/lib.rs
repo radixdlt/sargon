@@ -16,8 +16,6 @@ mod system;
 mod types;
 mod wrapped_radix_engine_toolkit;
 
-pub fn apa() -> u8 { 0 }
-
 pub mod prelude {
 
     pub use crate::core::*;

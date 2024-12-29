@@ -1,39 +1,29 @@
-#![cfg(test)]
 use crate::prelude::*;
 
-impl DerivationPath {
-    pub fn for_entity(
+pub trait DerivationPathConstructors: Sized {
+    fn for_entity(
         network_id: NetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
         hardened: Hardened,
-    ) -> Self {
-        match entity_kind {
-            CAP26EntityKind::Account => DerivationPath::account(
-                AccountPath::new(network_id, key_kind, hardened),
-            ),
-            CAP26EntityKind::Identity => DerivationPath::identity(
-                IdentityPath::new(network_id, key_kind, hardened),
-            ),
-        }
-    }
+    ) -> DerivationPath;
 
-    pub fn hardening_global_index(
+    fn hardening_global_index(
         network_id: NetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
         global_key_space: u32,
-    ) -> Self {
+    ) -> DerivationPath {
         let index = Hardened::from_global_key_space(global_key_space).unwrap();
         Self::for_entity(network_id, entity_kind, key_kind, index)
     }
 
-    pub fn unsecurified_hardening_base_index(
+    fn unsecurified_hardening_base_index(
         network_id: NetworkID,
         entity_kind: CAP26EntityKind,
         key_kind: CAP26KeyKind,
         index: u32,
-    ) -> Self {
+    ) -> DerivationPath {
         let index = U30::try_from(index).unwrap();
         let index = Hardened::Unsecurified(UnsecurifiedHardened::from(index));
         match entity_kind {
@@ -46,10 +36,10 @@ impl DerivationPath {
         }
     }
 
-    pub fn hardening_global_index_account_tx(
+    fn hardening_global_index_account_tx(
         network_id: NetworkID,
         global_key_space: u32,
-    ) -> Self {
+    ) -> DerivationPath {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Account,
@@ -58,10 +48,10 @@ impl DerivationPath {
         )
     }
 
-    pub fn hardening_global_index_account_rola(
+    fn hardening_global_index_account_rola(
         network_id: NetworkID,
         global_key_space: u32,
-    ) -> Self {
+    ) -> DerivationPath {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Account,
@@ -70,10 +60,10 @@ impl DerivationPath {
         )
     }
 
-    pub fn hardening_global_index_identity_tx(
+    fn hardening_global_index_identity_tx(
         network_id: NetworkID,
         global_key_space: u32,
-    ) -> Self {
+    ) -> DerivationPath {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Identity,
@@ -82,10 +72,10 @@ impl DerivationPath {
         )
     }
 
-    pub fn hardening_global_index_identity_rola(
+    fn hardening_global_index_identity_rola(
         network_id: NetworkID,
         global_key_space: u32,
-    ) -> Self {
+    ) -> DerivationPath {
         Self::hardening_global_index(
             network_id,
             CAP26EntityKind::Identity,
@@ -94,10 +84,10 @@ impl DerivationPath {
         )
     }
 
-    pub fn account_tx_unsecurified_hardening_base_index(
+    fn account_tx_unsecurified_hardening_base_index(
         network_id: NetworkID,
         index: u32,
-    ) -> Self {
+    ) -> DerivationPath {
         Self::unsecurified_hardening_base_index(
             network_id,
             CAP26EntityKind::Account,
@@ -107,12 +97,29 @@ impl DerivationPath {
     }
 }
 
-mod key_derivation_tests {
+impl DerivationPathConstructors for DerivationPath {
+    fn for_entity(
+        network_id: NetworkID,
+        entity_kind: CAP26EntityKind,
+        key_kind: CAP26KeyKind,
+        hardened: Hardened,
+    ) -> DerivationPath {
+        match entity_kind {
+            CAP26EntityKind::Account => DerivationPath::account(
+                AccountPath::new(network_id, key_kind, hardened),
+            ),
+            CAP26EntityKind::Identity => DerivationPath::identity(
+                IdentityPath::new(network_id, key_kind, hardened),
+            ),
+        }
+    }
+}
 
-    use super::CAP26EntityKind::*;
-    use super::CAP26KeyKind::*;
-    use super::NetworkID::*;
+mod key_derivation_tests {
     use super::*;
+    use sargon_hierarchical_deterministic::CAP26EntityKind::*;
+    use sargon_hierarchical_deterministic::CAP26KeyKind::*;
+    use NetworkID::*;
 
     #[actix_rt::test]
     async fn failure_unknown_factor() {

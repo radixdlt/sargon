@@ -30,6 +30,14 @@ pub enum SLIP10Curve {
     Secp256k1,
 }
 
+impl Identifiable for SLIP10Curve {
+    type ID = String;
+
+    fn id(&self) -> Self::ID {
+        self.string()
+    }
+}
+
 impl Display for SLIP10Curve {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.string())

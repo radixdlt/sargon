@@ -114,7 +114,7 @@ impl NetworkID {
 
     /// Returns collection of all by Sargon known network ids.
     pub fn all() -> Vec<Self> {
-        all::<Self>().collect()
+        enum_iterator::all::<Self>().collect()
     }
 }
 
@@ -127,13 +127,7 @@ impl TryFrom<u8> for NetworkID {
             .ok_or(Self::Error::UnknownNetworkID { bad_value: value })
     }
 }
-impl TryFrom<HDPathComponent> for NetworkID {
-    type Error = CommonError;
 
-    fn try_from(value: HDPathComponent) -> Result<Self> {
-        Self::try_from(value.index_in_local_key_space())
-    }
-}
 impl TryFrom<U31> for NetworkID {
     type Error = CommonError;
     fn try_from(value: U31) -> Result<Self> {
@@ -157,7 +151,7 @@ impl NetworkID {
     /// Looks up a `ScryptoNetworkDefinition` in lookup table,
     /// this is used internally for radix_common::address::AddressBech32Decoder,
     /// and to read out the canonical name (logical name) for a network.
-    pub(crate) fn network_definition(&self) -> ScryptoNetworkDefinition {
+    pub fn network_definition(&self) -> ScryptoNetworkDefinition {
         use NetworkID::*;
         match self {
             Mainnet => ScryptoNetworkDefinition::mainnet(),

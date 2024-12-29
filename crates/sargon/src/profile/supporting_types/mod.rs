@@ -9,7 +9,6 @@ mod email_address;
 mod host_id;
 mod host_info;
 mod host_os;
-mod is_network_aware;
 mod on_same_network_validating;
 
 pub use account_for_display::*;
@@ -23,5 +22,4 @@ pub use email_address::*;
 pub use host_id::*;
 pub use host_info::*;
 pub use host_os::*;
-pub use is_network_aware::*;
 pub use on_same_network_validating::*;

@@ -394,10 +394,10 @@ impl FactorInstancesProvider {
                                 let path = next_index_assigner
                                     .next(factor_source_id, index_agnostic_path)
                                     .map(|index| {
-                                        DerivationPath::from((
+                                        DerivationPath::from_index_agnostic_path_and_component(
                                             index_agnostic_path,
                                             index,
-                                        ))
+                                        )
                                     })?;
                                 Ok(path)
                             })

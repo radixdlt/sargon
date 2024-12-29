@@ -60,6 +60,7 @@ macro_rules! decl_ret_wrapped_address {
         $address_type: ident
     ) => {
         paste! {
+            use std::str::FromStr;
             $(
                 #[doc = $expr]
             )*
@@ -95,7 +96,7 @@ macro_rules! decl_ret_wrapped_address {
             impl From<&str> for [< $address_type:camel Address >] {
                 /// TEST ONLY
                 fn from(value: &str) -> Self {
-                    value.parse().expect(&format!("Test failed since the passed in str is not a valid address: '{}'", value))
+                    value.parse::<Self>().expect(&format!("Test failed since the passed in str is not a valid address: '{}'", value))
                 }
             }
 
@@ -182,8 +183,8 @@ macro_rules! decl_ret_wrapped_address {
                 pub fn entity_type(&self) -> ScryptoEntityType {
                     self.0.entity_type()
                 }
-
                 pub fn try_from_bech32(bech32: impl AsRef<str>) -> Result<Self> {
+
                     bech32.as_ref().parse::<[< Ret $address_type:camel Address >]>()
                     .map_err(|e| {
                         error!("Failed Bech32 decode String, RET error: {:?}", e);

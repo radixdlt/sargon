@@ -138,8 +138,18 @@ impl TryFrom<IndexAgnosticPath> for DerivationPreset {
     }
 }
 
-impl From<(IndexAgnosticPath, HDPathComponent)> for DerivationPath {
-    fn from((path, index): (IndexAgnosticPath, HDPathComponent)) -> Self {
+pub trait FromIndexAgnosticPathAndComponent {
+    fn from_index_agnostic_path_and_component(
+        path: IndexAgnosticPath,
+        index: HDPathComponent,
+    ) -> Self;
+}
+
+impl FromIndexAgnosticPathAndComponent for DerivationPath {
+    fn from_index_agnostic_path_and_component(
+        path: IndexAgnosticPath,
+        index: HDPathComponent,
+    ) -> Self {
         assert_eq!(index.key_space(), path.key_space);
         let hardened =
             Hardened::try_from(index).expect("Expected only hardened indices.");
@@ -158,8 +168,12 @@ impl From<(IndexAgnosticPath, HDPathComponent)> for DerivationPath {
     }
 }
 
-impl AccountPath {
-    pub fn agnostic(&self) -> IndexAgnosticPath {
+pub trait ToAgnosticPath {
+    fn agnostic(&self) -> IndexAgnosticPath;
+}
+
+impl ToAgnosticPath for AccountPath {
+    fn agnostic(&self) -> IndexAgnosticPath {
         IndexAgnosticPath {
             network_id: self.network_id,
             entity_kind: self.get_entity_kind(),
@@ -169,8 +183,8 @@ impl AccountPath {
     }
 }
 
-impl IdentityPath {
-    pub fn agnostic(&self) -> IndexAgnosticPath {
+impl ToAgnosticPath for IdentityPath {
+    fn agnostic(&self) -> IndexAgnosticPath {
         IndexAgnosticPath {
             network_id: self.network_id,
             entity_kind: self.get_entity_kind(),
@@ -180,8 +194,8 @@ impl IdentityPath {
     }
 }
 
-impl DerivationPath {
-    pub fn agnostic(&self) -> IndexAgnosticPath {
+impl ToAgnosticPath for DerivationPath {
+    fn agnostic(&self) -> IndexAgnosticPath {
         match self {
             DerivationPath::Account { value } => value.agnostic(),
             DerivationPath::Identity { value } => value.agnostic(),

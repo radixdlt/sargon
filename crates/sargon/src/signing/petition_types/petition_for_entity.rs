@@ -654,7 +654,7 @@ mod tests {
             || {
                 let fi = HierarchicalDeterministicFactorInstance::sample_id_to_instance(
                 CAP26EntityKind::Account,
-                Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
+                Hardened::from_local_key_space(U31::ZERO, IsSecurified(true)).unwrap(),
             );
                 GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
                     RoleKind::Primary,
@@ -676,7 +676,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::from(entity.address),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
+                    Hardened::from_local_key_space(U31::ZERO, IsSecurified(true)).unwrap(),
                     FactorSourceIDFromHash::sample_at(0),
                 ),
             ),
@@ -696,7 +696,7 @@ mod tests {
                 OwnedFactorInstance::new(
                     sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                        Hardened::from_local_key_space(6, IsSecurified(true)).unwrap(),
+                        Hardened::from_local_key_space(U31::try_from(6u32).unwrap(), IsSecurified(true)).unwrap(),
                         FactorSourceIDFromHash::sample_at(1),
                     ),
                 ),

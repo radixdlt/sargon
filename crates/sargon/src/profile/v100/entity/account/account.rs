@@ -92,6 +92,13 @@ impl IsSecurityStateAware for Account {
         self.security_state().is_securified()
     }
 }
+
+impl IsNetworkAware for Account {
+    fn network_id(&self) -> NetworkID {
+        self.address().network_id()
+    }
+}
+
 impl IsBaseEntity for Account {
     type Address = AccountAddress;
 

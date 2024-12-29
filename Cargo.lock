@@ -2750,7 +2750,6 @@ dependencies = [
  "async-std",
  "async-trait",
  "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
- "bip39",
  "camino 1.0.8",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "delegate",
@@ -2834,6 +2833,7 @@ name = "sargon-hierarchical-deterministic"
 version = "1.2.0"
 dependencies = [
  "assert-json-diff",
+ "bip39",
  "delegate",
  "derive_more",
  "enum-as-inner",

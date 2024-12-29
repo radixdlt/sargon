@@ -115,7 +115,7 @@ mod tests {
             AccountPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
-                UnsecurifiedHardened::from_local_key_space(0).unwrap(),
+                UnsecurifiedHardened::from_local_key_space(U31::ZERO).unwrap(),
             )
             .into(),
         );
@@ -168,7 +168,8 @@ mod tests {
             IdentityPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::AuthenticationSigning,
-                Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
+                Hardened::from_local_key_space(U31::ZERO, IsSecurified(false))
+                    .unwrap(),
             )
             .into(),
         );

@@ -99,7 +99,11 @@ static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
     ]
 });
 
-impl DerivationPath {
+trait UnsafeAsPersona {
+    unsafe fn as_persona(&self) -> Self;
+}
+
+impl UnsafeAsPersona for DerivationPath {
     /// # Safety
     /// Crashes for Bip44LikePath, this is only meant to be used for tests
     /// to map between IdentityPath -> IdentityPath

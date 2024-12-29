@@ -751,8 +751,11 @@ mod tests {
                     DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        Hardened::from_local_key_space(6, IsSecurified(true))
-                            .unwrap()
+                        Hardened::from_local_key_space(
+                            U31::try_from(6u32).unwrap(),
+                            IsSecurified(true)
+                        )
+                        .unwrap()
                     )),
                     5
                 )
@@ -1368,8 +1371,11 @@ mod tests {
                     vec![DerivationPath::from(AccountPath::new(
                         NetworkID::Mainnet,
                         CAP26KeyKind::TransactionSigning,
-                        Hardened::from_local_key_space(0, IsSecurified(false)) // unsecurified account at `0`.
-                            .unwrap()
+                        Hardened::from_local_key_space(
+                            U31::ZERO,
+                            IsSecurified(false)
+                        ) // unsecurified account at `0`.
+                        .unwrap()
                     ))]
                 )
             }
@@ -1448,7 +1454,7 @@ mod tests {
                             HierarchicalDeterministicFactorInstance::new_for_entity(
                                 FactorSourceIDFromHash::sample_at(0),
                                 CAP26EntityKind::Account,
-                                Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
+                                Hardened::from_local_key_space(U31::ZERO, IsSecurified(false)).unwrap(),
                             ),
                         ),
                         Account::sample_unsecurified_mainnet(
@@ -1456,7 +1462,7 @@ mod tests {
                             HierarchicalDeterministicFactorInstance::new_for_entity(
                                 FactorSourceIDFromHash::sample_at(0),
                                 CAP26EntityKind::Account,
-                                Hardened::from_local_key_space(1, IsSecurified(false)).unwrap(),
+                                Hardened::from_local_key_space(U31::ONE, IsSecurified(false)).unwrap(),
                             ),
                         ),
                     ])
@@ -1476,7 +1482,7 @@ mod tests {
                             NetworkID::Mainnet,
                             CAP26KeyKind::TransactionSigning,
                             Hardened::from_local_key_space(
-                                0,
+                                U31::ZERO,
                                 IsSecurified(false)
                             )
                             .unwrap()
@@ -1485,7 +1491,7 @@ mod tests {
                             NetworkID::Mainnet,
                             CAP26KeyKind::TransactionSigning,
                             Hardened::from_local_key_space(
-                                1,
+                                U31::ONE,
                                 IsSecurified(false)
                             )
                             .unwrap()
@@ -1921,7 +1927,7 @@ mod tests {
                                         HierarchicalDeterministicFactorInstance::new_for_entity(
                                             *f.factor_source_id().as_hash().unwrap(),
                                              E::entity_kind(),
-                                            Hardened::from_local_key_space(0, IsSecurified(true)).unwrap(),
+                                            Hardened::from_local_key_space(U31::ZERO, IsSecurified(true)).unwrap(),
                                         )
                                     }),
                                 ).unwrap()

@@ -22,7 +22,6 @@ pub struct MnemonicWithPassphrase {
 }
 
 impl MnemonicWithPassphrase {
-    #[cfg(not(tarpaulin_include))] // false negative
     pub fn partially_obfuscated_string(&self) -> String {
         format!(
             "{} + {}",
@@ -133,98 +132,98 @@ impl MnemonicWithPassphrase {
 }
 
 impl MnemonicWithPassphrase {
-    pub(crate) fn sample_device() -> Self {
+    pub fn sample_device() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_device_other() -> Self {
+    pub fn sample_device_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device_other(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_device_12_words() -> Self {
+    pub fn sample_device_12_words() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device_12_words(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_device_12_words_other() -> Self {
+    pub fn sample_device_12_words_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_device_12_words_other(),
             BIP39Passphrase::new("Olympia rules!"),
         )
     }
 
-    pub(crate) fn sample_ledger() -> Self {
+    pub fn sample_ledger() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_ledger(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_ledger_other() -> Self {
+    pub fn sample_ledger_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_ledger_other(),
             BIP39Passphrase::new("Mellon"),
         )
     }
 
-    pub(crate) fn sample_off_device() -> Self {
+    pub fn sample_off_device() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_off_device(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_off_device_other() -> Self {
+    pub fn sample_off_device_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_off_device_other(),
             BIP39Passphrase::new("open sesame"),
         )
     }
 
-    pub(crate) fn sample_arculus() -> Self {
+    pub fn sample_arculus() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_arculus(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_arculus_other() -> Self {
+    pub fn sample_arculus_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_arculus_other(),
             BIP39Passphrase::new("Leonidas"),
         )
     }
 
-    pub(crate) fn sample_security_questions() -> Self {
+    pub fn sample_security_questions() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_security_questions(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_security_questions_other() -> Self {
+    pub fn sample_security_questions_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_security_questions_other(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_password() -> Self {
+    pub fn sample_password() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_password(),
             BIP39Passphrase::default(),
         )
     }
 
-    pub(crate) fn sample_password_other() -> Self {
+    pub fn sample_password_other() -> Self {
         Self::with_passphrase(
             Mnemonic::sample_password_other(),
             BIP39Passphrase::new("Pass phrase"),
@@ -482,7 +481,8 @@ mod tests {
         let path = AccountPath::new(
             NetworkID::Mainnet,
             CAP26KeyKind::TransactionSigning,
-            Hardened::from_local_key_space(0, IsSecurified(false)).unwrap(),
+            Hardened::from_local_key_space(U31::ZERO, IsSecurified(false))
+                .unwrap(),
         );
         let seed = mwp.to_seed();
         let private_key = seed.derive_private_key(&path);

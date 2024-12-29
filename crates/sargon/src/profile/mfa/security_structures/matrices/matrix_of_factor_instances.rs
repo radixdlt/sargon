@@ -103,7 +103,16 @@ impl HasFactorInstances for MatrixOfFactorInstances {
     }
 }
 
-impl MnemonicWithPassphrase {
+trait InstancesDerivingWithFactorSources {
+    fn derive_instances_for_factor_sources(
+        network_id: NetworkID,
+        quantity_per_factor: usize,
+        derivation_presets: impl IntoIterator<Item = DerivationPreset>,
+        sources: impl IntoIterator<Item = FactorSource>,
+    ) -> IndexMap<FactorSourceIDFromHash, FactorInstances>;
+}
+
+impl InstancesDerivingWithFactorSources for MnemonicWithPassphrase {
     fn derive_instances_for_factor_sources(
         network_id: NetworkID,
         quantity_per_factor: usize,
@@ -143,10 +152,10 @@ impl MnemonicWithPassphrase {
                                 next_index_assigner
                                     .next(fsid, index_agnostic_path)
                                     .map(|index| {
-                                        DerivationPath::from((
+                                        DerivationPath::from_index_agnostic_path_and_component(
                                             index_agnostic_path,
                                             index,
-                                        ))
+                                        )
                                     })
                                     .unwrap()
                             })

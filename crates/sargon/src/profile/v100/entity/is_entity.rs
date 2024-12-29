@@ -30,11 +30,11 @@ pub trait IsBaseEntity:
     }
 }
 
-impl<T: IsBaseEntity> IsNetworkAware for T {
-    fn network_id(&self) -> NetworkID {
-        self.address().network_id()
-    }
-}
+// impl<T: IsBaseEntity> IsNetworkAware for T {
+//     fn network_id(&self) -> NetworkID {
+//         self.address().network_id()
+//     }
+// }
 
 /// A trait bridging Account and Persona.
 pub trait IsEntity:

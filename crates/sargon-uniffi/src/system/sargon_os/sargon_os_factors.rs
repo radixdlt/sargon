@@ -2,6 +2,7 @@ use crate::prelude::*;
 use sargon::DeviceFactorSourceType as InternalDeviceFactorSourceType;
 use sargon::HasIndexInLocalKeySpace;
 use sargon::HierarchicalDeterministicFactorInstance as InternalHierarchicalDeterministicFactorInstance;
+use sargon::ToAgnosticPath;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
