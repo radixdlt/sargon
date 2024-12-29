@@ -25,7 +25,7 @@ class FactorSourceIdTest {
 
         val addressFactorSourceId = FactorSourceIdFromAddress(
             kind = FactorSourceKind.TRUSTED_CONTACT,
-            body = AccountAddress.sampleMainnet()
+            body = AccountAddress.sampleMainnet().string
         )
         assertEquals(
             FactorSourceId.Address(addressFactorSourceId),
@@ -47,7 +47,7 @@ class FactorSourceIdTest {
 
         val sutAddress = FactorSourceIdFromAddress(
             kind = FactorSourceKind.TRUSTED_CONTACT,
-            body = AccountAddress.sampleMainnet()
+            body = AccountAddress.sampleMainnet().string
         ).asGeneral()
 
         assertEquals(

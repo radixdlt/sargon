@@ -190,7 +190,7 @@ class FactorSourceTest : SampleTestable<FactorSource> {
     private val trustedContact = FactorSource.TrustedContact(
         value = TrustedContactFactorSource(
             id = FactorSourceIdFromAddress(
-                kind = FactorSourceKind.TRUSTED_CONTACT, body = AccountAddress.sampleMainnet()
+                kind = FactorSourceKind.TRUSTED_CONTACT, body = AccountAddress.sampleMainnet().string
             ),
             common = FactorSourceCommon(
                 cryptoParameters = FactorSourceCryptoParameters(
