@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[allow(clippy::large_enum_variant)]
 #[derive(
     Serialize,
     Deserialize,

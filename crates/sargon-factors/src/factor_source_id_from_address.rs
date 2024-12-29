@@ -34,10 +34,7 @@ impl FactorSourceIDFromAddress {
 
 impl FactorSourceIDFromAddress {
     pub fn new_for_trusted_contact(address: impl AsRef<str>) -> Self {
-        Self::new(
-            FactorSourceKind::TrustedContact,
-            address.as_ref().to_owned(),
-        )
+        Self::new(FactorSourceKind::TrustedContact, address.as_ref())
     }
 }
 

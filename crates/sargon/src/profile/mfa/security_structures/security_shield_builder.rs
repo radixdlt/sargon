@@ -800,6 +800,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::mutable_key_type)]
     fn hash() {
         assert_eq!(
             radix_rust::hashset![

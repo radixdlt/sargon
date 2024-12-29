@@ -65,7 +65,7 @@ impl FactorInstance {
 impl From<HierarchicalDeterministicFactorInstance> for FactorInstance {
     fn from(value: HierarchicalDeterministicFactorInstance) -> Self {
         Self::with_hierarchical_deterministic_public_key(
-            value.factor_source_id.clone().into(),
+            value.factor_source_id.into(),
             value.hd_public_key(),
         )
     }

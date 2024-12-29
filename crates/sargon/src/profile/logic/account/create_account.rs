@@ -27,7 +27,7 @@ impl Profile {
                 1,
                 factor_instances_cache_client,
                 key_derivation_interactor,
-                |_| name.clone(),
+                |_| name,
             )
             .await?;
 

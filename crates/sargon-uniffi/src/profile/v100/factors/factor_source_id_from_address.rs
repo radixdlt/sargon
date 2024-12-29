@@ -18,7 +18,7 @@ impl FactorSourceIDFromAddress {
 impl From<InternalFactorSourceIDFromAddress> for FactorSourceIDFromAddress {
     fn from(factor_source_id: InternalFactorSourceIDFromAddress) -> Self {
         Self {
-            kind: factor_source_id.kind.clone().into(),
+            kind: factor_source_id.kind.into(),
             body: factor_source_id.body.to_string(),
         }
     }

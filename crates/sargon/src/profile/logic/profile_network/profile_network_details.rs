@@ -22,7 +22,7 @@ impl AuthorizedPersonaSimple {
                 };
                 Ok(AccountForDisplay::new(
                     account.address,
-                    account.display_name.clone(),
+                    account.display_name,
                     account.appearance_id
                 ))
             }).collect::<Result<AccountsForDisplay>>()?;
@@ -121,7 +121,7 @@ impl AuthorizedPersonaSimple {
         let has_auth_signing_key = persona.is_securified();
         Ok(AuthorizedPersonaDetailed::new(
             persona.address,
-            persona.display_name.clone(),
+            persona.display_name,
             shared_accounts.clone(),
             persona_data,
             has_auth_signing_key,
