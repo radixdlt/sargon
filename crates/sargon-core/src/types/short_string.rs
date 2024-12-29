@@ -68,15 +68,6 @@ mod tests {
     }
 
     #[test]
-    fn invalid() {
-        let s = "this is a much much too long display name";
-        assert_eq!(
-            SUT::new(s).unwrap().value(),
-            "this is a much much too long d"
-        );
-    }
-
-    #[test]
     fn max_is_ok() {
         assert!(SUT::new("0|RDX|Dev Nano S|Some very lon").is_ok());
     }
@@ -102,7 +93,6 @@ mod tests {
 
     #[test]
     fn json_fails_for_invalid() {
-        assert_json_value_fails::<SUT>(json!(""));
-        assert_json_value_fails::<SUT>(json!("   "));
+        assert_json_value_fails::<SUT>(json!("this is a much much too long string which character count way exceed the limit which is two hundred and fifty five or written with digits 255 which is u8 max value which is 2^8 - 1 and it is in fact quite a long string it allows for, but this is just too long."));
     }
 }
