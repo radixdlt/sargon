@@ -13,6 +13,7 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [dependencies]
 sargon-core = { path = "../sargon-core" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 
 zeroize = { workspace = true }
 
