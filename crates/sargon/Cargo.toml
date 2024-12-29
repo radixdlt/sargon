@@ -13,7 +13,9 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [dependencies]
 sargon-core = { path = "../sargon-core" }
+identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-factors = { path = "../sargon-factors" }
 
 zeroize = { workspace = true }
 
@@ -70,7 +72,6 @@ iota-crypto = { workspace = true }
 k256 = { workspace = true }
 
 
-
 assert-json-diff = { workspace = true }
 
 url = { workspace = true }
@@ -87,14 +88,7 @@ async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8b
 
 pretty_assertions = { workspace = true }
 
-# AES for Profile Encryption
-# aes-gcm = "10.3"
-aes-gcm = { git = "https://github.com/RustCrypto/AEADs", rev = "7e82b01cd4901f6a35b5153536f11b87f5e4e622", default-features = false, features = [
-    "aes",
-    "alloc",
-    "getrandom",
-    "zeroize",
-] }
+aes-gcm = { workspace = true }
 
 # hkdf = "0.12.4"
 hkdf = { workspace = true }
@@ -123,8 +117,7 @@ actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d
 
 [build-dependencies]
 
-# cargo_toml = "0.15.3"
-cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
+cargo_toml = { workspace = true }
 
 [lints.rust]
 unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(tarpaulin_include)'] }

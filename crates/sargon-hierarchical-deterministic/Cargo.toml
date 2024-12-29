@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
+identified-vec-of = { path = "../identified-vec-of" }
 sargon-core = { path = "../sargon-core" }
 
 # ==== RADIX DEPENDENCIES ====

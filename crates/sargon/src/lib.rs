@@ -15,7 +15,6 @@ mod error_from;
 mod factor_instances_provider;
 mod gateway_api;
 mod home_cards;
-mod identified_vec_of;
 mod keys_collector;
 mod profile;
 mod radix_connect;
@@ -26,14 +25,15 @@ mod types;
 mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
+    pub use identified_vec_of::prelude::*;
     pub use sargon_core::prelude::*;
+    pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
 
     pub use crate::error_from::*;
     pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
     pub use crate::home_cards::*;
-    pub use crate::identified_vec_of::*;
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;

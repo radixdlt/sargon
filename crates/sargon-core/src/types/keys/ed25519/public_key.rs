@@ -91,7 +91,7 @@ impl TryFrom<&[u8]> for Ed25519PublicKey {
     fn try_from(slice: &[u8]) -> Result<Self> {
         ScryptoEd25519PublicKey::try_from(slice)
             .map_err(|_| CommonError::InvalidEd25519PublicKeyFromBytes {
-                bad_value: slice.to_vec().into(),
+                bad_value: hex_encode(slice),
             })
             .and_then(|k| k.try_into())
     }
@@ -252,7 +252,7 @@ mod tests {
         assert_eq!(
             Ed25519PublicKey::try_from(&[0u8] as &[u8]),
             Err(CommonError::InvalidEd25519PublicKeyFromBytes {
-                bad_value: vec![0].into()
+                bad_value: "00".to_owned()
             })
         );
     }

@@ -1,0 +1,14 @@
+[package]
+name = "sargon-core-assert-json"
+version = "1.2.1"
+edition = "2021"
+
+[dependencies]
+sargon-core-error = { path = "../sargon-core-error" }
+
+log = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+assert-json-diff = { workspace = true }

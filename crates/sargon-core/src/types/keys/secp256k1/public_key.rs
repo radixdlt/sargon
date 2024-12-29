@@ -111,7 +111,7 @@ impl TryFrom<&[u8]> for Secp256k1PublicKeyUncheckedBytes {
             .map(Self::Compressed)
             .or(Exactly65Bytes::try_from(value).map(Self::Uncompressed))
             .map_err(|_| CommonError::InvalidSecp256k1PublicKeyFromBytes {
-                bad_value: BagOfBytes::from(value),
+                bad_value: hex_encode(value),
             })
     }
 }
@@ -334,7 +334,7 @@ mod tests {
         assert_eq!(
             SUT::from_str("dead"),
             Err(CommonError::InvalidSecp256k1PublicKeyFromBytes {
-                bad_value: vec![0xde, 0xad].into()
+                bad_value: "dead".to_owned()
             })
         );
     }
@@ -345,7 +345,7 @@ mod tests {
         assert_eq!(
             SUT::try_from(bytes),
             Err(CommonError::InvalidSecp256k1PublicKeyFromBytes {
-                bad_value: bytes.to_vec().into()
+                bad_value: hex_encode(bytes)
             })
         );
     }

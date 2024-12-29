@@ -8,14 +8,7 @@ use super::{
 use FactorSourceCategory::*;
 use RoleKind::*;
 
-impl FactorSourceCategory {
-    fn is_supported(&self) -> bool {
-        match self {
-            Identity | Hardware | Contact | Information => true,
-            Custodian => false,
-        }
-    }
-}
+
 
 /// A crate internal helper builder which assigns factors to
 /// Recovery and Confirmation roles based on the heuristic

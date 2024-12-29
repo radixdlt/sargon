@@ -4,6 +4,11 @@ version = "1.2.1"
 edition = "2021"
 
 [dependencies]
+identified-vec-of = { path = "../identified-vec-of" }
+sargon-core-utils = { path = "../sargon-core-utils" }
+sargon-core-error = { path = "../sargon-core-error" }
+sargon-core-assert-json = { path = "../sargon-core-assert-json" }
+
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }
 radix-engine-interface = { workspace = true }
@@ -12,6 +17,8 @@ radix-transactions = { workspace = true }
 
 
 # ==== EXTERNAL DEPENDENCIES ====
+aes-gcm = { workspace = true }
+arraystring = { workspace = true }
 assert-json-diff = { workspace = true }
 delegate = { workspace = true }
 enum-as-inner = { workspace = true }

@@ -119,7 +119,12 @@ impl UnsafeAsPersona for DerivationPath {
     }
 }
 
-impl HierarchicalDeterministicFactorInstance {
+trait UnsafeHardcodingDerivationPathAsPersona {
+    unsafe fn invalid_hard_coding_derivation_path_as_persona(&self) -> Self;
+}
+impl UnsafeHardcodingDerivationPathAsPersona
+    for HierarchicalDeterministicFactorInstance
+{
     /// # Safety
     /// Completely unsafe, this is an invalid FactorInstance! It hardcodes
     /// the derivation path as a persona, resulting in an invalid (DerivationPath, PublicKey) pair.!

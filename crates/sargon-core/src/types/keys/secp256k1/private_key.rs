@@ -93,7 +93,7 @@ impl IsPrivateKey<Secp256k1PublicKey> for Secp256k1PrivateKey {
     fn from_bytes(slice: &[u8]) -> Result<Self> {
         ScryptoSecp256k1PrivateKey::from_bytes(slice)
             .map_err(|_| CommonError::InvalidSecp256k1PrivateKeyFromBytes {
-                bad_value: slice.to_owned().into(),
+                bad_value: hex_encode(slice),
             })
             .map(Self::from_scrypto)
     }
@@ -249,7 +249,7 @@ mod tests {
         assert_eq!(
             SUT::from_bytes(&[0u8] as &[u8]),
             Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes {
-                bad_value: vec![0].into()
+                bad_value: "00".to_owned()
             })
         );
     }
@@ -260,7 +260,7 @@ mod tests {
         assert_eq!(
             SUT::from_bytes(&bytes),
             Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes {
-                bad_value: bytes.to_vec().into()
+                bad_value: hex_encode(bytes)
             })
         );
     }
@@ -271,7 +271,7 @@ mod tests {
         assert_eq!(
             SUT::from_bytes(&bytes),
             Err(CommonError::InvalidSecp256k1PrivateKeyFromBytes {
-                bad_value: bytes.to_vec().into()
+                bad_value: hex_encode(bytes)
             })
         );
     }

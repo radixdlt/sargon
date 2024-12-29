@@ -10,6 +10,7 @@ mod has_key_kind;
 
 pub mod prelude {
     pub(crate) use sargon_core::prelude::*;
+    pub(crate) use identified_vec_of::prelude::*;
 
     pub use crate::bip32::*;
     pub use crate::bip39::*;

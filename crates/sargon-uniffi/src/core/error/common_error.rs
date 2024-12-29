@@ -12,7 +12,7 @@ pub enum CommonError {
     Unknown = 10000,
 
     #[error("Failed to create Ed25519 Private key from bytes {bad_value:?}")]
-    InvalidEd25519PrivateKeyFromBytes { bad_value: BagOfBytes } = 10001,
+    InvalidEd25519PrivateKeyFromBytes { bad_value: String } = 10001,
 
     #[error("Failed to create Ed25519 Private key from String {bad_value}.")]
     InvalidEd25519PrivateKeyFromString { bad_value: String } = 10002,
@@ -20,7 +20,7 @@ pub enum CommonError {
     #[error(
         "Failed to create Secp256k1 Private key from bytes {bad_value:?}."
     )]
-    InvalidSecp256k1PrivateKeyFromBytes { bad_value: BagOfBytes } = 10003,
+    InvalidSecp256k1PrivateKeyFromBytes { bad_value: String } = 10003,
 
     #[error(
         "Failed to create Secp256k1 Private key from String {bad_value:?}."
@@ -28,13 +28,13 @@ pub enum CommonError {
     InvalidSecp256k1PrivateKeyFromString { bad_value: String } = 10004,
 
     #[error("Failed to create Ed25519 Public key from bytes {bad_value:?}.")]
-    InvalidEd25519PublicKeyFromBytes { bad_value: BagOfBytes } = 10005,
+    InvalidEd25519PublicKeyFromBytes { bad_value: String } = 10005,
 
     #[error("Failed to create Ed25519 Public key from String {bad_value}.")]
     InvalidEd25519PublicKeyFromString { bad_value: String } = 10006,
 
     #[error("Failed to create Secp256k1 Public key from bytes {bad_value:?}.")]
-    InvalidSecp256k1PublicKeyFromBytes { bad_value: BagOfBytes } = 10007,
+    InvalidSecp256k1PublicKeyFromBytes { bad_value: String } = 10007,
 
     #[error("Failed to create Secp256k1 Public key from String {bad_value}.")]
     InvalidSecp256k1PublicKeyFromString { bad_value: String } = 10008,
@@ -204,7 +204,7 @@ pub enum CommonError {
     InvalidLength {
         expected: u64,
         found: u64,
-        data: BagOfBytes,
+        data: String,
     } = 10057,
 
     #[error("Invalid NonFungibleLocalID::String")]
@@ -486,12 +486,12 @@ pub enum CommonError {
     #[error(
         "Failed to create KeyAgreementPublicKey from bytes: {bad_value:?}"
     )]
-    InvalidKeyAgreementPublicKeyFromBytes { bad_value: BagOfBytes } = 10138,
+    InvalidKeyAgreementPublicKeyFromBytes { bad_value: String } = 10138,
 
     #[error(
         "Failed to create KeyAgreementPrivateKey from bytes: {bad_value:?}"
     )]
-    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: BagOfBytes } = 10139,
+    InvalidKeyAgreementPrivateKeyFromBytes { bad_value: String } = 10139,
 
     #[error("RadixConnectMobileSession not found, session id: {session_id}")]
     RadixConnectMobileSessionNotFound { session_id: String } = 10140,

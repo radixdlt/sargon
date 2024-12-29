@@ -1,12 +1,21 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/sargon",
+    # sorted according to dependency, not alphabetically
+    "crates/sargon-core-utils",
+    "crates/sargon-core-error",
+    "crates/sargon-core-assert-json",
+
+    "crates/identified-vec-of",
+
     "crates/sargon-core",
     "crates/sargon-hierarchical-deterministic",
     "crates/sargon-factors",
-    "crates/sargon-uniffi",
+
+    "crates/sargon", # to be split
+
     "crates/sargon-uniffi-conversion-macros",
+    "crates/sargon-uniffi",
 ]
 
 [profile.release]
@@ -33,6 +42,10 @@ radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag
 
 
 # ===== EXTERNAL DEPENDENCIES ========
+arraystring = { git = "https://github.com/paulocsanz/arraystring", rev = "ebd7d8ba94fa0d5068fe048d5445f6b1af56035d", features = [
+    "serde-traits",
+] }
+
 # hkdf = "0.12.4"
 hkdf = { git = "https://github.com/RustCrypto/KDFs/", rev = "1ac16e8b9d4ee7a67613c9396c6cc1327652eaba" }
 # thiserror = "1.0.50"
@@ -59,6 +72,14 @@ enum-as-inner = { git = "https://github.com/bluejekyll/enum-as-inner/", rev = "c
 # enum-iterator = "1.4.1"
 enum-iterator = { git = "https://github.com/stephaneyfx/enum-iterator/", rev = "9d472a1237cfd03b1c7657fdcba74c8070bfb4ea" }
 
+
+# aes-gcm = "10.3"
+aes-gcm = { git = "https://github.com/RustCrypto/AEADs", rev = "7e82b01cd4901f6a35b5153536f11b87f5e4e622", default-features = false, features = [
+    "aes",
+    "alloc",
+    "getrandom",
+    "zeroize",
+] }
 
 # delegate = "0.12.0"
 delegate = { git = "https://github.com/Kobzol/rust-delegate/", rev = "ac852be64f3e4b5f9b58be910d09921488d2845d" }
@@ -135,3 +156,6 @@ zeroize = { git = "https://github.com/RustCrypto/utils", rev = "df6d2f48a5e8afe8
     "zeroize_derive",
     "derive",
 ] }
+
+# cargo_toml = "0.15.3"
+cargo_toml = { git = "https://gitlab.com/lib.rs/cargo_toml", rev = "e498c94fc42a660c1ca1a28999ce1d757cfe77fe" }
