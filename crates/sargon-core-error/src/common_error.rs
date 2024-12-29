@@ -861,7 +861,6 @@ impl CommonError {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

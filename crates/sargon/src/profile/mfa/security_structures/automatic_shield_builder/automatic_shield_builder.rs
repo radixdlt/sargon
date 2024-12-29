@@ -8,8 +8,6 @@ use super::{
 use FactorSourceCategory::*;
 use RoleKind::*;
 
-
-
 /// A crate internal helper builder which assigns factors to
 /// Recovery and Confirmation roles based on the heuristic
 /// laid out in ["Automatic Security Shield Construction" document][doc]
