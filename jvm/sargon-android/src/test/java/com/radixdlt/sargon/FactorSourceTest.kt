@@ -10,6 +10,7 @@ import com.radixdlt.sargon.extensions.olympia
 import com.radixdlt.sargon.extensions.supportsBabylon
 import com.radixdlt.sargon.extensions.supportsOlympia
 import com.radixdlt.sargon.extensions.name
+import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import com.radixdlt.sargon.samples.sampleMainnet

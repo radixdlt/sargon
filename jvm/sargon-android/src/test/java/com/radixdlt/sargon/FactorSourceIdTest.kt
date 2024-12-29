@@ -4,6 +4,7 @@ import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.hex
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.sampleMainnet
