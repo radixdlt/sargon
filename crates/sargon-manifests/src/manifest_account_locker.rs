@@ -1,12 +1,21 @@
 use crate::prelude::*;
-use radix_common::prelude::ManifestExpression;
-use radix_engine_interface::blueprints::locker::{
-    ACCOUNT_LOCKER_CLAIM_IDENT, ACCOUNT_LOCKER_CLAIM_NON_FUNGIBLES_IDENT,
-};
-use std::cmp::min;
+use radix_engine_interface::blueprints::locker::ACCOUNT_LOCKER_CLAIM_IDENT;
 
-impl TransactionManifest {
-    pub fn account_locker_claim(
+pub trait ManifestForAccountLockerClaim: Sized {
+    fn account_locker_claim(
+        locker_address: &LockerAddress,
+        claimant: &AccountAddress,
+        claimable_resources: Vec<AccountLockerClaimableResource>,
+    ) -> Self;
+
+    fn build_claimable_batch(
+        claimable_resources: Vec<AccountLockerClaimableResource>,
+        max_size: u64,
+    ) -> IndexSet<AccountLockerClaimableResource>;
+}
+
+impl ManifestForAccountLockerClaim for TransactionManifest {
+    fn account_locker_claim(
         locker_address: &LockerAddress,
         claimant: &AccountAddress,
         claimable_resources: Vec<AccountLockerClaimableResource>,

@@ -1298,6 +1298,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "gateway-logic"
+version = "1.2.1"
+dependencies = [
+ "derive_more",
+ "gateway-models",
+ "itertools 0.12.0",
+ "radix-engine-toolkit-common",
+ "radix-transactions",
+ "sargon-addresses",
+ "sargon-core",
+ "sargon-core-assert-json",
+ "sargon-transaction-models",
+ "serde",
+]
+
+[[package]]
+name = "gateway-models"
+version = "1.2.1"
+dependencies = [
+ "derive_more",
+ "radix-engine-toolkit-common",
+ "radix-transactions",
+ "sargon-addresses",
+ "sargon-core",
+ "sargon-core-assert-json",
+ "serde",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2779,6 +2808,7 @@ dependencies = [
  "enum-as-inner",
  "enum-iterator",
  "futures",
+ "gateway-models",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "hkdf",
  "identified-vec-of",
@@ -3071,6 +3101,7 @@ dependencies = [
  "derive_more",
  "enum-as-inner",
  "enum-iterator",
+ "gateway-models",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "identified-vec-of",
  "iota-crypto",
@@ -3094,6 +3125,7 @@ dependencies = [
  "sargon-core",
  "sargon-factors",
  "sargon-hierarchical-deterministic",
+ "sargon-profile",
  "sargon-transaction-models",
  "sbor",
  "serde",
@@ -3153,8 +3185,6 @@ dependencies = [
  "sargon-keys-collector",
  "sargon-transaction-models",
  "sbor",
- "security-framework",
- "security-framework-sys",
  "serde",
  "serde_json 1.0.108",
  "serde_repr",
@@ -3164,6 +3194,27 @@ dependencies = [
  "url",
  "uuid 1.6.1",
  "zeroize 1.7.0",
+]
+
+[[package]]
+name = "sargon-profile-logic"
+version = "1.2.1"
+dependencies = [
+ "identified-vec-of",
+ "radix-common",
+ "radix-common-derive",
+ "radix-engine",
+ "radix-engine-interface",
+ "radix-engine-toolkit",
+ "radix-engine-toolkit-common",
+ "radix-rust",
+ "radix-transactions",
+ "sargon-addresses",
+ "sargon-core",
+ "sargon-factors",
+ "sargon-hierarchical-deterministic",
+ "sargon-profile",
+ "sbor",
 ]
 
 [[package]]

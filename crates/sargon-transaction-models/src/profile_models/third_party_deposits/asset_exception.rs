@@ -1,5 +1,11 @@
 use crate::prelude::*;
 
+use radix_engine_interface::blueprints::account::{
+    AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
+    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
+    AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
+};
+
 /// The specific Asset exception rule, which overrides the general
 ///  `deposit_rule` of a `ThirdPartyDeposits` settings.
 #[derive(
@@ -21,6 +27,34 @@ pub struct AssetException {
 
     /// Either deny or allow the `address`.
     pub exception_rule: DepositAddressExceptionRule,
+}
+
+impl From<AssetException> for ScryptoAccountSetResourcePreferenceInput {
+    fn from(value: AssetException) -> Self {
+        Self {
+            resource_address: value.address.into(),
+            resource_preference: value.exception_rule.into(),
+        }
+    }
+}
+
+impl From<AssetException> for ScryptoManifestValue {
+    fn from(value: AssetException) -> Self {
+        ScryptoManifestValue::from(value.address)
+    }
+}
+
+impl From<DepositAddressExceptionRule> for ScryptoResourcePreference {
+    fn from(value: DepositAddressExceptionRule) -> Self {
+        match value {
+            DepositAddressExceptionRule::Allow => {
+                ScryptoResourcePreference::Allowed
+            }
+            DepositAddressExceptionRule::Deny => {
+                ScryptoResourcePreference::Disallowed
+            }
+        }
+    }
 }
 
 impl HasSampleValues for AssetException {

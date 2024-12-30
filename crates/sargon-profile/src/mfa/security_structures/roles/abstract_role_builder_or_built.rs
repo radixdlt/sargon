@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
@@ -85,7 +83,7 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
                     .any(|x| x != KeySpace::Securified)
                 {
                     return Err(
-                        crate::CommonError::IndexUnsecurifiedExpectedSecurified,
+                        CommonError::IndexUnsecurifiedExpectedSecurified,
                     );
                 }
                 Ok(())

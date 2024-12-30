@@ -5,7 +5,6 @@
 #![feature(generic_const_exprs)]
 
 mod encrypted;
-mod logic;
 mod mfa;
 mod profilesnapshot_version;
 mod supporting_types;
@@ -21,7 +20,6 @@ pub mod prelude {
     pub use sargon_transaction_models::prelude::*;
 
     pub use crate::encrypted::*;
-    pub use crate::logic::*;
     pub use crate::mfa::*;
     pub use crate::profilesnapshot_version::*;
     pub use crate::supporting_types::*;

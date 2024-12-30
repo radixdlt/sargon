@@ -1,0 +1,25 @@
+[package]
+name = "gateway-logic"
+version = "1.2.1"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-core-assert-json = { path = "../sargon-core-assert-json" }
+sargon-core = { path = "../sargon-core" }
+sargon-addresses = { path = "../sargon-addresses" }
+gateway-models = { path = "../gateway-models" }
+
+# hmm should maybe not do this, we only use NotarizedTransaction for a ctor, we can put
+# it elsewhere... outside of gateway-logic crate
+sargon-transaction-models = { path = "../sargon-transaction-models" }
+
+# === RADIX DEPENDENCIES ===
+radix-engine-toolkit-common = { workspace = true }
+radix-transactions = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+itertools = { workspace = true }
+serde = { workspace = true }

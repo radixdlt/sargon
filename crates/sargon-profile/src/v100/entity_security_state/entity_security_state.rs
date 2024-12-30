@@ -125,6 +125,7 @@ impl HasFactorInstances for EntitySecurityState {
             }
         }
     }
+
     fn unique_all_factor_instances(&self) -> IndexSet<FactorInstance> {
         match self {
             EntitySecurityState::Unsecured { value } => {

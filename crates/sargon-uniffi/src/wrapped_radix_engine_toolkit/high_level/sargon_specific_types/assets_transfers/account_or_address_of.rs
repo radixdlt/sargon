@@ -14,7 +14,8 @@ pub fn new_account_or_address_of_sample() -> OwnedOrThirdPartyAccountAddress {
 }
 
 #[uniffi::export]
-pub fn new_account_or_address_of_sample_other() -> OwnedOrThirdPartyAccountAddress {
+pub fn new_account_or_address_of_sample_other(
+) -> OwnedOrThirdPartyAccountAddress {
     InternalAccountOrAddressOf::sample_other().into()
 }
 

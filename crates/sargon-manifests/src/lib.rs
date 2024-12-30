@@ -1,6 +1,7 @@
 mod bucket;
 mod bucket_factory;
 mod delete_account;
+mod high_level;
 mod manifest_account_locker;
 mod manifest_assets_transfers;
 mod manifests;
@@ -10,16 +11,19 @@ mod modify_manifest;
 mod third_party_deposit_update;
 
 pub mod prelude {
+    pub use gateway_models::prelude::*;
     pub use identified_vec_of::prelude::*;
     pub use sargon_addresses::prelude::*;
     pub use sargon_core::prelude::*;
     pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
+    pub use sargon_profile::prelude::*;
     pub use sargon_transaction_models::prelude::*;
 
     pub use crate::bucket::*;
     pub use crate::bucket_factory::*;
     pub use crate::delete_account::*;
+    pub use crate::high_level::*;
     pub use crate::manifest_account_locker::*;
     pub use crate::manifest_assets_transfers::*;
     pub use crate::manifests::*;

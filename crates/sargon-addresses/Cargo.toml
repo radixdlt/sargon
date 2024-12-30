@@ -4,18 +4,18 @@ version = "1.2.1"
 edition = "2021"
 
 [dependencies]
+# === SARGON CRATES ===
 sargon-core = { path = "../sargon-core" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }
-radix-engine-interface = { workspace = true }
 radix-engine = { workspace = true }
+radix-engine-interface = { workspace = true }
+radix-engine-toolkit = { workspace = true }
 radix-rust = { workspace = true }
 radix-transactions = { workspace = true }
-
-radix-engine-toolkit = { workspace = true }
 
 # ==== EXTERNAL DEPENDENCIES ====
 derive_more = { workspace = true }

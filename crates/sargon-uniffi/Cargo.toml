@@ -14,91 +14,50 @@ crate-type = ["staticlib", "cdylib", "lib"]
 [[bin]]
 name = "sargon-bindgen"
 path = "src/bindgen/bin.rs"
-required-features = ["build-binary"]
+# required-features = ["build-binary"]
 
 [dependencies]
+# === SARGON CRATES ===
 sargon-core = { path = "../sargon-core" }
 sargon = { path = "../sargon" }
 sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" }
 
+# === RADIX DEPENDENCIES ===
 radix-engine-toolkit = { workspace = true }
 
+# === EXTERNAL DEPENDENCIES ===
+assert-json-diff = { workspace = true }
+async-trait = { workspace = true }
+base64 = { workspace = true }
+camino = { workspace = true }
+clap = { workspace = true }
+delegate = { workspace = true }
+derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
+enum-iterator = { workspace = true }
+hex = { workspace = true }
+iso8601-timestamp = { workspace = true }
+itertools = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
+preinterpret = { workspace = true }
+pretty_assertions = { workspace = true }
+pretty_env_logger = { workspace = true }
+rand = { workspace = true }
+regex = { workspace = true }
+strum = { workspace = true }
+thiserror = { workspace = true }
+uniffi = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }
 zeroize = { workspace = true }
 
-
-log = { workspace = true }
-
-# pretty_env_logger = "0.5.0"
-pretty_env_logger = { git = "https://github.com/seanmonstar/pretty-env-logger/", rev = "0e238400e18649415dc710c025e99c009a1bb744" }
-
-derive_more = { workspace = true }
-
-thiserror = { workspace = true }
-
-iso8601-timestamp = { workspace = true }
-
-
-uuid = { workspace = true }
-
-strum = { workspace = true }
-enum-iterator = { workspace = true }
-
-rand = { workspace = true }
-hex = { workspace = true }
-
-delegate = { workspace = true }
-
-itertools = { workspace = true }
-
-enum-as-inner = { workspace = true }
-
-# uniffi = "0.28.3"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [
-    "cli",
-] }
-assert-json-diff = { workspace = true }
-
-url = { workspace = true }
-
-paste = { workspace = true }
-
-# regex = "1.9.3"
-regex = { git = "https://github.com/rust-lang/regex/", rev = "72f889ef3cca59ebac6a026f3646e8d92f056d88", optional = true }
-
-# clap = "4.5.1"
-clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff328624a5266e7b4d88649a", default-features = false, features = [
-    "std",
-    "derive",
-], optional = true }
-
-# camino = "1.0.8"
-camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
-
-async-trait = { workspace = true }
-
-pretty_assertions = { workspace = true }
-
-base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14400697453bcc85997119b874bc03d9601d0af" }
-
-# preinterpret = "0.2.0"
-preinterpret = { git = "https://github.com/dhedey/preinterpret", rev = "6754b92bdead0ddd6f69fbee7d782180d6351605" }
-
-
 [dev-dependencies]
-# uniffi = "0.28.3"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [
-    "bindgen-tests",
-] }
-
 actix-rt = { workspace = true }
-[build-dependencies]
-# uniffi = "0.28.3"
-uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [
-    "build",
-] }
+uniffi = { workspace = true, features = ["bindgen-tests"] }
 
-[features]
-build-binary = ["camino", "clap", "regex"]
+[build-dependencies]
+uniffi = { workspace = true, features = ["build"] }
 
 [lints.rust]
 unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(tarpaulin_include)'] }

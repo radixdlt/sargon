@@ -1,9 +1,8 @@
+mod assert_manifest;
+mod error_from;
 mod is_intent_signing;
 mod low_level;
-mod metadata;
-mod error_from;
 mod profile_models;
-mod assert_manifest;
 mod unvalidated_transaction_manifest;
 
 pub mod prelude {
@@ -13,12 +12,11 @@ pub mod prelude {
     pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
 
-    pub use crate::is_intent_signing::*;
-    pub use crate::low_level::*;
-    pub use crate::metadata::*;
-    pub use crate::profile_models::*;
     pub use crate::assert_manifest::*;
     pub use crate::error_from::*;
+    pub use crate::is_intent_signing::*;
+    pub use crate::low_level::*;
+    pub use crate::profile_models::*;
     pub use crate::unvalidated_transaction_manifest::*;
 
     pub(crate) use radix_engine::{

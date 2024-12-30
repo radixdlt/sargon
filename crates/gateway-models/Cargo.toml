@@ -1,0 +1,19 @@
+[package]
+name = "gateway-models"
+version = "1.2.1"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-core-assert-json = { path = "../sargon-core-assert-json" }
+sargon-core = { path = "../sargon-core" }
+sargon-addresses = { path = "../sargon-addresses" }
+
+# === RADIX DEPENDENCIES ===
+radix-engine-toolkit-common = { workspace = true }
+radix-transactions = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+serde = { workspace = true }

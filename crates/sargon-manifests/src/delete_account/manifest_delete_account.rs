@@ -3,15 +3,27 @@ use radix_engine_interface::blueprints::account::{
     AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
     AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
     AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
-    ResourcePreference as ScryptoResourcePreference,
     ACCOUNT_REMOVE_AUTHORIZED_DEPOSITOR_IDENT,
     ACCOUNT_REMOVE_RESOURCE_PREFERENCE_IDENT, ACCOUNT_SECURIFY_IDENT,
     ACCOUNT_SET_DEFAULT_DEPOSIT_RULE_IDENT,
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
 
-impl TransactionManifest {
-    pub fn delete_account(
+pub trait ManifestForAccountDeletion {
+    fn delete_account(
+        account_address: &AccountAddress,
+        account_transfers: impl Into<Option<DeleteAccountTransfers>>,
+        resource_preferences_to_be_removed: Vec<
+            ScryptoAccountRemoveResourcePreferenceInput,
+        >,
+        authorized_depositors_to_be_removed: Vec<
+            ScryptoAccountRemoveAuthorizedDepositorInput,
+        >,
+    ) -> Self;
+}
+
+impl ManifestForAccountDeletion for TransactionManifest {
+    fn delete_account(
         account_address: &AccountAddress,
         account_transfers: impl Into<Option<DeleteAccountTransfers>>,
         resource_preferences_to_be_removed: Vec<

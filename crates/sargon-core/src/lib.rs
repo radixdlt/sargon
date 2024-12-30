@@ -8,6 +8,7 @@ mod has_sample_values;
 mod hash;
 mod image_url_utils;
 mod is_network_aware;
+mod metadata;
 mod network_id;
 mod secure_random_bytes;
 mod types;
@@ -29,6 +30,7 @@ pub mod prelude {
     pub use crate::hash::*;
     pub use crate::image_url_utils::*;
     pub use crate::is_network_aware::*;
+    pub use crate::metadata::*;
     pub use crate::network_id::*;
     pub use crate::secure_random_bytes::*;
     pub use crate::types::*;
@@ -92,6 +94,11 @@ pub mod prelude {
         },
         network::NetworkDefinition as ScryptoNetworkDefinition,
         prelude::Instant as ScryptoInstant,
+    };
+
+    pub(crate) use radix_engine_interface::prelude::{
+        MetadataValue as ScryptoMetadataValue,
+        ToMetadataEntry as ScryptoToMetadataEntry,
     };
 
     pub use radix_engine_interface::prelude::Epoch as ScryptoEpoch;

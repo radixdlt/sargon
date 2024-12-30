@@ -113,7 +113,6 @@ impl IsBaseEntity for Account {
 impl IsEntity for Account {
     type Path = AccountPath;
 
-
     fn with_veci_and_name(
         veci: HDFactorInstanceTransactionSigning<Self::Path>,
         name: DisplayName,

@@ -59,7 +59,6 @@ mod tests {
     use super::*;
     use serde_json::json;
 
-
     #[test]
     fn json() {
         assert_json_value_eq_after_roundtrip(

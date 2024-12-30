@@ -1,10 +1,7 @@
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, InternalConversion, uniffi::enum)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, InternalConversion, uniffi::enum,
+)]
 pub enum OwnedOrThirdPartyAccountAddress {
-    OwnedAccount {
-        value: AccountAddress,
-    },
-    ThirdPartyAccount {
-        value: AccountAddress,
-    },    
+    OwnedAccount { value: AccountAddress },
+    ThirdPartyAccount { value: AccountAddress },
 }
