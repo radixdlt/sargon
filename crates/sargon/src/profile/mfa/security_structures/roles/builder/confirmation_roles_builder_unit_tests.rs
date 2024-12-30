@@ -1,5 +1,7 @@
 #![cfg(test)]
 
+use sargon_factors::FactorSourceKind;
+
 use crate::prelude::*;
 
 #[allow(clippy::upper_case_acronyms)]

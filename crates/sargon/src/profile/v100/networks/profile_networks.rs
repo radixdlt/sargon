@@ -243,7 +243,7 @@ mod tests {
                 .get_id(account_address)
                 .unwrap()
                 .display_name
-                .value,
+                .value(),
             "Alice"
         );
 
@@ -258,7 +258,7 @@ mod tests {
                 .get_id(account_address)
                 .unwrap()
                 .display_name
-                .value,
+                .value(),
             "Stella"
         );
     }

@@ -81,18 +81,6 @@ pub trait HasFactorInstances {
     }
 }
 
-pub trait HasFactorSourceKindObjectSafe {
-    fn get_factor_source_kind(&self) -> FactorSourceKind;
-}
-impl HasFactorSourceKindObjectSafe for FactorSourceID {
-    fn get_factor_source_kind(&self) -> FactorSourceKind {
-        match self {
-            FactorSourceID::Hash { value } => value.kind,
-            FactorSourceID::Address { value } => value.kind,
-        }
-    }
-}
-
 impl HasFactorInstances for MatrixOfFactorInstances {
     fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
         let mut set = IndexSet::new();

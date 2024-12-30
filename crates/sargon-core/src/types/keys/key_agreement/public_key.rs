@@ -52,7 +52,7 @@ impl TryFrom<&[u8]> for KeyAgreementPublicKey {
     fn try_from(slice: &[u8]) -> Result<Self> {
         X25519PublicKey::try_from_slice(slice)
             .map_err(|_| CommonError::InvalidKeyAgreementPublicKeyFromBytes {
-                bad_value: slice.to_vec().into(),
+                bad_value: hex_encode(slice),
             })
             .map(|k| k.into())
     }
@@ -208,7 +208,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             SUT::try_from(vec![0]),
             Err(CommonError::InvalidKeyAgreementPublicKeyFromBytes {
-                bad_value: vec![0].into()
+                bad_value: "00".to_owned()
             })
         );
     }

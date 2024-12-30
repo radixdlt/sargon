@@ -205,8 +205,8 @@ impl ToAgnosticPath for DerivationPath {
         }
     }
 }
-impl HierarchicalDeterministicFactorInstance {
-    pub fn agnostic_path(&self) -> IndexAgnosticPath {
+impl ToAgnosticPath for HierarchicalDeterministicFactorInstance {
+    fn agnostic(&self) -> IndexAgnosticPath {
         self.derivation_path().agnostic()
     }
 }

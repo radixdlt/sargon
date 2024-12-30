@@ -1,9 +1,9 @@
 use hkdf::Hkdf;
 use k256::sha2::Sha256;
-use sargon_core::Exactly32Bytes;
+use sargon_core::{Exactly32Bytes, VersionOfAlgorithm};
 
 use super::{
-    PasswordBasedKeyDerivationSchemeVersion, VersionOfAlgorithm,
+    PasswordBasedKeyDerivationSchemeVersion,
     VersionedPasswordBasedKeyDerivation,
 };
 

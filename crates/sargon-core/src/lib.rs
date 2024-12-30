@@ -3,32 +3,37 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
-mod assert_json;
-mod error;
+mod encryption;
 mod has_sample_values;
 mod hash;
-mod identifiable;
+mod image_url_utils;
 mod is_network_aware;
 mod network_id;
 mod secure_random_bytes;
 mod types;
 mod unsafe_id_stepper;
 mod unsigned_ints;
-mod utils;
+
+pub fn parse_url(s: impl AsRef<str>) -> Result<Url, CommonError> {
+    Url::try_from(s.as_ref()).map_err(|_| CommonError::InvalidURL {
+        bad_value: s.as_ref().to_owned(),
+    })
+}
 
 pub mod prelude {
-    pub use crate::assert_json::*;
-    pub use crate::error::*;
+    pub use identified_vec_of::prelude::*;
+    pub use sargon_core_utils::prelude::*;
+
+    pub use crate::encryption::*;
     pub use crate::has_sample_values::*;
     pub use crate::hash::*;
-    pub use crate::identifiable::*;
+    pub use crate::image_url_utils::*;
     pub use crate::is_network_aware::*;
     pub use crate::network_id::*;
     pub use crate::secure_random_bytes::*;
     pub use crate::types::*;
     pub use crate::unsafe_id_stepper::*;
     pub use crate::unsigned_ints::*;
-    pub use crate::utils::*;
 
     pub use radix_rust::prelude::{
         indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
@@ -37,7 +42,6 @@ pub mod prelude {
 
     pub use ::hex::decode as hex_decode;
     pub use ::hex::encode as hex_encode;
-    pub use iso8601_timestamp::Timestamp;
     pub use itertools::Itertools;
     pub use log::{debug, error, info, trace, warn};
     pub use serde::{
@@ -99,3 +103,18 @@ pub mod prelude {
 }
 
 pub use prelude::*;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_url() {
+        assert!(parse_url("https://radixdlt.com").is_ok());
+    }
+
+    #[test]
+    fn test_parse_url_invalid() {
+        assert!(parse_url("https/radixdlt").is_err());
+    }
+}

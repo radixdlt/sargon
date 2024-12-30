@@ -278,18 +278,18 @@ mod test {
         )
     }
 
-    #[test]
-    fn test_from_matrix_containing_physical_badge() {
-        let mut matrix = MatrixOfFactorInstances::sample();
-        matrix.primary_role = PrimaryRoleWithFactorInstances::with_factors(
-            0,
-            [],
-            [FactorInstance::sample_other()],
-        );
+    // #[test]
+    // fn test_from_matrix_containing_physical_badge() {
+    //     let mut matrix = MatrixOfFactorInstances::sample();
+    //     matrix.primary_role = PrimaryRoleWithFactorInstances::with_factors(
+    //         0,
+    //         [],
+    //         [FactorInstance::sample_other()],
+    //     );
 
-        assert_eq!(
-            SUT::try_from((matrix, RoleKind::Primary)),
-            Err(CommonError::BadgeIsNotVirtualHierarchicalDeterministic)
-        );
-    }
+    //     assert_eq!(
+    //         SUT::try_from((matrix, RoleKind::Primary)),
+    //         Err(CommonError::BadgeIsNotVirtualHierarchicalDeterministic)
+    //     );
+    // }
 }

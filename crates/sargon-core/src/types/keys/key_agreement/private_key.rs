@@ -44,7 +44,7 @@ impl TryFrom<&[u8]> for KeyAgreementPrivateKey {
     fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
         X25519PrivateKey::try_from_slice(slice)
             .map_err(|_| CommonError::InvalidKeyAgreementPrivateKeyFromBytes {
-                bad_value: slice.into(),
+                bad_value: hex_encode(slice),
             })
             .map(Self::from)
     }
@@ -139,7 +139,7 @@ mod tests {
         assert_eq!(
             from_bytes,
             Err(CommonError::InvalidKeyAgreementPrivateKeyFromBytes {
-                bad_value: bytes,
+                bad_value: bytes.to_hex(),
             })
         );
     }

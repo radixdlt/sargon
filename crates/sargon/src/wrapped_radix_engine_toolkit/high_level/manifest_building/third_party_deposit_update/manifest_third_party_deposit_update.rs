@@ -107,7 +107,7 @@ CALL_METHOD
 
     #[test]
     fn update_third_party_deposits() {
-        let owner:AccountAddress = "account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf".into();
+        let owner: AccountAddress = "account_tdx_2_128x8q5es2dstqtcc8wqm843xdtfs0lgetfcdn62a54wxspj6yhpxkf".parse::<AccountAddress>().unwrap();
         let to_json = r#"
         {
             "assetsExceptionList" : [

@@ -45,7 +45,7 @@ impl IsPrivateKey<Ed25519PublicKey> for Ed25519PrivateKey {
     fn from_bytes(slice: &[u8]) -> Result<Self> {
         ScryptoEd25519PrivateKey::from_bytes(slice)
             .map_err(|_| CommonError::InvalidEd25519PrivateKeyFromBytes {
-                bad_value: slice.into(),
+                bad_value: hex_encode(slice),
             })
             .map(Self::from_scrypto)
     }
@@ -259,7 +259,7 @@ mod tests {
         assert_eq!(
             Ed25519PrivateKey::from_bytes(&[0u8] as &[u8]),
             Err(CommonError::InvalidEd25519PrivateKeyFromBytes {
-                bad_value: vec![0].into()
+                bad_value: "00".to_owned()
             })
         );
     }

@@ -476,7 +476,7 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn manifest_summary_multi_account_resources_transfer() {
-        let a = AccountAddress::from("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q");
+        let a = AccountAddress::from_str("account_sim1cyvgx33089ukm2pl97pv4max0x40ruvfy4lt60yvya744cve475w0q").unwrap();
 
         let manifest = SUT::sample_other();
         let summary = manifest.summary().unwrap();
@@ -487,19 +487,19 @@ DROP_AUTH_ZONE_PROOFS;
                     a => vec![AccountWithdraw::sample()],
                 ),
                 hashmap!(
-                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz") =>
+                    AccountAddress::from_str("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz").unwrap() =>
                         AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 150)],
                             UnspecifiedResources::NonePresent,
                         )
                     ,
-                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva") =>
+                    AccountAddress::from_str("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva").unwrap() =>
                         AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 50)],
                             UnspecifiedResources::NonePresent,
                         )
                     ,
-                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr") =>
+                    AccountAddress::from_str("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr").unwrap() =>
                         AccountDeposits::new_for_test(
                             vec![SimpleResourceBounds::exact_fungible(ResourceAddress::sample_sim_xrd(), 130)],
                             UnspecifiedResources::NonePresent,
@@ -510,9 +510,9 @@ DROP_AUTH_ZONE_PROOFS;
                     a
                 ],
                 [
-                    AccountAddress::from("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz"),
-                    AccountAddress::from("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr"),
-                    AccountAddress::from("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva"),
+                    AccountAddress::from_str("account_sim1c8mulhl5yrk6hh4jsyldps5sdrp08r5v9wusupvzxgqvhlp4c4nwjz").unwrap(),
+                    AccountAddress::from_str("account_sim1c8s2hass5g62ckwpv78y8ykdqljtetv4ve6etcz64gveykxznj36tr").unwrap(),
+                    AccountAddress::from_str("account_sim1c8ct6jdcwqrg3gzskyxuy0z933fe55fyjz6p56730r95ulzwl3ppva").unwrap(),
                 ],
                 [],
                 [a],
@@ -544,7 +544,7 @@ DROP_AUTH_ZONE_PROOFS;
         )
         .unwrap();
         let pool_addresses = sut.involved_pool_addresses();
-        assert_eq!(pool_addresses, ["pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830"].into_iter().map(PoolAddress::from).collect_vec());
+        assert_eq!(pool_addresses, ["pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830"].into_iter().map(PoolAddress::from_str).map(Result::unwrap).collect_vec());
     }
 
     #[test]

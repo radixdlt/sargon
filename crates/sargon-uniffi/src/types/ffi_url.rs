@@ -1,3 +1,5 @@
+use sargon_core::parse_url;
+
 use crate::prelude::*;
 
 /// A wrapper around `Url` that allows us to safely deal with Urls generated on hosts.
@@ -32,7 +34,7 @@ impl FromStr for FfiUrl {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let url = sargon::parse_url(s)?;
+        let url = parse_url(s)?;
         Ok(Self { url })
     }
 }

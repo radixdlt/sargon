@@ -1,6 +1,6 @@
-use radix_common::address;
-
 use crate::prelude::*;
+use crate::types::samples::access_controller_address_samples::SamplesFromAccountAddress;
+use radix_common::address;
 
 static ALL_ACCOUNT_SAMPLES: Lazy<[Account; 10]> = Lazy::new(|| {
     [

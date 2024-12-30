@@ -73,7 +73,7 @@ impl From<FactorInstances> for InstancesByAgnosticPath {
         let map = value
             .factor_instances()
             .into_iter()
-            .into_group_map_by(|f| f.agnostic_path())
+            .into_group_map_by(|f| f.agnostic())
             .into_iter()
             .map(|(k, v)| (k, FactorInstances::from_iter(v)))
             .collect::<IndexMap<IndexAgnosticPath, FactorInstances>>();

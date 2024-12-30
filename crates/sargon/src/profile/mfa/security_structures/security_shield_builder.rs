@@ -800,6 +800,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::mutable_key_type)]
     fn hash() {
         assert_eq!(
             radix_rust::hashset![
@@ -926,7 +927,7 @@ mod tests {
         let shield = sut.build().unwrap();
         pretty_assertions::assert_eq!(shield0, shield);
 
-        assert_eq!(shield.metadata.display_name.value, "S.H.I.E.L.D.");
+        assert_eq!(shield.metadata.display_name.value(), "S.H.I.E.L.D.");
         assert_eq!(
             shield.matrix_of_factors.primary().get_override_factors(),
             &vec![FactorSourceID::sample_arculus()]
@@ -1326,7 +1327,7 @@ mod test_invalid {
         );
         let shield = sut.build().unwrap();
         assert_eq!(
-            shield.metadata.display_name.value,
+            shield.metadata.display_name.value(),
             "This shield name's too long an"
         );
     }

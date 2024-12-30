@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use identified_vec_of::prelude::Identifiable;
+
 use crate::prelude::*;
 
 /// Elliptic Curves which the SLIP10 derivation algorithm supports.

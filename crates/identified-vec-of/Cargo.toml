@@ -1,0 +1,17 @@
+[package]
+name = "identified-vec-of"
+version = "1.2.1"
+edition = "2021"
+
+[dependencies]
+sargon-core-assert-json = { path = "../sargon-core-assert-json" }
+sargon-core-error = { path = "../sargon-core-error" }
+
+paste = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+derive_more = { workspace = true }
+itertools = { workspace = true }
+
+# === RADIX DEPENDENCIES
+radix-rust = { workspace = true }

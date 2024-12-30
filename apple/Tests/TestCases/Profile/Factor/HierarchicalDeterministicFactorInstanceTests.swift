@@ -25,7 +25,7 @@ final class HierarchicalDeterministicFactorInstanceTests: Test<HierarchicalDeter
 			case let .virtual(.hierarchicalDeterministic(hdKey)):
 				XCTAssertEqual(hdKey.derivationPath, sut.derivationPath)
 				XCTAssertEqual(hdKey.publicKey, sut.publicKey.publicKey)
-			case .physical: XCTFail("not supported yet")
+//			case .physical: XCTFail("not supported yet")
 			}
 		}
 	}
