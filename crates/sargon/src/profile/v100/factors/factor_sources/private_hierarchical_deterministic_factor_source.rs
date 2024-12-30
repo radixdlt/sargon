@@ -132,10 +132,18 @@ impl PrivateHierarchicalDeterministicFactorSource {
     }
 }
 
-impl MnemonicWithPassphrase {
+pub trait EntityCreatingFactorInstanceDeriving {
+    fn _derive_entity_creation_factor_instances(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        derivation_paths: impl IntoIterator<Item = DerivationPath>,
+    ) -> IndexSet<HierarchicalDeterministicFactorInstance>;
+}
+
+impl EntityCreatingFactorInstanceDeriving for MnemonicWithPassphrase {
     /// Should only be used for testing and sample values, for production code use
     /// `VirtualEntityCreatingInstanceProvider` powered by the `FactorInstancesProvider`
-    pub(crate) fn _derive_entity_creation_factor_instances(
+    fn _derive_entity_creation_factor_instances(
         &self,
         factor_source_id: FactorSourceIDFromHash,
         derivation_paths: impl IntoIterator<Item = DerivationPath>,

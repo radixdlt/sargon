@@ -2,9 +2,10 @@
 resolver = "2"
 members = [
     "crates/sargon",
+    "crates/sargon-core",
+    "crates/sargon-hierarchical-deterministic",
     "crates/sargon-uniffi",
     "crates/sargon-uniffi-conversion-macros",
-    "crates/sargon-core",
 ]
 
 [profile.release]

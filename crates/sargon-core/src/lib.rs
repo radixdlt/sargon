@@ -7,9 +7,13 @@ mod assert_json;
 mod error;
 mod has_sample_values;
 mod hash;
+mod identifiable;
+mod is_network_aware;
+mod network_id;
 mod secure_random_bytes;
 mod types;
 mod unsafe_id_stepper;
+mod unsigned_ints;
 mod utils;
 
 pub mod prelude {
@@ -17,9 +21,13 @@ pub mod prelude {
     pub use crate::error::*;
     pub use crate::has_sample_values::*;
     pub use crate::hash::*;
+    pub use crate::identifiable::*;
+    pub use crate::is_network_aware::*;
+    pub use crate::network_id::*;
     pub use crate::secure_random_bytes::*;
     pub use crate::types::*;
     pub use crate::unsafe_id_stepper::*;
+    pub use crate::unsigned_ints::*;
     pub use crate::utils::*;
 
     pub use radix_rust::prelude::{
@@ -78,6 +86,7 @@ pub mod prelude {
             traits::CheckedMul as ScryptoCheckedMul,
             Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,
         },
+        network::NetworkDefinition as ScryptoNetworkDefinition,
         prelude::Instant as ScryptoInstant,
     };
 

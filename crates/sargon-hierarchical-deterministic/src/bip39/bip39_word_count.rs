@@ -44,7 +44,7 @@ impl std::fmt::Display for BIP39WordCount {
 impl BIP39WordCount {
     /// Returns collection of all word counts
     pub fn all() -> Vec<Self> {
-        all::<Self>().collect()
+        enum_iterator::all::<Self>().collect()
     }
 
     /// The raw representation of the word count as a number.

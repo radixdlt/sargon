@@ -332,10 +332,11 @@ mod tests {
 
     #[test]
     fn add_one() {
-        let sut = SUT::from_local_key_space(42).unwrap();
+        let sut =
+            SUT::from_local_key_space(U31::try_from(42u32).unwrap()).unwrap();
         assert_eq!(
             sut.checked_add_one().unwrap(),
-            SUT::from_local_key_space(43).unwrap()
+            SUT::from_local_key_space(U31::try_from(43u32).unwrap()).unwrap()
         );
     }
 

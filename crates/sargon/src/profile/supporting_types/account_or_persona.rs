@@ -73,6 +73,12 @@ impl AccountOrPersona {
     }
 }
 
+impl IsNetworkAware for AccountOrPersona {
+    fn network_id(&self) -> NetworkID {
+        self.address().network_id()
+    }
+}
+
 impl IsBaseEntity for AccountOrPersona {
     type Address = AddressOfAccountOrPersona;
 

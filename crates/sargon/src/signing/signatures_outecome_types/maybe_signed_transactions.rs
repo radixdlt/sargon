@@ -282,7 +282,7 @@ mod tests {
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
-                    Hardened::from_local_key_space_unsecurified(0).unwrap(),
+                    Hardened::from_local_key_space_unsecurified(U31::ZERO).unwrap(),
                     FactorSourceIDFromHash::sample(),
                 ),
             ),

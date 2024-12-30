@@ -186,6 +186,7 @@ impl KeysCollector {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::DerivationPathConstructors;
 
     #[actix_rt::test]
     async fn valid() {

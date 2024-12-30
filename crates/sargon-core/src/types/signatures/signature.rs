@@ -112,7 +112,6 @@ impl FromStr for Signature {
 
 #[cfg(test)]
 mod tests {
-    use hex::ToHex;
 
     use super::*;
 

@@ -1,7 +1,7 @@
 [package]
 name = "sargon"
 # Don't forget to update version in crates/sargon-uniffi/Cargo.toml
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 build = "build.rs"
 
@@ -13,6 +13,7 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [dependencies]
 sargon-core = { path = "../sargon-core" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 
 zeroize = { workspace = true }
 
@@ -68,12 +69,7 @@ iota-crypto = { workspace = true }
 # Transitive dependency of iota_crypto - used to construct PubKey from uncompressed bytes.
 k256 = { workspace = true }
 
-# bip39 = "2.0.0"
-bip39 = { git = "https://github.com/rust-bitcoin/rust-bip39", rev = "a30760beac21d595b2bda376df4f4e6bf029bcc5", features = [
-    "serde",
-    "zeroize",
-    "french",
-] }
+
 
 assert-json-diff = { workspace = true }
 

@@ -536,21 +536,32 @@ mod tests {
         assert_eq!(
             SUT::from_global_key_space(1337).unwrap(),
             SUT::Unsecurified(Unsecurified::Unhardened(
-                Unhardened::from_local_key_space(1337).unwrap()
+                Unhardened::from_local_key_space(
+                    U31::try_from(1337u32).unwrap()
+                )
+                .unwrap()
             ))
         );
 
         assert_eq!(
             SUT::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap(),
             SUT::Unsecurified(Unsecurified::Hardened(
-                UnsecurifiedHardened::from_local_key_space(42).unwrap()
+                UnsecurifiedHardened::from_local_key_space(
+                    U31::try_from(42u32).unwrap()
+                )
+                .unwrap()
             ))
         );
 
         assert_eq!(
             SUT::from_global_key_space(237 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
                 .unwrap(),
-            SUT::Securified(SecurifiedU30::from_local_key_space(237).unwrap())
+            SUT::Securified(
+                SecurifiedU30::from_local_key_space(
+                    U31::try_from(237u32).unwrap()
+                )
+                .unwrap()
+            )
         );
     }
 

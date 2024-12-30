@@ -1,34 +1,47 @@
 use crate::prelude::*;
 
-/// Represents a hardened component in a BIP32 path, furthermore it is
-/// known to not be "Securified".
+/// Represents a "Securified" index in a BIP32 (SLIP10) path, used as
+/// the last path component in an HDPath for a securified Account or
+/// Persona.
 ///
 /// The internal representation hold a "local" offset, a non-hardened index,
-/// and at the time of usage, when forming a BIP32 path, we "map" it to a global
-/// offset by adding the `GLOBAL_OFFSET_HARDENED`.
+/// and at the time of usage, when forming a BIP32 path, we "map" it to a
+/// global offset by adding `GLOBAL_OFFSET_HARDENED_SECURIFIED` to the local index.
+///
+/// We can instantiate a `SecurifiedU30` from a global key space index, or from a local key space index, and we can convert it back to a global key space index.
 ///
 /// # Examples
 /// ```
 /// extern crate sargon;
 /// use sargon::prelude::*;
-///
+/// // From Global KeySpace
 /// assert_eq!(
-///   UnsecurifiedHardened::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap().index_in_local_key_space(),
-///   U31::new(42)
-/// );
-///
-/// assert_eq!(
-///   UnsecurifiedHardened::from_local_key_space(5u32).unwrap().map_to_global_key_space(),
-///   5 + GLOBAL_OFFSET_HARDENED
+///   SecurifiedU30::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
+///     .unwrap()
+///     .index_in_local_key_space(),
+///     U31::new(42)
 /// );
 ///
 /// assert!(
 ///   matches!(
-///     UnsecurifiedHardened::from_global_key_space(3),
+///     SecurifiedU30::from_global_key_space(1234),
 ///     Err(CommonError::IndexInGlobalKeySpaceIsLowerThanOffset)
 ///  )
 /// );
-/// ```
+///
+/// // From Local KeySpace
+/// assert_eq!(
+///     SecurifiedU30::from_local_key_space(55u32).unwrap().map_to_global_key_space(),
+///     55 + GLOBAL_OFFSET_HARDENED_SECURIFIED
+/// );
+///
+/// // To Global KeySpace
+/// assert_eq!(
+///   SecurifiedU30::from_global_key_space(237 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
+///     .unwrap()
+///     .map_to_global_key_space(),
+///     237 + GLOBAL_OFFSET_HARDENED_SECURIFIED
+/// );
 #[derive(
     Clone,
     Copy,
@@ -38,7 +51,6 @@ use crate::prelude::*;
     Ord,
     Hash,
     Deref,
-    AsRef,
     DeserializeFromStr,
     SerializeDisplay,
     derive_more::Display,
@@ -47,9 +59,9 @@ use crate::prelude::*;
 #[deref(forward)]
 #[display("{}", self.to_bip32_string())]
 #[debug("{}", self.to_bip32_string_debug())]
-pub struct UnsecurifiedHardened(pub U30);
+pub struct SecurifiedU30(pub U30);
 
-impl UnsecurifiedHardened {
+impl SecurifiedU30 {
     pub const MAX_LOCAL: u32 = U30::MAX;
 
     /// `Self::from_local_key_space(0).unwrap()`
@@ -65,10 +77,10 @@ impl UnsecurifiedHardened {
     pub const THREE: Self = Self(U30::THREE);
 }
 
-impl AddViaDeref for UnsecurifiedHardened {}
-impl AddSelfViaDeref for UnsecurifiedHardened {}
+impl AddViaDeref for SecurifiedU30 {}
+impl AddSelfViaDeref for SecurifiedU30 {}
 
-impl HasSampleValues for UnsecurifiedHardened {
+impl HasSampleValues for SecurifiedU30 {
     fn sample() -> Self {
         Self::from_local_key_space(*U30::sample()).unwrap()
     }
@@ -78,24 +90,32 @@ impl HasSampleValues for UnsecurifiedHardened {
     }
 }
 
-impl UnsecurifiedHardened {
-    /// # Safety
-    /// Only use this for tests and constants.
-    pub(crate) const unsafe fn new(value: U30) -> Self {
-        Self(value)
+impl HasIndexInLocalKeySpace for SecurifiedU30 {
+    fn index_in_local_key_space(&self) -> U31 {
+        U31::from(self.0)
     }
 }
-impl FromLocalKeySpace for UnsecurifiedHardened {
-    type Magnitude = U30;
+impl IsKeySpaceAware for SecurifiedU30 {
+    fn key_space(&self) -> KeySpace {
+        KeySpace::Securified
+    }
+}
+impl HasOffsetFromGlobalKeySpace for SecurifiedU30 {
+    fn offset_from_global_key_space() -> u32 {
+        GLOBAL_OFFSET_HARDENED_SECURIFIED
+    }
 }
 
-impl From<U30> for UnsecurifiedHardened {
+impl FromLocalKeySpace for SecurifiedU30 {
+    type Magnitude = U30;
+}
+impl From<U30> for SecurifiedU30 {
     fn from(value: U30) -> Self {
         Self(value)
     }
 }
 
-impl TryFrom<u32> for UnsecurifiedHardened {
+impl TryFrom<u32> for SecurifiedU30 {
     type Error = CommonError;
 
     fn try_from(value: u32) -> std::result::Result<Self, Self::Error> {
@@ -103,46 +123,20 @@ impl TryFrom<u32> for UnsecurifiedHardened {
     }
 }
 
-pub const UNSECURIFIED_HARDENED_CANONICAL_SUFFIX: &str = "H";
-pub const UNSECURIFIED_HARDENED_NON_CANONICAL_SUFFIX: &str = "'";
-impl IsPathComponentStringConvertible for UnsecurifiedHardened {
-    const CANONICAL_SUFFIX: &'static str =
-        UNSECURIFIED_HARDENED_CANONICAL_SUFFIX;
-    const NON_CANONICAL_SUFFIX: &'static str =
-        UNSECURIFIED_HARDENED_NON_CANONICAL_SUFFIX;
-}
-
-impl HasIndexInLocalKeySpace for UnsecurifiedHardened {
-    fn index_in_local_key_space(&self) -> U31 {
-        U31::from(self.0)
-    }
-}
-impl IsKeySpaceAware for UnsecurifiedHardened {
-    fn key_space(&self) -> KeySpace {
-        KeySpace::Unsecurified { is_hardened: true }
-    }
-}
-
-impl HasOffsetFromGlobalKeySpace for UnsecurifiedHardened {
-    fn offset_from_global_key_space() -> u32 {
-        GLOBAL_OFFSET_HARDENED
-    }
-}
-
-impl TryFrom<Unsecurified> for UnsecurifiedHardened {
+impl TryFrom<HDPathComponent> for SecurifiedU30 {
     type Error = CommonError;
 
-    fn try_from(value: Unsecurified) -> Result<Self> {
-        match value {
-            Unsecurified::Unhardened(_) => Err(CommonError::IndexNotHardened {
-                bad_value: value.map_to_global_key_space(),
-            }),
-            Unsecurified::Hardened(u) => Ok(u),
-        }
+    fn try_from(value: HDPathComponent) -> Result<Self> {
+        value
+            .into_securified()
+            .map_err(|_| CommonError::IndexUnsecurifiedExpectedSecurified)
     }
 }
-
-impl FromStr for UnsecurifiedHardened {
+impl IsPathComponentStringConvertible for SecurifiedU30 {
+    const CANONICAL_SUFFIX: &'static str = "S";
+    const NON_CANONICAL_SUFFIX: &'static str = "^";
+}
+impl FromStr for SecurifiedU30 {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
         Self::from_bip32_string(s)
@@ -156,7 +150,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = UnsecurifiedHardened;
+    type SUT = SecurifiedU30;
 
     #[test]
     fn equality() {
@@ -189,25 +183,38 @@ mod tests {
     }
 
     #[test]
+    fn try_from_u32() {
+        assert_eq!(
+            SUT::try_from(0u32).unwrap(),
+            SUT::from_local_key_space(U31::ZERO).unwrap()
+        );
+    }
+
+    #[test]
+    fn try_from_u32_fail() {
+        assert!(SUT::try_from(SUT::MAX_LOCAL + 1).is_err());
+    }
+
+    #[test]
     fn from_str_valid_canonical_0() {
         assert_eq!(
-            "0H".parse::<SUT>().unwrap(),
-            SUT::from_local_key_space(0).unwrap()
+            "0S".parse::<SUT>().unwrap(),
+            SUT::from_local_key_space(U31::ZERO).unwrap()
         );
     }
 
     #[test]
     fn from_str_valid_canonical_1() {
         assert_eq!(
-            "1H".parse::<SUT>().unwrap(),
-            SUT::from_local_key_space(1).unwrap()
+            "1S".parse::<SUT>().unwrap(),
+            SUT::from_local_key_space(U31::ONE).unwrap()
         );
     }
 
     #[test]
     fn from_str_valid_canonical_max() {
         assert_eq!(
-            "1073741823H".parse::<SUT>().unwrap(),
+            "1073741823S".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U30_MAX).unwrap()
         );
     }
@@ -215,37 +222,40 @@ mod tests {
     #[test]
     fn from_str_valid_uncanonical_0() {
         assert_eq!(
-            "0'".parse::<SUT>().unwrap(),
-            SUT::from_local_key_space(0).unwrap()
+            "0^".parse::<SUT>().unwrap(),
+            SUT::from_local_key_space(U31::ZERO).unwrap()
         );
     }
 
     #[test]
     fn from_str_valid_uncanonical_1() {
         assert_eq!(
-            "1'".parse::<SUT>().unwrap(),
-            SUT::from_local_key_space(1).unwrap()
+            "1^".parse::<SUT>().unwrap(),
+            SUT::from_local_key_space(U31::ONE).unwrap()
         );
     }
 
     #[test]
     fn from_str_valid_uncanonical_max() {
         assert_eq!(
-            "1073741823'".parse::<SUT>().unwrap(),
+            "1073741823^".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U30_MAX).unwrap()
         );
     }
 
     #[test]
     fn display_0() {
-        assert_eq!(format!("{}", SUT::from_local_key_space(0).unwrap()), "0H");
+        assert_eq!(
+            format!("{}", SUT::from_local_key_space(U31::ZERO).unwrap()),
+            "0S"
+        );
     }
 
     #[test]
     fn debug_0() {
         assert_eq!(
-            format!("{:?}", SUT::from_local_key_space(0).unwrap()),
-            "0'"
+            format!("{:?}", SUT::from_local_key_space(U31::ZERO).unwrap()),
+            "0^"
         );
     }
 
@@ -253,7 +263,7 @@ mod tests {
     fn display_max() {
         assert_eq!(
             format!("{}", SUT::from_local_key_space(U30_MAX).unwrap()),
-            "1073741823H"
+            "1073741823S"
         );
     }
 
@@ -261,8 +271,24 @@ mod tests {
     fn debug_max() {
         assert_eq!(
             format!("{:?}", SUT::from_local_key_space(U30_MAX).unwrap()),
-            "1073741823'"
+            "1073741823^"
         );
+    }
+
+    #[test]
+    fn try_from_hd_path_component_successful() {
+        let sut = SUT::sample();
+        let from = HDPathComponent::Securified(sut);
+        assert_eq!(SUT::try_from(from).unwrap(), sut)
+    }
+
+    #[test]
+    fn try_from_hd_path_component_fail() {
+        let from = HDPathComponent::Unsecurified(Unsecurified::sample());
+        assert!(matches!(
+            SUT::try_from(from),
+            Err(CommonError::IndexUnsecurifiedExpectedSecurified)
+        ))
     }
 
     #[test]
@@ -276,31 +302,39 @@ mod tests {
     #[test]
     fn from_global_valid() {
         assert_eq!(
-            SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED).unwrap(),
-            SUT::from_local_key_space(0).unwrap()
-        );
-
-        assert_eq!(
-            SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED + 1337).unwrap(),
-            SUT::from_local_key_space(1337).unwrap()
+            SUT::from_global_key_space(
+                GLOBAL_OFFSET_HARDENED_SECURIFIED + 1337
+            )
+            .unwrap(),
+            SUT::from_local_key_space(U31::try_from(1337u32).unwrap()).unwrap()
         );
     }
 
     #[test]
     fn from_global_invalid() {
-        assert!(matches!(
-            SUT::from_global_key_space(0),
-            Err(CommonError::IndexInGlobalKeySpaceIsLowerThanOffset)
-        ));
-        assert!(SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED - 1).is_err());
+        assert!(SUT::from_global_key_space(0).is_err());
+        assert!(SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED).is_err());
+        assert!(SUT::from_global_key_space(
+            GLOBAL_OFFSET_HARDENED_SECURIFIED - 1
+        )
+        .is_err());
+    }
+
+    #[test]
+    fn from_local_invalid() {
+        assert!(SUT::from_local_key_space(U32_MAX).is_err());
+        assert!(SUT::from_local_key_space(U31_MAX).is_err());
+        assert!(SUT::from_local_key_space(U30_MAX + 1).is_err());
     }
 
     #[test]
     fn index_in_local_key_space() {
         assert_eq!(
-            SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED + 1337)
-                .unwrap()
-                .index_in_local_key_space(),
+            SUT::from_global_key_space(
+                GLOBAL_OFFSET_HARDENED_SECURIFIED + 1337
+            )
+            .unwrap()
+            .index_in_local_key_space(),
             U31::from(1337)
         );
     }
@@ -308,39 +342,33 @@ mod tests {
     #[test]
     fn map_to_local_key_space_key_space() {
         assert_eq!(
-            SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED + 1337)
-                .unwrap()
-                .key_space(),
-            KeySpace::Unsecurified { is_hardened: true }
+            SUT::from_global_key_space(
+                GLOBAL_OFFSET_HARDENED_SECURIFIED + 1337
+            )
+            .unwrap()
+            .key_space(),
+            KeySpace::Securified
         );
     }
 
     #[test]
     fn into_global() {
         assert_eq!(
-            SUT::from_local_key_space(1337)
+            SUT::from_local_key_space(U31::try_from(1337u32).unwrap())
                 .unwrap()
                 .map_to_global_key_space(),
-            GLOBAL_OFFSET_HARDENED + 1337
+            GLOBAL_OFFSET_HARDENED_SECURIFIED + 1337
         );
     }
 
     #[test]
-    fn test_try_from_unsecurified() {
-        let from = Unsecurified::Unhardened(Unhardened::sample());
-        assert!(matches!(
-            SUT::try_from(from),
-            Err(CommonError::IndexNotHardened { bad_value: _ })
-        ));
-    }
-
-    #[test]
     fn json_roundtrip() {
-        let sut = SUT::from_local_key_space(1337).unwrap();
+        let sut =
+            SUT::from_local_key_space(U31::try_from(1337u32).unwrap()).unwrap();
 
-        assert_json_value_eq_after_roundtrip(&sut, json!("1337H"));
+        assert_json_value_eq_after_roundtrip(&sut, json!("1337S"));
         assert_json_roundtrip(&sut);
-        assert_json_value_ne_after_roundtrip(&sut, json!("0H"));
+        assert_json_value_ne_after_roundtrip(&sut, json!("0S"));
     }
 
     #[test]
@@ -349,42 +377,22 @@ mod tests {
         assert_json_value_fails::<SUT>(json!("^"));
         assert_json_value_fails::<SUT>(json!("S"));
         assert_json_value_fails::<SUT>(json!("2"));
-        assert_json_value_fails::<SUT>(json!("2^"));
+        assert_json_value_fails::<SUT>(json!("2'"));
         assert_json_value_fails::<SUT>(json!("2X"));
         assert_json_value_fails::<SUT>(json!("   "));
     }
 
     #[test]
-    fn try_from_u32() {
-        assert_eq!(
-            SUT::try_from(0u32).unwrap(),
-            SUT::from_local_key_space(0).unwrap()
-        );
-    }
-
-    #[test]
-    fn try_from_u32_fail() {
-        assert!(SUT::try_from(SUT::MAX_LOCAL + 1).is_err());
-    }
-
-    #[test]
     fn add_zero() {
-        let sut = SUT::from_local_key_space(42).unwrap();
-        assert_eq!(
-            sut.checked_add(&SUT::from_local_key_space(0u32).unwrap())
-                .unwrap(),
-            sut
-        );
+        let sut =
+            SUT::from_local_key_space(U31::try_from(42u32).unwrap()).unwrap();
+        assert_eq!(sut.checked_add(&SUT::ZERO).unwrap(), sut);
     }
 
     #[test]
     fn add_zero_to_max_is_ok() {
         let sut = SUT::from_local_key_space(SUT::MAX_LOCAL).unwrap();
-        assert_eq!(
-            sut.checked_add(&SUT::from_local_key_space(0u32).unwrap())
-                .unwrap(),
-            sut,
-        );
+        assert_eq!(sut.checked_add(&SUT::ZERO).unwrap(), sut,);
     }
 
     #[test]
@@ -398,10 +406,11 @@ mod tests {
 
     #[test]
     fn add_one() {
-        let sut = SUT::from_local_key_space(42).unwrap();
+        let sut =
+            SUT::from_local_key_space(U31::try_from(42u32).unwrap()).unwrap();
         assert_eq!(
             sut.checked_add_one().unwrap(),
-            SUT::from_local_key_space(43).unwrap()
+            SUT::from_local_key_space(U31::try_from(43u32).unwrap()).unwrap()
         );
     }
 
@@ -409,7 +418,8 @@ mod tests {
     fn add_one_to_max_minus_1_is_max() {
         let sut = SUT::from_local_key_space(SUT::MAX_LOCAL - 1).unwrap();
         assert_eq!(
-            sut.checked_add_one().unwrap(),
+            sut.checked_add(&SUT::from_local_key_space(1u32).unwrap())
+                .unwrap(),
             SUT::from_local_key_space(SUT::MAX_LOCAL).unwrap()
         );
     }
@@ -430,7 +440,7 @@ mod tests {
 
     #[test]
     fn addition_overflow_add_max() {
-        let sut = SUT::from_local_key_space(1).unwrap();
+        let sut = SUT::from_local_key_space(U31::ONE).unwrap();
         assert!(matches!(
             sut.checked_add(
                 &SUT::from_local_key_space(SUT::MAX_LOCAL).unwrap()

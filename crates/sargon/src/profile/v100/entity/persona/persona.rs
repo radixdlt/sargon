@@ -105,6 +105,12 @@ impl TryFrom<AccountOrPersona> for Persona {
     }
 }
 
+impl IsNetworkAware for Persona {
+    fn network_id(&self) -> NetworkID {
+        self.address().network_id()
+    }
+}
+
 impl IsEntity for Persona {
     type Path = IdentityPath;
 

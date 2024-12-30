@@ -14,7 +14,6 @@
 mod error_from;
 mod factor_instances_provider;
 mod gateway_api;
-mod hierarchical_deterministic;
 mod home_cards;
 mod identified_vec_of;
 mod keys_collector;
@@ -28,11 +27,11 @@ mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
     pub use sargon_core::prelude::*;
+    pub use sargon_hierarchical_deterministic::prelude::*;
 
     pub use crate::error_from::*;
     pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
-    pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
     pub use crate::identified_vec_of::*;
     pub use crate::keys_collector::*;
@@ -72,7 +71,7 @@ pub mod prelude {
             Ed25519PublicKey as ScryptoEd25519PublicKey,
             Ed25519PublicKeyHash as ScryptoEd25519PublicKeyHash,
             Ed25519Signature as ScryptoEd25519Signature, Hash as ScryptoHash,
-            IsHash as ScryptoIsHash, PublicKey as ScryptoPublicKey,
+            PublicKey as ScryptoPublicKey,
             PublicKeyHash as ScryptoPublicKeyHash,
             Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
             Secp256k1PublicKey as ScryptoSecp256k1PublicKey,

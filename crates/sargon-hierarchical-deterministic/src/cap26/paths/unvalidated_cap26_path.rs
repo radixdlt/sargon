@@ -9,9 +9,19 @@ pub struct UnvalidatedCAP26Path {
     pub key_kind: CAP26KeyKind,
     pub index: Hardened,
 }
+
 impl UnvalidatedCAP26Path {
     pub const DEPTH: usize = 6;
 }
+
+impl TryFrom<HDPathComponent> for NetworkID {
+    type Error = CommonError;
+
+    fn try_from(value: HDPathComponent) -> Result<Self> {
+        Self::try_from(value.index_in_local_key_space())
+    }
+}
+
 impl TryFrom<HDPath> for UnvalidatedCAP26Path {
     type Error = CommonError;
 

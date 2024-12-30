@@ -2742,7 +2742,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -2750,7 +2750,6 @@ dependencies = [
  "async-std",
  "async-trait",
  "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
- "bip39",
  "camino 1.0.8",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "delegate",
@@ -2780,6 +2779,7 @@ dependencies = [
  "rand",
  "reqwest",
  "sargon-core",
+ "sargon-hierarchical-deterministic",
  "sbor",
  "security-framework",
  "security-framework-sys",
@@ -2796,7 +2796,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-core"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "assert-json-diff",
  "delegate",
@@ -2829,8 +2829,44 @@ dependencies = [
 ]
 
 [[package]]
+name = "sargon-hierarchical-deterministic"
+version = "1.2.1"
+dependencies = [
+ "assert-json-diff",
+ "bip39",
+ "delegate",
+ "derive_more",
+ "enum-as-inner",
+ "enum-iterator",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "hkdf",
+ "iota-crypto",
+ "iso8601-timestamp",
+ "itertools 0.12.0",
+ "k256 0.13.3",
+ "log",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "radix-common",
+ "radix-engine-interface",
+ "radix-rust",
+ "radix-transactions",
+ "rand",
+ "sargon-core",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_repr",
+ "serde_with 3.4.0",
+ "strum 0.26.1",
+ "thiserror 1.0.50",
+ "url",
+ "uuid 1.6.1",
+ "zeroize 1.7.0",
+]
+
+[[package]]
 name = "sargon-uniffi"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "actix-rt",
  "assert-json-diff",
