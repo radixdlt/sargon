@@ -65,6 +65,12 @@ impl HasSampleValues for AccountAddress {
     }
 }
 
+impl From<AccountAddress> for ScryptoComponentAddress {
+    fn from(value: AccountAddress) -> ScryptoComponentAddress {
+        ScryptoComponentAddress::new_or_panic(value.node_id().0)
+    }
+}
+
 impl AccountAddress {
     /// A sample used to facilitate unit tests.
     pub fn sample_mainnet() -> Self {

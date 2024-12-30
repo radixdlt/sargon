@@ -15,6 +15,13 @@ pub fn type_name<T>() -> String {
         .to_owned()
 }
 
+pub fn format_string(s: impl AsRef<str>, start: usize, end: usize) -> String {
+    let s = s.as_ref();
+    let prefix = &s[0..start];
+    let suffix = suffix_str(end, s);
+    format!("{}...{}", prefix, suffix)
+}
+
 /// Returns the first `n` chars of the &str `s`. If `n` is bigger than `s` then
 /// the whole `s` is returned.
 pub fn prefix_str(n: usize, s: impl AsRef<str>) -> String {

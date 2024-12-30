@@ -25,6 +25,7 @@ mod short_string;
 mod signatures;
 mod vector_image_type;
 mod version_type;
+mod hidden_constructor;
 
 pub use appearance_id::*;
 pub use bag_of_bytes::*;
@@ -36,6 +37,7 @@ pub use email_address::*;
 pub use entity_kind::*;
 pub use epoch::*;
 pub use exactly_n_bytes::*;
+pub use hidden_constructor::*;
 pub use host_info::*;
 pub use instant::*;
 pub use intent_discriminator::*;

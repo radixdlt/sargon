@@ -16,6 +16,8 @@ sargon-core = { path = "../sargon-core" }
 identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-factors = { path = "../sargon-factors" }
+sargon-keys-collector = { path = "../sargon-keys-collector" }
+sargon-addresses = { path = "../sargon-addresses" }
 
 zeroize = { workspace = true }
 
@@ -44,7 +46,7 @@ uuid = { workspace = true }
 strum = { workspace = true }
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-rust = { workspace = true }
-radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-engine = { workspace = true }
 radix-common = { workspace = true }
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 radix-engine-interface = { workspace = true }
@@ -52,7 +54,7 @@ radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scry
 
 radix-transactions = { workspace = true }
 
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "2ab5b35a6cb96c9faeb98ed8df67b870336e6873" }
+radix-engine-toolkit = { workspace = true }
 
 enum-iterator = { workspace = true }
 
@@ -83,8 +85,7 @@ paste = { workspace = true }
 # camino = "1.0.8"
 camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
 
-# async-trait = "0.1.79"
-async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8bd87029bf4dcbea41ff309f2b2220c43" }
+async-trait = { workspace =  true }
 
 pretty_assertions = { workspace = true }
 
@@ -112,8 +113,7 @@ security-framework-sys = "=2.10.0"
 
 [dev-dependencies]
 
-# actix-rt = "3.3.0"
-actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
+actix-rt = { workspace = true }
 
 [build-dependencies]
 

@@ -1,0 +1,27 @@
+[package]
+name = "sargon-addresses"
+version = "1.2.1"
+edition = "2021"
+
+[dependencies]
+sargon-core = { path = "../sargon-core" }
+sargon-factors = { path = "../sargon-factors" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+
+# ==== RADIX DEPENDENCIES ====
+radix-common = { workspace = true }
+radix-engine-interface = { workspace = true }
+radix-engine = { workspace = true }
+radix-rust = { workspace = true }
+radix-transactions = { workspace = true }
+
+radix-engine-toolkit = { workspace = true }
+
+# ==== EXTERNAL DEPENDENCIES ====
+derive_more = { workspace = true }
+enum-iterator = { workspace = true }
+log = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_with = { workspace = true }

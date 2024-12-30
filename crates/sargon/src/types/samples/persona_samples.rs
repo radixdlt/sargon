@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crate::types::samples::access_controller_address_samples::SamplesFromIdentityAddress;
 
 static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
     [

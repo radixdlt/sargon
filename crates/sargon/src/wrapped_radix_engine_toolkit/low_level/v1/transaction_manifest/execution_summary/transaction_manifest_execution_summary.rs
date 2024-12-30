@@ -79,7 +79,7 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_v3: AccountAddress = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".into();
+        let acc_v3 = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".parse::<AccountAddress>().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -89,21 +89,21 @@ mod tests {
                         acc_v3,
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
                                 FungibleResourceIndicator::guaranteed(10)
                             ),
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq",
+                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".parse::<ResourceAddress>().unwrap(),
                                 FungibleResourceIndicator::guaranteed(5)
                             ),
                             ResourceIndicator::non_fungible(
-                                "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7",
+                                "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7".parse::<ResourceAddress>().unwrap(),
                                 NonFungibleResourceIndicator::by_ids([
                                     NonFungibleLocalId::integer(64),
                                 ])
                             ),
                             ResourceIndicator::non_fungible(
-                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(),
                                 NonFungibleResourceIndicator::by_ids([
                                     NonFungibleLocalId::string("Member_6").unwrap(),
                                 ])
@@ -113,14 +113,14 @@ mod tests {
                 ], //withdrawals
                 [
                     (
-                        AccountAddress::from("account_tdx_2_129n8v0x9q2zj78293sv7xhz9zcysvcvwp70pc6826k8f7dte96sfcn"),
+                        AccountAddress::from_str("account_tdx_2_129n8v0x9q2zj78293sv7xhz9zcysvcvwp70pc6826k8f7dte96sfcn").unwrap(),
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+                                "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
                                 FungibleResourceIndicator::guaranteed(10)
                             ),
                             ResourceIndicator::non_fungible(
-                                "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7",
+                                "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7".parse::<ResourceAddress>().unwrap(),
                                 NonFungibleResourceIndicator::by_ids([
                                     NonFungibleLocalId::integer(64),
                                 ])
@@ -128,14 +128,14 @@ mod tests {
                         ]
                     ),
                     (
-                        AccountAddress::from("account_tdx_2_12x58hfy598wl5vukv3sqrkc7h3n699nqygufncycayeuwydel8esnu"),
+                        AccountAddress::from_str("account_tdx_2_12x58hfy598wl5vukv3sqrkc7h3n699nqygufncycayeuwydel8esnu").unwrap(),
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq",
+                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".parse::<ResourceAddress>().unwrap(),
                                 FungibleResourceIndicator::guaranteed(5)
                             ),
                             ResourceIndicator::non_fungible(
-                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(),
                                 NonFungibleResourceIndicator::by_ids([
                                     NonFungibleLocalId::string("Member_6").unwrap(),
                                 ])
@@ -187,7 +187,7 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_g2: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
+        let acc_g2: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -208,7 +208,7 @@ mod tests {
                         >::from_iter([(
                             acc_g2,
                             HashMap::<_, _>::from_iter([(
-                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".into(),
+                                "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".parse::<ResourceAddress>().unwrap(),
                                 ResourcePreferenceUpdate::Remove,
                             )]),
                         )]),
@@ -253,8 +253,8 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_v3: AccountAddress = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".into();
-        let token_address: ResourceAddress = "resource_tdx_2_1tkd0xf49tvq4wjdxn7khkt9l900750rd2jqdajukgwsyv8k9md5hh6".into();
+        let acc_v3 = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".parse::<AccountAddress>().unwrap();
+        let token_address = "resource_tdx_2_1tkd0xf49tvq4wjdxn7khkt9l900750rd2jqdajukgwsyv8k9md5hh6".parse::<ResourceAddress>().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -309,8 +309,8 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc: AccountAddress = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".into();
-        let non_fungible_address: ResourceAddress = "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl".into();
+        let acc: AccountAddress = "account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3".parse().unwrap();
+        let non_fungible_address: ResourceAddress = "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl".parse().unwrap();
 
         pretty_assertions::assert_eq!(
                 sut,
@@ -396,7 +396,7 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_ac: AccountAddress = "account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac".into();
+        let acc_ac: AccountAddress = "account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac".parse().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -406,7 +406,7 @@ mod tests {
                         acc_ac,
                         vec![
                             ResourceIndicator::fungible(
-                                "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck",
+                                "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
                                 FungibleResourceIndicator::guaranteed(5)
                             ),
                         ]
@@ -417,7 +417,7 @@ mod tests {
                         acc_ac,
                         vec![
                             ResourceIndicator::non_fungible(
-                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue",
+                                "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(),
                                 NonFungibleResourceIndicator::by_amount(1, PredictedNonFungibleLocalIds::new(
                                     [],
                                     4
@@ -479,7 +479,7 @@ mod tests {
                             acc_ac,
                             vec![
                                 ResourceIndicator::fungible(
-                                    "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck",
+                                    "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
                                     FungibleResourceIndicator::guaranteed(1)
                                 ),
                             ]
@@ -490,7 +490,7 @@ mod tests {
                     [], // addresses_of_identities_requiring_auth
                     [], // newly_created_non_fungibles
                     [ReservedInstruction::AccountLockFee], // reserved_instructions
-                    [ResourceSpecifier::non_fungible("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue", vec!["<Member_83>".parse().unwrap()])], // presented_proofs
+                    [ResourceSpecifier::non_fungible("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(), vec!["<Member_83>".parse().unwrap()])], // presented_proofs
                     ["component_tdx_2_1cr4pa9ex9xhwzfjzclv8vjnfylw93wvhkwcwc0xlahpkel0krxqedw".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
                     [
                         DetailedManifestClass::General
@@ -581,7 +581,7 @@ mod tests {
                             FungibleResourceIndicator::guaranteed(237)
                         ),
                         ResourceIndicator::fungible(
-                            r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy",
+                            r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
                             FungibleResourceIndicator::guaranteed(1337)
                         ),
                     ]
@@ -713,9 +713,9 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk = AccountAddress::from("account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3");
-        let resource_address_of_pool = ResourceAddress::from("resource_tdx_2_1thgnc84xkcjhs46pfvm9s8zn8t9kxwryvyr9x3947xpt6jxty7qn25");
-        let pool_address = PoolAddress::from("pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830");
+        let acc_gk = AccountAddress::from_str("account_tdx_2_12x55t8w9lf2qjh6z98jjxy04tkpjgjxawqm252gerhyath7qka34v3").unwrap();
+        let resource_address_of_pool = ResourceAddress::from_str("resource_tdx_2_1thgnc84xkcjhs46pfvm9s8zn8t9kxwryvyr9x3947xpt6jxty7qn25").unwrap();
+        let pool_address = PoolAddress::from_str("pool_tdx_2_1c5mygu9t8rlfq6j8v2ynrg60ltts2dctsghust8u2tuztrml427830").unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -738,7 +738,7 @@ mod tests {
                     pool_addresses: vec![pool_address],
                     pool_redemptions: vec![TrackedPoolRedemption::new(
                         pool_address,
-                        ResourceAddress::from("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"),
+                        ResourceAddress::from_str("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc").unwrap(),
                         3.162277,
                         []
                     )]
@@ -770,11 +770,11 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
+        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
 
-        let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}".into();
+        let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}".parse().unwrap();
 
-        let validator: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".into();
+        let validator: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
 
         pretty_assertions::assert_eq!(
                 sut,
@@ -784,7 +784,7 @@ mod tests {
                            acc_gk,
                             vec![
                                 ResourceIndicator::fungible(
-                                    "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn", 
+                                    "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse::<ResourceAddress>().unwrap(), 
                                     FungibleResourceIndicator::guaranteed(500)
                                 ),
                             ]
@@ -795,7 +795,7 @@ mod tests {
                         acc_gk,
                         vec![
                             ResourceIndicator::non_fungible(
-                                "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj",
+                                "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj".parse::<ResourceAddress>().unwrap(),
                                 NonFungibleResourceIndicator::by_all(
                                     PredictedDecimal::new(0, 4),
                                     PredictedNonFungibleLocalIds::new(
@@ -851,9 +851,9 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".into();
+        let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
 
-        let validator: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".into();
+        let validator: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().unwrap();
 
         pretty_assertions::assert_eq!(
                 sut,
@@ -863,7 +863,7 @@ mod tests {
                             acc_gk,
                             vec![
                                 ResourceIndicator::non_fungible(
-                                    "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw",
+                                    "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw".parse::<ResourceAddress>().unwrap(),
                                     NonFungibleResourceIndicator::by_ids([
                                         NonFungibleLocalId::ruid(hex_decode("1c1ce92c810094a765659db6a666c19c6cea4367bb789b55276b137712ceecce").unwrap()).unwrap(),
                                         NonFungibleLocalId::ruid(hex_decode("5aebd0270caf3f8751031498741f57b5d24fe0d62a976589519c6a92423888cc").unwrap()).unwrap()
@@ -928,9 +928,9 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc: AccountAddress = "account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp".into();
-        let fungible_address: ResourceAddress = "resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32".into();
-        let non_fungible_address: ResourceAddress = "resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3".into();
+        let acc: AccountAddress = "account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp".parse().unwrap();
+        let fungible_address: ResourceAddress = "resource_tdx_2_1th75jg2gx9l3v0r8duzrmknfarhd3ha0387lg9n78qc9849xsfyq32".parse().unwrap();
+        let non_fungible_address: ResourceAddress = "resource_tdx_2_1n2z4k99wuqlph9lj64ckc64znm48axl37xctsa0xqmm2sqg7klrte3".parse::<ResourceAddress>().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -953,7 +953,7 @@ mod tests {
                         ),
                     ]
                 )],
-                vec!["account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp".into()], // addresses_of_accounts_requiring_auth
+                vec!["account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp".parse::<AccountAddress>().unwrap()], // addresses_of_accounts_requiring_auth
                 [], // addresses_of_identities_requiring_auth
                 [], // newly_created_non_fungibles
                 [ReservedInstruction::AccountLockFee], // reserved_instructions
@@ -986,8 +986,8 @@ mod tests {
 
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
-        let acc: AccountAddress = "account_tdx_2_12xy65ekdcrehj24t0ks5lvvqcvr48qgac4efq3phecp0xyetze5nyy".into();
-        let badge_address: ResourceAddress = "resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk".into();
+        let acc = "account_tdx_2_12xy65ekdcrehj24t0ks5lvvqcvr48qgac4efq3phecp0xyetze5nyy".parse::<AccountAddress>().unwrap();
+        let badge_address = "resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk".parse::<ResourceAddress>().unwrap();
         let badge_id = NonFungibleLocalId::bytes(
             NonEmptyMax64Bytes::from_hex(
                 "5189aa66cdc0f3792aab7da14fb180c30753811dc572904437ce02f3132b",

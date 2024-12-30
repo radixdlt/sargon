@@ -106,13 +106,7 @@ impl Identifiable for AuthorizedDapp {
 
 pub type DappDefinitionAddress = AccountAddress;
 
-impl Identifiable for AccountAddress {
-    type ID = Self;
 
-    fn id(&self) -> Self::ID {
-        *self
-    }
-}
 
 impl AuthorizedDapp {
     pub fn sample_mainnet_dashboard() -> Self {

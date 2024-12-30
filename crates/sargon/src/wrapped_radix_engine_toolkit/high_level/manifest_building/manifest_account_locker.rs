@@ -5,12 +5,6 @@ use radix_engine_interface::blueprints::locker::{
 };
 use std::cmp::min;
 
-impl From<AccountAddress> for ScryptoComponentAddress {
-    fn from(value: AccountAddress) -> ScryptoComponentAddress {
-        ScryptoComponentAddress::new_or_panic(value.node_id().0)
-    }
-}
-
 impl TransactionManifest {
     pub fn account_locker_claim(
         locker_address: &LockerAddress,
@@ -87,7 +81,7 @@ impl TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use radix_common::prelude::ResourceAddress;
+    use sargon_addresses::ResourceAddress;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
@@ -95,8 +89,8 @@ mod tests {
     #[test]
     fn empty() {
         let manifest = SUT::account_locker_claim(
-            &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".into(),
-            &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into(),
+            &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".parse::<LockerAddress>().unwrap(),
+            &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".parse::<AccountAddress>().unwrap(),
             vec![],
         );
         manifest_eq(manifest, "")
@@ -110,23 +104,23 @@ mod tests {
         ));
 
         let manifest = SUT::account_locker_claim(
-            &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".into(),
-            &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into(),
+            &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".parse::<LockerAddress>().unwrap(),
+            &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".parse::<AccountAddress>().unwrap(),
             vec![
                 AccountLockerClaimableResource::Fungible {
-                    resource_address: "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j".into(),
+                    resource_address: "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j".parse::<ResourceAddress>().unwrap(),
                     amount: 123.into(),
                 },
                 AccountLockerClaimableResource::NonFungible {
-                    resource_address: "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".into(),
+                    resource_address: "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa".parse::<ResourceAddress>().unwrap(),
                     number_of_items: 10,
                 },
                 AccountLockerClaimableResource::Fungible {
-                    resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".into(),
+                    resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".parse::<ResourceAddress>().unwrap(),
                     amount: 1500.into(),
                 },
                 AccountLockerClaimableResource::NonFungible {
-                    resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
+                    resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".parse::<ResourceAddress>().unwrap(),
                     number_of_items: 1,
                 },
             ],
@@ -142,15 +136,15 @@ mod tests {
             "account_locker_claim_max_nft_items.rtm"
         ));
         let manifest = SUT::account_locker_claim(
-            &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".into(),
-            &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".into(),
+            &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".parse::<LockerAddress>().unwrap(),
+            &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".parse::<AccountAddress>().unwrap(),
             vec![
                 AccountLockerClaimableResource::NonFungible {
-                    resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".into(),
+                    resource_address: "resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd".parse::<ResourceAddress>().unwrap(),
                     number_of_items: 100,
                 },
                 AccountLockerClaimableResource::Fungible {
-                    resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".into(),
+                    resource_address: "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd".parse::<ResourceAddress>().unwrap(),
                     amount: Decimal192::one(),
                 }
             ],

@@ -1,0 +1,15 @@
+[package]
+name = "sargon-keys-collector"
+version = "1.2.1"
+edition = "2021"
+
+[dependencies]
+sargon-core = { path = "../sargon-core" }
+sargon-factors = { path = "../sargon-factors" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-addresses = { path = "../sargon-addresses" }
+
+actix-rt = { workspace = true }
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+log = { workspace = true }

@@ -2801,9 +2801,11 @@ dependencies = [
  "radix-transactions",
  "rand",
  "reqwest",
+ "sargon-addresses",
  "sargon-core",
  "sargon-factors",
  "sargon-hierarchical-deterministic",
+ "sargon-keys-collector",
  "sbor",
  "security-framework",
  "security-framework-sys",
@@ -2816,6 +2818,28 @@ dependencies = [
  "url",
  "uuid 1.6.1",
  "zeroize 1.7.0",
+]
+
+[[package]]
+name = "sargon-addresses"
+version = "1.2.1"
+dependencies = [
+ "derive_more",
+ "enum-iterator",
+ "log",
+ "pretty_assertions",
+ "radix-common",
+ "radix-engine",
+ "radix-engine-interface",
+ "radix-engine-toolkit",
+ "radix-rust",
+ "radix-transactions",
+ "sargon-core",
+ "sargon-factors",
+ "sargon-hierarchical-deterministic",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
 ]
 
 [[package]]
@@ -2970,6 +2994,20 @@ dependencies = [
  "url",
  "uuid 1.6.1",
  "zeroize 1.7.0",
+]
+
+[[package]]
+name = "sargon-keys-collector"
+version = "1.2.1"
+dependencies = [
+ "actix-rt",
+ "async-trait",
+ "derive_more",
+ "log",
+ "sargon-addresses",
+ "sargon-core",
+ "sargon-factors",
+ "sargon-hierarchical-deterministic",
 ]
 
 [[package]]

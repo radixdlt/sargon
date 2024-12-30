@@ -37,17 +37,6 @@ pub(crate) trait FromRetAddress {
     type RetAddress;
 }
 
-pub(crate) fn format_string(
-    s: impl AsRef<str>,
-    start: usize,
-    end: usize,
-) -> String {
-    let s = s.as_ref();
-    let prefix = &s[0..start];
-    let suffix = suffix_str(end, s);
-    format!("{}...{}", prefix, suffix)
-}
-
 pub trait IntoScryptoAddress: IsNetworkAware {
     fn scrypto(&self) -> ScryptoGlobalAddress;
 }
@@ -89,6 +78,14 @@ macro_rules! decl_ret_wrapped_address {
                 type Err = CommonError;
                 fn from_str(s: &str) -> Result<Self> {
                     Self::try_from_bech32(s)
+                }
+            }
+
+            impl Identifiable for [< $address_type:camel Address >] {
+                type ID = Self;
+
+                fn id(&self) -> Self::ID {
+                    *self
                 }
             }
 

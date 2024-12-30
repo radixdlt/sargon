@@ -2,12 +2,12 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FactorSourcesOfKind {
-    pub(crate) kind: FactorSourceKind,
+    pub kind: FactorSourceKind,
     factor_sources: Vec<FactorSource>,
 }
 
 impl FactorSourcesOfKind {
-    pub(crate) fn new(
+    pub fn new(
         kind: FactorSourceKind,
         factor_sources: impl IntoIterator<Item = FactorSource>,
     ) -> Result<Self> {
@@ -32,9 +32,34 @@ impl FactorSourcesOfKind {
         })
     }
 
-    pub(crate) fn factor_sources(&self) -> IndexSet<FactorSource> {
+    pub fn factor_sources(&self) -> IndexSet<FactorSource> {
         self.factor_sources.clone().into_iter().collect()
     }
+}
+
+pub fn sort_group_factors(
+    used_factor_sources: HashSet<FactorSource>,
+) -> IndexSet<FactorSourcesOfKind> {
+    let factors_of_kind: HashMap<FactorSourceKind, IndexSet<FactorSource>> =
+        used_factor_sources
+            .into_iter()
+            .into_grouping_map_by(|x| x.factor_source_kind())
+            .collect::<IndexSet<_>>();
+
+    let mut factors_of_kind = factors_of_kind
+        .into_iter()
+        .map(|(k, v)| (k, v.into_iter().sorted().collect::<IndexSet<_>>()))
+        .collect::<IndexMap<FactorSourceKind, IndexSet<FactorSource>>>();
+
+    factors_of_kind.sort_keys();
+
+    factors_of_kind
+        .into_iter()
+        .map(|(k, v)| {
+            FactorSourcesOfKind::new(k, v)
+                .expect("All factors should be of the same kind, since this is calling iter on a Map, using kind as key. Did you just move around lines of code?")
+        })
+        .collect::<IndexSet<_>>()
 }
 
 #[cfg(test)]

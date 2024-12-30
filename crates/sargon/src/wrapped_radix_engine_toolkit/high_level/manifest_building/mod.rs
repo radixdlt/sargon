@@ -1,4 +1,3 @@
-mod addresses_manifest_builder_support;
 mod assert_manifest;
 mod bucket;
 mod bucket_factory;
@@ -12,7 +11,6 @@ mod metadata;
 mod modify_manifest;
 mod third_party_deposit_update;
 
-pub use addresses_manifest_builder_support::*;
 pub use assert_manifest::*;
 pub use bucket::*;
 pub use bucket_factory::*;

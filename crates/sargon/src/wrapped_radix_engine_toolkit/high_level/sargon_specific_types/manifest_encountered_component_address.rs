@@ -1,3 +1,5 @@
+use sargon_addresses::address_union;
+
 use crate::prelude::*;
 
 address_union!(

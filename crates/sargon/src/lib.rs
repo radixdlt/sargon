@@ -15,7 +15,6 @@ mod error_from;
 mod factor_instances_provider;
 mod gateway_api;
 mod home_cards;
-mod keys_collector;
 mod profile;
 mod radix_connect;
 mod security_center;
@@ -26,15 +25,16 @@ mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
     pub use identified_vec_of::prelude::*;
+    pub use sargon_addresses::prelude::*;
     pub use sargon_core::prelude::*;
     pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
+    pub use sargon_keys_collector::prelude::*;
 
     pub use crate::error_from::*;
     pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
     pub use crate::home_cards::*;
-    pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
     pub use crate::security_center::*;
@@ -60,67 +60,23 @@ pub mod prelude {
     pub(crate) use sbor::Versioned;
 
     pub(crate) use radix_common::{
-        address::{
-            AddressBech32Decoder as ScryptoAddressBech32Decoder,
-            AddressBech32Encoder as ScryptoAddressBech32Encoder,
-        },
         crypto::{
             blake2b_256_hash, verify_ed25519 as scrypto_verify_ed25519,
             verify_secp256k1 as scrypto_verify_secp256k1,
             Ed25519PrivateKey as ScryptoEd25519PrivateKey,
-            Ed25519PublicKey as ScryptoEd25519PublicKey,
-            Ed25519PublicKeyHash as ScryptoEd25519PublicKeyHash,
-            Ed25519Signature as ScryptoEd25519Signature, Hash as ScryptoHash,
-            PublicKey as ScryptoPublicKey,
-            PublicKeyHash as ScryptoPublicKeyHash,
+            Ed25519Signature as ScryptoEd25519Signature,
             Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
             Secp256k1PublicKey as ScryptoSecp256k1PublicKey,
-            Secp256k1PublicKeyHash as ScryptoSecp256k1PublicKeyHash,
             Secp256k1Signature as ScryptoSecp256k1Signature,
-        },
-        data::scrypto::{
-            model::{
-                BytesNonFungibleLocalId as ScryptoBytesNonFungibleLocalId,
-                IntegerNonFungibleLocalId as ScryptoIntegerNonFungibleLocalId,
-                NonFungibleLocalId as ScryptoNonFungibleLocalId,
-                RUIDNonFungibleLocalId as ScryptoRUIDNonFungibleLocalId,
-                StringNonFungibleLocalId as ScryptoStringNonFungibleLocalId,
-            },
-            scrypto_decode as Scrypto_scrypto_decode,
-            scrypto_encode as Scrypto_scrypto_encode,
         },
         math::{
             Decimal as ScryptoDecimal192, RoundingMode as ScryptoRoundingMode,
         },
         network::NetworkDefinition as ScryptoNetworkDefinition,
         prelude::{
-            AllowedIds as ScryptoAllowedIds,
-            DynamicComponentAddress as ScryptoDynamicComponentAddress,
-            DynamicGlobalAddress as ScryptoDynamicGlobalAddress,
-            DynamicResourceAddress as ScryptoDynamicResourceAddress,
-            FromPublicKey as ScryptoFromPublicKey, Instant as ScryptoInstant,
-            LowerBound as ScryptoLowerBound,
-            ManifestAddress as ScryptoManifestAddress,
-            ManifestAddressReservation as ScryptoManifestAddressReservation,
-            ManifestBucket as ScryptoManifestBucket,
-            ManifestCustomValue as ScryptoManifestCustomValue,
-            ManifestCustomValueKind as ScryptoManifestCustomValueKind,
-            ManifestEncode as ScryptoManifestEncode,
-            ManifestNamedAddress as ScryptoManifestNamedAddress,
-            ManifestProof as ScryptoManifestProof,
-            ManifestValue as ScryptoManifestValue,
-            NonFungibleData as ScryptoNonFungibleData,
-            NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
-            NonFungibleIdType as ScryptoNonFungibleIdType,
             UpperBound as ScryptoUpperBound,
             ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
-            IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE, XRD,
-        },
-        types::{
-            ComponentAddress as ScryptoComponentAddress,
-            EntityType as ScryptoEntityType,
-            GlobalAddress as ScryptoGlobalAddress, NodeId as ScryptoNodeId,
-            ResourceAddress as ScryptoResourceAddress,
+            IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE,
         },
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };

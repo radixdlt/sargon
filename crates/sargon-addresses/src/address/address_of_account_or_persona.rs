@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{address_union, prelude::*};
 
 address_union!(
     /// A tagged union of addresses of either an Account or a Persona (IdentityAddress)
