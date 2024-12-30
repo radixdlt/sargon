@@ -1,0 +1,111 @@
+use crate::prelude::*;
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub enum OwnedOrThirdPartyAccountAddress {
+    OwnedAccount { value: AccountAddress },
+    ThirdPartyAccount { value: AccountAddress },
+}
+
+// impl From<AccountAddress> for OwnedOrThirdPartyAccountAddress {
+//     fn from(value: AccountAddress) -> Self {
+//         Self::ThirdPartyAccount { value }
+//     }
+// }
+
+impl OwnedOrThirdPartyAccountAddress {
+    pub fn account_address(&self) -> &AccountAddress {
+        match self {
+            OwnedOrThirdPartyAccountAddress::OwnedAccount { value } => value,
+            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount { value } => {
+                value
+            }
+        }
+    }
+}
+
+impl OwnedOrThirdPartyAccountAddress {
+    pub(crate) fn sample_mainnet() -> Self {
+        Self::OwnedAccount {
+            value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap(),
+        }
+    }
+
+    pub(crate) fn sample_mainnet_other() -> Self {
+        Self::ThirdPartyAccount {
+            value: AccountAddress::sample_mainnet_other(),
+        }
+    }
+
+    pub(crate) fn sample_stokenet() -> Self {
+        Self::OwnedAccount {
+            value: AccountAddress::from_str("account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m").unwrap(),
+        }
+    }
+
+    pub(crate) fn sample_stokenet_other() -> Self {
+        Self::ThirdPartyAccount {
+            value: AccountAddress::sample_stokenet_other(),
+        }
+    }
+}
+
+impl HasSampleValues for OwnedOrThirdPartyAccountAddress {
+    fn sample() -> Self {
+        Self::sample_mainnet()
+    }
+
+    fn sample_other() -> Self {
+        Self::sample_stokenet_other()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = OwnedOrThirdPartyAccountAddress;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn hash() {
+        assert_eq!(
+            HashSet::<SUT>::from_iter([
+                SUT::sample_mainnet(),
+                SUT::sample_mainnet_other(),
+                SUT::sample_stokenet(),
+                SUT::sample_stokenet_other(),
+                // duplicates should be removed
+                SUT::sample_mainnet(),
+                SUT::sample_mainnet_other(),
+                SUT::sample_stokenet(),
+                SUT::sample_stokenet_other(),
+            ])
+            .len(),
+            4
+        )
+    }
+
+    // #[test]
+    // fn from_account() {
+    //     let acc = Account::sample();
+    //     let exp = &acc.clone().address;
+    //     assert_eq!(SUT::from(acc).account_address(), exp)
+    // }
+
+    // #[test]
+    // fn from_address() {
+    //     let exp = &AccountAddress::sample();
+    //     assert_eq!(SUT::from(*exp).account_address(), exp)
+    // }
+}

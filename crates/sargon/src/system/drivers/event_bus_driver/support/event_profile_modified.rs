@@ -69,6 +69,63 @@ impl HasEventKind for EventProfileModified {
     }
 }
 
+pub trait IsProfileModifiedEvent {
+    fn profile_modified_event(
+        is_update: bool,
+        addresses: IndexSet<Self::Address>,
+    ) -> Option<EventProfileModified>;
+}
+
+impl IsProfileModifiedEvent for Account {
+    fn profile_modified_event(
+        is_update: bool,
+        addresses: IndexSet<Self::Address>,
+    ) -> Option<EventProfileModified> {
+        let address = addresses.iter().last().cloned()?;
+        let addresses = addresses.clone().into_iter().collect_vec();
+        let is_many = addresses.len() > 1;
+        match (is_update, is_many) {
+            (true, true) => {
+                Some(EventProfileModified::AccountsUpdated { addresses })
+            }
+            (false, true) => {
+                Some(EventProfileModified::AccountsAdded { addresses })
+            }
+            (true, false) => {
+                Some(EventProfileModified::AccountUpdated { address })
+            }
+            (false, false) => {
+                Some(EventProfileModified::AccountAdded { address })
+            }
+        }
+    }
+}
+
+impl IsProfileModifiedEvent for Persona {
+    fn profile_modified_event(
+        is_update: bool,
+        addresses: IndexSet<Self::Address>,
+    ) -> Option<EventProfileModified> {
+        let address = addresses.iter().last().cloned()?;
+        let addresses = addresses.clone().into_iter().collect_vec();
+        let is_many = addresses.len() > 1;
+        match (is_update, is_many) {
+            (true, true) => {
+                Some(EventProfileModified::PersonasUpdated { addresses })
+            }
+            (false, true) => {
+                Some(EventProfileModified::PersonasAdded { addresses })
+            }
+            (true, false) => {
+                Some(EventProfileModified::PersonaUpdated { address })
+            }
+            (false, false) => {
+                Some(EventProfileModified::PersonaAdded { address })
+            }
+        }
+    }
+}
+
 impl HasSampleValues for EventProfileModified {
     fn sample() -> Self {
         Self::AccountAdded {

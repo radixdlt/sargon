@@ -11,37 +11,33 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
-mod error_from;
-mod factor_instances_provider;
 mod gateway_api;
 mod home_cards;
-mod profile;
 mod radix_connect;
 mod security_center;
 mod signing;
 mod system;
 mod types;
-mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
     pub use identified_vec_of::prelude::*;
     pub use sargon_addresses::prelude::*;
     pub use sargon_core::prelude::*;
+    pub use sargon_factor_instances_provider::prelude::*;
     pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
     pub use sargon_keys_collector::prelude::*;
+    pub use sargon_manifests::prelude::*;
+    pub use sargon_profile::prelude::*;
+    pub use sargon_transaction_models::prelude::*;
 
-    pub use crate::error_from::*;
-    pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
     pub use crate::home_cards::*;
-    pub use crate::profile::*;
     pub use crate::radix_connect::*;
     pub use crate::security_center::*;
     pub use crate::signing::*;
     pub use crate::system::*;
     pub use crate::types::*;
-    pub use crate::wrapped_radix_engine_toolkit::*;
 
     pub(crate) use once_cell::sync::Lazy;
 
@@ -94,6 +90,7 @@ pub mod prelude {
         identity::IDENTITY_SECURIFY_IDENT as SCRYPTO_IDENTITY_SECURIFY_IDENT,
         resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
     };
+
     pub(crate) use radix_engine_interface::prelude::{
         AccessRule as ScryptoAccessRule,
         BasicRequirement as ScryptoBasicRequirement,

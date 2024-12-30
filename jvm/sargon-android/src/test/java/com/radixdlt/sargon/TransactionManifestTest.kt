@@ -342,14 +342,14 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 )
                 perAssetTransfer.transfers.forEach {
                     when (val recipient = it.recipient) {
-                        is AccountOrAddressOf.AddressOfExternalAccount ->
+                        is OwnedOrThirdPartyAccountAddress.ThirdPartyAccount ->
                             assertTrue(
                                 contains(
                                     recipient.value
                                         .string
                                 )
                             )
-                        is AccountOrAddressOf.ProfileAccount ->
+                        is OwnedOrThirdPartyAccountAddress.OwnedAccount ->
                             assertTrue(
                                 contains(
                                     recipient.value
@@ -377,8 +377,8 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                     listOf(
                         PerRecipientAssetTransfer(
                             recipient =
-                            AccountOrAddressOf
-                                .AddressOfExternalAccount(
+                            OwnedOrThirdPartyAccountAddress
+                                .ThirdPartyAccount(
                                     value =
                                     AccountAddress(
                                         "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"

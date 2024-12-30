@@ -18,7 +18,7 @@ macro_rules! decl_transfer_of {
 
                 /// If `true` the `try_deposit_batch_or_abort` method will be used instead of `deposit`,
                 /// typically wallets sets this to try if and only if the recipient is a self-owned account
-                /// (`AccountOrAddressOf::ProfileAccount`) controlled by a DeviceFactorSource thy have
+                /// (`OwnedOrThirdPartyAccountAddress::OwnedAccount`) controlled by a DeviceFactorSource thy have
                 /// access to and which third party deposit setting's `DepositRule` is `AcceptKnown` and
                 /// which resource is known (`resource_address` is owned or has been owned before).
                 pub(crate) use_try_deposit_or_abort: bool,
@@ -47,7 +47,7 @@ macro_rules! decl_per_asset_transfer_of {
             $struct_name,
             $($fields)*
             /// The account or account address to send the tokens to.
-            pub recipient: AccountOrAddressOf,
+            pub recipient: OwnedOrThirdPartyAccountAddress,
         );
     };
 }

@@ -18,6 +18,10 @@ sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-determinist
 sargon-factors = { path = "../sargon-factors" }
 sargon-keys-collector = { path = "../sargon-keys-collector" }
 sargon-addresses = { path = "../sargon-addresses" }
+sargon-transaction-models = { path = "../sargon-transaction-models" }
+sargon-manifests = { path = "../sargon-manifests" }
+sargon-profile = { path = "../sargon-profile" }
+sargon-factor-instances-provider = { path = "../sargon-factor-instances-provider" }
 
 zeroize = { workspace = true }
 
@@ -85,7 +89,7 @@ paste = { workspace = true }
 # camino = "1.0.8"
 camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
 
-async-trait = { workspace =  true }
+async-trait = { workspace = true }
 
 pretty_assertions = { workspace = true }
 

@@ -13,6 +13,10 @@ members = [
     "crates/sargon-factors",
     "crates/sargon-addresses",
     "crates/sargon-keys-collector",
+    "crates/sargon-transaction-models",
+    "crates/sargon-manifests",
+    "crates/sargon-profile",
+    "crates/sargon-factor-instances-provider",
 
     "crates/sargon", # to be split
 

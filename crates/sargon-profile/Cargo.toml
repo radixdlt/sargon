@@ -1,0 +1,117 @@
+[package]
+name = "sargon-profile"
+version = "1.2.1"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+sargon-core = { path = "../sargon-core" }
+identified-vec-of = { path = "../identified-vec-of" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-factors = { path = "../sargon-factors" }
+sargon-keys-collector = { path = "../sargon-keys-collector" }
+sargon-addresses = { path = "../sargon-addresses" }
+sargon-transaction-models = { path = "../sargon-transaction-models" }
+
+zeroize = { workspace = true }
+
+log = { workspace = true }
+# pretty_env_logger = "0.5.0"
+pretty_env_logger = { git = "https://github.com/seanmonstar/pretty-env-logger/", rev = "0e238400e18649415dc710c025e99c009a1bb744" }
+
+derive_more = { workspace = true }
+
+serde = { workspace = true }
+
+serde_json = { workspace = true }
+
+serde_with = { workspace = true }
+
+serde_repr = { workspace = true }
+
+once_cell = { workspace = true }
+
+thiserror = { workspace = true }
+
+iso8601-timestamp = { workspace = true }
+
+uuid = { workspace = true }
+
+strum = { workspace = true }
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-rust = { workspace = true }
+radix-engine = { workspace = true }
+radix-common = { workspace = true }
+radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-engine-interface = { workspace = true }
+radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+
+radix-transactions = { workspace = true }
+
+radix-engine-toolkit = { workspace = true }
+
+enum-iterator = { workspace = true }
+
+rand = { workspace = true }
+
+hex = { workspace = true }
+
+delegate = { workspace = true }
+
+itertools = { workspace = true }
+
+enum-as-inner = { workspace = true }
+
+# SLIP10 implementation
+iota-crypto = { workspace = true }
+# Transitive dependency of iota_crypto - used to construct PubKey from uncompressed bytes.
+k256 = { workspace = true }
+
+
+assert-json-diff = { workspace = true }
+
+url = { workspace = true }
+
+
+paste = { workspace = true }
+
+
+# camino = "1.0.8"
+camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
+
+async-trait = { workspace = true }
+
+pretty_assertions = { workspace = true }
+
+aes-gcm = { workspace = true }
+
+# hkdf = "0.12.4"
+hkdf = { workspace = true }
+
+base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14400697453bcc85997119b874bc03d9601d0af" }
+
+# reqwest = "0.12.3"
+reqwest = { git = "https://github.com/seanmonstar/reqwest", rev = "0720159f6369f54e045a1fd315e0f24b7a0b4a39", default-features = false, features = [
+    "native-tls-vendored",
+] }
+
+async-std = "1.13.0"
+futures = "0.3.31"
+
+# Fixes nasty iOS bug "_kSecMatchSubjectWholeString", see https://github.com/kornelski/rust-security-framework/issues/203
+# This is a workaround to fix a bug with version 2.11.0 that added some symbols that are not available on iOS
+# The bug is fixed already but the fix is not released yet. https://github.com/kornelski/rust-security-framework/pull/204
+[target.'cfg(target_os = "ios")'.dependencies]
+security-framework = { version = "=2.10" }
+security-framework-sys = "=2.10.0"
+
+[dev-dependencies]
+
+actix-rt = { workspace = true }
+
+[build-dependencies]
+
+cargo_toml = { workspace = true }
+
+[lints.rust]
+unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(tarpaulin_include)'] }
