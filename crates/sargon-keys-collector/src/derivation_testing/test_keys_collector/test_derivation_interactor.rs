@@ -41,7 +41,7 @@ impl Default for TestDerivationInteractor {
     fn default() -> Self {
         Self {
             always_fail: false,
-            mnemonic_loading: Arc::new(FailingMnemonicLoader::default()),
+            mnemonic_loading: Arc::new(FailingMnemonicLoader),
         }
     }
 }
@@ -58,10 +58,7 @@ impl TestDerivationInteractor {
     }
 
     pub fn fail() -> Self {
-        Self::with_mnemonic_loading(
-            true,
-            Arc::new(FailingMnemonicLoader::default()),
-        )
+        Self::with_mnemonic_loading(true, Arc::new(FailingMnemonicLoader))
     }
 
     async fn do_derive(
