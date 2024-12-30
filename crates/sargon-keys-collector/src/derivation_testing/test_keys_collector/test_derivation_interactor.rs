@@ -1,40 +1,64 @@
-#![cfg(test)]
-#![allow(unused)]
+use std::{
+    future::Future,
+    pin::Pin,
+    task::{Context, Poll},
+};
 
 use crate::prelude::*;
+
+#[async_trait::async_trait]
+pub trait MnemonicLoading: Debug + Send + Sync {
+    async fn load_mnemonic(
+        &self,
+        id: FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase>;
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct FailingMnemonicLoader;
+
+#[async_trait::async_trait]
+impl MnemonicLoading for FailingMnemonicLoader {
+    async fn load_mnemonic(
+        &self,
+        _id: FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase> {
+        Err(CommonError::Unknown)
+    }
+}
 
 /// A type impl KeyDerivationInteractor suitable for tests.
 ///
 /// Uses Sample values of MnemonicWithPassphrase for derivation, or looks up the mnemonic
 /// using a SecureStorageClient
 #[derive(Debug)]
-pub(crate) struct TestDerivationInteractor {
+pub struct TestDerivationInteractor {
     pub always_fail: bool,
-    pub secure_storage_client: Arc<SecureStorageClient>,
+    pub mnemonic_loading: Arc<dyn MnemonicLoading>,
 }
 
 impl Default for TestDerivationInteractor {
     fn default() -> Self {
         Self {
             always_fail: false,
-            secure_storage_client: Arc::new(SecureStorageClient::ephemeral().0),
+            mnemonic_loading: Arc::new(FailingMnemonicLoader),
         }
     }
 }
 
 impl TestDerivationInteractor {
-    pub(crate) fn new(
+    pub fn with_mnemonic_loading(
         always_fail: bool,
-        secure_storage_client: Arc<SecureStorageClient>,
+        mnemonic_loading: Arc<dyn MnemonicLoading>,
     ) -> Self {
         Self {
             always_fail,
-            secure_storage_client,
+            mnemonic_loading,
         }
     }
 
-    pub(crate) fn fail() -> Self {
-        Self::new(true, Arc::new(SecureStorageClient::always_fail()))
+    pub fn fail() -> Self {
+        Self::with_mnemonic_loading(true, Arc::new(FailingMnemonicLoader))
     }
 
     async fn do_derive(
@@ -46,12 +70,12 @@ impl TestDerivationInteractor {
             return Err(CommonError::Unknown);
         }
 
-        let cloned_client = self.secure_storage_client.clone();
+        let cloned_mnemonic_loading = self.mnemonic_loading.clone();
 
         Self::do_derive_serially_looking_up_with_secure_storage_and_extra(
             factor_source_id,
             derivation_paths,
-            cloned_client,
+            cloned_mnemonic_loading,
             async move |id| {
                 id.maybe_sample_associated_mnemonic()
                     .ok_or(CommonError::FactorSourceDiscrepancy)
@@ -89,13 +113,13 @@ impl TestDerivationInteractor {
     async fn do_derive_serially_looking_up_with_secure_storage_and_extra<F>(
         factor_source_id: FactorSourceIDFromHash,
         derivation_paths: IndexSet<DerivationPath>,
-        secure_storage: Arc<SecureStorageClient>,
+        mnemonic_loading: Arc<dyn MnemonicLoading>,
         lookup_mnemonic: F,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>
     where
         F: async Fn(FactorSourceIDFromHash) -> Result<MnemonicWithPassphrase>,
     {
-        let cloned_client = secure_storage.clone();
+        let cloned_mnemonic_loading = mnemonic_loading.clone();
         Self::do_derive_serially_with_lookup_of_mnemonic(
             factor_source_id,
             derivation_paths,
@@ -103,11 +127,32 @@ impl TestDerivationInteractor {
                 if let Ok(m) = lookup_mnemonic(id).await {
                     return Ok(m);
                 }
-                let cloned_cloned_client = cloned_client.clone();
-                cloned_cloned_client.load_mnemonic_with_passphrase(id).await
+                let cloned_cloned_mnemonic_loading =
+                    cloned_mnemonic_loading.clone();
+                cloned_cloned_mnemonic_loading.load_mnemonic(id).await
             },
         )
         .await
+    }
+}
+
+// ==== HERE BE DRAGONS ====
+// Workaround from:
+// https://github.com/rust-lang/rust/issues/64552#issuecomment-604419315
+// for Implementation of `Send` is not general enough bug
+struct IamSend<F: Future> {
+    f: F,
+}
+impl<F: Future> IamSend<F> {
+    pub unsafe fn new(f: F) -> Self {
+        IamSend { f }
+    }
+}
+unsafe impl<F: Future> Send for IamSend<F> {}
+impl<F: Future> Future for IamSend<F> {
+    type Output = F::Output;
+    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+        unsafe { self.map_unchecked_mut(|s| &mut s.f).poll(cx) }
     }
 }
 
@@ -119,7 +164,8 @@ impl KeyDerivationInteractor for TestDerivationInteractor {
     ) -> Result<KeyDerivationResponse> {
         let mut pairs = IndexMap::new();
         for (k, r) in request.per_factor_source {
-            let instances = self.do_derive(k, r).await?;
+            let instances =
+                unsafe { IamSend::new(self.do_derive(k, r)) }.await?;
             pairs.insert(k, instances);
         }
         Ok(KeyDerivationResponse::new(pairs))

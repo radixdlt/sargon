@@ -24,7 +24,6 @@ pub trait IsEntityAddress:
 {
     /// Creates a new address from `public_key` and `network_id` by bech32 encoding
     /// it.
-    #[cfg(not(tarpaulin_include))] // false negative
     fn from_public_key<P>(public_key: P, network_id: NetworkID) -> Self
     where
         P: Into<ScryptoPublicKey> + Clone,
@@ -39,7 +38,6 @@ pub trait IsEntityAddress:
         Self::new(node_id, network_id).expect("To always be able to create a address from public key and network id.")
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative
     fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(
         hd_factor_instance_virtual_entity_creation: HDFactorInstanceTransactionSigning<E>,
     ) -> Self {

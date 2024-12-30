@@ -1,4 +1,3 @@
-mod address;
 mod app_preferences;
 mod entities_linked_to_factor_source;
 mod entity;
@@ -10,7 +9,6 @@ mod profile_file_contents;
 mod profile_legacy_state_bugs;
 mod proto_profile_maybe_with_legacy_p2p_links;
 
-pub use address::*;
 pub use app_preferences::*;
 pub use entities_linked_to_factor_source::*;
 pub use entity::*;

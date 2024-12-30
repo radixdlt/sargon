@@ -115,6 +115,97 @@ impl DerivationPathConstructors for DerivationPath {
     }
 }
 
+#[cfg(test)]
+mod basic_tests {
+    use super::*;
+    use crate::DerivationPathConstructors;
+
+    #[actix_rt::test]
+    async fn valid() {
+        let f0 = FactorSource::sample_ledger();
+        let f1 = FactorSource::sample_device();
+        let f2 = FactorSource::sample_device_babylon_other();
+        let f3 = FactorSource::sample_arculus();
+
+        let paths = IndexMap::<_, _>::from_iter([
+            (
+                f0.id_from_hash(),
+                IndexSet::<_>::from_iter([
+                    DerivationPath::for_entity(
+                        NetworkID::Mainnet,
+                        CAP26EntityKind::Account,
+                        CAP26KeyKind::TransactionSigning,
+                        Hardened::Securified(SecurifiedU30::ZERO),
+                    ),
+                    DerivationPath::for_entity(
+                        NetworkID::Mainnet,
+                        CAP26EntityKind::Account,
+                        CAP26KeyKind::TransactionSigning,
+                        Hardened::Securified(SecurifiedU30::ONE),
+                    ),
+                    DerivationPath::for_entity(
+                        NetworkID::Stokenet,
+                        CAP26EntityKind::Account,
+                        CAP26KeyKind::TransactionSigning,
+                        Hardened::Unsecurified(UnsecurifiedHardened::TWO),
+                    ),
+                ]),
+            ),
+            (
+                f1.id_from_hash(),
+                IndexSet::<_>::just(DerivationPath::for_entity(
+                    NetworkID::Stokenet,
+                    CAP26EntityKind::Account,
+                    CAP26KeyKind::TransactionSigning,
+                    Hardened::Unsecurified(UnsecurifiedHardened::THREE),
+                )),
+            ),
+            (
+                f2.id_from_hash(),
+                IndexSet::<_>::just(DerivationPath::for_entity(
+                    NetworkID::Mainnet,
+                    CAP26EntityKind::Account,
+                    CAP26KeyKind::TransactionSigning,
+                    Hardened::Unsecurified(
+                        UnsecurifiedHardened::try_from(4u32).unwrap(),
+                    ),
+                )),
+            ),
+            (
+                f3.id_from_hash(),
+                IndexSet::<_>::just(DerivationPath::for_entity(
+                    NetworkID::Mainnet,
+                    CAP26EntityKind::Identity,
+                    CAP26KeyKind::AuthenticationSigning,
+                    Hardened::Securified(
+                        SecurifiedU30::try_from(5u32).unwrap(),
+                    ),
+                )),
+            ),
+        ]);
+
+        let collector = KeysCollector::new(
+            [f0, f1, f2, f3],
+            paths.clone(),
+            Arc::new(TestDerivationInteractor::default()),
+            DerivationPurpose::PreDerivingKeys,
+        )
+        .unwrap();
+
+        let outcome = collector.collect_keys().await;
+        let factors = outcome.all_factors().factor_instances();
+        assert_eq!(
+            factors.len(),
+            paths
+                .clone()
+                .into_iter()
+                .flat_map(|(_, v)| v)
+                .collect::<IndexSet<_>>()
+                .len(),
+        );
+    }
+}
+
 mod key_derivation_tests {
     use super::*;
     use sargon_hierarchical_deterministic::CAP26EntityKind::*;

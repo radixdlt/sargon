@@ -12,6 +12,7 @@ mod factor_source_id_from_address;
 mod factor_source_id_from_hash;
 mod factor_source_kind;
 mod factor_sources;
+mod factor_sources_of_kind;
 mod hd_factor_instance_account_creation;
 mod hd_factor_instance_identity_creation;
 mod hd_transaction_signing_factor_instance;
@@ -40,6 +41,7 @@ pub mod prelude {
     pub use crate::factor_source_id_from_hash::*;
     pub use crate::factor_source_kind::*;
     pub use crate::factor_sources::*;
+    pub use crate::factor_sources_of_kind::*;
     pub use crate::hd_factor_instance_account_creation::*;
     pub use crate::hd_factor_instance_identity_creation::*;
     pub use crate::hd_transaction_signing_factor_instance::*;

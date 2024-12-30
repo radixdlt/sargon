@@ -4,31 +4,6 @@ pub(crate) struct SignaturesCollectorPreprocessor<S: Signable> {
     signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,
 }
 
-pub(crate) fn sort_group_factors(
-    used_factor_sources: HashSet<FactorSource>,
-) -> IndexSet<FactorSourcesOfKind> {
-    let factors_of_kind: HashMap<FactorSourceKind, IndexSet<FactorSource>> =
-        used_factor_sources
-            .into_iter()
-            .into_grouping_map_by(|x| x.factor_source_kind())
-            .collect::<IndexSet<_>>();
-
-    let mut factors_of_kind = factors_of_kind
-        .into_iter()
-        .map(|(k, v)| (k, v.into_iter().sorted().collect::<IndexSet<_>>()))
-        .collect::<IndexMap<FactorSourceKind, IndexSet<FactorSource>>>();
-
-    factors_of_kind.sort_keys();
-
-    factors_of_kind
-        .into_iter()
-        .map(|(k, v)| {
-            FactorSourcesOfKind::new(k, v)
-                .expect("All factors should be of the same kind, since this is calling iter on a Map, using kind as key. Did you just move around lines of code?")
-        })
-        .collect::<IndexSet<_>>()
-}
-
 impl<S: Signable> SignaturesCollectorPreprocessor<S> {
     pub(super) fn new(
         signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,

@@ -1,11 +1,14 @@
 use crate::prelude::*;
+use crate::types::samples::{HasIndexedSampleValues, HasManySampleValues};
 
-impl AccountAddress {
-    pub fn sample_at(index: usize) -> Self {
+impl HasIndexedSampleValues for AccountAddress {
+    fn sample_at(index: usize) -> Self {
         Account::sample_at(index).address
     }
+}
 
-    pub fn sample_all() -> Vec<Self> {
+impl HasManySampleValues for AccountAddress {
+    fn sample_all() -> Vec<Self> {
         Account::sample_all().iter().map(|a| a.address).collect()
     }
 }

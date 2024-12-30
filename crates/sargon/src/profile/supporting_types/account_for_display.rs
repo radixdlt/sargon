@@ -104,7 +104,7 @@ mod tests {
         assert_eq!(
             lhs,
             SUT::new(
-                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87".parse::<AccountAddress>().unwrap(),
                 DisplayName::new("Alice").unwrap(),
                 AppearanceID::new(0).unwrap(),
             )

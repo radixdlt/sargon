@@ -99,37 +99,6 @@ impl ThirdPartyDepositsDelta {
     }
 }
 
-impl From<ResourceOrNonFungible>
-    for ScryptoAccountRemoveAuthorizedDepositorInput
-{
-    fn from(value: ResourceOrNonFungible) -> Self {
-        Self {
-            badge: value.into(),
-        }
-    }
-}
-impl From<ResourceOrNonFungible> for ScryptoAccountAddAuthorizedDepositorInput {
-    fn from(value: ResourceOrNonFungible) -> Self {
-        Self {
-            badge: value.into(),
-        }
-    }
-}
-impl From<ResourceOrNonFungible>
-    for ScryptoAccountRemoveResourcePreferenceInput
-{
-    fn from(value: ResourceOrNonFungible) -> Self {
-        match value {
-            ResourceOrNonFungible::Resource { value } => Self {
-                resource_address: value.into(),
-            },
-            ResourceOrNonFungible::NonFungible { value } => Self {
-                resource_address: value.resource_address.into(),
-            },
-        }
-    }
-}
-
 impl From<AssetException> for ScryptoAccountSetResourcePreferenceInput {
     fn from(value: AssetException) -> Self {
         Self {

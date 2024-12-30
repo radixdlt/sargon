@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 
-use crate::HasSampleValues;
-
 /// A type used to hide a constructor for some other type, use
 /// it like this:
 ///

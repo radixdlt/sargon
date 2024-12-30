@@ -21,7 +21,7 @@ sargon-core = { path = "../sargon-core" }
 sargon = { path = "../sargon" }
 sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" }
 
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "2ab5b35a6cb96c9faeb98ed8df67b870336e6873" }
+radix-engine-toolkit = { workspace = true }
 
 zeroize = { workspace = true }
 
@@ -74,11 +74,9 @@ clap = { git = "https://github.com/clap-rs/clap/", rev = "8a7a13a5618cfdc4ff3286
 # camino = "1.0.8"
 camino = { git = "https://github.com/camino-rs/camino/", rev = "afa51b1b4c684b7e6698a6717ccda3affd0abd42", optional = true }
 
-# async-trait = "0.1.79"
-async-trait = { git = "https://github.com/dtolnay/async-trait", rev = "1eb21ed8bd87029bf4dcbea41ff309f2b2220c43" }
+async-trait = { workspace = true }
 
-# pretty_assertions = "1.4.0"
-pretty_assertions = { git = "https://github.com/rust-pretty-assertions/rust-pretty-assertions", rev = "3f1ebc0cac5f88e875f036bf16636e15fa935c8d" }
+pretty_assertions = { workspace = true }
 
 base64 = { git = "https://github.com/marshallpierce/rust-base64.git", rev = "e14400697453bcc85997119b874bc03d9601d0af" }
 
@@ -92,9 +90,7 @@ uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8
     "bindgen-tests",
 ] }
 
-# actix-rt = "3.3.0"
-actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }
-
+actix-rt = { workspace = true }
 [build-dependencies]
 # uniffi = "0.28.3"
 uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [

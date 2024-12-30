@@ -65,7 +65,7 @@ impl NonFungibleLocalId {
 }
 
 impl NonFungibleLocalId {
-    pub(crate) fn derives_account_address(
+    pub fn derives_account_address(
         &self,
         account_address: AccountAddress,
     ) -> bool {

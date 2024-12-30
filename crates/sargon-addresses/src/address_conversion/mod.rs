@@ -1,0 +1,2 @@
+mod addresses_manifest_builder_support;
+mod resource_address_from;

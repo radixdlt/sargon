@@ -136,7 +136,7 @@ mod tests {
     fn manifest_without_transfers() {
         manifest_eq(
             SUT::delete_account(
-                &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".into(),
+                &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".parse::<AccountAddress>().unwrap(),
                 None,
                 vec![
                     AccountResourcePreference::sample_other().into(),
@@ -206,7 +206,7 @@ CALL_METHOD
             vec![],
         );
         let manifest = SUT::delete_account(
-                &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".into(),
+                &"account_tdx_2_16yll6clntk9za0wvrw0nat848uazduyqy635m8ms77md99q7yf9fzg".parse::<AccountAddress>().unwrap(),
                 transfers,
                 vec![
                     AccountResourcePreference::sample_other().into(),
