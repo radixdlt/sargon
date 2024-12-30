@@ -250,8 +250,8 @@ mod tests {
                 NetworkID::Stokenet
             ),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Mainnet,
-                specified_to_instructions_ctor: NetworkID::Stokenet
+                found_in_instructions: NetworkID::Mainnet.to_string(),
+                specified_to_instructions_ctor: NetworkID::Stokenet.to_string()
             })
         );
     }
@@ -379,8 +379,9 @@ mod tests {
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Mainnet,
+                found_in_instructions: NetworkID::Mainnet.to_string(),
                 specified_to_instructions_ctor: NetworkID::Simulator
+                    .to_string()
             }
         );
     }
@@ -410,8 +411,9 @@ mod tests {
                 NetworkID::Simulator
             ),
             CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Mainnet,
+                found_in_instructions: NetworkID::Mainnet.to_string(),
                 specified_to_instructions_ctor: NetworkID::Simulator
+                    .to_string()
             }
         );
     }

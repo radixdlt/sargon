@@ -15,8 +15,12 @@ impl HasSampleValues for HomeCards {
     }
 }
 
-impl HomeCards {
-    pub fn sort(&self) -> Self {
+pub trait Sortable {
+    fn sort(&self) -> Self;
+}
+
+impl Sortable for HomeCards {
+    fn sort(&self) -> Self {
         let mut vec = self.into_iter().collect_vec();
         vec.sort();
         Self::from_iter(vec)

@@ -36,8 +36,8 @@ impl<T: IsNetworkAware, U: Clone + IntoIterator<Item = T>>
                 Ok(())
             } else {
                 Err(CommonError::NetworkDiscrepancy {
-                    expected: network_id,
-                    actual: e.network_id(),
+                    expected: network_id.to_string(),
+                    actual: e.network_id().to_string(),
                 })
             }
         })?;

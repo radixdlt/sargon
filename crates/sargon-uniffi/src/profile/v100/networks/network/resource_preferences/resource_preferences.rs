@@ -1,5 +1,7 @@
 use crate::prelude::*;
-use sargon::ResourcePreferences as InternalResourcePreferences;
+use sargon::{
+    ResourceHiding, ResourcePreferences as InternalResourcePreferences,
+};
 
 #[uniffi::export]
 pub fn resource_preferences_get_hidden_resources(

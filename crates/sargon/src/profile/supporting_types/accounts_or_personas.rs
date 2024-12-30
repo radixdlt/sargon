@@ -18,8 +18,13 @@ impl HasSampleValues for AccountsOrPersonas {
     }
 }
 
-impl AccountsOrPersonas {
-    pub(crate) fn sample_mainnet() -> Self {
+pub trait HasSampleValuesOnNetworks {
+    fn sample_mainnet() -> Self;
+    fn sample_stokenet() -> Self;
+}
+
+impl HasSampleValuesOnNetworks for AccountsOrPersonas {
+    fn sample_mainnet() -> Self {
         Self::from_iter([
             Account::sample_mainnet().into(),
             Persona::sample_mainnet().into(),
@@ -30,7 +35,7 @@ impl AccountsOrPersonas {
         ])
     }
 
-    pub(crate) fn sample_stokenet() -> Self {
+    fn sample_stokenet() -> Self {
         Self::from_iter([
             Persona::sample_stokenet().into(),
             Account::sample_stokenet().into(),

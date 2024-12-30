@@ -9,11 +9,11 @@ use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 use hkdf::Hkdf;
 use k256::sha2::Sha256;
 
-impl From<Exactly32Bytes> for X25519PrivateKey {
-    fn from(value: Exactly32Bytes) -> Self {
-        Self::from_bytes(*value.bytes())
-    }
-}
+// impl From<Exactly32Bytes> for X25519PrivateKey {
+//     fn from(value: Exactly32Bytes) -> Self {
+//         Self::from_bytes(*value.bytes())
+//     }
+// }
 
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A Key Derivation Scheme which lowercases, trims and ut8f encodes answers.
@@ -106,7 +106,7 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_KeyExchangeKeysFromQandAsLowerTrimUt
         let hkdf = Hkdf::<Sha256>::new(None, &ikm);
         let mut okm = [0u8; 32];
         hkdf.expand(&info, &mut okm).unwrap();
-        Ok(X25519PrivateKey::from(Exactly32Bytes::from(&okm)))
+        Ok(X25519PrivateKey::from_bytes(okm))
     }
 
 

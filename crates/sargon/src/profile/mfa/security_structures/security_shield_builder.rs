@@ -819,6 +819,7 @@ mod tests {
         assert_eq!(SUT::sample_other(), SUT::sample_other().clone());
     }
 
+    #[test]
     fn default_is_lenient() {
         assert_eq!(SUT::default().mode, SecurityShieldBuilderMode::Lenient);
     }

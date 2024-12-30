@@ -9,6 +9,7 @@ use std::{
 };
 
 use sargon::{
+    FactorSourceWithExtraSampleValues,
     SecurityShieldBuilder as InternalSecurityShieldBuilder,
     SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus,
 };

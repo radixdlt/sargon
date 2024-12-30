@@ -8,7 +8,9 @@ impl SargonOS {
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
     pub fn accounts_on_current_network(&self) -> Result<Vec<Account>> {
-        self.wrapped.accounts_on_current_network().into_result()
+        self.wrapped
+            .accounts_on_current_network()
+            .into_iter_result()
     }
 
     /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
@@ -17,7 +19,7 @@ impl SargonOS {
     ) -> Result<Vec<AccountForDisplay>> {
         self.wrapped
             .accounts_for_display_on_current_network()
-            .into_result()
+            .into_iter_result()
     }
 
     /// Looks up the account by account address, returns Err if the account is
@@ -172,7 +174,7 @@ impl SargonOS {
                 name_prefix,
             )
             .await
-            .into_result()
+            .into_iter_result()
     }
 }
 

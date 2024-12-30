@@ -35,7 +35,7 @@ impl KeysCollectorPreprocessor {
             .map(|id| {
                 all_factor_sources_in_profile.get(id).cloned().ok_or(
                     CommonError::ProfileDoesNotContainFactorSourceWithID {
-                        bad_value: (*id).into(),
+                        bad_value: (*id).to_string(),
                     },
                 )
             })

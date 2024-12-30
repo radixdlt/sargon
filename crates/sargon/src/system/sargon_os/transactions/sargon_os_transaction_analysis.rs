@@ -196,7 +196,7 @@ impl SargonOS {
             && !are_instructions_originating_from_host
         {
             return Err(CommonError::ReservedManifestClass {
-                class: reserved_manifest_class.kind().clone(),
+                class: reserved_manifest_class.kind().to_string(),
             });
         }
 
@@ -683,7 +683,7 @@ mod transaction_preview_analysis_tests {
                     [],
                     [],
                     FeeLocks::default(),
-                    FeeSummary::new("0", "0", "0", 0,),
+                    FeeSummary::new(0, 0, 0, 0,),
                     NewEntities::default()
                 )
             })
@@ -855,7 +855,7 @@ mod transaction_preview_analysis_tests {
                     [],
                     [DetailedManifestClass::General],
                     FeeLocks::default(),
-                    FeeSummary::new("0", "0", "0", 0,),
+                    FeeSummary::new(0, 0, 0, 0,),
                     NewEntities::default()
                 )
             })

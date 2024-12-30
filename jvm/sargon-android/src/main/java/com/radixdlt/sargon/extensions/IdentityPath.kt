@@ -7,6 +7,7 @@ import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.Hardened
 import com.radixdlt.sargon.IdentityPath
 import com.radixdlt.sargon.NetworkId
+import com.radixdlt.sargon.cap26EntityKindToString
 import com.radixdlt.sargon.newIdentityPath
 
 fun IdentityPath.Companion.init(
@@ -19,13 +20,15 @@ fun IdentityPath.Companion.init(
     index = index
 )
 
+public fun Cap26EntityKind.discriminant(): String = cap26EntityKindToString(kind = this)
+
 @Throws(SargonException::class)
 fun IdentityPath.Companion.init(path: String): IdentityPath =
     when (val derivationPath = DerivationPath.init(path)) {
         is DerivationPath.Identity -> derivationPath.value
         is DerivationPath.Bip44Like, is DerivationPath.Account -> throw CommonException.WrongEntityKind(
-            expected = Cap26EntityKind.IDENTITY,
-            found = Cap26EntityKind.ACCOUNT
+            expected = Cap26EntityKind.IDENTITY.discriminant(),
+            found = Cap26EntityKind.ACCOUNT.discriminant()
         )
     }
 

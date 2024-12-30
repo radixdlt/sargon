@@ -79,13 +79,13 @@ mod tests {
     #[test]
     fn rounding() {
         let sut = SUT::new(
-            "0.12344",
+            "0.12344".parse::<Decimal>().unwrap(),
             90,
             2,
             ResourceAddress::sample_mainnet_candy(),
             4,
         );
 
-        assert_eq!(sut.rounded_amount(), "0.1234".into());
+        assert_eq!(sut.rounded_amount(), "0.1234".parse().unwrap());
     }
 }

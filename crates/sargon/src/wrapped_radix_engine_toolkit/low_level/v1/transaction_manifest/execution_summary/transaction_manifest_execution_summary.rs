@@ -90,11 +90,11 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-                                FungibleResourceIndicator::guaranteed("10")
+                                FungibleResourceIndicator::guaranteed(10)
                             ),
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq",
-                                FungibleResourceIndicator::guaranteed("5")
+                                FungibleResourceIndicator::guaranteed(5)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7",
@@ -117,7 +117,7 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-                                FungibleResourceIndicator::guaranteed("10")
+                                FungibleResourceIndicator::guaranteed(10)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7",
@@ -157,9 +157,9 @@ mod tests {
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.37765305",
-                    "0.10476895",
-                    "0.3614425597",
+                    "0.37765305".parse::<Decimal>().unwrap(),
+                    "0.10476895".parse::<Decimal>().unwrap(),
+                    "0.3614425597".parse::<Decimal>().unwrap(),
                     0,
                 ),
                 NewEntities::default()
@@ -223,9 +223,9 @@ mod tests {
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.07638415",
-                    "0.0105008",
-                    "0.03871917658",
+                    "0.07638415".parse::<Decimal>().unwrap(),
+                    "0.0105008".parse::<Decimal>().unwrap(),
+                    "0.03871917658".parse::<Decimal>().unwrap(),
                     0
                 ),
                 NewEntities::default()
@@ -275,7 +275,12 @@ mod tests {
                 [], // encountered_component_addresses
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
-                FeeSummary::new("0.1585925", "0.1210119", "0.26540755769", 0,),
+                FeeSummary::new(
+                    "0.1585925".parse::<Decimal>().unwrap(),
+                    "0.1210119".parse::<Decimal>().unwrap(),
+                    "0.26540755769".parse::<Decimal>().unwrap(),
+                    0,
+                ),
                 NewEntities::new([(
                     token_address,
                     NewlyCreatedResource::empty()
@@ -359,9 +364,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.18451315",
-                        "0.40604035",
-                        "0.96845625165",
+                        "0.18451315".parse::<Decimal>().unwrap(),
+                        "0.40604035".parse::<Decimal>().unwrap(),
+                        "0.96845625165".parse::<Decimal>().unwrap(),
                         0,
                     ),
                     NewEntities::new([
@@ -434,9 +439,9 @@ mod tests {
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
-                    "0.3737913",
-                    "0.0467599",
-                    "0.14677047477",
+                    "0.3737913".parse::<Decimal>().unwrap(),
+                    "0.0467599".parse::<Decimal>().unwrap(),
+                    "0.14677047477".parse::<Decimal>().unwrap(),
                     0,
                 ),
                 NewEntities::default()
@@ -492,9 +497,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.4943021",
-                        "0.0467589",
-                        "0.13551711803",
+                        "0.4943021".parse::<Decimal>().unwrap(),
+                        "0.0467589".parse::<Decimal>().unwrap(),
+                        "0.13551711803".parse::<Decimal>().unwrap(),
                         0,
                     ),
                     NewEntities::default()
@@ -534,7 +539,7 @@ mod tests {
                 [], // encountered_component_addresses
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
-                FeeSummary::new("0.15184175", "0.1607719", "0.33388137243", 0,),
+                FeeSummary::new("0.15184175".parse::<Decimal>().unwrap(), "0.1607719".parse::<Decimal>().unwrap(), "0.33388137243".parse::<Decimal>().unwrap(), 0,),
                 NewEntities::new([
                     (ResourceAddress::try_from_bech32("resource_tdx_2_1tkrg7uwrc9sw3tkckuxwu65euwppxa00f7aqtx5ujd0aa22gej6nm7").unwrap(), NewlyCreatedResource::default())
                 ])
@@ -593,7 +598,12 @@ mod tests {
                     pool_contributions: vec![]
                 }],
                 FeeLocks::new(0.36962, 0),
-                FeeSummary::new("0.1493972", "0.01125345", "0.0782012926", 0,),
+                FeeSummary::new(
+                    "0.1493972".parse::<Decimal>().unwrap(),
+                    "0.01125345".parse::<Decimal>().unwrap(),
+                    "0.0782012926".parse::<Decimal>().unwrap(),
+                    0,
+                ),
                 NewEntities::default()
             )
         );
@@ -622,13 +632,13 @@ mod tests {
         let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
 
         let validator_0: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().unwrap();
-        let validator_0_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t45l9ku3r5mwxazht2qutmhhk3660hqqvxkkyl8rxs20n9k2zv0w7t".parse().unwrap();
+        let validator_0_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t45l9ku3r5mwxazht2qutmhhk3660hqqvxkkyl8rxs20n9k2zv0w7t".parse::<_>().unwrap();
 
         let validator_1: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
-        let validator_1_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse().unwrap();
+        let validator_1_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse::<_>().unwrap();
 
         let validator_2: ValidatorAddress = "validator_tdx_2_1svr6rmtd9ts5zx8d3euwmmp6mmjdtcj2q7zlmd8xjrn4qx7q5snkas".parse().unwrap();
-        let validator_2_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t48zl3qmcv3pf24r0765q4zc6rrk83cfjv6wza2xksej80pcfd7p5g".parse().unwrap();
+        let validator_2_resource_address_of_stake: ResourceAddress = "resource_tdx_2_1t48zl3qmcv3pf24r0765q4zc6rrk83cfjv6wza2xksej80pcfd7p5g".parse::<_>().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -672,7 +682,12 @@ mod tests {
                     validator_stakes: vec![]
                 }],
                 FeeLocks::default(),
-                FeeSummary::new("0.3527215", "0.1150347", "0.32796859177", 0,),
+                FeeSummary::new(
+                    "0.3527215".parse::<Decimal>().unwrap(),
+                    "0.1150347".parse::<Decimal>().unwrap(),
+                    "0.32796859177".parse::<Decimal>().unwrap(),
+                    0,
+                ),
                 NewEntities::default()
             )
         );
@@ -729,7 +744,7 @@ mod tests {
                     )]
                 }],
                 FeeLocks::default(),
-                FeeSummary::new("0.26154965", "0.0325088", "0.12760162134", 0,),
+                FeeSummary::new("0.26154965".parse::<Decimal>().unwrap(), "0.0325088".parse::<Decimal>().unwrap(), "0.12760162134".parse::<Decimal>().unwrap(), 0,),
                 NewEntities::default()
             )
         );
@@ -806,9 +821,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.2848875",
-                        "0.06251535",
-                        "0.16927718825",
+                        "0.2848875".parse::<Decimal>().unwrap(),
+                        "0.06251535".parse::<Decimal>().unwrap(),
+                        "0.16927718825".parse::<Decimal>().unwrap(),
                         0,
                     ),
                     NewEntities::default()
@@ -882,9 +897,9 @@ mod tests {
                     ],
                     FeeLocks::default(),
                     FeeSummary::new(
-                        "0.2383276",
-                        "0.041757",
-                        "0.11224746511",
+                        "0.2383276".parse::<Decimal>().unwrap(),
+                        "0.041757".parse::<Decimal>().unwrap(),
+                        "0.11224746511".parse::<Decimal>().unwrap(),
                         0,
                     ),
                     NewEntities::default()
@@ -946,7 +961,7 @@ mod tests {
                 ["locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx".parse::<ManifestEncounteredComponentAddress>().unwrap()],
                 [DetailedManifestClass::General],
                 FeeLocks::default(),
-                FeeSummary::new("0.2516311", "0.03200635", "0.12903213279", 0,),
+                FeeSummary::new("0.2516311".parse::<Decimal>().unwrap(), "0.03200635".parse::<Decimal>().unwrap(), "0.12903213279".parse::<Decimal>().unwrap(), 0,),
                 NewEntities::default()
             )
         );
@@ -1007,7 +1022,12 @@ mod tests {
                 account_addresses: vec![acc],
             }],
             FeeLocks::default(),
-            FeeSummary::new("0.21017315", "0.04175875", "0.1564025852", 0),
+            FeeSummary::new(
+                "0.21017315".parse::<Decimal>().unwrap(),
+                "0.04175875".parse::<Decimal>().unwrap(),
+                "0.1564025852".parse::<Decimal>().unwrap(),
+                0,
+            ),
             NewEntities::default(),
         );
 

@@ -35,8 +35,11 @@ impl AuthIntent {
         if metadata.network_id != metadata.dapp_definition_address.network_id()
         {
             return Err(CommonError::NetworkDiscrepancy {
-                expected: metadata.network_id,
-                actual: metadata.dapp_definition_address.network_id(),
+                expected: metadata.network_id.to_string(),
+                actual: metadata
+                    .dapp_definition_address
+                    .network_id()
+                    .to_string(),
             });
         }
 
@@ -44,8 +47,8 @@ impl AuthIntent {
         for entity in &entities {
             if entity.network_id() != metadata.network_id {
                 return Err(CommonError::NetworkDiscrepancy {
-                    expected: metadata.network_id,
-                    actual: entity.network_id(),
+                    expected: metadata.network_id.to_string(),
+                    actual: entity.network_id().to_string(),
                 });
             }
         }
@@ -169,8 +172,8 @@ mod tests {
                 vec![AddressOfAccountOrPersona::sample()]
             ),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Mainnet,
-                actual: NetworkID::Stokenet,
+                expected: NetworkID::Mainnet.to_string(),
+                actual: NetworkID::Stokenet.to_string(),
             })
         )
     }
@@ -188,8 +191,8 @@ mod tests {
                 vec![AddressOfAccountOrPersona::sample_stokenet()]
             ),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Mainnet,
-                actual: NetworkID::Stokenet,
+                expected: NetworkID::Mainnet.to_string(),
+                actual: NetworkID::Stokenet.to_string(),
             })
         )
     }

@@ -2,14 +2,14 @@ use crate::prelude::*;
 use crypto::keys::x25519::PublicKey as X25519PublicKey;
 use crypto::keys::x25519::SecretKey as X25519PrivateKey;
 
-impl From<X25519PublicKey> for Exactly32Bytes {
-    fn from(value: X25519PublicKey) -> Exactly32Bytes {
-        Exactly32Bytes::from(&value.to_bytes())
-    }
-}
+// impl From<X25519PublicKey> for Exactly32Bytes {
+//     fn from(value: X25519PublicKey) -> Exactly32Bytes {
+//         Exactly32Bytes::from(&value.to_bytes())
+//     }
+// }
 impl From<X25519PublicKey> for EncryptionKey {
     fn from(value: X25519PublicKey) -> EncryptionKey {
-        EncryptionKey::from(Exactly32Bytes::from(value))
+        EncryptionKey(Exactly32Bytes::from(&value.to_bytes()))
     }
 }
 

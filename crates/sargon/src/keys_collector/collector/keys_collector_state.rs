@@ -50,7 +50,7 @@ impl KeysCollectorState {
             .map(|x| x.clone_snapshot())
             .inspect(|k| assert_eq!(k.factor_source_id, *factor_source_id))
             .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: (*factor_source_id).into(),
+                bad_value: (*factor_source_id).to_string(),
             })
     }
 
@@ -64,7 +64,7 @@ impl KeysCollectorState {
             let mut rings = self.keyrings.try_write().unwrap();
             let keyring = rings.get_mut(&factor_source_id).ok_or(
                 CommonError::ProfileDoesNotContainFactorSourceWithID {
-                    bad_value: factor_source_id.into(),
+                    bad_value: factor_source_id.to_string(),
                 },
             )?;
             keyring.process_response(factors)

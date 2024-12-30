@@ -12,6 +12,6 @@ impl SargonOS {
     ) -> Result<Vec<SecurityProblem>> {
         self.wrapped
             .check_security_problems(input.into_internal())
-            .into_result()
+            .into_iter_result()
     }
 }

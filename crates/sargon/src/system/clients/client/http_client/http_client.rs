@@ -89,7 +89,8 @@ mod tests {
 
     #[actix_rt::test]
     async fn execute_network_request_invalid_url() {
-        let mock_networking_driver = MockNetworkingDriver::new(200, ());
+        let mock_networking_driver =
+            MockNetworkingDriver::new(200, BagOfBytes::new());
         let base = "http://example.com";
         let sut = SUT::with_gateway(
             Arc::new(mock_networking_driver),
@@ -109,7 +110,7 @@ mod tests {
     async fn execute_network_request_bad_status_code() {
         let mock_networking_driver = MockNetworkingDriver::new(
             404, // bad code
-            (),
+            BagOfBytes::new(),
         );
         let sut =
             SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
@@ -141,8 +142,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn spy_headers() {
-        let mock_networking_driver =
-            MockNetworkingDriver::with_spy(200, (), |request, _| {
+        let mock_networking_driver = MockNetworkingDriver::with_spy(
+            200,
+            BagOfBytes::new(),
+            |request, _| {
                 assert_eq!(
                     request
                         .headers
@@ -160,7 +163,8 @@ mod tests {
                     .map(|s| s.to_owned())
                     .collect::<BTreeSet<String>>()
                 )
-            });
+            },
+        );
         let sut =
             SUT::new(Arc::new(mock_networking_driver), NetworkID::Stokenet);
         let req = sut.current_epoch();

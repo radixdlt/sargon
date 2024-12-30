@@ -9,7 +9,7 @@ impl SargonOS {
     ) -> Result<Vec<SecurityStructureOfFactorSources>> {
         self.wrapped
             .security_structures_of_factor_sources()
-            .into_result()
+            .into_iter_result()
     }
 
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
@@ -19,7 +19,7 @@ impl SargonOS {
     ) -> Result<Vec<SecurityStructureOfFactorSourceIDs>> {
         self.wrapped
             .security_structures_of_factor_source_ids()
-            .into_result()
+            .into_iter_result()
     }
 
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored

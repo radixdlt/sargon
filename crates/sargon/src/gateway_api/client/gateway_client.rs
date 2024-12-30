@@ -45,13 +45,6 @@ impl GatewayClient {
 }
 
 #[cfg(test)]
-impl From<()> for BagOfBytes {
-    fn from(_value: ()) -> Self {
-        Self::new()
-    }
-}
-
-#[cfg(test)]
 mod tests {
     use super::*;
     use actix_rt::time::timeout;

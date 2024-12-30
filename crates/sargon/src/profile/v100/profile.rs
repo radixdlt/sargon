@@ -225,8 +225,12 @@ impl Profile {
     }
 }
 
-impl<T: IsEntity> IdentifiedVecOf<T> {
-    pub fn erased(&self) -> IdentifiedVecOf<AccountOrPersona> {
+pub trait EntitiesErased {
+    fn erased(&self) -> IdentifiedVecOf<AccountOrPersona>;
+}
+
+impl<T: IsEntity> EntitiesErased for IdentifiedVecOf<T> {
+    fn erased(&self) -> IdentifiedVecOf<AccountOrPersona> {
         self.items()
             .into_iter()
             .map(Into::<AccountOrPersona>::into)
@@ -288,10 +292,9 @@ impl Profile {
             + Identifiable,
     >(
         &self,
-        entities: IdentifiedVecOf<E>,
+        entities: impl IntoIterator<Item = E>,
     ) -> Result<()> {
         let entities = entities
-            .items()
             .into_iter()
             .map(Into::<AccountOrPersona>::into)
             .collect::<IdentifiedVecOf<AccountOrPersona>>();
@@ -301,10 +304,9 @@ impl Profile {
 
     pub fn assert_new_factor_instances_not_already_used_erased(
         &self,
-        entities: IdentifiedVecOf<AccountOrPersona>,
+        entities: impl IntoIterator<Item = AccountOrPersona>,
     ) -> Result<()> {
         let instances_of_new_entities = entities
-            .items()
             .into_iter()
             .map(|e| (e.clone(), e.unique_all_factor_instances()))
             .collect::<IndexMap<AccountOrPersona, IndexSet<_>>>();
@@ -486,8 +488,8 @@ impl Profile {
             .maybe_update_with(factor_source_id, |f| {
                 S::try_from(f.clone())
                     .map_err(|_| CommonError::CastFactorSourceWrongKind {
-                        expected: S::kind(),
-                        found: f.factor_source_kind(),
+                        expected: S::kind().to_string(),
+                        found: f.factor_source_kind().to_string(),
                     })
                     .and_then(|element| {
                         mutate(element).map(|modified| modified.into())
@@ -609,7 +611,7 @@ mod tests {
     fn not_allowed_to_create_profile_with_empty_factor_source() {
         let _ = SUT::with(
             Header::sample(),
-            IdentifiedVecOf::new(),
+            FactorSources::new(),
             AppPreferences::sample(),
             ProfileNetworks::sample(),
         );
@@ -784,8 +786,8 @@ mod tests {
                 }
             ),
             Err(CommonError::CastFactorSourceWrongKind {
-                expected: FactorSourceKind::LedgerHQHardwareWallet,
-                found: FactorSourceKind::Device
+                expected: FactorSourceKind::LedgerHQHardwareWallet.to_string(),
+                found: FactorSourceKind::Device.to_string()
             })
         );
 

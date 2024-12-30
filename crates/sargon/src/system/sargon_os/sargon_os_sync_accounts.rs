@@ -108,7 +108,7 @@ mod tests {
         // Assert first that accounts in profile are active
         assert_eq!(
             os.accounts_on_current_network().unwrap(),
-            Accounts::from_iter(all_initial_accounts)
+            Accounts::from_iter(all_initial_accounts.clone())
         );
         let result = os.sync_accounts_deleted_on_ledger().await.unwrap();
 

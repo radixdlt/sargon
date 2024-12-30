@@ -209,7 +209,6 @@ impl TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
     use radix_common::prelude::ManifestBucket;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
@@ -425,8 +424,8 @@ BURN_RESOURCE
         assert_eq!(
             SUT::new(instructions_str, NetworkID::Mainnet, Blobs::default(),),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Simulator,
-                specified_to_instructions_ctor: NetworkID::Mainnet
+                found_in_instructions: NetworkID::Simulator.to_string(),
+                specified_to_instructions_ctor: NetworkID::Mainnet.to_string()
             })
         );
     }
@@ -442,8 +441,8 @@ BURN_RESOURCE
         assert_eq!(
             SUT::new(instructions_str, NetworkID::Stokenet, Blobs::default(),),
             Err(CommonError::InvalidInstructionsWrongNetwork {
-                found_in_instructions: NetworkID::Mainnet,
-                specified_to_instructions_ctor: NetworkID::Stokenet
+                found_in_instructions: NetworkID::Mainnet.to_string(),
+                specified_to_instructions_ctor: NetworkID::Stokenet.to_string()
             })
         );
     }

@@ -61,7 +61,7 @@ impl FactorSourceIdAssigner {
             self.map.insert(template.clone(), next);
             Ok(next)
         } else {
-            Err(CommonError::Unknown)
+            Err(CommonError::TooFewFactorInstancesDerived)
         }
     }
 }

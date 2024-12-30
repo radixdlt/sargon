@@ -5,12 +5,13 @@ decl_identified_vec_of!(
     AuthorizedDapp
 );
 
-impl AuthorizedDapps {
+pub(crate) trait ReferencedAccountRemoving {
+    fn remove_referenced_account(&mut self, account_address: &AccountAddress);
+}
+
+impl ReferencedAccountRemoving for AuthorizedDapps {
     /// Remove referenced account from all the dApps
-    pub(crate) fn remove_referenced_account(
-        &mut self,
-        account_address: &AccountAddress,
-    ) {
+    fn remove_referenced_account(&mut self, account_address: &AccountAddress) {
         self.update_all_with(|dapp| {
             dapp.remove_referenced_account(account_address);
         })
@@ -29,9 +30,9 @@ impl HasSampleValues for AuthorizedDapps {
     }
 }
 
-impl AuthorizedDapps {
+impl HasSampleValuesOnNetworks for AuthorizedDapps {
     /// A sample used to facilitate unit tests.
-    pub fn sample_mainnet() -> Self {
+    fn sample_mainnet() -> Self {
         Self::from_iter([
             AuthorizedDapp::sample_mainnet_dashboard(),
             AuthorizedDapp::sample_mainnet_gumballclub(),
@@ -39,7 +40,7 @@ impl AuthorizedDapps {
     }
 
     /// A sample used to facilitate unit tests.
-    pub fn sample_stokenet() -> Self {
+    fn sample_stokenet() -> Self {
         Self::from_iter([
             AuthorizedDapp::sample_stokenet_devconsole(),
             AuthorizedDapp::sample_stokenet_sandbox(),

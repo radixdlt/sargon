@@ -17,9 +17,9 @@ impl HasSampleValues for Personas {
     }
 }
 
-impl Personas {
+impl HasSampleValuesOnNetworks for Personas {
     /// A sample used to facilitate unit tests.
-    pub fn sample_mainnet() -> Self {
+    fn sample_mainnet() -> Self {
         Self::from_iter([
             Persona::sample_mainnet_satoshi(),
             Persona::sample_mainnet_batman(),
@@ -27,7 +27,7 @@ impl Personas {
     }
 
     /// A sample used to facilitate unit tests.
-    pub fn sample_stokenet() -> Self {
+    fn sample_stokenet() -> Self {
         Self::from_iter([
             Persona::sample_stokenet_leia_skywalker(),
             Persona::sample_stokenet_hermione(),

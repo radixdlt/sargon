@@ -1,3 +1,5 @@
+use sargon_core::decl_bool_type;
+
 use crate::prelude::*;
 
 #[derive(

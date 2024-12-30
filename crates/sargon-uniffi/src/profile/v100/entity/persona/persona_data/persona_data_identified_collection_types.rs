@@ -29,6 +29,25 @@ macro_rules! declare_collection_of_identified_entry {
                 pub collection: Vec<[< PersonaDataIdentified $id_ent_type >]>,
             }
 
+            impl FromInternal<[< InternalCollectionOf $struct_name>], Vec<[< PersonaDataIdentified $id_ent_type >]>> for [< CollectionOf $struct_name>]
+            {
+                fn into_type(self) -> Vec<[< PersonaDataIdentified $id_ent_type >]> {
+                    self.collection.into_iter().map([< PersonaDataIdentified $id_ent_type >]::from).collect()
+                }
+            }
+
+            impl
+            IntoInternal<Vec<[< PersonaDataIdentified $id_ent_type >]>, [< CollectionOf $struct_name>]>
+            for Vec<[< PersonaDataIdentified $id_ent_type >]>
+        {
+            fn into_internal(self) -> [< CollectionOf $struct_name>] {
+                [< CollectionOf $struct_name>] {
+                    collection: self
+                }
+            }
+        }
+
+
             decl_conversion_tests_for!([< CollectionOf $struct_name>]);
         }
     };

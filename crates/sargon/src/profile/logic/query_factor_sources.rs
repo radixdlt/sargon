@@ -13,13 +13,13 @@ impl Profile {
         self.factor_sources
             .get_id(id)
             .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: id,
+                bad_value: id.to_string(),
             })
             .and_then(|f| {
                 f.clone().try_into().map_err(|_| {
                     CommonError::CastFactorSourceWrongKind {
-                        expected: <F as IsFactorSource>::kind(),
-                        found: f.factor_source_kind(),
+                        expected: <F as IsFactorSource>::kind().to_string(),
+                        found: f.factor_source_kind().to_string(),
                     }
                 })
             })
@@ -153,8 +153,8 @@ mod tests {
                 dfs.factor_source_id()
             ),
             Err(CommonError::CastFactorSourceWrongKind {
-                expected: FactorSourceKind::LedgerHQHardwareWallet,
-                found: FactorSourceKind::Device,
+                expected: FactorSourceKind::LedgerHQHardwareWallet.to_string(),
+                found: FactorSourceKind::Device.to_string(),
             })
         );
     }
@@ -168,7 +168,7 @@ mod tests {
                 lfs.factor_source_id()
             ),
             Err(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: lfs.factor_source_id()
+                bad_value: lfs.factor_source_id().to_string()
             })
         );
     }
@@ -194,7 +194,7 @@ mod tests {
         assert_eq!(
             profile.device_factor_source_by_id(&id),
             Err(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: id.into()
+                bad_value: id.to_string()
             })
         );
     }

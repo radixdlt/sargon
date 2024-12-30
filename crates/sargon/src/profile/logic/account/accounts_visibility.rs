@@ -1,14 +1,19 @@
 use crate::prelude::*;
 
-impl Accounts {
-    pub fn visible(&self) -> Self {
+pub trait VisibleOrHidden {
+    fn visible(&self) -> Self;
+    fn hidden(&self) -> Self;
+}
+
+impl VisibleOrHidden for Accounts {
+    fn visible(&self) -> Self {
         self.clone()
             .into_iter()
             .filter(|p| !p.is_hidden() && !p.is_tombstoned())
             .collect()
     }
 
-    pub fn hidden(&self) -> Self {
+    fn hidden(&self) -> Self {
         self.clone()
             .into_iter()
             .filter(|p| p.is_hidden() && !p.is_tombstoned())

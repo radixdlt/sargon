@@ -22,7 +22,7 @@ macro_rules! impl_try_from_for_manifest_encountered_address {
 
                 Err(CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
                     global_address_as_hex: global_address.to_hex(),
-                    network_id,
+                    network_id: network_id.to_string(),
                 })
             }
         }
@@ -66,7 +66,7 @@ mod tests {
             result.unwrap_err(),
             CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
                 global_address_as_hex: global_address.to_hex(),
-                network_id,
+                network_id: network_id.to_string(),
             }
         );
     }

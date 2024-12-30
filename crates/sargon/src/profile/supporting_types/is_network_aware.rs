@@ -9,8 +9,8 @@ pub trait IsNetworkAware {
         let other = other.network_id();
         if this != other {
             Err(CommonError::NetworkDiscrepancy {
-                expected: this,
-                actual: other,
+                expected: this.to_string(),
+                actual: other.to_string(),
             })
         } else {
             Ok(())

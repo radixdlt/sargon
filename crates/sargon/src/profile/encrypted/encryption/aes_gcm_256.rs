@@ -104,14 +104,14 @@ impl VersionedEncryption for AesGcm256 {
     }
 }
 
-impl From<Exactly32Bytes> for Key<aes_gcm::Aes256Gcm> {
-    fn from(value: Exactly32Bytes) -> Self {
-        Self::from(*value.bytes())
-    }
-}
+// impl From<Exactly32Bytes> for Key<aes_gcm::Aes256Gcm> {
+//     fn from(value: Exactly32Bytes) -> Self {
+//         Self::from(*value.bytes())
+//     }
+// }
 impl From<EncryptionKey> for Key<aes_gcm::Aes256Gcm> {
     fn from(value: EncryptionKey) -> Self {
-        Self::from(value.0)
+        Self::from(*value.0.bytes())
     }
 }
 
@@ -131,7 +131,9 @@ mod tests {
                     nonce: Exactly12Bytes::sample(),
                     cipher_text: hex_decode("deadbeef").unwrap(),
                 },
-                Exactly32Bytes::sample_aced().into(),
+                Key::<aes_gcm::Aes256Gcm>::from(
+                    *Exactly32Bytes::sample_aced().bytes()
+                )
             ),
             Err(CommonError::AESDecryptionFailed)
         )

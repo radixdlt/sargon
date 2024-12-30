@@ -7,20 +7,62 @@ decl_identified_vec_of!(
     ProfileNetwork
 );
 
-impl ProfileNetworks {
-    pub fn get_account(&self, address: &AccountAddress) -> Option<Account> {
+pub trait EntityOnNetworkHandling {
+    fn get_account(&self, address: &AccountAddress) -> Option<Account>;
+    fn get_persona(&self, address: &IdentityAddress) -> Option<Persona>;
+    fn update_entities<E: IsEntity>(
+        &mut self,
+        updated_entities: IdentifiedVecOf<E>,
+    ) -> Result<()>;
+    fn update_entities_erased(
+        &mut self,
+        updated_entities: IdentifiedVecOf<AccountOrPersona>,
+    ) -> Result<()>;
+
+    fn update_account<F>(
+        &mut self,
+        address: &AccountAddress,
+        mutate: F,
+    ) -> Option<Account>
+    where
+        F: FnMut(&mut Account);
+
+    fn hide_account(&mut self, account_address: &AccountAddress) -> bool;
+
+    fn tombstone_account(&mut self, account_address: &AccountAddress) -> bool;
+
+    /// Tombstones the accounts
+    fn tombstone_accounts(&mut self, account_addresses: &Vec<AccountAddress>) {
+        for account_address in account_addresses {
+            self.tombstone_account(account_address);
+        }
+    }
+
+    fn update_persona<F>(
+        &mut self,
+        address: &IdentityAddress,
+        mutate: F,
+    ) -> Option<Persona>
+    where
+        F: FnMut(&mut Persona);
+
+    fn content_hint(&self) -> ContentHint;
+}
+
+impl EntityOnNetworkHandling for ProfileNetworks {
+    fn get_account(&self, address: &AccountAddress) -> Option<Account> {
         self.get_id(address.network_id())
             .and_then(|n| n.accounts.get_id(address))
             .cloned()
     }
 
-    pub fn get_persona(&self, address: &IdentityAddress) -> Option<Persona> {
+    fn get_persona(&self, address: &IdentityAddress) -> Option<Persona> {
         self.get_id(address.network_id())
             .and_then(|n| n.personas.get_id(address))
             .cloned()
     }
 
-    pub fn update_entities<E: IsEntity>(
+    fn update_entities<E: IsEntity>(
         &mut self,
         updated_entities: IdentifiedVecOf<E>,
     ) -> Result<()> {
@@ -29,7 +71,7 @@ impl ProfileNetworks {
         )
     }
 
-    pub fn update_entities_erased(
+    fn update_entities_erased(
         &mut self,
         updated_entities: IdentifiedVecOf<AccountOrPersona>,
     ) -> Result<()> {
@@ -41,7 +83,7 @@ impl ProfileNetworks {
     }
 
     /// Returns a clone of the updated account if found, else None.
-    pub fn update_account<F>(
+    fn update_account<F>(
         &mut self,
         address: &AccountAddress,
         mut mutate: F,
@@ -56,37 +98,21 @@ impl ProfileNetworks {
     }
 
     /// Hides the account associated with the `account_address`
-    pub(crate) fn hide_account(
-        &mut self,
-        account_address: &AccountAddress,
-    ) -> bool {
+    fn hide_account(&mut self, account_address: &AccountAddress) -> bool {
         self.update_with(account_address.network_id(), |n| {
             n.hide_account(account_address);
         })
     }
 
     /// Tombstones the account associated with the `account_address`
-    pub(crate) fn tombstone_account(
-        &mut self,
-        account_address: &AccountAddress,
-    ) -> bool {
+    fn tombstone_account(&mut self, account_address: &AccountAddress) -> bool {
         self.update_with(account_address.network_id(), |n| {
             n.tombstone_account(account_address);
         })
     }
 
-    /// Tombstones the accounts
-    pub(crate) fn tombstone_accounts(
-        &mut self,
-        account_addresses: &Vec<AccountAddress>,
-    ) {
-        for account_address in account_addresses {
-            self.tombstone_account(account_address);
-        }
-    }
-
     /// Returns a clone of the updated persona if found, else None.
-    pub fn update_persona<F>(
+    fn update_persona<F>(
         &mut self,
         address: &IdentityAddress,
         mut mutate: F,
@@ -99,10 +125,8 @@ impl ProfileNetworks {
         });
         self.get_persona(address)
     }
-}
 
-impl ProfileNetworks {
-    pub fn content_hint(&self) -> ContentHint {
+    fn content_hint(&self) -> ContentHint {
         let number_of_accounts =
             self.iter().fold(0, |acc, x| acc + x.accounts.len());
         let number_of_personas =

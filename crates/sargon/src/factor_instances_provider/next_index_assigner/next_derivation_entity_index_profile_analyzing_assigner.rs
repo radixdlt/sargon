@@ -255,8 +255,8 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     ) -> Result<Option<HDPathComponent>> {
         if agnostic_path.network_id != self.network_id {
             return Err(CommonError::NetworkDiscrepancy {
-                expected: self.network_id,
-                actual: agnostic_path.network_id,
+                expected: self.network_id.to_string(),
+                actual: agnostic_path.network_id.to_string(),
             });
         }
         let derivation_preset = DerivationPreset::try_from(agnostic_path)?;
@@ -297,17 +297,17 @@ mod tests {
     #[test]
     fn test_network_discrepancy() {
         let sut = SUT::new(NetworkID::Mainnet, None);
-        assert!(matches!(
+        assert_eq!(
             sut.next(
                 FactorSourceIDFromHash::sample_at(0),
                 DerivationPreset::AccountVeci
                     .index_agnostic_path_on_network(NetworkID::Stokenet),
             ),
             Err(CommonError::NetworkDiscrepancy {
-                expected: NetworkID::Mainnet,
-                actual: NetworkID::Stokenet
+                expected: NetworkID::Mainnet.to_string(),
+                actual: NetworkID::Stokenet.to_string()
             })
-        ));
+        );
     }
 
     #[test]
@@ -608,14 +608,10 @@ mod tests {
     fn test_next_identity_rola_at_7_is_8() {
         let preset = DerivationPreset::IdentityRola;
         let network_id = NetworkID::Mainnet;
-        let sut = SUT::new(
-            network_id,
-            Arc::new(Profile::sample_from(
-                FactorSource::sample_all(),
-                [],
-                [&Persona::sample_at(7)],
-            )),
-        );
+        let persona = Persona::sample_at(7);
+        let profile =
+            Profile::sample_from(FactorSource::sample_all(), [], [&persona]);
+        let sut = SUT::new(network_id, Arc::new(profile));
         type F = FactorSourceIDFromHash;
         {
             let fid = F::sample_device();

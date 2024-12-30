@@ -7,6 +7,14 @@ decl_identified_vec_of!(
     SLIP10Curve
 );
 
+impl Identifiable for SLIP10Curve {
+    type ID = String;
+
+    fn id(&self) -> Self::ID {
+        self.string()
+    }
+}
+
 /// Cryptographic parameters a certain FactorSource supports, e.g. which Elliptic Curves
 /// it supports and which Hierarchical Deterministic (HD) derivations schemes it supports,
 /// if any.
@@ -120,6 +128,7 @@ impl HasSampleValues for SupportedCurves {
         ])
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

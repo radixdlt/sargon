@@ -263,7 +263,7 @@ macro_rules! decl_ret_wrapped_address {
                     [< Ret $address_type:camel Address >]::new(node_id.clone(), network_id.discriminant())
                     .map_err(|e| {
                         error!("Failed create address, from node and network_id, RET error: {:?}", e);
-                        CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id }
+                        CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID { node_id_as_hex: node_id.to_hex(), network_id: network_id.to_string() }
                     })
                     .map(|i| [< $address_type:camel Address >]::from(i))
                 }
@@ -298,7 +298,7 @@ mod tests {
             <AccountAddress as AddressViaRet>::new(unknown_node_id, NetworkID::Mainnet),
             Err(CommonError::FailedToCreateAddressViaRetAddressFromNodeIdAndNetworkID {
                 node_id_as_hex: "deffffffffffffffffffffffffffffffffffffffffffffffffffffffffff".to_owned(), 
-                network_id: NetworkID::Mainnet,
+                network_id: NetworkID::Mainnet.to_string(),
             })
         );
     }

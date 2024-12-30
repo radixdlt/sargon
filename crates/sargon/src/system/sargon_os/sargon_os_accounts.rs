@@ -483,7 +483,9 @@ impl SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
-        self.batch_create_unsaved_entities_with_factor_source_with_derivation_outcome(factor_source, network_id, count, name_prefix).await
+        self.batch_create_unsaved_entities_with_factor_source_with_derivation_outcome(factor_source, network_id, count, name_prefix)
+        .await
+        .map(|(a, b, c)| (a.into_iter().collect(), b, c))
     }
 
     pub async fn batch_create_unsaved_entities_with_factor_source_with_derivation_outcome<
@@ -609,7 +611,7 @@ impl SargonOS {
 
     pub async fn update_entities<E: IsEntity>(
         &self,
-        updated: IdentifiedVecOf<E>,
+        updated: impl IntoIterator<Item = E>,
     ) -> Result<()> {
         self.update_entities_erased(
             updated.into_iter().map(Into::into).collect(),
@@ -702,8 +704,16 @@ impl SargonOS {
     }
 }
 
-impl<E: IsEntity> IdentifiedVecOf<E> {
-    pub fn to_accounts(self) -> Result<Accounts> {
+pub trait ToEntityConverting {
+    fn to_accounts(self) -> Result<Accounts>;
+    fn to_personas(self) -> Result<Personas>;
+}
+
+impl<T, E: IsEntity> ToEntityConverting for T
+where
+    T: IntoIterator<Item = E>,
+{
+    fn to_accounts(self) -> Result<Accounts> {
         self.into_iter()
             .map(|e| {
                 Account::try_from(Into::<AccountOrPersona>::into(e.clone()))
@@ -714,7 +724,7 @@ impl<E: IsEntity> IdentifiedVecOf<E> {
             .collect::<Result<Accounts>>()
     }
 
-    pub fn to_personas(self) -> Result<Personas> {
+    fn to_personas(self) -> Result<Personas> {
         self.into_iter()
             .map(|e| {
                 Persona::try_from(Into::<AccountOrPersona>::into(e.clone()))
@@ -740,8 +750,9 @@ impl SargonOS {
     /// of the active profile to secure storage.
     pub async fn add_entities<E: IsEntity>(
         &self,
-        entities: IdentifiedVecOf<E>,
+        entities: impl IntoIterator<Item = E>,
     ) -> Result<()> {
+        let entities = entities.into_iter().collect_vec();
         if entities.is_empty() {
             warn!("Tried to add empty entities...");
             return Ok(());

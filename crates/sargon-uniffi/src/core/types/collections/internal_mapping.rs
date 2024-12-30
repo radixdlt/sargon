@@ -9,35 +9,10 @@ pub trait FromInternal<InternalType, Type> {
     fn into_type(self) -> Type;
 }
 
-// =====  Vec  ======
-impl<InternalElement, Element> FromInternal<Vec<InternalElement>, Vec<Element>>
-    for Vec<InternalElement>
+// === IntoIterator ====
+impl<T, InternalElement, Element> FromInternal<T, Vec<Element>> for T
 where
-    Element: From<InternalElement>,
-{
-    fn into_type(self) -> Vec<Element> {
-        self.into_iter().map(Element::from).collect()
-    }
-}
-
-// === IdentifiedVec ====
-impl<InternalElement, Element>
-    FromInternal<IdentifiedVecOf<InternalElement>, Vec<Element>>
-    for IdentifiedVecOf<InternalElement>
-where
-    InternalElement: Debug + PartialEq + Eq + Clone + sargon::Identifiable,
-    Element: From<InternalElement>,
-{
-    fn into_type(self) -> Vec<Element> {
-        self.into_iter().map(Element::from).collect()
-    }
-}
-
-// ====  IndexSet  ======
-impl<InternalElement, Element>
-    FromInternal<IndexSet<InternalElement>, Vec<Element>>
-    for IndexSet<InternalElement>
-where
+    T: IntoIterator<Item = InternalElement>,
     Element: From<InternalElement>,
 {
     fn into_type(self) -> Vec<Element> {
@@ -76,7 +51,7 @@ where
     }
 }
 
-// === IdentifiedVec ====
+// === IdentifiedVecOf ====
 impl<InternalElement, Element>
     IntoInternal<Vec<Element>, IdentifiedVecOf<InternalElement>>
     for Vec<Element>

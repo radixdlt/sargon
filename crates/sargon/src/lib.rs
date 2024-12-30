@@ -1,19 +1,22 @@
+#![allow(unused_imports)]
+#![allow(internal_features)]
+#![allow(incomplete_features)]
 #![feature(async_closure)]
 #![feature(let_chains)]
 #![feature(core_intrinsics)]
-#![allow(unused_imports)]
-#![allow(internal_features)]
 #![feature(iter_repeat_n)]
 #![feature(future_join)]
-#![allow(incomplete_features)]
 #![feature(generic_const_exprs)]
 #![feature(trait_upcasting)]
+#![feature(trivial_bounds)]
+#![allow(trivial_bounds)]
 
-mod core;
+mod error_from;
 mod factor_instances_provider;
 mod gateway_api;
 mod hierarchical_deterministic;
 mod home_cards;
+mod identified_vec_of;
 mod keys_collector;
 mod profile;
 mod radix_connect;
@@ -24,12 +27,14 @@ mod types;
 mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
+    pub use sargon_core::prelude::*;
 
-    pub use crate::core::*;
+    pub use crate::error_from::*;
     pub use crate::factor_instances_provider::*;
     pub use crate::gateway_api::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
+    pub use crate::identified_vec_of::*;
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
@@ -38,48 +43,11 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
-    pub use radix_rust::prelude::{
-        indexmap, BTreeSet, HashMap, HashSet, IndexMap, IndexSet,
-    };
-    pub(crate) use std::marker::PhantomData;
 
-    pub(crate) use ::hex::decode as hex_decode;
-    pub(crate) use ::hex::encode as hex_encode;
-    pub(crate) use iso8601_timestamp::Timestamp;
-    pub(crate) use itertools::Itertools;
-    pub(crate) use log::{debug, error, info, trace, warn};
     pub(crate) use once_cell::sync::Lazy;
-    pub(crate) use serde::{
-        de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
-        Serializer,
-    };
-    pub(crate) use serde_json::json;
-    pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
-    pub(crate) use serde_with::*;
-    pub(crate) use zeroize::{Zeroize, ZeroizeOnDrop};
 
-    pub(crate) use derive_more::derive::{
-        AsRef, Debug as MoreDebug, Deref, Display,
-    };
     pub(crate) use futures::future::join_all;
-    pub use radix_common::math::traits::CheckedMul as ScryptoCheckedMul;
-    pub(crate) use std::cell::RefCell;
-    pub(crate) use std::cmp::Ordering;
-    pub(crate) use std::collections::BTreeMap;
-    pub(crate) use std::fmt::{Debug, Display, Formatter};
-    pub(crate) use std::fs;
-    pub(crate) use std::hash::Hash as StdHash;
-    pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
-    pub(crate) use std::str::FromStr;
-    pub(crate) use std::sync::{Arc, RwLock};
 
-    pub(crate) use strum::FromRepr;
-    pub(crate) use strum::IntoEnumIterator;
-    pub(crate) use url::Url;
-    pub(crate) use uuid::Uuid;
-
-    pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use paste::*;
     pub(crate) use radix_engine::{
         blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
         system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier,
@@ -175,7 +143,6 @@ pub mod prelude {
         AccessRule as ScryptoAccessRule,
         BasicRequirement as ScryptoBasicRequirement,
         CompositeRequirement as ScryptoCompositeRequirement,
-        Epoch as ScryptoEpoch,
         FungibleResourceRoles as ScryptoFungibleResourceRoles,
         MetadataInit as ScryptoMetadataInit,
         MetadataValue as ScryptoMetadataValue,
@@ -244,8 +211,6 @@ pub mod prelude {
             NotarySignatureV1 as ScryptoNotarySignature,
             PartialTransactionV2 as ScryptoPartialTransaction,
             PlaintextMessageV1 as ScryptoPlaintextMessage,
-            SignatureV1 as ScryptoSignature,
-            SignatureWithPublicKeyV1 as ScryptoSignatureWithPublicKey,
             SignedIntentV1 as ScryptoSignedIntent,
             SignedPartialTransactionV2 as ScryptoSignedPartialTransaction,
             SignedTransactionIntentHash as ScryptoSignedTransactionIntentHash,
@@ -379,4 +344,27 @@ pub fn android_sign_hash_with_private_key_bytes(
 ) -> Result<Ed25519Signature> {
     Ed25519PrivateKey::try_from(private_key_bytes.as_ref())
         .map(|pk| pk.sign(hash))
+}
+
+#[cfg(test)]
+mod helper_tests {
+    use super::*;
+
+    #[test]
+    fn test_android_notarize_hash_with_private_key_bytes() {
+        assert!(android_notarize_hash_with_private_key_bytes(
+            Exactly32Bytes::sample(),
+            &SignedTransactionIntentHash::sample()
+        )
+        .is_ok());
+    }
+
+    #[test]
+    fn test_android_sign_hash_with_private_key_bytes() {
+        assert!(android_sign_hash_with_private_key_bytes(
+            Exactly32Bytes::sample(),
+            &Hash::sample()
+        )
+        .is_ok());
+    }
 }

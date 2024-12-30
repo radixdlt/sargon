@@ -76,3 +76,10 @@ pub fn secure_storage_access_error_kind_is_manual_cancellation(
 ) -> bool {
     kind.into_internal().is_manual_cancellation()
 }
+
+#[uniffi::export]
+pub fn secure_storage_access_error_kind_to_string(
+    kind: SecureStorageAccessErrorKind,
+) -> String {
+    kind.into_internal().to_string()
+}

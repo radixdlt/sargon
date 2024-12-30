@@ -115,7 +115,9 @@ impl RadixConnectMobile {
 
         let is_in_flight_session = in_flight_session.is_some();
         let session = existing_session.or(in_flight_session).ok_or(
-            CommonError::RadixConnectMobileSessionNotFound { session_id },
+            CommonError::RadixConnectMobileSessionNotFound {
+                session_id: session_id.to_string(),
+            },
         )?;
 
         let is_success_response = wallet_response.response.is_success();
@@ -205,7 +207,9 @@ impl RadixConnectMobile {
     async fn load_session(&self, session_id: SessionID) -> Result<Session> {
         let session_bytes =
             self.session_storage.load_session(session_id).await?.ok_or(
-                CommonError::RadixConnectMobileSessionNotFound { session_id },
+                CommonError::RadixConnectMobileSessionNotFound {
+                    session_id: session_id.to_string(),
+                },
             )?;
         session_bytes.deserialize()
     }
@@ -292,7 +296,7 @@ mod tests {
                     Some(encoded_session.into())
                 })
                 .ok_or(CommonError::RadixConnectMobileSessionNotFound {
-                    session_id,
+                    session_id: session_id.to_string(),
                 })
         }
     }
