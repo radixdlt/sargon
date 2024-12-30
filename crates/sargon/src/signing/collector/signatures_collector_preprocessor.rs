@@ -4,7 +4,6 @@ pub(crate) struct SignaturesCollectorPreprocessor<S: Signable> {
     signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,
 }
 
-
 impl<S: Signable> SignaturesCollectorPreprocessor<S> {
     pub(super) fn new(
         signables_with_entities: IdentifiedVecOf<SignableWithEntities<S>>,

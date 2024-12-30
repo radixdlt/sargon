@@ -115,7 +115,6 @@ impl DerivationPathConstructors for DerivationPath {
     }
 }
 
-
 #[cfg(test)]
 mod basic_tests {
     use super::*;
@@ -206,7 +205,6 @@ mod basic_tests {
         );
     }
 }
-
 
 mod key_derivation_tests {
     use super::*;

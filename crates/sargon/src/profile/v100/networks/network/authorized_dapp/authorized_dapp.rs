@@ -106,8 +106,6 @@ impl Identifiable for AuthorizedDapp {
 
 pub type DappDefinitionAddress = AccountAddress;
 
-
-
 impl AuthorizedDapp {
     pub fn sample_mainnet_dashboard() -> Self {
         Self::new(

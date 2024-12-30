@@ -2,7 +2,6 @@ use radix_rust::prelude::IndexMap;
 
 use crate::prelude::*;
 
-
 pub(crate) fn to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
@@ -45,7 +44,6 @@ where
         .filter_map(Result::ok)
         .collect_vec()
 }
-
 
 /// A summary of the execution of the manifest and the information that helps
 /// wallets present the contents of a transaction.

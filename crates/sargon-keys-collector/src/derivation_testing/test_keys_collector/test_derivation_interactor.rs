@@ -58,7 +58,10 @@ impl TestDerivationInteractor {
     }
 
     pub fn fail() -> Self {
-        Self::with_mnemonic_loading(true, Arc::new(FailingMnemonicLoader::default()))
+        Self::with_mnemonic_loading(
+            true,
+            Arc::new(FailingMnemonicLoader::default()),
+        )
     }
 
     async fn do_derive(
@@ -129,9 +132,7 @@ impl TestDerivationInteractor {
                 }
                 let cloned_cloned_mnemonic_loading =
                     cloned_mnemonic_loading.clone();
-                cloned_cloned_mnemonic_loading
-                    .load_mnemonic(id)
-                    .await
+                cloned_cloned_mnemonic_loading.load_mnemonic(id).await
             },
         )
         .await

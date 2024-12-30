@@ -8,6 +8,7 @@ mod email_address;
 mod entity_kind;
 mod epoch;
 mod exactly_n_bytes;
+mod hidden_constructor;
 mod host_info;
 mod instant;
 mod intent_discriminator;
@@ -25,7 +26,6 @@ mod short_string;
 mod signatures;
 mod vector_image_type;
 mod version_type;
-mod hidden_constructor;
 
 pub use appearance_id::*;
 pub use bag_of_bytes::*;
