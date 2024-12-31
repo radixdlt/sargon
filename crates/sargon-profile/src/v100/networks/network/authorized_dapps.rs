@@ -5,18 +5,6 @@ decl_identified_vec_of!(
     AuthorizedDapp
 );
 
-pub(crate) trait ReferencedAccountRemoving {
-    fn remove_referenced_account(&mut self, account_address: &AccountAddress);
-}
-
-impl ReferencedAccountRemoving for AuthorizedDapps {
-    /// Remove referenced account from all the dApps
-    fn remove_referenced_account(&mut self, account_address: &AccountAddress) {
-        self.update_all_with(|dapp| {
-            dapp.remove_referenced_account(account_address);
-        })
-    }
-}
 
 impl HasSampleValues for AuthorizedDapps {
     /// A sample used to facilitate unit tests.

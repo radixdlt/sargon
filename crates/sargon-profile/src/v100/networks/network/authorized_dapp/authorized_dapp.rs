@@ -40,18 +40,6 @@ pub struct AuthorizedDapp {
     pub preferences: AuthorizedDappPreferences,
 }
 
-impl AuthorizedDapp {
-    /// Removes the referenced account for this dApp
-    pub(crate) fn remove_referenced_account(
-        &mut self,
-        account_address: &AccountAddress,
-    ) {
-        self.references_to_authorized_personas
-            .update_all_with(|persona| {
-                persona.remove_shared_account(account_address);
-            });
-    }
-}
 
 impl IsNetworkAware for AuthorizedDapp {
     fn network_id(&self) -> NetworkID {

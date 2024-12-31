@@ -163,22 +163,7 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
-    #[test]
-    fn append() {
-        let mut sut = SUT::sample();
-        assert!(!sut.append(Gateway::mainnet()));
-        assert!(!sut.append(Gateway::stokenet()));
-        assert_eq!(sut, SUT::sample());
-        assert!(sut.append(Gateway::kisharnet()));
-        assert_eq!(
-            sut,
-            SUT::new_with_other(
-                Gateway::mainnet(),
-                [Gateway::stokenet(), Gateway::kisharnet()]
-            )
-            .unwrap()
-        );
-    }
+   
 
     #[test]
     fn new_throw_gateways_discrepancy_other_should_not_contain_current() {
@@ -186,17 +171,6 @@ mod tests {
             SUT::new_with_other(Gateway::mainnet(), vec![Gateway::mainnet()]),
             Err(CommonError::GatewaysDiscrepancyOtherShouldNotContainCurrent)
         );
-    }
-
-    #[test]
-    fn change_current_to_current() {
-        let mut sut = SUT::default();
-        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
-        assert_eq!(
-            sut.change_current(Gateway::mainnet()),
-            ChangeGatewayOutcome::NoChange
-        );
-        assert_eq!(sut.current.network.id, NetworkID::Mainnet);
     }
 
     #[test]
@@ -242,61 +216,6 @@ mod tests {
             }
             "#,
         )
-    }
-
-    #[test]
-    fn deserialize_from_json_ignore_repetitions() {
-        let json = r#"
-        {
-                "current": "https://rcnet-v3.radixdlt.com/",
-                "saved": [
-                    {
-                        "network":
-                        {
-                            "name": "zabanet",
-                            "id": 14,
-                            "displayDescription": "RCnet-V3 (Test Network)"
-                        },
-                        "url": "https://rcnet-v3.radixdlt.com/"
-                    },
-                    {
-                        "network":
-                        {
-                            "name": "mainnet",
-                            "id": 1,
-                            "displayDescription": "Mainnet"
-                        },
-                        "url": "https://mainnet.radixdlt.com/"
-                    },
-                    {
-                        "network":
-                        {
-                            "name": "stokenet",
-                            "id": 2,
-                            "displayDescription": "Stokenet"
-                        },
-                        "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-                    },
-                    {
-                        "network":
-                        {
-                            "name": "different",
-                            "id": 11,
-                            "displayDescription": "All differs but Url is the same than stokenet"
-                        },
-                        "url": "https://babylon-stokenet-gateway.radixdlt.com/"
-                    }
-                ]
-            }
-        "#;
-
-        let sut = serde_json::from_str::<SUT>(json).unwrap();
-
-        let mut expected = SUT::new(Gateway::rcnet());
-        expected.append(Gateway::mainnet());
-        expected.append(Gateway::stokenet());
-
-        assert_eq!(sut, expected);
     }
 
     #[test]

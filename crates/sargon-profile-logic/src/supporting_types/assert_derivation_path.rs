@@ -18,7 +18,15 @@ impl AssertMatches {
     }
 }
 
-impl MatrixOfFactorInstances {
+pub trait HighestDerivationPathIndex {
+    fn highest_derivation_path_index(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        assert_matches: AssertMatches,
+    ) -> Option<HDPathComponent>;
+}
+
+impl HighestDerivationPathIndex for MatrixOfFactorInstances {
     fn highest_derivation_path_index(
         &self,
         factor_source_id: FactorSourceIDFromHash,
@@ -35,8 +43,8 @@ impl MatrixOfFactorInstances {
     }
 }
 
-impl SecuredEntityControl {
-    pub fn highest_derivation_path_index(
+impl HighestDerivationPathIndex for SecuredEntityControl {
+    fn highest_derivation_path_index(
         &self,
         factor_source_id: FactorSourceIDFromHash,
         assert_matches: AssertMatches,

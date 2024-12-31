@@ -1,45 +1,23 @@
 use crate::prelude::*;
 
-impl Profile {
-    #[cfg(not(tarpaulin_include))] // false negative
-    pub fn factor_source_by_id<F>(
+pub trait ProfileFactorSourceQuerying {
+    fn factor_source_by_id<F>(
         &self,
         id: impl Into<FactorSourceID>,
     ) -> Result<F>
     where
-        F: IsFactorSource,
-    {
-        let id = id.into();
-        self.factor_sources
-            .get_id(id)
-            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
-                bad_value: id.to_string(),
-            })
-            .and_then(|f| {
-                f.clone().try_into().map_err(|_| {
-                    CommonError::CastFactorSourceWrongKind {
-                        expected: <F as IsFactorSource>::kind().to_string(),
-                        found: f.factor_source_kind().to_string(),
-                    }
-                })
-            })
-    }
+        F: IsFactorSource;
 
-    pub fn device_factor_source_by_id(
+    fn device_factor_source_by_id(
         &self,
         id: &FactorSourceIDFromHash,
     ) -> Result<DeviceFactorSource> {
         self.factor_source_by_id(*id)
     }
 
-    pub fn device_factor_sources(&self) -> Vec<DeviceFactorSource> {
-        self.factor_sources
-            .iter()
-            .filter_map(|f| f.as_device().cloned())
-            .collect_vec()
-    }
+    fn device_factor_sources(&self) -> Vec<DeviceFactorSource>;
 
-    pub fn bdfs(&self) -> DeviceFactorSource {
+    fn bdfs(&self) -> DeviceFactorSource {
         let device_factor_sources = self.device_factor_sources();
         let explicit_main = device_factor_sources
             .clone()
@@ -63,8 +41,43 @@ impl Profile {
     }
 }
 
-impl Profile {
-    pub fn sample_no_device_factor_source() -> Self {
+impl ProfileFactorSourceQuerying for Profile {
+    fn factor_source_by_id<F>(&self, id: impl Into<FactorSourceID>) -> Result<F>
+    where
+        F: IsFactorSource,
+    {
+        let id = id.into();
+        self.factor_sources
+            .get_id(id)
+            .ok_or(CommonError::ProfileDoesNotContainFactorSourceWithID {
+                bad_value: id.to_string(),
+            })
+            .and_then(|f| {
+                f.clone().try_into().map_err(|_| {
+                    CommonError::CastFactorSourceWrongKind {
+                        expected: <F as IsFactorSource>::kind().to_string(),
+                        found: f.factor_source_kind().to_string(),
+                    }
+                })
+            })
+    }
+
+    fn device_factor_sources(&self) -> Vec<DeviceFactorSource> {
+        self.factor_sources
+            .iter()
+            .filter_map(|f| f.as_device().cloned())
+            .collect_vec()
+    }
+}
+
+pub trait ProfileSampleValuesWithSpecificFactorSources: Sized {
+    fn sample_no_device_factor_source() -> Self;
+    fn sample_no_babylon_device_factor_source() -> Self;
+    fn sample_no_factor_source_explicitly_marked_as_main() -> Self;
+}
+
+impl ProfileSampleValuesWithSpecificFactorSources for Profile {
+    fn sample_no_device_factor_source() -> Self {
         let networks = ProfileNetworks::sample();
         let mut header = Header::sample();
         header.content_hint = networks.content_hint();
@@ -76,7 +89,7 @@ impl Profile {
         )
     }
 
-    pub fn sample_no_babylon_device_factor_source() -> Self {
+    fn sample_no_babylon_device_factor_source() -> Self {
         let networks = ProfileNetworks::sample();
         let mut header = Header::sample();
         header.content_hint = networks.content_hint();
@@ -90,7 +103,7 @@ impl Profile {
         )
     }
 
-    pub fn sample_no_factor_source_explicitly_marked_as_main() -> Self {
+    fn sample_no_factor_source_explicitly_marked_as_main() -> Self {
         let mut profile = Profile::sample();
 
         let main_factors = profile

@@ -1,13 +1,18 @@
 use crate::prelude::*;
 
-impl Account {
+pub trait AccountVisibility {
+    fn mark_as_hidden(&mut self);
+    fn mark_as_tombstoned(&mut self);
+}
+
+impl AccountVisibility for Account {
     /// Marks the account as hidden
-    pub fn mark_as_hidden(&mut self) {
+    fn mark_as_hidden(&mut self) {
         self.flags.insert_flag(EntityFlag::HiddenByUser);
     }
 
     /// Marks the account as tombstoned
-    pub fn mark_as_tombstoned(&mut self) {
+    fn mark_as_tombstoned(&mut self) {
         self.flags.insert_flag(EntityFlag::TombstonedByUser);
         self.flags.remove_flag(&EntityFlag::HiddenByUser);
     }

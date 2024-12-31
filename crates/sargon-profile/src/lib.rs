@@ -7,6 +7,7 @@
 mod encrypted;
 mod mfa;
 mod profilesnapshot_version;
+mod samples;
 mod supporting_types;
 mod v100;
 
@@ -22,6 +23,7 @@ pub mod prelude {
     pub use crate::encrypted::*;
     pub use crate::mfa::*;
     pub use crate::profilesnapshot_version::*;
+    pub use crate::samples::*;
     pub use crate::supporting_types::*;
     pub use crate::v100::*;
 

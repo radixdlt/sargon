@@ -1,7 +1,4 @@
-use crate::{
-    AccessControllerAddress, AccountAddress, HasNodeId, IdentityAddress,
-    IsNetworkAware,
-};
+use crate::prelude::*;
 
 pub trait SamplesFromAccountAddress {
     fn sample_from_account_address(account_address: AccountAddress) -> Self;

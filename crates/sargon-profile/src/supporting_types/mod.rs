@@ -6,7 +6,9 @@ mod authorized_dapp_detailed;
 mod authorized_persona_detailed;
 mod detailed_authorized_personas;
 mod on_same_network_validating;
+mod agnostic_paths;
 
+pub use agnostic_paths::*;
 pub use account_for_display::*;
 pub use account_or_persona::*;
 pub use accounts_for_display::*;

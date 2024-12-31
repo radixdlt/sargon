@@ -3200,7 +3200,9 @@ dependencies = [
 name = "sargon-profile-logic"
 version = "1.2.1"
 dependencies = [
+ "derive_more",
  "identified-vec-of",
+ "itertools 0.12.0",
  "radix-common",
  "radix-common-derive",
  "radix-engine",
@@ -3215,6 +3217,8 @@ dependencies = [
  "sargon-hierarchical-deterministic",
  "sargon-profile",
  "sbor",
+ "serde",
+ "serde_json 1.0.108",
 ]
 
 [[package]]

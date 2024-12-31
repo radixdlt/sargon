@@ -1,9 +1,17 @@
 use crate::prelude::*;
 
-impl Header {
+pub trait HeaderUpdating {
+    fn update(
+        &mut self,
+        content_hint: ContentHint,
+        maybe_device_info: impl Into<Option<DeviceInfo>>,
+    );
+}
+
+impl HeaderUpdating for Header {
     /// Updates `last_modified`, `content_hint` and also `last_used_on_device` if
     /// it was specified.
-    pub fn update(
+    fn update(
         &mut self,
         content_hint: ContentHint,
         maybe_device_info: impl Into<Option<DeviceInfo>>,
@@ -16,10 +24,17 @@ impl Header {
     }
 }
 
-impl Profile {
+pub trait ProfileHeaderUpdating {
+    fn update_header(
+        &mut self,
+        maybe_device_info: impl Into<Option<DeviceInfo>>,
+    );
+}
+
+impl ProfileHeaderUpdating for Profile {
     /// Updates the header's fields: `last_modified`, `content_hint` and also
     /// `last_used_on_device` if it was specified.
-    pub fn update_header(
+    fn update_header(
         &mut self,
         maybe_device_info: impl Into<Option<DeviceInfo>>,
     ) {

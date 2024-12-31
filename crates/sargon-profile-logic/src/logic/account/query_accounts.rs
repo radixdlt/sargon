@@ -1,44 +1,27 @@
 use crate::prelude::*;
 
-impl Profile {
-    /// Returns the non-hidden accounts on the current network, empty if no accounts
-    /// on the network
-    pub fn accounts_on_current_network(&self) -> Result<Accounts> {
-        self.current_network().map(|n| n.accounts.visible())
-    }
+pub trait ProfileAccountsOnAllNetworksIncludingHidden {
+    fn accounts_on_all_networks_including_hidden(&self) -> Accounts;
+}
 
-    /// Returns the hidden accounts on the current network, empty if no hidden accounts
-    /// on the network
-    pub fn hidden_accounts_on_current_network(&self) -> Result<Accounts> {
-        self.current_network().map(|n| n.accounts.hidden())
-    }
-
+impl ProfileAccountsOnAllNetworksIncludingHidden for Profile {
     /// Returns **ALL** accounts - including hidden/deleted ones, on **ALL** networks.
-    pub fn accounts_on_all_networks_including_hidden(&self) -> Accounts {
+    fn accounts_on_all_networks_including_hidden(&self) -> Accounts {
         self.networks
             .iter()
             .flat_map(|n| n.accounts.clone().into_iter())
             .collect::<Accounts>()
     }
+}
 
-    /// Returns the non-hidden accounts on the current network as `AccountForDisplay`
-    pub fn accounts_for_display_on_current_network(
-        &self,
-    ) -> Result<AccountsForDisplay> {
-        self.accounts_on_current_network().map(|accounts| {
-            accounts
-                .iter()
-                .map(AccountForDisplay::from)
-                .collect::<AccountsForDisplay>()
-        })
-    }
+pub trait ProfileAccountByAddress {
+    fn account_by_address(&self, address: AccountAddress) -> Result<Account>;
+}
 
+impl ProfileAccountByAddress for Profile {
     /// Looks up the account by account address, returns Err if the account is
     /// unknown, will return a hidden, or tombstoned account if queried for.
-    pub fn account_by_address(
-        &self,
-        address: AccountAddress,
-    ) -> Result<Account> {
+    fn account_by_address(&self, address: AccountAddress) -> Result<Account> {
         for network in self.networks.iter() {
             if let Some(account) = network.accounts.get_id(address) {
                 return Ok(account.clone());
@@ -46,8 +29,17 @@ impl Profile {
         }
         Err(CommonError::UnknownAccount)
     }
+}
 
-    pub fn entity_by_address(
+pub trait ProfileEntityByAddress {
+    fn entity_by_address(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<AccountOrPersona>;
+}
+
+impl ProfileEntityByAddress for Profile {
+    fn entity_by_address(
         &self,
         entity_address: AddressOfAccountOrPersona,
     ) -> Result<AccountOrPersona> {
@@ -60,22 +52,17 @@ impl Profile {
                 CommonError::UnknownPersona
             })
     }
+}
 
-    pub fn get_entities_of_kind_on_network_in_key_space(
+pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
+    fn get_entities_of_kind_on_network_in_key_space(
         &self,
         entity_kind: CAP26EntityKind,
         network_id: NetworkID,
         key_space: KeySpace,
-    ) -> IndexSet<AccountOrPersona> {
-        self.networks
-            .get_id(network_id)
-            .map(|n| {
-                n.get_entities_of_kind_in_key_space(entity_kind, key_space)
-            })
-            .unwrap_or_default()
-    }
+    ) -> IndexSet<AccountOrPersona>;
 
-    pub fn get_unsecurified_entities_of_kind_on_network(
+    fn get_unsecurified_entities_of_kind_on_network(
         &self,
         entity_kind: CAP26EntityKind,
         network_id: NetworkID,
@@ -84,7 +71,7 @@ impl Profile {
             entity_kind,
             network_id,
             // We don't support unhardened paths really. CAP26 dictates all path components are hardened.
-            // And all out BIP44 LIKE paths from Olymlia are (contrary to BIP44) in fact hardened
+            // And all out BIP44 LIKE paths from Olympia are (contrary to BIP44) in fact hardened
             KeySpace::Unsecurified { is_hardened: true },
         )
         .into_iter()
@@ -102,7 +89,7 @@ impl Profile {
         .collect()
     }
 
-    pub fn unsecurified_accounts_on_network(
+    fn unsecurified_accounts_on_network(
         &self,
         network_id: NetworkID,
     ) -> IndexSet<UnsecurifiedEntity> {
@@ -112,7 +99,7 @@ impl Profile {
         )
     }
 
-    pub fn get_securified_entities_of_kind_on_network<
+    fn get_securified_entities_of_kind_on_network<
         E: IsSecurifiedEntity + HasEntityKind + TryFrom<AccountOrPersona>,
     >(
         &self,
@@ -128,11 +115,27 @@ impl Profile {
         .collect()
     }
 
-    pub fn securified_accounts_on_network(
+    fn securified_accounts_on_network(
         &self,
         network_id: NetworkID,
     ) -> IndexSet<SecurifiedAccount> {
         self.get_securified_entities_of_kind_on_network(network_id)
+    }
+}
+
+impl ProfileEntitiesOfKindOnNetworkInKeySpace for Profile {
+    fn get_entities_of_kind_on_network_in_key_space(
+        &self,
+        entity_kind: CAP26EntityKind,
+        network_id: NetworkID,
+        key_space: KeySpace,
+    ) -> IndexSet<AccountOrPersona> {
+        self.networks
+            .get_id(network_id)
+            .map(|n| {
+                n.get_entities_of_kind_in_key_space(entity_kind, key_space)
+            })
+            .unwrap_or_default()
     }
 }
 

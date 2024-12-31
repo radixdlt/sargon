@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use crate::types::samples::access_controller_address_samples::SamplesFromIdentityAddress;
+use once_cell::sync::Lazy;
 
 static ALL_PERSONA_SAMPLES: Lazy<[Persona; 8]> = Lazy::new(|| {
     [
@@ -132,7 +132,7 @@ impl UnsafeHardcodingDerivationPathAsPersona
     unsafe fn invalid_hard_coding_derivation_path_as_persona(&self) -> Self {
         unsafe {
             Self::new(
-                self.factor_source_id(),
+                self.factor_source_id.clone(),
                 HierarchicalDeterministicPublicKey::new(
                     self.public_key(),
                     self.derivation_path().as_persona(),

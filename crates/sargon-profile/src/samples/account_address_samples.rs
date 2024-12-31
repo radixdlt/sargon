@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::types::samples::{HasIndexedSampleValues, HasManySampleValues};
 
 impl HasIndexedSampleValues for AccountAddress {
     fn sample_at(index: usize) -> Self {

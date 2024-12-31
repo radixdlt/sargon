@@ -24,3 +24,7 @@ radix-transactions = { workspace = true }
 sbor = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+itertools = { workspace = true}
+serde = { workspace = true }
+serde_json = { workspace = true }

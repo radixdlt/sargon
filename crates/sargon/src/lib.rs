@@ -13,6 +13,7 @@
 
 mod gateway_api;
 mod home_cards;
+mod needs_a_new_home_dumping_ground;
 mod radix_connect;
 mod security_center;
 mod signing;
@@ -33,6 +34,7 @@ pub mod prelude {
 
     pub use crate::gateway_api::*;
     pub use crate::home_cards::*;
+    pub use crate::needs_a_new_home_dumping_ground::*;
     pub use crate::radix_connect::*;
     pub use crate::security_center::*;
     pub use crate::signing::*;
