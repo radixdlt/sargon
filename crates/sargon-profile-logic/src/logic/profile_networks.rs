@@ -401,5 +401,3 @@ mod profile_tests {
         assert!(profile.has_any_account_on_any_network())
     }
 }
-
-

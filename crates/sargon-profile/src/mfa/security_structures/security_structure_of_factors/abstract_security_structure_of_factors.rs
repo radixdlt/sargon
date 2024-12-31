@@ -1,6 +1,15 @@
 use crate::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, derive_more::Display)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Eq,
+    Hash,
+    Serialize,
+    Deserialize,
+    derive_more::Display,
+)]
 #[serde(rename_all = "camelCase")]
 #[display("{}", self.metadata.display_name)]
 pub struct AbstractSecurityStructure<FACTOR> {

@@ -5,7 +5,6 @@ decl_identified_vec_of!(
     AuthorizedDapp
 );
 
-
 impl HasSampleValues for AuthorizedDapps {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

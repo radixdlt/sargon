@@ -113,7 +113,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn with_network() {
         let network = ProfileNetwork::new(

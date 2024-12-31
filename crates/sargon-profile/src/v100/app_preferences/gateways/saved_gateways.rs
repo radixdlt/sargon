@@ -163,8 +163,6 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
 
-   
-
     #[test]
     fn new_throw_gateways_discrepancy_other_should_not_contain_current() {
         assert_eq!(

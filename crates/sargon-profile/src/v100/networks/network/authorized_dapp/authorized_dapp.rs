@@ -40,7 +40,6 @@ pub struct AuthorizedDapp {
     pub preferences: AuthorizedDappPreferences,
 }
 
-
 impl IsNetworkAware for AuthorizedDapp {
     fn network_id(&self) -> NetworkID {
         self.network_id

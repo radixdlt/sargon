@@ -78,10 +78,6 @@ impl ProfileNetworkEntitiesQuerying for ProfileNetwork {
                 .collect::<IndexSet<_>>(),
         }
     }
-
-
-
-  
 }
 
 #[cfg(test)]
