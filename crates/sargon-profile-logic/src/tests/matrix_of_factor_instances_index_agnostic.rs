@@ -2,6 +2,8 @@
 
 use crate::prelude::*;
 
+type SUT = MatrixOfFactorInstances;
+
 #[test]
 fn wrong_entity_kind() {
     let invalid = unsafe {

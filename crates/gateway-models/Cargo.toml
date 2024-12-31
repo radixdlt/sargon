@@ -13,6 +13,7 @@ sargon-addresses = { path = "../sargon-addresses" }
 # === RADIX DEPENDENCIES ===
 radix-engine-toolkit-common = { workspace = true }
 radix-transactions = { workspace = true }
+radix-engine-interface = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
 derive_more = { workspace = true }

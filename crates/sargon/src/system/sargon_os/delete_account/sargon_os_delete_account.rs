@@ -135,55 +135,7 @@ impl SargonOS {
     }
 }
 
-impl From<AccountResourcePreference>
-    for ScryptoAccountRemoveResourcePreferenceInput
-{
-    fn from(value: AccountResourcePreference) -> Self {
-        Self {
-            resource_address: value.resource_address.into(),
-        }
-    }
-}
 
-impl TryFrom<AccountAuthorizedDepositor>
-    for ScryptoAccountRemoveAuthorizedDepositorInput
-{
-    type Error = CommonError;
-    fn try_from(value: AccountAuthorizedDepositor) -> Result<Self> {
-        let resource_or_non_fungible = ResourceOrNonFungible::try_from(value)?;
-        Ok(resource_or_non_fungible.into())
-    }
-}
-
-impl TryFrom<AccountAuthorizedDepositor> for ResourceOrNonFungible {
-    type Error = CommonError;
-    fn try_from(value: AccountAuthorizedDepositor) -> Result<Self> {
-        match value {
-            AccountAuthorizedDepositor::ResourceBadge { resource_address } => {
-                Ok(Self::Resource {
-                    value: resource_address,
-                })
-            }
-            AccountAuthorizedDepositor::NonFungibleBadge {
-                resource_address,
-                non_fungible_id,
-            } => {
-                if let Ok(non_fungible_id) =
-                    NonFungibleLocalId::from_str(&non_fungible_id)
-                {
-                    Ok(Self::NonFungible {
-                        value: NonFungibleGlobalId::new_unchecked(
-                            resource_address,
-                            non_fungible_id,
-                        ),
-                    })
-                } else {
-                    Err(CommonError::InvalidNonFungibleLocalIDString)
-                }
-            }
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {

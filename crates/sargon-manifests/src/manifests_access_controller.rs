@@ -2,11 +2,16 @@ use radix_engine_interface::blueprints::access_controller::AccessControllerCreat
 
 use crate::prelude::*;
 
-impl TransactionManifest {
-    pub fn securify_unsecurified_entity<E: IsEntity>(
+pub trait TransactionManifestSecurifyEntity: Sized {
+    fn _securify_unsecurified_entity(
+        entity_address: AddressOfAccountOrPersona,
+        security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
+    ) -> Result<TransactionManifest>;
+
+    fn securify_unsecurified_entity<E: IsEntity>(
         entity: E,
         security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
-    ) -> Result<Self> {
+    ) -> Result<TransactionManifest> {
         let Ok(unsecurified) = entity.security_state().into_unsecured() else {
             return Err(CommonError::CannotSecurifyEntityItIsAlreadySecurifiedAccordingToProfile);
         };
@@ -22,7 +27,9 @@ impl TransactionManifest {
             security_structure_of_factor_instances,
         )
     }
+}
 
+impl TransactionManifestSecurifyEntity for TransactionManifest {
     fn _securify_unsecurified_entity(
         entity_address: AddressOfAccountOrPersona,
         security_structure_of_factor_instances: SecurityStructureOfFactorInstances,

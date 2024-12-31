@@ -18,10 +18,16 @@ impl HasSampleValues for SecurityStructuresOfFactorSources {
     }
 }
 
-impl Profile {
+pub trait ProfileSecurityStructuresOfFactorSources {
+    fn security_structures_of_factor_sources(
+        &self,
+    ) -> Result<SecurityStructuresOfFactorSources>;
+}
+
+impl ProfileSecurityStructuresOfFactorSources for Profile {
     /// Returns all the SecurityStructuresOfFactorSources,
     /// by trying to map FactorSourceID level -> FactorSource Level
-    pub fn security_structures_of_factor_sources(
+    fn security_structures_of_factor_sources(
         &self,
     ) -> Result<SecurityStructuresOfFactorSources> {
         self.app_preferences
@@ -38,14 +44,20 @@ impl Profile {
     }
 }
 
-impl Profile {
+pub trait ProfileSecurityShieldPrerequisitesStatus {
+    fn security_shield_prerequisites_status(
+        &self,
+    ) -> SecurityShieldPrerequisitesStatus;
+}
+
+impl ProfileSecurityShieldPrerequisitesStatus for Profile {
     /// Returns the status of the prerequisites for building a Security Shield.
     ///
     /// According to [definition][doc], a Security Shield can be built if the user has, asides from
     /// the Identity factor, "2 or more factors, one of which must be Hardware"
     ///
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3758063620/MFA+Rules+for+Factors+and+Security+Shields#Factor-Prerequisites
-    pub fn security_shield_prerequisites_status(
+    fn security_shield_prerequisites_status(
         &self,
     ) -> SecurityShieldPrerequisitesStatus {
         let factor_source_ids = self

@@ -14,7 +14,9 @@ pub mod prelude {
     pub use gateway_models::prelude::*;
     pub use identified_vec_of::prelude::*;
     pub use sargon_addresses::prelude::*;
+    pub use sargon_addresses::prelude::*;
     pub use sargon_core::prelude::*;
+    pub use sargon_core_utils::prelude::*;
     pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
     pub use sargon_profile::prelude::*;
@@ -31,6 +33,8 @@ pub mod prelude {
     pub use crate::manifests_create_tokens::*;
     pub use crate::modify_manifest::*;
     pub use crate::third_party_deposit_update::*;
+
+    pub use std::str::FromStr;
 
     pub(crate) use radix_engine::{
         blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,

@@ -23,6 +23,7 @@ mod types;
 pub mod prelude {
     pub use identified_vec_of::prelude::*;
     pub use sargon_addresses::prelude::*;
+    pub use sargon_clients::prelude::*;
     pub use sargon_core::prelude::*;
     pub use sargon_factor_instances_provider::prelude::*;
     pub use sargon_factors::prelude::*;

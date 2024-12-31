@@ -8,20 +8,27 @@ use radix_engine_interface::blueprints::account::{
     ACCOUNT_SET_RESOURCE_PREFERENCE_IDENT,
 };
 
-impl TransactionManifest {
-    pub fn third_party_deposit_update(
+pub trait TransactionManifestThirdPartyDepositUpdating: Sized {
+    fn third_party_deposit_update_by_delta(
+        owner: &AccountAddress,
+        delta: ThirdPartyDepositsDelta,
+    ) -> TransactionManifest;
+
+    fn third_party_deposit_update(
         owner: &AccountAddress,
         from: ThirdPartyDeposits,
         to: ThirdPartyDeposits,
-    ) -> Self {
+    ) -> TransactionManifest {
         let delta = ThirdPartyDepositsDelta::new(from, to);
         Self::third_party_deposit_update_by_delta(owner, delta)
     }
+}
 
-    pub fn third_party_deposit_update_by_delta(
+impl TransactionManifestThirdPartyDepositUpdating for TransactionManifest {
+    fn third_party_deposit_update_by_delta(
         owner: &AccountAddress,
         delta: ThirdPartyDepositsDelta,
-    ) -> Self {
+    ) -> TransactionManifest {
         let mut builder = ScryptoTransactionManifestBuilder::new();
 
         if let Some(deposit_rule) = delta.deposit_rule {

@@ -76,7 +76,8 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                 ],
             ),
             PerRecipientAssetTransfer::new(
-                AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap(),
+                OwnedOrThirdPartyAccountAddress::ThirdPartyAccount { value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap() }
+                ,
                 [PerRecipientFungibleTransfer::new(
                     ResourceAddress::sample_mainnet_xrd(),
                     Decimal192::from_str("987654.1234").unwrap(),
@@ -115,7 +116,9 @@ impl HasSampleValues for PerRecipientAssetTransfers {
             sender,
             [
                 PerRecipientAssetTransfer::new(
-                    recip0,
+                    OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                        value: recip0,
+                    },
                     [
                         PerRecipientFungibleTransfer::new(fung_0, 30, true, 18),
                         PerRecipientFungibleTransfer::new(fung_1, 3, true, 18),
@@ -140,7 +143,9 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                     ],
                 ),
                 PerRecipientAssetTransfer::new(
-                    recip1,
+                    OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                        value: recip1,
+                    },
                     [
                         PerRecipientFungibleTransfer::new(fung_0, 50, true, 18),
                         PerRecipientFungibleTransfer::new(fung_1, 5, true, 18),
@@ -301,15 +306,19 @@ mod tests {
                 PerAssetTransfersOfFungibleResource::new(
                     PerAssetFungibleResource::new(fung_0, 18),
                     [
-                        PerAssetFungibleTransfer::new(recip0, true, 30),
-                        PerAssetFungibleTransfer::new(recip1, true, 50),
+                        PerAssetFungibleTransfer::new(OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                            value: recip0 }, true, 30),
+                        PerAssetFungibleTransfer::new(OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                            value: recip1 }, true, 50),
                     ],
                 ),
                 PerAssetTransfersOfFungibleResource::new(
                     PerAssetFungibleResource::new(fung_1, 18),
                     [
-                        PerAssetFungibleTransfer::new(recip0, true, 3),
-                        PerAssetFungibleTransfer::new(recip1, true, 5),
+                        PerAssetFungibleTransfer::new(OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                            value: recip0 }, true, 3),
+                        PerAssetFungibleTransfer::new(OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                            value: recip1 }, true, 5),
                     ],
                 ),
             ],
@@ -318,7 +327,8 @@ mod tests {
                     nft_c0,
                     [
                         PerAssetNonFungibleTransfer::new(
-                            recip0,
+                            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                                value: recip0 },
                             true,
                             [
                                 NonFungibleLocalId::integer(40),
@@ -326,7 +336,8 @@ mod tests {
                             ],
                         ),
                         PerAssetNonFungibleTransfer::new(
-                            recip1,
+                            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                                value: recip1},
                             true,
                             [
                                 NonFungibleLocalId::integer(34),
@@ -339,7 +350,8 @@ mod tests {
                     nft_c1,
                     [
                         PerAssetNonFungibleTransfer::new(
-                            recip0,
+                            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                                value: recip0},
                             true,
                             [
                                 NonFungibleLocalId::integer(21),
@@ -347,7 +359,8 @@ mod tests {
                             ],
                         ),
                         PerAssetNonFungibleTransfer::new(
-                            recip1,
+                            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+                                value: recip1},
                             true,
                             [
                                 NonFungibleLocalId::integer(15),

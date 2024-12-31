@@ -121,9 +121,72 @@ pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
     ) -> IndexSet<SecurifiedAccount> {
         self.get_securified_entities_of_kind_on_network(network_id)
     }
+
+    fn unsecurified_personas_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<UnsecurifiedEntity> {
+        self.get_unsecurified_entities_of_kind_on_network(
+            CAP26EntityKind::Identity,
+            network_id,
+        )
+    }
+
+    fn securified_personas_on_network(
+        &self,
+        network_id: NetworkID,
+    ) -> IndexSet<SecurifiedPersona> {
+        self.get_securified_entities_of_kind_on_network(network_id)
+    }
+
+    /// Returns the non-hidden personas on the current network, empty if no personas
+    /// on the network
+    fn personas_on_current_network(&self) -> Result<Personas>;
+
+    /// Returns the hidden personas on the current network, empty if no hidden personas
+    /// on the network
+    fn hidden_personas_on_current_network(&self) -> Result<Personas>;
+
+    /// Returns **ALL** personas - including hidden/deleted ones, on **ALL** networks.
+    fn personas_on_all_networks_including_hidden(&self) -> Personas;
+
+    /// Looks up the persona by identity address, returns Err if the persona is
+    /// unknown, will return a hidden persona if queried for.
+    fn persona_by_address(&self, address: IdentityAddress) -> Result<Persona>;
 }
 
 impl ProfileEntitiesOfKindOnNetworkInKeySpace for Profile {
+    /// Returns the non-hidden personas on the current network, empty if no personas
+    /// on the network
+    fn personas_on_current_network(&self) -> Result<Personas> {
+        self.current_network().map(|n| n.personas.non_hidden())
+    }
+
+    /// Returns the hidden personas on the current network, empty if no hidden personas
+    /// on the network
+    fn hidden_personas_on_current_network(&self) -> Result<Personas> {
+        self.current_network().map(|n| n.personas.hidden())
+    }
+
+    /// Returns **ALL** personas - including hidden/deleted ones, on **ALL** networks.
+    fn personas_on_all_networks_including_hidden(&self) -> Personas {
+        self.networks
+            .iter()
+            .flat_map(|n| n.personas.clone().into_iter())
+            .collect::<Personas>()
+    }
+
+    /// Looks up the persona by identity address, returns Err if the persona is
+    /// unknown, will return a hidden persona if queried for.
+    fn persona_by_address(&self, address: IdentityAddress) -> Result<Persona> {
+        for network in self.networks.iter() {
+            if let Some(persona) = network.personas.get_id(address) {
+                return Ok(persona.clone());
+            }
+        }
+        Err(CommonError::UnknownPersona)
+    }
+
     fn get_entities_of_kind_on_network_in_key_space(
         &self,
         entity_kind: CAP26EntityKind,

@@ -1,29 +1,11 @@
 [package]
-name = "sargon"
+name = "sargon-drivers"
 version = "1.2.1"
 edition = "2021"
-build = "build.rs"
-
-[[test]]
-name = "vectors"
-
-[lib]
-crate-type = ["staticlib", "cdylib", "lib"]
 
 [dependencies]
 # === SARGON CRATES ===
 sargon-core = { path = "../sargon-core" }
-identified-vec-of = { path = "../identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
-sargon-factors = { path = "../sargon-factors" }
-sargon-keys-collector = { path = "../sargon-keys-collector" }
-sargon-addresses = { path = "../sargon-addresses" }
-sargon-transaction-models = { path = "../sargon-transaction-models" }
-sargon-manifests = { path = "../sargon-manifests" }
-sargon-profile = { path = "../sargon-profile" }
-sargon-factor-instances-provider = { path = "../sargon-factor-instances-provider" }
-gateway-models = { path = "../gateway-models" }
-sargon-clients = { path = "../sargon-clients" }
 
 # === RADIX DEPENDENCIES ===
 radix-engine = { workspace = true }
@@ -70,19 +52,3 @@ thiserror = { workspace = true }
 url = { workspace = true }
 uuid = { workspace = true }
 zeroize = { workspace = true }
-
-# Fixes nasty iOS bug "_kSecMatchSubjectWholeString", see https://github.com/kornelski/rust-security-framework/issues/203
-# This is a workaround to fix a bug with version 2.11.0 that added some symbols that are not available on iOS
-# The bug is fixed already but the fix is not released yet. https://github.com/kornelski/rust-security-framework/pull/204
-[target.'cfg(target_os = "ios")'.dependencies]
-security-framework = { version = "=2.10" }
-security-framework-sys = "=2.10.0"
-
-[dev-dependencies]
-actix-rt = { workspace = true }
-
-[build-dependencies]
-cargo_toml = { workspace = true }
-
-[lints.rust]
-unexpected_cfgs = { level = "forbid", check-cfg = ['cfg(tarpaulin_include)'] }

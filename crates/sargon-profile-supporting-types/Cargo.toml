@@ -1,5 +1,5 @@
 [package]
-name = "sargon-profile-logic"
+name = "sargon-profile-supporting-types"
 version = "1.2.1"
 edition = "2021"
 
@@ -11,7 +11,6 @@ sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-determinist
 sargon-factors = { path = "../sargon-factors" }
 sargon-addresses = { path = "../sargon-addresses" }
 sargon-profile = { path = "../sargon-profile" }
-sargon-profile-supporting-types = { path = "../sargon-profile-supporting-types" }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

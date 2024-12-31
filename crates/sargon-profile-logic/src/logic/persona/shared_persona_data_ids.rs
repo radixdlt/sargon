@@ -1,8 +1,12 @@
 use crate::prelude::*;
 use radix_rust::prelude::IndexSet;
 
-impl SharedPersonaData {
-    pub fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID> {
+pub trait SharedPersonaDataIdsOfEntries {
+    fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID>;
+}
+
+impl SharedPersonaDataIdsOfEntries for SharedPersonaData {
+    fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID> {
         let mut full_ids = IndexSet::<PersonaDataEntryID>::new();
         if let Some(name) = &self.name {
             let _ = full_ids.insert(*name);

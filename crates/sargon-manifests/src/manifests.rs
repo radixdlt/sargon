@@ -1,10 +1,17 @@
 use crate::prelude::*;
 
-impl TransactionManifest {
-    pub fn faucet(
+pub trait TransactionManifestFaucet: Sized {
+    fn faucet(
         include_lock_fee_instruction: bool,
         address_of_receiving_account: &AccountAddress,
-    ) -> Self {
+    ) -> TransactionManifest;
+}
+
+impl TransactionManifestFaucet for TransactionManifest {
+    fn faucet(
+        include_lock_fee_instruction: bool,
+        address_of_receiving_account: &AccountAddress,
+    ) -> TransactionManifest {
         let mut builder = ScryptoTransactionManifestBuilder::new();
 
         if include_lock_fee_instruction {
@@ -23,10 +30,32 @@ impl TransactionManifest {
             address_of_receiving_account.network_id(),
         )
     }
+}
 
-    pub fn marking_account_as_dapp_definition_type(
+pub trait TransactionManifestMetadataSetting: Sized {
+    fn set_metadata<A>(
+        address: &A,
+        key: MetadataKey,
+        value: impl ScryptoToMetadataEntry,
+    ) -> TransactionManifest
+    where
+        A: IntoScryptoAddress;
+
+    fn set_metadata_on_builder<A>(
+        address: &A,
+        key: MetadataKey,
+        value: impl ScryptoToMetadataEntry,
+        builder: ScryptoTransactionManifestBuilder,
+    ) -> ScryptoTransactionManifestBuilder
+    where
+        A: IntoScryptoAddress,
+    {
+        builder.set_metadata(address.scrypto(), key, value)
+    }
+
+    fn marking_account_as_dapp_definition_type(
         account_address: &AccountAddress,
-    ) -> Self {
+    ) -> TransactionManifest {
         Self::set_metadata(
             account_address,
             MetadataKey::AccountType,
@@ -34,10 +63,10 @@ impl TransactionManifest {
         )
     }
 
-    pub fn set_owner_keys_hashes(
+    fn set_owner_keys_hashes(
         address_of_account_or_persona: &AddressOfAccountOrPersona,
         owner_key_hashes: Vec<PublicKeyHash>,
-    ) -> Self {
+    ) -> TransactionManifest {
         let builder = Self::set_owner_keys_hashes_on_builder(
             address_of_account_or_persona,
             owner_key_hashes,
@@ -49,7 +78,7 @@ impl TransactionManifest {
         )
     }
 
-    pub fn set_owner_keys_hashes_on_builder(
+    fn set_owner_keys_hashes_on_builder(
         address_of_account_or_persona: &AddressOfAccountOrPersona,
         owner_key_hashes: Vec<PublicKeyHash>,
         builder: ScryptoTransactionManifestBuilder,
@@ -79,11 +108,39 @@ impl TransactionManifest {
                 .map(ScryptoNonFungibleLocalId::from),
         )
     }
+}
 
-    pub fn stake_claims(
+impl TransactionManifestMetadataSetting for TransactionManifest {
+    fn set_metadata<A>(
+        address: &A,
+        key: MetadataKey,
+        value: impl ScryptoToMetadataEntry,
+    ) -> TransactionManifest
+    where
+        A: IntoScryptoAddress,
+    {
+        let builder = Self::set_metadata_on_builder(
+            address,
+            key,
+            value,
+            ScryptoTransactionManifestBuilder::new(),
+        );
+        TransactionManifest::sargon_built(builder, address.network_id())
+    }
+}
+
+pub trait TransactionManifestStakeClaim: Sized {
+    fn stake_claims(
         owner: &AccountAddress,
         stake_claims: Vec<StakeClaim>,
-    ) -> Self {
+    ) -> TransactionManifest;
+}
+
+impl TransactionManifestStakeClaim for TransactionManifest {
+    fn stake_claims(
+        owner: &AccountAddress,
+        stake_claims: Vec<StakeClaim>,
+    ) -> TransactionManifest {
         let account_address = owner;
         let network_id = account_address.network_id();
         if stake_claims
@@ -134,42 +191,10 @@ impl TransactionManifest {
     }
 }
 
-impl TransactionManifest {
-    fn set_metadata<A>(
-        address: &A,
-        key: MetadataKey,
-        value: impl ScryptoToMetadataEntry,
-    ) -> Self
-    where
-        A: IntoScryptoAddress,
-    {
-        let builder = Self::set_metadata_on_builder(
-            address,
-            key,
-            value,
-            ScryptoTransactionManifestBuilder::new(),
-        );
-        TransactionManifest::sargon_built(builder, address.network_id())
-    }
-
-    fn set_metadata_on_builder<A>(
-        address: &A,
-        key: MetadataKey,
-        value: impl ScryptoToMetadataEntry,
-        builder: ScryptoTransactionManifestBuilder,
-    ) -> ScryptoTransactionManifestBuilder
-    where
-        A: IntoScryptoAddress,
-    {
-        builder.set_metadata(address.scrypto(), key, value)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use pretty_assertions::{assert_eq, assert_ne};
-    use rand::Rng;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use crate::{factor_instances_provider::next_index_assigner, prelude::*};
 
 /// A coordinator between a cache, an optional profile and the KeysCollector.
 ///

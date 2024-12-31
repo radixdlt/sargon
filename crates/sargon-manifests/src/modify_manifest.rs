@@ -52,10 +52,46 @@ where
     instruction[0].clone()
 }
 
-impl TransactionManifest {
+pub trait TransactionManifestModifying: Sized {
+    fn modify_add_guarantees<I>(
+        self,
+        guarantees: I,
+    ) -> Result<TransactionManifest>
+    where
+        I: IntoIterator<Item = TransactionGuarantee>;
+
+    fn modify_add_guarantees_vec(
+        self,
+        guarantees: Vec<TransactionGuarantee>,
+    ) -> Result<TransactionManifest> {
+        self.modify_add_guarantees(guarantees)
+    }
+
+    fn modify_add_lock_fee(
+        self,
+        address_of_fee_payer: &AccountAddress,
+        fee: Option<Decimal192>,
+    ) -> Self {
+        let fee = fee.unwrap_or(default_fee());
+        let instruction = single(|b| b.lock_fee(address_of_fee_payer, fee));
+        self.prepend_instruction(instruction)
+    }
+
+    fn prepend_instruction(self, instruction: ScryptoInstruction) -> Self {
+        self.insert_instruction(InstructionPosition::First, instruction)
+    }
+
+    fn insert_instruction(
+        self,
+        position: InstructionPosition,
+        instruction: ScryptoInstruction,
+    ) -> Self;
+}
+
+impl TransactionManifestModifying for TransactionManifest {
     /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
     /// term for `assert_worktop_contains`.
-    pub fn modify_add_guarantees<I>(
+    fn modify_add_guarantees<I>(
         self,
         guarantees: I,
     ) -> Result<TransactionManifest>
@@ -110,27 +146,6 @@ impl TransactionManifest {
         }
 
         Ok(manifest)
-    }
-
-    pub fn modify_add_guarantees_vec(
-        self,
-        guarantees: Vec<TransactionGuarantee>,
-    ) -> Result<TransactionManifest> {
-        self.modify_add_guarantees(guarantees)
-    }
-
-    pub fn modify_add_lock_fee(
-        self,
-        address_of_fee_payer: &AccountAddress,
-        fee: Option<Decimal192>,
-    ) -> Self {
-        let fee = fee.unwrap_or(default_fee());
-        let instruction = single(|b| b.lock_fee(address_of_fee_payer, fee));
-        self.prepend_instruction(instruction)
-    }
-
-    fn prepend_instruction(self, instruction: ScryptoInstruction) -> Self {
-        self.insert_instruction(InstructionPosition::First, instruction)
     }
 
     fn insert_instruction(

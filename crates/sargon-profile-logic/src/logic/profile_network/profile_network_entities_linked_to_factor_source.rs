@@ -1,8 +1,16 @@
 use crate::prelude::*;
 
-impl ProfileNetwork {
+pub trait ProfileNetworkQueryEntitiesLinkedToFactorSource {
+    fn entities_linked_to_factor_source(
+        &self,
+        factor_source: FactorSource,
+        integrity: FactorSourceIntegrity,
+    ) -> Result<EntitiesLinkedToFactorSource>;
+}
+
+impl ProfileNetworkQueryEntitiesLinkedToFactorSource for ProfileNetwork {
     /// Returns the entities linked to a given `FactorSource` on the current `ProfileNetwork`.
-    pub fn entities_linked_to_factor_source(
+    fn entities_linked_to_factor_source(
         &self,
         factor_source: FactorSource,
         integrity: FactorSourceIntegrity,

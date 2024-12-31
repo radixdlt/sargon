@@ -1,6 +1,26 @@
 use crate::prelude::*;
 
-impl AuthorizedPersonaSimple {
+pub trait AuthorizedPersonaSimpleQueryState {
+    fn accounts_for_display(
+        &self,
+        non_hidden_accounts: &Accounts,
+    ) -> Result<Option<AccountsForDisplay>>;
+
+    fn pick_persona_data_from_full(
+        &self,
+        full: &PersonaData,
+    ) -> Result<PersonaData>;
+
+    fn persona_from(&self, non_hidden_personas: &Personas) -> Result<Persona>;
+
+    fn detailed(
+        &self,
+        non_hidden_personas: &Personas,
+        non_hidden_accounts: &Accounts,
+    ) -> Result<AuthorizedPersonaDetailed>;
+}
+
+impl AuthorizedPersonaSimpleQueryState for AuthorizedPersonaSimple {
     fn accounts_for_display(
         &self,
         non_hidden_accounts: &Accounts,
@@ -129,8 +149,17 @@ impl AuthorizedPersonaSimple {
     }
 }
 
-impl ProfileNetwork {
-    pub fn details_for_authorized_dapp(
+pub trait ProfileNetworkDetailsForAuthorizedDapp:
+    ProfileNetworkEntitiesQuerying
+{
+    fn details_for_authorized_dapp(
+        &self,
+        dapp: &AuthorizedDapp,
+    ) -> Result<AuthorizedDappDetailed>;
+}
+
+impl ProfileNetworkDetailsForAuthorizedDapp for ProfileNetwork {
+    fn details_for_authorized_dapp(
         &self,
         dapp: &AuthorizedDapp,
     ) -> Result<AuthorizedDappDetailed> {

@@ -1,10 +1,25 @@
 use crate::prelude::*;
 
+use radix_engine_interface::blueprints::account::{
+    AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
+    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
+};
+
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct AccountResourcePreference {
     pub resource_address: ResourceAddress,
     #[serde(rename = "resource_preference_rule")]
     pub status: AccountResourcePreferenceRule,
+}
+
+impl From<AccountResourcePreference>
+    for ScryptoAccountRemoveResourcePreferenceInput
+{
+    fn from(value: AccountResourcePreference) -> Self {
+        Self {
+            resource_address: value.resource_address.into(),
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
