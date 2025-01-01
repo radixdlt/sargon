@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-pub type DappDefinitionAddress = AccountAddress;
-
 impl GatewayClient {
     /// Fetched the XRD balance of account of `address`, returns `None` if
     /// it has no balance.

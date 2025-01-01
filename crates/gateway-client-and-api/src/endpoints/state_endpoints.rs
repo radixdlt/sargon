@@ -8,7 +8,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/StateEntityDetails
-    pub(crate) async fn state_entity_details(
+    pub async fn state_entity_details(
         &self,
         request: StateEntityDetailsRequest,
     ) -> Result<StateEntityDetailsResponse> {
@@ -24,7 +24,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityFungiblesPage
-    pub(crate) async fn state_entity_page_fungibles(
+    pub async fn state_entity_page_fungibles(
         &self,
         request: StateEntityPageFungiblesRequest,
     ) -> Result<PageResponse<FungibleResourcesCollectionItem>> {
@@ -41,7 +41,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungiblesPage
-    pub(crate) async fn state_entity_page_non_fungibles(
+    pub async fn state_entity_page_non_fungibles(
         &self,
         request: StateEntityPageNonFungiblesRequest,
     ) -> Result<PageResponse<NonFungibleResourcesCollectionItem>> {
@@ -58,7 +58,7 @@ impl GatewayClient {
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleResourceVaultPage
     #[allow(dead_code)]
-    pub(crate) async fn state_entity_page_non_fungible_vaults(
+    pub async fn state_entity_page_non_fungible_vaults(
         &self,
         request: StateEntityPageNonFungibleVaultsRequest,
     ) -> Result<
@@ -80,7 +80,7 @@ impl GatewayClient {
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleIdsPage
     #[allow(dead_code)]
-    pub(crate) async fn state_entity_page_non_fungible_vault_ids(
+    pub async fn state_entity_page_non_fungible_vault_ids(
         &self,
         request: StateEntityPageNonFungibleVaultIdsRequest,
     ) -> Result<PageResponse<NonFungibleLocalId>> {
@@ -97,7 +97,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/AccountResourcePreferencesPage
-    pub(crate) async fn account_page_resource_preferences(
+    pub async fn account_page_resource_preferences(
         &self,
         request: AccountPageResourcePreferencesRequest,
     ) -> Result<PageResponse<AccountResourcePreference>> {
@@ -112,7 +112,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/AccountAuthorizedDepositorsPage
-    pub(crate) async fn account_page_authorized_depositors(
+    pub async fn account_page_authorized_depositors(
         &self,
         request: AccountPageAuthorizedDepositorsRequest,
     ) -> Result<PageResponse<AccountAuthorizedDepositor>> {
@@ -129,7 +129,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/NonFungibleLocation
-    pub(crate) async fn state_non_fungible_location(
+    pub async fn state_non_fungible_location(
         &self,
         request: StateNonFungibleLocationRequest,
     ) -> Result<StateNonFungibleLocationResponse> {

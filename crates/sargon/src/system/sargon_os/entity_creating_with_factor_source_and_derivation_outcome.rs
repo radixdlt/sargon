@@ -61,6 +61,21 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
         ))
     }
 
+    async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
+        get_name: impl Fn(u32) -> DisplayName, // name of account at index
+    ) -> Result<(
+        FactorSourceID,
+        Accounts,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )>;
+
     async fn create_unsaved_accounts_with_factor_source(
         &self,
         factor_source: FactorSource,
@@ -80,59 +95,6 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
         )
         .await
         .map(|(x, y, z, _)| (x, y, z))
-    }
-
-    async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
-        &self,
-        factor_source: FactorSource,
-        network_id: NetworkID,
-        count: u16,
-        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
-        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
-        get_name: impl Fn(u32) -> DisplayName, // name of account at index
-    ) -> Result<(
-        FactorSourceID,
-        Accounts,
-        InstancesInCacheConsumer,
-        FactorInstancesProviderOutcomeForFactor,
-    )> {
-        let number_of_accounts_on_network = self
-            .networks
-            .get_id(network_id)
-            .map(|n| n.accounts.len())
-            .unwrap_or(0);
-
-        let (factor_source_id, accounts, instances_in_cache_consumer, derivation_outcome) = self
-            .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
-                factor_source,
-                network_id,
-                count,
-                factor_instances_cache_client,
-                key_derivation_interactor,
-                get_name,
-            )
-            .await?;
-
-        let accounts_with_appearance_ids_set = accounts
-            .into_iter()
-            .enumerate()
-            .map(|(offset, account)| {
-                let mut account = account;
-                let appearance_id =
-                    AppearanceID::from_number_of_accounts_on_network(
-                        number_of_accounts_on_network + offset,
-                    );
-                account.appearance_id = appearance_id;
-                account
-            })
-            .collect::<Accounts>();
-
-        Ok((
-            factor_source_id,
-            accounts_with_appearance_ids_set,
-            instances_in_cache_consumer,
-            derivation_outcome,
-        ))
     }
 
     async fn create_unsaved_persona_with_factor_source_with_derivation_outcome(
@@ -204,6 +166,59 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
 }
 
 impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
+    async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        count: u16,
+        factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
+        key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
+        get_name: impl Fn(u32) -> DisplayName, // name of account at index
+    ) -> Result<(
+        FactorSourceID,
+        Accounts,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
+        let number_of_accounts_on_network = self
+            .networks
+            .get_id(network_id)
+            .map(|n| n.accounts.len())
+            .unwrap_or(0);
+
+        let (factor_source_id, accounts, instances_in_cache_consumer, derivation_outcome) = self
+            .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
+                factor_source,
+                network_id,
+                count,
+                factor_instances_cache_client,
+                key_derivation_interactor,
+                get_name,
+            )
+            .await?;
+
+        let accounts_with_appearance_ids_set = accounts
+            .into_iter()
+            .enumerate()
+            .map(|(offset, account)| {
+                let mut account = account;
+                let appearance_id =
+                    AppearanceID::from_number_of_accounts_on_network(
+                        number_of_accounts_on_network + offset,
+                    );
+                account.appearance_id = appearance_id;
+                account
+            })
+            .collect::<Accounts>();
+
+        Ok((
+            factor_source_id,
+            accounts_with_appearance_ids_set,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ))
+    }
+
     /// Creates `count` many new virtual entities of type `E` on `network_id` with `factor_source` as the factor source.
     /// Setting the names according to `get_name`, loading pre-derived FactorInstances from the
     /// FactorInstancesCache if possible, else derives more using the FactorInstancesProvider.

@@ -20,6 +20,7 @@ path = "src/bindgen/bin.rs"
 # === SARGON CRATES ===
 sargon-core = { path = "../sargon-core" }
 sargon = { path = "../sargon" }
+sargon-manifests = { path = "../sargon-manifests" }
 sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" }
 
 # === RADIX DEPENDENCIES ===

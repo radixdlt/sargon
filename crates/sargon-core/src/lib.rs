@@ -3,6 +3,7 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
+mod appendable_collection;
 mod encryption;
 mod has_sample_values;
 mod hash;
@@ -12,7 +13,6 @@ mod metadata;
 mod network_id;
 mod secure_random_bytes;
 mod types;
-mod appendable_collection;
 mod unsafe_id_stepper;
 mod unsigned_ints;
 
@@ -26,10 +26,10 @@ pub mod prelude {
     pub use identified_vec_of::prelude::*;
     pub use sargon_core_utils::prelude::*;
 
+    pub use crate::appendable_collection::*;
     pub use crate::encryption::*;
     pub use crate::has_sample_values::*;
     pub use crate::hash::*;
-    pub use crate::appendable_collection::*;
     pub use crate::image_url_utils::*;
     pub use crate::is_network_aware::*;
     pub use crate::metadata::*;

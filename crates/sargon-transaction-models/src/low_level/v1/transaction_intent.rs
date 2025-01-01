@@ -9,6 +9,12 @@ pub struct TransactionIntent {
     pub message: Message,
 }
 
+impl From<SignedIntent> for TransactionIntent {
+    fn from(val: SignedIntent) -> Self {
+        val.intent
+    }
+}
+
 impl TransactionIntent {
     pub fn new(
         header: TransactionHeader,

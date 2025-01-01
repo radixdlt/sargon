@@ -7,7 +7,6 @@ pub trait TestDerivationInteractorFromSecureStorageClient: Sized {
     ) -> Self;
 }
 
-
 impl TestDerivationInteractorFromSecureStorageClient
     for TestDerivationInteractor
 {

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-pub type DappDefinitionAddress = AccountAddress;
-
 /// A connection made between a Radix Dapp and the user.
 #[derive(
     Serialize,

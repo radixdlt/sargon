@@ -23,7 +23,6 @@ impl AppendableCollection for FactorInstances {
     }
 }
 
-
 impl FactorInstances {
     pub fn extend(
         &mut self,

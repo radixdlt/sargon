@@ -21,10 +21,14 @@ impl WellKnownClient {
     }
 }
 
-impl NetworkRequest {
-    fn get_well_known(url: Url) -> Self {
+pub trait NetworkRequestWellKnownFile {
+    fn get_well_known(url: Url) -> NetworkRequest;
+}
+
+impl NetworkRequestWellKnownFile for NetworkRequest {
+    fn get_well_known(url: Url) -> NetworkRequest {
         let well_known_url = url.join(SUFFIX_WELL_KNOWN_FILE).unwrap();
-        NetworkRequest::new_get(well_known_url)
+        Self::new_get(well_known_url)
     }
 }
 

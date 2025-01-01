@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use crate::{prelude::*, profile};
+use crate::prelude::*;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.

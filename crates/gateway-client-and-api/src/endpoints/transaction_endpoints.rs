@@ -8,7 +8,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionConstruction
-    pub(crate) async fn transaction_construction(&self) -> Result<LedgerState> {
+    pub async fn transaction_construction(&self) -> Result<LedgerState> {
         self.post_empty(
             "transaction/construction",
             |response: TransactionConstructionResponse| {
@@ -26,7 +26,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionPreview
-    pub(crate) async fn transaction_preview(
+    pub async fn transaction_preview(
         &self,
         request: TransactionPreviewRequest,
     ) -> Result<TransactionPreviewResponse> {
@@ -41,7 +41,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionPreviewV2
-    pub(crate) async fn transaction_preview_v2(
+    pub async fn transaction_preview_v2(
         &self,
         request: TransactionPreviewRequestV2,
     ) -> Result<TransactionPreviewResponseV2> {
@@ -53,7 +53,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionSubmit
-    pub(crate) async fn transaction_submit(
+    pub async fn transaction_submit(
         &self,
         request: TransactionSubmitRequest,
     ) -> Result<TransactionSubmitResponse> {
@@ -65,7 +65,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionStatus
-    pub(crate) async fn transaction_status(
+    pub async fn transaction_status(
         &self,
         request: TransactionStatusRequest,
     ) -> Result<TransactionStatusResponse> {
@@ -79,7 +79,7 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionSubintentStatus
-    pub(crate) async fn subintent_status(
+    pub async fn subintent_status(
         &self,
         request: SubintentStatusRequest,
     ) -> Result<SubintentStatusResponse> {

@@ -48,7 +48,7 @@ pub mod prelude {
     };
 
     pub(crate) use sargon_uniffi_conversion_macros::*;
-
+    pub(crate) use sargon_manifests::prelude::*;
     pub(crate) use sargon::prelude::{
         DeserializeBytes, DeserializeStr, HasSampleValues, HashMap, HashSet,
         SerializeToBytes, SerializeToString,

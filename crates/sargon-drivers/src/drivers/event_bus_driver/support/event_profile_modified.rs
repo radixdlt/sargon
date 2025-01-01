@@ -69,19 +69,17 @@ impl HasEventKind for EventProfileModified {
     }
 }
 
-pub trait IsProfileModifiedEvent {
-    type Address: Clone + Eq + StdHash;
+pub trait IsProfileModifiedEvent<Address: Eq + std::hash::Hash> {
     fn profile_modified_event(
         is_update: bool,
-        addresses: IndexSet<Self::Address>,
+        addresses: IndexSet<Address>,
     ) -> Option<EventProfileModified>;
 }
 
-impl IsProfileModifiedEvent for Account {
-    type Address = AccountAddress;
+impl IsProfileModifiedEvent<AccountAddress> for Account {
     fn profile_modified_event(
         is_update: bool,
-        addresses: IndexSet<Self::Address>,
+        addresses: IndexSet<AccountAddress>,
     ) -> Option<EventProfileModified> {
         let address = addresses.iter().last().cloned()?;
         let addresses = addresses.clone().into_iter().collect_vec();
@@ -103,11 +101,10 @@ impl IsProfileModifiedEvent for Account {
     }
 }
 
-impl IsProfileModifiedEvent for Persona {
-    type Address = IdentityAddress;
+impl IsProfileModifiedEvent<IdentityAddress> for Persona {
     fn profile_modified_event(
         is_update: bool,
-        addresses: IndexSet<Self::Address>,
+        addresses: IndexSet<IdentityAddress>,
     ) -> Option<EventProfileModified> {
         let address = addresses.iter().last().cloned()?;
         let addresses = addresses.clone().into_iter().collect_vec();

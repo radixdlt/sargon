@@ -31,6 +31,8 @@ pub mod prelude {
     pub use sargon_keys_collector::prelude::*;
     pub use sargon_manifests::prelude::*;
     pub use sargon_profile::prelude::*;
+    pub use sargon_profile_logic::prelude::*;
+    pub use sargon_profile_security_structures::prelude::*;
     pub use sargon_transaction_models::prelude::*;
 
     pub use crate::home_cards::*;

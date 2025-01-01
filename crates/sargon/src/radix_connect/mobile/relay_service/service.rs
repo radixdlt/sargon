@@ -38,15 +38,18 @@ impl Service {
 
 const SERVICE_PATH: &str = "https://radix-connect-relay.radixdlt.com/api/v1";
 
-impl NetworkRequest {
-    fn radix_connect_relay_request() -> Self {
-        NetworkRequest::new_post(Url::from_str(SERVICE_PATH).unwrap())
-    }
-
+pub trait NetworkRequestsForRadixConnect {
+    fn radix_connect_relay_request() -> NetworkRequest;
     fn radix_connect_success_response(
         response: SuccessResponse,
-    ) -> Result<Self> {
+    ) -> Result<NetworkRequest> {
         Self::radix_connect_relay_request().with_serializing_body(response)
+    }
+}
+
+impl NetworkRequestsForRadixConnect for NetworkRequest {
+    fn radix_connect_relay_request() -> Self {
+        NetworkRequest::new_post(Url::from_str(SERVICE_PATH).unwrap())
     }
 }
 

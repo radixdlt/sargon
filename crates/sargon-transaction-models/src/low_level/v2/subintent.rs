@@ -9,6 +9,12 @@ pub struct Subintent {
     pub message: MessageV2,
 }
 
+impl From<SignedSubintent> for Subintent {
+    fn from(val: SignedSubintent) -> Self {
+        val.subintent
+    }
+}
+
 impl Subintent {
     pub fn new(
         header: IntentHeaderV2,

@@ -6,6 +6,20 @@ pub struct SignedSubintent {
     pub subintent_signatures: IntentSignatures,
 }
 
+impl IntoIterator for SignedSubintent {
+    type Item = SignatureWithPublicKey;
+    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.subintent_signatures
+            .signatures
+            .into_iter()
+            .map(|s| s.0)
+            .collect_vec()
+            .into_iter()
+    }
+}
+
 impl SignedSubintent {
     pub fn new(
         subintent: Subintent,
