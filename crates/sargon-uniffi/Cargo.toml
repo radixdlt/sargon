@@ -19,8 +19,23 @@ path = "src/bindgen/bin.rs"
 [dependencies]
 # === SARGON CRATES ===
 sargon-core = { path = "../sargon-core" }
-sargon = { path = "../sargon" }
+identified-vec-of = { path = "../identified-vec-of" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-factors = { path = "../sargon-factors" }
+sargon-keys-collector = { path = "../sargon-keys-collector" }
+sargon-addresses = { path = "../sargon-addresses" }
+sargon-transaction-models = { path = "../sargon-transaction-models" }
 sargon-manifests = { path = "../sargon-manifests" }
+sargon-profile = { path = "../sargon-profile" }
+sargon-profile-logic = { path = "../sargon-profile-logic" }
+sargon-profile-security-structures = { path = "../sargon-profile-security-structures" }
+sargon-factor-instances-provider = { path = "../sargon-factor-instances-provider" }
+gateway-models = { path = "../gateway-models" }
+sargon-clients = { path = "../sargon-clients" }
+sargon-drivers = { path = "../sargon-drivers" }
+gateway-client-and-api = { path = "../gateway-client-and-api" }
+
+sargon = { path = "../sargon" }
 sargon-uniffi-conversion-macros = { path = "../sargon-uniffi-conversion-macros" }
 
 # === RADIX DEPENDENCIES ===

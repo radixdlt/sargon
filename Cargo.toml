@@ -34,7 +34,7 @@ members = [
     "crates/sargon", # to be split
 
     "crates/sargon-uniffi-conversion-macros",
-    # "crates/sargon-uniffi",
+    "crates/sargon-uniffi",
 ]
 
 [profile.release]

@@ -48,7 +48,7 @@ pub mod prelude {
     };
 
     pub(crate) use sargon_uniffi_conversion_macros::*;
-    pub(crate) use sargon_manifests::prelude::*;
+    // pub(crate) use sargon_manifests::prelude::*;
     pub(crate) use sargon::prelude::{
         DeserializeBytes, DeserializeStr, HasSampleValues, HashMap, HashSet,
         SerializeToBytes, SerializeToString,
@@ -97,7 +97,7 @@ uniffi::custom_type!(Timestamp, String, {
     remote,
     try_lift: |val| {
         Timestamp::parse(val.as_str())
-        .ok_or(CommonError::InvalidISO8601String { bad_value: val })
+        .ok_or(crate::CommonError::InvalidISO8601String { bad_value: val })
         .map_err(|e| e.into())
     },
     lower: |obj| obj.to_string(),

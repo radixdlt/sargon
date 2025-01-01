@@ -3,6 +3,18 @@ use sargon::ResourceAddress as InternalResourceAddress;
 use sargon::SargonBuildInformation as InternalSargonBuildInformation;
 use sargon::TransactionManifest as InternalTransactionManifest;
 
+use sargon::{
+    // sargon_manifests crate
+    ManifestForAccountLockerClaim as _,
+    TransactionManifestAssetTransfers as _,
+    TransactionManifestFaucet as _,
+    TransactionManifestMetadataSetting as _,
+    TransactionManifestModifying as _,
+    TransactionManifestStakeClaim as _,
+    TransactionManifestThirdPartyDepositUpdating as _,
+    TransactionManifestTokenCreating as _,
+};
+
 #[uniffi::export]
 pub fn manifest_for_faucet(
     include_lock_fee_instruction: bool,

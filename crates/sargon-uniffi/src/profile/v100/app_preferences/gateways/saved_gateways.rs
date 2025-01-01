@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use sargon::SavedGateways as InternalSavedGateways;
+use sargon_profile_logic::prelude::SavedGatewaysChangeCurrent as _;
 
 decl_vec_samples_for!(Gateways, Gateway);
 
