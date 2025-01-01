@@ -1985,6 +1985,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "next-derivation-index-ephemeral"
+version = "1.2.1"
+dependencies = [
+ "derive_more",
+ "enum-iterator",
+ "sargon-addresses",
+ "sargon-core",
+ "sargon-core-assert-json",
+ "sargon-core-error",
+ "sargon-factors",
+ "sargon-hierarchical-deterministic",
+ "serde",
+ "serde_with 3.4.0",
+]
+
+[[package]]
 name = "nom"
 version = "7.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3127,6 +3143,7 @@ dependencies = [
  "itertools 0.12.0",
  "k256 0.13.3",
  "log",
+ "next-derivation-index-ephemeral",
  "paste 1.0.14",
  "pretty_assertions",
  "radix-common",
@@ -3532,6 +3549,7 @@ dependencies = [
  "itertools 0.12.0",
  "k256 0.13.3",
  "log",
+ "next-derivation-index-ephemeral",
  "once_cell 1.19.0",
  "paste 1.0.14",
  "pretty_assertions",

@@ -62,14 +62,13 @@ mod address_tests {
 
     #[test]
     fn resource_addresses() {
-        // let fungible = FungibleResourcesCollectionItem::sample();
-        // let non_fungible = NonFungibleResourcesCollectionItem::sample();
-        // let sut = SUT::new([fungible.clone()], [non_fungible.clone()]);
+        let fungible = FungibleResourcesCollectionItem::sample();
+        let non_fungible = NonFungibleResourcesCollectionItem::sample();
+        let sut = SUT::new([fungible.clone()], [non_fungible.clone()]);
 
-        // assert_eq!(
-        //     sut.resource_addresses(),
-        //     vec![fungible.resource_address(), non_fungible.resource_address()]
-        // );
-        todo!() // FIXME
+        assert_eq!(
+            sut.resource_addresses(),
+            vec![fungible.resource_address(), non_fungible.resource_address()]
+        );
     }
 }

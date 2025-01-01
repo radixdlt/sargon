@@ -2,17 +2,16 @@
 #![feature(generic_const_exprs)]
 #![feature(let_chains)]
 
-mod agnostic_paths;
 mod factor_list_kind;
 mod role_kind;
 mod roles_matrices_structures;
 
 pub mod prelude {
-    pub use crate::agnostic_paths::*;
     pub use crate::factor_list_kind::*;
     pub use crate::role_kind::*;
     pub use crate::roles_matrices_structures::*;
 
+    pub use next_derivation_index_ephemeral::prelude::*;
     pub use sargon_addresses::prelude::*;
     pub use sargon_core::prelude::*;
     pub use sargon_factors::prelude::*;

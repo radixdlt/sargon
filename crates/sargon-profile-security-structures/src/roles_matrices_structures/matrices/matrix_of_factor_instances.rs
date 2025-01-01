@@ -97,44 +97,111 @@ impl MatrixOfFactorInstances {
         matrix_of_sources: MatrixOfFactorSources,
         entity_kind: CAP26EntityKind,
     ) -> Self {
-        // let mut consuming_instances =
-        //     MnemonicWithPassphrase::derive_instances_for_factor_sources(
-        //         NetworkID::Mainnet,
-        //         1,
-        //         [if entity_kind == CAP26EntityKind::Account {
-        //             DerivationPreset::AccountMfa
-        //         } else {
-        //             DerivationPreset::IdentityMfa
-        //         }],
-        //         matrix_of_sources.all_factors().into_iter().cloned(),
-        //     );
+        let mut consuming_instances =
+            MnemonicWithPassphrase::derive_instances_for_factor_sources(
+                NetworkID::Mainnet,
+                1,
+                [if entity_kind == CAP26EntityKind::Account {
+                    DerivationPreset::AccountMfa
+                } else {
+                    DerivationPreset::IdentityMfa
+                }],
+                matrix_of_sources.all_factors().into_iter().cloned(),
+            );
 
-        // Self::fulfilling_matrix_of_factor_sources_with_instances(
-        //     &mut consuming_instances,
-        //     matrix_of_sources.clone(),
-        // )
-        // .unwrap()
-        todo!() // FIXME
+        Self::fulfilling_matrix_of_factor_sources_with_instances(
+            &mut consuming_instances,
+            matrix_of_sources.clone(),
+        )
+        .unwrap()
+    }
+}
+
+trait InstancesDeriving {
+    fn derive_instances_for_factor_sources(
+        network_id: NetworkID,
+        quantity_per_factor: usize,
+        derivation_presets: impl IntoIterator<Item = DerivationPreset>,
+        sources: impl IntoIterator<Item = FactorSource>,
+    ) -> IndexMap<FactorSourceIDFromHash, FactorInstances>;
+}
+
+impl InstancesDeriving for MnemonicWithPassphrase {
+    fn derive_instances_for_factor_sources(
+        network_id: NetworkID,
+        quantity_per_factor: usize,
+        derivation_presets: impl IntoIterator<Item = DerivationPreset>,
+        sources: impl IntoIterator<Item = FactorSource>,
+    ) -> IndexMap<FactorSourceIDFromHash, FactorInstances> {
+        let derivation_presets =
+            derivation_presets.into_iter().collect::<Vec<_>>();
+
+        let next_index_assigner =
+            NextDerivationEntityIndexWithEphemeralOffsets::default();
+
+        sources
+            .into_iter()
+            .map(|fs| {
+                let fsid = fs.id_from_hash();
+                let mwp = fsid.sample_associated_mnemonic();
+
+                let paths = derivation_presets
+                    .clone()
+                    .into_iter()
+                    .map(|dp| (dp, quantity_per_factor))
+                    .collect::<IndexMap<DerivationPreset, usize>>();
+
+                let paths = paths
+                    .into_iter()
+                    .flat_map(|(derivation_preset, qty)| {
+                        // `qty` many paths
+                        (0..qty)
+                            .map(|_| {
+                                let index_agnostic_path = derivation_preset
+                                    .index_agnostic_path_on_network(network_id);
+
+                                next_index_assigner
+                                    .reserve(fsid, index_agnostic_path)
+                                    .map(|index| {
+                                        DerivationPath::from_index_agnostic_path_and_component(index_agnostic_path, index)
+                                    })
+                                    .unwrap()
+                            })
+                            .collect::<IndexSet<DerivationPath>>()
+                    })
+                    .collect::<IndexSet<DerivationPath>>();
+
+                let instances = mwp
+                    .derive_public_keys(paths)
+                    .into_iter()
+                    .map(|public_key| {
+                        HierarchicalDeterministicFactorInstance::new(
+                            fsid, public_key,
+                        )
+                    })
+                    .collect::<FactorInstances>();
+
+                (fsid, instances)
+            })
+            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
     }
 }
 
 impl HasSampleValues for MatrixOfFactorInstances {
     /// Account
     fn sample() -> Self {
-        // Self::sample_from_matrix_of_sources(
-        //     MatrixOfFactorSources::sample(),
-        //     CAP26EntityKind::Account,
-        // )
-        todo!()
+        Self::sample_from_matrix_of_sources(
+            MatrixOfFactorSources::sample(),
+            CAP26EntityKind::Account,
+        )
     }
 
     /// Persona
     fn sample_other() -> Self {
-        // Self::sample_from_matrix_of_sources(
-        //     MatrixOfFactorSources::sample_other(),
-        //     CAP26EntityKind::Identity,
-        // )
-        todo!()
+        Self::sample_from_matrix_of_sources(
+            MatrixOfFactorSources::sample_other(),
+            CAP26EntityKind::Identity,
+        )
     }
 }
 

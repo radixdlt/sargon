@@ -10,6 +10,7 @@ identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-addresses = { path = "../sargon-addresses" }
+next-derivation-index-ephemeral = { path = "../next-derivation-index-ephemeral" }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

@@ -26,6 +26,7 @@ members = [
     "crates/sargon-profile-security-structures",
     "crates/sargon-profile-logic",
     "crates/sargon-factor-instances-provider",
+    "crates/next-derivation-index-ephemeral",
 
     "crates/gateway-models",
     "crates/gateway-logic",
