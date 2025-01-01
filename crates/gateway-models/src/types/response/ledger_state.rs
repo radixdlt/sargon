@@ -26,8 +26,8 @@ pub struct LedgerState {
     pub round: u64,
 }
 
-#[cfg(test)]
 impl LedgerState {
+    /// For tests
     /// A sample used to facilitate unit tests.
     pub fn sample_stokenet() -> Self {
         Self {

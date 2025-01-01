@@ -23,32 +23,37 @@ impl TransactionStatusResponse {
     }
 }
 
-#[cfg(test)]
 impl TransactionStatusResponse {
     // Helper functions to create sample responses
 
+    /// For tests
     pub fn sample_empty() -> Self {
         Self::success([])
     }
 
+    /// For tests
     pub fn sample_unknown() -> Self {
         Self::success([TransactionStatusResponsePayloadItem::sample_unknown()])
     }
 
+    /// For tests
     pub fn sample_pending() -> Self {
         Self::success([TransactionStatusResponsePayloadItem::sample_pending()])
     }
 
+    /// For tests
     pub fn sample_commit_pending_outcome_unknown() -> Self {
         Self::success([TransactionStatusResponsePayloadItem::sample_commit_pending_outcome_unknown()])
     }
 
+    /// For tests
     pub fn sample_committed_success() -> Self {
         Self::success([
             TransactionStatusResponsePayloadItem::sample_committed_success(),
         ])
     }
 
+    /// For tests
     pub fn sample_committed_failure(error_message: Option<String>) -> Self {
         Self::failure(
             [
@@ -59,10 +64,12 @@ impl TransactionStatusResponse {
         )
     }
 
+    /// For tests
     pub fn sample_permanently_rejected(error_message: Option<String>) -> Self {
         Self::failure([TransactionStatusResponsePayloadItem::sample_committed_permanently_rejected()], error_message)
     }
 
+    /// For tests
     pub fn sample_temporarily_rejected() -> Self {
         Self::failure([TransactionStatusResponsePayloadItem::sample_temporarily_rejected()], None)
     }

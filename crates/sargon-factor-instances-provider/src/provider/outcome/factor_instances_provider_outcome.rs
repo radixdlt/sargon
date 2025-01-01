@@ -63,8 +63,8 @@ impl From<InternalFactorInstancesProviderOutcomePerFactor>
     }
 }
 
-#[cfg(test)]
 impl FactorInstancesProviderOutcome {
+    /// For tests
     pub fn newly_derived_instances_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
@@ -78,14 +78,17 @@ impl FactorInstancesProviderOutcome {
             .collect()
     }
 
+    /// For tests
     pub fn total_number_of_newly_derived_instances(&self) -> usize {
         self.newly_derived_instances_from_all_factor_sources().len()
     }
 
+    /// For tests
     pub fn derived_any_new_instance_for_any_factor_source(&self) -> bool {
         self.total_number_of_newly_derived_instances() > 0
     }
 
+    /// For tests
     pub fn instances_found_in_cache_from_all_factor_sources(
         &self,
     ) -> FactorInstances {
@@ -99,11 +102,13 @@ impl FactorInstancesProviderOutcome {
             .collect()
     }
 
+    /// For tests
     pub fn total_number_of_instances_found_in_cache(&self) -> usize {
         self.instances_found_in_cache_from_all_factor_sources()
             .len()
     }
 
+    /// For tests
     pub fn found_any_instances_in_cache_for_any_factor_source(&self) -> bool {
         self.total_number_of_instances_found_in_cache() > 0
     }

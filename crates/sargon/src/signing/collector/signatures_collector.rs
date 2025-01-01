@@ -1550,7 +1550,13 @@ mod tests {
                 }
             }
 
-            impl AccountOrPersona {
+            trait EntityTXSigningFI {
+                fn transaction_signing_factor_instances(
+                    &self,
+                ) -> IndexSet<FactorInstance>;
+            }
+
+            impl EntityTXSigningFI for AccountOrPersona {
                 fn transaction_signing_factor_instances(
                     &self,
                 ) -> IndexSet<FactorInstance> {

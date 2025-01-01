@@ -27,7 +27,6 @@ pub struct FactorInstancesProviderOutcomeForFactor {
     /// Might be empty
     ///
     /// Useful for unit tests.
-    #[cfg(test)]
     pub debug_was_cached: FactorInstances,
 
     /// FactorInstances which were found in the cache before the operation was
@@ -38,7 +37,6 @@ pub struct FactorInstancesProviderOutcomeForFactor {
     /// Useful for unit tests.
     ///
     /// Might overlap with `to_use_directly`
-    #[cfg(test)]
     pub debug_found_in_cache: FactorInstances,
 
     /// FactorInstances which were derived.
@@ -48,7 +46,6 @@ pub struct FactorInstancesProviderOutcomeForFactor {
     /// Useful for unit tests.
     ///
     /// Might overlap with `debug_was_cached` and `to_use_directly`
-    #[cfg(test)]
     pub debug_was_derived: FactorInstances,
 }
 
@@ -82,7 +79,6 @@ impl From<InternalFactorInstancesProviderOutcomeForFactor>
     for FactorInstancesProviderOutcomeForFactor
 {
     fn from(value: InternalFactorInstancesProviderOutcomeForFactor) -> Self {
-        #[cfg(test)]
         let _self = Self {
             hidden: HiddenConstructor,
             factor_source_id: value.factor_source_id,
@@ -90,13 +86,6 @@ impl From<InternalFactorInstancesProviderOutcomeForFactor>
             debug_was_cached: value.to_cache,
             debug_found_in_cache: value.found_in_cache,
             debug_was_derived: value.newly_derived,
-        };
-
-        #[cfg(not(test))]
-        let _self = Self {
-            hidden: HiddenConstructor,
-            factor_source_id: value.factor_source_id,
-            to_use_directly: value.to_use_directly,
         };
 
         _self

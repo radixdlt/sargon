@@ -27,6 +27,12 @@ impl DynamicallyAnalyzableManifest for TransactionManifest {
     }
 }
 
+impl Default for FeeLocks {
+    fn default() -> Self {
+        Self::new(0, 0)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -48,12 +54,6 @@ mod tests {
                 underlying: "InvalidReceipt".to_owned()
             })
         );
-    }
-
-    impl Default for FeeLocks {
-        fn default() -> Self {
-            Self::new(0, 0)
-        }
     }
 
     #[test]

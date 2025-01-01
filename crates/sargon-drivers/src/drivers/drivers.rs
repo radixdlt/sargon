@@ -40,7 +40,6 @@ impl Drivers {
     }
 }
 
-#[cfg(test)]
 impl Drivers {
     fn file_system() -> Arc<dyn FileSystemDriver> {
         #[cfg(test)]

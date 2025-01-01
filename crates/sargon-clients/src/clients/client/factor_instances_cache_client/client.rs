@@ -89,13 +89,14 @@ impl FactorInstancesCacheClient {
     }
 }
 
-#[cfg(test)]
 impl FactorInstancesCacheClient {
+    /// For tests
     pub async fn clear(&self) -> Result<()> {
         self.set_cache(FactorInstancesCacheSnapshot::default())
             .await
     }
 
+    /// For tests
     pub async fn set_cache(
         &self,
         cache_snapshot: FactorInstancesCacheSnapshot,

@@ -29,10 +29,9 @@ impl SubintentStatusResponse {
     }
 }
 
-#[cfg(test)]
+/// === Helper functions to create sample responses ===
 impl SubintentStatusResponse {
-    // Helper functions to create sample responses
-
+    /// For tests
     pub fn sample_unknown() -> Self {
         Self::new(
             LedgerState::sample_stokenet(),
@@ -41,10 +40,12 @@ impl SubintentStatusResponse {
         )
     }
 
+    /// For tests
     pub fn sample_committed_success() -> Self {
         Self::committed_success("txid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6szm3ltd".to_owned())
     }
 
+    /// For tests
     pub fn committed_success(
         finalized_at_transaction_intent_hash: impl Into<Option<String>>,
     ) -> Self {

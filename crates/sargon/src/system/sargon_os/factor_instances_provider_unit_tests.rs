@@ -2889,88 +2889,84 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .collect::<IndexMap<_, _>>()
         );
     }
+}
 
-    #[actix_rt::test]
-    async fn securify_accounts_and_personas_with_override_factor() {
-        // this is mostly a soundness test for the two functions `for_persona_mfa` and `for_account_mfa`
-        // using `os` to create a profile, and BDFS because I'm lazy.
-        // We might in fact remove `for_persona_mfa` and `for_account_mfa`
-        // and only use the `for_entity_mfa` function... but we have these to get code coverage.
-        let (os, bdfs) = SargonOS::with_bdfs().await;
+#[actix_rt::test]
+async fn securify_accounts_and_personas_with_override_factor() {
+    // this is mostly a soundness test for the two functions `for_persona_mfa` and `for_account_mfa`
+    // using `os` to create a profile, and BDFS because I'm lazy.
+    // We might in fact remove `for_persona_mfa` and `for_account_mfa`
+    // and only use the `for_entity_mfa` function... but we have these to get code coverage.
+    let (os, bdfs) = SargonOS::with_bdfs().await;
 
-        let (batman, derivation_outcome) = os
-            .create_and_save_new_mainnet_persona_with_derivation_outcome(
-                "Batman",
-            )
-            .await
-            .unwrap();
-        assert!(derivation_outcome.debug_was_derived.is_empty());
+    let (batman, derivation_outcome) = os
+        .create_and_save_new_mainnet_persona_with_derivation_outcome("Batman")
+        .await
+        .unwrap();
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-        let (alice, derivation_outcome) = os
-            .create_and_save_new_mainnet_account_with_derivation_outcome(
-                "alice",
-            )
-            .await
-            .unwrap();
-        assert!(derivation_outcome.debug_was_derived.is_empty());
+    let (alice, derivation_outcome) = os
+        .create_and_save_new_mainnet_account_with_derivation_outcome("alice")
+        .await
+        .unwrap();
+    assert!(derivation_outcome.debug_was_derived.is_empty());
 
-        os.add_factor_source(FactorSource::sample_ledger())
-            .await
-            .unwrap();
-        os.add_factor_source(FactorSource::sample_password())
-            .await
-            .unwrap();
-        let factor_sources = &os.profile().unwrap().factor_sources;
-        let matrix_ids = MatrixTemplate::config_1_4()
-            .materialize(factor_sources.items())
-            .unwrap();
+    os.add_factor_source(FactorSource::sample_ledger())
+        .await
+        .unwrap();
+    os.add_factor_source(FactorSource::sample_password())
+        .await
+        .unwrap();
+    let factor_sources = &os.profile().unwrap().factor_sources;
+    let matrix_ids = MatrixTemplate::config_1_4()
+        .materialize(factor_sources.items())
+        .unwrap();
 
-        let matrix_0 =
-            MatrixOfFactorSources::new(matrix_ids, factor_sources).unwrap();
+    let matrix_0 =
+        MatrixOfFactorSources::new(matrix_ids, factor_sources).unwrap();
 
-        let shield_0 = SecurityStructureOfFactorSources::new(
-            DisplayName::sample(),
-            matrix_0,
-            bdfs.clone(),
-        );
+    let shield_0 = SecurityStructureOfFactorSources::new(
+        DisplayName::sample(),
+        matrix_0,
+        bdfs.clone(),
+    );
 
-        let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
-        let profile = Arc::new(os.profile().unwrap());
-        let derivation_interactors = os.keys_derivation_interactor();
+    let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
+    let profile = Arc::new(os.profile().unwrap());
+    let derivation_interactors = os.keys_derivation_interactor();
 
-        let (instances_in_cache_consumer, outcome) =
-            SUT::securifying_unsecurified(
-                cache_client.clone(),
-                profile,
-                shield_0.clone(),
-                IndexSet::from_iter([
-                    AddressOfAccountOrPersona::from(alice.address()),
-                    AddressOfAccountOrPersona::from(batman.address()),
-                ]),
-                derivation_interactors.clone(),
-            )
-            .await
-            .unwrap();
+    let (instances_in_cache_consumer, outcome) =
+        SecurifyEntityFactorInstancesProvider::securifying_unsecurified(
+            cache_client.clone(),
+            profile,
+            shield_0.clone(),
+            IndexSet::from_iter([
+                AddressOfAccountOrPersona::from(alice.address()),
+                AddressOfAccountOrPersona::from(batman.address()),
+            ]),
+            derivation_interactors.clone(),
+        )
+        .await
+        .unwrap();
 
-        assert_eq!(outcome.per_derivation_preset.len(), 4);
+    assert_eq!(outcome.per_derivation_preset.len(), 4);
 
-        // don't forget to consume
-        instances_in_cache_consumer.consume().await.unwrap();
+    // don't forget to consume
+    instances_in_cache_consumer.consume().await.unwrap();
 
-        let account_outcome = outcome
-            .get_derivation_preset_for_factor(
-                DerivationPreset::AccountMfa,
-                &bdfs.id_from_hash(),
-            )
-            .unwrap();
-        assert_eq!(account_outcome.to_use_directly.len(), 1);
+    let account_outcome = outcome
+        .get_derivation_preset_for_factor(
+            DerivationPreset::AccountMfa,
+            &bdfs.id_from_hash(),
+        )
+        .unwrap();
+    assert_eq!(account_outcome.to_use_directly.len(), 1);
 
-        let persona_outcome = outcome
-            .get_derivation_preset_for_factor(
-                DerivationPreset::AccountMfa,
-                &bdfs.id_from_hash(),
-            )
-            .unwrap();
-        assert_eq!(persona_outcome.to_use_directly.len(), 1);
-    }
+    let persona_outcome = outcome
+        .get_derivation_preset_for_factor(
+            DerivationPreset::AccountMfa,
+            &bdfs.id_from_hash(),
+        )
+        .unwrap();
+    assert_eq!(persona_outcome.to_use_directly.len(), 1);
 }
