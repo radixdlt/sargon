@@ -12,6 +12,7 @@ pub mod prelude {
     pub(crate) use sargon_hierarchical_deterministic::prelude::*;
     pub(crate) use sargon_keys_collector::prelude::*;
     pub(crate) use sargon_profile::prelude::*;
+    pub(crate) use sargon_profile_logic::prelude::*;
     pub(crate) use sargon_profile_supporting_types::prelude::*;
 
     pub use crate::factor_instances_cache::*;

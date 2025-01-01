@@ -15,6 +15,7 @@ sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-determinist
 sargon-keys-collector = { path = "../sargon-keys-collector" }
 sargon-addresses = { path = "../sargon-addresses" }
 sargon-profile = { path = "../sargon-profile" }
+sargon-profile-logic = { path = "../sargon-profile-logic" }
 sargon-clients = { path = "../sargon-clients" }
 sargon-profile-supporting-types = { path = "../sargon-profile-supporting-types" }
 

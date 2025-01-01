@@ -3089,6 +3089,7 @@ dependencies = [
  "sargon-hierarchical-deterministic",
  "sargon-keys-collector",
  "sargon-profile",
+ "sargon-profile-logic",
  "sargon-profile-supporting-types",
  "serde",
  "serde_json 1.0.108",
