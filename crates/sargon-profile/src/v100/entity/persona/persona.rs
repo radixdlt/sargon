@@ -71,6 +71,13 @@ impl IsSecurityStateAware for Persona {
         self.security_state().is_securified()
     }
 }
+
+impl HasFactorInstances for Persona {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_state().unique_tx_signing_factor_instances()
+    }
+}
+
 impl HasSecurityState for Persona {
     fn security_state(&self) -> EntitySecurityState {
         self.security_state.clone()

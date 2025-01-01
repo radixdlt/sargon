@@ -97,7 +97,6 @@ impl FileSystemClient {
     }
 }
 
-#[cfg(test)]
 impl FileSystemClient {
     pub fn test() -> Self {
         Self::new(RustFileSystemDriver::new())

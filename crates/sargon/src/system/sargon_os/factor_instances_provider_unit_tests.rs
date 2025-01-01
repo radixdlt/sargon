@@ -434,11 +434,13 @@ async fn adding_personas_and_clearing_cache_in_between() {
     );
 }
 
+trait AllHdFactorsFromRole {
+    fn all_hd_factors(&self) -> Vec<HierarchicalDeterministicFactorInstance>;
+}
+
 #[cfg(test)]
-impl PrimaryRoleWithFactorInstances {
-    pub fn all_hd_factors(
-        &self,
-    ) -> Vec<HierarchicalDeterministicFactorInstance> {
+impl AllHdFactorsFromRole for PrimaryRoleWithFactorInstances {
+    fn all_hd_factors(&self) -> Vec<HierarchicalDeterministicFactorInstance> {
         self.all_factors()
             .into_iter()
             .map(|f| {
@@ -450,10 +452,8 @@ impl PrimaryRoleWithFactorInstances {
 }
 
 #[cfg(test)]
-impl RecoveryRoleWithFactorInstances {
-    pub fn all_hd_factors(
-        &self,
-    ) -> Vec<HierarchicalDeterministicFactorInstance> {
+impl AllHdFactorsFromRole for RecoveryRoleWithFactorInstances {
+    fn all_hd_factors(&self) -> Vec<HierarchicalDeterministicFactorInstance> {
         self.all_factors()
             .into_iter()
             .map(|f| {
@@ -465,10 +465,8 @@ impl RecoveryRoleWithFactorInstances {
 }
 
 #[cfg(test)]
-impl ConfirmationRoleWithFactorInstances {
-    pub fn all_hd_factors(
-        &self,
-    ) -> Vec<HierarchicalDeterministicFactorInstance> {
+impl AllHdFactorsFromRole for ConfirmationRoleWithFactorInstances {
+    fn all_hd_factors(&self) -> Vec<HierarchicalDeterministicFactorInstance> {
         self.all_factors()
             .into_iter()
             .map(|f| {
@@ -502,23 +500,17 @@ async fn cache_is_unchanged_in_case_of_failure() {
 
     assert_eq!(all_accounts.len(), 3 * n);
 
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(1, [bdfs.clone()], []),
+            RecoveryRoleWithFactorSources::with_factors(0, [], [bdfs.clone()]),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone()],
+            ),
             1,
-            [bdfs.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -571,7 +563,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
             .map(|a| a
                 .1
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
@@ -659,23 +651,17 @@ async fn test_assert_factor_instances_invalid() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(1, [bdfs.clone()], []),
+            RecoveryRoleWithFactorSources::with_factors(0, [], [bdfs.clone()]),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone()],
+            ),
             1,
-            [bdfs.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -1000,23 +986,25 @@ async fn test_securified_accounts() {
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(password.clone()).await.unwrap();
 
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
-            2,
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                2,
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -1050,7 +1038,7 @@ async fn test_securified_accounts() {
 
     assert_eq!(
         alice_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -1063,9 +1051,9 @@ async fn test_securified_accounts() {
     );
 
     for factors_for_role in [
-        &alice_matrix.primary_role.all_hd_factors(),
-        &alice_matrix.recovery_role.all_hd_factors(),
-        &alice_matrix.confirmation_role.all_hd_factors(),
+        &alice_matrix.primary().all_hd_factors(),
+        &alice_matrix.recovery().all_hd_factors(),
+        &alice_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -1091,7 +1079,7 @@ async fn test_securified_accounts() {
 
     assert_eq!(
         bob_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -1104,9 +1092,9 @@ async fn test_securified_accounts() {
     );
 
     for factors_for_role in [
-        &bob_matrix.primary_role.all_hd_factors(),
-        &bob_matrix.recovery_role.all_hd_factors(),
-        &bob_matrix.confirmation_role.all_hd_factors(),
+        &bob_matrix.primary().all_hd_factors(),
+        &bob_matrix.recovery().all_hd_factors(),
+        &bob_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -1141,23 +1129,25 @@ async fn test_securified_accounts() {
             "First account created with ledger, should have index 0, even though this ledger was used in the shield, since we are using two different KeySpaces for Securified and Unsecurified accounts."
         );
 
-    let matrix_1 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_1 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                1,
+                [password.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [password.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [password.clone()],
+            ),
             1,
-            [password.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [password.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [password.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_1 = SecurityStructureOfFactorSources::new(
@@ -1182,11 +1172,11 @@ async fn test_securified_accounts() {
         .unwrap();
 
     let carol_matrix = carol_sec.matrix_of_factors.clone();
-    assert_eq!(carol_matrix.primary_role.get_threshold_factors().len(), 1);
+    assert_eq!(carol_matrix.primary().get_threshold_factors().len(), 1);
 
     assert_eq!(
         carol_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -1195,9 +1185,9 @@ async fn test_securified_accounts() {
     );
 
     for factors_for_role in [
-        &carol_matrix.primary_role.all_hd_factors(),
-        &carol_matrix.recovery_role.all_hd_factors(),
-        &carol_matrix.confirmation_role.all_hd_factors(),
+        &carol_matrix.primary().all_hd_factors(),
+        &carol_matrix.recovery().all_hd_factors(),
+        &carol_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -1233,7 +1223,7 @@ async fn test_securified_accounts() {
 
     assert_eq!(
         alice_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -1242,9 +1232,9 @@ async fn test_securified_accounts() {
     );
 
     for factors_for_role in [
-        &alice_matrix.primary_role.all_hd_factors(),
-        &alice_matrix.recovery_role.all_hd_factors(),
-        &alice_matrix.confirmation_role.all_hd_factors(),
+        &alice_matrix.primary().all_hd_factors(),
+        &alice_matrix.recovery().all_hd_factors(),
+        &alice_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -1283,23 +1273,17 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(1, [bdfs.clone()], []),
+            RecoveryRoleWithFactorSources::with_factors(0, [], [bdfs.clone()]),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone()],
+            ),
             1,
-            [bdfs.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -1349,7 +1333,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
@@ -1387,7 +1371,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
@@ -1435,23 +1419,25 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
-            2,
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                2,
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -1519,7 +1505,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .iter()
                 .map(|f| f.derivation_entity_index())
@@ -1534,7 +1520,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .confirmation_role
+                .confirmation()
                 .all_hd_factors()
                 .iter()
                 .map(|f| f.derivation_entity_index())
@@ -1549,7 +1535,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .recovery_role
+                .recovery()
                 .all_hd_factors()
                 .iter()
                 .map(|f| f.derivation_entity_index())
@@ -1620,7 +1606,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .iter()
                 .map(|f| f.derivation_entity_index())
@@ -1635,7 +1621,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .recovery_role
+                .recovery()
                 .all_hd_factors()
                 .iter()
                 .map(|f| f.derivation_entity_index())
@@ -1650,7 +1636,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .confirmation_role
+                .confirmation()
                 .all_hd_factors()
                 .iter()
                 .map(|f| f.derivation_entity_index())
@@ -1677,23 +1663,17 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(1, [bdfs.clone()], []),
+            RecoveryRoleWithFactorSources::with_factors(0, [], [bdfs.clone()]),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone()],
+            ),
             1,
-            [bdfs.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -1746,7 +1726,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
@@ -1768,7 +1748,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
     .await
     .unwrap();
 
-    // dont forget to consume!
+    // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
 
     assert!(
@@ -1781,7 +1761,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
             .values()
             .map(|ss| ss
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .into_iter()
                 .map(|f| f.derivation_entity_index())
@@ -1815,23 +1795,17 @@ async fn create_single_account() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(1, [bdfs.clone()], []),
+            RecoveryRoleWithFactorSources::with_factors(0, [], [bdfs.clone()]),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone()],
+            ),
             1,
-            [bdfs.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -1863,7 +1837,7 @@ async fn create_single_account() {
 
     assert_eq!(
         alice_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -1872,9 +1846,9 @@ async fn create_single_account() {
     );
 
     for factors_for_role in [
-        &alice_matrix.primary_role.all_hd_factors(),
-        &alice_matrix.recovery_role.all_hd_factors(),
-        &alice_matrix.confirmation_role.all_hd_factors(),
+        &alice_matrix.primary().all_hd_factors(),
+        &alice_matrix.recovery().all_hd_factors(),
+        &alice_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -1908,23 +1882,25 @@ async fn securified_personas() {
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(password.clone()).await.unwrap();
 
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
-            2,
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                2,
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -1958,7 +1934,7 @@ async fn securified_personas() {
 
     assert_eq!(
         batman_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -1971,9 +1947,9 @@ async fn securified_personas() {
     );
 
     for factors_for_role in [
-        &batman_matrix.primary_role.all_hd_factors(),
-        &batman_matrix.recovery_role.all_hd_factors(),
-        &batman_matrix.confirmation_role.all_hd_factors(),
+        &batman_matrix.primary().all_hd_factors(),
+        &batman_matrix.recovery().all_hd_factors(),
+        &batman_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -1999,7 +1975,7 @@ async fn securified_personas() {
 
     assert_eq!(
         satoshi_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -2012,9 +1988,9 @@ async fn securified_personas() {
     );
 
     for factors_for_role in [
-        &satoshi_matrix.primary_role.all_hd_factors(),
-        &satoshi_matrix.recovery_role.all_hd_factors(),
-        &satoshi_matrix.confirmation_role.all_hd_factors(),
+        &satoshi_matrix.primary().all_hd_factors(),
+        &satoshi_matrix.recovery().all_hd_factors(),
+        &satoshi_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -2052,23 +2028,25 @@ async fn securified_personas() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_1 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_1 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                1,
+                [password.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [password.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [password.clone()],
+            ),
             1,
-            [password.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [password.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [password.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_1 = SecurityStructureOfFactorSources::new(
@@ -2098,11 +2076,11 @@ async fn securified_personas() {
         .unwrap();
 
     let hyde_matrix = hyde_sec.matrix_of_factors.clone();
-    assert_eq!(hyde_matrix.primary_role.get_threshold_factors().len(), 1);
+    assert_eq!(hyde_matrix.primary().get_threshold_factors().len(), 1);
 
     assert_eq!(
         hyde_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -2111,9 +2089,9 @@ async fn securified_personas() {
     );
 
     for factors_for_role in [
-        &hyde_matrix.primary_role.all_hd_factors(),
-        &hyde_matrix.recovery_role.all_hd_factors(),
-        &hyde_matrix.confirmation_role.all_hd_factors(),
+        &hyde_matrix.primary().all_hd_factors(),
+        &hyde_matrix.recovery().all_hd_factors(),
+        &hyde_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -2148,7 +2126,7 @@ async fn securified_personas() {
 
     assert_eq!(
         batman_matrix
-            .primary_role
+            .primary()
             .all_factors()
             .into_iter()
             .map(|f| f.factor_source_id)
@@ -2157,9 +2135,9 @@ async fn securified_personas() {
     );
 
     for factors_for_role in [
-        &batman_matrix.primary_role.all_hd_factors(),
-        &batman_matrix.recovery_role.all_hd_factors(),
-        &batman_matrix.confirmation_role.all_hd_factors(),
+        &batman_matrix.primary().all_hd_factors(),
+        &batman_matrix.recovery().all_hd_factors(),
+        &batman_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -2222,23 +2200,17 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(1, [bdfs.clone()], []),
+            RecoveryRoleWithFactorSources::with_factors(0, [], [bdfs.clone()]),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone()],
+            ),
             1,
-            [bdfs.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -2363,9 +2335,9 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     let alice_sec = alice.try_get_secured_control().unwrap();
     let alice_matrix = alice_sec.security_structure.matrix_of_factors.clone();
     for factors_for_role in [
-        &alice_matrix.primary_role.all_hd_factors(),
-        &alice_matrix.recovery_role.all_hd_factors(),
-        &alice_matrix.confirmation_role.all_hd_factors(),
+        &alice_matrix.primary().all_hd_factors(),
+        &alice_matrix.recovery().all_hd_factors(),
+        &alice_matrix.confirmation().all_hd_factors(),
     ] {
         assert_eq!(
             factors_for_role
@@ -2436,23 +2408,17 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_0 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
+    let matrix_0 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(1, [bdfs.clone()], []),
+            RecoveryRoleWithFactorSources::with_factors(0, [], [bdfs.clone()]),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone()],
+            ),
             1,
-            [bdfs.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+        )
     };
 
     let shield_0 = SecurityStructureOfFactorSources::new(
@@ -2565,23 +2531,25 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_1 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
-            2,
-            [bdfs.clone(), arculus.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), arculus.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), arculus.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+    let matrix_1 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                2,
+                [bdfs.clone(), arculus.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), arculus.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), arculus.clone()],
+            ),
+            1,
+        )
     };
 
     let shield_1 = SecurityStructureOfFactorSources::new(
@@ -2609,7 +2577,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .unwrap()
             .security_structure
             .matrix_of_factors
-            .primary_role
+            .primary()
             .all_hd_factors()
             .into_iter()
             .map(|f| (f.factor_source_id, f.derivation_entity_index()))
@@ -2633,23 +2601,25 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_2 = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
-            2,
-            [bdfs.clone(), ledger.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+    let matrix_2 = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                2,
+                [bdfs.clone(), ledger.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone()],
+            ),
+            1,
+        )
     };
 
     let shield_2 = SecurityStructureOfFactorSources::new(
@@ -2677,7 +2647,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .unwrap()
             .security_structure
             .matrix_of_factors
-            .primary_role
+            .primary()
             .all_hd_factors()
             .into_iter()
             .map(|f| (f.factor_source_id, f.derivation_entity_index()))
@@ -2716,7 +2686,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .unwrap()
             .security_structure
             .matrix_of_factors
-            .primary_role
+            .primary()
             .all_hd_factors()
             .into_iter()
             .map(|f| (f.factor_source_id, f.derivation_entity_index()))
@@ -2743,23 +2713,25 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
     // instances provider...
-    let matrix_3fa = MatrixOfFactorSources {
-        primary_role: PrimaryRoleWithFactorSources::with_factors(
-            2,
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-            [],
-        ),
-        recovery_role: RecoveryRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        confirmation_role: ConfirmationRoleWithFactorSources::with_factors(
-            0,
-            [],
-            [bdfs.clone(), ledger.clone(), arculus.clone()],
-        ),
-        number_of_days_until_auto_confirm: 1,
+    let matrix_3fa = unsafe {
+        MatrixOfFactorSources::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSources::with_factors(
+                2,
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+                [],
+            ),
+            RecoveryRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            ConfirmationRoleWithFactorSources::with_factors(
+                0,
+                [],
+                [bdfs.clone(), ledger.clone(), arculus.clone()],
+            ),
+            1,
+        )
     };
 
     let shield_3fa = SecurityStructureOfFactorSources::new(
@@ -2787,7 +2759,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .unwrap()
             .security_structure
             .matrix_of_factors
-            .primary_role
+            .primary()
             .all_hd_factors()
             .into_iter()
             .map(|f| (f.factor_source_id, f.derivation_entity_index()))
@@ -2888,7 +2860,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
                 .unwrap()
                 .security_structure
                 .matrix_of_factors
-                .primary_role
+                .primary()
                 .all_hd_factors()
                 .into_iter()
                 .map(|f| (f.factor_source_id, f.derivation_entity_index()))
@@ -2916,5 +2888,89 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .into_iter()
             .collect::<IndexMap<_, _>>()
         );
+    }
+
+    #[actix_rt::test]
+    async fn securify_accounts_and_personas_with_override_factor() {
+        // this is mostly a soundness test for the two functions `for_persona_mfa` and `for_account_mfa`
+        // using `os` to create a profile, and BDFS because I'm lazy.
+        // We might in fact remove `for_persona_mfa` and `for_account_mfa`
+        // and only use the `for_entity_mfa` function... but we have these to get code coverage.
+        let (os, bdfs) = SargonOS::with_bdfs().await;
+
+        let (batman, derivation_outcome) = os
+            .create_and_save_new_mainnet_persona_with_derivation_outcome(
+                "Batman",
+            )
+            .await
+            .unwrap();
+        assert!(derivation_outcome.debug_was_derived.is_empty());
+
+        let (alice, derivation_outcome) = os
+            .create_and_save_new_mainnet_account_with_derivation_outcome(
+                "alice",
+            )
+            .await
+            .unwrap();
+        assert!(derivation_outcome.debug_was_derived.is_empty());
+
+        os.add_factor_source(FactorSource::sample_ledger())
+            .await
+            .unwrap();
+        os.add_factor_source(FactorSource::sample_password())
+            .await
+            .unwrap();
+        let factor_sources = &os.profile().unwrap().factor_sources;
+        let matrix_ids = MatrixTemplate::config_1_4()
+            .materialize(factor_sources.items())
+            .unwrap();
+
+        let matrix_0 =
+            MatrixOfFactorSources::new(matrix_ids, factor_sources).unwrap();
+
+        let shield_0 = SecurityStructureOfFactorSources::new(
+            DisplayName::sample(),
+            matrix_0,
+            bdfs.clone(),
+        );
+
+        let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
+        let profile = Arc::new(os.profile().unwrap());
+        let derivation_interactors = os.keys_derivation_interactor();
+
+        let (instances_in_cache_consumer, outcome) =
+            SUT::securifying_unsecurified(
+                cache_client.clone(),
+                profile,
+                shield_0.clone(),
+                IndexSet::from_iter([
+                    AddressOfAccountOrPersona::from(alice.address()),
+                    AddressOfAccountOrPersona::from(batman.address()),
+                ]),
+                derivation_interactors.clone(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(outcome.per_derivation_preset.len(), 4);
+
+        // don't forget to consume
+        instances_in_cache_consumer.consume().await.unwrap();
+
+        let account_outcome = outcome
+            .get_derivation_preset_for_factor(
+                DerivationPreset::AccountMfa,
+                &bdfs.id_from_hash(),
+            )
+            .unwrap();
+        assert_eq!(account_outcome.to_use_directly.len(), 1);
+
+        let persona_outcome = outcome
+            .get_derivation_preset_for_factor(
+                DerivationPreset::AccountMfa,
+                &bdfs.id_from_hash(),
+            )
+            .unwrap();
+        assert_eq!(persona_outcome.to_use_directly.len(), 1);
     }
 }

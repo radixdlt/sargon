@@ -49,14 +49,6 @@ impl<V: Eq + std::hash::Hash> AppendableCollection for IndexSet<V> {
     }
 }
 
-impl AppendableCollection for FactorInstances {
-    type Element = HierarchicalDeterministicFactorInstance;
-
-    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T) {
-        self.extend(iter)
-    }
-}
-
 impl<K, V> AppendableCollection for IndexMap<K, V>
 where
     K: Eq + std::hash::Hash + Clone,

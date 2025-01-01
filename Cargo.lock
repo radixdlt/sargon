@@ -3106,9 +3106,11 @@ dependencies = [
 name = "sargon-factor-instances-provider"
 version = "1.2.1"
 dependencies = [
+ "actix-rt",
  "aes-gcm",
  "arraystring",
  "assert-json-diff",
+ "async-trait",
  "delegate",
  "derive_more",
  "enum-as-inner",

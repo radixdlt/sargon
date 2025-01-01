@@ -413,6 +413,7 @@ impl GatewayClient {
 mod fetch_all_resources_tests {
     use crate::prelude::*;
     use actix_rt::time::timeout;
+    use sargon_profile_gateway::prelude::Gateway;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = GatewayClient;
@@ -684,6 +685,7 @@ mod fetch_all_resources_tests {
 mod filter_transferable_tests {
     use crate::prelude::*;
     use actix_rt::time::timeout;
+    use sargon_profile_gateway::prelude::Gateway;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = GatewayClient;

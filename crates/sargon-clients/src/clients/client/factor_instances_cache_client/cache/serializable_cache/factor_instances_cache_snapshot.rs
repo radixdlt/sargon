@@ -1,4 +1,4 @@
-use crate::{factor_instances_cache::FICStorage, prelude::*};
+use crate::prelude::*;
 
 pub type DenseKeyStorage = IndexMap<
     FactorSourceIDFromHashDenseKey,

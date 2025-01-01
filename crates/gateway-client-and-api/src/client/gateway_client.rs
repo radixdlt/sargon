@@ -1,4 +1,4 @@
-use sargon_profile::prelude::Gateway;
+use sargon_profile_gateway::prelude::Gateway;
 
 use crate::prelude::*;
 

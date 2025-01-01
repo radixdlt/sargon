@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 pub trait TestDerivationInteractorFromSecureStorageClient: Sized {
     fn new(
         always_fail: bool,
@@ -5,15 +7,6 @@ pub trait TestDerivationInteractorFromSecureStorageClient: Sized {
     ) -> Self;
 }
 
-#[async_trait::async_trait]
-impl MnemonicLoading for SecureStorageClient {
-    async fn load_mnemonic(
-        &self,
-        id: FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase> {
-        self.load_mnemonic_with_passphrase(id).await
-    }
-}
 
 impl TestDerivationInteractorFromSecureStorageClient
     for TestDerivationInteractor

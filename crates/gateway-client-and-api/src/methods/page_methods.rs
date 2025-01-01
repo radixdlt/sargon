@@ -38,8 +38,9 @@ impl GatewayClient {
 
 #[cfg(test)]
 mod tests {
+    use sargon_profile_gateway::prelude::Gateway;
+
     use crate::prelude::*;
-    use actix_rt::time::timeout;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = GatewayClient;

@@ -78,6 +78,12 @@ impl HasEntityKind for Account {
     }
 }
 
+impl HasFactorInstances for Account {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_state().unique_tx_signing_factor_instances()
+    }
+}
+
 impl HasSecurityState for Account {
     fn security_state(&self) -> EntitySecurityState {
         self.security_state.clone()

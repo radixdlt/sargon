@@ -14,6 +14,16 @@ pub struct SecureStorageClient {
     driver: Arc<dyn SecureStorageDriver>,
 }
 
+#[async_trait::async_trait]
+impl MnemonicLoading for SecureStorageClient {
+    async fn load_mnemonic(
+        &self,
+        id: FactorSourceIDFromHash,
+    ) -> Result<MnemonicWithPassphrase> {
+        self.load_mnemonic_with_passphrase(id).await
+    }
+}
+
 impl SecureStorageClient {
     /// Creates a new SecureStorageClient using an implementation of
     /// `SecureStorageDriver`.

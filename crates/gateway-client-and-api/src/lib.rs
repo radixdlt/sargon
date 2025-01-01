@@ -18,7 +18,7 @@ pub mod prelude {
 
     pub(crate) use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
 
-    pub(crate) use serde_json::*;
+    pub(crate) use serde::{Deserialize, Serialize};
 }
 
 pub use prelude::*;

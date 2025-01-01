@@ -20,6 +20,11 @@ impl HasEntityKindObjectSafe for AccountOrPersona {
         }
     }
 }
+impl HasFactorInstances for AccountOrPersona {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_state().unique_tx_signing_factor_instances()
+    }
+}
 impl HasSecurityState for AccountOrPersona {
     fn security_state(&self) -> EntitySecurityState {
         match self {
