@@ -14,4 +14,4 @@ pub use references_to_authorized_personas::*;
 pub use shared_persona_data::*;
 pub use shared_to_dapp_with_persona_account_addresses::*;
 pub use shared_to_dapp_with_persona_ids_of_persona_data_entries::*;
-pub use shared_with_dapp::*;
+pub(crate) use shared_with_dapp::*;

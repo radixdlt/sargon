@@ -1,3 +1,5 @@
+use bucket_factory::BucketFactory;
+
 use crate::prelude::*;
 
 pub trait TransactionManifestAssetTransfers: Sized {

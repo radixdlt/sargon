@@ -40,8 +40,6 @@ impl HostInfoClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_rt::time::timeout;
-    use std::{future::Future, time::Duration};
     #[allow(clippy::upper_case_acronyms)]
     type SUT = HostInfoClient;
 

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_common::prelude::NodeId;
 use radix_common::time::Instant;
 use radix_common::types::GlobalAddress;
 use radix_engine_interface::prelude::UncheckedOrigin;

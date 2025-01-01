@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt;
 
 impl GatewayClient {
     /// Returns the current `Epoch` of the Radix Network of the provided gateway.

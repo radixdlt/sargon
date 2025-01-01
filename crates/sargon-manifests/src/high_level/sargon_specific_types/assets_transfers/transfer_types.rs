@@ -53,7 +53,7 @@ macro_rules! decl_per_asset_transfer_of {
         paste! {
             impl [< PerAsset $struct_name Transfer>] {
 
-                pub(crate) fn deposit_instruction(&self, builder: ScryptoTransactionManifestBuilder, bucket: &Bucket) -> ScryptoTransactionManifestBuilder {
+                pub(crate) fn deposit_instruction(&self, builder: ScryptoTransactionManifestBuilder, bucket: &crate::bucket::Bucket) -> ScryptoTransactionManifestBuilder {
 
                     if self.use_try_deposit_or_abort {
                         return builder.try_deposit_or_abort(

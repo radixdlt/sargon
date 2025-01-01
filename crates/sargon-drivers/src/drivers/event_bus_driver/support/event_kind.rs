@@ -164,10 +164,6 @@ impl HasSampleValues for EventKind {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::EventKind::{
-        AccountAdded, AccountUpdated, AccountsAdded, Booted, ProfileImported,
-        ProfileSaved,
-    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = EventKind;

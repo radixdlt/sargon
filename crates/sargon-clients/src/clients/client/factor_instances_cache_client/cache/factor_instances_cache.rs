@@ -1,7 +1,4 @@
-use std::{
-    borrow::Borrow,
-    ops::{Add, Index},
-};
+use std::{borrow::Borrow, ops::Add};
 
 use crate::prelude::*;
 

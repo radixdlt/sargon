@@ -7,7 +7,9 @@ pub mod prelude {
     pub use crate::network_definition::*;
     pub use crate::saved_gateways::*;
 
-    pub use sargon_core::prelude::*;
+    pub(crate) use sargon_core::prelude::*;
 
     pub(crate) use serde::*;
 }
+
+pub use prelude::*;

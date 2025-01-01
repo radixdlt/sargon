@@ -3,7 +3,6 @@ use crate::prelude::*;
 use radix_engine_interface::blueprints::account::{
     AccountAddAuthorizedDepositorInput as ScryptoAccountAddAuthorizedDepositorInput,
     AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
-    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
     AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
 };
 
@@ -118,6 +117,8 @@ impl HasSampleValues for ThirdPartyDepositsDelta {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use radix_engine_interface::blueprints::account::AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ThirdPartyDepositsDelta;

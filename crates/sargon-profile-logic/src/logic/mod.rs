@@ -12,7 +12,6 @@ mod query_factor_sources;
 pub use account::*;
 pub use authorized_dapps_logic::*;
 pub use gateway::*;
-pub use instances_deriving_with_factor_sources::*;
 pub use persona::*;
 pub use profile_header::*;
 pub use profile_network::*;

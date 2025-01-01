@@ -1,3 +1,5 @@
+use sargon_core::decl_identified_vec_of;
+
 use crate::prelude::*;
 
 decl_identified_vec_of!(

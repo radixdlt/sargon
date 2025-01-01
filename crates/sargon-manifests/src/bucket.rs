@@ -1,8 +1,5 @@
 // only used here...
-use radix_rust::{
-    labelled_resolvable_with_identity_impl, LabelResolver, LabelledResolvable,
-    LabelledResolveFrom,
-};
+use radix_rust::{LabelResolver, LabelledResolvable, LabelledResolveFrom};
 
 use crate::prelude::*;
 

@@ -1,7 +1,4 @@
 use crate::prelude::*;
-use crate::EventKind::{
-    AccountUpdated, AccountsAdded, Booted, ProfileImported, ProfileSaved,
-};
 
 /// SargonOS event contain information about something of interest that has
 /// happened to the SargonOS, most prominently to the Profile. Host device

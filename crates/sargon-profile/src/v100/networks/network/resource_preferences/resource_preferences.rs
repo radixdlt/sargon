@@ -89,7 +89,6 @@ mod tests {
 
     #[test]
     fn hidden_resources() {
-        use ResourceIdentifier::*;
         let mut sut = SUT::new();
 
         // Test with no resources hidden

@@ -174,14 +174,13 @@ impl TransactionManifestModifying for TransactionManifest {
     }
 }
 
-enum InstructionPosition {
+pub enum InstructionPosition {
     First,
     At(u64),
 }
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_interface::blueprints::account::AccountLockFeeInput;
     use radix_transactions::manifest::{AssertWorktopContains, DropAllProofs};
 
     use super::*;

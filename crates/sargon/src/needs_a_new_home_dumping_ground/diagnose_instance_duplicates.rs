@@ -42,6 +42,7 @@ fn with_android_bug_with_shared_pubkey_between_account_and_persona() -> Profile
     sut
 }
 
+#[cfg(test)]
 fn with_instance_collision_both_accounts() -> Profile {
     let mwp = MnemonicWithPassphrase::sample_device();
     let mut sut = Profile::from_mnemonic_with_passphrase(
@@ -82,6 +83,7 @@ fn with_instance_collision_both_accounts() -> Profile {
     sut
 }
 
+#[cfg(test)]
 fn with_instance_collision_securified() -> Profile {
     let mwp = MnemonicWithPassphrase::sample_device();
     let mut sut = Profile::from_mnemonic_with_passphrase(
@@ -108,6 +110,7 @@ fn with_instance_collision_securified() -> Profile {
     sut
 }
 
+#[cfg(test)]
 fn with_instance_collision_both_personas() -> Profile {
     let mwp = MnemonicWithPassphrase::sample_device();
     let mut sut = Profile::from_mnemonic_with_passphrase(

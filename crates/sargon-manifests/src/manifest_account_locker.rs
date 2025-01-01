@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use bucket_factory::BucketFactory;
 use radix_engine_interface::blueprints::locker::ACCOUNT_LOCKER_CLAIM_IDENT;
 
 pub trait ManifestForAccountLockerClaim: Sized {

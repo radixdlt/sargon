@@ -5,7 +5,6 @@ mod header;
 mod networks;
 mod profile;
 mod profile_file_contents;
-mod profile_legacy_state_bugs;
 mod proto_profile_maybe_with_legacy_p2p_links;
 mod secured_entity_control;
 
@@ -16,6 +15,5 @@ pub use header::*;
 pub use networks::*;
 pub use profile::*;
 pub use profile_file_contents::*;
-pub use profile_legacy_state_bugs::*;
 pub use proto_profile_maybe_with_legacy_p2p_links::*;
 pub use secured_entity_control::*;

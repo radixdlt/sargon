@@ -50,7 +50,6 @@ impl GatewayClient {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use reqwest::Response;
     use std::time::Duration;
 
     const MAX: Duration = Duration::from_millis(10);

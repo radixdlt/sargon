@@ -63,6 +63,8 @@ pub fn rust_logger_set_level(level: LogFilter) {
     );
 }
 
+use enum_iterator::all;
+
 /// Returns every supported LogFilter
 pub fn rust_logger_get_all_filters() -> Vec<LogFilter> {
     all::<LogFilter>().collect()

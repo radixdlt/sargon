@@ -1,4 +1,4 @@
-use radix_engine_interface::blueprints::access_controller::AccessControllerCreateManifestInput as ScryptoAccessControllerCreateManifestInput;
+use bucket_factory::BucketFactory;
 
 use crate::prelude::*;
 
