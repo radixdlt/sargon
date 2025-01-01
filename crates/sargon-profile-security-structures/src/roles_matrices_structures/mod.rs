@@ -12,7 +12,6 @@ mod security_structure_of_factors;
 mod selected_factor_sources_status;
 
 pub use automatic_shield_builder::*;
-pub use general_role_with_hd_factor_instance_samples::*;
 pub use has_role_kind::*;
 pub use matrices::*;
 pub use roles::*;

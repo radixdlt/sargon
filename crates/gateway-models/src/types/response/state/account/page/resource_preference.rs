@@ -1,9 +1,6 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::account::{
-    AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
-    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
-};
+use radix_engine_interface::blueprints::account::AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct AccountResourcePreference {

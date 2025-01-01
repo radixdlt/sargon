@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 #[cfg(test)]
 use radix_common::prelude::{
     manifest_encode as Scrypto_manifest_encode,
@@ -35,6 +33,9 @@ pub(crate) fn scrypto_value_with_sbor_depth(
 }
 
 #[cfg(test)]
+use radix_common::prelude::ManifestValue as ScryptoManifestValue;
+
+#[cfg(test)]
 pub(crate) fn manifest_value_with_sbor_depth(
     depth: usize,
 ) -> ScryptoManifestValue {
@@ -43,6 +44,8 @@ pub(crate) fn manifest_value_with_sbor_depth(
 
 #[cfg(test)]
 mod sbor_depth_validation_tests {
+    use sargon_addresses::Scrypto_scrypto_encode;
+
     use super::*;
 
     #[test]

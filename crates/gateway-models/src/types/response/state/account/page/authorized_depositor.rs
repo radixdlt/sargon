@@ -1,9 +1,6 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::account::{
-    AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
-    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
-};
+use radix_engine_interface::blueprints::account::AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput;
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 #[serde(tag = "badge_type")]

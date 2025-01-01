@@ -5,7 +5,6 @@ pub mod prelude {
 
     pub use sargon_addresses::prelude::*;
     pub use sargon_core::prelude::*;
-    pub use sargon_core_assert_json::prelude::*;
 
     pub use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt as ScryptoSerializableToolkitTransactionReceipt;
 

@@ -24,7 +24,6 @@ pub use manifest_encountered_component_address::*;
 pub use manifest_summary::*;
 pub use notarized_transaction::*;
 pub use notary_signature::*;
-pub(crate) use sbor_depth_validation::*;
 pub use signed_intent::*;
 pub use statically_analyzable_manifest::*;
 pub use transaction_classes::*;

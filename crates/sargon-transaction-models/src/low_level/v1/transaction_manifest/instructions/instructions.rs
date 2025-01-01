@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+#[cfg(test)]
+use crate::low_level::sbor_depth_validation::manifest_value_with_sbor_depth;
+
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.instructions_string())]
 pub struct Instructions {
@@ -212,6 +215,8 @@ impl Instructions {
 mod tests {
     use super::*;
     use radix_transactions::manifest::{
+        lexer::{LexerError, LexerErrorKind},
+        token::{Position, Span},
         DropAuthZoneProofs, DropAuthZoneRegularProofs,
     };
 

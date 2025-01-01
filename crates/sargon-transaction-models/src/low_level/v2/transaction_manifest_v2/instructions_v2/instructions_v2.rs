@@ -103,6 +103,9 @@ impl InstructionsV2 {
 }
 
 #[cfg(test)]
+use crate::low_level::sbor_depth_validation::manifest_value_with_sbor_depth;
+
+#[cfg(test)]
 impl InstructionsV2 {
     /// Utility function which uses `InstructionsV2::new(<string>, <network_id>)`
     /// and SHOULD return `Err` if `depth > Instructions::MAX_SBOR_DEPTH`, which
@@ -212,6 +215,8 @@ impl InstructionsV2 {
 mod tests {
     use super::*;
     use radix_transactions::manifest::{
+        lexer::{LexerError, LexerErrorKind},
+        token::{Position, Span},
         DropAuthZoneProofs, DropAuthZoneRegularProofs,
     };
 

@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use super::quantities;
-
 /// A DerivationPath which is not indexed. On a specific network.
 #[derive(
     Clone,

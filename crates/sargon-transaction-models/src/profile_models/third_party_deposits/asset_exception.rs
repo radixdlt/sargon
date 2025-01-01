@@ -1,10 +1,6 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::account::{
-    AccountRemoveAuthorizedDepositorInput as ScryptoAccountRemoveAuthorizedDepositorInput,
-    AccountRemoveResourcePreferenceInput as ScryptoAccountRemoveResourcePreferenceInput,
-    AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput,
-};
+use radix_engine_interface::blueprints::account::AccountSetResourcePreferenceInput as ScryptoAccountSetResourcePreferenceInput;
 
 /// The specific Asset exception rule, which overrides the general
 ///  `deposit_rule` of a `ThirdPartyDeposits` settings.
