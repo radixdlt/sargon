@@ -11,7 +11,6 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
-mod gateway_api;
 mod home_cards;
 mod needs_a_new_home_dumping_ground;
 mod radix_connect;
@@ -21,6 +20,7 @@ mod system;
 mod types;
 
 pub mod prelude {
+    pub use gateway_client_and_api::prelude::*;
     pub use identified_vec_of::prelude::*;
     pub use sargon_addresses::prelude::*;
     pub use sargon_clients::prelude::*;
@@ -33,7 +33,6 @@ pub mod prelude {
     pub use sargon_profile::prelude::*;
     pub use sargon_transaction_models::prelude::*;
 
-    pub use crate::gateway_api::*;
     pub use crate::home_cards::*;
     pub use crate::needs_a_new_home_dumping_ground::*;
     pub use crate::radix_connect::*;

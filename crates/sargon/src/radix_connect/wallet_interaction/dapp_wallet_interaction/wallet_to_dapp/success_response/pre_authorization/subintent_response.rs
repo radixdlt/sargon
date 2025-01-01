@@ -70,7 +70,6 @@ impl Serialize for WalletToDappInteractionSubintentResponseItem {
 }
 
 impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {

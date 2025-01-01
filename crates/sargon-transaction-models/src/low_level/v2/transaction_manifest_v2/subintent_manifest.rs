@@ -250,9 +250,7 @@ mod tests {
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
         BlobProvider, CallMethod, DropAllProofs, DropAuthZoneProofs,
-        YieldToParent,
     };
-    use radix_transactions::model::InstructionV1;
     use sbor::ValueKind as ScryptoValueKind;
 
     #[allow(clippy::upper_case_acronyms)]

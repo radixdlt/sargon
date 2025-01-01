@@ -156,7 +156,6 @@ impl Persona {
 }
 
 impl Persona {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn sample_at_index_name_network<P, E>(
         network_id: NetworkID,
         index: u32,
@@ -213,7 +212,6 @@ impl Persona {
         persona
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative
     fn sample_at_index_name<P, E>(
         index: u32,
         display_name: &str,

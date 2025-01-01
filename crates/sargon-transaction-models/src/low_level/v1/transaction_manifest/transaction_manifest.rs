@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use radix_common::prelude::ManifestBucket;
-use radix_transactions::manifest::KnownManifestObjectNames;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.manifest_string())] // TODO add blobs to Display
@@ -209,14 +207,12 @@ impl TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use radix_common::prelude::ManifestBucket;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
         CallMethod, DropAllProofs, DropAuthZoneProofs,
     };
     use radix_transactions::model::InstructionV1;
     use sbor::ValueKind as ScryptoValueKind;
-    use std::collections::BTreeMap;
 
     impl FromStr for TransactionManifest {
         type Err = crate::CommonError;

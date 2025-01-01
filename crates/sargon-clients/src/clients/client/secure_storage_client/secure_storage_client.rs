@@ -17,7 +17,7 @@ pub struct SecureStorageClient {
 impl SecureStorageClient {
     /// Creates a new SecureStorageClient using an implementation of
     /// `SecureStorageDriver`.
-    pub(crate) fn new(driver: Arc<dyn SecureStorageDriver>) -> Self {
+    pub fn new(driver: Arc<dyn SecureStorageDriver>) -> Self {
         Self { driver }
     }
 }
@@ -229,46 +229,13 @@ impl SecureStorageClient {
     }
 }
 
-pub trait TestDerivationInteractorFromSecureStorageClient: Sized {
-    fn new(
-        always_fail: bool,
-        secure_storage_client: Arc<SecureStorageClient>,
-    ) -> Self;
-}
-
-#[async_trait::async_trait]
-impl MnemonicLoading for SecureStorageClient {
-    async fn load_mnemonic(
-        &self,
-        id: FactorSourceIDFromHash,
-    ) -> Result<MnemonicWithPassphrase> {
-        self.load_mnemonic_with_passphrase(id).await
-    }
-}
-
-impl TestDerivationInteractorFromSecureStorageClient
-    for TestDerivationInteractor
-{
-    fn new(
-        always_fail: bool,
-        secure_storage_client: Arc<SecureStorageClient>,
-    ) -> Self {
-        Self::with_mnemonic_loading(
-            always_fail,
-            secure_storage_client as Arc<dyn MnemonicLoading>,
-        )
-    }
-}
-
-#[cfg(test)]
 impl SecureStorageClient {
-    pub(crate) fn ephemeral(
-    ) -> (SecureStorageClient, Arc<EphemeralSecureStorage>) {
+    pub fn ephemeral() -> (SecureStorageClient, Arc<EphemeralSecureStorage>) {
         let storage = EphemeralSecureStorage::new();
         (SecureStorageClient::new(storage.clone()), storage)
     }
 
-    pub(crate) fn always_fail() -> Self {
+    pub fn always_fail() -> Self {
         SecureStorageClient::new(Arc::new(AlwaysFailSecureStorage {}))
     }
 }

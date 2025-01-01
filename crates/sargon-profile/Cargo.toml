@@ -13,6 +13,8 @@ sargon-factors = { path = "../sargon-factors" }
 sargon-keys-collector = { path = "../sargon-keys-collector" }
 sargon-addresses = { path = "../sargon-addresses" }
 sargon-transaction-models = { path = "../sargon-transaction-models" }
+sargon-profile-app-preferences = { path = "../sargon-profile-app-preferences" }
+sargon-profile-security-structures = { path = "../sargon-profile-security-structures" }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

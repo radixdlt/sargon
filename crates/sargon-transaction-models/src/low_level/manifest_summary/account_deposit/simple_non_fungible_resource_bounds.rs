@@ -1,5 +1,3 @@
-use uuid::fmt::Simple;
-
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]

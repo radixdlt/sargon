@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::collections::HashMap;
 
 /// Represents an account deposit, which includes specified and unspecified resources.
 #[derive(Clone, Debug, PartialEq, Eq)]

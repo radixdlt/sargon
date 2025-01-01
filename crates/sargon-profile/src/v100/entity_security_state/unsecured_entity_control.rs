@@ -51,7 +51,6 @@ impl UnsecuredEntityControl {
         }
     }
 
-    #[cfg(not(tarpaulin_include))] // false negative
     pub fn new(
         transaction_signing: HierarchicalDeterministicFactorInstance,
         provisional_securified_config: impl Into<

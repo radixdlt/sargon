@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use radix_common::prelude::ManifestBucket;
-use radix_transactions::manifest::KnownManifestObjectNames;
 
 impl StaticallyAnalyzableManifest for ScryptoTransactionManifestV2 {
     fn summary(&self, network_id: NetworkID) -> Result<ManifestSummary> {
@@ -206,7 +204,6 @@ mod tests {
     use radix_transactions::manifest::{
         CallMethod, DropAllProofs, DropAuthZoneProofs,
     };
-    use radix_transactions::model::InstructionV1;
     use sbor::ValueKind as ScryptoValueKind;
 
     #[allow(clippy::upper_case_acronyms)]

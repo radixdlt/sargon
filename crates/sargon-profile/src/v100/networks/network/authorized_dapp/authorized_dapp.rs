@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+pub type DappDefinitionAddress = AccountAddress;
+
 /// A connection made between a Radix Dapp and the user.
 #[derive(
     Serialize,
@@ -90,8 +92,6 @@ impl Identifiable for AuthorizedDapp {
         self.dapp_definition_address
     }
 }
-
-pub type DappDefinitionAddress = AccountAddress;
 
 impl AuthorizedDapp {
     pub fn sample_mainnet_dashboard() -> Self {

@@ -1,9 +1,7 @@
-#![cfg(test)]
-
 use crate::prelude::*;
 
 #[derive(Debug)]
-pub(crate) struct AlwaysFailSecureStorage {}
+pub struct AlwaysFailSecureStorage {}
 
 #[async_trait::async_trait]
 impl SecureStorageDriver for AlwaysFailSecureStorage {

@@ -6,6 +6,10 @@ edition = "2021"
 [dependencies]
 # === SARGON CRATES ===
 sargon-core = { path = "../sargon-core" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-addresses = { path = "../sargon-addresses" }
+sargon-profile = { path = "../sargon-profile" }
+sargon-profile-supporting-types = { path = "../sargon-profile-supporting-types" }
 
 # === RADIX DEPENDENCIES ===
 radix-engine = { workspace = true }
@@ -52,3 +56,6 @@ thiserror = { workspace = true }
 url = { workspace = true }
 uuid = { workspace = true }
 zeroize = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

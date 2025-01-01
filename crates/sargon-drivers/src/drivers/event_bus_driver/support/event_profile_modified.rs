@@ -70,6 +70,7 @@ impl HasEventKind for EventProfileModified {
 }
 
 pub trait IsProfileModifiedEvent {
+    type Address: Clone + Eq + StdHash;
     fn profile_modified_event(
         is_update: bool,
         addresses: IndexSet<Self::Address>,
@@ -77,6 +78,7 @@ pub trait IsProfileModifiedEvent {
 }
 
 impl IsProfileModifiedEvent for Account {
+    type Address = AccountAddress;
     fn profile_modified_event(
         is_update: bool,
         addresses: IndexSet<Self::Address>,
@@ -102,6 +104,7 @@ impl IsProfileModifiedEvent for Account {
 }
 
 impl IsProfileModifiedEvent for Persona {
+    type Address = IdentityAddress;
     fn profile_modified_event(
         is_update: bool,
         addresses: IndexSet<Self::Address>,

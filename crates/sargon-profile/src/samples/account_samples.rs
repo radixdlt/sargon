@@ -166,17 +166,21 @@ impl Account {
         let role = make_role();
         assert_eq!(role.get_role_kind(), RoleKind::Primary, "If this tests fails you can update the code below to not be hardcoded to set the primary role...");
         let mut matrix = MatrixOfFactorInstances::sample();
-        matrix.primary_role = PrimaryRoleWithFactorInstances::with_factors(
-            role.get_threshold(),
-            role.get_threshold_factors()
-                .into_iter()
-                .map(FactorInstance::from)
-                .collect_vec(),
-            role.get_override_factors()
-                .into_iter()
-                .map(FactorInstance::from)
-                .collect_vec(),
-        );
+        unsafe {
+            matrix.set_primary_role(
+                PrimaryRoleWithFactorInstances::with_factors(
+                    role.get_threshold(),
+                    role.get_threshold_factors()
+                        .into_iter()
+                        .map(FactorInstance::from)
+                        .collect_vec(),
+                    role.get_override_factors()
+                        .into_iter()
+                        .map(FactorInstance::from)
+                        .collect_vec(),
+                ),
+            );
+        }
 
         let network_id = NetworkID::Mainnet;
         let address =

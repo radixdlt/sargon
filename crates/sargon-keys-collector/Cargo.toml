@@ -9,6 +9,7 @@ sargon-core = { path = "../sargon-core" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-addresses = { path = "../sargon-addresses" }
+sargon-factors-supporting-types = { path = "../sargon-factors-supporting-types" }
 
 # === RADIX DEPENDENCIES ===
 # None

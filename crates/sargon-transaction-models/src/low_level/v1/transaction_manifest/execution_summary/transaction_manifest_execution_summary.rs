@@ -29,9 +29,6 @@ impl DynamicallyAnalyzableManifest for TransactionManifest {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine::transaction::{
-        AbortReason, AbortResult, TransactionResult,
-    };
 
     use super::*;
 

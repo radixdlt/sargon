@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use delegate::delegate;
 use std::hash::Hasher;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
@@ -141,11 +140,8 @@ impl HasSampleValues for Subintent {
 
 #[cfg(test)]
 mod tests {
-    use std::process::Child;
 
     use super::*;
-    use radix_transactions::manifest::CallMethod;
-    use sbor::ValueKind as ScryptoValueKind;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Subintent;

@@ -50,7 +50,6 @@ impl HasProvisionalSecurifiedConfig for EntitySecurityState {
 }
 
 impl<'de> Deserialize<'de> for EntitySecurityState {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {
@@ -65,7 +64,6 @@ impl<'de> Deserialize<'de> for EntitySecurityState {
 }
 
 impl Serialize for EntitySecurityState {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,

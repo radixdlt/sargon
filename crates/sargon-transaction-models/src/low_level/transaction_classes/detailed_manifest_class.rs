@@ -136,7 +136,7 @@ impl std::fmt::Display for DetailedManifestClass {
 
 impl DetailedManifestClass {
     /// Checks the manifest class is reserved for Wallet interactions only
-    pub(crate) fn is_reserved(&self) -> bool {
+    pub fn is_reserved(&self) -> bool {
         self.kind() == DetailedManifestClassKind::DeleteAccounts
     }
 }

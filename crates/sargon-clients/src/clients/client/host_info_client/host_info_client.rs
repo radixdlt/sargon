@@ -6,11 +6,11 @@ pub struct HostInfoClient {
 }
 
 impl HostInfoClient {
-    pub(crate) fn new(driver: Arc<dyn HostInfoDriver>) -> Self {
+    pub fn new(driver: Arc<dyn HostInfoDriver>) -> Self {
         Self { driver }
     }
 
-    pub(crate) async fn summary(&self) -> String {
+    pub async fn summary(&self) -> String {
         let host_model = self.driver.host_device_model().await;
         let host_os = self.driver.host_os().await;
         let host_app_version = self.driver.host_app_version().await;

@@ -1,9 +1,5 @@
 use crate::prelude::*;
 
-use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
-use radix_engine_toolkit::functions::address::decode as RET_decode_address;
-use radix_transactions::manifest::CallMethod;
-
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.instructions_string())]
 pub struct Instructions {
@@ -176,6 +172,13 @@ impl Instructions {
         }
     }
 }
+
+#[cfg(test)]
+use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
+#[cfg(test)]
+use radix_engine_toolkit::functions::address::decode as RET_decode_address;
+#[cfg(test)]
+use radix_transactions::manifest::CallMethod;
 
 #[cfg(test)]
 impl Instructions {

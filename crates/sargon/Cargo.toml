@@ -24,6 +24,7 @@ sargon-profile = { path = "../sargon-profile" }
 sargon-factor-instances-provider = { path = "../sargon-factor-instances-provider" }
 gateway-models = { path = "../gateway-models" }
 sargon-clients = { path = "../sargon-clients" }
+gateway-client-and-api = { path = "../gateway-client-and-api" }
 
 # === RADIX DEPENDENCIES ===
 radix-engine = { workspace = true }

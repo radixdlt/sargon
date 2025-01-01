@@ -1,4 +1,6 @@
 use crate::prelude::*;
+
+#[cfg(test)]
 use radix_transactions::manifest::CallMethod;
 
 #[derive(
@@ -64,7 +66,9 @@ impl HasSampleValues for CompiledNotarizedIntent {
     }
 }
 
+#[cfg(test)]
 use sbor::ValueKind as ScryptoValueKind;
+
 #[cfg(test)]
 pub(crate) fn invalid_signed_intent() -> ScryptoSignedIntent {
     let invalid_value = ScryptoManifestValue::Tuple {

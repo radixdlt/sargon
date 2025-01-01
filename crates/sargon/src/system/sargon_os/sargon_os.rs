@@ -17,6 +17,15 @@ pub struct SargonOS {
     pub(crate) host_id: HostId,
 }
 
+pub trait WithBios: Sized {
+    fn new(bios: Arc<Bios>) -> Self;
+}
+impl WithBios for Clients {
+    fn new(bios: Arc<Bios>) -> Self {
+        Self::with_drivers(bios.drivers.clone())
+    }
+}
+
 /// So that we do not have to go through `self.clients`,
 /// but can use e.g. `self.secure_storage` directly.
 impl Deref for SargonOS {

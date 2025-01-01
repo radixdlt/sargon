@@ -175,19 +175,22 @@ impl Persona {
         let role = make_role();
         assert_eq!(role.get_role_kind(), RoleKind::Primary, "If this tests fails you can update the code below to not be hardcoded to set the primary role...");
         let mut matrix = MatrixOfFactorInstances::sample();
-        matrix.primary_role = PrimaryRoleWithFactorInstances::with_factors(
-            role.get_threshold(),
-            role.get_threshold_factors()
-                .into_iter()
-                .map(FactorInstance::from)
-                .collect_vec(),
-            role.get_override_factors()
-                .into_iter()
-                .map(FactorInstance::from)
-                .collect_vec(),
-        );
+
         unsafe {
-            matrix.recovery_role =
+            matrix.set_primary_role(
+                PrimaryRoleWithFactorInstances::with_factors(
+                    role.get_threshold(),
+                    role.get_threshold_factors()
+                        .into_iter()
+                        .map(FactorInstance::from)
+                        .collect_vec(),
+                    role.get_override_factors()
+                        .into_iter()
+                        .map(FactorInstance::from)
+                        .collect_vec(),
+                ),
+            );
+            matrix.set_recovery_role(
                 RecoveryRoleWithFactorInstances::with_factors(
                     0,
                     [],
@@ -201,8 +204,9 @@ impl Persona {
                         })
                         .map(FactorInstance::from)
                         .collect_vec(),
-                );
-            matrix.confirmation_role =
+                ),
+            );
+            matrix.set_confirmation_role(
                 ConfirmationRoleWithFactorInstances::with_factors(
                     0,
                     [],
@@ -216,7 +220,8 @@ impl Persona {
                         })
                         .map(FactorInstance::from)
                         .collect_vec(),
-                );
+                ),
+            );
         }
         let address =
             IdentityAddress::new(veci.public_key(), NetworkID::Mainnet);

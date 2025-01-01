@@ -1,5 +1,3 @@
-#![cfg(test)]
-
 use crate::prelude::*;
 
 use std::sync::RwLock;

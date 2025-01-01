@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::prelude::*;
 
 #[derive(Debug)]
@@ -41,9 +43,5 @@ impl Clients {
             profile_state_change: profile_change,
             factor_instances_cache,
         }
-    }
-
-    pub fn new(bios: Arc<Bios>) -> Self {
-        Self::with_drivers(bios.drivers.clone())
     }
 }

@@ -1,6 +1,8 @@
 use crate::prelude::*;
 
+#[cfg(test)]
 use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
+#[cfg(test)]
 use radix_transactions::manifest::CallMethod;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]

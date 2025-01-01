@@ -5,7 +5,6 @@ pub enum PasswordBasedKeyDerivationScheme {
     Version1(PbHkdfSha256),
 }
 
-#[cfg(not(tarpaulin_include))] // false negative
 impl Serialize for PasswordBasedKeyDerivationScheme {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -19,7 +18,6 @@ impl Serialize for PasswordBasedKeyDerivationScheme {
     }
 }
 
-#[cfg(not(tarpaulin_include))] // false negative
 impl<'de> Deserialize<'de> for PasswordBasedKeyDerivationScheme {
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,

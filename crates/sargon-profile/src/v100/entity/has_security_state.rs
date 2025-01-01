@@ -1,5 +1,11 @@
 use crate::prelude::*;
 
+impl<T: HasSecurityState> HasFactorInstances for T {
+    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
+        self.security_state().unique_tx_signing_factor_instances()
+    }
+}
+
 pub trait HasSecurityState: HasFactorInstances + IsSecurityStateAware {
     fn security_state(&self) -> EntitySecurityState;
     fn set_security_state_unchecked(&mut self, new_state: EntitySecurityState);
@@ -51,12 +57,6 @@ pub trait HasSecurityState: HasFactorInstances + IsSecurityStateAware {
             .as_unsecured()
             .cloned()
             .ok_or(CommonError::SecurityStateSecurifiedButExpectedUnsecurified)
-    }
-}
-
-impl<T: HasSecurityState> HasFactorInstances for T {
-    fn unique_tx_signing_factor_instances(&self) -> IndexSet<FactorInstance> {
-        self.security_state().unique_tx_signing_factor_instances()
     }
 }
 
