@@ -353,7 +353,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                             assertTrue(
                                 contains(
                                     recipient.value
-                                        .address
                                         .string
                                 )
                             )
