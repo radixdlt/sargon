@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use sargon::BaseBaseIsFactorSource;
-use sargon::BaseIsFactorSource;
 use sargon::FactorSource as InternalFactorSource;
 
 decl_vec_samples_for!(FactorSources, FactorSource);

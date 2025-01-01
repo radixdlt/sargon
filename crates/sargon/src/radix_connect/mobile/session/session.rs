@@ -104,7 +104,6 @@ impl HasSampleValues for Session {
 
 #[cfg(test)]
 mod tests {
-    use hex::ToHex;
 
     use super::*;
 

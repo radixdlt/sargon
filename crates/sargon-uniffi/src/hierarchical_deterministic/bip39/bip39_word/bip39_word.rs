@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use sargon::BIP39Word as InternalBIP39Word;
-use sargon::U11 as InternalU11;
 
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]

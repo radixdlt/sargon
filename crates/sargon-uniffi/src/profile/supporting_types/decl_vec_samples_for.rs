@@ -11,7 +11,6 @@ macro_rules! decl_vec_samples_for {
         paste! {
 
             use sargon::$collection_type as [< Internal $collection_type >];
-            use sargon::Result as InternalResult;
 
             impl
                 IntoInternal<Vec<$element_type>, [< Internal $collection_type >]>

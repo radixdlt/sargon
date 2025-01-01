@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::hash::Hasher;
 
 /// Any type conforming to `Signable` can be used with `SignaturesCollector` and collect
 /// signatures from all involved entities according to their security structure.

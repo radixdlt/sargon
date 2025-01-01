@@ -129,11 +129,10 @@ impl SargonOS {
 #[cfg(test)]
 mod poll_pre_authorization_status_with_delays {
     use super::*;
-    use actix_rt::time::timeout;
-    use std::{future::Future, time::Duration};
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
     #[allow(clippy::upper_case_acronyms)]
     type SSR = SubintentStatusResponse;
 

@@ -1,7 +1,3 @@
-use std::{borrow::Borrow, sync::RwLockWriteGuard};
-
-use radix_common::address;
-
 use crate::prelude::*;
 
 // ==================
@@ -998,7 +994,7 @@ impl SargonOS {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use std::{future::join, future::Future, time::Duration};
+    use futures::future::join_all;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;

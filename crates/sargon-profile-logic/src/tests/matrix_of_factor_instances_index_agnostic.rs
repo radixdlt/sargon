@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 
+#[allow(clippy::upper_case_acronyms)]
 type SUT = MatrixOfFactorInstances;
 
 #[test]

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::BagOfBytes as InternalBagOfBytes;
 
 /// Small macro to facilitate generation of UniFFI exported functions.
 macro_rules! decl_exactly_n_bytes {

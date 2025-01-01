@@ -1,7 +1,5 @@
-use async_std::sync::RwLockWriteGuard;
-
 use crate::prelude::*;
-use std::{borrow::Borrow, sync::RwLock};
+use std::sync::RwLock;
 
 #[derive(Debug)]
 pub struct ProfileStateHolder {
@@ -182,7 +180,7 @@ impl ProfileStateHolder {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use std::sync::{Arc, RwLock};
+    use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
 

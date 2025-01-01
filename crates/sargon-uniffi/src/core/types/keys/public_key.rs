@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::BagOfBytes as InternalBagOfBytes;
 use sargon::PublicKey as InternalPublicKey;
 
 /// A tagged union of supported public keys on different curves, supported

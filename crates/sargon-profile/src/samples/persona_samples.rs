@@ -132,7 +132,7 @@ impl UnsafeHardcodingDerivationPathAsPersona
     unsafe fn invalid_hard_coding_derivation_path_as_persona(&self) -> Self {
         unsafe {
             Self::new(
-                self.factor_source_id.clone(),
+                self.factor_source_id,
                 HierarchicalDeterministicPublicKey::new(
                     self.public_key(),
                     self.derivation_path().as_persona(),

@@ -2,8 +2,7 @@ use crate::prelude::*;
 use sargon::{HasIndexInLocalKeySpace, SecurifiedU30 as InternalSecurifiedU30};
 
 use sargon::{
-    FromGlobalKeySpace, FromLocalKeySpace, IsInLocalKeySpace,
-    IsMappableToGlobalKeySpace, ToBIP32Str,
+    FromGlobalKeySpace, FromLocalKeySpace, IsMappableToGlobalKeySpace,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]

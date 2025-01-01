@@ -17,7 +17,7 @@ pub use entity::*;
 pub use entity_security_state::*;
 pub use factors::*;
 pub use header::*;
-pub use json_data_convertible::*;
+pub(crate) use json_data_convertible::*;
 pub use networks::*;
 pub use profile::*;
 pub use profile_file_contents::*;

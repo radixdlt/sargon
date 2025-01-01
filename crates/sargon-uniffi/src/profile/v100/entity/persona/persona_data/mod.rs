@@ -11,5 +11,5 @@ pub use collection_of_phone_numbers::*;
 pub use entry_kinds::*;
 pub use persona_data::*;
 pub use persona_data_entry_id::*;
-pub use persona_data_identified_collection_types::*;
+pub(crate) use persona_data_identified_collection_types::*;
 pub use persona_data_identified_entry_types::*;

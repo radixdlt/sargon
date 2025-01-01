@@ -79,16 +79,16 @@ impl From<InternalFactorInstancesProviderOutcomeForFactor>
     for FactorInstancesProviderOutcomeForFactor
 {
     fn from(value: InternalFactorInstancesProviderOutcomeForFactor) -> Self {
-        let _self = Self {
+        
+
+        Self {
             hidden: HiddenConstructor,
             factor_source_id: value.factor_source_id,
             to_use_directly: value.to_use_directly,
             debug_was_cached: value.to_cache,
             debug_found_in_cache: value.found_in_cache,
             debug_was_derived: value.newly_derived,
-        };
-
-        _self
+        }
     }
 }
 

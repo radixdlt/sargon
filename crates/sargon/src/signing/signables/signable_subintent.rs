@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_transactions::prelude::TransactionManifestV2Builder;
 
 impl Signable for Subintent {
     type ID = SubintentHash;

@@ -34,6 +34,6 @@ pub use nonce::*;
 pub use requested_number_quantifier::*;
 pub use requested_quantity::*;
 pub use rounding_mode::*;
-pub use secret_bytes::*;
+pub(crate) use secret_bytes::*;
 pub use signatures::*;
-pub use version_type::*;
+pub(crate) use version_type::*;

@@ -1,5 +1,3 @@
-use crypto::signatures::ed25519::Signature;
-
 use super::super::session::session_id::SessionID;
 use crate::prelude::*;
 use hex::ToHex;

@@ -8,8 +8,6 @@ pub mod prelude {
     pub use crate::saved_gateways::*;
 
     pub(crate) use sargon_core::prelude::*;
-
-    pub(crate) use serde::*;
 }
 
 pub use prelude::*;

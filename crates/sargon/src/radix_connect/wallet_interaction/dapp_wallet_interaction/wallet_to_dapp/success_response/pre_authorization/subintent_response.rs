@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSubintentResponseItem {

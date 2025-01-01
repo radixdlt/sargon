@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_transactions::model::TransactionPayload;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct WalletToDappInteractionPreAuthorizationResponseItems {

@@ -41,7 +41,6 @@ pub(crate) fn new_dapp_to_wallet_interaction_unvalidated_sample_other(
 
 #[cfg(test)]
 mod test {
-    use super::*;
 
     #[test]
     fn test_dapp_to_wallet_interaction_unvalidated() {

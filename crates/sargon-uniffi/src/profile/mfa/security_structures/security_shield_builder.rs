@@ -2,17 +2,10 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::{
-    borrow::Borrow,
-    future::Future,
-    sync::{Arc, RwLock},
-};
+use std::{borrow::Borrow, sync::Arc};
 
-use sargon::{
-    FactorSourceWithExtraSampleValues,
-    SecurityShieldBuilder as InternalSecurityShieldBuilder,
-    SelectedFactorSourcesForRoleStatus as InternalSelectedFactorSourcesForRoleStatus,
-};
+#[cfg(test)]
+use sargon::FactorSourceWithExtraSampleValues;
 
 use crate::prelude::*;
 
@@ -429,8 +422,6 @@ impl SecurityShieldBuilder {
         )
     }
 }
-
-use sargon::FactorSource as InternalFactorSource;
 
 #[uniffi::export]
 impl SecurityShieldBuilder {

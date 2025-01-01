@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::BIP39Entropy as InternalBIP39Entropy;
 use sargon::PrivateHierarchicalDeterministicFactorSource as InternalPrivateHierarchicalDeterministicFactorSource;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]

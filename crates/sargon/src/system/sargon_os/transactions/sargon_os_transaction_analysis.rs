@@ -303,12 +303,10 @@ struct PreviewResponseReceipts {
 #[cfg(test)]
 mod transaction_preview_analysis_tests {
     use super::*;
-    use radix_common::prelude::Decimal;
     use radix_engine_toolkit_common::receipt::{
-        AsStr, FeeSummary as RETFeeSummary, LockedFees as RETLockedFees,
+        FeeSummary as RETFeeSummary, LockedFees as RETLockedFees,
         StateUpdatesSummary as RETStateUpdatesSummary,
     };
-    use std::sync::Mutex;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;

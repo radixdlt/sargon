@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use paste::paste;
 
 /// A macro that generates a XYZVersion type, which is a typed version of `u64`.
 macro_rules! decl_version_type {

@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 #[uniffi::export]
 pub fn constant_entity_name_max_length() -> u64 {
     sargon::DisplayName::MAX_LEN as u64
