@@ -1,7 +1,5 @@
 #![allow(deprecated)]
 
-use std::sync::RwLockWriteGuard;
-
 use crate::prelude::*;
 
 #[uniffi::export]

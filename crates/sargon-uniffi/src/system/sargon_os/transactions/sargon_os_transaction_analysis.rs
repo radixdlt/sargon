@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::sync::RwLockWriteGuard;
 
 #[uniffi::export]
 impl SargonOS {

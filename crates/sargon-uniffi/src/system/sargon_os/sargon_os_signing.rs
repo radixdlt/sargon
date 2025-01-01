@@ -1,7 +1,5 @@
 use crate::prelude::*;
 use sargon::AuthIntent as InternalAuthIntent;
-use sargon::Subintent as InternalSubintent;
-use sargon::TransactionIntent as InternalTransactionIntent;
 
 #[uniffi::export]
 impl SargonOS {

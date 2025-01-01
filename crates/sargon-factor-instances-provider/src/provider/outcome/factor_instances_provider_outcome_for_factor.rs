@@ -79,8 +79,6 @@ impl From<InternalFactorInstancesProviderOutcomeForFactor>
     for FactorInstancesProviderOutcomeForFactor
 {
     fn from(value: InternalFactorInstancesProviderOutcomeForFactor) -> Self {
-        
-
         Self {
             hidden: HiddenConstructor,
             factor_source_id: value.factor_source_id,
