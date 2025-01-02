@@ -407,8 +407,9 @@ impl SargonOS {
         let test_drivers =
             Drivers::with_file_system(InMemoryFileSystemDriver::new());
         let bios = Bios::new(test_drivers);
-        let clients = Clients::new(bios.clone());
-
+        let mut clients = Clients::new(bios.clone());
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let keys_derivation_interactor =
             derivation_interactor.into().unwrap_or_else(|| {
                 Arc::new(TestDerivationInteractor::new(
