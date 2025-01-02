@@ -923,8 +923,8 @@ mod tests {
             &mut self,
             wallet_aid: BagOfBytes,
         ) -> &mut Self {
-            let request = BagOfBytes::sample();
-            let nfc_card_response = BagOfBytes::sample_other();
+            let request = BagOfBytes::from_hex("00a404000a415243554c5553010157").unwrap();
+            let nfc_card_response = BagOfBytes::from_hex("6f819d840a415243554c5553010157a5049f6501ff5fc104020207069f33081f003f003f0007039f2304070807089fca0200015f402042bab07235ab1c19638e05403a2e28c33268eb560d078cefc5919a5c0195f02b9f4b47304502210097587f1dd5e23609dd86c2c398de70cd781dd874c6586f8b1f8eb47539554d9c022002d292d2d6a7272b7845f93524e15b053d86bc2fccb11d9d6a5ea5f5f8c759f59000").unwrap();
             self.csdk_driver
                 .expect_select_wallet_request()
                 .with(eq(self.wallet_pointer.clone()), eq(wallet_aid))
@@ -945,16 +945,18 @@ mod tests {
         fn init_encrypted_session(
             &mut self,
         ) -> &mut Self {
+            let request = BagOfBytes::from_hex("805000004104b210690d389ffab381d432df17b034bd6faa456776c9a5c1707e5159d57374037ab8665c40c76917614e0593def07ce25d2756d6fd3e53593f0deb47b6480d8b").unwrap();
+            let nfc_card_response = BagOfBytes::from_hex("041b1e7d6fecb10ddadb4610085fdb6d73fc3445ce3321fa6286863c0a36face961910b3b13cdacd93060905571abe0601e57fc64830806838a19a8233ff040a259000").unwrap();
             self.csdk_driver
                 .expect_init_encrypted_session_request()
                 .with(eq(self.wallet_pointer.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive(request, nfc_card_response.clone());
             self.csdk_driver
                 .expect_init_encrypted_session_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(0));
@@ -1044,16 +1046,18 @@ mod tests {
         fn reset_wallet(
             &mut self,
         ) -> &mut Self {
+            let request = BagOfBytes::from_hex("80ef000010be5d7d3929bb96637a4aeca143e9d00e").unwrap();
+            let nfc_response = BagOfBytes::from_hex("24ad24564f18ba954ad9a643f1e948e29000").unwrap();
             self.csdk_driver
                 .expect_reset_wallet_request()
                 .with(eq(self.wallet_pointer.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_reset_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(0));
@@ -1065,16 +1069,18 @@ mod tests {
             &mut self,
             pin: String,
         ) -> &mut Self {
+            let request = BagOfBytes::from_hex("80ef0000207f2e8ac59205e712da95a800381873bfa970adc416e4d3e07928b0d00a25cb1e").unwrap();
+            let nfc_response = BagOfBytes::from_hex("24ad24564f18ba954ad9a643f1e948e29000").unwrap();
             self.csdk_driver
                 .expect_store_data_pin_request()
                 .with(eq(self.wallet_pointer.clone()), eq(pin.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_store_data_pin_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(0));
@@ -1086,16 +1092,19 @@ mod tests {
             &mut self,
             pin: String,
         ) -> &mut Self {
+            let request = BagOfBytes::from_hex("80ef0000201a3ee2b393a32d8f53deff8bb32617eedb42a23e2221e31236401799676a8971").unwrap();
+            let nfc_response = BagOfBytes::from_hex("24ad24564f18ba954ad9a643f1e948e29000").unwrap();
+
             self.csdk_driver
                 .expect_verify_pin_request()
                 .with(eq(self.wallet_pointer.clone()), eq(pin.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+                .return_const(Ok(request.clone()));
+            self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_verify_pin_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(0));
@@ -1108,17 +1117,18 @@ mod tests {
             word_count: i64,
             seed: BagOfBytes,
         ) -> &mut Self {
-            let request = BagOfBytes::sample();
+            let request = BagOfBytes::from_hex("80ef00001057cf5fa28514eabaf0eab603ea53f93a").unwrap();
+            let nfc_response = BagOfBytes::from_hex("50d7935ddd31d62e051ee15b238335d3f5bdaecc6470de19eb0ae682480bfb75c987c708cefb8e596ffbe2399eea095b6b29a12f3b662024c89c880f049f0f5e9000").unwrap();
             self.csdk_driver
                 .expect_create_wallet_seed_request()
                 .with(eq(self.wallet_pointer.clone()), eq(word_count))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(request.clone()));
-            self.nfc_send_receive();
+            self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_create_wallet_seed_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(seed));
@@ -1151,8 +1161,8 @@ mod tests {
             &mut self,
             seed_words_count: i64,
         ) -> &mut Self {
-            let request = BagOfBytes::sample();
-            let nfc_card_reponse = BagOfBytes::sample_other();
+            let request = BagOfBytes::from_hex("80ef0000106fb9c950cd0c9fe9af4de773c1be2e45").unwrap();
+            let nfc_card_reponse = BagOfBytes::from_hex("24ad24564f18ba954ad9a643f1e948e29000").unwrap();
 
             self.csdk_driver
                 .expect_init_recover_wallet_request()
@@ -1175,8 +1185,8 @@ mod tests {
             &mut self,
             seed: BagOfBytes
         ) -> &mut Self {
-            let request = BagOfBytes::sample();
-            let nfc_card_reponse = BagOfBytes::sample_other();
+            let request = BagOfBytes::from_hex("80ef0000d05428019539de0097469d6cd787a22d2f38cc1b8d93339ba2b6fdfc3bea15697d829d2e6433b4f3c4c24e759c8fbf2a0091cf16caf95d4656123d0255318af24211990bc7a3eaab90f85c366e15f3e597fe9758041b921e64960eef4aa6b0a9deb85d661621f3c3c9e58d1d5d53fef52799c092add2cec2640a06f60977059ff7e16a3d1f1f75f6414c3eb37f158fb98c1977bce36afbc216f8dc696c5a6f34cded8a2c19028d3034690be56fc5857b19eaf8021a55302a8399b445b30a7e35e7a3ec6ad2d4ac4dcebdfd561c9d7e9290").unwrap();
+            let nfc_card_reponse = BagOfBytes::from_hex("24ad24564f18ba954ad9a643f1e948e29000").unwrap();
             self.csdk_driver
                 .expect_finish_recover_wallet_request()
                 .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
@@ -1197,13 +1207,14 @@ mod tests {
         fn seed_phrase_from_mnemonic_sentence(
             &mut self,
             mnemonic_sentence: BagOfBytes,
+            seed_response: BagOfBytes,
         ) -> &mut Self {
             self.csdk_driver
                 .expect_seed_phrase_from_mnemonic_sentence()
                 .with(eq(self.wallet_pointer.clone()), eq(mnemonic_sentence.clone()), eq(None))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(Ok(BagOfBytes::sample()));
+                .return_const(Ok(seed_response));
 
             self
         }
@@ -1220,24 +1231,21 @@ mod tests {
     
     #[actix_rt::test]
     async fn create_wallet_seed() {
-        let pin = "1234".to_string();
+        let pin = "123456".to_string();
         let wallet_pointer = ArculusWalletPointer::sample();
         let word_count = 24;
-        let seed = BagOfBytes::sample();
-        let create_wallet_seed_request = BagOfBytes::sample();
-        let create_wallet_seed_response = BagOfBytes::sample_other();
-        let create_wallet_seed_parsed = BagOfBytes::sample_fade();
-
+        let created_mnemonic_sentence = BagOfBytes::from_hex("6578616d706c652070656c6963616e207370656e6420646172696e6720696e6d61746520676c616420746f6e6520636f6c756d6e2064657061727420726f736520736f727420706561722062726965662063656c657279206e6f7465206f6c796d706963206d697373207370617469616c206f626a65637420756e69666f726d207265736f7572636520646973706c617920666973682073686f7000").unwrap();
+        let seed_response = BagOfBytes::from_hex("8b10dc86df2ff3d44f8c350fc0a7bf5c7eeb27f74e529d90eea280fb1ea9b62b679328235b6eca5de27c89e2bc655d38385d7c3c0a3543845938ce9f1ee4c69951a1e3652c8b2aac1b013c3971c92acff03f32592d62999f4a96f06a2b1b8e542d9a91103a36f55752e7c2230f04399c1f69907bf814c6938f8a69c6410bc8789a60825588362f333be01b5b60dca6bf7eb998da864a3e86fe4979f5d051baa597d45fef318ae1ad8b68a81645d60eeb12a2b63fc90b8f7506d0e14957e0249a").unwrap();
         let mut stub = ArculusWalletTestStub::new();
 
         stub
         .initialize_session()
         .reset_wallet()
         .store_pin(pin.clone())
-        .create_wallet_seed(word_count, seed.clone())
+        .create_wallet_seed(word_count, created_mnemonic_sentence.clone())
         .init_recover_wallet(word_count)
-        .seed_phrase_from_mnemonic_sentence(seed.clone())
-        .finish_recover_wallet(seed.clone())
+        .seed_phrase_from_mnemonic_sentence(created_mnemonic_sentence.clone(), seed_response.clone())
+        .finish_recover_wallet(seed_response.clone())
         .verify_pin(pin.clone())
         .end_session();
 
@@ -1247,7 +1255,7 @@ mod tests {
             Arc::new(stub.nfc_tag_driver),
         );
 
-        let result = sut.create_wallet_seed("1234".to_string(), 24).await;
+        let result = sut.create_wallet_seed(pin, 24).await;
         pretty_assertions::assert_eq!(result, Ok(Mnemonic::sample()))
     }
 }

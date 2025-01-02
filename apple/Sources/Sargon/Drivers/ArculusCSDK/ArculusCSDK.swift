@@ -70,12 +70,20 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
         return sentence
     }
 
-    func buildCommand(build: (inout size_t) -> UnsafeMutablePointer<UInt8>?) throws -> Data {
+    func buildCommand(build: (inout size_t) -> UnsafeMutablePointer<UInt8>?, file: StaticString = #filePath, fun: StaticString = #function) throws -> Data {
         var len: size_t = 0
         guard let pointer = build(&len) else {
             fatalError()
         }
-        return cBufToData(buf: pointer, len: len)
+
+        let response = cBufToData(buf: pointer, len: len)
+
+        logData(fun: fun, response: response)
+        return response
+    }
+
+    func logData(fun: StaticString = #function, response: Data) {
+        debugPrint("#CARD \(fun), payload: \(response.hex)")
     }
 
     func walletInit() -> SargonUniFFI.ArculusWalletPointer {
@@ -93,6 +101,8 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func selectWalletResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Int32 {
+        logData(response: response)
+
         let response = response.toArray
         let pointer = ArculusCSDK.selectWalletResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count)
 
@@ -112,6 +122,7 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func createWalletSeedResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {
+        logData(response: response)
         let response = response.toArray
         return try buildCommand { len in
             ArculusCSDK.seedCreateWalletResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count, mnemonicSentenceLength: &len)
@@ -125,6 +136,7 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func resetWalletResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Int32 {
+        logData(response: response)
         let response = response.toArray
         return ArculusCSDK.resetWalletResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count)
     }
@@ -136,6 +148,7 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func getGguidResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {
+        logData(response: response)
         let response = response.toArray
         return try buildCommand { len in
             ArculusCSDK.getGGUIDResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count, GGUIDLength: &len)
@@ -161,6 +174,7 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func storeDataPinResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Int32 {
+        logData(response: response)
         let response = response.toArray
         return ArculusCSDK.storeDataPINResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count)
     }
@@ -172,6 +186,7 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func verifyPinResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Int32 {
+        logData(response: response)
         let response = response.toArray
         var numberOfTries: Int = 0
         return ArculusCSDK.verifyPINResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count, nbrOfTries: &numberOfTries)
@@ -184,6 +199,7 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func initEncryptedSessionResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Int32 {
+        logData(response: response)
         let response = response.toArray
         return ArculusCSDK.initSessionResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count)
     }
@@ -196,6 +212,7 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func getPublicKeyByPathResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {
+        logData(response: response)
         let response = response.toArray
         var extendedKey = ArculusCSDK.getPublicKeyFromPathResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count).pointee
         return try cArrayToData(val: extendedKey.publicKey, len: extendedKey.pubKeyLe)
@@ -224,19 +241,21 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
     
     func signHashPathResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {
+        logData(response: response)
         let response = response.toArray
         return try buildCommand { len in
             ArculusCSDK.signHashResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count, signedHashLength: &len)
         }
     }
 
-    func initRecoverWalletRequest(wallet: SargonUniFFI.ArculusWalletPointer, wordCount: Int64) throws -> SargonUniFFI.BagOfBytes {
+    func initRecoverWalletRequest(wallet: SargonUniFFI.ArculusWalletPointer, wordCount: Int64) throws -> Data {
         try buildCommand { len in
             ArculusCSDK.initRecoverWalletRequest(walletPointer: wallet.toOpaquePointer(), nbrOfWords: Int(wordCount), len: &len)
         }
     }
 
-    func initRecoverWalletResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: SargonUniFFI.BagOfBytes) throws -> Int32 {
+    func initRecoverWalletResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Int32 {
+        logData(response: response)
         let response = response.toArray
         return ArculusCSDK.initRecoverWalletResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count)
     }
@@ -248,7 +267,9 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
     }
 
     func finishRecoverWalletResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: SargonUniFFI.BagOfBytes) throws -> Int32 {
-        ArculusCSDK.seedFinishRecoverWalletResponse(walletPointer: wallet.toOpaquePointer(), response: response.toArray, responseLength: response.toArray.count)
+        logData(response: response)
+
+        return ArculusCSDK.seedFinishRecoverWalletResponse(walletPointer: wallet.toOpaquePointer(), response: response.toArray, responseLength: response.toArray.count)
     }
 }
 

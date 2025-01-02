@@ -1,13 +1,16 @@
 import CoreNFC
 
 extension NFCISO7816Tag {
-    public func sendCommand(data: Data) async throws -> Data {
+    public func sendCommand(data: Data, file: StaticString = #filePath, fun: StaticString = #function) async throws -> Data {
         guard let command = NFCISO7816APDU(data: data) else {
             throw NFCReaderError(.readerErrorInvalidParameterLength)
         }
 
         let (response, statusBytesSW1, statusBytesSW2) = try await sendCommand(apdu: command)
-        return response + Data([statusBytesSW1]) + Data([statusBytesSW2])
+        let result = response + Data([statusBytesSW1]) + Data([statusBytesSW2])
+
+        print("# NFC request response for \(fun), request: \(data.hex), response: \(result.hex)")
+        return result
     }
 
     func sendCommandChain(_ apdus: [Data]) async throws -> Data {
