@@ -1302,15 +1302,10 @@ name = "gateway-client-and-api"
 version = "1.1.99"
 dependencies = [
  "actix-rt",
- "derive_more",
  "gateway-logic",
  "gateway-models",
  "http-client",
- "itertools 0.12.0",
  "radix-common",
- "radix-engine-toolkit-common",
- "radix-transactions",
- "reqwest",
  "sargon-addresses",
  "sargon-core",
  "sargon-core-assert-json",

@@ -68,7 +68,14 @@ mod tests {
         let req =
             sut.submit_notarized_transaction(NotarizedTransaction::sample());
         let result = timeout(MAX, req).await.unwrap();
-        assert_eq!(result, Err(CommonError::GatewaySubmitDuplicateTX { intent_hash: "txid_rdx198k527d5wt4ms5tvrdcu8089v4hptp7ztv388k539uzzvmw25ltsj7u4zz".to_owned() }));
+
+        assert_eq!(
+            result,
+            Err(
+                CommonError::GatewaySubmitDuplicateTX {
+                    intent_hash: r#"txid_rdx198k527d5wt4ms5tvrdcu8089v4hptp7ztv388k539uzzvmw25ltsj7u4zz"#.to_owned() }
+                )
+            );
     }
 
     #[actix_rt::test]

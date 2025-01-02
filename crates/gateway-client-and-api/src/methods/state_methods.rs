@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
+
 impl GatewayClient {
     /// Fetched the XRD balance of account of `address`, returns `None` if
     /// it has no balance.

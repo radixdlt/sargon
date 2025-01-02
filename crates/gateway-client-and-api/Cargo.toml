@@ -16,14 +16,9 @@ gateway-logic = { path = "../gateway-logic" }
 sargon-profile-gateway = { path = "../sargon-profile-gateway" }
 
 # === RADIX DEPENDENCIES ===
-radix-engine-toolkit-common = { workspace = true }
-radix-transactions = { workspace = true }
 radix-common = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
-derive_more = { workspace = true }
-itertools = { workspace = true }
-reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 

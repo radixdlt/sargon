@@ -13,8 +13,6 @@ pub mod prelude {
     pub use sargon_drivers::prelude::*;
     pub use sargon_transaction_models::prelude::*;
 
-    pub use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
-
     pub use serde::{Deserialize, Serialize};
 }
 
