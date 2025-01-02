@@ -1,14 +1,7 @@
 use super::request::RadixConnectMobileDappRequest;
 use crate::prelude::*;
-use base64::engine::general_purpose::URL_SAFE;
-use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use base64::Engine;
-use crypto::signatures::ed25519::Signature;
-use sargon_core::parse_url;
-use url::form_urlencoded;
-use url::Url;
 
-use super::*;
+use sargon_core::parse_url;
 
 const CONNECT_URL_PARAM_SESSION_ID: &str = "sessionId";
 const CONNECT_URL_PARAM_ORIGIN: &str = "origin";
@@ -18,6 +11,9 @@ const CONNECT_URL_PARAM_PUBLIC_KEY: &str = "publicKey";
 const CONNECT_URL_PARAM_IDENTITY_KEY: &str = "identity";
 const CONNECT_URL_PARAM_DAPP_DEFINITION_ADDRESS: &str = "dAppDefinitionAddress";
 const APP_SCHEME: &str = "radixwallet";
+
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use base64::engine::Engine as _;
 
 pub fn parse_mobile_connect_request(
     url: impl AsRef<str>,
@@ -216,8 +212,6 @@ impl SampleRequestParams {
 
 #[cfg(test)]
 mod tests {
-    use hex::ToHex;
-    use rand::random;
     use sargon_core::parse_url;
 
     use super::*;
@@ -245,6 +239,8 @@ mod tests {
         );
         pretty_assertions::assert_eq!(APP_SCHEME, "radixwallet");
     }
+
+    use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 
     #[test]
     fn parse_url_into_request() {

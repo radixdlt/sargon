@@ -21,7 +21,6 @@ pub struct WalletToDappInteractionSendTransactionResponseItem {
 }
 
 impl Serialize for WalletToDappInteractionSendTransactionResponseItem {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -41,7 +40,6 @@ impl Serialize for WalletToDappInteractionSendTransactionResponseItem {
 impl<'de> Deserialize<'de>
     for WalletToDappInteractionSendTransactionResponseItem
 {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {

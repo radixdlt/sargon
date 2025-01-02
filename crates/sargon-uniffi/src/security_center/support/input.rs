@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use sargon::CheckSecurityProblemsInput as InternalCheckSecurityProblemsInput;
-use sargon::IsCloudProfileSyncEnabled;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record, InternalConversion)]
 pub struct CheckSecurityProblemsInput {

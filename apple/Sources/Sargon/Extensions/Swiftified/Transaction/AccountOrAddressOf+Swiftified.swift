@@ -1,17 +1,17 @@
 import SargonUniFFI
 
-// MARK: - AccountOrAddressOf + SargonModel
-extension AccountOrAddressOf: SargonModel {}
+// MARK: - OwnedOrThirdPartyAccountAddress + SargonModel
+extension OwnedOrThirdPartyAccountAddress: SargonModel {}
 
-// MARK: - AccountOrAddressOf + CustomStringConvertible
-extension AccountOrAddressOf: CustomStringConvertible {
+// MARK: - OwnedOrThirdPartyAccountAddress + CustomStringConvertible
+extension OwnedOrThirdPartyAccountAddress: CustomStringConvertible {
 	public var description: String {
 		accountAddress.address
 	}
 }
 
-// MARK: - AccountOrAddressOf + Identifiable
-extension AccountOrAddressOf: Identifiable {
+// MARK: - OwnedOrThirdPartyAccountAddress + Identifiable
+extension OwnedOrThirdPartyAccountAddress: Identifiable {
 	public typealias ID = AccountAddress
 	public var id: ID {
 		accountAddress

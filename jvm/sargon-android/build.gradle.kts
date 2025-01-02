@@ -283,7 +283,6 @@ afterEvaluate {
                 commandLine(
                     "cargo", "run",
                     "-p", "sargon-uniffi",
-                    "--features", "build-binary",
                     "--bin", "sargon-bindgen",
                     "generate", "--library", binaryFile.toString(),
                     "--language", "kotlin",

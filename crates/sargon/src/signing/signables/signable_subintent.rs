@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_transactions::prelude::TransactionManifestV2Builder;
 
 impl Signable for Subintent {
     type ID = SubintentHash;
@@ -30,26 +29,6 @@ impl Signable for Subintent {
             self.clone(),
             IntentSignatures::new(intent_signatures),
         )
-    }
-}
-
-impl From<SignedSubintent> for Subintent {
-    fn from(val: SignedSubintent) -> Self {
-        val.subintent
-    }
-}
-
-impl IntoIterator for SignedSubintent {
-    type Item = SignatureWithPublicKey;
-    type IntoIter = <Vec<SignatureWithPublicKey> as IntoIterator>::IntoIter;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.subintent_signatures
-            .signatures
-            .into_iter()
-            .map(|s| s.0)
-            .collect_vec()
-            .into_iter()
     }
 }
 

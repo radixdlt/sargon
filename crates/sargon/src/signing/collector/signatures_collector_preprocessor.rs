@@ -13,7 +13,7 @@ impl<S: Signable> SignaturesCollectorPreprocessor<S> {
         }
     }
 
-    pub(super) fn analyzing_signables(
+    pub fn analyzing_signables(
         profile: &Profile,
         signables: Vec<S>,
     ) -> Result<Self> {

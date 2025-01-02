@@ -83,7 +83,6 @@ macro_rules! decl_sign_request {
     (signable: $signable:ty, signable_id: $signable_id:ty) => {
         paste! {
             use sargon::[< $signable >] as [< Internal $signable >];
-            use sargon::[< $signable_id >] as [< Internal $signable_id >];
 
             type [< InternalSignRequestOf $signable >] =
                 sargon::SignRequest<[< Internal $signable >]>;

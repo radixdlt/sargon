@@ -1,17 +1,19 @@
 [package]
 name = "identified-vec-of"
-version = "1.2.1"
+version = "1.1.99"
 edition = "2021"
 
 [dependencies]
+# === SARGON CRATES ===
 sargon-core-assert-json = { path = "../sargon-core-assert-json" }
 sargon-core-error = { path = "../sargon-core-error" }
 
+# === RADIX DEPENDENCIES
+radix-rust = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES
+derive_more = { workspace = true }
+itertools = { workspace = true }
 paste = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-derive_more = { workspace = true }
-itertools = { workspace = true }
-
-# === RADIX DEPENDENCIES
-radix-rust = { workspace = true }

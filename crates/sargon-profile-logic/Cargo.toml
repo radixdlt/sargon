@@ -1,0 +1,32 @@
+[package]
+name = "sargon-profile-logic"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-core = { path = "../sargon-core" }
+identified-vec-of = { path = "../identified-vec-of" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-factors = { path = "../sargon-factors" }
+sargon-addresses = { path = "../sargon-addresses" }
+sargon-profile = { path = "../sargon-profile" }
+sargon-profile-supporting-types = { path = "../sargon-profile-supporting-types" }
+
+# === RADIX DEPENDENCIES ===
+radix-common = { workspace = true }
+radix-common-derive = { workspace = true }
+radix-engine = { workspace = true }
+radix-engine-interface = { workspace = true }
+radix-engine-toolkit = { workspace = true }
+radix-engine-toolkit-common = { workspace = true }
+radix-rust = { workspace = true }
+radix-transactions = { workspace = true }
+sbor = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+itertools = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

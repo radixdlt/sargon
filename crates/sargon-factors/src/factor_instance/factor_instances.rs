@@ -15,6 +15,14 @@ pub struct FactorInstances {
     factor_instances: IndexSet<HierarchicalDeterministicFactorInstance>,
 }
 
+impl AppendableCollection for FactorInstances {
+    type Element = HierarchicalDeterministicFactorInstance;
+
+    fn append<T: IntoIterator<Item = Self::Element>>(&mut self, iter: T) {
+        self.extend(iter)
+    }
+}
+
 impl FactorInstances {
     pub fn extend(
         &mut self,

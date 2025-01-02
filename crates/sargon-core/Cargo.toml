@@ -1,6 +1,6 @@
 [package]
 name = "sargon-core"
-version = "1.2.1"
+version = "1.1.99"
 edition = "2021"
 
 [dependencies]
@@ -15,37 +15,30 @@ radix-engine-interface = { workspace = true }
 radix-rust = { workspace = true }
 radix-transactions = { workspace = true }
 
-
 # ==== EXTERNAL DEPENDENCIES ====
 aes-gcm = { workspace = true }
 arraystring = { workspace = true }
 assert-json-diff = { workspace = true }
 delegate = { workspace = true }
+derive_more = { workspace = true }
 enum-as-inner = { workspace = true }
 enum-iterator = { workspace = true }
-hkdf = { workspace = true }
 hex = { workspace = true }
+hkdf = { workspace = true }
+iota-crypto = { workspace = true }
+iso8601-timestamp = { workspace = true }
+itertools = { workspace = true }
+k256 = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
 pretty_assertions = { workspace = true }
+rand = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-derive_more = { workspace = true }
-
-
-itertools = { workspace = true }
-iota-crypto = { workspace = true }
-k256 = { workspace = true }
-rand = { workspace = true }
-log = { workspace = true }
-
-
-serde_with = { workspace = true }
-
-paste = { workspace = true }
 serde_repr = { workspace = true }
-iso8601-timestamp = { workspace = true }
-zeroize = { workspace = true }
+serde_with = { workspace = true }
 strum = { workspace = true }
-url = { workspace = true }
 thiserror = { workspace = true }
-
+url = { workspace = true }
 uuid = { workspace = true }
+zeroize = { workspace = true }

@@ -27,7 +27,6 @@ macro_rules! decl_signatures_per_factor_source {
     };
     ($signable_id:ty) => {
         paste! {
-            use sargon::[< $signable_id >] as [< Internal $signable_id >];
 
             decl_signatures_per_factor_source!(
                 struct_name: [< SignaturesPerFactorSourceOf $signable_id >],

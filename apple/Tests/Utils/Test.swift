@@ -24,11 +24,12 @@ class TestCase: XCTestCase {
 	func openFile(
 		subPath: String,
 		_ fileName: String,
-		extension fileExtension: String
+		extension fileExtension: String,
+		in crate: String = "sargon-profile"
 	) throws -> Data {
 		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(4).joined(separator: "/")
 
-		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/crates/sargon/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
+		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/crates/\(crate)/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
 
 		return try Data(contentsOf: fileURL)
 	}

@@ -1,5 +1,3 @@
-use std::cell::Ref;
-
 use super::*;
 use crate::prelude::*;
 
@@ -137,7 +135,6 @@ impl<ID: SignableID> PetitionForFactorsState<ID> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::DependencyInformation::Tag;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = PetitionForFactorsState<TransactionIntentHash>;

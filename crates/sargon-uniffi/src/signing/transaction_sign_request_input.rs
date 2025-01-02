@@ -27,7 +27,6 @@ macro_rules! decl_transaction_sign_request_input {
     (signable: $signable:ty, payload: $payload:ty) => {
         paste! {
             use sargon::[< $signable >] as [< Internal $signable >];
-            use sargon::[< $payload >] as [< Internal $payload >];
 
             type [< InternalTransactionSignRequestInputOf $signable >] =
                 sargon::TransactionSignRequestInput<[< Internal $signable >]>;

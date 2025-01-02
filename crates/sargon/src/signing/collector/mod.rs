@@ -11,5 +11,4 @@ pub(crate) use signatures_collector_preprocessor::*;
 
 pub use signatures_collecting_continuation::*;
 pub use signatures_collector::*;
-pub use signatures_collector_dependencies::*;
 pub use signing_finish_early_strategy::*;

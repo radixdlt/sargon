@@ -1,11 +1,6 @@
 use crate::prelude::*;
 use sargon::Unsecurified as InternalUnsecurified;
 
-use sargon::{
-    FromGlobalKeySpace, FromLocalKeySpace, IsInLocalKeySpace,
-    IsMappableToGlobalKeySpace, ToBIP32Str,
-};
-
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum Unsecurified {
     UnhardenedComponent(Unhardened),

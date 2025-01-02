@@ -16,6 +16,7 @@ pub mod prelude {
     pub(crate) use sargon_addresses::prelude::*;
     pub(crate) use sargon_core::prelude::*;
     pub(crate) use sargon_factors::prelude::*;
+    pub(crate) use sargon_factors_supporting_types::prelude::*;
     pub(crate) use sargon_hierarchical_deterministic::prelude::*;
 
     pub use crate::collector::*;

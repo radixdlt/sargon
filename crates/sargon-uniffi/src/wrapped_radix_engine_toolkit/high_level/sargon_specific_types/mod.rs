@@ -14,8 +14,6 @@ pub use address_of_account_or_persona::*;
 pub use assets_transfers::*;
 pub use build_information::*;
 
-pub use address_union::*;
-
 pub use stake_claim::*;
 pub use transaction::*;
 pub use transaction_guarantee::*;

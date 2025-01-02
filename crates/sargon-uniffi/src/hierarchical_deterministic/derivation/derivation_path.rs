@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::Derivation;
 use sargon::DerivationPath as InternalDerivationPath;
 
 /// A derivation path on either supported schemes, either Babylon (CAP26) or Olympia (BIP44Like).

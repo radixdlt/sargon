@@ -3,7 +3,7 @@ use sargon::UnsecurifiedHardened as InternalUnsecurifiedHardened;
 
 use sargon::{
     FromGlobalKeySpace, FromLocalKeySpace, HasIndexInLocalKeySpace,
-    IsMappableToGlobalKeySpace, ToBIP32Str,
+    IsMappableToGlobalKeySpace,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Record)]

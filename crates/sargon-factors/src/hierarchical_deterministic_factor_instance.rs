@@ -6,6 +6,19 @@ pub struct HierarchicalDeterministicFactorInstance {
     pub public_key: HierarchicalDeterministicPublicKey,
 }
 
+/// A trait for types which reference a factor source.
+pub trait FactorSourceReferencing:
+    std::hash::Hash + PartialEq + Eq + Clone
+{
+    fn factor_source_id(&self) -> FactorSourceIDFromHash;
+}
+
+impl FactorSourceReferencing for HierarchicalDeterministicFactorInstance {
+    fn factor_source_id(&self) -> FactorSourceIDFromHash {
+        self.factor_source_id
+    }
+}
+
 impl HasEntityKindObjectSafe for HierarchicalDeterministicFactorInstance {
     fn get_entity_kind(&self) -> CAP26EntityKind {
         self.public_key.derivation_path.get_entity_kind()

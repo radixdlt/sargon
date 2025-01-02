@@ -1,23 +1,5 @@
-use async_std::sync::RwLockWriteGuard;
-
 use crate::prelude::*;
-use std::{borrow::Borrow, sync::RwLock};
-
-#[derive(Debug, Clone, PartialEq, EnumAsInner, derive_more::Display)]
-#[allow(clippy::large_enum_variant)]
-pub enum ProfileState {
-    /// When no profile exists in secure storage when OS is booted.
-    None,
-
-    /// When the profile snapshot retrieved from secure storage failed to convert into a
-    /// valid Profile.
-    Incompatible(CommonError),
-
-    /// When a valid 'Profile' exists. This can either happen when the os boots, or a profile is
-    /// restored, or the user creates a new profile.
-    #[display("Loaded: {}", _0.id())]
-    Loaded(Profile),
-}
+use std::sync::RwLock;
 
 #[derive(Debug)]
 pub struct ProfileStateHolder {
@@ -198,7 +180,7 @@ impl ProfileStateHolder {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use std::sync::{Arc, RwLock};
+    use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
 

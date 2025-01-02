@@ -1,5 +1,7 @@
 pub use crate::prelude::*;
 
+pub type DappDefinitionAddress = AccountAddress;
+
 decl_ret_wrapped_address!(
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///

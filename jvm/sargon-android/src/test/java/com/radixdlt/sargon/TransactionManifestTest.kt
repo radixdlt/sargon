@@ -342,18 +342,17 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 )
                 perAssetTransfer.transfers.forEach {
                     when (val recipient = it.recipient) {
-                        is AccountOrAddressOf.AddressOfExternalAccount ->
+                        is OwnedOrThirdPartyAccountAddress.ThirdPartyAccount ->
                             assertTrue(
                                 contains(
                                     recipient.value
                                         .string
                                 )
                             )
-                        is AccountOrAddressOf.ProfileAccount ->
+                        is OwnedOrThirdPartyAccountAddress.OwnedAccount ->
                             assertTrue(
                                 contains(
                                     recipient.value
-                                        .address
                                         .string
                                 )
                             )
@@ -377,8 +376,8 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                     listOf(
                         PerRecipientAssetTransfer(
                             recipient =
-                            AccountOrAddressOf
-                                .AddressOfExternalAccount(
+                            OwnedOrThirdPartyAccountAddress
+                                .ThirdPartyAccount(
                                     value =
                                     AccountAddress(
                                         "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
@@ -588,7 +587,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     @Test
     fun testAccountLockerClaim() {
         val expectedManifest = TransactionManifest.init(
-            instructionsString = openFile("account_locker_claim", "rtm").readText(),
+            instructionsString = openFileInManifests("account_locker_claim", "rtm").readText(),
             networkId = NetworkId.MAINNET
         )
         var actualManifest = TransactionManifest.accountLockerClaim(
@@ -643,12 +642,15 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     private fun manifest(name: String) =
         TransactionManifest.init(
-            instructionsString = openFile(name, "rtm").readText(),
+            instructionsString = openFileInTxModels(name, "rtm").readText(),
             networkId = NetworkId.STOKENET
         )
 
-    private fun engineToolkitReceipt(name: String): String = openFile(name, "dat").readText()
+    private fun engineToolkitReceipt(name: String): String = openFileInTxModels(name, "dat").readText()
 
-    private fun openFile(name: String, extension: String) =
-        File("../../" + "crates/sargon/fixtures/transaction/$name.$extension")
+    private fun openFileInCrate(crate: String, name: String, extension: String) =
+        File("../../" + "crates/" + crate + "/fixtures/transaction/$name.$extension")
+
+    private fun openFileInTxModels(name: String, extension: String) = openFileInCrate("sargon-transaction-models", name, extension)
+    private fun openFileInManifests(name: String, extension: String) = openFileInCrate("sargon-manifests", name, extension)
 }

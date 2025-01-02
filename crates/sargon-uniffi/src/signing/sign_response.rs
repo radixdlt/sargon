@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use paste::paste;
-use sargon::IndexMap;
 
 macro_rules! decl_sign_response {
     (

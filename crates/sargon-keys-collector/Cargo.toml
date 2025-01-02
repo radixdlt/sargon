@@ -1,14 +1,20 @@
 [package]
 name = "sargon-keys-collector"
-version = "1.2.1"
+version = "1.1.99"
 edition = "2021"
 
 [dependencies]
+# === SARGON CRATES ===
 sargon-core = { path = "../sargon-core" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-addresses = { path = "../sargon-addresses" }
+sargon-factors-supporting-types = { path = "../sargon-factors-supporting-types" }
 
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
 actix-rt = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }

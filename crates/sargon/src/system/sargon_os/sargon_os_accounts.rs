@@ -1,7 +1,3 @@
-use std::{borrow::Borrow, sync::RwLockWriteGuard};
-
-use radix_common::address;
-
 use crate::prelude::*;
 
 // ==================
@@ -553,7 +549,12 @@ impl SargonOS {
         self.add_entity(account).await
     }
 
-    pub async fn add_entity<E: IsEntity>(&self, entity: E) -> Result<()> {
+    pub async fn add_entity<
+        E: IsEntity + IsProfileModifiedEvent<E::Address>,
+    >(
+        &self,
+        entity: E,
+    ) -> Result<()> {
         let address = entity.address();
         debug!("Adding entity with address: {} to profile", address);
         self.add_entities(IdentifiedVecOf::just(entity)).await
@@ -748,7 +749,9 @@ impl SargonOS {
     /// # Emits
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn add_entities<E: IsEntity>(
+    pub async fn add_entities<
+        E: IsEntity + IsProfileModifiedEvent<E::Address>,
+    >(
         &self,
         entities: impl IntoIterator<Item = E>,
     ) -> Result<()> {
@@ -841,7 +844,11 @@ impl SargonOS {
 
         if let Some(event) = E::profile_modified_event(
             false,
-            entities.clone().into_iter().map(|e| e.address()).collect(),
+            entities
+                .clone()
+                .into_iter()
+                .map(|e| e.address())
+                .collect::<IndexSet<_>>(),
         ) {
             self.event_bus
                 .emit(EventNotification::profile_modified(event))
@@ -987,7 +994,7 @@ impl SargonOS {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
-    use std::{future::join, future::Future, time::Duration};
+    use futures::future::join_all;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;

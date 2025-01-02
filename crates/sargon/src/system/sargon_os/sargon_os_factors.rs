@@ -1,6 +1,6 @@
 use std::borrow::Borrow;
 
-use crate::{prelude::*, profile};
+use crate::prelude::*;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
@@ -519,7 +519,6 @@ mod tests {
 
     use super::*;
     use actix_rt::time::timeout;
-    use std::{future::Future, time::Duration};
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;

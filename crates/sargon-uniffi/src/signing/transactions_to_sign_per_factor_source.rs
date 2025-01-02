@@ -46,8 +46,6 @@ macro_rules! decl_transaction_to_sign_per_factor_source {
     };
     (signable: $signable:ty, signable_id: $signable_id:ty) => {
         paste! {
-            use sargon::[< $signable >] as [< Internal $signable >];
-            use sargon::[< $signable_id >] as [< Internal $signable_id >];
 
             decl_transaction_to_sign_per_factor_source!(
                 struct_name: [< TransactionToSignPerFactorSourceOf $signable >],

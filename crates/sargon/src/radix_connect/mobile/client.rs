@@ -1,10 +1,7 @@
-use std::borrow::BorrowMut;
-
 use super::deep_link_parsing::*;
 use super::relay_service::Service as RelayService;
 use super::relay_service::WalletInteractionTransport;
 use crate::prelude::*;
-use hex::ToHex;
 use std::sync::RwLock;
 
 /// The Radix Connect Mobile client that handles the interaction with dApps on mobile through deepLinks.

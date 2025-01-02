@@ -1,0 +1,60 @@
+[package]
+name = "sargon-profile-gateway"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === INTERNAL DEPENDENCIES ===
+sargon-core = { path = "../sargon-core" }
+identified-vec-of = { path = "../identified-vec-of" }
+sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-factors = { path = "../sargon-factors" }
+sargon-keys-collector = { path = "../sargon-keys-collector" }
+sargon-addresses = { path = "../sargon-addresses" }
+sargon-transaction-models = { path = "../sargon-transaction-models" }
+
+# === RADIX DEPENDENCIES ===
+radix-common = { workspace = true }
+radix-common-derive = { workspace = true }
+radix-engine = { workspace = true }
+radix-engine-interface = { workspace = true }
+radix-engine-toolkit = { workspace = true }
+radix-engine-toolkit-common = { workspace = true }
+radix-rust = { workspace = true }
+radix-transactions = { workspace = true }
+sbor = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+aes-gcm = { workspace = true }
+assert-json-diff = { workspace = true }
+async-std = { workspace = true }
+async-trait = { workspace = true }
+base64 = { workspace = true }
+camino = { workspace = true }
+delegate = { workspace = true }
+derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
+enum-iterator = { workspace = true }
+futures = { workspace = true }
+hex = { workspace = true }
+hkdf = { workspace = true }
+iota-crypto = { workspace = true }
+iso8601-timestamp = { workspace = true }
+itertools = { workspace = true }
+k256 = { workspace = true }
+log = { workspace = true }
+once_cell = { workspace = true }
+paste = { workspace = true }
+pretty_assertions = { workspace = true }
+pretty_env_logger = { workspace = true }
+rand = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_repr = { workspace = true }
+serde_with = { workspace = true }
+strum = { workspace = true }
+thiserror = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }
+zeroize = { workspace = true }

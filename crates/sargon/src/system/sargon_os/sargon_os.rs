@@ -1,8 +1,4 @@
-use std::{cell::Cell, sync::Once};
-
-use sbor::prelude::indexmap::IndexMap;
-
-use crate::{prelude::*, system::interactors};
+use crate::prelude::*;
 
 /// The Sargon "Operating System" is the root "manager" of the Sargon library
 /// which holds an in-memory Profile and a collection of "clients" which are
@@ -15,6 +11,15 @@ pub struct SargonOS {
     pub(crate) clients: Clients,
     pub(crate) interactors: Interactors,
     pub(crate) host_id: HostId,
+}
+
+pub trait WithBios: Sized {
+    fn new(bios: Arc<Bios>) -> Self;
+}
+impl WithBios for Clients {
+    fn new(bios: Arc<Bios>) -> Self {
+        Self::with_drivers(bios.drivers.clone())
+    }
 }
 
 /// So that we do not have to go through `self.clients`,
@@ -502,7 +507,6 @@ impl SargonOS {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
 
     use actix_rt::time::timeout;
 

@@ -12,7 +12,7 @@ pub use account_for_display::*;
 pub use account_or_persona::*;
 pub use authorized_dapp_detailed::*;
 pub use authorized_persona_detailed::*;
-pub use decl_vec_samples_for::*;
+pub(crate) use decl_vec_samples_for::*;
 pub use email_address::*;
 pub use host_id::*;
 pub use host_info::*;

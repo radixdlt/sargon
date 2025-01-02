@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::IdentifiedVecOf;
 use sargon::Result as InternalResult;
 
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;

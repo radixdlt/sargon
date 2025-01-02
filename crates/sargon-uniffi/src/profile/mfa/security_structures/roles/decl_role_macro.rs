@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 // This macro generates "Role" types, for each RoleKind: Primary, Recovery, Confirmation
 // for the specified "Factor Level", so input is `FactorSource` or `FactorInstance`
 // or `FactorSourceID` etc.
@@ -190,5 +188,3 @@ macro_rules! role_conversion_inner {
         }
     };
 }
-
-pub(crate) use role_conversion_inner;

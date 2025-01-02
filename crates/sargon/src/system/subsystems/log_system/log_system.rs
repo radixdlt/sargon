@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, sync::Once};
+use std::sync::Once;
 
 use crate::prelude::*;
 
@@ -62,6 +62,8 @@ pub fn rust_logger_set_level(level: LogFilter) {
         std::ffi::OsStr::new(&format!("{:?}", log_level)),
     );
 }
+
+use enum_iterator::all;
 
 /// Returns every supported LogFilter
 pub fn rust_logger_get_all_filters() -> Vec<LogFilter> {

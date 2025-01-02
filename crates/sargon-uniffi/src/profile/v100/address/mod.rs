@@ -34,4 +34,4 @@ pub use pool_address::*;
 pub use resource_address::*;
 pub use validator_address::*;
 pub use vault_address::*;
-pub use wrap_ret_address::*;
+pub(crate) use wrap_ret_address::*;

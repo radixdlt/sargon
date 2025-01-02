@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct WalletToDappInteractionSubintentResponseItem {
@@ -70,7 +69,6 @@ impl Serialize for WalletToDappInteractionSubintentResponseItem {
 }
 
 impl<'de> Deserialize<'de> for WalletToDappInteractionSubintentResponseItem {
-    #[cfg(not(tarpaulin_include))] // false negative
     fn deserialize<D: Deserializer<'de>>(
         deserializer: D,
     ) -> Result<Self, D::Error> {

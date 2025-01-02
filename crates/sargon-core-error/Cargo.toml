@@ -1,10 +1,15 @@
 [package]
 name = "sargon-core-error"
-version = "1.2.1"
+version = "1.1.99"
 edition = "2021"
 
 [dependencies]
+# === SARGON CRATES ===
 
-thiserror = { workspace = true }
-serde_json = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+
+# === EXTERNAL DEPENDENCIES ===
 log = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use sargon::MatrixOfFactorSources as InternalMatrixOfFactorSources;
 use sargon::SecurityStructureOfFactorSources as InternalSecurityStructureOfFactorSources;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]

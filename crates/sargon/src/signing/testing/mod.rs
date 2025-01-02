@@ -1,5 +1,4 @@
 #![allow(unused)]
-#![allow(unused_imports)]
 
 mod interactors;
 mod simulated_user;
