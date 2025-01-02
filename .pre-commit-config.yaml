@@ -41,5 +41,5 @@ repos:
         name: unit tests
         language: system
         types: [file, rust]
-        entry: cargo test --lib
+        entry: cargo test --workspace --lib
         pass_filenames: false
