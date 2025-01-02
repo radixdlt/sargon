@@ -649,5 +649,5 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     private fun engineToolkitReceipt(name: String): String = openFile(name, "dat").readText()
 
     private fun openFile(name: String, extension: String) =
-        File("../../" + "crates/sargon/fixtures/transaction/$name.$extension")
+        File("../../" + "crates/sargon-transaction-models/fixtures/transaction/$name.$extension")
 }
