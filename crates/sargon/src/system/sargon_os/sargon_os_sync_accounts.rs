@@ -71,6 +71,8 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
+    use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
+
     #[actix_rt::test]
     async fn test_sync_accounts_deleted_on_ledger() {
         // ARRANGE

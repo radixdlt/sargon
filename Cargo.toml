@@ -29,7 +29,6 @@ members = [
     "crates/next-derivation-index-ephemeral",
 
     "crates/gateway-models",
-    "crates/gateway-logic",
     "crates/gateway-client-and-api",
 
     "crates/sargon", # to be split

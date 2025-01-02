@@ -1302,7 +1302,6 @@ name = "gateway-client-and-api"
 version = "1.1.99"
 dependencies = [
  "actix-rt",
- "gateway-logic",
  "gateway-models",
  "http-client",
  "radix-common",
@@ -1317,22 +1316,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "gateway-logic"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "gateway-models",
- "itertools 0.12.0",
- "radix-engine-toolkit-common",
- "radix-transactions",
- "sargon-addresses",
- "sargon-core",
- "sargon-core-assert-json",
- "sargon-transaction-models",
- "serde",
-]
-
-[[package]]
 name = "gateway-models"
 version = "1.1.99"
 dependencies = [
@@ -1343,6 +1326,7 @@ dependencies = [
  "sargon-addresses",
  "sargon-core",
  "sargon-core-assert-json",
+ "sargon-transaction-models",
  "serde",
 ]
 

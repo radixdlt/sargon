@@ -12,7 +12,6 @@ sargon-drivers = { path = "../sargon-drivers" }
 http-client = { path = "../http-client" }
 gateway-models = { path = "../gateway-models" }
 sargon-transaction-models = { path = "../sargon-transaction-models" }
-gateway-logic = { path = "../gateway-logic" }
 sargon-profile-gateway = { path = "../sargon-profile-gateway" }
 
 # === RADIX DEPENDENCIES ===

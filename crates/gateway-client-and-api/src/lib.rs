@@ -7,7 +7,6 @@ pub mod prelude {
     pub use crate::assert_network_request::*;
     pub use crate::client::*;
 
-    pub use gateway_logic::prelude::*;
     pub use gateway_models::prelude::*;
     pub use http_client::prelude::*;
     pub use sargon_drivers::prelude::*;
