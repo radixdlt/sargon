@@ -1,6 +1,6 @@
 [package]
 name = "sargon-core"
-version = "1.2.1"
+version = "1.1.99"
 edition = "2021"
 
 [dependencies]

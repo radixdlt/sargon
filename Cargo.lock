@@ -1299,7 +1299,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-client-and-api"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "derive_more",
@@ -1323,7 +1323,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-logic"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "derive_more",
  "gateway-models",
@@ -1339,7 +1339,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-models"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "derive_more",
  "radix-engine-interface",
@@ -1551,7 +1551,7 @@ dependencies = [
 
 [[package]]
 name = "http-client"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "reqwest",
@@ -1658,7 +1658,7 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "identified-vec-of"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "derive_more",
  "itertools 0.12.0",
@@ -1986,7 +1986,7 @@ dependencies = [
 
 [[package]]
 name = "next-derivation-index-ephemeral"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "derive_more",
  "enum-iterator",
@@ -2846,7 +2846,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -2914,7 +2914,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-addresses"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "derive_more",
  "enum-iterator",
@@ -2936,7 +2936,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-clients"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -2993,7 +2993,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-core"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "aes-gcm",
  "arraystring",
@@ -3033,7 +3033,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-core-assert-json"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "assert-json-diff",
  "log",
@@ -3046,7 +3046,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-core-error"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "log",
  "serde_json 1.0.108",
@@ -3055,7 +3055,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-core-utils"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "iso8601-timestamp",
  "log",
@@ -3069,7 +3069,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-drivers"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -3123,7 +3123,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-factor-instances-provider"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -3176,7 +3176,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-factors"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "arraystring",
  "assert-json-diff",
@@ -3217,7 +3217,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-factors-supporting-types"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "async-trait",
  "identified-vec-of",
@@ -3228,7 +3228,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-hierarchical-deterministic"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "assert-json-diff",
  "bip39",
@@ -3265,7 +3265,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-keys-collector"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -3280,7 +3280,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-manifests"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "assert-json-diff",
  "async-trait",
@@ -3330,7 +3330,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-profile"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "aes-gcm",
@@ -3389,7 +3389,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-profile-app-preferences"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "aes-gcm",
  "assert-json-diff",
@@ -3446,7 +3446,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-profile-gateway"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "aes-gcm",
  "assert-json-diff",
@@ -3501,7 +3501,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-profile-logic"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "derive_more",
  "identified-vec-of",
@@ -3528,7 +3528,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-profile-security-structures"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "aes-gcm",
  "assert-json-diff",
@@ -3582,7 +3582,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-profile-supporting-types"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "derive_more",
  "identified-vec-of",
@@ -3608,7 +3608,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-transaction-models"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "assert-json-diff",
  "async-trait",
@@ -3654,7 +3654,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi"
-version = "1.2.1"
+version = "1.1.99"
 dependencies = [
  "actix-rt",
  "assert-json-diff",
