@@ -852,6 +852,9 @@ pub enum CommonError {
 
     #[error("SecurityStateAccessController address mismatch")]
     SecurityStateAccessControllerAddressMismatch = 10244,
+
+    #[error("Not all signatures are produced with the same factor source.")]
+    FactorOutcomeSignedFactorSourceIDMismatch = 10245,
 }
 
 #[uniffi::export]

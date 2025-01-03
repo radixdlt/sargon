@@ -7,6 +7,8 @@ macro_rules! decl_sign_response {
         struct_name: $struct_name:ident,
         internal_struct_name: $internal_struct_name:ident,
         per_factor_outcome: $per_factor_outcome:ident,
+        new_from_outcomes: $new_from_outcomes:ident,
+        new_from_skipping_factors: $new_from_skipping_factors:ident,
     ) => {
         #[derive(Clone, PartialEq, Eq, uniffi::Record)]
         pub struct $struct_name {
@@ -25,7 +27,7 @@ macro_rules! decl_sign_response {
                     per_factor_outcome: value
                         .per_factor_outcome
                         .into_iter()
-                        .map(|(_, per_factor)| per_factor.into())
+                        .map(|(id, outcome)| $per_factor_outcome::new(id.into(), outcome.into()))
                         .collect(),
                 }
             }
@@ -33,13 +35,39 @@ macro_rules! decl_sign_response {
 
         impl From<$struct_name> for $internal_struct_name {
             fn from(value: $struct_name) -> Self {
-                Self::new(sargon::IndexMap::from_iter(
-                    value.per_factor_outcome.into_iter().map(|item| {
-                        let internal_outcome = item.into_internal();
-                        (internal_outcome.factor_source_id(), internal_outcome)
-                    }),
-                ))
+                Self {
+                    per_factor_outcome: sargon::IndexMap::from_iter(
+                        value.per_factor_outcome.into_iter().map(|item| {
+                            let factor_source_id = item.factor_source_id.into_internal();
+                            let internal_outcome = item.outcome.into_internal();
+                            (factor_source_id, internal_outcome)
+                        }),
+                    ),
+                }
             }
+        }
+
+
+        #[uniffi::export]
+        pub fn $new_from_outcomes(
+            outcomes: Vec<$per_factor_outcome>
+        ) -> Result<$struct_name> {
+            $internal_struct_name::new_from_outcomes(
+                sargon::IndexMap::from_iter(outcomes.into_iter().map(|item| {
+                    let factor_source_id = item.factor_source_id.into_internal();
+                    let internal_outcome = item.outcome.into_internal();
+                    (factor_source_id, internal_outcome)
+                }))
+            ).into_result()
+        }
+
+        #[uniffi::export]
+        pub fn $new_from_skipping_factors(
+            factors: Vec<FactorSourceIDFromHash>
+        ) -> $struct_name {
+            $internal_struct_name::user_skipped_factors(
+                sargon::IndexSet::from_iter(factors.iter().map(|f| f.into_internal()))
+            ).into()
         }
 
         decl_conversion_tests_for!($struct_name);
@@ -55,6 +83,8 @@ macro_rules! decl_sign_response {
                 struct_name: [< SignResponseOf $signable_id >],
                 internal_struct_name: [< InternalSignResponseOf $signable_id >],
                 per_factor_outcome: [< PerFactorOutcomeOf $signable_id >],
+                new_from_outcomes: [< new_sign_response_of_ $signable_id:snake _from_outcomes >],
+                new_from_skipping_factors: [< new_sign_response_of_ $signable_id:snake _from_skipping_factors >],
             );
         }
     };

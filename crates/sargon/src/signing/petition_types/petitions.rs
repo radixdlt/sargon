@@ -213,7 +213,7 @@ impl<S: Signable> Petitions<S> {
             .per_factor_outcome
             .iter()
             .for_each(|(id, outcome)| match outcome {
-                PerFactorOutcome::Signed {
+                FactorOutcome::Signed {
                     produced_signatures,
                     ..
                 } => {
@@ -226,7 +226,7 @@ impl<S: Signable> Petitions<S> {
                         .iter()
                         .for_each(|s| self.add_signature(s));
                 }
-                PerFactorOutcome::Neglected(neglected_factor) => {
+                FactorOutcome::Neglected(neglected_factor) => {
                     self.neglect_factor_source_with_id(neglected_factor.clone())
                 }
             })

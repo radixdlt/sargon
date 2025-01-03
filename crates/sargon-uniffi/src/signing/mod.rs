@@ -1,4 +1,5 @@
 mod authentication;
+mod factor_outcome;
 mod hd_signature;
 mod hd_signature_input;
 mod intent_signature_of_owner;
@@ -12,6 +13,7 @@ mod signatures_per_fractor_source;
 mod transaction_sign_request_input;
 
 pub use authentication::*;
+pub use factor_outcome::*;
 pub use hd_signature::*;
 pub use hd_signature_input::*;
 pub use intent_signature_of_owner::*;

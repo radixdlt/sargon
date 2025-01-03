@@ -63,7 +63,7 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
                         (*id, signatures)
                     }));
 
-                Ok(SignResponse::signed(per_factor_outcome))
+                SignResponse::signed(per_factor_outcome)
             }
 
             SigningUserInput::Skip => {

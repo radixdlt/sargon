@@ -295,12 +295,12 @@ mod integration_tests {
                 transactions_to_sign: &IndexSet<
                     TransactionSignRequestInput<TransactionIntent>,
                 >,
-            ) -> PerFactorOutcome<TransactionIntentHash> {
+            ) -> Result<FactorOutcome<TransactionIntentHash>> {
                 if request
                     .invalid_transactions_if_factor_neglected(&factor_source_id)
                     .is_empty()
                 {
-                    return PerFactorOutcome::skipped(factor_source_id);
+                    return Ok(FactorOutcome::skipped(factor_source_id));
                 }
 
                 let signatures = transactions_to_sign
@@ -314,7 +314,7 @@ mod integration_tests {
                     })
                     .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
 
-                PerFactorOutcome::signed(factor_source_id, signatures)
+                FactorOutcome::signed(signatures)
             }
         }
 
@@ -326,7 +326,7 @@ mod integration_tests {
             ) -> Result<SignResponse<TransactionIntentHash>> {
                 let mut per_factor_outcome = IndexMap::<
                     FactorSourceIDFromHash,
-                    PerFactorOutcome<TransactionIntentHash>,
+                    FactorOutcome<TransactionIntentHash>,
                 >::new();
 
                 for (factor_source_id, inputs) in
@@ -338,12 +338,12 @@ mod integration_tests {
                             &request,
                             &inputs.per_transaction,
                         )
-                        .await;
+                        .await?;
 
                     per_factor_outcome.insert(*factor_source_id, outcome);
                 }
 
-                Ok(SignResponse::new(per_factor_outcome))
+                SignResponse::new_from_outcomes(per_factor_outcome)
             }
         }
 
