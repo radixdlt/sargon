@@ -188,8 +188,6 @@ impl<S: Signable> SimulatedUser<S> {
     where
         F: Fn() -> bool,
     {
-        use rand::prelude::*;
-
         match &self.mode {
             SimulatedUserMode::Prudent => true,
             SimulatedUserMode::Lazy(laziness) => match laziness {

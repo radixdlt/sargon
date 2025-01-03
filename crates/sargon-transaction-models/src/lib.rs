@@ -19,23 +19,25 @@ pub mod prelude {
     pub use crate::profile_models::*;
     pub use crate::unvalidated_transaction_manifest::*;
 
-    pub(crate) use radix_engine::{
-        blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
-        system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier,
-        transaction::FeeLocks as ScryptoFeeLocks,
-    };
-
     pub(crate) use radix_common::{
         crypto::Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
         math::Decimal as ScryptoDecimal192,
         prelude::UpperBound as ScryptoUpperBound,
     };
 
-    pub(crate) use radix_engine_toolkit_common::receipt::RuntimeToolkitTransactionReceipt as ScryptoRuntimeToolkitTransactionReceipt;
+    pub(crate) use radix_engine::{
+        blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
+        system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier,
+        transaction::FeeLocks as ScryptoFeeLocks,
+    };
 
-    pub(crate) use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt as ScryptoSerializableToolkitTransactionReceipt;
-
-    pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
+    pub(crate) use radix_engine_interface::{
+        blueprints::account::{
+            DefaultDepositRule as ScryptoDefaultDepositRule,
+            ResourcePreference as ScryptoResourcePreference,
+        },
+        prelude::MetadataValue as ScryptoMetadataValue,
+    };
 
     pub use radix_engine_toolkit::{
         functions::{
@@ -126,9 +128,9 @@ pub mod prelude {
         },
     };
 
-    pub(crate) use radix_engine_interface::blueprints::account::{
-        DefaultDepositRule as ScryptoDefaultDepositRule,
-        ResourcePreference as ScryptoResourcePreference,
+    pub(crate) use radix_engine_toolkit_common::receipt::{
+        RuntimeToolkitTransactionReceipt as ScryptoRuntimeToolkitTransactionReceipt,
+        SerializableToolkitTransactionReceipt as ScryptoSerializableToolkitTransactionReceipt,
     };
 
     pub(crate) use radix_transactions::{

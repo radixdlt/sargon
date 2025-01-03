@@ -15,7 +15,6 @@ radix-engine = { workspace = true }
 radix-engine-interface = { workspace = true }
 radix-engine-toolkit = { workspace = true }
 radix-rust = { workspace = true }
-radix-transactions = { workspace = true }
 
 # ==== EXTERNAL DEPENDENCIES ====
 derive_more = { workspace = true }

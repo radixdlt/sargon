@@ -272,7 +272,9 @@ mod test {
     #[actix_rt::test]
     async fn test_sign_fail_due_to_profile() {
         let test_drivers = Drivers::test();
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
         let sut =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
@@ -321,7 +323,9 @@ mod test {
         secure_storage_client.save_profile(profile).await.unwrap();
 
         let test_drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
 
         let use_factor_sources_interactors =
             Arc::new(TestUseFactorSourcesInteractors::new(

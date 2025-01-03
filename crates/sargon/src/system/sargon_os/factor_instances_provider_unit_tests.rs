@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 
+use crate::prelude::*;
+
 impl SargonOS {
     pub(crate) async fn with_bdfs() -> (Arc<Self>, FactorSource) {
         let os = Self::fast_boot().await;
@@ -223,10 +225,6 @@ impl SargonOS {
         Ok((account, outcome))
     }
 }
-
-use sbor::prelude::indexmap::IndexSet;
-
-use crate::prelude::*;
 
 #[actix_rt::test]
 async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis_and_if_profile_is_used_a_new_account_is_created(

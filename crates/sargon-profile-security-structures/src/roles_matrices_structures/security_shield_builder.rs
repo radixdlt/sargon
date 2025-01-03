@@ -803,12 +803,12 @@ mod tests {
     #[allow(clippy::mutable_key_type)]
     fn hash() {
         assert_eq!(
-            radix_rust::hashset![
+            HashSet::from_iter([
                 SUT::sample(),
                 SUT::sample(),
                 SUT::sample_other(),
                 SUT::sample_other(),
-            ]
+            ])
             .len(),
             2
         )

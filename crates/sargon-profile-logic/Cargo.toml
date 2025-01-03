@@ -14,15 +14,7 @@ sargon-profile = { path = "../sargon-profile" }
 sargon-profile-supporting-types = { path = "../sargon-profile-supporting-types" }
 
 # === RADIX DEPENDENCIES ===
-radix-common = { workspace = true }
-radix-common-derive = { workspace = true }
-radix-engine = { workspace = true }
-radix-engine-interface = { workspace = true }
-radix-engine-toolkit = { workspace = true }
-radix-engine-toolkit-common = { workspace = true }
-radix-rust = { workspace = true }
-radix-transactions = { workspace = true }
-sbor = { workspace = true }
+# None
 
 # === EXTERNAL DEPENDENCIES ===
 derive_more = { workspace = true }

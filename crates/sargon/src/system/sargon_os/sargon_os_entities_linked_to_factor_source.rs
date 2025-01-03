@@ -286,7 +286,9 @@ mod tests {
             build_unsafe_storage(device_mnemonic_backed_up).await;
         let drivers = Drivers::with_storages(secure_storage, unsafe_storage);
         let bios = Bios::new(drivers);
-        let clients = Clients::new(bios);
+        let mut clients = Clients::new(bios);
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
 
         let os =

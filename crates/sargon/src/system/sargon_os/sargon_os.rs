@@ -481,7 +481,9 @@ impl SargonOS {
     ) -> Result<Arc<Self>> {
         let drivers = Drivers::with_networking(networking);
         let bios = Bios::new(drivers);
-        let clients = Clients::new(bios);
+        let mut clients = Clients::new(bios);
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
 
         let os =
@@ -540,7 +542,9 @@ mod tests {
             SecureStorageClient::new(secure_storage_driver.clone());
         secure_storage_client.save_profile(&profile).await.unwrap();
         let drivers = Drivers::with_secure_storage(secure_storage_driver);
-        let clients = Clients::new(Bios::new(drivers));
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
         // ACT
         let os = timeout(
@@ -559,7 +563,9 @@ mod tests {
     async fn test_boot_when_existing_profile_with_no_networks_profile_state_considered_none(
     ) {
         // ARRANGE
-        let clients = Clients::new(Bios::new(Drivers::test()));
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
@@ -581,7 +587,9 @@ mod tests {
             .unwrap();
 
         // ACT
-        let clients = Clients::new(Bios::new(Drivers::test()));
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
 
         let new_os =
@@ -621,7 +629,9 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet() {
         let test_drivers = Drivers::test();
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
@@ -664,7 +674,9 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs() {
         let test_drivers = Drivers::test();
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
@@ -684,7 +696,9 @@ mod tests {
     #[actix_rt::test]
     async fn test_new_wallet_through_derived_bdfs_with_empty_accounts() {
         let test_drivers = Drivers::test();
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
 
         let os =
@@ -706,7 +720,9 @@ mod tests {
     async fn test_new_wallet_through_derived_bdfs_with_accounts_derived_from_other_hd_factor_source(
     ) {
         let test_drivers = Drivers::test();
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
 
         let os =
@@ -739,7 +755,9 @@ mod tests {
     #[actix_rt::test]
     async fn test_delete_wallet() {
         let test_drivers = Drivers::test();
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
 
         let os =

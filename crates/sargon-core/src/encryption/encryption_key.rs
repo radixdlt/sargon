@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use crypto::keys::x25519::PublicKey as X25519PublicKey;
 
 #[derive(
     Zeroize,
@@ -15,8 +16,6 @@ use crate::prelude::*;
 )]
 #[serde(transparent)]
 pub struct EncryptionKey(pub Exactly32Bytes);
-
-use crypto::keys::x25519::PublicKey as X25519PublicKey;
 
 impl From<X25519PublicKey> for EncryptionKey {
     fn from(value: X25519PublicKey) -> EncryptionKey {
