@@ -762,7 +762,9 @@ mod tests {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let clients = Clients::new(Bios::new(drivers));
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,

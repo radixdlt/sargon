@@ -286,7 +286,9 @@ mod tests {
         // ARRANGE (and ACT)
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let clients = Clients::new(Bios::new(drivers));
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
 
         let os = timeout(
@@ -496,7 +498,9 @@ mod tests {
     async fn test_set_profile_when_no_profile_exists() {
         // ARRANGE
         let test_drivers = Drivers::test();
-        let clients = Clients::new(Bios::new(test_drivers));
+        let mut clients = Clients::new(Bios::new(test_drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
         let interactors = Interactors::new_from_clients(&clients);
         let os =
             SargonOS::boot_with_clients_and_interactor(clients, interactors)
