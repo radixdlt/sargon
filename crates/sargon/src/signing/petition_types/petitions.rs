@@ -166,7 +166,7 @@ impl<S: Signable> Petitions<S> {
     /// `should_neglect_factors_due_to_irrelevant` from SignatureCollector main
     /// loop, i.e. we should not have called this method from SignaturesCollector
     /// if `should_neglect_factors_due_to_irrelevant` returned true.
-    pub(crate) fn input_for_interactor(
+    pub(crate) fn per_transaction_input(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> IndexSet<TransactionSignRequestInput<S>> {
@@ -208,36 +208,28 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    pub(crate) fn process_batch_response(
-        &self,
-        response: SignWithFactorsOutcome<S::ID>,
-    ) {
-        match response {
-            SignWithFactorsOutcome::Signed {
-                produced_signatures,
-            } => {
-                for (k, v) in produced_signatures.signatures.clone().iter() {
-                    info!("Signed with {} (#{} signatures)", k, v.len());
+    pub(crate) fn process_batch_response(&self, response: SignResponse<S::ID>) {
+        response
+            .per_factor_outcome
+            .iter()
+            .for_each(|(id, outcome)| match outcome {
+                PerFactorOutcome::Signed {
+                    produced_signatures,
+                    ..
+                } => {
+                    info!(
+                        "Signed with {} (#{} signatures)",
+                        id.clone(),
+                        produced_signatures.len()
+                    );
+                    produced_signatures
+                        .iter()
+                        .for_each(|s| self.add_signature(s));
                 }
-                produced_signatures
-                    .signatures
-                    .values()
-                    .flatten()
-                    .for_each(|s| self.add_signature(s));
-            }
-            SignWithFactorsOutcome::Neglected(neglected_factors) => {
-                let reason = neglected_factors.reason;
-                for neglected_factor_source_id in
-                    neglected_factors.content.iter()
-                {
-                    info!("Neglected {}", neglected_factor_source_id);
-                    self.neglect_factor_source_with_id(NeglectedFactor::new(
-                        reason,
-                        *neglected_factor_source_id,
-                    ))
+                PerFactorOutcome::Neglected(neglected_factor) => {
+                    self.neglect_factor_source_with_id(neglected_factor.clone())
                 }
-            }
-        }
+            })
     }
 
     #[allow(unused)]

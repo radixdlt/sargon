@@ -66,6 +66,14 @@ impl<ID: SignableID> HDSignature<ID> {
     }
 }
 
+impl<ID: SignableID> FactorSourceReferencing for HDSignature<ID> {
+    fn factor_source_id(&self) -> FactorSourceIDFromHash {
+        self.owned_factor_instance()
+            .factor_instance()
+            .factor_source_id
+    }
+}
+
 impl<ID: SignableID + HasSampleValues> HasSampleValues for HDSignature<ID> {
     fn sample() -> Self {
         Self::fake_sign_by_looking_up_mnemonic_amongst_samples(

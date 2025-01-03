@@ -188,7 +188,7 @@ impl<S: Signable> SignaturesCollector<S> {
                 "Neglecting all factors of kind: {} since they are all irrelevant (all TX referencing those factors have already failed)",
                 factor_sources_of_kind.kind
             );
-            self.process_batch_response(SignWithFactorsOutcome::irrelevant(
+            self.process_batch_response(SignResponse::irrelevant(
                 factor_sources_of_kind,
             ));
             true
@@ -207,57 +207,77 @@ impl<S: Signable> SignaturesCollector<S> {
             &factor_sources_of_kind.kind
         );
 
-        let kind = factor_sources_of_kind.kind;
-        if kind == FactorSourceKind::Device {
-            debug!("Creating poly request for interactor");
-            let request =
-                self.request_for_parallel_interactor(factor_sources_of_kind);
-            if !request.invalid_transactions_if_neglected.is_empty() {
+        if factor_sources_of_kind.supports_poly_sign() {
+            self.sign_poly(factor_sources_of_kind).await
+        } else {
+            self.sign_mono(factor_sources_of_kind).await
+        }
+    }
+
+    async fn sign_poly(
+        &self,
+        factor_sources_of_kind: &FactorSourcesOfKind,
+    ) -> Result<()> {
+        debug!("Creating poly request for interactor");
+        let request = self.request_for_poly_sign(factor_sources_of_kind);
+
+        let invalid_transactions =
+            request.invalid_transactions_if_all_factors_neglected();
+        if !invalid_transactions.is_empty() {
+            info!(
+                "If factors {:?} are neglected, invalid TXs: {:?}",
+                request.per_factor_source.keys(),
+                invalid_transactions
+            )
+        }
+        debug!("Dispatching poly request to interactor: {:?}", request);
+        let response = self.dependencies.interactor.sign(request).await?;
+        debug!("Got response from poly interactor: {:?}", response);
+        self.process_batch_response(response);
+
+        Ok(())
+    }
+
+    async fn sign_mono(
+        &self,
+        factor_sources_of_kind: &FactorSourcesOfKind,
+    ) -> Result<()> {
+        let factor_sources = factor_sources_of_kind.factor_sources();
+        for factor_source in factor_sources {
+            // Prepare the request for the interactor
+            debug!("Creating mono request for interactor");
+            let factor_source_id =
+                factor_source.factor_source_id().as_hash().cloned().expect(
+                    "Signature Collector only works with HD FactorSources.",
+                );
+
+            let request = self.request_for_mono_sign(
+                factor_sources_of_kind.kind,
+                &factor_source_id,
+            );
+
+            let invalid_transactions = request
+                .invalid_transactions_if_factor_neglected(&factor_source_id);
+            if !invalid_transactions.is_empty() {
                 info!(
-                    "If factors {:?} are neglected, invalid TXs: {:?}",
-                    request.per_factor_source.keys(),
-                    request.invalid_transactions_if_neglected
+                    "If factor {:?} are neglected, invalid TXs: {:?}",
+                    factor_source_id, invalid_transactions
                 )
             }
-            debug!("Dispatching poly request to interactor: {:?}", request);
+
+            debug!("Dispatching mono request to interactor: {:?}", request);
+            // Produce the results from the interactor
             let response = self.dependencies.interactor.sign(request).await?;
-            debug!("Got response from poly interactor: {:?}", response);
+            debug!("Got response from mono interactor: {:?}", response);
+
+            // Report the results back to the collector
             self.process_batch_response(response);
-        } else {
-            let factor_sources = factor_sources_of_kind.factor_sources();
-            for factor_source in factor_sources {
-                // Prepare the request for the interactor
-                debug!("Creating mono request for interactor");
-                let factor_source_id =
-                    factor_source.factor_source_id().as_hash().cloned().expect(
-                        "Signature Collector only works with HD FactorSources.",
-                    );
 
-                let request =
-                    self.request_for_serial_interactor(kind, &factor_source_id);
-
-                if !request.invalid_transactions_if_neglected.is_empty() {
-                    info!(
-                        "If factor {:?} are neglected, invalid TXs: {:?}",
-                        factor_source_id,
-                        request.invalid_transactions_if_neglected
-                    )
-                }
-
-                debug!("Dispatching mono request to interactor: {:?}", request);
-                // Produce the results from the interactor
-                let response =
-                    self.dependencies.interactor.sign(request).await?;
-                debug!("Got response from mono interactor: {:?}", response);
-
-                // Report the results back to the collector
-                self.process_batch_response(response);
-
-                if self.continuation() == FinishEarly {
-                    break;
-                }
+            if self.continuation() == FinishEarly {
+                break;
             }
         }
+
         Ok(())
     }
 
@@ -279,7 +299,7 @@ impl<S: Signable> SignaturesCollector<S> {
         Ok(())
     }
 
-    fn input_for_interactor(
+    fn per_transaction_input(
         &self,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> IndexSet<TransactionSignRequestInput<S>> {
@@ -291,15 +311,15 @@ impl<S: Signable> SignaturesCollector<S> {
             .expect(
                 "SignaturesCollectorState lock should not have been poisoned.",
             )
-            .input_for_interactor(factor_source_id)
+            .per_transaction_input(factor_source_id)
     }
 
-    fn request_for_serial_interactor(
+    fn request_for_mono_sign(
         &self,
         factor_source_kind: FactorSourceKind,
         factor_source_id: &FactorSourceIDFromHash,
     ) -> SignRequest<S> {
-        let batch_signing_request = self.input_for_interactor(factor_source_id);
+        let per_transaction = self.per_transaction_input(factor_source_id);
 
         let invalid_transactions_if_neglected = self
             .invalid_transactions_if_neglected_factor_sources(IndexSet::just(
@@ -308,14 +328,19 @@ impl<S: Signable> SignaturesCollector<S> {
             .into_iter()
             .collect::<IndexSet<_>>();
 
+        let per_factor_source_input = PerFactorSourceInput::new(
+            *factor_source_id,
+            per_transaction,
+            invalid_transactions_if_neglected,
+        );
+
         SignRequest::new(
             factor_source_kind,
-            IndexMap::just((*factor_source_id, batch_signing_request)),
-            invalid_transactions_if_neglected,
+            IndexMap::just((*factor_source_id, per_factor_source_input)),
         )
     }
 
-    fn request_for_parallel_interactor(
+    fn request_for_poly_sign(
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> SignRequest<S> {
@@ -328,26 +353,24 @@ impl<S: Signable> SignaturesCollector<S> {
                 )
             })
             .collect::<IndexSet<FactorSourceIDFromHash>>();
-        let per_factor_source = factor_source_ids
-            .clone()
-            .iter()
-            .map(|fid| (*fid, self.input_for_interactor(fid)))
-            .collect::<IndexMap<
-                FactorSourceIDFromHash,
-                IndexSet<TransactionSignRequestInput<S>>,
-            >>();
 
         let invalid_transactions_if_neglected = self
             .invalid_transactions_if_neglected_factor_sources(
-                factor_source_ids,
+                factor_source_ids.clone(),
             );
 
+        let per_factor_source = factor_source_ids.iter().map(|id| {
+            let per_transaction = self.per_transaction_input(id);
+
+            (*id, PerFactorSourceInput::new(
+                *id,
+                per_transaction,
+                invalid_transactions_if_neglected.clone(),
+            ))
+        }).collect::<IndexMap<FactorSourceIDFromHash, PerFactorSourceInput<S>>>();
+
         // Prepare the request for the interactor
-        SignRequest::new(
-            factor_sources_of_kind.kind,
-            per_factor_source,
-            invalid_transactions_if_neglected,
-        )
+        SignRequest::new(factor_sources_of_kind.kind, per_factor_source)
     }
 
     fn invalid_transactions_if_neglected_factor_sources(
@@ -365,7 +388,7 @@ impl<S: Signable> SignaturesCollector<S> {
             .invalid_transactions_if_neglected_factors(factor_source_ids)
     }
 
-    fn process_batch_response(&self, response: SignWithFactorsOutcome<S::ID>) {
+    fn process_batch_response(&self, response: SignResponse<S::ID>) {
         let state = self
             .state
             .write()

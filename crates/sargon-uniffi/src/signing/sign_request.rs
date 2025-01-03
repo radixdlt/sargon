@@ -5,21 +5,16 @@ macro_rules! decl_sign_request {
     (
         struct_name: $struct_name:ident,
         internal_struct_name: $internal_struct_name:ident,
-        per_factor_source: $per_factor_source:ident,
-        invalid_transactions_if_neglected: $invalid_transactions_if_neglected:ident,
+        per_factor_source_input: $per_factor_source_input:ident,
+        internal_per_factor_source_input: $internal_per_factor_source_input:ident
     ) => {
         #[derive(Clone, PartialEq, Eq, uniffi::Record)]
         pub struct $struct_name {
             pub factor_source_kind: FactorSourceKind,
 
-            /// Per factor source, a set of transactions to sign, with
-            /// multiple derivations paths.
-            pub per_factor_source: Vec<$per_factor_source>,
-
-            /// A collection of transactions which would be invalid if the user skips
-            /// signing with this factor source.
-            pub invalid_transactions_if_neglected:
-                Vec<$invalid_transactions_if_neglected>,
+            /// Per factor source, a set of inputs that contain information on what signables need signing,
+            /// and what signables will fail if such factor source is neglected.
+            pub per_factor_source: Vec<$per_factor_source_input>,
         }
 
         impl $struct_name {
@@ -35,17 +30,19 @@ macro_rules! decl_sign_request {
                     per_factor_source: value
                         .per_factor_source
                         .into_iter()
-                        .map(|(id, transactions)| {
-                            $per_factor_source::new(
+                        .map(|(id, input)| {
+                            $per_factor_source_input::new(
                                 id.into(),
-                                transactions.into_iter().map(|t| t.into()).collect()
+                                input.per_transaction
+                                    .into_iter()
+                                    .map(|t| t.into())
+                                    .collect(),
+                                input.invalid_transactions_if_neglected
+                                    .into_iter()
+                                    .map(|t| t.into())
+                                    .collect()
                             )
                         })
-                        .collect(),
-                    invalid_transactions_if_neglected: value
-                        .invalid_transactions_if_neglected
-                        .into_iter()
-                        .map(|t| t.into())
                         .collect(),
                 }
             }
@@ -62,17 +59,20 @@ macro_rules! decl_sign_request {
                         .map(|item| {
                             (
                                 item.factor_source_id.into_internal(),
-                                item.transactions
-                                    .iter()
-                                    .map(|t| t.into_internal())
-                                    .collect(),
+                                $internal_per_factor_source_input::new(
+                                    item.factor_source_id.into_internal(),
+                                    item.per_transaction
+                                        .iter()
+                                        .map(|t| t.into_internal())
+                                        .collect(),
+                                    item.invalid_transactions_if_neglected
+                                        .iter()
+                                        .map(|t| t.into_internal())
+                                        .collect()
+                                )
+
                             )
                         })
-                        .collect(),
-                    invalid_transactions_if_neglected: value
-                        .invalid_transactions_if_neglected
-                        .iter()
-                        .map(|t| t.into_internal())
                         .collect(),
                 }
             }
@@ -83,15 +83,18 @@ macro_rules! decl_sign_request {
     (signable: $signable:ty, signable_id: $signable_id:ty) => {
         paste! {
             use sargon::[< $signable >] as [< Internal $signable >];
+            use sargon::[< $signable_id >] as [< Internal $signable_id >];
 
             type [< InternalSignRequestOf $signable >] =
                 sargon::SignRequest<[< Internal $signable >]>;
+            type [< InternalPerFactorSourceInputOf $signable >] =
+                sargon::PerFactorSourceInput<[< Internal $signable >]>;
 
             decl_sign_request!(
                 struct_name: [< SignRequestOf $signable >],
                 internal_struct_name: [< InternalSignRequestOf $signable >],
-                per_factor_source: [< TransactionToSignPerFactorSourceOf $signable >],
-                invalid_transactions_if_neglected: [< InvalidTransactionIfNeglectedOf $signable_id >],
+                per_factor_source_input: [< PerFactorSourceInputOf $signable >],
+                internal_per_factor_source_input: [< InternalPerFactorSourceInputOf $signable >]
             );
         }
     };

@@ -1,33 +1,9 @@
 use crate::prelude::*;
 
-/// The response of a batch signing request, either a PolyFactor or MonoFactor signing
-/// request, matters not, because the goal is to have signed all transactions with
-/// enough keys (derivation paths) needed for it to be valid when submitted to the
-/// Radix network.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
-#[debug("SignResponse {{ signatures: {:#?} }}", signatures.values().map(|f| format!("{:#?}", f)).join(", "))]
 pub struct SignResponse<ID: SignableID> {
-    pub signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<ID>>>,
-}
-
-impl<ID: SignableID> SignResponse<ID> {
-    pub fn new(
-        signatures: IndexMap<FactorSourceIDFromHash, IndexSet<HDSignature<ID>>>,
-    ) -> Self {
-        Self { signatures }
-    }
-
-    pub fn with_signatures(signatures: IndexSet<HDSignature<ID>>) -> Self {
-        let signatures = signatures
-            .into_iter()
-            .into_group_map_by(|x| x.factor_source_id());
-        Self::new(
-            signatures
-                .into_iter()
-                .map(|(k, v)| (k, IndexSet::from_iter(v)))
-                .collect(),
-        )
-    }
+    pub per_factor_outcome:
+        IndexMap<FactorSourceIDFromHash, PerFactorOutcome<ID>>,
 }
 
 impl<ID: SignableID + HasSampleValues> HasSampleValues for SignResponse<ID> {
@@ -38,28 +14,94 @@ impl<ID: SignableID + HasSampleValues> HasSampleValues for SignResponse<ID> {
             .owned_factor_instance
             .value
             .factor_source_id;
-        Self::new(IndexMap::just((
+
+        Self::signed(IndexMap::just((
             factor_source_id,
             IndexSet::just(hd_signature),
         )))
     }
 
     fn sample_other() -> Self {
-        let hd_signature = HDSignature::sample_other();
-        let factor_source_id = hd_signature
-            .input
-            .owned_factor_instance
-            .value
-            .factor_source_id;
-        Self::new(IndexMap::just((
-            factor_source_id,
-            IndexSet::just(hd_signature),
-        )))
+        Self::failure_with_factors(IndexSet::just(
+            FactorSourceIDFromHash::sample_other(),
+        ))
+    }
+}
+
+impl<ID: SignableID> SignResponse<ID> {
+    #[allow(unused)]
+    pub fn new(
+        per_factor_outcome: IndexMap<
+            FactorSourceIDFromHash,
+            PerFactorOutcome<ID>,
+        >,
+    ) -> Self {
+        Self { per_factor_outcome }
+    }
+
+    #[allow(unused)]
+    pub fn signed(
+        produced_signatures: IndexMap<
+            FactorSourceIDFromHash,
+            IndexSet<HDSignature<ID>>,
+        >,
+    ) -> Self {
+        Self {
+            per_factor_outcome: IndexMap::from_iter(
+                produced_signatures.iter().map(|(id, signatures)| {
+                    (*id, PerFactorOutcome::signed(*id, signatures.clone()))
+                }),
+            ),
+        }
+    }
+
+    #[allow(unused)]
+    pub(crate) fn failure_with_factors(
+        ids: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
+        Self {
+            per_factor_outcome: IndexMap::from_iter(
+                ids.iter().map(|id| (*id, PerFactorOutcome::failure(*id))),
+            ),
+        }
+    }
+
+    #[allow(unused)]
+    pub(crate) fn user_skipped_factors(
+        ids: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
+        Self {
+            per_factor_outcome: IndexMap::from_iter(
+                ids.iter().map(|id| (*id, PerFactorOutcome::skipped(*id))),
+            ),
+        }
+    }
+
+    #[allow(unused)]
+    pub(crate) fn user_skipped_factor(id: FactorSourceIDFromHash) -> Self {
+        Self::user_skipped_factors(IndexSet::from_iter([id]))
+    }
+
+    pub(crate) fn irrelevant(
+        factor_sources_of_kind: &FactorSourcesOfKind,
+    ) -> Self {
+        let ids = factor_sources_of_kind
+            .factor_sources()
+            .into_iter()
+            .map(|f| *f.factor_source_id().as_hash().unwrap()) // TODO ask that
+            .collect_vec();
+
+        Self {
+            per_factor_outcome: IndexMap::from_iter(
+                ids.iter()
+                    .map(|id| (*id, PerFactorOutcome::irrelevant(*id))),
+            ),
+        }
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

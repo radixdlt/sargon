@@ -4,17 +4,10 @@ use crate::prelude::*;
 pub struct SignRequest<S: Signable> {
     pub factor_source_kind: FactorSourceKind,
 
-    /// Per factor source, a set of transactions to sign, with
-    /// multiple derivations paths.
-    pub per_factor_source: IndexMap<
-        FactorSourceIDFromHash,
-        IndexSet<TransactionSignRequestInput<S>>,
-    >,
-
-    /// A collection of transactions which would be invalid if the user skips
-    /// signing with this factor source.
-    pub invalid_transactions_if_neglected:
-        IndexSet<InvalidTransactionIfNeglected<S::ID>>,
+    /// Per factor source, a set of inputs that contain information on what signables need signing,
+    /// and what signables will fail if such factor source is neglected.
+    pub per_factor_source:
+        IndexMap<FactorSourceIDFromHash, PerFactorSourceInput<S>>,
 }
 
 impl<S: Signable> SignRequest<S> {
@@ -26,10 +19,7 @@ impl<S: Signable> SignRequest<S> {
         factor_source_kind: FactorSourceKind,
         per_factor_source: IndexMap<
             FactorSourceIDFromHash,
-            IndexSet<TransactionSignRequestInput<S>>,
-        >,
-        invalid_transactions_if_neglected: IndexSet<
-            InvalidTransactionIfNeglected<S::ID>,
+            PerFactorSourceInput<S>,
         >,
     ) -> Self {
         assert!(
@@ -47,12 +37,36 @@ impl<S: Signable> SignRequest<S> {
         Self {
             factor_source_kind,
             per_factor_source,
-            invalid_transactions_if_neglected,
         }
     }
 
     pub fn factor_source_ids(&self) -> IndexSet<FactorSourceIDFromHash> {
         self.per_factor_source.keys().cloned().collect()
+    }
+
+    pub fn invalid_transactions_if_all_factors_neglected(
+        &self,
+    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
+        let mut invalid_transactions_for_all_factors =
+            IndexSet::<InvalidTransactionIfNeglected<S::ID>>::new();
+
+        self.per_factor_source.values().for_each(|input| {
+            invalid_transactions_for_all_factors
+                .extend(input.invalid_transactions_if_neglected.clone())
+        });
+
+        invalid_transactions_for_all_factors
+    }
+
+    pub fn invalid_transactions_if_factor_neglected(
+        &self,
+        factor_source_id: &FactorSourceIDFromHash,
+    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
+        self.per_factor_source
+            .get(factor_source_id)
+            .map_or(IndexSet::new(), |i| {
+                i.invalid_transactions_if_neglected.clone()
+            })
     }
 
     #[allow(unused)]
@@ -71,12 +85,8 @@ where
             FactorSourceKind::sample(),
             IndexMap::just((
                 FactorSourceIDFromHash::sample(),
-                IndexSet::from_iter(vec![
-                    TransactionSignRequestInput::sample(),
-                    TransactionSignRequestInput::sample_other(),
-                ]),
+                PerFactorSourceInput::sample(),
             )),
-            IndexSet::new(),
         )
     }
 
@@ -85,14 +95,8 @@ where
             FactorSourceKind::sample_other(),
             IndexMap::just((
                 FactorSourceIDFromHash::sample_ledger(),
-                IndexSet::from_iter(vec![
-                    TransactionSignRequestInput::sample(),
-                    TransactionSignRequestInput::sample_other(),
-                ]),
+                PerFactorSourceInput::sample_other(),
             )),
-            IndexSet::just(
-                InvalidTransactionIfNeglected::<S::ID>::sample_other(),
-            ),
         )
     }
 }
@@ -119,7 +123,7 @@ mod tests {
         expected = "Invalid input, per_factor_source must not be empty, this is a programmer error."
     )]
     fn panics_if_per_factor_source_is_empty() {
-        SUT::new(FactorSourceKind::Device, IndexMap::new(), IndexSet::new());
+        SUT::new(FactorSourceKind::Device, IndexMap::new());
     }
 
     #[test]
@@ -131,11 +135,8 @@ mod tests {
             FactorSourceKind::ArculusCard,
             IndexMap::just((
                 FactorSourceIDFromHash::sample(),
-                IndexSet::just(
-                    TransactionSignRequestInput::<TransactionIntent>::sample(),
-                ),
+                PerFactorSourceInput::<TransactionIntent>::sample(),
             )),
-            IndexSet::new(),
         );
     }
 }
