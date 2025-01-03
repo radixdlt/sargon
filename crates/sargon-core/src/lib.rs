@@ -46,7 +46,6 @@ pub mod prelude {
 
     pub use ::hex::decode as hex_decode;
     pub use ::hex::encode as hex_encode;
-    pub use itertools::Itertools;
     pub use log::{debug, error, info, trace, warn};
     pub use serde::{
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
@@ -99,11 +98,9 @@ pub mod prelude {
     };
 
     pub(crate) use radix_engine_interface::prelude::{
-        MetadataValue as ScryptoMetadataValue,
+        Epoch as ScryptoEpoch, MetadataValue as ScryptoMetadataValue,
         ToMetadataEntry as ScryptoToMetadataEntry,
     };
-
-    pub use radix_engine_interface::prelude::Epoch as ScryptoEpoch;
 
     pub use radix_transactions::model::{
         SignatureV1 as ScryptoSignature,

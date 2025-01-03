@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_rust::prelude::IndexMap;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PerRecipientAssetTransfers {

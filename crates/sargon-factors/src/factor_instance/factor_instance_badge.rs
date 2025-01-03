@@ -213,20 +213,20 @@ mod tests {
     //     );
     // }
 
-    // #[test]
-    // fn a_correct_resource_or_non_fungible_is_derived_from_a_virtual_factor_instance_badge(
-    // ) {
-    //     let sut = FactorInstanceBadge::sample_virtual();
-    //     let resource_or_non_fungible = ScryptoResourceOrNonFungible::from(sut);
-    //     assert_eq!(
-    //         resource_or_non_fungible,
-    //         ScryptoResourceOrNonFungible::NonFungible(
-    //             ScryptoNonFungibleGlobalId::from_public_key(
-    //                 &ScryptoPublicKey::from(
-    //                     HierarchicalDeterministicPublicKey::sample().public_key
-    //                 )
-    //             )
-    //         )
-    //     );
-    // }
+    #[test]
+    fn a_correct_resource_or_non_fungible_is_derived_from_a_virtual_factor_instance_badge(
+    ) {
+        let sut = FactorInstanceBadge::sample_virtual();
+        let resource_or_non_fungible = ScryptoResourceOrNonFungible::from(sut);
+        assert_eq!(
+            resource_or_non_fungible,
+            ScryptoResourceOrNonFungible::NonFungible(
+                ScryptoNonFungibleGlobalId::from_public_key(
+                    &ScryptoPublicKey::from(
+                        HierarchicalDeterministicPublicKey::sample().public_key
+                    )
+                )
+            )
+        );
+    }
 }

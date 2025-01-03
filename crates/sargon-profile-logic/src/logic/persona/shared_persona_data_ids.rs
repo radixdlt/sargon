@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_rust::prelude::IndexSet;
 
 pub trait SharedPersonaDataIdsOfEntries {
     fn ids_of_entries(&self) -> IndexSet<PersonaDataEntryID>;

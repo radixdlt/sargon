@@ -17,14 +17,15 @@ pub mod prelude {
     pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
 
-    pub(crate) use radix_engine_interface::prelude::{
-        AccessRule as ScryptoAccessRule,
-        BasicRequirement as ScryptoBasicRequirement,
-        CompositeRequirement as ScryptoCompositeRequirement,
-    };
-
-    pub(crate) use radix_engine_interface::blueprints::{
-        access_controller::RuleSet as ScryptoRuleSet,
-        resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
+    pub(crate) use radix_engine_interface::{
+        blueprints::{
+            access_controller::RuleSet as ScryptoRuleSet,
+            resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
+        },
+        prelude::{
+            AccessRule as ScryptoAccessRule,
+            BasicRequirement as ScryptoBasicRequirement,
+            CompositeRequirement as ScryptoCompositeRequirement,
+        },
     };
 }

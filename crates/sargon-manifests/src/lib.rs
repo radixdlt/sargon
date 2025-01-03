@@ -39,17 +39,27 @@ pub mod prelude {
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };
 
-    pub(crate) use radix_engine_interface::prelude::{
-        AccessRule as ScryptoAccessRule,
-        FungibleResourceRoles as ScryptoFungibleResourceRoles,
-        MetadataInit as ScryptoMetadataInit,
-        MetadataValue as ScryptoMetadataValue,
-        ModuleConfig as ScryptoModuleConfig,
-        NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
-        OwnerRole as ScryptoOwnerRole,
-        RoleAssignmentInit as ScryptoRoleAssignmentInit,
-        ToMetadataEntry as ScryptoToMetadataEntry,
-        UncheckedUrl as ScryptoUncheckedUrl,
+    pub(crate) use radix_engine_interface::{
+        blueprints::{
+            access_controller::RuleSet as ScryptoRuleSet,
+            account::{
+                DefaultDepositRule as ScryptoDefaultDepositRule,
+                ACCOUNT_SECURIFY_IDENT as SCRYPTO_ACCOUNT_SECURIFY_IDENT,
+            },
+            identity::IDENTITY_SECURIFY_IDENT as SCRYPTO_IDENTITY_SECURIFY_IDENT,
+        },
+        prelude::{
+            AccessRule as ScryptoAccessRule,
+            FungibleResourceRoles as ScryptoFungibleResourceRoles,
+            MetadataInit as ScryptoMetadataInit,
+            MetadataValue as ScryptoMetadataValue,
+            ModuleConfig as ScryptoModuleConfig,
+            NonFungibleResourceRoles as ScryptoNonFungibleResourceRoles,
+            OwnerRole as ScryptoOwnerRole,
+            RoleAssignmentInit as ScryptoRoleAssignmentInit,
+            ToMetadataEntry as ScryptoToMetadataEntry,
+            UncheckedUrl as ScryptoUncheckedUrl,
+        },
     };
 
     pub use radix_engine_toolkit::{
@@ -139,15 +149,6 @@ pub mod prelude {
             TransactionTypesError as RetTransactionTypesError,
             Update as RetUpdate,
         },
-    };
-
-    pub(crate) use radix_engine_interface::blueprints::{
-        access_controller::RuleSet as ScryptoRuleSet,
-        account::{
-            DefaultDepositRule as ScryptoDefaultDepositRule,
-            ACCOUNT_SECURIFY_IDENT as SCRYPTO_ACCOUNT_SECURIFY_IDENT,
-        },
-        identity::IDENTITY_SECURIFY_IDENT as SCRYPTO_IDENTITY_SECURIFY_IDENT,
     };
 }
 

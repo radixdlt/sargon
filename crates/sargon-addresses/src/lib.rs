@@ -62,6 +62,7 @@ pub mod prelude {
             ResourceAddress as ScryptoResourceAddress,
         },
     };
+
     pub(crate) use radix_engine::system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier;
 
     pub use radix_engine_toolkit::models::{
