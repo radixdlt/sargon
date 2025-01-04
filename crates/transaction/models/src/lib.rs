@@ -6,18 +6,18 @@ mod profile_models;
 mod unvalidated_transaction_manifest;
 
 pub mod prelude {
+    pub use addresses::prelude::*;
+    pub use bytes::prelude::*;
+    pub use core_collections::prelude::Just;
+    pub use core_misc::prelude::Instant;
+    pub use ecc::prelude::*;
+    pub use factors::prelude::*;
+    pub use hash::prelude::*;
+    pub use hierarchical_deterministic::prelude::*;
     pub use identified_vec_of::prelude::*;
-    pub use sargon_addresses::prelude::*;
-    pub use sargon_bytes::prelude::*;
-    pub use sargon_core_collections::prelude::Just;
-    pub use sargon_core_misc::prelude::Instant;
-    pub use sargon_core_network::prelude::*;
-    pub use sargon_core_tx::prelude::*;
-    pub use sargon_ecc::prelude::*;
-    pub use sargon_factors::prelude::*;
-    pub use sargon_hash::prelude::*;
-    pub use sargon_hierarchical_deterministic::prelude::*;
-    pub use sargon_numeric::prelude::*;
+    pub use network::prelude::*;
+    pub use numeric::prelude::*;
+    pub use transaction_foundation::prelude::*;
 
     pub use crate::assert_manifest::*;
     pub use crate::error_from::*;

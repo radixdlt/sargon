@@ -1,11 +1,11 @@
 [package]
-name = "sargon-core-collections"
+name = "core-collections"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-has-sample-values = { path = "../../core/has-sample-values" }
+has-sample-values = { path = "../../core/has-sample-values" }
 
 # === RADIX DEPENDENCIES ===
 # None

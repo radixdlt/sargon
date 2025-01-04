@@ -6,11 +6,11 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core-assert-json = { path = "../../core/assert-json" }
-sargon-addresses = { path = "../../crypto/addresses" }
-sargon-transaction-models = { path = "../../transaction/models" }
-sargon-core-misc = { path = "../../core/misc" } # decl_bool_type
-sargon-core-metadata = { path = "../../types/metadata" }
+assert-json = { path = "../../core/assert-json" }
+addresses = { path = "../../crypto/addresses" }
+transaction-models = { path = "../../transaction/models" }
+core-misc = { path = "../../core/misc" }                   # decl_bool_type
+metadata = { path = "../../common/metadata" }
 
 # === RADIX DEPENDENCIES ===
 radix-engine-toolkit-common = { workspace = true }

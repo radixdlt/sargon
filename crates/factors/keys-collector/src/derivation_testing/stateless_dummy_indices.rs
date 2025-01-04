@@ -1,7 +1,7 @@
 #![cfg(test)]
 #![allow(unused)]
 
-use sargon_core_network::prelude::NetworkID;
+use network::prelude::NetworkID;
 
 use crate::prelude::*;
 use crate::DerivationPathConstructors;

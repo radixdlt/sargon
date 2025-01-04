@@ -1,6 +1,15 @@
 [workspace]
 resolver = "2"
 members = [
+    # === COMMON ===
+    "crates/common/bytes",
+    "crates/common/entity-foundation",
+    "crates/common/host-info",
+    "crates/common/identified-vec-of",
+    "crates/common/metadata",
+    "crates/common/network",
+    "crates/common/numeric",
+    "crates/common/short-string",
 
     # === CORE ===
     "crates/core/assert-json",
@@ -38,7 +47,7 @@ members = [
     "crates/profile/models/supporting-types",
 
     # === SARGON - SPLIT ME ===
-    "crates/sargon_SPLIT_ME", 
+    "crates/sargon_SPLIT_ME",
 
     # === SYSTEM ===
     "crates/system/clients/clients",
@@ -50,21 +59,75 @@ members = [
     "crates/transaction/manifests",
     "crates/transaction/models",
 
-    # === TYPES ===
-    "crates/types/bytes",
-    "crates/types/entity-foundation",
-    "crates/types/host-info",
-    "crates/types/identified-vec-of",
-    "crates/types/metadata",
-    "crates/types/network",
-    "crates/types/numeric",
-    "crates/types/short-string",
-
     # === UNIFFI ===
     "crates/uniffi/uniffi_SPLIT_ME",
     "crates/uniffi/conversion-macros",
 ]
 
+default-members = [
+    # === COMMON ===
+    "crates/common/bytes",
+    "crates/common/entity-foundation",
+    "crates/common/host-info",
+    "crates/common/identified-vec-of",
+    "crates/common/metadata",
+    "crates/common/network",
+    "crates/common/numeric",
+    "crates/common/short-string",
+
+    # === CORE ===
+    "crates/core/assert-json",
+    "crates/core/collections",
+    "crates/core/error",
+    "crates/core/has-sample-values",
+    "crates/core/misc",
+    "crates/core/time-utils",
+    "crates/core/utils",
+
+    # === CRYPTO ===
+    "crates/crypto/addresses",
+    "crates/crypto/ecc",
+    "crates/crypto/encryption",
+    "crates/crypto/hash",
+    "crates/crypto/hd",
+
+    # === FACTORS ===
+    "crates/factors/factors",
+    "crates/factors/instances-provider",
+    "crates/factors/keys-collector",
+    "crates/factors/next-derivation-index-ephemeral",
+    "crates/factors/supporting-types",
+
+    # === GATEWAY ===
+    "crates/gateway/client-and-api",
+    "crates/gateway/models",
+
+    # === PROFILE ===
+    "crates/profile/logic/logic_SPLIT_ME",
+    "crates/profile/models/app-preferences",
+    "crates/profile/models/gateway",
+    "crates/profile/models/profile_SPLIT_ME",
+    "crates/profile/models/security-structures",
+    "crates/profile/models/supporting-types",
+
+    # === SARGON - SPLIT ME ===
+    "crates/sargon_SPLIT_ME",
+
+    # === SYSTEM ===
+    "crates/system/clients/clients",
+    "crates/system/clients/http",
+    "crates/system/drivers",
+
+    # === TRANSACTION ===
+    "crates/transaction/foundation",
+    "crates/transaction/manifests",
+    "crates/transaction/models",
+
+    # === UNIFFI ===
+    # Uniffi is omitted for maximum compilation speed
+    # you can `cargo check --workspace` to check it.
+    # or cargo test --workspace to test it.
+]
 
 [profile.release]
 incremental = false

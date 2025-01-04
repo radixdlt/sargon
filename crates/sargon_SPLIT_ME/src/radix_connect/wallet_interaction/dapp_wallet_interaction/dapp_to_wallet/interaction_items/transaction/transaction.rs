@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon_core_tx::decl_version_type;
+use transaction_foundation::decl_version_type;
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub struct DappToWalletInteractionTransactionItems {

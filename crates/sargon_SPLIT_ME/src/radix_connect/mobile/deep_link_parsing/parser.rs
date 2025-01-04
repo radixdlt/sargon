@@ -1,7 +1,7 @@
 use super::request::RadixConnectMobileDappRequest;
 use crate::prelude::*;
 
-use sargon_core_misc::parse_url;
+use core_misc::parse_url;
 
 const CONNECT_URL_PARAM_SESSION_ID: &str = "sessionId";
 const CONNECT_URL_PARAM_ORIGIN: &str = "origin";

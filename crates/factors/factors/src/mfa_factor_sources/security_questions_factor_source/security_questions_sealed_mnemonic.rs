@@ -1,4 +1,4 @@
-use sargon_encryption::{EncryptionScheme, VersionedEncryption};
+use encryption::{EncryptionScheme, VersionedEncryption};
 
 use crate::prelude::*;
 

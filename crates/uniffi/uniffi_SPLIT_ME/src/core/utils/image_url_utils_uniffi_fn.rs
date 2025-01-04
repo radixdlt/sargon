@@ -1,4 +1,4 @@
-use sargon_core_misc::{is_vector_image, make_image_url};
+use core_misc::{is_vector_image, make_image_url};
 
 use crate::prelude::*;
 use crate::types::*;

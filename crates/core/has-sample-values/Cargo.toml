@@ -1,10 +1,10 @@
 [package]
-name = "sargon-has-sample-values"
+name = "has-sample-values"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
-sargon-core-error = { path = "../../core/error" }
+error = { path = "../../core/error" }
 
 # ==== RADIX DEPENDENCIES ====
 # None

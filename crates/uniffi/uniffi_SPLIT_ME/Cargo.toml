@@ -16,22 +16,22 @@ path = "src/bindgen/bin.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-encryption = { path = "../../crypto/encryption" }
-sargon-factors = { path = "../../factors/factors" }
-sargon-keys-collector = { path = "../../factors/keys-collector" }
-sargon-addresses = { path = "../../crypto/addresses" }
-sargon-transaction-models = { path = "../../transaction/models" }
-sargon-manifests = { path = "../../transaction/manifests" }
-sargon-profile = { path = "../../profile/models/profile_SPLIT_ME" }
-sargon-profile-logic = { path = "../../profile/logic/logic_SPLIT_ME" }
-sargon-profile-security-structures = { path = "../../profile/models/security-structures" }
-sargon-factor-instances-provider = { path = "../../factors/instances-provider" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+encryption = { path = "../../crypto/encryption" }
+factors = { path = "../../factors/factors" }
+keys-collector = { path = "../../factors/keys-collector" }
+addresses = { path = "../../crypto/addresses" }
+transaction-models = { path = "../../transaction/models" }
+manifests = { path = "../../transaction/manifests" }
+profile = { path = "../../profile/models/profile_SPLIT_ME" }
+profile-logic = { path = "../../profile/logic/logic_SPLIT_ME" }
+profile-security-structures = { path = "../../profile/models/security-structures" }
+factor-instances-provider = { path = "../../factors/instances-provider" }
 gateway-models = { path = "../../gateway/models" }
-sargon-core-misc = { path = "../../core/misc" }
-sargon-clients = { path = "../../system/clients/clients" }
-sargon-drivers = { path = "../../system/drivers" }
+core-misc = { path = "../../core/misc" }
+clients = { path = "../../system/clients/clients" }
+drivers = { path = "../../system/drivers" }
 gateway-client-and-api = { path = "../../gateway/client-and-api" }
 
 sargon = { path = "../../sargon_SPLIT_ME" }

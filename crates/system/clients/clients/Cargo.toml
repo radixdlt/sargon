@@ -1,19 +1,19 @@
 [package]
-name = "sargon-clients"
+name = "clients"
 version = "1.1.99"
 edition = "2021"
 build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core-collections = { path = "../../../core/collections" }
-sargon-profile = { path = "../../../profile/models/profile_SPLIT_ME" }
-sargon-factors-supporting-types = { path = "../../../factors/supporting-types" }
-sargon-profile-supporting-types = { path = "../../../profile/models/supporting-types" }
-sargon-drivers = { path = "../../../system/drivers" }
+core-collections = { path = "../../../core/collections" }
+profile = { path = "../../../profile/models/profile_SPLIT_ME" }
+factors-supporting-types = { path = "../../../factors/supporting-types" }
+profile-supporting-types = { path = "../../../profile/models/supporting-types" }
+drivers = { path = "../../../system/drivers" }
 http-client = { path = "../../../system/clients/http" }
 gateway-client-and-api = { path = "../../../gateway/client-and-api" }
-sargon-hierarchical-deterministic = { path = "../../../crypto/hd" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
 
 # === RADIX DEPENDENCIES ===
 # None

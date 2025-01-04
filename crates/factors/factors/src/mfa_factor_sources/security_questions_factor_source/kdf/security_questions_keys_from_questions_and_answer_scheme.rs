@@ -1,4 +1,4 @@
-use sargon_encryption::EncryptionKey;
+use encryption::EncryptionKey;
 
 use crate::prelude::*;
 

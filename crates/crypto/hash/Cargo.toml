@@ -1,11 +1,11 @@
 [package]
-name = "sargon-hash"
+name = "hash"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-sargon-bytes = { path = "../../types/bytes" }
+bytes = { path = "../../common/bytes" }
 
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }

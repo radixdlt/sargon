@@ -5,14 +5,14 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../types/identified-vec-of" }
-sargon-core-assert-json = { path = "../../core/assert-json" }
-sargon-core-error = { path = "../../core/error" }
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-has-sample-values = { path = "../../core/has-sample-values" }
-sargon-factors = { path = "../../factors/factors" }
-sargon-addresses = { path = "../../crypto/addresses" }
-sargon-core-network = { path = "../../types/network" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+assert-json = { path = "../../core/assert-json" }
+error = { path = "../../core/error" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+has-sample-values = { path = "../../core/has-sample-values" }
+factors = { path = "../../factors/factors" }
+addresses = { path = "../../crypto/addresses" }
+network = { path = "../../common/network" }
 
 # === RADIX DEPENDENCIES
 #None

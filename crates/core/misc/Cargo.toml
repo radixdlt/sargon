@@ -1,14 +1,14 @@
 [package]
-name = "sargon-core-misc"
+name = "core-misc"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core-assert-json = { path = "../../core/assert-json" }
-sargon-core-error = { path = "../../core/error" }
+assert-json = { path = "../../core/assert-json" }
+error = { path = "../../core/error" }
 sargon-core-utils = { path = "../../core/utils" }
-sargon-has-sample-values = { path = "../../core/has-sample-values" }
+has-sample-values = { path = "../../core/has-sample-values" }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

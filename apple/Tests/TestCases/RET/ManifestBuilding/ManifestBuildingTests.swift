@@ -232,7 +232,7 @@ extension TestCase {
 
 	func rtm(
 		_ rtmFile: String,
-		in crate: String = "sargon-transaction-models"
+		in crate: String = "transaction/models"
 	) throws -> TransactionManifest {
 		let data = try openTransactionFile(rtmFile, extension: "rtm", in: crate)
 		let instructionsString = try XCTUnwrap(String(data: data, encoding: .utf8))
@@ -247,7 +247,7 @@ extension TestCase {
 	private func openTransactionFile(
 		_ fileName: String,
 		extension fileExtension: String,
-		in crate: String = "sargon-transaction-models"
+		in crate: String = "transaction/models"
 	) throws -> Data {
 		try openFile(subPath: "transaction", fileName, extension: fileExtension, in: crate)
 	}

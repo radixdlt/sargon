@@ -3,7 +3,7 @@ mod has_sample_values;
 pub mod prelude {
     pub use crate::has_sample_values::*;
 
-    pub use sargon_core_error::prelude::*;
+    pub use error::prelude::*;
 
     pub(crate) use indexmap::IndexSet;
     pub use iso8601_timestamp::Timestamp;

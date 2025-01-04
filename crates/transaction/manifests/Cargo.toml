@@ -1,5 +1,5 @@
 [package]
-name = "sargon-manifests"
+name = "manifests"
 version = "1.1.99"
 edition = "2021"
 build = "build.rs"
@@ -7,14 +7,14 @@ build = "build.rs"
 [dependencies]
 # === SARGON CRATES ===
 sargon-core-utils = { path = "../../core/utils" }
-identified-vec-of = { path = "../../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-factors = { path = "../../factors/factors" }
-sargon-addresses = { path = "../../crypto/addresses" }
-sargon-core-metadata = { path = "../../types/metadata" }
-sargon-transaction-models = { path = "../../transaction/models" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+factors = { path = "../../factors/factors" }
+addresses = { path = "../../crypto/addresses" }
+metadata = { path = "../../common/metadata" }
+transaction-models = { path = "../../transaction/models" }
 gateway-models = { path = "../../gateway/models" }
-sargon-profile = { path = "../../profile/models/profile_SPLIT_ME" }
+profile = { path = "../../profile/models/profile_SPLIT_ME" }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

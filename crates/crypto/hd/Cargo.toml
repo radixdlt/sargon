@@ -1,18 +1,18 @@
 [package]
-name = "sargon-hierarchical-deterministic"
+name = "hierarchical-deterministic"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-identified-vec-of = { path = "../../types/identified-vec-of" }
-sargon-ecc = { path = "../../crypto/ecc" }
-sargon-hash = { path = "../../crypto/hash" }
-sargon-bytes = { path = "../../types/bytes" }
-sargon-has-sample-values = { path = "../../core/has-sample-values" }
-sargon-core-assert-json = { path = "../../core/assert-json" }
-sargon-core-network = { path = "../../types/network" }
-sargon-numeric = { path = "../../types/numeric" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+ecc = { path = "../../crypto/ecc" }
+hash = { path = "../../crypto/hash" }
+bytes = { path = "../../common/bytes" }
+has-sample-values = { path = "../../core/has-sample-values" }
+assert-json = { path = "../../core/assert-json" }
+network = { path = "../../common/network" }
+numeric = { path = "../../common/numeric" }
 
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }

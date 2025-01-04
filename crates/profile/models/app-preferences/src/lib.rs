@@ -9,9 +9,9 @@ pub mod prelude {
     pub use crate::security::*;
     pub use crate::transaction_preferences::*;
 
-    pub use sargon_numeric::prelude::*;
-    pub use sargon_profile_gateway::prelude::*;
-    pub use sargon_profile_security_structures::prelude::*;
+    pub use numeric::prelude::*;
+    pub use profile_gateway::prelude::*;
+    pub use profile_security_structures::prelude::*;
 
     pub(crate) use serde::{Deserialize, Serialize};
 }

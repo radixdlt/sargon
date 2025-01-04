@@ -1,6 +1,6 @@
 use crate::prelude::*;
+use profile_logic::prelude::ProfileNetworkDetailsForAuthorizedDapp as _;
 use sargon::ProfileNetwork as InternalProfileNetwork;
-use sargon_profile_logic::prelude::ProfileNetworkDetailsForAuthorizedDapp as _;
 
 decl_vec_samples_for!(ProfileNetworks, ProfileNetwork);
 

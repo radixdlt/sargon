@@ -12,24 +12,24 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../crypto/hd" }
-sargon-factors = { path = "../factors/factors" }
-sargon-core-misc = { path = "../core/misc" }
-sargon-core-tx = { path = "../transaction/foundation" }
-sargon-keys-collector = { path = "../factors/keys-collector" }
-sargon-encryption = { path = "../crypto/encryption" }
-sargon-addresses = { path = "../crypto/addresses" }
-sargon-transaction-models = { path = "../transaction/models" }
-sargon-manifests = { path = "../transaction/manifests" }
-sargon-profile = { path = "../profile/models/profile_SPLIT_ME" }
-sargon-profile-gateway = { path = "../profile/models/gateway" }
-sargon-profile-logic = { path = "../profile/logic/logic_SPLIT_ME" }
-sargon-profile-security-structures = { path = "../profile/models/security-structures" }
-sargon-factor-instances-provider = { path = "../factors/instances-provider" }
+identified-vec-of = { path = "../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../crypto/hd" }
+factors = { path = "../factors/factors" }
+core-misc = { path = "../core/misc" }
+transaction-foundation = { path = "../transaction/foundation" }
+keys-collector = { path = "../factors/keys-collector" }
+encryption = { path = "../crypto/encryption" }
+addresses = { path = "../crypto/addresses" }
+transaction-models = { path = "../transaction/models" }
+manifests = { path = "../transaction/manifests" }
+profile = { path = "../profile/models/profile_SPLIT_ME" }
+profile-gateway = { path = "../profile/models/gateway" }
+profile-logic = { path = "../profile/logic/logic_SPLIT_ME" }
+profile-security-structures = { path = "../profile/models/security-structures" }
+factor-instances-provider = { path = "../factors/instances-provider" }
 gateway-models = { path = "../gateway/models" }
-sargon-clients = { path = "../system/clients/clients" }
-sargon-drivers = { path = "../system/drivers" }
+clients = { path = "../system/clients/clients" }
+drivers = { path = "../system/drivers" }
 gateway-client-and-api = { path = "../gateway/client-and-api" }
 
 # === RADIX DEPENDENCIES ===

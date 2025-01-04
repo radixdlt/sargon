@@ -4,7 +4,7 @@ use sargon::SargonBuildInformation as InternalSargonBuildInformation;
 use sargon::TransactionManifest as InternalTransactionManifest;
 
 use sargon::{
-    // sargon_manifests crate
+    // manifests crate
     ManifestForAccountLockerClaim as _,
     TransactionManifestAssetTransfers as _,
     TransactionManifestFaucet as _,

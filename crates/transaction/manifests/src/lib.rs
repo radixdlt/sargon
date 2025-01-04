@@ -11,11 +11,11 @@ mod modify_manifest;
 mod third_party_deposit_update;
 
 pub mod prelude {
+    pub use factors::prelude::*;
     pub use gateway_models::prelude::*;
-    pub use sargon_core_metadata::prelude::*;
-    pub use sargon_factors::prelude::*;
-    pub use sargon_hierarchical_deterministic::prelude::*;
-    pub use sargon_profile::prelude::*;
+    pub use hierarchical_deterministic::prelude::*;
+    pub use metadata::prelude::*;
+    pub use profile::prelude::*;
 
     pub(crate) use crate::bucket_factory;
 

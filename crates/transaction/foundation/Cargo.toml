@@ -1,13 +1,13 @@
 [package]
-name = "sargon-core-tx"
+name = "transaction-foundation"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core-assert-json = { path = "../../core/assert-json" }
-sargon-has-sample-values = { path = "../../core/has-sample-values" }
-sargon-bytes = { path = "../../types/bytes" }
+assert-json = { path = "../../core/assert-json" }
+has-sample-values = { path = "../../core/has-sample-values" }
+bytes = { path = "../../common/bytes" }
 
 # === RADIX DEPENDENCIES ===
 radix-engine-interface = { workspace = true }

@@ -1,4 +1,4 @@
-use sargon_encryption::EncryptionKey;
+use encryption::EncryptionKey;
 
 use super::session_id::SessionID;
 use super::session_origin::SessionOrigin;

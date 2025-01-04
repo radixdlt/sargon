@@ -1,4 +1,4 @@
-use sargon_core_short_string::prelude::ShortString;
+use short_string::prelude::ShortString;
 
 use crate::prelude::*;
 

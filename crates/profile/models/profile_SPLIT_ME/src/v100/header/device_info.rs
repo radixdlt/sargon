@@ -96,7 +96,7 @@ impl DeviceInfo {
 }
 
 #[cfg(test)]
-use sargon_core_time_utils::now;
+use time_utils::now;
 
 #[cfg(test)]
 impl DeviceInfo {

@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-drivers = { path = "../../../system/drivers" }
-sargon-bytes = { path = "../../../types/bytes" }
-sargon-core-error = { path = "../../../core/error" }
+drivers = { path = "../../../system/drivers" }
+bytes = { path = "../../../common/bytes" }
+error = { path = "../../../core/error" }
 sargon-core-utils = { path = "../../../core/utils" }
 
 # === RADIX DEPENDENCIES ===

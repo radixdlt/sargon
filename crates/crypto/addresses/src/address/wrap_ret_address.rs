@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use sargon_hash::hash_of;
+use hash::hash_of;
 
 pub trait AddressViaRet: Sized {
     fn new(
@@ -126,7 +126,7 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
-            use sargon_bytes::prelude::generate_byte_array;
+            use bytes::prelude::generate_byte_array;
             use sargon_core_utils::prelude::format_string;
 
             impl [< $address_type:camel Address >] {

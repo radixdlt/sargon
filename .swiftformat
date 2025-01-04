@@ -1,5 +1,7 @@
 --swiftversion 5.9
 
+--exclude apple/Sources/UniFFI/**
+
 # format options
 --allman false # Prefer `K&R` https://en.wikipedia.org/wiki/Indentation_style#K&R_style
 --indent tab

@@ -19,8 +19,8 @@ pub mod prelude {
     pub use crate::unsecurified_entity::*;
     pub use crate::veci::*;
 
-    pub use sargon_hierarchical_deterministic::prelude::*;
-    pub use sargon_profile::prelude::*;
+    pub use hierarchical_deterministic::prelude::*;
+    pub use profile::prelude::*;
 
     pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use serde::{Deserialize, Serialize};

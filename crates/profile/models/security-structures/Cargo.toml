@@ -1,20 +1,20 @@
 [package]
-name = "sargon-profile-security-structures"
+name = "profile-security-structures"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-identified-vec-of = { path = "../../../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../../../crypto/hd" }
-sargon-factors = { path = "../../../factors/factors" }
-sargon-has-sample-values = { path = "../../../core/has-sample-values" }
-sargon-addresses = { path = "../../../crypto/addresses" }
+identified-vec-of = { path = "../../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
+factors = { path = "../../../factors/factors" }
+has-sample-values = { path = "../../../core/has-sample-values" }
+addresses = { path = "../../../crypto/addresses" }
 next-derivation-index-ephemeral = { path = "../../../factors/next-derivation-index-ephemeral" }
-sargon-core-network = { path = "../../../types/network" }
-sargon-core-collections = { path = "../../../core/collections" }
-sargon-core-time-utils = { path = "../../../core/time-utils" }
-sargon-core-short-string = { path = "../../../types/short-string" }
+network = { path = "../../../common/network" }
+core-collections = { path = "../../../core/collections" }
+time-utils = { path = "../../../core/time-utils" }
+short-string = { path = "../../../common/short-string" }
 sargon-core-utils = { path = "../../../core/utils" }
 
 # === RADIX DEPENDENCIES ===

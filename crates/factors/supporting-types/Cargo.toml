@@ -1,14 +1,14 @@
 [package]
-name = "sargon-factors-supporting-types"
+name = "factors-supporting-types"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-identified-vec-of = { path = "../../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-factors = { path = "../../factors/factors" }
-sargon-core-error = { path = "../../core/error" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+factors = { path = "../../factors/factors" }
+error = { path = "../../core/error" }
 
 # === RADIX DEPENDENCIES ===
 # None

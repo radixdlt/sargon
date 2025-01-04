@@ -9,12 +9,12 @@ mod derivation;
 mod has_key_kind;
 
 pub mod prelude {
+    pub(crate) use bytes::prelude::*;
+    pub(crate) use ecc::prelude::*;
+    pub(crate) use hash::prelude::*;
     pub(crate) use identified_vec_of::prelude::*;
-    pub(crate) use sargon_bytes::prelude::*;
-    pub(crate) use sargon_core_network::prelude::*;
-    pub(crate) use sargon_ecc::prelude::*;
-    pub(crate) use sargon_hash::prelude::*;
-    pub(crate) use sargon_numeric::prelude::*;
+    pub(crate) use network::prelude::*;
+    pub(crate) use numeric::prelude::*;
 
     pub use crate::bip32::*;
     pub use crate::bip39::*;

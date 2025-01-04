@@ -20,8 +20,8 @@ pub mod prelude {
     pub use crate::vector_image_type::*;
 
     #[cfg(test)]
-    pub(crate) use sargon_core_assert_json::prelude::*;
-    pub(crate) use sargon_has_sample_values::prelude::*;
+    pub(crate) use assert_json::prelude::*;
+    pub(crate) use has_sample_values::prelude::*;
 
     pub(crate) use radix_common::prelude::Instant as ScryptoInstant;
 

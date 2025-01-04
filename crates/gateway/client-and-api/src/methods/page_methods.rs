@@ -38,7 +38,7 @@ impl GatewayClient {
 
 #[cfg(test)]
 mod tests {
-    use sargon_profile_gateway::prelude::Gateway;
+    use profile_gateway::prelude::Gateway;
 
     use crate::prelude::*;
 

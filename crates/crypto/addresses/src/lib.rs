@@ -4,12 +4,12 @@ mod resource;
 
 pub mod prelude {
 
+    pub(crate) use bytes::prelude::*;
+    pub(crate) use ecc::prelude::*;
+    pub(crate) use factors::prelude::*;
+    pub(crate) use hierarchical_deterministic::prelude::*;
     pub(crate) use identified_vec_of::prelude::*;
-    pub(crate) use sargon_bytes::prelude::*;
-    pub(crate) use sargon_core_network::prelude::*;
-    pub(crate) use sargon_ecc::prelude::*;
-    pub(crate) use sargon_factors::prelude::*;
-    pub(crate) use sargon_hierarchical_deterministic::prelude::*;
+    pub(crate) use network::prelude::*;
 
     pub use crate::address::*;
     pub use crate::resource::*;

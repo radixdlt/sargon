@@ -1,5 +1,5 @@
 [package]
-name = "sargon-core-time-utils"
+name = "time-utils"
 version = "1.1.99"
 edition = "2021"
 

@@ -1,5 +1,5 @@
-use sargon_core_short_string::prelude::DisplayName;
-use sargon_encryption::EncryptionScheme;
+use encryption::EncryptionScheme;
+use short_string::prelude::DisplayName;
 
 use crate::prelude::*;
 

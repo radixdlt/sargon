@@ -1,4 +1,4 @@
-use sargon_core_short_string::prelude::DisplayName;
+use short_string::prelude::DisplayName;
 
 use crate::prelude::*;
 

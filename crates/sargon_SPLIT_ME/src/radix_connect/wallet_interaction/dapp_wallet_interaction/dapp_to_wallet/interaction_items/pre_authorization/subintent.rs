@@ -1,4 +1,4 @@
-use sargon_core_tx::decl_version_type;
+use transaction_foundation::decl_version_type;
 
 use crate::prelude::*;
 

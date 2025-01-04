@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon_core_error::prelude::CommonError;
+use error::prelude::CommonError;
 
 pub trait MapToFailedToDeserializeJSONToValue<R> {
     fn map_failed_to_deserialize_string<T>(

@@ -1,4 +1,4 @@
-use sargon_core_metadata::prelude::MetadataKey;
+use metadata::prelude::MetadataKey;
 
 use crate::prelude::*;
 

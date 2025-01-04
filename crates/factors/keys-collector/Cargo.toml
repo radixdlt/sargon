@@ -1,20 +1,20 @@
 [package]
-name = "sargon-keys-collector"
+name = "keys-collector"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-has-sample-values = { path = "../../core/has-sample-values" }
-sargon-factors = { path = "../../factors/factors" }
-sargon-numeric = { path = "../../types/numeric" }
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-addresses = { path = "../../crypto/addresses" }
-sargon-core-network = { path = "../../types/network" }
-sargon-core-error = { path = "../../core/error" }
-sargon-core-misc = { path = "../../core/misc" }                               # HiddenConstructor
-sargon-core-collections = { path = "../../core/collections" }
-sargon-factors-supporting-types = { path = "../../factors/supporting-types" }
+has-sample-values = { path = "../../core/has-sample-values" }
+factors = { path = "../../factors/factors" }
+numeric = { path = "../../common/numeric" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+addresses = { path = "../../crypto/addresses" }
+network = { path = "../../common/network" }
+error = { path = "../../core/error" }
+core-misc = { path = "../../core/misc" }                               # HiddenConstructor
+core-collections = { path = "../../core/collections" }
+factors-supporting-types = { path = "../../factors/supporting-types" }
 
 # === RADIX DEPENDENCIES ===
 # None

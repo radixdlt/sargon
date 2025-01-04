@@ -32,6 +32,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "addresses"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "bytes 1.1.99",
+ "derive_more",
+ "ecc",
+ "enum-as-inner",
+ "enum-iterator",
+ "factors",
+ "has-sample-values",
+ "hash",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "log",
+ "network",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "radix-common",
+ "radix-engine",
+ "radix-engine-interface",
+ "radix-engine-toolkit",
+ "radix-rust",
+ "sargon-core-utils",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -192,6 +222,19 @@ name = "arrayvec"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
+
+[[package]]
+name = "assert-json"
+version = "1.1.99"
+dependencies = [
+ "assert-json-diff",
+ "error",
+ "log",
+ "pretty_assertions",
+ "serde",
+ "serde_json 1.0.108",
+ "thiserror 1.0.50",
+]
 
 [[package]]
 name = "assert-json-diff"
@@ -507,6 +550,24 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "delegate",
+ "derive_more",
+ "error",
+ "has-sample-values",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "paste 1.0.14",
+ "rand",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+ "zeroize 1.7.0",
+]
+
+[[package]]
+name = "bytes"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "325918d6fe32f23b19878fe4b34794ae41fc19ddbe53b10571a4874d44ffd39b"
@@ -693,6 +754,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
+name = "clients"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "async-trait",
+ "core-collections",
+ "derive_more",
+ "drivers",
+ "enum-as-inner",
+ "factors-supporting-types",
+ "gateway-client-and-api",
+ "hierarchical-deterministic",
+ "http-client",
+ "pretty_assertions",
+ "profile",
+ "profile-supporting-types",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -730,6 +813,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d8a42181e0652c2997ae4d217f25b63c5337a52fd2279736e97b832fa0a3cff"
 
 [[package]]
+name = "core-collections"
+version = "1.1.99"
+dependencies = [
+ "has-sample-values",
+ "indexmap 2.7.0",
+ "serde",
+ "serde_json 1.0.108",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -744,6 +837,25 @@ name = "core-foundation-sys"
 version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
+
+[[package]]
+name = "core-misc"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "derive_more",
+ "error",
+ "has-sample-values",
+ "iso8601-timestamp",
+ "itertools 0.12.0",
+ "log",
+ "pretty_assertions",
+ "radix-common",
+ "sargon-core-utils",
+ "serde",
+ "serde_json 1.0.108",
+ "strum 0.26.1",
+]
 
 [[package]]
 name = "cpufeatures"
@@ -957,6 +1069,54 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
+name = "drivers"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "async-trait",
+ "derive_more",
+ "enum-iterator",
+ "hierarchical-deterministic",
+ "indexmap 2.7.0",
+ "itertools 0.12.0",
+ "log",
+ "pretty_env_logger",
+ "profile",
+ "profile-supporting-types",
+ "reqwest",
+ "serde",
+ "serde_json 1.0.108",
+ "strum 0.26.1",
+ "time-utils",
+]
+
+[[package]]
+name = "ecc"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "bytes 1.1.99",
+ "derive_more",
+ "enum-as-inner",
+ "error",
+ "has-sample-values",
+ "hash",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "identified-vec-of",
+ "iota-crypto",
+ "k256 0.13.3",
+ "log",
+ "pretty_assertions",
+ "radix-common",
+ "radix-transactions",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+ "zeroize 1.7.0",
+]
+
+[[package]]
 name = "ecdsa"
 version = "0.16.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1035,6 +1195,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "encryption"
+version = "1.1.99"
+dependencies = [
+ "aes-gcm",
+ "assert-json",
+ "bytes 1.1.99",
+ "derive_more",
+ "error",
+ "has-sample-values",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "hkdf",
+ "iota-crypto",
+ "k256 0.13.3",
+ "log",
+ "serde",
+ "serde_repr",
+ "zeroize 1.7.0",
+]
+
+[[package]]
+name = "entity-foundation"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "derive_more",
+ "error",
+ "has-sample-values",
+ "itertools 0.12.0",
+ "serde",
+ "serde_json 1.0.108",
+]
+
+[[package]]
 name = "enum-as-inner"
 version = "0.6.0"
 source = "git+https://github.com/bluejekyll/enum-as-inner/?rev=c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2#c15f6e5c4f98ec865e181ae1fff9fc13a1a2e4e2"
@@ -1093,6 +1286,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "error"
+version = "1.1.99"
+dependencies = [
+ "log",
+ "serde_json 1.0.108",
+ "thiserror 1.0.50",
+]
+
+[[package]]
 name = "error-chain"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1137,6 +1339,76 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.94",
+]
+
+[[package]]
+name = "factor-instances-provider"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "assert-json",
+ "clients",
+ "derive_more",
+ "error",
+ "factors",
+ "futures",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "indexmap 2.7.0",
+ "keys-collector",
+ "next-derivation-index-ephemeral",
+ "profile",
+ "profile-logic",
+ "profile-supporting-types",
+ "sargon-core-utils",
+ "serde",
+]
+
+[[package]]
+name = "factors"
+version = "1.1.99"
+dependencies = [
+ "bytes 1.1.99",
+ "core-collections",
+ "core-misc",
+ "derive_more",
+ "ecc",
+ "encryption",
+ "enum-as-inner",
+ "enum-iterator",
+ "hash",
+ "hierarchical-deterministic",
+ "hkdf",
+ "host-info",
+ "identified-vec-of",
+ "indexmap 2.7.0",
+ "iota-crypto",
+ "k256 0.13.3",
+ "network",
+ "numeric",
+ "once_cell 1.19.0",
+ "paste 1.0.14",
+ "radix-common",
+ "radix-engine-interface",
+ "sargon-core-utils",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+ "short-string",
+ "time-utils",
+ "zeroize 1.7.0",
+]
+
+[[package]]
+name = "factors-supporting-types"
+version = "1.1.99"
+dependencies = [
+ "async-trait",
+ "error",
+ "factors",
+ "hierarchical-deterministic",
+ "identified-vec-of",
 ]
 
 [[package]]
@@ -1313,35 +1585,35 @@ name = "gateway-client-and-api"
 version = "1.1.99"
 dependencies = [
  "actix-rt",
+ "addresses",
+ "assert-json",
+ "drivers",
  "gateway-models",
  "http-client",
+ "metadata",
+ "profile-gateway",
  "radix-common",
- "sargon-addresses",
- "sargon-core-assert-json",
- "sargon-core-metadata",
  "sargon-core-utils",
- "sargon-drivers",
- "sargon-profile-gateway",
- "sargon-transaction-models",
  "serde",
  "serde_json 1.0.108",
+ "transaction-models",
 ]
 
 [[package]]
 name = "gateway-models"
 version = "1.1.99"
 dependencies = [
+ "addresses",
+ "assert-json",
+ "core-misc",
  "derive_more",
  "enum-as-inner",
+ "metadata",
  "radix-engine-interface",
  "radix-engine-toolkit-common",
  "radix-transactions",
- "sargon-addresses",
- "sargon-core-assert-json",
- "sargon-core-metadata",
- "sargon-core-misc",
- "sargon-transaction-models",
  "serde",
+ "transaction-models",
 ]
 
 [[package]]
@@ -1432,6 +1704,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "has-sample-values"
+version = "1.1.99"
+dependencies = [
+ "error",
+ "indexmap 2.7.0",
+ "iso8601-timestamp",
+ "url",
+ "uuid 1.6.1",
+]
+
+[[package]]
+name = "hash"
+version = "1.1.99"
+dependencies = [
+ "bytes 1.1.99",
+ "derive_more",
+ "radix-common",
+ "serde",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1492,6 +1785,33 @@ version = "0.4.3"
 source = "git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792#b2b4370b5bf021b98ee7adc92233e8de3f2de792"
 
 [[package]]
+name = "hierarchical-deterministic"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "bip39",
+ "bytes 1.1.99",
+ "derive_more",
+ "ecc",
+ "enum-as-inner",
+ "enum-iterator",
+ "has-sample-values",
+ "hash",
+ "identified-vec-of",
+ "iota-crypto",
+ "itertools 0.12.0",
+ "network",
+ "numeric",
+ "paste 1.0.14",
+ "radix-common",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+ "strum 0.26.1",
+ "zeroize 1.7.0",
+]
+
+[[package]]
 name = "hkdf"
 version = "0.12.4"
 source = "git+https://github.com/RustCrypto/KDFs/?rev=1ac16e8b9d4ee7a67613c9396c6cc1327652eaba#1ac16e8b9d4ee7a67613c9396c6cc1327652eaba"
@@ -1509,12 +1829,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "host-info"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "derive_more",
+ "has-sample-values",
+ "serde",
+ "serde_json 1.0.108",
+ "time-utils",
+]
+
+[[package]]
 name = "http"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f16ca2af56261c99fba8bac40a10251ce8188205a4c448fbb745a2e4daa76fea"
 dependencies = [
- "bytes",
+ "bytes 1.9.0",
  "fnv",
  "itoa",
 ]
@@ -1525,7 +1857,7 @@ version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1efedce1fb8e6913f23e0c92de8e62cd5b772a67e7b3946df930a62566c93184"
 dependencies = [
- "bytes",
+ "bytes 1.9.0",
  "http",
 ]
 
@@ -1535,7 +1867,7 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "793429d76616a256bcb62c2a2ec2bed781c8307e797e2598c50010f2bee2544f"
 dependencies = [
- "bytes",
+ "bytes 1.9.0",
  "futures-util",
  "http",
  "http-body",
@@ -1547,11 +1879,11 @@ name = "http-client"
 version = "1.1.99"
 dependencies = [
  "actix-rt",
+ "bytes 1.1.99",
+ "drivers",
+ "error",
  "reqwest",
- "sargon-bytes",
- "sargon-core-error",
  "sargon-core-utils",
- "sargon-drivers",
  "serde",
  "serde_json 1.0.108",
 ]
@@ -1574,7 +1906,7 @@ version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "256fb8d4bd6413123cc9d91832d78325c48ff41677595be797d90f42969beae0"
 dependencies = [
- "bytes",
+ "bytes 1.9.0",
  "futures-channel",
  "futures-util",
  "http",
@@ -1593,7 +1925,7 @@ version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "70206fc6890eaca9fde8a0bf71caa2ddfc9fe045ac9e5c70df101a7dbde866e0"
 dependencies = [
- "bytes",
+ "bytes 1.9.0",
  "http-body-util",
  "hyper",
  "hyper-util",
@@ -1609,7 +1941,7 @@ version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df2dcfbe0677734ab2f3ffa7fa7bfd4706bfdc1ef393f2ee30184aed67e631b4"
 dependencies = [
- "bytes",
+ "bytes 1.9.0",
  "futures-channel",
  "futures-util",
  "http",
@@ -1773,12 +2105,12 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 name = "identified-vec-of"
 version = "1.1.99"
 dependencies = [
+ "assert-json",
  "derive_more",
+ "error",
  "indexmap 2.7.0",
  "itertools 0.12.0",
  "paste 1.0.14",
- "sargon-core-assert-json",
- "sargon-core-error",
  "serde",
  "serde_json 1.0.108",
 ]
@@ -1958,6 +2290,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "keys-collector"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "async-trait",
+ "core-collections",
+ "core-misc",
+ "derive_more",
+ "error",
+ "factors",
+ "factors-supporting-types",
+ "has-sample-values",
+ "hierarchical-deterministic",
+ "indexmap 2.7.0",
+ "itertools 0.12.0",
+ "log",
+ "network",
+ "numeric",
+]
+
+[[package]]
 name = "kv-log-macro"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2022,10 +2376,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "manifests"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
+ "derive_more",
+ "enum-as-inner",
+ "factors",
+ "gateway-models",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "itertools 0.12.0",
+ "metadata",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "profile",
+ "radix-common",
+ "radix-engine",
+ "radix-engine-interface",
+ "radix-engine-toolkit",
+ "radix-rust",
+ "radix-transactions",
+ "sargon-core-utils",
+ "sbor",
+ "serde",
+ "serde_json 1.0.108",
+ "transaction-models",
+]
+
+[[package]]
 name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
+
+[[package]]
+name = "metadata"
+version = "1.1.99"
+dependencies = [
+ "derive_more",
+ "has-sample-values",
+ "radix-engine-interface",
+ "serde",
+ "serde_json 1.0.108",
+ "strum 0.26.1",
+]
 
 [[package]]
 name = "mime"
@@ -2115,20 +2511,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "network"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "enum-iterator",
+ "has-sample-values",
+ "numeric",
+ "radix-common",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_repr",
+ "strum 0.26.1",
+]
+
+[[package]]
 name = "next-derivation-index-ephemeral"
 version = "1.1.99"
 dependencies = [
+ "addresses",
+ "assert-json",
  "derive_more",
  "enum-iterator",
+ "error",
+ "factors",
+ "has-sample-values",
+ "hierarchical-deterministic",
  "identified-vec-of",
  "indexmap 2.7.0",
- "sargon-addresses",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-core-network",
- "sargon-factors",
- "sargon-has-sample-values",
- "sargon-hierarchical-deterministic",
+ "network",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -2186,6 +2597,24 @@ checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
  "hermit-abi 0.3.9",
  "libc",
+]
+
+[[package]]
+name = "numeric"
+version = "1.1.99"
+dependencies = [
+ "bytes 1.1.99",
+ "delegate",
+ "derive_more",
+ "enum-iterator",
+ "error",
+ "has-sample-values",
+ "radix-common",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_repr",
+ "serde_with 3.4.0",
+ "strum 0.26.1",
 ]
 
 [[package]]
@@ -2435,6 +2864,148 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37d3544b3f2748c54e147655edb5025752e2303145b5aefb3c3ea2c78b973bb0"
 dependencies = [
  "unicode-ident",
+]
+
+[[package]]
+name = "profile"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
+ "core-misc",
+ "derive_more",
+ "encryption",
+ "entity-foundation",
+ "enum-as-inner",
+ "enum-iterator",
+ "factors",
+ "has-sample-values",
+ "hierarchical-deterministic",
+ "hkdf",
+ "host-info",
+ "identified-vec-of",
+ "itertools 0.12.0",
+ "k256 0.13.3",
+ "keys-collector",
+ "log",
+ "once_cell 1.19.0",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "profile-app-preferences",
+ "profile-security-structures",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_repr",
+ "serde_with 3.4.0",
+ "strum 0.26.1",
+ "time-utils",
+ "transaction-models",
+]
+
+[[package]]
+name = "profile-app-preferences"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "core-misc",
+ "derive_more",
+ "factors",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "indexmap 2.7.0",
+ "keys-collector",
+ "log",
+ "numeric",
+ "paste 1.0.14",
+ "profile-gateway",
+ "profile-security-structures",
+ "serde",
+ "serde_json 1.0.108",
+ "transaction-models",
+]
+
+[[package]]
+name = "profile-gateway"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "assert-json",
+ "core-misc",
+ "derive_more",
+ "error",
+ "factors",
+ "has-sample-values",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "keys-collector",
+ "log",
+ "network",
+ "paste 1.0.14",
+ "serde",
+ "serde_json 1.0.108",
+ "transaction-models",
+ "url",
+]
+
+[[package]]
+name = "profile-logic"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "derive_more",
+ "factors",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "itertools 0.12.0",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "profile",
+ "profile-supporting-types",
+ "serde",
+ "serde_json 1.0.108",
+ "time-utils",
+]
+
+[[package]]
+name = "profile-security-structures"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "core-collections",
+ "derive_more",
+ "enum-as-inner",
+ "factors",
+ "has-sample-values",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "log",
+ "network",
+ "next-derivation-index-ephemeral",
+ "pretty_assertions",
+ "radix-engine-interface",
+ "sargon-core-utils",
+ "serde",
+ "serde_json 1.0.108",
+ "short-string",
+ "thiserror 1.0.50",
+ "time-utils",
+]
+
+[[package]]
+name = "profile-supporting-types"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "derive_more",
+ "enum-as-inner",
+ "factors",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "itertools 0.12.0",
+ "pretty_assertions",
+ "profile",
+ "serde",
+ "serde_json 1.0.108",
 ]
 
 [[package]]
@@ -2827,7 +3398,7 @@ version = "0.12.3"
 source = "git+https://github.com/seanmonstar/reqwest?rev=0720159f6369f54e045a1fd315e0f24b7a0b4a39#0720159f6369f54e045a1fd315e0f24b7a0b4a39"
 dependencies = [
  "base64 0.22.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "bytes",
+ "bytes 1.9.0",
  "futures-core",
  "futures-util",
  "http",
@@ -2983,709 +3554,60 @@ name = "sargon"
 version = "1.1.99"
 dependencies = [
  "actix-rt",
+ "addresses",
  "async-std",
  "async-trait",
  "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
+ "clients",
+ "core-misc",
  "derive_more",
+ "drivers",
+ "encryption",
  "enum-as-inner",
  "enum-iterator",
+ "factor-instances-provider",
+ "factors",
  "futures",
  "gateway-client-and-api",
  "gateway-models",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "hierarchical-deterministic",
  "identified-vec-of",
+ "keys-collector",
  "log",
+ "manifests",
  "paste 1.0.14",
  "pretty_assertions",
+ "profile",
+ "profile-gateway",
+ "profile-logic",
+ "profile-security-structures",
  "radix-common",
  "radix-engine-interface",
  "radix-engine-toolkit-common",
  "radix-transactions",
- "sargon-addresses",
- "sargon-clients",
- "sargon-core-misc",
- "sargon-core-tx",
- "sargon-drivers",
- "sargon-encryption",
- "sargon-factor-instances-provider",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
- "sargon-keys-collector",
- "sargon-manifests",
- "sargon-profile",
- "sargon-profile-gateway",
- "sargon-profile-logic",
- "sargon-profile-security-structures",
- "sargon-transaction-models",
  "security-framework",
  "security-framework-sys",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
-]
-
-[[package]]
-name = "sargon-addresses"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "enum-as-inner",
- "enum-iterator",
- "identified-vec-of",
- "log",
- "paste 1.0.14",
- "pretty_assertions",
- "radix-common",
- "radix-engine",
- "radix-engine-interface",
- "radix-engine-toolkit",
- "radix-rust",
- "sargon-bytes",
- "sargon-core-assert-json",
- "sargon-core-network",
- "sargon-core-utils",
- "sargon-ecc",
- "sargon-factors",
- "sargon-has-sample-values",
- "sargon-hash",
- "sargon-hierarchical-deterministic",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
-]
-
-[[package]]
-name = "sargon-bytes"
-version = "1.1.99"
-dependencies = [
- "delegate",
- "derive_more",
- "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
- "paste 1.0.14",
- "rand",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
- "zeroize 1.7.0",
-]
-
-[[package]]
-name = "sargon-clients"
-version = "1.1.99"
-dependencies = [
- "actix-rt",
- "async-trait",
- "derive_more",
- "enum-as-inner",
- "gateway-client-and-api",
- "http-client",
- "pretty_assertions",
- "sargon-core-collections",
- "sargon-drivers",
- "sargon-factors-supporting-types",
- "sargon-hierarchical-deterministic",
- "sargon-profile",
- "sargon-profile-supporting-types",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
-]
-
-[[package]]
-name = "sargon-core-assert-json"
-version = "1.1.99"
-dependencies = [
- "assert-json-diff",
- "log",
- "pretty_assertions",
- "sargon-core-error",
- "serde",
- "serde_json 1.0.108",
- "thiserror 1.0.50",
-]
-
-[[package]]
-name = "sargon-core-collections"
-version = "1.1.99"
-dependencies = [
- "indexmap 2.7.0",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-core-entity"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "itertools 0.12.0",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-core-error"
-version = "1.1.99"
-dependencies = [
- "log",
- "serde_json 1.0.108",
- "thiserror 1.0.50",
-]
-
-[[package]]
-name = "sargon-core-host-info"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "sargon-core-assert-json",
- "sargon-core-time-utils",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-core-metadata"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "radix-engine-interface",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
- "strum 0.26.1",
-]
-
-[[package]]
-name = "sargon-core-misc"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "iso8601-timestamp",
- "itertools 0.12.0",
- "log",
- "pretty_assertions",
- "radix-common",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-core-utils",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
- "strum 0.26.1",
-]
-
-[[package]]
-name = "sargon-core-network"
-version = "1.1.99"
-dependencies = [
- "enum-iterator",
- "radix-common",
- "sargon-core-assert-json",
- "sargon-has-sample-values",
- "sargon-numeric",
- "serde",
- "serde_json 1.0.108",
- "serde_repr",
- "strum 0.26.1",
-]
-
-[[package]]
-name = "sargon-core-short-string"
-version = "1.1.99"
-dependencies = [
- "arraystring",
- "derive_more",
- "identified-vec-of",
- "sargon-core-assert-json",
- "sargon-core-utils",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
-]
-
-[[package]]
-name = "sargon-core-time-utils"
-version = "1.1.99"
-dependencies = [
- "iso8601-timestamp",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-core-tx"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "paste 1.0.14",
- "radix-engine-interface",
- "sargon-bytes",
- "sargon-core-assert-json",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
+ "transaction-foundation",
+ "transaction-models",
 ]
 
 [[package]]
 name = "sargon-core-utils"
 version = "1.1.99"
 dependencies = [
+ "error",
  "iso8601-timestamp",
  "log",
  "pretty_assertions",
- "sargon-core-error",
  "serde",
  "serde_json 1.0.108",
  "url",
  "uuid 1.6.1",
-]
-
-[[package]]
-name = "sargon-drivers"
-version = "1.1.99"
-dependencies = [
- "actix-rt",
- "async-trait",
- "derive_more",
- "enum-iterator",
- "indexmap 2.7.0",
- "itertools 0.12.0",
- "log",
- "pretty_env_logger",
- "reqwest",
- "sargon-addresses",
- "sargon-core-time-utils",
- "sargon-hierarchical-deterministic",
- "sargon-profile",
- "sargon-profile-supporting-types",
- "serde",
- "serde_json 1.0.108",
- "strum 0.26.1",
-]
-
-[[package]]
-name = "sargon-ecc"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "enum-as-inner",
- "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
- "identified-vec-of",
- "iota-crypto",
- "k256 0.13.3",
- "log",
- "pretty_assertions",
- "radix-common",
- "radix-transactions",
- "sargon-bytes",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-has-sample-values",
- "sargon-hash",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
- "zeroize 1.7.0",
-]
-
-[[package]]
-name = "sargon-encryption"
-version = "1.1.99"
-dependencies = [
- "aes-gcm",
- "derive_more",
- "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
- "hkdf",
- "iota-crypto",
- "k256 0.13.3",
- "log",
- "sargon-bytes",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-has-sample-values",
- "serde",
- "serde_repr",
- "zeroize 1.7.0",
-]
-
-[[package]]
-name = "sargon-factor-instances-provider"
-version = "1.1.99"
-dependencies = [
- "actix-rt",
- "derive_more",
- "futures",
- "identified-vec-of",
- "indexmap 2.7.0",
- "next-derivation-index-ephemeral",
- "sargon-addresses",
- "sargon-clients",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-core-utils",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
- "sargon-keys-collector",
- "sargon-profile",
- "sargon-profile-logic",
- "sargon-profile-supporting-types",
- "serde",
-]
-
-[[package]]
-name = "sargon-factors"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "enum-as-inner",
- "enum-iterator",
- "hkdf",
- "identified-vec-of",
- "indexmap 2.7.0",
- "iota-crypto",
- "k256 0.13.3",
- "once_cell 1.19.0",
- "paste 1.0.14",
- "radix-common",
- "radix-engine-interface",
- "sargon-bytes",
- "sargon-core-collections",
- "sargon-core-host-info",
- "sargon-core-misc",
- "sargon-core-network",
- "sargon-core-short-string",
- "sargon-core-time-utils",
- "sargon-core-utils",
- "sargon-ecc",
- "sargon-encryption",
- "sargon-hash",
- "sargon-hierarchical-deterministic",
- "sargon-numeric",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
- "zeroize 1.7.0",
-]
-
-[[package]]
-name = "sargon-factors-supporting-types"
-version = "1.1.99"
-dependencies = [
- "async-trait",
- "identified-vec-of",
- "sargon-core-error",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
-]
-
-[[package]]
-name = "sargon-has-sample-values"
-version = "1.1.99"
-dependencies = [
- "indexmap 2.7.0",
- "iso8601-timestamp",
- "sargon-core-error",
- "url",
- "uuid 1.6.1",
-]
-
-[[package]]
-name = "sargon-hash"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "radix-common",
- "sargon-bytes",
- "serde",
-]
-
-[[package]]
-name = "sargon-hierarchical-deterministic"
-version = "1.1.99"
-dependencies = [
- "bip39",
- "derive_more",
- "enum-as-inner",
- "enum-iterator",
- "identified-vec-of",
- "iota-crypto",
- "itertools 0.12.0",
- "paste 1.0.14",
- "radix-common",
- "sargon-bytes",
- "sargon-core-assert-json",
- "sargon-core-network",
- "sargon-ecc",
- "sargon-has-sample-values",
- "sargon-hash",
- "sargon-numeric",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
- "strum 0.26.1",
- "zeroize 1.7.0",
-]
-
-[[package]]
-name = "sargon-keys-collector"
-version = "1.1.99"
-dependencies = [
- "actix-rt",
- "async-trait",
- "derive_more",
- "indexmap 2.7.0",
- "itertools 0.12.0",
- "log",
- "sargon-addresses",
- "sargon-core-collections",
- "sargon-core-error",
- "sargon-core-misc",
- "sargon-core-network",
- "sargon-factors",
- "sargon-factors-supporting-types",
- "sargon-has-sample-values",
- "sargon-hierarchical-deterministic",
- "sargon-numeric",
-]
-
-[[package]]
-name = "sargon-manifests"
-version = "1.1.99"
-dependencies = [
- "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
- "derive_more",
- "enum-as-inner",
- "gateway-models",
- "identified-vec-of",
- "itertools 0.12.0",
- "paste 1.0.14",
- "pretty_assertions",
- "radix-common",
- "radix-engine",
- "radix-engine-interface",
- "radix-engine-toolkit",
- "radix-rust",
- "radix-transactions",
- "sargon-addresses",
- "sargon-core-metadata",
- "sargon-core-utils",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
- "sargon-profile",
- "sargon-transaction-models",
- "sbor",
- "serde",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-numeric"
-version = "1.1.99"
-dependencies = [
- "delegate",
- "derive_more",
- "enum-iterator",
- "radix-common",
- "sargon-bytes",
- "sargon-core-error",
- "sargon-has-sample-values",
- "serde",
- "serde_json 1.0.108",
- "serde_repr",
- "serde_with 3.4.0",
- "strum 0.26.1",
-]
-
-[[package]]
-name = "sargon-profile"
-version = "1.1.99"
-dependencies = [
- "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
- "derive_more",
- "enum-as-inner",
- "enum-iterator",
- "hkdf",
- "identified-vec-of",
- "itertools 0.12.0",
- "k256 0.13.3",
- "log",
- "once_cell 1.19.0",
- "paste 1.0.14",
- "pretty_assertions",
- "sargon-addresses",
- "sargon-core-entity",
- "sargon-core-host-info",
- "sargon-core-misc",
- "sargon-core-time-utils",
- "sargon-encryption",
- "sargon-factors",
- "sargon-has-sample-values",
- "sargon-hierarchical-deterministic",
- "sargon-keys-collector",
- "sargon-profile-app-preferences",
- "sargon-profile-security-structures",
- "sargon-transaction-models",
- "serde",
- "serde_json 1.0.108",
- "serde_repr",
- "serde_with 3.4.0",
- "strum 0.26.1",
-]
-
-[[package]]
-name = "sargon-profile-app-preferences"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "identified-vec-of",
- "indexmap 2.7.0",
- "log",
- "paste 1.0.14",
- "sargon-addresses",
- "sargon-core-misc",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
- "sargon-keys-collector",
- "sargon-numeric",
- "sargon-profile-gateway",
- "sargon-profile-security-structures",
- "sargon-transaction-models",
- "serde",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-profile-gateway"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "identified-vec-of",
- "log",
- "paste 1.0.14",
- "sargon-addresses",
- "sargon-core-assert-json",
- "sargon-core-error",
- "sargon-core-misc",
- "sargon-core-network",
- "sargon-factors",
- "sargon-has-sample-values",
- "sargon-hierarchical-deterministic",
- "sargon-keys-collector",
- "sargon-transaction-models",
- "serde",
- "serde_json 1.0.108",
- "url",
-]
-
-[[package]]
-name = "sargon-profile-logic"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "identified-vec-of",
- "itertools 0.12.0",
- "paste 1.0.14",
- "pretty_assertions",
- "sargon-addresses",
- "sargon-core-time-utils",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
- "sargon-profile",
- "sargon-profile-supporting-types",
- "serde",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-profile-security-structures"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "enum-as-inner",
- "identified-vec-of",
- "log",
- "next-derivation-index-ephemeral",
- "pretty_assertions",
- "radix-engine-interface",
- "sargon-addresses",
- "sargon-core-collections",
- "sargon-core-network",
- "sargon-core-short-string",
- "sargon-core-time-utils",
- "sargon-core-utils",
- "sargon-factors",
- "sargon-has-sample-values",
- "sargon-hierarchical-deterministic",
- "serde",
- "serde_json 1.0.108",
- "thiserror 1.0.50",
-]
-
-[[package]]
-name = "sargon-profile-supporting-types"
-version = "1.1.99"
-dependencies = [
- "derive_more",
- "enum-as-inner",
- "identified-vec-of",
- "itertools 0.12.0",
- "pretty_assertions",
- "sargon-addresses",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
- "sargon-profile",
- "serde",
- "serde_json 1.0.108",
-]
-
-[[package]]
-name = "sargon-transaction-models"
-version = "1.1.99"
-dependencies = [
- "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
- "derive_more",
- "enum-as-inner",
- "enum-iterator",
- "identified-vec-of",
- "log",
- "paste 1.0.14",
- "pretty_assertions",
- "radix-common",
- "radix-common-derive",
- "radix-engine",
- "radix-engine-interface",
- "radix-engine-toolkit",
- "radix-engine-toolkit-common",
- "radix-rust",
- "radix-transactions",
- "sargon-addresses",
- "sargon-bytes",
- "sargon-core-collections",
- "sargon-core-metadata",
- "sargon-core-misc",
- "sargon-core-network",
- "sargon-core-tx",
- "sargon-core-utils",
- "sargon-ecc",
- "sargon-factors",
- "sargon-has-sample-values",
- "sargon-hash",
- "sargon-hierarchical-deterministic",
- "sargon-numeric",
- "sbor",
- "serde",
- "serde_json 1.0.108",
- "serde_with 3.4.0",
- "strum 0.26.1",
 ]
 
 [[package]]
@@ -3693,48 +3615,48 @@ name = "sargon-uniffi"
 version = "1.1.99"
 dependencies = [
  "actix-rt",
+ "addresses",
  "assert-json-diff",
  "async-trait",
  "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
  "camino 1.0.8",
  "clap 4.5.1",
+ "clients",
+ "core-misc",
  "delegate",
  "derive_more",
+ "drivers",
+ "encryption",
  "enum-as-inner",
  "enum-iterator",
+ "factor-instances-provider",
+ "factors",
  "gateway-client-and-api",
  "gateway-models",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "hierarchical-deterministic",
  "identified-vec-of",
  "indexmap 2.7.0",
  "iso8601-timestamp",
  "itertools 0.12.0",
+ "keys-collector",
  "log",
+ "manifests",
  "paste 1.0.14",
  "preinterpret",
  "pretty_assertions",
  "pretty_env_logger",
+ "profile",
+ "profile-logic",
+ "profile-security-structures",
  "radix-engine-toolkit",
  "rand",
  "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
  "sargon",
- "sargon-addresses",
- "sargon-clients",
- "sargon-core-misc",
- "sargon-drivers",
- "sargon-encryption",
- "sargon-factor-instances-provider",
- "sargon-factors",
- "sargon-hierarchical-deterministic",
- "sargon-keys-collector",
- "sargon-manifests",
- "sargon-profile",
- "sargon-profile-logic",
- "sargon-profile-security-structures",
- "sargon-transaction-models",
  "sargon-uniffi-conversion-macros",
  "strum 0.26.1",
  "thiserror 1.0.50",
+ "transaction-models",
  "uniffi",
  "url",
  "uuid 1.6.1",
@@ -4107,6 +4029,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
+name = "short-string"
+version = "1.1.99"
+dependencies = [
+ "arraystring",
+ "assert-json",
+ "derive_more",
+ "has-sample-values",
+ "identified-vec-of",
+ "sargon-core-utils",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+]
+
+[[package]]
 name = "signal-hook-registry"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4426,6 +4363,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "time-utils"
+version = "1.1.99"
+dependencies = [
+ "iso8601-timestamp",
+ "serde_json 1.0.108",
+]
+
+[[package]]
 name = "tinystr"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4457,7 +4402,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5cec9b21b0450273377fc97bd4c33a8acffc8c996c987a7c5b319a0083707551"
 dependencies = [
  "backtrace",
- "bytes",
+ "bytes 1.9.0",
  "libc",
  "mio",
  "parking_lot",
@@ -4543,6 +4488,61 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e672c95779cf947c5311f83787af4fa8fffd12fb27e4993211a84bdfd9610f9c"
 dependencies = [
  "once_cell 1.20.2",
+]
+
+[[package]]
+name = "transaction-foundation"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "bytes 1.1.99",
+ "derive_more",
+ "has-sample-values",
+ "paste 1.0.14",
+ "radix-engine-interface",
+ "serde",
+ "serde_json 1.0.108",
+]
+
+[[package]]
+name = "transaction-models"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "bytes 1.1.99",
+ "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
+ "core-collections",
+ "core-misc",
+ "derive_more",
+ "ecc",
+ "enum-as-inner",
+ "enum-iterator",
+ "factors",
+ "has-sample-values",
+ "hash",
+ "hierarchical-deterministic",
+ "identified-vec-of",
+ "log",
+ "metadata",
+ "network",
+ "numeric",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "radix-common",
+ "radix-common-derive",
+ "radix-engine",
+ "radix-engine-interface",
+ "radix-engine-toolkit",
+ "radix-engine-toolkit-common",
+ "radix-rust",
+ "radix-transactions",
+ "sargon-core-utils",
+ "sbor",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+ "strum 0.26.1",
+ "transaction-foundation",
 ]
 
 [[package]]
@@ -4659,7 +4659,7 @@ version = "0.28.3"
 source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
- "bytes",
+ "bytes 1.9.0",
  "once_cell 1.20.2",
  "paste 1.0.15",
  "static_assertions",
@@ -4688,7 +4688,7 @@ version = "0.28.3"
 source = "git+https://github.com/mozilla/uniffi-rs/?rev=9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d#9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d"
 dependencies = [
  "anyhow",
- "bytes",
+ "bytes 1.9.0",
  "siphasher",
  "uniffi_checksum_derive",
 ]

@@ -1,5 +1,5 @@
-use sargon_core_network::prelude::NetworkID;
-use sargon_numeric::prelude::*;
+use network::prelude::NetworkID;
+use numeric::prelude::*;
 
 use crate::prelude::*;
 
@@ -211,8 +211,8 @@ mod basic_tests {
 
 mod key_derivation_tests {
     use super::*;
-    use sargon_hierarchical_deterministic::CAP26EntityKind::*;
-    use sargon_hierarchical_deterministic::CAP26KeyKind::*;
+    use hierarchical_deterministic::CAP26EntityKind::*;
+    use hierarchical_deterministic::CAP26KeyKind::*;
     use NetworkID::*;
 
     #[actix_rt::test]

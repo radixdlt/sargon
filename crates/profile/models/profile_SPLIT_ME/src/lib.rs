@@ -12,16 +12,16 @@ mod v100;
 
 pub mod prelude {
 
+    pub use addresses::prelude::*;
+    pub use core_misc::prelude::*;
+    pub use entity_foundation::prelude::*;
+    pub use factors::prelude::*;
+    pub use has_sample_values::prelude::*;
+    pub use hierarchical_deterministic::prelude::*;
+    pub use host_info::prelude::*;
     pub use identified_vec_of::prelude::*;
-    pub use sargon_addresses::prelude::*;
-    pub use sargon_core_entity::prelude::*;
-    pub use sargon_core_host_info::prelude::*;
-    pub use sargon_core_misc::prelude::*;
-    pub use sargon_factors::prelude::*;
-    pub use sargon_has_sample_values::prelude::*;
-    pub use sargon_hierarchical_deterministic::prelude::*;
-    pub use sargon_profile_app_preferences::prelude::*;
-    pub use sargon_transaction_models::prelude::*;
+    pub use profile_app_preferences::prelude::*;
+    pub use transaction_models::prelude::*;
 
     pub use crate::encrypted_profile::*;
     pub use crate::profilesnapshot_version::*;

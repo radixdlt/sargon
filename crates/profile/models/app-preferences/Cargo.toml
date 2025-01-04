@@ -1,20 +1,20 @@
 [package]
-name = "sargon-profile-app-preferences"
+name = "profile-app-preferences"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-identified-vec-of = { path = "../../../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../../../crypto/hd" }
-sargon-factors = { path = "../../../factors/factors" }
-sargon-numeric = { path = "../../../types/numeric" }
-sargon-core-misc = { path = "../../../core/misc" }                                     # decl_bool_Type
-sargon-keys-collector = { path = "../../../factors/keys-collector" }
-sargon-addresses = { path = "../../../crypto/addresses" }
-sargon-transaction-models = { path = "../../../transaction/models" }
-sargon-profile-gateway = { path = "../../../profile/models/gateway" }
-sargon-profile-security-structures = { path = "../../../profile/models/security-structures" }
+identified-vec-of = { path = "../../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
+factors = { path = "../../../factors/factors" }
+numeric = { path = "../../../common/numeric" }
+core-misc = { path = "../../../core/misc" }                                            # decl_bool_Type
+keys-collector = { path = "../../../factors/keys-collector" }
+addresses = { path = "../../../crypto/addresses" }
+transaction-models = { path = "../../../transaction/models" }
+profile-gateway = { path = "../../../profile/models/gateway" }
+profile-security-structures = { path = "../../../profile/models/security-structures" }
 
 # === RADIX DEPENDENCIES ===
 # None

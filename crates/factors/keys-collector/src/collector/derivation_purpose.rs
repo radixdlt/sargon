@@ -67,7 +67,7 @@ impl DerivationPurpose {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sargon_has_sample_values::prelude::*;
+    use has_sample_values::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DerivationPurpose;

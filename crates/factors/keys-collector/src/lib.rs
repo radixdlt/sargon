@@ -13,12 +13,12 @@ pub(crate) use tests::*;
 
 pub mod prelude {
 
-    pub(crate) use sargon_addresses::prelude::*;
-    pub(crate) use sargon_core_collections::prelude::Just;
-    pub(crate) use sargon_core_error::prelude::*;
-    pub(crate) use sargon_factors::prelude::*;
-    pub(crate) use sargon_factors_supporting_types::prelude::*;
-    pub(crate) use sargon_hierarchical_deterministic::prelude::*;
+    pub(crate) use addresses::prelude::*;
+    pub(crate) use core_collections::prelude::Just;
+    pub(crate) use error::prelude::*;
+    pub(crate) use factors::prelude::*;
+    pub(crate) use factors_supporting_types::prelude::*;
+    pub(crate) use hierarchical_deterministic::prelude::*;
 
     pub use crate::collector::*;
     pub use crate::derivation_testing::*;

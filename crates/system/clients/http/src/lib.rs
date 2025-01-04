@@ -3,9 +3,9 @@ mod http_client;
 pub mod prelude {
     pub use crate::http_client::*;
 
-    pub(crate) use sargon_bytes::prelude::*;
+    pub(crate) use bytes::prelude::*;
+    pub(crate) use drivers::prelude::*;
     pub(crate) use sargon_core_utils::prelude::*;
-    pub(crate) use sargon_drivers::prelude::*;
 
     pub(crate) use serde::Deserialize;
 

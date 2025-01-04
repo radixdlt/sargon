@@ -44,7 +44,7 @@ pub(crate) fn manifest_value_with_sbor_depth(
 
 #[cfg(test)]
 mod sbor_depth_validation_tests {
-    use sargon_addresses::Scrypto_scrypto_encode;
+    use addresses::Scrypto_scrypto_encode;
 
     use super::*;
 

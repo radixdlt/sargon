@@ -1,6 +1,6 @@
 #![cfg(test)]
 
-use sargon_factors::FactorSourceKind;
+use factors::FactorSourceKind;
 
 use crate::prelude::*;
 

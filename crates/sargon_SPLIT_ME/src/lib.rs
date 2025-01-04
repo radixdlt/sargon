@@ -19,13 +19,12 @@ mod system;
 mod types;
 
 pub mod prelude {
-    pub use gateway_client_and_api::prelude::*;
-    pub use sargon_clients::prelude::*;
+    pub use clients::prelude::*;
 
-    pub use sargon_factor_instances_provider::prelude::*;
-    pub use sargon_keys_collector::prelude::*;
-    pub use sargon_manifests::prelude::*;
-    pub use sargon_profile_logic::prelude::*;
+    pub use factor_instances_provider::prelude::*;
+    pub use keys_collector::prelude::*;
+    pub use manifests::prelude::*;
+    pub use profile_logic::prelude::*;
 
     pub use crate::home_cards::*;
     pub use crate::radix_connect::*;

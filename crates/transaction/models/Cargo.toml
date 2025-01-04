@@ -1,26 +1,26 @@
 [package]
-name = "sargon-transaction-models"
+name = "transaction-models"
 version = "1.1.99"
 edition = "2021"
 build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-factors = { path = "../../factors/factors" }
-sargon-addresses = { path = "../../crypto/addresses" }
-sargon-hash = { path = "../../crypto/hash" }
-sargon-bytes = { path = "../../types/bytes" }
-sargon-ecc = { path = "../../crypto/ecc" }
-sargon-numeric = { path = "../../types/numeric" }
-sargon-has-sample-values = { path = "../../core/has-sample-values" }
-sargon-core-metadata = { path = "../../types/metadata" }
-sargon-core-network = { path = "../../types/network" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+factors = { path = "../../factors/factors" }
+addresses = { path = "../../crypto/addresses" }
+hash = { path = "../../crypto/hash" }
+bytes = { path = "../../common/bytes" }
+ecc = { path = "../../crypto/ecc" }
+numeric = { path = "../../common/numeric" }
+has-sample-values = { path = "../../core/has-sample-values" }
+metadata = { path = "../../common/metadata" }
+network = { path = "../../common/network" }
 sargon-core-utils = { path = "../../core/utils" }
-sargon-core-tx = { path = "../../transaction/foundation" }
-sargon-core-collections = { path = "../../core/collections" }
-sargon-core-misc = { path = "../../core/misc" }                      # Instant
+transaction-foundation = { path = "../../transaction/foundation" }
+core-collections = { path = "../../core/collections" }
+core-misc = { path = "../../core/misc" }                           # Instant
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

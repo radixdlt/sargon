@@ -1,15 +1,15 @@
 [package]
-name = "sargon-profile-supporting-types"
+name = "profile-supporting-types"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../../types/identified-vec-of" }
-sargon-hierarchical-deterministic = { path = "../../../crypto/hd" }
-sargon-factors = { path = "../../../factors/factors" }
-sargon-addresses = { path = "../../../crypto/addresses" }
-sargon-profile = { path = "../../../profile/models/profile_SPLIT_ME" }
+identified-vec-of = { path = "../../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
+factors = { path = "../../../factors/factors" }
+addresses = { path = "../../../crypto/addresses" }
+profile = { path = "../../../profile/models/profile_SPLIT_ME" }
 
 # === RADIX DEPENDENCIES ===
 # None

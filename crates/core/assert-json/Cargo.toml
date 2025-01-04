@@ -1,11 +1,11 @@
 [package]
-name = "sargon-core-assert-json"
+name = "assert-json"
 version = "1.1.99"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core-error = { path = "../../core/error" }
+error = { path = "../../core/error" }
 
 # === RADIX DEPENDENCIES ===
 # None

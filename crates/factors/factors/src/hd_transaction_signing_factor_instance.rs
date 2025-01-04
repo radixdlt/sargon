@@ -74,7 +74,7 @@ impl<E: IsEntityPath> From<HDFactorInstanceTransactionSigning<E>>
 
 #[cfg(test)]
 mod tests {
-    use sargon_numeric::U31;
+    use numeric::U31;
 
     use crate::prelude::*;
 

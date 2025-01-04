@@ -651,6 +651,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     private fun openFileInCrate(crate: String, name: String, extension: String) =
         File("../../" + "crates/" + crate + "/fixtures/transaction/$name.$extension")
 
-    private fun openFileInTxModels(name: String, extension: String) = openFileInCrate("sargon-transaction-models", name, extension)
-    private fun openFileInManifests(name: String, extension: String) = openFileInCrate("sargon-manifests", name, extension)
+    private fun openFileInTxModels(name: String, extension: String) = openFileInCrate("transaction/models", name, extension)
+    private fun openFileInManifests(name: String, extension: String) = openFileInCrate("transaction/manifests", name, extension)
 }

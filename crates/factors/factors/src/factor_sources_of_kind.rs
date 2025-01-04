@@ -64,7 +64,7 @@ pub fn sort_group_factors(
 
 #[cfg(test)]
 mod tests {
-    use sargon_core_collections::prelude::Just;
+    use core_collections::prelude::Just;
 
     use super::*;
     #[allow(clippy::upper_case_acronyms)]

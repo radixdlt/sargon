@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon_core_error::prelude::*;
+use error::prelude::*;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub trait SerializeToBytes {

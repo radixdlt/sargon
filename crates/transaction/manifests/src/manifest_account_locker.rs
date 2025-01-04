@@ -91,7 +91,7 @@ impl ManifestForAccountLockerClaim for TransactionManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sargon_addresses::ResourceAddress;
+    use addresses::ResourceAddress;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;

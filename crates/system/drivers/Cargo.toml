@@ -1,16 +1,16 @@
 [package]
-name = "sargon-drivers"
+name = "drivers"
 version = "1.1.99"
 edition = "2021"
 build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-addresses = { path = "../../crypto/addresses" }
-sargon-profile = { path = "../../profile/models/profile_SPLIT_ME" }
-sargon-profile-supporting-types = { path = "../../profile/models/supporting-types" }
-sargon-core-time-utils = { path = "../../core/time-utils" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+addresses = { path = "../../crypto/addresses" }
+profile = { path = "../../profile/models/profile_SPLIT_ME" }
+profile-supporting-types = { path = "../../profile/models/supporting-types" }
+time-utils = { path = "../../core/time-utils" }
 
 # === RADIX DEPENDENCIES ===
 # None

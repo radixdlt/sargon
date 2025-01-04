@@ -191,7 +191,7 @@ impl ProfileNetworkDetailsForAuthorizedDapp for ProfileNetwork {
 
 #[cfg(test)]
 mod tests {
-    use sargon_core_time_utils::now;
+    use time_utils::now;
 
     use super::*;
 

@@ -1,25 +1,25 @@
 [package]
-name = "sargon-factors"
+name = "factors"
 version = "1.1.99"
 edition = "2021"
 build = "build.rs"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-identified-vec-of = { path = "../../types/identified-vec-of" }
-sargon-bytes = { path = "../../types/bytes" }
-sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
-sargon-encryption = { path = "../../crypto/encryption" }
-sargon-hash = { path = "../../crypto/hash" }
-sargon-ecc = { path = "../../crypto/ecc" }
-sargon-numeric = { path = "../../types/numeric" }
-sargon-core-network = { path = "../../types/network" }
-sargon-core-time-utils = { path = "../../core/time-utils" }
-sargon-core-short-string = { path = "../../types/short-string" }
-sargon-core-host-info = { path = "../../types/host-info" }
-sargon-core-misc = { path = "../../core/misc" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+bytes = { path = "../../common/bytes" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+encryption = { path = "../../crypto/encryption" }
+hash = { path = "../../crypto/hash" }
+ecc = { path = "../../crypto/ecc" }
+numeric = { path = "../../common/numeric" }
+network = { path = "../../common/network" }
+time-utils = { path = "../../core/time-utils" }
+short-string = { path = "../../common/short-string" }
+host-info = { path = "../../common/host-info" }
+core-misc = { path = "../../core/misc" }
 sargon-core-utils = { path = "../../core/utils" }
-sargon-core-collections = { path = "../../core/collections" }
+core-collections = { path = "../../core/collections" }
 
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }

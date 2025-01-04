@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon_bytes::*;
+use bytes::*;
 
 macro_rules! entropy_with_byte_counts {
     (

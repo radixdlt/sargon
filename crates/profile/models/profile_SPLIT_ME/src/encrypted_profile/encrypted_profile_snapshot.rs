@@ -1,4 +1,4 @@
-use sargon_encryption::{
+use encryption::{
     EncryptionKey, EncryptionScheme, PasswordBasedKeyDerivationScheme,
     VersionedEncryption, VersionedPasswordBasedKeyDerivation,
 };

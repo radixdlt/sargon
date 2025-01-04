@@ -5,9 +5,9 @@ pub mod prelude {
     pub use crate::keys::*;
     pub use crate::signatures::*;
 
+    pub(crate) use bytes::prelude::*;
+    pub(crate) use hash::prelude::*;
     pub(crate) use identified_vec_of::prelude::*;
-    pub(crate) use sargon_bytes::prelude::*;
-    pub(crate) use sargon_hash::prelude::*;
 
     pub(crate) use radix_common::crypto::{
         verify_ed25519 as scrypto_verify_ed25519,

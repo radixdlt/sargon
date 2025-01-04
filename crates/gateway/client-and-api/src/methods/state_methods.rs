@@ -412,7 +412,7 @@ impl GatewayClient {
 #[cfg(test)]
 mod fetch_all_resources_tests {
     use crate::prelude::*;
-    use sargon_profile_gateway::prelude::Gateway;
+    use profile_gateway::prelude::Gateway;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = GatewayClient;
@@ -683,7 +683,7 @@ mod fetch_all_resources_tests {
 #[cfg(test)]
 mod filter_transferable_tests {
     use crate::prelude::*;
-    use sargon_profile_gateway::prelude::Gateway;
+    use profile_gateway::prelude::Gateway;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = GatewayClient;

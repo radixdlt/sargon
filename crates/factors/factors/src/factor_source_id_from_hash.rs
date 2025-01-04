@@ -1,4 +1,4 @@
-use sargon_hash::hash_of;
+use hash::hash_of;
 
 use crate::prelude::*;
 
