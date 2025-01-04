@@ -13,6 +13,10 @@ extension Account {
 	public var appearanceID: AppearanceID {
 		appearanceId
 	}
+
+	public var forDisplay: AccountForDisplay {
+		AccountForDisplay(address: address, displayName: displayName, appearanceId: appearanceID)
+	}
 }
 
 // MARK: - Account + EntityProtocol

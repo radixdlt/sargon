@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class AccountOrAddressOfTests: Test<OwnedOrThirdPartyAccountAddress> {
+final class AccountOrAddressOfTests: Test<AccountOrAddressOf> {
 	func test_id_is_account_address() {
 		XCTAssertEqual(SUT.sample.id, SUT.sample.accountAddress)
 	}

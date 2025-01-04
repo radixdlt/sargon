@@ -1,55 +1,50 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub enum OwnedOrThirdPartyAccountAddress {
-    OwnedAccount { value: AccountAddress },
-    ThirdPartyAccount { value: AccountAddress },
+#[allow(clippy::large_enum_variant)]
+pub enum AccountOrAddressOf {
+    ProfileAccount { value: AccountForDisplay },
+    AddressOfExternalAccount { value: AccountAddress },
 }
 
-// impl From<AccountAddress> for OwnedOrThirdPartyAccountAddress {
-//     fn from(value: AccountAddress) -> Self {
-//         Self::ThirdPartyAccount { value }
-//     }
-// }
-
-impl OwnedOrThirdPartyAccountAddress {
+impl AccountOrAddressOf {
     pub fn account_address(&self) -> &AccountAddress {
         match self {
-            OwnedOrThirdPartyAccountAddress::OwnedAccount { value } => value,
-            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount { value } => {
-                value
-            }
+            AccountOrAddressOf::ProfileAccount { value } => &value.address,
+            AccountOrAddressOf::AddressOfExternalAccount { value } => value,
         }
     }
 }
 
-impl OwnedOrThirdPartyAccountAddress {
+impl AccountOrAddressOf {
     pub(crate) fn sample_mainnet() -> Self {
-        Self::OwnedAccount {
-            value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap(),
+        Self::ProfileAccount {
+            value: AccountForDisplay::new(AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap(), 
+            DisplayName::sample(), AppearanceID::sample()
+        ),
         }
     }
 
     pub(crate) fn sample_mainnet_other() -> Self {
-        Self::ThirdPartyAccount {
+        Self::AddressOfExternalAccount {
             value: AccountAddress::sample_mainnet_other(),
         }
     }
 
     pub(crate) fn sample_stokenet() -> Self {
-        Self::OwnedAccount {
-            value: AccountAddress::from_str("account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m").unwrap(),
+        Self::ProfileAccount {
+            value: AccountForDisplay::new(AccountAddress::from_str("account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m").unwrap(), DisplayName::sample(), AppearanceID::sample())
         }
     }
 
     pub(crate) fn sample_stokenet_other() -> Self {
-        Self::ThirdPartyAccount {
+        Self::AddressOfExternalAccount {
             value: AccountAddress::sample_stokenet_other(),
         }
     }
 }
 
-impl HasSampleValues for OwnedOrThirdPartyAccountAddress {
+impl HasSampleValues for AccountOrAddressOf {
     fn sample() -> Self {
         Self::sample_mainnet()
     }
@@ -64,7 +59,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = OwnedOrThirdPartyAccountAddress;
+    type SUT = AccountOrAddressOf;
 
     #[test]
     fn equality() {

@@ -72,6 +72,12 @@ pub struct Account {
     pub on_ledger_settings: OnLedgerSettings,
 }
 
+impl From<Account> for AccountForDisplay {
+    fn from(value: Account) -> Self {
+        Self::new(value.address, value.display_name, value.appearance_id)
+    }
+}
+
 impl HasEntityKind for Account {
     fn entity_kind() -> CAP26EntityKind {
         CAP26EntityKind::Account
@@ -502,6 +508,19 @@ mod tests {
             account.on_ledger_settings.third_party_deposits.deposit_rule,
             DepositRule::AcceptAll
         );
+    }
+
+    #[test]
+    fn to_account_for_display() {
+        let lhs = AccountForDisplay::from(Account::sample());
+        assert_eq!(
+            lhs,
+            AccountForDisplay::new(
+                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87".parse::<AccountAddress>().unwrap(),
+                DisplayName::new("Alice").unwrap(),
+                AppearanceID::new(0).unwrap(),
+            )
+        )
     }
 
     #[test]

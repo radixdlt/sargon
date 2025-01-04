@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 impl PerAssetNonFungibleTransfer {
     pub fn new(
-        recipient: impl Into<OwnedOrThirdPartyAccountAddress>,
+        recipient: impl Into<AccountOrAddressOf>,
         use_try_deposit_or_abort: bool,
         non_fungible_local_ids: impl IntoIterator<Item = NonFungibleLocalId>,
     ) -> Self {
@@ -24,17 +24,11 @@ impl PerAssetNonFungibleTransfer {
     }
 }
 
-impl
-    From<(
-        &OwnedOrThirdPartyAccountAddress,
-        PerRecipientNonFungibleTransfer,
-    )> for PerAssetNonFungibleTransfer
+impl From<(&AccountOrAddressOf, PerRecipientNonFungibleTransfer)>
+    for PerAssetNonFungibleTransfer
 {
     fn from(
-        value: (
-            &OwnedOrThirdPartyAccountAddress,
-            PerRecipientNonFungibleTransfer,
-        ),
+        value: (&AccountOrAddressOf, PerRecipientNonFungibleTransfer),
     ) -> Self {
         let (recipient, non_fungibles) = value;
         Self::new(
@@ -48,8 +42,8 @@ impl
 impl PerAssetNonFungibleTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
-            OwnedOrThirdPartyAccountAddress::OwnedAccount {
-                value: AccountAddress::from_str("account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv").unwrap(),
+            AccountOrAddressOf::ProfileAccount {
+                value: AccountForDisplay::new(AccountAddress::from_str("account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv").unwrap(), DisplayName::sample(), AppearanceID::sample())
             },
             true,
             [
@@ -61,7 +55,7 @@ impl PerAssetNonFungibleTransfer {
 
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
-            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+            AccountOrAddressOf::AddressOfExternalAccount {
                 value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap() 
             },
         true,
@@ -71,8 +65,8 @@ impl PerAssetNonFungibleTransfer {
 
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
-            OwnedOrThirdPartyAccountAddress::OwnedAccount {
-                value: AccountAddress::from_str("account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m").unwrap(),
+            AccountOrAddressOf::ProfileAccount {
+                value: AccountForDisplay::new(AccountAddress::from_str("account_tdx_2_128jx5fmru80v38a7hun8tdhajf2exef756c92tfg4atwl3y4pqn48m").unwrap(), DisplayName::sample(), AppearanceID::sample())
             },
             true,
             [
@@ -84,7 +78,7 @@ impl PerAssetNonFungibleTransfer {
 
     pub(crate) fn sample_stokenet_other() -> Self {
         Self::new(
-            OwnedOrThirdPartyAccountAddress::ThirdPartyAccount {
+            AccountOrAddressOf::AddressOfExternalAccount {
                 value: AccountAddress::from_str("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk").unwrap() 
             },
         true,

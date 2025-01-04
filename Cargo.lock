@@ -3,6 +3,20 @@
 version = 3
 
 [[package]]
+name = "account-for-display"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "derive_more",
+ "entity-foundation",
+ "has-sample-values",
+ "identified-vec-of",
+ "network",
+ "serde",
+ "short-string",
+]
+
+[[package]]
 name = "actix-macros"
 version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2379,6 +2393,7 @@ dependencies = [
 name = "manifests"
 version = "1.1.99"
 dependencies = [
+ "account-for-display",
  "addresses",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "derive_more",
@@ -2870,6 +2885,7 @@ dependencies = [
 name = "profile"
 version = "1.1.99"
 dependencies = [
+ "account-for-display",
  "addresses",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "core-misc",

@@ -55,12 +55,6 @@ impl HasSampleValues for AccountForDisplay {
     }
 }
 
-impl From<Account> for AccountForDisplay {
-    fn from(value: Account) -> Self {
-        Self::new(value.address, value.display_name, value.appearance_id)
-    }
-}
-
 impl Identifiable for AccountForDisplay {
     type ID = AccountAddress;
 
@@ -96,18 +90,5 @@ mod tests {
     #[test]
     fn test_is_network_aware() {
         assert_eq!(SUT::sample().network_id(), NetworkID::Mainnet);
-    }
-
-    #[test]
-    fn from_account() {
-        let lhs = SUT::from(Account::sample());
-        assert_eq!(
-            lhs,
-            SUT::new(
-                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87".parse::<AccountAddress>().unwrap(),
-                DisplayName::new("Alice").unwrap(),
-                AppearanceID::new(0).unwrap(),
-            )
-        )
     }
 }

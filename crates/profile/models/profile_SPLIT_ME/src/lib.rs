@@ -12,6 +12,7 @@ mod v100;
 
 pub mod prelude {
 
+    pub use account_for_display::prelude::*;
     pub use addresses::prelude::*;
     pub use core_misc::prelude::*;
     pub use entity_foundation::prelude::*;
