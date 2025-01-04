@@ -1,0 +1,23 @@
+[package]
+name = "gateway-models"
+version = "1.1.99"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+# === SARGON CRATES ===
+assert-json = { path = "../../core/assert-json" }
+addresses = { path = "../../crypto/addresses" }
+transaction-models = { path = "../../transaction/models" }
+core-misc = { path = "../../core/misc" }                   # decl_bool_type
+metadata = { path = "../../common/metadata" }
+
+# === RADIX DEPENDENCIES ===
+radix-engine-toolkit-common = { workspace = true }
+radix-transactions = { workspace = true }
+radix-engine-interface = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+enum-as-inner = { workspace = true }
+derive_more = { workspace = true }
+serde = { workspace = true }

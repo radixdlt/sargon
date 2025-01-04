@@ -1,0 +1,21 @@
+[package]
+name = "http-client"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+drivers = { path = "../../../system/drivers" }
+bytes = { path = "../../../common/bytes" }
+error = { path = "../../../core/error" }
+sargon-core-utils = { path = "../../../core/utils" }
+
+# === RADIX DEPENDENCIES ===
+
+# === EXTERNAL DEPENDENCIES ===
+reqwest = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

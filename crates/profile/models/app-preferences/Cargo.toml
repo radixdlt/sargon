@@ -1,0 +1,28 @@
+[package]
+name = "profile-app-preferences"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === INTERNAL DEPENDENCIES ===
+identified-vec-of = { path = "../../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
+factors = { path = "../../../factors/factors" }
+numeric = { path = "../../../common/numeric" }
+core-misc = { path = "../../../core/misc" }                                            # decl_bool_Type
+keys-collector = { path = "../../../factors/keys-collector" }
+addresses = { path = "../../../crypto/addresses" }
+transaction-models = { path = "../../../transaction/models" }
+profile-gateway = { path = "../../../profile/models/gateway" }
+profile-security-structures = { path = "../../../profile/models/security-structures" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+indexmap = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

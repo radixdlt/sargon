@@ -11,9 +11,9 @@ class TestCase: XCTestCase {
 	}
 
 	override class func setUp() {
-//		if shouldEnableRustLog() {
-//
-//		}
+		//		if shouldEnableRustLog() {
+		//
+		//		}
 		super.setUp()
 	}
 
@@ -25,11 +25,15 @@ class TestCase: XCTestCase {
 		subPath: String,
 		_ fileName: String,
 		extension fileExtension: String,
-		in crate: String = "sargon-profile"
+		in crate: String = "profile/models/profile_SPLIT_ME"
 	) throws -> Data {
-		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(4).joined(separator: "/")
+		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(4).joined(
+			separator: "/")
 
-		let fileURL = try XCTUnwrap(URL(fileURLWithPath: "\(testsDirectory)/crates/\(crate)/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
+		let fileURL = try XCTUnwrap(
+			URL(
+				fileURLWithPath:
+				"\(testsDirectory)/crates/\(crate)/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
 
 		return try Data(contentsOf: fileURL)
 	}
@@ -47,9 +51,10 @@ class TestCase: XCTestCase {
 	func jsonFixture<T>(
 		as: T.Type = T.self,
 		file fileName: String,
+		in crate: String = "profile/models/profile_SPLIT_ME",
 		decode: (Data) throws -> T
 	) throws -> (model: T, json: Data) {
-		let json = try openFile(subPath: "vector", fileName, extension: "json")
+		let json = try openFile(subPath: "vector", fileName, extension: "json", in: crate)
 		let model: T = try decode(json)
 		return (model, json)
 	}
@@ -57,9 +62,15 @@ class TestCase: XCTestCase {
 	func jsonString<T>(
 		as: T.Type = T.self,
 		file fileName: String,
+		in crate: String = "profile/models/profile_SPLIT_ME",
 		decode: (String) throws -> T
 	) throws -> (model: T, jsonString: String) {
-		let jsonData = try openFile(subPath: "vector", fileName, extension: "json")
+		let jsonData = try openFile(
+			subPath: "vector",
+			fileName,
+			extension: "json",
+			in: crate
+		)
 		let jsonString = try XCTUnwrap(String(data: jsonData, encoding: .utf8))
 		let model: T = try decode(jsonString)
 		return (model, jsonString)

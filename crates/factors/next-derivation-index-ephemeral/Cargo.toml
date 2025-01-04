@@ -1,0 +1,26 @@
+[package]
+name = "next-derivation-index-ephemeral"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+identified-vec-of = { path = "../../common/identified-vec-of" }
+assert-json = { path = "../../core/assert-json" }
+error = { path = "../../core/error" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+has-sample-values = { path = "../../core/has-sample-values" }
+factors = { path = "../../factors/factors" }
+addresses = { path = "../../crypto/addresses" }
+network = { path = "../../common/network" }
+
+# === RADIX DEPENDENCIES
+#None
+
+# === EXTERNAL DEPENDENCIES
+enum-iterator = { workspace = true }
+derive_more = { workspace = true }
+indexmap = { workspace = true }
+serde = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }

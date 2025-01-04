@@ -1,0 +1,20 @@
+[package]
+name = "account-for-display"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+addresses = { path = "../../../crypto/addresses" }
+short-string = { path = "../../../common/short-string" }
+entity-foundation = { path = "../../../common/entity-foundation" }
+identified-vec-of = { path = "../../../common/identified-vec-of" }
+network = { path = "../../../common/network" }
+has-sample-values = { path = "../../../core/has-sample-values" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+serde = { workspace = true }

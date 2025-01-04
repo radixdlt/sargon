@@ -1,0 +1,29 @@
+[package]
+name = "profile-gateway"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === INTERNAL DEPENDENCIES ===
+identified-vec-of = { path = "../../../common/identified-vec-of" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
+factors = { path = "../../../factors/factors" }
+keys-collector = { path = "../../../factors/keys-collector" }
+addresses = { path = "../../../crypto/addresses" }
+transaction-models = { path = "../../../transaction/models" }
+network = { path = "../../../common/network" }
+error = { path = "../../../core/error" }
+core-misc = { path = "../../../core/misc" }
+assert-json = { path = "../../../core/assert-json" }
+has-sample-values = { path = "../../../core/has-sample-values" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+url = { workspace = true }

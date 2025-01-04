@@ -1,0 +1,28 @@
+[package]
+name = "keys-collector"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+has-sample-values = { path = "../../core/has-sample-values" }
+factors = { path = "../../factors/factors" }
+numeric = { path = "../../common/numeric" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+addresses = { path = "../../crypto/addresses" }
+network = { path = "../../common/network" }
+error = { path = "../../core/error" }
+core-misc = { path = "../../core/misc" }                               # HiddenConstructor
+core-collections = { path = "../../core/collections" }
+factors-supporting-types = { path = "../../factors/supporting-types" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+actix-rt = { workspace = true }
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+itertools = { workspace = true }
+indexmap = { workspace = true }
+log = { workspace = true }

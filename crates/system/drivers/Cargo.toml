@@ -1,0 +1,32 @@
+[package]
+name = "drivers"
+version = "1.1.99"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+# === SARGON CRATES ===
+hierarchical-deterministic = { path = "../../crypto/hd" }
+addresses = { path = "../../crypto/addresses" }
+profile = { path = "../../profile/models/profile_SPLIT_ME" }
+profile-supporting-types = { path = "../../profile/models/supporting-types" }
+time-utils = { path = "../../core/time-utils" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+enum-iterator = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }
+log = { workspace = true }
+pretty_env_logger = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+strum = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

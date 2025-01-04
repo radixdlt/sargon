@@ -1,6 +1,6 @@
 import SargonUniFFI
 
-extension OwnedOrThirdPartyAccountAddress {
+extension AccountOrAddressOf {
 	public var accountAddress: AccountAddress {
 		accountOrAddressOfAccountAddress(recipient: self)
 	}

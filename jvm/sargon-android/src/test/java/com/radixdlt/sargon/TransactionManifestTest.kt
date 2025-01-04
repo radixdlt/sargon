@@ -342,17 +342,17 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 )
                 perAssetTransfer.transfers.forEach {
                     when (val recipient = it.recipient) {
-                        is OwnedOrThirdPartyAccountAddress.ThirdPartyAccount ->
+                        is AccountOrAddressOf.AddressOfExternalAccount ->
                             assertTrue(
                                 contains(
                                     recipient.value
                                         .string
                                 )
                             )
-                        is OwnedOrThirdPartyAccountAddress.OwnedAccount ->
+                        is AccountOrAddressOf.ProfileAccount ->
                             assertTrue(
                                 contains(
-                                    recipient.value
+                                    recipient.value.address
                                         .string
                                 )
                             )
@@ -376,8 +376,8 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                     listOf(
                         PerRecipientAssetTransfer(
                             recipient =
-                            OwnedOrThirdPartyAccountAddress
-                                .ThirdPartyAccount(
+                            AccountOrAddressOf
+                                .AddressOfExternalAccount(
                                     value =
                                     AccountAddress(
                                         "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
@@ -651,6 +651,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     private fun openFileInCrate(crate: String, name: String, extension: String) =
         File("../../" + "crates/" + crate + "/fixtures/transaction/$name.$extension")
 
-    private fun openFileInTxModels(name: String, extension: String) = openFileInCrate("sargon-transaction-models", name, extension)
-    private fun openFileInManifests(name: String, extension: String) = openFileInCrate("sargon-manifests", name, extension)
+    private fun openFileInTxModels(name: String, extension: String) = openFileInCrate("transaction/models", name, extension)
+    private fun openFileInManifests(name: String, extension: String) = openFileInCrate("transaction/manifests", name, extension)
 }

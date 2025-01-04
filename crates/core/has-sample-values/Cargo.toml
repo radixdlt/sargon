@@ -1,0 +1,16 @@
+[package]
+name = "has-sample-values"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+error = { path = "../../core/error" }
+
+# ==== RADIX DEPENDENCIES ====
+# None
+
+# ==== EXTERNAL DEPENDENCIES ====
+indexmap = { workspace = true }
+iso8601-timestamp = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }

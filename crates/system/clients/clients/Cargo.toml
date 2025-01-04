@@ -1,0 +1,31 @@
+[package]
+name = "clients"
+version = "1.1.99"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+# === SARGON CRATES ===
+core-collections = { path = "../../../core/collections" }
+profile = { path = "../../../profile/models/profile_SPLIT_ME" }
+factors-supporting-types = { path = "../../../factors/supporting-types" }
+profile-supporting-types = { path = "../../../profile/models/supporting-types" }
+drivers = { path = "../../../system/drivers" }
+http-client = { path = "../../../system/clients/http" }
+gateway-client-and-api = { path = "../../../gateway/client-and-api" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_with = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }
