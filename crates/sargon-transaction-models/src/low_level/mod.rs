@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 mod compiled_notarized_intent;
 mod compiled_transaction_intent;
 mod dynamically_analyzable_manifest;
@@ -34,12 +36,12 @@ pub use v2::*;
 
 pub(crate) fn map_static_analysis_error(
     error: radix_transactions::manifest::static_resource_movements::StaticResourceMovementsError,
-) -> crate::prelude::CommonError {
-    crate::prelude::error!(
+) -> CommonError {
+    error!(
         "Failed to get execution summary from RET, error: {:?}",
         error
     );
-    crate::prelude::CommonError::FailedToGenerateManifestSummary {
+    CommonError::FailedToGenerateManifestSummary {
         underlying: format!("{:?}", error),
     }
 }

@@ -25,7 +25,10 @@ mod samples;
 pub mod prelude {
 
     pub(crate) use identified_vec_of::prelude::*;
-    pub(crate) use sargon_core::prelude::*;
+    pub(crate) use sargon_bytes::prelude::*;
+
+    pub(crate) use sargon_core_network::prelude::*;
+    pub(crate) use sargon_ecc::prelude::*;
     pub(crate) use sargon_hierarchical_deterministic::prelude::*;
 
     pub(crate) use once_cell::sync::Lazy;
@@ -57,6 +60,17 @@ pub mod prelude {
         types::FromPublicKey as _,
     };
     pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
+
+    pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use indexmap::{IndexMap, IndexSet};
+    pub(crate) use serde::{
+        de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
+        Serializer,
+    };
+    #[cfg(test)]
+    pub(crate) use serde_json::json;
+    pub(crate) use std::collections::{HashMap, HashSet};
+    pub(crate) use zeroize::*;
 }
 
 pub use prelude::*;

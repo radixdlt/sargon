@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::prelude::*;
 
 /// A word in the BIP39 word list of `language` at known `index` (0-2047).

@@ -56,7 +56,7 @@ impl From<SignedAuthIntent> for InternalSignedAuthIntent {
                         item.intent_signature.into_internal(),
                     )
                 })
-                .collect::<sargon::IndexMap<
+                .collect::<IndexMap<
                     InternalAddressOfAccountOrPersona,
                     InternalIntentSignature,
                 >>(),

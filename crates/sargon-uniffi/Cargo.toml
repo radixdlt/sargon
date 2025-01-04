@@ -1,6 +1,5 @@
 [package]
 name = "sargon-uniffi"
-# Don't forget to update version in crates/sargon/Cargo.toml
 version = "1.1.99"
 edition = "2021"
 build = "build.rs"
@@ -14,13 +13,12 @@ crate-type = ["staticlib", "cdylib", "lib"]
 [[bin]]
 name = "sargon-bindgen"
 path = "src/bindgen/bin.rs"
-# required-features = ["build-binary"]
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core = { path = "../sargon-core" }
 identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-encryption = { path = "../sargon-encryption" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-keys-collector = { path = "../sargon-keys-collector" }
 sargon-addresses = { path = "../sargon-addresses" }
@@ -31,6 +29,7 @@ sargon-profile-logic = { path = "../sargon-profile-logic" }
 sargon-profile-security-structures = { path = "../sargon-profile-security-structures" }
 sargon-factor-instances-provider = { path = "../sargon-factor-instances-provider" }
 gateway-models = { path = "../gateway-models" }
+sargon-core-misc = { path = "../sargon-core-misc" }
 sargon-clients = { path = "../sargon-clients" }
 sargon-drivers = { path = "../sargon-drivers" }
 gateway-client-and-api = { path = "../gateway-client-and-api" }
@@ -52,6 +51,7 @@ derive_more = { workspace = true }
 enum-as-inner = { workspace = true }
 enum-iterator = { workspace = true }
 hex = { workspace = true }
+indexmap = { workspace = true }
 iso8601-timestamp = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }

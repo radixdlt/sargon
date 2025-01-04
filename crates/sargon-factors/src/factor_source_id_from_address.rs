@@ -1,3 +1,5 @@
+use sargon_core_short_string::prelude::ShortString;
+
 use crate::prelude::*;
 
 /// FactorSourceID from an AccountAddress, typically used by `trustedContact` FactorSource.

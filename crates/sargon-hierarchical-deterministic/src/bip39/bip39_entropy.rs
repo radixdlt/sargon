@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon_core::decl_secret_bytes;
+use sargon_bytes::*;
 
 macro_rules! entropy_with_byte_counts {
     (
@@ -11,7 +11,7 @@ macro_rules! entropy_with_byte_counts {
             $byte_count: literal,
         )+
     ) => {
-        paste! {
+        paste::paste! {
             $(
                 decl_secret_bytes!(
                     [< Entropy $byte_count Bytes >],

@@ -1,3 +1,5 @@
+use sargon_encryption::{EncryptionScheme, VersionedEncryption};
+
 use crate::prelude::*;
 
 /// ❗️ NOT PRODUCTION READY YET ❗️

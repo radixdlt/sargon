@@ -1092,7 +1092,7 @@ mod tests {
         }
 
         mod with_failure {
-            use std::rc::Rc;
+            use std::{cell::RefCell, rc::Rc};
 
             use super::*;
 

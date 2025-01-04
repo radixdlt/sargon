@@ -1,3 +1,5 @@
+use sargon_encryption::PbHkdfSha256;
+
 use super::deep_link_parsing::*;
 use super::relay_service::Service as RelayService;
 use super::relay_service::WalletInteractionTransport;

@@ -1,4 +1,4 @@
-use sargon_core::decl_identified_vec_of;
+use identified_vec_of::decl_identified_vec_of;
 
 use crate::prelude::*;
 

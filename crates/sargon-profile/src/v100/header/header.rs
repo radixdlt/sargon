@@ -1,3 +1,5 @@
+use sargon_core_time_utils::now;
+
 use crate::prelude::*;
 
 /// The header of a Profile(Snapshot) contains crucial metadata

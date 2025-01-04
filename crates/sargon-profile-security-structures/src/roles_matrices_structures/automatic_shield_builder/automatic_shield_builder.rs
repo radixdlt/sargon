@@ -437,7 +437,6 @@ impl SecurityShieldBuilder {
 
 #[cfg(test)]
 mod tests {
-    use indexmap::IndexSet;
 
     use super::*;
 

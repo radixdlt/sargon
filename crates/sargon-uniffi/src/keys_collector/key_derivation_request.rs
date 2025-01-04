@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::IndexMap;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 
 /// A collection of derivation paths, on a per-factor-source basis.

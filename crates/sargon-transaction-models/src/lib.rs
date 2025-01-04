@@ -8,9 +8,16 @@ mod unvalidated_transaction_manifest;
 pub mod prelude {
     pub use identified_vec_of::prelude::*;
     pub use sargon_addresses::prelude::*;
-    pub use sargon_core::prelude::*;
+    pub use sargon_bytes::prelude::*;
+    pub use sargon_core_collections::prelude::Just;
+    pub use sargon_core_misc::prelude::Instant;
+    pub use sargon_core_network::prelude::*;
+    pub use sargon_core_tx::prelude::*;
+    pub use sargon_ecc::prelude::*;
     pub use sargon_factors::prelude::*;
+    pub use sargon_hash::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
+    pub use sargon_numeric::prelude::*;
 
     pub use crate::assert_manifest::*;
     pub use crate::error_from::*;
@@ -195,6 +202,17 @@ pub mod prelude {
             TransactionManifestV2Builder as ScryptoTransactionManifestV2Builder,
         },
     };
+
+    pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use log::*;
+    pub(crate) use serde::{Deserialize, Serialize};
+    pub(crate) use std::collections::HashMap;
+
+    #[cfg(test)]
+    pub(crate) use serde_json::json;
+
+    #[cfg(test)]
+    pub(crate) use std::collections::HashSet;
 }
 
 pub use prelude::*;

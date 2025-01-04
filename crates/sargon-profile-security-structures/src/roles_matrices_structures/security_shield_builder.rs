@@ -1,3 +1,5 @@
+use sargon_core_time_utils::now;
+
 use crate::prelude::*;
 
 /// The mode of the shield builder, either `Lenient` or `Strict`, this has
@@ -137,7 +139,7 @@ impl SecurityShieldBuilder {
             matrix_builder: RwLock::new(matrix_builder),
             name,
             authentication_signing_factor: RwLock::new(None),
-            shield_id: SecurityStructureID::from(id()),
+            shield_id: SecurityStructureID::from(Uuid::new_v4()),
             created_on: now(),
         }
     }
@@ -803,7 +805,7 @@ mod tests {
     #[allow(clippy::mutable_key_type)]
     fn hash() {
         assert_eq!(
-            HashSet::from_iter([
+            HashSet::<SUT>::from_iter([
                 SUT::sample(),
                 SUT::sample(),
                 SUT::sample_other(),

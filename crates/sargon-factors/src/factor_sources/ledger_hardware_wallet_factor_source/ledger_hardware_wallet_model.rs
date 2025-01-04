@@ -1,3 +1,5 @@
+use sargon_core_utils::prelude::{DeserializeStr, SerializeToString};
+
 use crate::prelude::*;
 
 /// The model of a Ledger HQ hardware wallet NanoS, e.g.
@@ -52,6 +54,8 @@ impl HasSampleValues for LedgerHardwareWalletModel {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeSet;
+
     use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]

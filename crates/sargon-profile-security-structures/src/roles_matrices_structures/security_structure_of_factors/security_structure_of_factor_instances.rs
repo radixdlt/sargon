@@ -1,5 +1,3 @@
-use indexmap::IndexSet;
-
 use crate::prelude::*;
 
 /// A structure of factors to use for certain roles, Primary, Recovery and

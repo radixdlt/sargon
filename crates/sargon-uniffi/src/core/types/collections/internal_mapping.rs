@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use sargon::{IdentifiedVecOf, IndexSet};
+use identified_vec_of::IdentifiedVecOf;
 
 // ==========================
 // === From InternalType ====

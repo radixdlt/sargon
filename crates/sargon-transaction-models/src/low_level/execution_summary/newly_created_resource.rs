@@ -1,4 +1,5 @@
 use radix_rust::prelude::IndexMap;
+use sargon_core_metadata::prelude::MetadataKey;
 
 use crate::prelude::*;
 
@@ -41,7 +42,7 @@ impl From<IndexMap<String, Option<ScryptoMetadataValue>>>
             _ => None,
         };
 
-        use MetadataKey::*;
+        use sargon_core_metadata::prelude::MetadataKey::*;
 
         Self::new(
             get_str(Name),

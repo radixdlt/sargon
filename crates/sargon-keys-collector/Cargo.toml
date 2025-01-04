@@ -5,10 +5,15 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core = { path = "../sargon-core" }
+sargon-has-sample-values = { path = "../sargon-has-sample-values" }
 sargon-factors = { path = "../sargon-factors" }
+sargon-numeric = { path = "../sargon-numeric" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-addresses = { path = "../sargon-addresses" }
+sargon-core-network = { path = "../sargon-core-network" }
+sargon-core-error = { path = "../sargon-core-error" }
+sargon-core-misc = { path = "../sargon-core-misc" }                                   # HiddenConstructor
+sargon-core-collections = { path = "../sargon-core-collections" }
 sargon-factors-supporting-types = { path = "../sargon-factors-supporting-types" }
 
 # === RADIX DEPENDENCIES ===
@@ -18,4 +23,6 @@ sargon-factors-supporting-types = { path = "../sargon-factors-supporting-types" 
 actix-rt = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }
+itertools = { workspace = true }
+indexmap = { workspace = true }
 log = { workspace = true }

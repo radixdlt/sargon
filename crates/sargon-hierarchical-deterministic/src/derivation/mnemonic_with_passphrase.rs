@@ -30,12 +30,6 @@ impl MnemonicWithPassphrase {
         )
     }
 }
-impl SafeToLog for MnemonicWithPassphrase {
-    /// Logs the word count and FactorSourceID o
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
-        self.partially_obfuscated_string()
-    }
-}
 
 impl MnemonicWithPassphrase {
     pub fn with_passphrase(
@@ -278,22 +272,6 @@ mod tests {
     fn debug_sample_other() {
         assert_eq!(
             format!("{:?}", SUT::sample_other()),
-            format!("{:?}", "24 words (pledge...cactus) + <EMPTY>")
-        );
-    }
-
-    #[test]
-    fn non_sensitive_sample() {
-        assert_eq!(
-            format!("{:?}", SUT::sample().non_sensitive()),
-            format!("{:?}", "24 words (device...swim) + <EMPTY>")
-        );
-    }
-
-    #[test]
-    fn non_sensitive_sample_other() {
-        assert_eq!(
-            format!("{:?}", SUT::sample_other().non_sensitive()),
             format!("{:?}", "24 words (pledge...cactus) + <EMPTY>")
         );
     }

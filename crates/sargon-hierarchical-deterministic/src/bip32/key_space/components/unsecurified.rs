@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::prelude::*;
 
 /// Represents an "unsecurified" component in a BIP32 path, known to be unhardened or hardened. If it is hardened we will add `GLOBAL_OFFSET_HARDENED` to it when mapped to global key space.

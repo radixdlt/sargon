@@ -140,6 +140,8 @@ impl VirtualEntityCreatingInstanceProvider {
 #[cfg(test)]
 mod tests {
 
+    use std::collections::HashSet;
+
     use super::*;
     #[allow(clippy::upper_case_acronyms)]
     type SUT = VirtualEntityCreatingInstanceProvider;

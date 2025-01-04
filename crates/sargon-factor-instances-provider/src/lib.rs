@@ -12,6 +12,7 @@ pub mod prelude {
     pub use crate::next_index_assigner::*;
     pub use crate::provider::*;
     pub use crate::types::*;
+    pub(crate) use indexmap::{IndexMap, IndexSet};
 }
 
 pub use prelude::*;

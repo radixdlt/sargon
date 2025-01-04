@@ -47,12 +47,11 @@ pub mod prelude {
         },
     };
 
-    pub(crate) use sargon_uniffi_conversion_macros::*;
-    // pub(crate) use sargon_manifests::prelude::*;
     pub(crate) use sargon::prelude::{
         DeserializeBytes, DeserializeStr, HasSampleValues, HashMap,
         SerializeToBytes, SerializeToString,
     };
+    pub(crate) use sargon_uniffi_conversion_macros::*;
 
     pub(crate) use iso8601_timestamp::Timestamp;
     pub(crate) use itertools::Itertools;
@@ -67,6 +66,8 @@ pub mod prelude {
     pub(crate) use uuid::Uuid;
 
     pub(crate) use paste::*;
+
+    pub(crate) use indexmap::{IndexMap, IndexSet};
 }
 
 pub use prelude::*;

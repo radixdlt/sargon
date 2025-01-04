@@ -7,9 +7,10 @@ build = "build.rs"
 [dependencies]
 # === SARGON CRATES ===
 sargon-core-assert-json = { path = "../sargon-core-assert-json" }
-sargon-core = { path = "../sargon-core" }
 sargon-addresses = { path = "../sargon-addresses" }
 sargon-transaction-models = { path = "../sargon-transaction-models" }
+sargon-core-misc = { path = "../sargon-core-misc" } # decl_bool_type
+sargon-core-metadata = { path = "../sargon-core-metadata" }
 
 # === RADIX DEPENDENCIES ===
 radix-engine-toolkit-common = { workspace = true }
@@ -17,5 +18,6 @@ radix-transactions = { workspace = true }
 radix-engine-interface = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
+enum-as-inner = { workspace = true }
 derive_more = { workspace = true }
 serde = { workspace = true }

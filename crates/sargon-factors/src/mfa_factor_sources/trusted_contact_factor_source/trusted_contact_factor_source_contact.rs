@@ -1,3 +1,5 @@
+use sargon_core_short_string::prelude::{DisplayName, EmailAddress};
+
 use crate::prelude::*;
 
 /// Hints about the trusted contact.

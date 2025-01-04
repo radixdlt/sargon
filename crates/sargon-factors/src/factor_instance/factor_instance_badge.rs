@@ -1,3 +1,5 @@
+use serde::ser::SerializeStruct;
+
 use crate::prelude::*;
 
 /// Either a "physical" badge (resource) or some source for recreation of a producer

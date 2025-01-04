@@ -1,3 +1,5 @@
+use sargon_core_utils::prelude::format_string;
+
 use crate::prelude::*;
 
 #[derive(
@@ -134,7 +136,9 @@ impl From<ScryptoNonFungibleLocalId> for NonFungibleLocalId {
                 value: value.value(),
             },
             ScryptoNonFungibleLocalId::Bytes(value) => Self::Bytes {
-                value: value.into(),
+                value: NonEmptyMax64Bytes::try_from(value.value()).expect(
+                    "ScryptoBytesNonFungibleLocalId should have 64 bytes",
+                ),
             },
             ScryptoNonFungibleLocalId::RUID(value) => Self::Ruid {
                 value: value.value().into(),

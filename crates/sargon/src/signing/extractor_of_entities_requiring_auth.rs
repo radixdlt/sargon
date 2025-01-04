@@ -46,7 +46,6 @@ impl ExtractorOfEntitiesRequiringAuth {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use indexmap::IndexSet;
     use radix_transactions::prelude::ManifestBuilder;
 
     #[test]

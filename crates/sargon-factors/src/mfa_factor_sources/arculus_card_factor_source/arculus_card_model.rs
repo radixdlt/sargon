@@ -1,3 +1,5 @@
+use sargon_core_utils::prelude::{DeserializeStr, SerializeToString};
+
 use crate::prelude::*;
 
 /// The model of a Arculus Card.

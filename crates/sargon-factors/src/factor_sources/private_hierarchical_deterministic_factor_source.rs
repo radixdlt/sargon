@@ -1,3 +1,5 @@
+use sargon_core_host_info::prelude::HostInfo;
+
 use crate::prelude::*;
 
 #[derive(Zeroize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -192,16 +194,6 @@ impl HasSampleValues for PrivateHierarchicalDeterministicFactorSource {
     }
 }
 
-impl SafeToLog for PrivateHierarchicalDeterministicFactorSource {
-    /// Logs the word count and FactorSourceID.
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
-        format!(
-            "{} {}",
-            self.factor_source.hint.mnemonic_word_count, self.factor_source.id
-        )
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -247,10 +239,5 @@ mod tests {
         )
         .unwrap();
         assert_eq!(sut.mnemonic_with_passphrase.mnemonic.phrase(), "zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo zoo vote");
-    }
-
-    #[test]
-    fn non_sensitive() {
-        assert_eq!(format!("{:?}", SUT::sample().non_sensitive()), "\"12 words device:f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a\"");
     }
 }

@@ -5,11 +5,11 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core = { path = "../sargon-core" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-addresses = { path = "../sargon-addresses" }
 sargon-profile = { path = "../sargon-profile" }
 sargon-profile-supporting-types = { path = "../sargon-profile-supporting-types" }
+sargon-core-time-utils = { path = "../sargon-core-time-utils" }
 
 # === RADIX DEPENDENCIES ===
 # None
@@ -18,6 +18,8 @@ sargon-profile-supporting-types = { path = "../sargon-profile-supporting-types" 
 async-trait = { workspace = true }
 derive_more = { workspace = true }
 enum-iterator = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }
 log = { workspace = true }
 pretty_env_logger = { workspace = true }
 reqwest = { workspace = true }

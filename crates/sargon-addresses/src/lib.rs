@@ -3,7 +3,11 @@ mod address_conversion;
 mod resource;
 
 pub mod prelude {
-    pub(crate) use sargon_core::prelude::*;
+
+    pub(crate) use identified_vec_of::prelude::*;
+    pub(crate) use sargon_bytes::prelude::*;
+    pub(crate) use sargon_core_network::prelude::*;
+    pub(crate) use sargon_ecc::prelude::*;
     pub(crate) use sargon_factors::prelude::*;
     pub(crate) use sargon_hierarchical_deterministic::prelude::*;
 
@@ -81,6 +85,18 @@ pub mod prelude {
         },
         node_id::TypedNodeId as RetTypedNodeId,
     };
+
+    pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use log::*;
+    pub(crate) use serde::{Deserialize, Serialize};
+    pub(crate) use serde_with::{DeserializeFromStr, SerializeDisplay};
+    pub(crate) use std::str::FromStr;
+
+    #[cfg(test)]
+    pub(crate) use serde_json::json;
+
+    #[cfg(test)]
+    pub(crate) use std::collections::HashSet;
 }
 
 pub use prelude::*;

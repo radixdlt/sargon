@@ -158,7 +158,7 @@ macro_rules! declare_shared_with_dapp {
         $expected_sample_debug: literal,
         $expected_sample_json: literal
     ) => {
-        paste! {
+        paste::paste! {
             declare_shared_with_dapp!(
                 $(
                     #[doc = $expr]

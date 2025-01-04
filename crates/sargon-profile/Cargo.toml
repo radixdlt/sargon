@@ -6,29 +6,39 @@ build = "build.rs"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-sargon-core = { path = "../sargon-core" }
+sargon-encryption = { path = "../sargon-encryption" }
 identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-factors = { path = "../sargon-factors" }
+sargon-core-misc = { path = "../sargon-core-misc" }
+sargon-core-entity = { path = "../sargon-core-entity" }
+sargon-has-sample-values = { path = "../sargon-has-sample-values" }
 sargon-keys-collector = { path = "../sargon-keys-collector" }
 sargon-addresses = { path = "../sargon-addresses" }
 sargon-transaction-models = { path = "../sargon-transaction-models" }
 sargon-profile-app-preferences = { path = "../sargon-profile-app-preferences" }
 sargon-profile-security-structures = { path = "../sargon-profile-security-structures" }
+sargon-core-time-utils = { path = "../sargon-core-time-utils" }
+sargon-core-host-info = { path = "../sargon-core-host-info" }
 
 # === RADIX DEPENDENCIES ===
 # None
 
 # === EXTERNAL DEPENDENCIES ===
 derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
 enum-iterator = { workspace = true }
 hkdf = { workspace = true }
 k256 = { workspace = true }
+itertools = { workspace = true }
+log = { workspace = true }
 once_cell = { workspace = true }
+paste = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_repr = { workspace = true }
+serde_with = { workspace = true }
 strum = { workspace = true }
 
 [build-dependencies]

@@ -170,6 +170,8 @@ impl FromStr for FactorSourceKind {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeSet;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

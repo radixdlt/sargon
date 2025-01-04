@@ -1,3 +1,5 @@
+use sargon_core_host_info::prelude::HostInfo;
+
 use crate::prelude::*;
 
 /// A factor source representing the host device which SargonOS runs on, typically

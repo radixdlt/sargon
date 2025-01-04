@@ -67,6 +67,8 @@ impl From<ScryptoDefaultDepositRule> for DepositRule {
 
 #[cfg(test)]
 mod tests {
+    use sargon_core_utils::prelude::DeserializeStr;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

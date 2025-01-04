@@ -1,5 +1,3 @@
-use radix_rust::prelude::IndexMap;
-
 use crate::prelude::*;
 
 impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {

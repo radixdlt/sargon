@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon_core_misc::HiddenConstructor;
 
 /// A collection of all `HierarchicalDeterministicFactorInstance`
 /// (Public Keys) which were derived from the referenced

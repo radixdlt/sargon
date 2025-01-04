@@ -9,10 +9,11 @@ sargon-core-assert-json = { path = "../sargon-core-assert-json" }
 sargon-core-error = { path = "../sargon-core-error" }
 
 # === RADIX DEPENDENCIES
-radix-rust = { workspace = true }
+# None
 
 # === EXTERNAL DEPENDENCIES
 derive_more = { workspace = true }
+indexmap = { workspace = true }
 itertools = { workspace = true }
 paste = { workspace = true }
 serde = { workspace = true }

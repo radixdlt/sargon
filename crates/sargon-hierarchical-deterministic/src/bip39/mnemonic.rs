@@ -1,3 +1,5 @@
+use serde::Serializer;
+
 use crate::prelude::*;
 
 #[derive(
@@ -39,12 +41,6 @@ impl Mnemonic {
             self.words.first().unwrap().word,
             self.words.last().unwrap().word
         )
-    }
-}
-impl SafeToLog for Mnemonic {
-    /// Logs the word count and FactorSourceID o
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
-        self.partially_obfuscated_string()
     }
 }
 
@@ -468,15 +464,6 @@ mod tests {
     fn display() {
         let mnemonic = SUT::sample();
         assert_eq!(format!("{}", mnemonic), "Mnemonic in English obfuscated.")
-    }
-
-    #[test]
-    fn non_sensitive() {
-        let mnemonic = SUT::sample();
-        assert_eq!(
-            format!("{:?}", mnemonic.non_sensitive()),
-            format!("{:?}", "24 words (bright...mandate)")
-        );
     }
 
     #[test]

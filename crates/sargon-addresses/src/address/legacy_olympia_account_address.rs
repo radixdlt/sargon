@@ -5,6 +5,7 @@ use radix_engine_toolkit::functions::derive::{
 };
 
 use radix_engine_toolkit::functions::derive::OlympiaNetwork as ScryptoOlympiaNetwork;
+use sargon_core_utils::prelude::format_string;
 
 #[derive(
     Clone,

@@ -5,9 +5,16 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core = { path = "../sargon-core" }
+identified-vec-of = { path = "../identified-vec-of" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
+sargon-hash = { path = "../sargon-hash" }
+sargon-ecc = { path = "../sargon-ecc" }
+sargon-bytes = { path = "../sargon-bytes" }
+sargon-core-network = { path = "../sargon-core-network" }
+sargon-has-sample-values = { path = "../sargon-has-sample-values" }
+sargon-core-assert-json = { path = "../sargon-core-assert-json" }
+sargon-core-utils = { path = "../sargon-core-utils" }
 
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }
@@ -18,8 +25,10 @@ radix-rust = { workspace = true }
 
 # ==== EXTERNAL DEPENDENCIES ====
 derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
 enum-iterator = { workspace = true }
 log = { workspace = true }
+paste = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

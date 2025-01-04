@@ -12,6 +12,7 @@ mod third_party_deposit_update;
 
 pub mod prelude {
     pub use gateway_models::prelude::*;
+    pub use sargon_core_metadata::prelude::*;
     pub use sargon_factors::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
     pub use sargon_profile::prelude::*;
@@ -150,6 +151,14 @@ pub mod prelude {
             Update as RetUpdate,
         },
     };
+
+    pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use serde::{Deserialize, Serialize};
+
+    pub(crate) use std::collections::BTreeMap;
+
+    #[cfg(test)]
+    pub(crate) use std::collections::HashSet;
 }
 
 pub use prelude::*;

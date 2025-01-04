@@ -1,3 +1,5 @@
+use std::fmt::Formatter;
+
 use crate::prelude::*;
 
 /// A neglected factor, with a reason.

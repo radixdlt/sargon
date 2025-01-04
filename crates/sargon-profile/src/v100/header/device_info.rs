@@ -96,6 +96,9 @@ impl DeviceInfo {
 }
 
 #[cfg(test)]
+use sargon_core_time_utils::now;
+
+#[cfg(test)]
 impl DeviceInfo {
     fn new_unknown() -> Self {
         Self::new(

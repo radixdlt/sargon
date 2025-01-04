@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon_core::decl_secret_bytes;
+use sargon_bytes::decl_secret_bytes;
 
 decl_secret_bytes!(
     /// A BIP39 seed for hierarchal deterministic wallets, as per the [BIP39 standard][doc].

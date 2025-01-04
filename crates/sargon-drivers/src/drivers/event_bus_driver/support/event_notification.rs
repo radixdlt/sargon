@@ -1,3 +1,5 @@
+use sargon_core_time_utils::now;
+
 use crate::prelude::*;
 
 /// A notification containing a timestamped and unique `event`, host client
@@ -12,7 +14,7 @@ pub struct EventNotification {
 impl EventNotification {
     pub fn new(event: Event) -> Self {
         Self {
-            id: id(),
+            id: Uuid::new_v4(),
             event,
             timestamp: now(),
         }

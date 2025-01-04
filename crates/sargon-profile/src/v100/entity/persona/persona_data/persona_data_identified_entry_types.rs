@@ -153,7 +153,7 @@ macro_rules! declare_identified_entry {
         $expected_sample_debug: literal,
         $expected_sample_json: literal
     ) => {
-        paste! {
+        paste::paste! {
             declare_identified_entry!(
                 $(
                     #[doc = $expr]

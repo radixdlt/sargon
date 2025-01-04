@@ -11,7 +11,7 @@ macro_rules! decl_specialized_address {
         $validation_err: ident
     ) => {
 
-        paste! {
+        paste::paste! {
             $(
                 #[doc = $expr]
             )*
@@ -68,7 +68,7 @@ macro_rules! decl_specialized_address {
                 }
             }
 
-            impl Deref for $specialized_address_type {
+            impl std::ops::Deref for $specialized_address_type {
                 type Target = $base_addr;
 
                 fn deref(&self) -> &Self::Target {

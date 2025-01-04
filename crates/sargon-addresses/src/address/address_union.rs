@@ -10,7 +10,7 @@ macro_rules! address_union {
             $variant_type: ty
         )+
     ) => {
-        paste! {
+        paste::paste! {
             $(
                 #[doc = $expr]
             )*
@@ -259,7 +259,7 @@ macro_rules! address_union {
             $address_type: ident
         ),+
     ) => {
-        paste! {
+        paste::paste! {
             address_union!(
                 $(
                     #[doc = $expr]

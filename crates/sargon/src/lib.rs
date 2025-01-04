@@ -12,7 +12,6 @@
 #![allow(trivial_bounds)]
 
 mod home_cards;
-mod needs_a_new_home_dumping_ground;
 mod radix_connect;
 mod security_center;
 mod signing;
@@ -22,6 +21,7 @@ mod types;
 pub mod prelude {
     pub use gateway_client_and_api::prelude::*;
     pub use sargon_clients::prelude::*;
+
     pub use sargon_factor_instances_provider::prelude::*;
     pub use sargon_keys_collector::prelude::*;
     pub use sargon_manifests::prelude::*;
@@ -36,8 +36,21 @@ pub mod prelude {
 
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
 
+    pub(crate) use serde::{
+        de, ser::SerializeStruct, Deserializer, Serializer,
+    };
+
+    pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use serde_with::{serde_as, DisplayFromStr};
+    pub(crate) use std::collections::HashSet;
+
     #[cfg(test)]
     pub(crate) use radix_common::math::Decimal as ScryptoDecimal192;
+    #[cfg(test)]
+    pub(crate) use std::collections::BTreeSet;
+
+    #[cfg(test)]
+    pub(crate) use serde_json::json;
 }
 
 pub use prelude::*;

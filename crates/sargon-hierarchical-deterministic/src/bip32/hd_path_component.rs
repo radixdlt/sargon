@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::prelude::*;
 
 /// A component for a BIP32 hd path, mappable into a `u32`. Retains information about the creating context, if this component is securified or not. And if it is not securified it is hardened or not.

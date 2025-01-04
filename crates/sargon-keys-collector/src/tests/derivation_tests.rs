@@ -1,3 +1,6 @@
+use sargon_core_network::prelude::NetworkID;
+use sargon_numeric::prelude::*;
+
 use crate::prelude::*;
 
 pub trait DerivationPathConstructors: Sized {
@@ -262,6 +265,7 @@ mod key_derivation_tests {
         assert!(outcome.all_factors().factor_instances().is_empty())
     }
     mod multi_key {
+
         use super::*;
 
         #[actix_rt::test]

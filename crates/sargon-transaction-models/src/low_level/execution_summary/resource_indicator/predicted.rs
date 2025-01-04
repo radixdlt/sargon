@@ -64,7 +64,7 @@ macro_rules! decl_predicted {
         )*
         $wrapped_type:ty
     ) => {
-        paste! {
+        paste::paste! {
             decl_predicted!(
                 $(
                     #[doc = $expr]

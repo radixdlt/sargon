@@ -41,7 +41,7 @@ macro_rules! decl_sign_response {
         impl From<$struct_name> for $internal_struct_name {
             fn from(value: $struct_name) -> Self {
                 Self::new(
-                    sargon::IndexMap::from_iter(value.per_factor_source.into_iter().map(
+                    IndexMap::from_iter(value.per_factor_source.into_iter().map(
                         |item| {
                             (
                                 item.factor_source_id.into_internal(),

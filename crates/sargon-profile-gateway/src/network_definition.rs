@@ -43,7 +43,6 @@ impl NetworkDefinition {
     }
 }
 
-use sargon_core::NetworkID;
 use NetworkID::*;
 impl NetworkDefinition {
     /// The Radix mainnet, the "real" Network on which all launched Dapps and

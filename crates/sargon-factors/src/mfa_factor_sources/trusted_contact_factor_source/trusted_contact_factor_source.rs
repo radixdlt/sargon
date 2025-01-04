@@ -1,3 +1,5 @@
+use sargon_core_short_string::prelude::{DisplayName, EmailAddress};
+
 use crate::prelude::*;
 
 /// A factor source representing a person, company, organization or otherwise

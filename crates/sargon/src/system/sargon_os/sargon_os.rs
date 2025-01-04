@@ -24,7 +24,7 @@ impl WithBios for Clients {
 
 /// So that we do not have to go through `self.clients`,
 /// but can use e.g. `self.secure_storage` directly.
-impl Deref for SargonOS {
+impl std::ops::Deref for SargonOS {
     type Target = Clients;
 
     fn deref(&self) -> &Self::Target {

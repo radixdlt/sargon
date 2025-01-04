@@ -1222,7 +1222,7 @@ mod tests {
         // ASSERT
         assert_eq!(accounts.len(), n);
         assert_eq!(
-            HashSet::from_iter(
+            HashSet::<AccountAddress>::from_iter(
                 accounts.clone().into_iter().map(|a| a.address())
             )
             .len(),

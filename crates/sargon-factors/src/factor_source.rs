@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::prelude::*;
 
 #[allow(clippy::large_enum_variant)]

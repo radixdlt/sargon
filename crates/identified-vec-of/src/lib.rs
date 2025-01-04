@@ -26,6 +26,8 @@ pub mod prelude {
     pub use crate::identified_vec_of_modify::*;
     pub use crate::identified_vec_of_validation_import_export::*;
 
+    pub use indexmap::IndexMap;
+    pub use indexmap::IndexSet;
     pub use itertools::Itertools;
     pub use std::fmt::{Debug, Display};
     pub use std::hash::Hash as StdHash;

@@ -1,4 +1,4 @@
-use sargon_core::decl_bool_type;
+use sargon_core_misc::decl_bool_type;
 
 use crate::prelude::*;
 

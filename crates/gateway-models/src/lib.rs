@@ -4,7 +4,6 @@ pub mod prelude {
     pub use crate::types::*;
 
     pub use sargon_addresses::prelude::*;
-    pub use sargon_core::prelude::*;
     pub(crate) use sargon_transaction_models::prelude::*;
 
     pub use radix_engine_toolkit_common::receipt::SerializableToolkitTransactionReceipt as ScryptoSerializableToolkitTransactionReceipt;
@@ -60,6 +59,12 @@ pub mod prelude {
             TransactionManifestV2 as ScryptoTransactionManifestV2,
             TransactionManifestV2Builder as ScryptoTransactionManifestV2Builder,
         },
+    };
+
+    pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use serde::{
+        de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
+        Serializer,
     };
 }
 

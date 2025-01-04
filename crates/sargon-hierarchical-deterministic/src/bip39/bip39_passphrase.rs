@@ -28,12 +28,6 @@ impl BIP39Passphrase {
         .to_string()
     }
 }
-impl SafeToLog for BIP39Passphrase {
-    /// Logs the word count and FactorSourceID o
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
-        self.partially_obfuscated_string()
-    }
-}
 
 impl BIP39Passphrase {
     pub fn new(s: impl AsRef<str>) -> Self {
@@ -107,18 +101,6 @@ mod tests {
     fn display() {
         assert_eq!(format!("{}", SUT::new("so secret")), "<OBFUSCATED>");
         assert_eq!(format!("{}", SUT::default()), "<OBFUSCATED>");
-    }
-
-    #[test]
-    fn non_sensitive() {
-        assert_eq!(
-            format!("{:?}", SUT::new("so secret").non_sensitive()),
-            format!("{:?}", "<NOT EMPTY>")
-        );
-        assert_eq!(
-            format!("{:?}", SUT::default().non_sensitive()),
-            format!("{:?}", "<EMPTY>")
-        );
     }
 
     #[test]

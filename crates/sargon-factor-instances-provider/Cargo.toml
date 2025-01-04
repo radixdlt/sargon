@@ -9,7 +9,6 @@ identified-vec-of = { path = "../identified-vec-of" }
 sargon-core-assert-json = { path = "../sargon-core-assert-json" }
 sargon-core-utils = { path = "../sargon-core-utils" }
 sargon-core-error = { path = "../sargon-core-error" }
-sargon-core = { path = "../sargon-core" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-keys-collector = { path = "../sargon-keys-collector" }
@@ -26,6 +25,8 @@ next-derivation-index-ephemeral = { path = "../next-derivation-index-ephemeral" 
 # ==== EXTERNAL DEPENDENCIES ====
 derive_more = { workspace = true }
 futures = { workspace = true }
+indexmap = { workspace = true }
+serde = { workspace = true }
 
 [dev-dependencies]
 actix-rt = { workspace = true }

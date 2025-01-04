@@ -42,13 +42,3 @@ impl From<MatrixOfFactorInstances> for ScryptoRuleSet {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn number_of_minutes_per_day() {
-        assert_eq!(MINUTES_PER_DAY, 1440);
-    }
-}

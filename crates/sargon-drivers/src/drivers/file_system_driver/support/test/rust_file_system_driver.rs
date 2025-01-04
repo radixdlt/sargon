@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use crate::prelude::*;
 
@@ -87,7 +90,8 @@ mod tests {
         let dir_path = dir_path.as_ref();
         assert!(std::fs::create_dir_all(dir_path).is_ok());
 
-        let file_name = format!("delete-me--generated-by-test-{}.txt", id());
+        let file_name =
+            format!("delete-me--generated-by-test-{}.txt", Uuid::new_v4());
         let file_path_buf = dir_path.join(file_name);
         let file = String::from(file_path_buf.to_string_lossy());
         file

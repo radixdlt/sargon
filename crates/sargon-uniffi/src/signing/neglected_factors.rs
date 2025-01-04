@@ -1,9 +1,8 @@
 use crate::prelude::*;
 use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
 use sargon::NeglectFactorReason as InternalNeglectFactorReason;
-type InternalNeglectedFactors = sargon::AbstractNeglectedFactor<
-    sargon::IndexSet<InternalFactorSourceIDFromHash>,
->;
+type InternalNeglectedFactors =
+    sargon::AbstractNeglectedFactor<IndexSet<InternalFactorSourceIDFromHash>>;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
 pub struct NeglectedFactors {

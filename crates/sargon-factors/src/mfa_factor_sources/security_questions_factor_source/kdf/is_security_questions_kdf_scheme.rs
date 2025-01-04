@@ -1,3 +1,5 @@
+use sargon_encryption::EncryptionKey;
+
 use crate::prelude::*;
 
 pub trait IsSecurityQuestionsKDFScheme {

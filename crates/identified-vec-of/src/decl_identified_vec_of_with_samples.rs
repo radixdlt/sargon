@@ -9,7 +9,7 @@ macro_rules! decl_identified_vec_of {
         $collection_type: ident,
         $element_type: ident
     ) => {
-        paste! {
+       paste::paste! {
             $(
                 #[doc = $expr]
             )*
@@ -104,7 +104,7 @@ macro_rules! decl_identified_vec_of {
         )*
         $element_type: ident
     ) => {
-		paste! {
+		paste::paste! {
 			decl_identified_vec_of!(
 				$(
                     #[doc = $expr]

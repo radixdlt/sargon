@@ -34,7 +34,7 @@ impl std::ops::Deref for PersonaDataEntryID {
 impl PersonaDataEntryID {
     /// Generates a new `PersonaDataEntryID` (using Uuid::new_v4())
     pub fn generate() -> Self {
-        id().into()
+        Uuid::new_v4().into()
     }
 }
 

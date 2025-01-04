@@ -2,13 +2,27 @@
 resolver = "2"
 members = [
     # sorted according to dependency, not alphabetically
+    "crates/sargon-has-sample-values",
     "crates/sargon-core-utils",
     "crates/sargon-core-error",
     "crates/sargon-core-assert-json",
+    "crates/sargon-numeric",
+    "crates/sargon-hash",
+    "crates/sargon-ecc",
 
     "crates/identified-vec-of",
 
-    "crates/sargon-core",
+    "crates/sargon-bytes",
+    "crates/sargon-encryption",
+    "crates/sargon-core-collections",
+    "crates/sargon-core-entity",
+    "crates/sargon-core-time-utils",
+    "crates/sargon-core-host-info",
+    "crates/sargon-core-metadata",
+    "crates/sargon-core-misc",
+    "crates/sargon-core-network",
+    "crates/sargon-core-short-string",
+    "crates/sargon-core-tx",
     "crates/sargon-hierarchical-deterministic",
     "crates/sargon-factors",
     "crates/sargon-factors-supporting-types",
@@ -39,13 +53,27 @@ members = [
 
 default-members = [
     # sorted according to dependency, not alphabetically
+    "crates/sargon-has-sample-values",
     "crates/sargon-core-utils",
     "crates/sargon-core-error",
     "crates/sargon-core-assert-json",
+    "crates/sargon-numeric",
+    "crates/sargon-hash",
+    "crates/sargon-ecc",
 
     "crates/identified-vec-of",
 
-    "crates/sargon-core",
+    "crates/sargon-bytes",
+    "crates/sargon-encryption",
+    "crates/sargon-core-collections",
+    "crates/sargon-core-entity",
+    "crates/sargon-core-time-utils",
+    "crates/sargon-core-host-info",
+    "crates/sargon-core-metadata",
+    "crates/sargon-core-misc",
+    "crates/sargon-core-network",
+    "crates/sargon-core-short-string",
+    "crates/sargon-core-tx",
     "crates/sargon-hierarchical-deterministic",
     "crates/sargon-factors",
     "crates/sargon-factors-supporting-types",
@@ -173,8 +201,10 @@ hex = { git = "https://github.com/KokaKiwi/rust-hex/", rev = "b2b4370b5bf021b98e
 # hkdf = "0.12.4"
 hkdf = { git = "https://github.com/RustCrypto/KDFs/", rev = "1ac16e8b9d4ee7a67613c9396c6cc1327652eaba" }
 
+indexmap = { version = "2.2.5", default-features = false }
+
 # SLIP10 implementation
-# iota_crypto = "0.23.2"
+# iota-crypto = "0.23.2"
 iota-crypto = { git = "https://github.com/iotaledger/crypto.rs", rev = "8c13125541e762206e2dc57b8bfde89c7f6ce8e3", features = [
     "slip10",
     "ed25519",

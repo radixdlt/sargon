@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub fn profile_id() -> ProfileID {
-    ProfileID(id())
+    ProfileID(Uuid::new_v4())
 }
 
 /// A stable and globally unique identifier of a Profile.

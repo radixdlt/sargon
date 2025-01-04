@@ -30,3 +30,13 @@ pub const POLLING_DELAY_INCREMENT_IN_SECONDS: u64 = 1;
 
 /// Number of minutes per day.
 pub const MINUTES_PER_DAY: u32 = 24 * 60;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn number_of_minutes_per_day() {
+        assert_eq!(MINUTES_PER_DAY, 1440);
+    }
+}

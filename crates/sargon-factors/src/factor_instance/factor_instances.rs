@@ -1,3 +1,6 @@
+use sargon_core_collections::prelude::{AppendableCollection, Just};
+use sargon_core_misc::HiddenConstructor;
+
 use crate::prelude::*;
 
 /// A collection of factor instances.

@@ -50,9 +50,9 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     Hash,
-    Deref,
     DeserializeFromStr,
     SerializeDisplay,
+    derive_more::Deref,
     derive_more::Display,
     derive_more::Debug,
 )]

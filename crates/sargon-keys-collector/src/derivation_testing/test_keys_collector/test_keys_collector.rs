@@ -1,6 +1,8 @@
 #![cfg(test)]
 #![allow(unused)]
 
+use sargon_core_network::prelude::NetworkID;
+
 use crate::prelude::*;
 
 impl KeysCollector {

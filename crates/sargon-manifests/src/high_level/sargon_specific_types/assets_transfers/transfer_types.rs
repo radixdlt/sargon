@@ -9,7 +9,7 @@ macro_rules! decl_transfer_of {
         $struct_name: ident,
         $($fields:tt)*
     ) => {
-        paste! {
+        paste::paste! {
             $(
                 #[doc = $expr]
             )*
@@ -50,7 +50,7 @@ macro_rules! decl_per_asset_transfer_of {
             pub recipient: OwnedOrThirdPartyAccountAddress,
         );
 
-        paste! {
+        paste::paste! {
             impl [< PerAsset $struct_name Transfer>] {
 
                 pub(crate) fn deposit_instruction(&self, builder: ScryptoTransactionManifestBuilder, bucket: &crate::bucket::Bucket) -> ScryptoTransactionManifestBuilder {

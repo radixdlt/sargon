@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::prelude::*;
 use std::sync::Mutex;
 

@@ -40,8 +40,9 @@ impl HasSampleValues for SignedAuthIntent {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures = indexmap!(
-           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        let intent_signatures = IndexMap::kv(
+            AddressOfAccountOrPersona::sample(),
+            IntentSignature(signature),
         );
 
         SignedAuthIntent::new(intent, intent_signatures).unwrap()
@@ -53,8 +54,9 @@ impl HasSampleValues for SignedAuthIntent {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures = indexmap!(
-           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        let intent_signatures = IndexMap::kv(
+            AddressOfAccountOrPersona::sample(),
+            IntentSignature(signature),
         );
 
         SignedAuthIntent::new(intent, intent_signatures).unwrap()
@@ -86,16 +88,18 @@ mod tests {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures = indexmap!(
-           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        let intent_signatures = IndexMap::kv(
+            AddressOfAccountOrPersona::sample(),
+            IntentSignature(signature),
         );
         assert!(SignedAuthIntent::new(intent, intent_signatures).is_ok())
     }
 
     #[test]
     fn test_invalid_signatures() {
-        let intent_signatures = indexmap!(
-           AddressOfAccountOrPersona::sample() => IntentSignature::sample()
+        let intent_signatures = IndexMap::kv(
+            AddressOfAccountOrPersona::sample(),
+            IntentSignature::sample(),
         );
         assert_eq!(
             SUT::new(AuthIntent::sample(), intent_signatures),
@@ -110,8 +114,9 @@ mod tests {
 
         let signature = mnemonic_with_passphrase
             .sign(&intent.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures = indexmap!(
-           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        let intent_signatures = IndexMap::kv(
+            AddressOfAccountOrPersona::sample(),
+            IntentSignature(signature),
         );
 
         assert_eq!(

@@ -430,9 +430,9 @@ impl SargonOS {
                 device_factor_source.clone(),
             )
         })
-        .log_info(
-            "Successfully loaded Private DeviceFactorSource from SecureStorage",
-        )
+        // .log_info(
+        //     "Successfully loaded Private DeviceFactorSource from SecureStorage",
+        // )
     }
 
     /// Tries to load a `MnemonicWithPassphrase` from secure storage

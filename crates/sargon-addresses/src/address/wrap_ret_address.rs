@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use sargon_hash::hash_of;
+
 pub trait AddressViaRet: Sized {
     fn new(
         node_id: impl Into<ScryptoNodeId>,
@@ -48,7 +50,7 @@ macro_rules! decl_ret_wrapped_address {
         )*
         $address_type: ident
     ) => {
-        paste! {
+        paste::paste! {
             use std::str::FromStr;
             $(
                 #[doc = $expr]
@@ -111,6 +113,7 @@ macro_rules! decl_ret_wrapped_address {
                 }
             }
 
+            use std::cmp::Ordering;
             impl Ord for [< $address_type:camel Address >] {
                 fn cmp(&self, other: &Self) -> Ordering {
                     self.address().cmp(&other.address())
@@ -122,6 +125,9 @@ macro_rules! decl_ret_wrapped_address {
                     Some(self.cmp(other))
                 }
             }
+
+            use sargon_bytes::prelude::generate_byte_array;
+            use sargon_core_utils::prelude::format_string;
 
             impl [< $address_type:camel Address >] {
 
@@ -151,6 +157,7 @@ macro_rules! decl_ret_wrapped_address {
                     let ret_address = [<Ret $address_type:camel Address>]::new(node_id, network_id.discriminant()).unwrap();
                     Self::from(ret_address)
                 }
+
 
                 pub fn formatted(&self, format: AddressFormat) -> String {
                     match format {

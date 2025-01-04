@@ -1,3 +1,5 @@
+use serde::ser::SerializeStruct;
+
 use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]

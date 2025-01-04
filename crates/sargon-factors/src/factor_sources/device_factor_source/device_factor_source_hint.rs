@@ -1,3 +1,5 @@
+use sargon_core_host_info::prelude::HostInfo;
+
 use crate::prelude::*;
 
 /// Properties describing a DeviceFactorSource to help user disambiguate between

@@ -133,8 +133,9 @@ mod tests {
         let mnemonic_with_passphrase = MnemonicWithPassphrase::sample();
         let signature = mnemonic_with_passphrase
             .sign(&sut.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures = indexmap!(
-           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        let intent_signatures = IndexMap::kv(
+            AddressOfAccountOrPersona::sample(),
+            IntentSignature(signature),
         );
 
         let signed = sut.signed(intent_signatures.clone()).unwrap();
@@ -152,8 +153,9 @@ mod tests {
         let mnemonic_with_passphrase = MnemonicWithPassphrase::sample();
         let signature = mnemonic_with_passphrase
             .sign(&sut.auth_intent_hash().hash(), &DerivationPath::sample());
-        let intent_signatures = indexmap!(
-           AddressOfAccountOrPersona::sample() => IntentSignature(signature)
+        let intent_signatures = IndexMap::kv(
+            AddressOfAccountOrPersona::sample(),
+            IntentSignature(signature),
         );
 
         let signed = sut.signed(intent_signatures.clone()).unwrap();

@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use crypto::keys::x25519::PublicKey as X25519PublicKey;
 use crypto::keys::x25519::SecretKey as X25519PrivateKey;
+use sargon_encryption::EncryptionKey;
 
 /// ❗️ NOT PRODUCTION READY YET ❗️
 /// A key derivation function which produces Encryption Keys from a set of

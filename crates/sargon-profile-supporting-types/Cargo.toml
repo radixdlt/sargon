@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core = { path = "../sargon-core" }
 identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-factors = { path = "../sargon-factors" }
@@ -17,6 +16,7 @@ sargon-profile = { path = "../sargon-profile" }
 
 # === EXTERNAL DEPENDENCIES ===
 derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
 itertools = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }

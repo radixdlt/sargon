@@ -41,12 +41,6 @@ pub struct P2PLink {
     pub display_name: String,
 }
 
-impl SafeToLog for P2PLink {
-    fn non_sensitive(&self) -> impl std::fmt::Debug {
-        self.to_obfuscated_string()
-    }
-}
-
 impl P2PLink {
     pub fn new(
         connection_password: RadixConnectPassword,
@@ -207,15 +201,6 @@ mod tests {
         assert_eq!(
             format!("{}", P2PLink::sample()),
             "P2PLink( name: 'Chrome on Macbook', password: <OMITTED>)"
-        );
-    }
-
-    #[test]
-    fn safe_to_log() {
-        let sut = P2PLink::sample();
-        assert_eq!(
-            format!("{:?}", sut.to_string()),
-            format!("{:?}", sut.non_sensitive())
         );
     }
 }

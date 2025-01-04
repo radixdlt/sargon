@@ -191,6 +191,8 @@ impl ProfileNetworkDetailsForAuthorizedDapp for ProfileNetwork {
 
 #[cfg(test)]
 mod tests {
+    use sargon_core_time_utils::now;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

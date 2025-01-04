@@ -1,5 +1,7 @@
 #![allow(clippy::non_canonical_partial_ord_impl)]
 
+use std::ops::Deref;
+
 use crate::prelude::*;
 
 #[derive(derive_more::Debug)]

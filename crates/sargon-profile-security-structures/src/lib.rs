@@ -11,10 +11,15 @@ pub mod prelude {
     pub use crate::role_kind::*;
     pub use crate::roles_matrices_structures::*;
 
+    pub use identified_vec_of::prelude::*;
     pub use next_derivation_index_ephemeral::prelude::*;
     pub use sargon_addresses::prelude::*;
-    pub use sargon_core::prelude::*;
+    pub use sargon_core_collections::prelude::{Just, JustKV};
+    pub use sargon_core_network::prelude::*;
+    pub use sargon_core_short_string::prelude::*;
+    pub use sargon_core_utils::prelude::*;
     pub use sargon_factors::prelude::*;
+    pub use sargon_has_sample_values::prelude::*;
     pub use sargon_hierarchical_deterministic::prelude::*;
 
     pub(crate) use radix_engine_interface::{
@@ -28,4 +33,15 @@ pub mod prelude {
             CompositeRequirement as ScryptoCompositeRequirement,
         },
     };
+
+    pub(crate) use enum_as_inner::EnumAsInner;
+    pub(crate) use serde::{Deserialize, Serialize};
+    #[cfg(test)]
+    pub(crate) use serde_json::json;
+
+    pub(crate) use std::collections::HashSet;
+
+    pub(crate) use std::str::FromStr;
+
+    pub(crate) use std::sync::RwLock;
 }

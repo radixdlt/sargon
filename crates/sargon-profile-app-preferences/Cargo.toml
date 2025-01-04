@@ -5,10 +5,11 @@ edition = "2021"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-sargon-core = { path = "../sargon-core" }
 identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-factors = { path = "../sargon-factors" }
+sargon-numeric = { path = "../sargon-numeric" }
+sargon-core-misc = { path = "../sargon-core-misc" }                                     # decl_bool_Type
 sargon-keys-collector = { path = "../sargon-keys-collector" }
 sargon-addresses = { path = "../sargon-addresses" }
 sargon-transaction-models = { path = "../sargon-transaction-models" }
@@ -20,5 +21,8 @@ sargon-profile-security-structures = { path = "../sargon-profile-security-struct
 
 # === EXTERNAL DEPENDENCIES ===
 derive_more = { workspace = true }
+indexmap = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

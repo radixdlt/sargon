@@ -6,12 +6,12 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core = { path = "../sargon-core" }
 sargon-core-utils = { path = "../sargon-core-utils" }
 identified-vec-of = { path = "../identified-vec-of" }
 sargon-hierarchical-deterministic = { path = "../sargon-hierarchical-deterministic" }
 sargon-factors = { path = "../sargon-factors" }
 sargon-addresses = { path = "../sargon-addresses" }
+sargon-core-metadata = { path = "../sargon-core-metadata" }
 sargon-transaction-models = { path = "../sargon-transaction-models" }
 gateway-models = { path = "../gateway-models" }
 sargon-profile = { path = "../sargon-profile" }
@@ -27,6 +27,9 @@ sbor = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
 derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
+itertools = { workspace = true }
+paste = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

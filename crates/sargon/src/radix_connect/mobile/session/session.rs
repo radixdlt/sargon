@@ -1,3 +1,5 @@
+use sargon_encryption::EncryptionKey;
+
 use super::session_id::SessionID;
 use super::session_origin::SessionOrigin;
 use crate::prelude::*;

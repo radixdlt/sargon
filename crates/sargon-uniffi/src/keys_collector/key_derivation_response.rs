@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use sargon::IndexMap;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
 
 /// A collection of `HierarchicalDeterministicFactorInstance`s, on a

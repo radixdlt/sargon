@@ -37,10 +37,10 @@ use crate::prelude::*;
     PartialOrd,
     Ord,
     Hash,
-    Deref,
-    AsRef,
     DeserializeFromStr,
     SerializeDisplay,
+    derive_more::Deref,
+    derive_more::AsRef,
     derive_more::Display,
     derive_more::Debug,
 )]

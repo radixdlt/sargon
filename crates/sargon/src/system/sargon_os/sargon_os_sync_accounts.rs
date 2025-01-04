@@ -153,10 +153,10 @@ mod tests {
         // ASSERT
         assert_eq!(
             accounts_status,
-            indexmap!(
-                account_address_deleted => true,
-                account_address_not_deleted => false,
-            )
+            IndexMap::<AccountAddress, bool>::from_iter([
+                (account_address_deleted, true),
+                (account_address_not_deleted, false),
+            ])
         )
     }
 

@@ -1,4 +1,4 @@
-use sargon_core::parse_url;
+use sargon_core_misc::parse_url;
 
 use crate::prelude::*;
 

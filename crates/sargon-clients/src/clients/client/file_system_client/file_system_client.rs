@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use std::path::Path;
+use std::{fs, path::Path};
 
 #[derive(Debug)]
 pub struct FileSystemClient {
@@ -120,7 +120,8 @@ mod tests {
         let dir_path = dir_path.as_ref();
         assert!(std::fs::create_dir_all(dir_path).is_ok());
 
-        let file_name = format!("delete-this--generated-by-test-{}.txt", id());
+        let file_name =
+            format!("delete-this--generated-by-test-{}.txt", Uuid::new_v4());
         dir_path.join(file_name)
     }
 

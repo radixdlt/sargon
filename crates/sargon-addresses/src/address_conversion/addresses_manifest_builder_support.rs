@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 macro_rules! from_scrypto_global_address {
     ($address_type: ty) => {
-        paste! {
+        paste::paste! {
             impl TryFrom<(ScryptoGlobalAddress, NetworkID)> for $address_type {
                 type Error = crate::CommonError;
                 fn try_from(value: (ScryptoGlobalAddress, NetworkID)) -> Result<Self> {
@@ -26,7 +26,7 @@ from_scrypto_global_address!(LockerAddress);
 macro_rules! from_scrypto_address_variant {
 
     ($address_type: ty) => {
-        paste! {
+        paste::paste! {
             impl From<([< Scrypto $address_type >], NetworkID)> for $address_type {
                 fn from(value: ([< Scrypto $address_type >], NetworkID)) -> Self {
                     let target_type_name = stringify!($address_type);
@@ -42,7 +42,7 @@ from_scrypto_address_variant!(ResourceAddress);
 
 macro_rules! from_scrypto_component_address {
     ($address_type: ty) => {
-        paste! {
+        paste::paste! {
             impl From<(ScryptoComponentAddress, NetworkID)> for $address_type {
                 fn from(value: (ScryptoComponentAddress, NetworkID)) -> Self {
                     <$address_type as AddressViaRet>::new(value.0.into_node_id(), value.1)
