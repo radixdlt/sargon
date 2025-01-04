@@ -1,0 +1,24 @@
+[package]
+name = "sargon-bytes"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-core-assert-json = { path = "../../core/assert-json" }
+sargon-core-error = { path = "../../core/error" }
+sargon-has-sample-values = { path = "../../core/has-sample-values" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+delegate = { workspace = true }
+derive_more = { workspace = true }
+hex = { workspace = true }
+paste = { workspace = true }
+rand = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_with = { workspace = true }
+zeroize = { workspace = true }

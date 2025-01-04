@@ -1,103 +1,70 @@
 [workspace]
 resolver = "2"
 members = [
-    # sorted according to dependency, not alphabetically
-    "crates/sargon-has-sample-values",
-    "crates/sargon-core-utils",
-    "crates/sargon-core-error",
-    "crates/sargon-core-assert-json",
-    "crates/sargon-numeric",
-    "crates/sargon-hash",
-    "crates/sargon-ecc",
 
-    "crates/identified-vec-of",
+    # === CORE ===
+    "crates/core/assert-json",
+    "crates/core/collections",
+    "crates/core/error",
+    "crates/core/has-sample-values",
+    "crates/core/misc",
+    "crates/core/time-utils",
+    "crates/core/utils",
 
-    "crates/sargon-bytes",
-    "crates/sargon-encryption",
-    "crates/sargon-core-collections",
-    "crates/sargon-core-entity",
-    "crates/sargon-core-time-utils",
-    "crates/sargon-core-host-info",
-    "crates/sargon-core-metadata",
-    "crates/sargon-core-misc",
-    "crates/sargon-core-network",
-    "crates/sargon-core-short-string",
-    "crates/sargon-core-tx",
-    "crates/sargon-hierarchical-deterministic",
-    "crates/sargon-factors",
-    "crates/sargon-factors-supporting-types",
-    "crates/sargon-addresses",
-    "crates/sargon-keys-collector",
-    "crates/sargon-transaction-models",
-    "crates/sargon-manifests",
-    "crates/sargon-profile-supporting-types",
-    "crates/sargon-drivers",
-    "crates/http-client",
-    "crates/sargon-clients",
-    "crates/sargon-profile-gateway",
-    "crates/sargon-profile",
-    "crates/sargon-profile-app-preferences",
-    "crates/sargon-profile-security-structures",
-    "crates/sargon-profile-logic",
-    "crates/sargon-factor-instances-provider",
-    "crates/next-derivation-index-ephemeral",
+    # === CRYPTO ===
+    "crates/crypto/addresses",
+    "crates/crypto/ecc",
+    "crates/crypto/encryption",
+    "crates/crypto/hash",
+    "crates/crypto/hd",
 
-    "crates/gateway-models",
-    "crates/gateway-client-and-api",
+    # === FACTORS ===
+    "crates/factors/factors",
+    "crates/factors/instances-provider",
+    "crates/factors/keys-collector",
+    "crates/factors/next-derivation-index-ephemeral",
+    "crates/factors/supporting-types",
 
-    "crates/sargon", # to be split
+    # === GATEWAY ===
+    "crates/gateway/client-and-api",
+    "crates/gateway/models",
 
-    "crates/sargon-uniffi-conversion-macros",
-    "crates/sargon-uniffi",
+    # === PROFILE ===
+    "crates/profile/logic/logic_SPLIT_ME",
+    "crates/profile/models/app-preferences",
+    "crates/profile/models/gateway",
+    "crates/profile/models/profile_SPLIT_ME",
+    "crates/profile/models/security-structures",
+    "crates/profile/models/supporting-types",
+
+    # === SARGON - SPLIT ME ===
+    "crates/sargon_SPLIT_ME", 
+
+    # === SYSTEM ===
+    "crates/system/clients/clients",
+    "crates/system/clients/http",
+    "crates/system/drivers",
+
+    # === TRANSACTION ===
+    "crates/transaction/foundation",
+    "crates/transaction/manifests",
+    "crates/transaction/models",
+
+    # === TYPES ===
+    "crates/types/bytes",
+    "crates/types/entity-foundation",
+    "crates/types/host-info",
+    "crates/types/identified-vec-of",
+    "crates/types/metadata",
+    "crates/types/network",
+    "crates/types/numeric",
+    "crates/types/short-string",
+
+    # === UNIFFI ===
+    "crates/uniffi/uniffi_SPLIT_ME",
+    "crates/uniffi/conversion-macros",
 ]
 
-default-members = [
-    # sorted according to dependency, not alphabetically
-    "crates/sargon-has-sample-values",
-    "crates/sargon-core-utils",
-    "crates/sargon-core-error",
-    "crates/sargon-core-assert-json",
-    "crates/sargon-numeric",
-    "crates/sargon-hash",
-    "crates/sargon-ecc",
-
-    "crates/identified-vec-of",
-
-    "crates/sargon-bytes",
-    "crates/sargon-encryption",
-    "crates/sargon-core-collections",
-    "crates/sargon-core-entity",
-    "crates/sargon-core-time-utils",
-    "crates/sargon-core-host-info",
-    "crates/sargon-core-metadata",
-    "crates/sargon-core-misc",
-    "crates/sargon-core-network",
-    "crates/sargon-core-short-string",
-    "crates/sargon-core-tx",
-    "crates/sargon-hierarchical-deterministic",
-    "crates/sargon-factors",
-    "crates/sargon-factors-supporting-types",
-    "crates/sargon-addresses",
-    "crates/sargon-keys-collector",
-    "crates/sargon-transaction-models",
-    "crates/sargon-manifests",
-    "crates/sargon-profile-supporting-types",
-    "crates/sargon-drivers",
-    "crates/http-client",
-    "crates/sargon-clients",
-    "crates/sargon-profile-gateway",
-    "crates/sargon-profile",
-    "crates/sargon-profile-app-preferences",
-    "crates/sargon-profile-security-structures",
-    "crates/sargon-profile-logic",
-    "crates/sargon-factor-instances-provider",
-    "crates/next-derivation-index-ephemeral",
-
-    "crates/gateway-models",
-    "crates/gateway-client-and-api",
-
-    "crates/sargon", # to be split
-]
 
 [profile.release]
 incremental = false

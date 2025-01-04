@@ -1,0 +1,26 @@
+[package]
+name = "gateway-client-and-api"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-core-assert-json = { path = "../../core/assert-json" }
+sargon-core-utils = { path = "../../core/utils" }
+sargon-core-metadata = { path = "../../types/metadata" }
+sargon-addresses = { path = "../../crypto/addresses" }
+sargon-drivers = { path = "../../system/drivers" }
+http-client = { path = "../../system/clients/http" }
+gateway-models = { path = "../../gateway/models" }
+sargon-transaction-models = { path = "../../transaction/models" }
+sargon-profile-gateway = { path = "../../profile/models/gateway" }
+
+# === RADIX DEPENDENCIES ===
+radix-common = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

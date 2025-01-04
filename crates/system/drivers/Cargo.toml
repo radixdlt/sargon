@@ -1,0 +1,32 @@
+[package]
+name = "sargon-drivers"
+version = "1.1.99"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
+sargon-addresses = { path = "../../crypto/addresses" }
+sargon-profile = { path = "../../profile/models/profile_SPLIT_ME" }
+sargon-profile-supporting-types = { path = "../../profile/models/supporting-types" }
+sargon-core-time-utils = { path = "../../core/time-utils" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+enum-iterator = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }
+log = { workspace = true }
+pretty_env_logger = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+strum = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

@@ -1,0 +1,29 @@
+[package]
+name = "sargon-profile-gateway"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === INTERNAL DEPENDENCIES ===
+identified-vec-of = { path = "../../../types/identified-vec-of" }
+sargon-hierarchical-deterministic = { path = "../../../crypto/hd" }
+sargon-factors = { path = "../../../factors/factors" }
+sargon-keys-collector = { path = "../../../factors/keys-collector" }
+sargon-addresses = { path = "../../../crypto/addresses" }
+sargon-transaction-models = { path = "../../../transaction/models" }
+sargon-core-network = { path = "../../../types/network" }
+sargon-core-error = { path = "../../../core/error" }
+sargon-core-misc = { path = "../../../core/misc" }
+sargon-core-assert-json = { path = "../../../core/assert-json" }
+sargon-has-sample-values = { path = "../../../core/has-sample-values" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+url = { workspace = true }

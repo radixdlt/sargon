@@ -1,0 +1,32 @@
+[package]
+name = "sargon-factor-instances-provider"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+identified-vec-of = { path = "../../types/identified-vec-of" }
+sargon-core-assert-json = { path = "../../core/assert-json" }
+sargon-core-utils = { path = "../../core/utils" }
+sargon-core-error = { path = "../../core/error" }
+sargon-factors = { path = "../../factors/factors" }
+sargon-hierarchical-deterministic = { path = "../../crypto/hd" }
+sargon-keys-collector = { path = "../../factors/keys-collector" }
+sargon-addresses = { path = "../../crypto/addresses" }
+sargon-profile = { path = "../../profile/models/profile_SPLIT_ME" }
+sargon-profile-logic = { path = "../../profile/logic/logic_SPLIT_ME" }
+sargon-clients = { path = "../../system/clients/clients" }
+sargon-profile-supporting-types = { path = "../../profile/models/supporting-types" }
+next-derivation-index-ephemeral = { path = "../../factors/next-derivation-index-ephemeral" }
+
+# ==== RADIX DEPENDENCIES ====
+# None
+
+# ==== EXTERNAL DEPENDENCIES ====
+derive_more = { workspace = true }
+futures = { workspace = true }
+indexmap = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

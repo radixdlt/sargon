@@ -1,0 +1,18 @@
+[package]
+name = "sargon-core-host-info"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-core-assert-json = { path = "../../core/assert-json" }
+sargon-has-sample-values = { path = "../../core/has-sample-values" }
+sargon-core-time-utils = { path = "../../core/time-utils" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
