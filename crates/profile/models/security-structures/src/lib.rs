@@ -13,13 +13,13 @@ pub mod prelude {
 
     pub use addresses::prelude::*;
     pub use core_collections::prelude::{Just, JustKV};
+    pub use core_utils::prelude::*;
     pub use factors::prelude::*;
     pub use has_sample_values::prelude::*;
     pub use hierarchical_deterministic::prelude::*;
     pub use identified_vec_of::prelude::*;
     pub use network::prelude::*;
     pub use next_derivation_index_ephemeral::prelude::*;
-    pub use sargon_core_utils::prelude::*;
     pub use short_string::prelude::*;
 
     pub(crate) use radix_engine_interface::{

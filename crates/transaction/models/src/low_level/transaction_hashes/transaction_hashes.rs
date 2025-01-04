@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 use crate::low_level::transaction_hashes::validate_and_decode_hash::validate_and_decode_hash;
+use core_utils::prelude::format_string;
 use radix_common::crypto::IsHash;
-use sargon_core_utils::prelude::format_string;
 
 macro_rules! decl_tx_hash {
     (

@@ -17,7 +17,7 @@ numeric = { path = "../../common/numeric" }
 has-sample-values = { path = "../../core/has-sample-values" }
 metadata = { path = "../../common/metadata" }
 network = { path = "../../common/network" }
-sargon-core-utils = { path = "../../core/utils" }
+core-utils = { path = "../../core/utils" }
 transaction-foundation = { path = "../../transaction/foundation" }
 core-collections = { path = "../../core/collections" }
 core-misc = { path = "../../core/misc" }                           # Instant

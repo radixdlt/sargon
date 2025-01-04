@@ -6,7 +6,7 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core-utils = { path = "../../core/utils" }
+core-utils = { path = "../../core/utils" }
 identified-vec-of = { path = "../../common/identified-vec-of" }
 hierarchical-deterministic = { path = "../../crypto/hd" }
 factors = { path = "../../factors/factors" }

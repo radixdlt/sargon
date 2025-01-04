@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 # === SARGON CRATES ===
 assert-json = { path = "../../core/assert-json" }
-sargon-core-utils = { path = "../../core/utils" }
+core-utils = { path = "../../core/utils" }
 metadata = { path = "../../common/metadata" }
 addresses = { path = "../../crypto/addresses" }
 drivers = { path = "../../system/drivers" }

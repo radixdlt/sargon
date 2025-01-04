@@ -1,7 +1,7 @@
 use crate::prelude::*;
+use core_utils::prelude::format_string;
 use radix_common::address::{AddressBech32Decoder, AddressBech32Encoder};
 use radix_engine_toolkit::utils::*;
-use sargon_core_utils::prelude::format_string;
 
 #[derive(
     Clone,

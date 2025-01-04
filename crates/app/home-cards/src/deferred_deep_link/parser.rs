@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+use gateway_client_and_api::GatewayClient;
 
 #[async_trait::async_trait]
 pub trait DeferredDeepLinkParser: Send + Sync {

@@ -1,6 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
+    # === FOR APP ===
+    "crates/app/home-cards",
+
     # === COMMON ===
     "crates/common/bytes",
     "crates/common/entity-foundation",
@@ -66,6 +69,9 @@ members = [
 ]
 
 default-members = [
+    # === FOR APP ===
+    "crates/app/home-cards",
+
     # === COMMON ===
     "crates/common/bytes",
     "crates/common/entity-foundation",

@@ -1,4 +1,4 @@
-use sargon_core_utils::prelude::{DeserializeStr, SerializeToString};
+use core_utils::prelude::{DeserializeStr, SerializeToString};
 
 use crate::prelude::*;
 

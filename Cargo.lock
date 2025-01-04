@@ -51,6 +51,7 @@ version = "1.1.99"
 dependencies = [
  "assert-json",
  "bytes 1.1.99",
+ "core-utils",
  "derive_more",
  "ecc",
  "enum-as-inner",
@@ -69,7 +70,6 @@ dependencies = [
  "radix-engine-interface",
  "radix-engine-toolkit",
  "radix-rust",
- "sargon-core-utils",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -857,6 +857,7 @@ name = "core-misc"
 version = "1.1.99"
 dependencies = [
  "assert-json",
+ "core-utils",
  "derive_more",
  "error",
  "has-sample-values",
@@ -865,10 +866,23 @@ dependencies = [
  "log",
  "pretty_assertions",
  "radix-common",
- "sargon-core-utils",
  "serde",
  "serde_json 1.0.108",
  "strum 0.26.1",
+]
+
+[[package]]
+name = "core-utils"
+version = "1.1.99"
+dependencies = [
+ "error",
+ "iso8601-timestamp",
+ "log",
+ "pretty_assertions",
+ "serde",
+ "serde_json 1.0.108",
+ "url",
+ "uuid 1.6.1",
 ]
 
 [[package]]
@@ -1363,6 +1377,7 @@ dependencies = [
  "addresses",
  "assert-json",
  "clients",
+ "core-utils",
  "derive_more",
  "error",
  "factors",
@@ -1375,7 +1390,6 @@ dependencies = [
  "profile",
  "profile-logic",
  "profile-supporting-types",
- "sargon-core-utils",
  "serde",
 ]
 
@@ -1386,6 +1400,7 @@ dependencies = [
  "bytes 1.1.99",
  "core-collections",
  "core-misc",
+ "core-utils",
  "derive_more",
  "ecc",
  "encryption",
@@ -1405,7 +1420,6 @@ dependencies = [
  "paste 1.0.14",
  "radix-common",
  "radix-engine-interface",
- "sargon-core-utils",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -1601,13 +1615,13 @@ dependencies = [
  "actix-rt",
  "addresses",
  "assert-json",
+ "core-utils",
  "drivers",
  "gateway-models",
  "http-client",
  "metadata",
  "profile-gateway",
  "radix-common",
- "sargon-core-utils",
  "serde",
  "serde_json 1.0.108",
  "transaction-models",
@@ -1843,6 +1857,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "home-cards"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "async-trait",
+ "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
+ "bytes 1.1.99",
+ "core-utils",
+ "derive_more",
+ "drivers",
+ "enum-as-inner",
+ "gateway-client-and-api",
+ "gateway-models",
+ "identified-vec-of",
+ "log",
+ "metadata",
+ "network",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "serde",
+ "serde_json 1.0.108",
+]
+
+[[package]]
 name = "host-info"
 version = "1.1.99"
 dependencies = [
@@ -1894,10 +1933,10 @@ version = "1.1.99"
 dependencies = [
  "actix-rt",
  "bytes 1.1.99",
+ "core-utils",
  "drivers",
  "error",
  "reqwest",
- "sargon-core-utils",
  "serde",
  "serde_json 1.0.108",
 ]
@@ -2396,6 +2435,7 @@ dependencies = [
  "account-for-display",
  "addresses",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
+ "core-utils",
  "derive_more",
  "enum-as-inner",
  "factors",
@@ -2413,7 +2453,6 @@ dependencies = [
  "radix-engine-toolkit",
  "radix-rust",
  "radix-transactions",
- "sargon-core-utils",
  "sbor",
  "serde",
  "serde_json 1.0.108",
@@ -2988,6 +3027,7 @@ version = "1.1.99"
 dependencies = [
  "addresses",
  "core-collections",
+ "core-utils",
  "derive_more",
  "enum-as-inner",
  "factors",
@@ -2999,7 +3039,6 @@ dependencies = [
  "next-derivation-index-ephemeral",
  "pretty_assertions",
  "radix-engine-interface",
- "sargon-core-utils",
  "serde",
  "serde_json 1.0.108",
  "short-string",
@@ -3580,7 +3619,6 @@ dependencies = [
  "derive_more",
  "drivers",
  "encryption",
- "enum-as-inner",
  "enum-iterator",
  "factor-instances-provider",
  "factors",
@@ -3589,6 +3627,7 @@ dependencies = [
  "gateway-models",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "hierarchical-deterministic",
+ "home-cards",
  "identified-vec-of",
  "keys-collector",
  "log",
@@ -3610,20 +3649,6 @@ dependencies = [
  "serde_with 3.4.0",
  "transaction-foundation",
  "transaction-models",
-]
-
-[[package]]
-name = "sargon-core-utils"
-version = "1.1.99"
-dependencies = [
- "error",
- "iso8601-timestamp",
- "log",
- "pretty_assertions",
- "serde",
- "serde_json 1.0.108",
- "url",
- "uuid 1.6.1",
 ]
 
 [[package]]
@@ -4050,10 +4075,10 @@ version = "1.1.99"
 dependencies = [
  "arraystring",
  "assert-json",
+ "core-utils",
  "derive_more",
  "has-sample-values",
  "identified-vec-of",
- "sargon-core-utils",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -4529,6 +4554,7 @@ dependencies = [
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "core-collections",
  "core-misc",
+ "core-utils",
  "derive_more",
  "ecc",
  "enum-as-inner",
@@ -4552,7 +4578,6 @@ dependencies = [
  "radix-engine-toolkit-common",
  "radix-rust",
  "radix-transactions",
- "sargon-core-utils",
  "sbor",
  "serde",
  "serde_json 1.0.108",

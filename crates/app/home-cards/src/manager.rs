@@ -1,3 +1,5 @@
+use gateway_client_and_api::GatewayClient;
+
 use crate::prelude::*;
 use std::sync::{RwLock, RwLockWriteGuard};
 
@@ -191,8 +193,9 @@ impl HomeCardsManager {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Mutex;
+
     use super::*;
-    use std::sync::{Arc, Mutex};
 
     struct MockHomeCardsStorage {
         stubbed_save_cards_result: Result<()>,
