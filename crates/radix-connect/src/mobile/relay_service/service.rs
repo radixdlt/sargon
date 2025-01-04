@@ -1,4 +1,6 @@
+use drivers::{NetworkRequest, NetworkingDriver};
 use encryption::{EncryptionScheme, VersionedEncryption};
+use http_client::HttpClient;
 
 use super::super::session::*;
 use super::success_response::SuccessResponse;
@@ -100,6 +102,7 @@ impl Service {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
+    use drivers::NetworkMethod;
     use encryption::{EncryptionScheme, VersionedEncryption};
     use std::time::Duration;
     const MAX: Duration = Duration::from_millis(10);

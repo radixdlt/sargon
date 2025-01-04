@@ -1,3 +1,6 @@
+use drivers::{NetworkRequest, NetworkingDriver};
+use http_client::HttpClient;
+
 use crate::prelude::*;
 
 const SUFFIX_WELL_KNOWN_FILE: &str = ".well-known/radix.json";
@@ -58,6 +61,7 @@ impl WellKnownClient {
 mod tests {
     use super::*;
     use actix_rt::time::timeout;
+    use drivers::{MockNetworkingDriver, NetworkMethod};
     use std::time::Duration;
     const MAX: Duration = Duration::from_millis(10);
 

@@ -36,37 +36,44 @@ macro_rules! declare_identified_entry {
             pub id: PersonaDataEntryID,
             pub value: $value_type,
         }
+
         impl From<$value_type> for $struct_name {
             fn from(value: $value_type) -> Self {
                 Self::new(value)
             }
         }
+
         impl PersonaDataEntryValue for $struct_name {
             type Value = $value_type;
         }
+
         impl Identifiable for $struct_name {
             type ID = PersonaDataEntryID;
             fn id(&self) -> Self::ID {
                 self.id.clone()
             }
         }
+
         impl $struct_name {
-            pub(crate) fn with_id(
+            pub fn with_id(
                 id: PersonaDataEntryID,
                 value: $value_type,
             ) -> Self {
                 Self { id, value }
             }
+
             pub fn new(value: $value_type) -> Self {
                 Self::with_id(PersonaDataEntryID::generate(), value)
             }
         }
+
         impl std::ops::Deref for $struct_name {
             type Target = $value_type;
             fn deref(&self) -> &Self::Target {
                 &self.value
             }
         }
+
         impl HasSampleValues for $struct_name {
             fn sample() -> Self {
                 $struct_name::with_id(
@@ -74,6 +81,7 @@ macro_rules! declare_identified_entry {
                     <$value_type>::sample(),
                 )
             }
+
             fn sample_other() -> Self {
                 $struct_name::with_id(
                     PersonaDataEntryID::sample_other(),

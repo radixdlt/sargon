@@ -2947,6 +2947,7 @@ dependencies = [
  "paste 1.0.14",
  "pretty_assertions",
  "profile-app-preferences",
+ "profile-persona-data",
  "profile-security-structures",
  "serde",
  "serde_json 1.0.108",
@@ -3019,6 +3020,24 @@ dependencies = [
  "serde",
  "serde_json 1.0.108",
  "time-utils",
+]
+
+[[package]]
+name = "profile-persona-data"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "assert-json",
+ "core-misc",
+ "derive_more",
+ "entity-foundation",
+ "has-sample-values",
+ "identified-vec-of",
+ "network",
+ "paste 1.0.14",
+ "serde",
+ "serde_json 1.0.108",
+ "short-string",
 ]
 
 [[package]]
@@ -3130,6 +3149,39 @@ dependencies = [
  "quote",
  "radix-common",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "radix-connect"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "assert-json",
+ "async-trait",
+ "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
+ "bytes 1.1.99",
+ "core-misc",
+ "core-utils",
+ "derive_more",
+ "drivers",
+ "ecc",
+ "encryption",
+ "entity-foundation",
+ "has-sample-values",
+ "hash",
+ "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
+ "http-client",
+ "identified-vec-of",
+ "paste 1.0.14",
+ "pretty_assertions",
+ "profile-persona-data",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_with 3.4.0",
+ "short-string",
+ "transaction-foundation",
+ "transaction-models",
 ]
 
 [[package]]
@@ -3639,6 +3691,7 @@ dependencies = [
  "profile-logic",
  "profile-security-structures",
  "radix-common",
+ "radix-connect",
  "radix-engine-interface",
  "radix-engine-toolkit-common",
  "radix-transactions",

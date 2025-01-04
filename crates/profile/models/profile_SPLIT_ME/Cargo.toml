@@ -11,6 +11,7 @@ identified-vec-of = { path = "../../../common/identified-vec-of" }
 hierarchical-deterministic = { path = "../../../crypto/hd" }
 factors = { path = "../../../factors/factors" }
 core-misc = { path = "../../../core/misc" }
+profile-persona-data = { path = "../../../profile/models/persona-data" }
 entity-foundation = { path = "../../../common/entity-foundation" }
 has-sample-values = { path = "../../../core/has-sample-values" }
 keys-collector = { path = "../../../factors/keys-collector" }

@@ -35,15 +35,15 @@ impl SharedToDappWithPersonaAccountAddresses {
         Self::new(
             RequestedQuantity::exactly(2),
             [
-                Account::sample_mainnet().address,
-                Account::sample_mainnet_other().address,
+                "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87".parse().unwrap(),
+                "account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7".parse().unwrap(),
             ],
         )
     }
     pub fn sample_mainnet_other() -> Self {
         Self::new(
             RequestedQuantity::at_least(1),
-            [Account::sample_mainnet_other().address],
+            ["account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7".parse().unwrap()],
         )
     }
     pub fn sample_stokenet() -> Self {

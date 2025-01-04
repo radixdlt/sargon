@@ -99,20 +99,6 @@ impl IsNetworkAware for AuthorizedPersonaSimple {
     }
 }
 
-impl PersonaData {
-    pub(crate) fn shared_everything(&self) -> SharedPersonaData {
-        SharedPersonaData::new(
-            self.name.clone().map(|x| x.id),
-            SharedToDappWithPersonaIDsOfPersonaDataEntries::exactly(
-                self.email_addresses.ids().into_iter().cloned(),
-            ),
-            SharedToDappWithPersonaIDsOfPersonaDataEntries::exactly(
-                self.phone_numbers.ids().into_iter().cloned(),
-            ),
-        )
-    }
-}
-
 impl AuthorizedPersonaSimple {
     pub fn sample_mainnet() -> Self {
         let persona = Persona::sample_mainnet();

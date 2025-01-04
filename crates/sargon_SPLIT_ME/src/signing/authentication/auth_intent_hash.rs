@@ -58,6 +58,8 @@ impl From<AuthIntent> for AuthIntentHash {
 
 #[cfg(test)]
 mod tests {
+    use serde::{de, Deserializer};
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]

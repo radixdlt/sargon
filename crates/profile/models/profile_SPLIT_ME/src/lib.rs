@@ -22,6 +22,7 @@ pub mod prelude {
     pub use host_info::prelude::*;
     pub use identified_vec_of::prelude::*;
     pub use profile_app_preferences::prelude::*;
+    pub use profile_persona_data::prelude::*;
     pub use transaction_models::prelude::*;
 
     pub use crate::encrypted_profile::*;

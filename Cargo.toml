@@ -43,12 +43,16 @@ members = [
 
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
+    "crates/profile/models/account-for-display",
     "crates/profile/models/app-preferences",
     "crates/profile/models/gateway",
-    "crates/profile/models/account-for-display",
+    "crates/profile/models/persona-data",
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
     "crates/profile/models/supporting-types",
+
+    # === RADIX CONNECT ===
+    "crates/radix-connect",
 
     # === SARGON - SPLIT ME ===
     "crates/sargon_SPLIT_ME",
@@ -111,12 +115,16 @@ default-members = [
 
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
+    "crates/profile/models/account-for-display",
     "crates/profile/models/app-preferences",
     "crates/profile/models/gateway",
-    "crates/profile/models/account-for-display",
+    "crates/profile/models/persona-data",
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
     "crates/profile/models/supporting-types",
+
+    # === RADIX CONNECT ===
+    "crates/radix-connect",
 
     # === SARGON - SPLIT ME ===
     "crates/sargon_SPLIT_ME",
