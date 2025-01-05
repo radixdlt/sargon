@@ -269,7 +269,7 @@ mod tests {
         let sut = ProfileStateHolder::new(state.clone());
         let state_holder = Arc::new(sut);
 
-        let first_mainnet_account = state_holder
+        let first_mainnet_account: Account = state_holder
             .access_profile_with(|profile| {
                 profile
                     .networks
@@ -284,6 +284,9 @@ mod tests {
 
         let mut handles = vec![];
 
+        let account_address = first_mainnet_account.clone().address;
+        let expected_name =
+            first_mainnet_account.clone().display_name.value() + "01234";
         for i in 0..5 {
             let state_holder_clone = Arc::clone(&state_holder);
             let handle = thread::spawn(move || {
@@ -293,7 +296,7 @@ mod tests {
                             &NetworkID::Mainnet,
                             |network| {
                                 let _res = network.accounts.try_update_with(
-                                    &first_mainnet_account.address,
+                                    &account_address,
                                     |account| {
                                         let display_name =
                                             account.display_name.value();
@@ -332,9 +335,6 @@ mod tests {
                     .value()
             })
             .unwrap();
-
-        let expected_name =
-            first_mainnet_account.display_name.value() + "01234";
 
         pretty_assertions::assert_eq!(expected_name, result_name)
     }

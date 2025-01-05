@@ -387,12 +387,12 @@ mod encrypted_profile_tests {
 
                     n.accounts
                         .into_iter()
-                        .map(|x| x.security_state)
+                        .map(|x| x.security_state.clone())
                         .for_each(test);
 
                     n.personas
                         .into_iter()
-                        .map(|x| x.security_state)
+                        .map(|x| x.security_state.clone())
                         .for_each(test);
 
                     Ok::<(), CommonError>(())

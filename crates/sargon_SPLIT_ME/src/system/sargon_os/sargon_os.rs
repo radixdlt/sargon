@@ -218,6 +218,7 @@ impl SargonOS {
             .map(|account| {
                 account
                     .security_state
+                    .clone()
                     .into_unsecured()
                     .map(|c| c.transaction_signing.public_key)
                     .map_err(|_| CommonError::EntitiesNotDerivedByFactorSource)

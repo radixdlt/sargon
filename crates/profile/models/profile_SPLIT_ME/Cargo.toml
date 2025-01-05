@@ -22,6 +22,11 @@ account-for-display = { path = "../../../profile/models/account-for-display" }
 profile-security-structures = { path = "../../../profile/models/security-structures" }
 time-utils = { path = "../../../core/time-utils" }
 host-info = { path = "../../../common/host-info" }
+profile-base-entity = { path = "../../../profile/models/base-entity" }
+profile-account-or-persona = { path = "../../../profile/models/account-or-persona" }
+profile-account = { path = "../../../profile/models/account" }
+profile-persona = { path = "../../../profile/models/persona" }
+entity-by-address = { path = "../../../profile/traits/entity-by-address" }
 
 # === RADIX DEPENDENCIES ===
 # None

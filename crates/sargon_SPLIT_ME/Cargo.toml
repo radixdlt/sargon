@@ -3,6 +3,7 @@ name = "sargon"
 version = "1.1.99"
 edition = "2021"
 build = "build.rs"
+resolver = "2"     # features enabled in integration test
 
 [[test]]
 name = "vectors"
@@ -33,6 +34,8 @@ drivers = { path = "../system/drivers" }
 home-cards = { path = "../app/home-cards" }
 security-center = { path = "../app/security-center" }
 radix-connect = { path = "../app/radix-connect" }
+radix-connect-models = { path = "../app/radix-connect-models" }
+signing = { path = "../app/signing" }
 gateway-client-and-api = { path = "../gateway/client-and-api" }
 
 # === RADIX DEPENDENCIES ===

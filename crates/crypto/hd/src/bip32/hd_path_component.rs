@@ -234,6 +234,22 @@ impl From<CAP26KeyKind> for HDPathComponent {
     }
 }
 
+impl TryFrom<HDPathComponent> for CAP26EntityKind {
+    type Error = CommonError;
+
+    fn try_from(value: HDPathComponent) -> Result<Self> {
+        Self::try_from(value.index_in_local_key_space())
+    }
+}
+
+impl TryFrom<HDPathComponent> for CAP26KeyKind {
+    type Error = CommonError;
+
+    fn try_from(value: HDPathComponent) -> Result<Self> {
+        Self::try_from(value.index_in_local_key_space())
+    }
+}
+
 /// # Safety
 /// Only use this for tests and constants.
 const unsafe fn hard(value: u16) -> HDPathComponent {

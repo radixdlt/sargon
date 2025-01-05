@@ -12,6 +12,7 @@ pub mod prelude {
     pub use crate::roles_matrices_structures::*;
 
     pub use addresses::prelude::*;
+    pub use cap26_models::prelude::*;
     pub use core_collections::prelude::{Just, JustKV};
     pub use core_utils::prelude::*;
     pub use factors::prelude::*;

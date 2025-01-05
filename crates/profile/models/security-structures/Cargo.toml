@@ -10,12 +10,14 @@ hierarchical-deterministic = { path = "../../../crypto/hd" }
 factors = { path = "../../../factors/factors" }
 has-sample-values = { path = "../../../core/has-sample-values" }
 addresses = { path = "../../../crypto/addresses" }
+cap26-models = { path = "../../../crypto/cap26-models" }
 next-derivation-index-ephemeral = { path = "../../../factors/next-derivation-index-ephemeral" }
 network = { path = "../../../common/network" }
 core-collections = { path = "../../../core/collections" }
 time-utils = { path = "../../../core/time-utils" }
 short-string = { path = "../../../common/short-string" }
 core-utils = { path = "../../../core/utils" }
+
 
 # === RADIX DEPENDENCIES ===
 radix-engine-interface = { workspace = true }

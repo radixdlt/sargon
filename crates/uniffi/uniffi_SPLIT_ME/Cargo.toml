@@ -32,6 +32,9 @@ gateway-models = { path = "../../gateway/models" }
 core-misc = { path = "../../core/misc" }
 clients = { path = "../../system/clients/clients" }
 drivers = { path = "../../system/drivers" }
+signing = { path = "../../app/signing" }
+profile-persona = { path = "../../profile/models/persona" }
+profile-account = { path = "../../profile/models/account" }
 gateway-client-and-api = { path = "../../gateway/client-and-api" }
 
 sargon = { path = "../../sargon_SPLIT_ME" }

@@ -1,3 +1,4 @@
+use cap26_models::prelude::*;
 use network::prelude::NetworkID;
 use numeric::prelude::*;
 
@@ -211,8 +212,8 @@ mod basic_tests {
 
 mod key_derivation_tests {
     use super::*;
-    use hierarchical_deterministic::CAP26EntityKind::*;
-    use hierarchical_deterministic::CAP26KeyKind::*;
+    use cap26_models::CAP26EntityKind::*;
+    use cap26_models::CAP26KeyKind::*;
     use NetworkID::*;
 
     #[actix_rt::test]

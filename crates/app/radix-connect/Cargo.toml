@@ -23,6 +23,7 @@ transaction-models = { path = "../../transaction/models" }
 entity-foundation = { path = "../../common/entity-foundation" }
 short-string = { path = "../../common/short-string" }
 has-sample-values = { path = "../../core/has-sample-values" }
+radix-connect-models = { path = "../../app/radix-connect-models" }
 
 # === RADIX DEPENDENCIES ===
 # None

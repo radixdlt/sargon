@@ -5,6 +5,7 @@ mod resource;
 pub mod prelude {
 
     pub(crate) use bytes::prelude::*;
+    pub(crate) use cap26_models::prelude::*;
     pub(crate) use ecc::prelude::*;
     pub(crate) use factors::prelude::*;
     pub(crate) use hierarchical_deterministic::prelude::*;

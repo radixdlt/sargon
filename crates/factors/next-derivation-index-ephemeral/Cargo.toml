@@ -11,6 +11,7 @@ error = { path = "../../core/error" }
 hierarchical-deterministic = { path = "../../crypto/hd" }
 has-sample-values = { path = "../../core/has-sample-values" }
 factors = { path = "../../factors/factors" }
+cap26-models = { path = "../../crypto/cap26-models" }
 addresses = { path = "../../crypto/addresses" }
 network = { path = "../../common/network" }
 

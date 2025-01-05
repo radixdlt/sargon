@@ -14,6 +14,7 @@ pub(crate) use tests::*;
 pub mod prelude {
 
     pub(crate) use addresses::prelude::*;
+    pub(crate) use cap26_models::prelude::*;
     pub(crate) use core_collections::prelude::Just;
     pub(crate) use error::prelude::*;
     pub(crate) use factors::prelude::*;

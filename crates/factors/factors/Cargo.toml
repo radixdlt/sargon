@@ -12,6 +12,7 @@ hierarchical-deterministic = { path = "../../crypto/hd" }
 encryption = { path = "../../crypto/encryption" }
 hash = { path = "../../crypto/hash" }
 ecc = { path = "../../crypto/ecc" }
+cap26-models = { path = "../../crypto/cap26-models" }
 numeric = { path = "../../common/numeric" }
 network = { path = "../../common/network" }
 time-utils = { path = "../../core/time-utils" }

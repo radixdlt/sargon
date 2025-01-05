@@ -10,6 +10,7 @@ factors = { path = "../../factors/factors" }
 numeric = { path = "../../common/numeric" }
 hierarchical-deterministic = { path = "../../crypto/hd" }
 addresses = { path = "../../crypto/addresses" }
+cap26-models = { path = "../../crypto/cap26-models" }
 network = { path = "../../common/network" }
 error = { path = "../../core/error" }
 core-misc = { path = "../../core/misc" }                               # HiddenConstructor

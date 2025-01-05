@@ -1,5 +1,4 @@
 mod interaction_id;
-mod interaction_version;
 mod p2p_links;
 mod wallet_account;
 mod wallet_interaction;
@@ -12,7 +11,6 @@ mod mobile;
 pub mod prelude {
     // RE-EXPORT MODULES
     pub use crate::interaction_id::*;
-    pub use crate::interaction_version::*;
     pub use crate::mobile::*;
     pub use crate::p2p_links::*;
     pub use crate::wallet_account::*;
@@ -30,6 +28,7 @@ pub mod prelude {
     pub(crate) use hash::prelude::*;
     pub(crate) use identified_vec_of::prelude::*;
     pub(crate) use profile_persona_data::prelude::*;
+    pub(crate) use radix_connect_models::prelude::*;
     pub(crate) use short_string::prelude::*;
     pub(crate) use transaction_models::prelude::*;
 

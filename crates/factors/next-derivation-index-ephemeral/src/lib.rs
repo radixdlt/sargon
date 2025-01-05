@@ -11,6 +11,7 @@ pub mod prelude {
     pub use crate::next_derivation_entity_index_with_ephemeral_offsets_for_factor_source::*;
 
     pub(crate) use addresses::prelude::*;
+    pub(crate) use cap26_models::prelude::*;
     pub(crate) use factors::prelude::*;
     pub(crate) use has_sample_values::prelude::*;
     pub(crate) use hierarchical_deterministic::prelude::*;

@@ -11,14 +11,10 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
-mod signing;
 mod system;
-mod types;
 
 pub mod prelude {
-    pub use crate::signing::*;
     pub use crate::system::*;
-    pub use crate::types::*;
 
     pub use clients::prelude::*;
     pub use factor_instances_provider::prelude::*;
@@ -27,7 +23,9 @@ pub mod prelude {
     pub use manifests::prelude::*;
     pub use profile_logic::prelude::*;
     pub use radix_connect::prelude::*;
+    pub use radix_connect_models::prelude::*;
     pub use security_center::prelude::*;
+    pub use signing::prelude::*;
 
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
 

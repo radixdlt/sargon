@@ -1,0 +1,42 @@
+[package]
+name = "signing"
+version = "1.1.99"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+# === SARGON CRATES ===
+assert-json = { path = "../../core/assert-json" }
+addresses = { path = "../../crypto/addresses" }
+has-sample-values = { path = "../../core/has-sample-values" }
+core-misc = { path = "../../core/misc" }
+core-collections = { path = "../../core/collections" }
+bytes = { path = "../../common/bytes" }
+ecc = { path = "../../crypto/ecc" }
+metadata = { path = "../../common/metadata" }
+hash = { path = "../../crypto/hash" }
+cap26-models = { path = "../../crypto/cap26-models" }
+transaction-models = { path = "../../transaction/models" }
+network = { path = "../../common/network" }
+identified-vec-of = { path = "../../common/identified-vec-of" }
+radix-connect-models = { path = "../../app/radix-connect-models" }
+profile-account-or-persona = { path = "../../profile/models/account-or-persona" }
+profile-persona = { path = "../../profile/models/persona" }
+profile-base-entity = { path = "../../profile/models/base-entity" }
+profile-account = { path = "../../profile/models/account" }
+entity-foundation = { path = "../../common/entity-foundation" }
+profile-security-structures = { path = "../../profile/models/security-structures" } # TODO only RoleKind and FactorListKind and GeneralRoleWithHierarchicalDeterministicFactorInstances? maybe move to a smaller crate?
+entity-by-address = { path = "../../profile/traits/entity-by-address" }
+
+# === RADIX DEPENDENCIES ===
+radix-engine-interface = { workspace = true }
+radix-transactions = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+actix-rt = { workspace = true }
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+log = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

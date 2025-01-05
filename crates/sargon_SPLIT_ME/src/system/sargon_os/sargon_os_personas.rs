@@ -702,6 +702,7 @@ mod tests {
         assert_eq!(
             persona
                 .security_state
+                .clone()
                 .into_unsecured()
                 .unwrap()
                 .transaction_signing
@@ -735,6 +736,7 @@ mod tests {
         assert_eq!(
             second
                 .security_state
+                .clone()
                 .into_unsecured()
                 .unwrap()
                 .transaction_signing
@@ -768,6 +770,7 @@ mod tests {
             .iter()
             .map(|x| {
                 x.security_state
+                    .clone()
                     .into_unsecured()
                     .unwrap()
                     .transaction_signing

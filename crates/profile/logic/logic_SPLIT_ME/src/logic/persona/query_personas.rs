@@ -1,23 +1,5 @@
 use crate::prelude::*;
 
-pub trait PersonasVisibility {
-    fn non_hidden(&self) -> Self;
-    fn hidden(&self) -> Self;
-}
-
-impl PersonasVisibility for Personas {
-    fn non_hidden(&self) -> Self {
-        self.clone()
-            .into_iter()
-            .filter(|p| !p.is_hidden())
-            .collect()
-    }
-
-    fn hidden(&self) -> Self {
-        self.clone().into_iter().filter(|p| p.is_hidden()).collect()
-    }
-}
-
 #[cfg(test)]
 mod personas_tests {
     use super::*;

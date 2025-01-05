@@ -40,8 +40,6 @@ impl IntoIterator for SignableManifestSummary {
     }
 }
 
-impl SignableID for Exactly32Bytes {}
-
 impl From<SignableManifestSummary> for Exactly32Bytes {
     fn from(val: SignableManifestSummary) -> Exactly32Bytes {
         val.id
@@ -61,9 +59,12 @@ impl Signable for SignableManifestSummary {
 
     fn entities_requiring_signing(
         &self,
-        profile: &Profile,
+        entity_querying: &impl GetEntityByAddress,
     ) -> Result<IndexSet<AccountOrPersona>> {
-        ExtractorOfEntitiesRequiringAuth::extract(profile, self.summary.clone())
+        ExtractorOfEntitiesRequiringAuth::extract(
+            entity_querying,
+            self.summary.clone(),
+        )
     }
 
     fn get_id(&self) -> Self::ID {

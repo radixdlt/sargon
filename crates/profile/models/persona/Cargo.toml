@@ -1,0 +1,27 @@
+[package]
+name = "profile-persona"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+short-string = { path = "../../../common/short-string" }
+hierarchical-deterministic = { path = "../../../crypto/hd" }
+has-sample-values = { path = "../../../core/has-sample-values" }
+addresses = { path = "../../../crypto/addresses" }
+host-info = { path = "../../../common/host-info" }
+core-misc = { path = "../../../core/misc" }
+cap26-models = { path = "../../../crypto/cap26-models" }
+profile-base-entity = { path = "../../../profile/models/base-entity" }
+profile-persona-data = { path = "../../../profile/models/persona-data" }
+profile-security-structures = { path = "../../../profile/models/security-structures" }
+
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+once_cell = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

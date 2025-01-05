@@ -10,6 +10,7 @@ factors = { path = "../../factors/factors" }
 hierarchical-deterministic = { path = "../../crypto/hd" }
 hash = { path = "../../crypto/hash" }
 ecc = { path = "../../crypto/ecc" }
+cap26-models = { path = "../../crypto/cap26-models" }
 bytes = { path = "../../common/bytes" }
 network = { path = "../../common/network" }
 has-sample-values = { path = "../../core/has-sample-values" }

@@ -4,7 +4,9 @@ members = [
     # === FOR APP ===
     "crates/app/home-cards",
     "crates/app/radix-connect",
+    "crates/app/radix-connect-models",
     "crates/app/security-center",
+    "crates/app/signing",
 
     # === COMMON ===
     "crates/common/bytes",
@@ -26,6 +28,7 @@ members = [
     "crates/core/utils",
 
     # === CRYPTO ===
+    "crates/crypto/cap26-models",
     "crates/crypto/addresses",
     "crates/crypto/ecc",
     "crates/crypto/encryption",
@@ -46,12 +49,17 @@ members = [
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
     "crates/profile/models/account-for-display",
+    "crates/profile/models/account-or-persona",
+    "crates/profile/models/account",
     "crates/profile/models/app-preferences",
+    "crates/profile/models/base-entity",
     "crates/profile/models/gateway",
     "crates/profile/models/persona-data",
+    "crates/profile/models/persona",
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
     "crates/profile/models/supporting-types",
+    "crates/profile/traits/entity-by-address",
 
     # === SARGON - SPLIT ME ===
     "crates/sargon_SPLIT_ME",
@@ -75,7 +83,9 @@ default-members = [
     # === FOR APP ===
     "crates/app/home-cards",
     "crates/app/radix-connect",
+    "crates/app/radix-connect-models",
     "crates/app/security-center",
+    "crates/app/signing",
 
     # === COMMON ===
     "crates/common/bytes",
@@ -97,6 +107,7 @@ default-members = [
     "crates/core/utils",
 
     # === CRYPTO ===
+    "crates/crypto/cap26-models",
     "crates/crypto/addresses",
     "crates/crypto/ecc",
     "crates/crypto/encryption",
@@ -117,12 +128,17 @@ default-members = [
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
     "crates/profile/models/account-for-display",
+    "crates/profile/models/account-or-persona",
+    "crates/profile/models/account",
     "crates/profile/models/app-preferences",
+    "crates/profile/models/base-entity",
     "crates/profile/models/gateway",
     "crates/profile/models/persona-data",
+    "crates/profile/models/persona",
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
     "crates/profile/models/supporting-types",
+    "crates/profile/traits/entity-by-address",
 
     # === SARGON - SPLIT ME ===
     "crates/sargon_SPLIT_ME",

@@ -51,6 +51,7 @@ version = "1.1.99"
 dependencies = [
  "assert-json",
  "bytes 1.1.99",
+ "cap26-models",
  "core-utils",
  "derive_more",
  "ecc",
@@ -598,6 +599,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b96ec4966b5813e2c0507c1f86115c8c5abaadc3980879c3424042a02fd1ad3"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "cap26-models"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "derive_more",
+ "enum-as-inner",
+ "error",
+ "has-sample-values",
+ "numeric",
+ "serde",
+ "serde_json 1.0.108",
+ "serde_repr",
+ "strum 0.26.1",
 ]
 
 [[package]]
@@ -1243,6 +1260,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "entity-by-address"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "error",
+ "profile-account",
+ "profile-account-or-persona",
+ "profile-persona",
+]
+
+[[package]]
 name = "entity-foundation"
 version = "1.1.99"
 dependencies = [
@@ -1398,6 +1426,7 @@ name = "factors"
 version = "1.1.99"
 dependencies = [
  "bytes 1.1.99",
+ "cap26-models",
  "core-collections",
  "core-misc",
  "core-utils",
@@ -1819,6 +1848,7 @@ dependencies = [
  "assert-json",
  "bip39",
  "bytes 1.1.99",
+ "cap26-models",
  "derive_more",
  "ecc",
  "enum-as-inner",
@@ -2349,6 +2379,7 @@ dependencies = [
  "actix-rt",
  "addresses",
  "async-trait",
+ "cap26-models",
  "core-collections",
  "core-misc",
  "derive_more",
@@ -2447,6 +2478,8 @@ dependencies = [
  "paste 1.0.14",
  "pretty_assertions",
  "profile",
+ "profile-account-or-persona",
+ "profile-base-entity",
  "radix-common",
  "radix-engine",
  "radix-engine-interface",
@@ -2585,6 +2618,7 @@ version = "1.1.99"
 dependencies = [
  "addresses",
  "assert-json",
+ "cap26-models",
  "derive_more",
  "enum-iterator",
  "error",
@@ -2930,6 +2964,7 @@ dependencies = [
  "core-misc",
  "derive_more",
  "encryption",
+ "entity-by-address",
  "entity-foundation",
  "enum-as-inner",
  "enum-iterator",
@@ -2946,7 +2981,11 @@ dependencies = [
  "once_cell 1.19.0",
  "paste 1.0.14",
  "pretty_assertions",
+ "profile-account",
+ "profile-account-or-persona",
  "profile-app-preferences",
+ "profile-base-entity",
+ "profile-persona",
  "profile-persona-data",
  "profile-security-structures",
  "serde",
@@ -2956,6 +2995,41 @@ dependencies = [
  "strum 0.26.1",
  "time-utils",
  "transaction-models",
+]
+
+[[package]]
+name = "profile-account"
+version = "1.1.99"
+dependencies = [
+ "account-for-display",
+ "addresses",
+ "cap26-models",
+ "derive_more",
+ "entity-foundation",
+ "has-sample-values",
+ "once_cell 1.19.0",
+ "profile-base-entity",
+ "profile-security-structures",
+ "serde",
+ "serde_json 1.0.108",
+ "short-string",
+ "transaction-models",
+]
+
+[[package]]
+name = "profile-account-or-persona"
+version = "1.1.99"
+dependencies = [
+ "cap26-models",
+ "derive_more",
+ "enum-as-inner",
+ "hierarchical-deterministic",
+ "profile-account",
+ "profile-base-entity",
+ "profile-persona",
+ "profile-security-structures",
+ "serde",
+ "serde_json 1.0.108",
 ]
 
 [[package]]
@@ -2977,6 +3051,28 @@ dependencies = [
  "profile-security-structures",
  "serde",
  "serde_json 1.0.108",
+ "transaction-models",
+]
+
+[[package]]
+name = "profile-base-entity"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "derive_more",
+ "entity-foundation",
+ "enum-as-inner",
+ "enum-iterator",
+ "factors",
+ "has-sample-values",
+ "identified-vec-of",
+ "network",
+ "paste 1.0.14",
+ "profile-security-structures",
+ "serde",
+ "serde_json 1.0.108",
+ "short-string",
+ "strum 0.26.1",
  "transaction-models",
 ]
 
@@ -3009,6 +3105,7 @@ version = "1.1.99"
 dependencies = [
  "addresses",
  "derive_more",
+ "entity-by-address",
  "factors",
  "hierarchical-deterministic",
  "identified-vec-of",
@@ -3020,6 +3117,26 @@ dependencies = [
  "serde",
  "serde_json 1.0.108",
  "time-utils",
+]
+
+[[package]]
+name = "profile-persona"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "cap26-models",
+ "core-misc",
+ "derive_more",
+ "has-sample-values",
+ "hierarchical-deterministic",
+ "host-info",
+ "once_cell 1.19.0",
+ "profile-base-entity",
+ "profile-persona-data",
+ "profile-security-structures",
+ "serde",
+ "serde_json 1.0.108",
+ "short-string",
 ]
 
 [[package]]
@@ -3045,6 +3162,7 @@ name = "profile-security-structures"
 version = "1.1.99"
 dependencies = [
  "addresses",
+ "cap26-models",
  "core-collections",
  "core-utils",
  "derive_more",
@@ -3078,6 +3196,8 @@ dependencies = [
  "itertools 0.12.0",
  "pretty_assertions",
  "profile",
+ "profile-account-or-persona",
+ "profile-base-entity",
  "serde",
  "serde_json 1.0.108",
 ]
@@ -3176,12 +3296,27 @@ dependencies = [
  "paste 1.0.14",
  "pretty_assertions",
  "profile-persona-data",
+ "radix-connect-models",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
  "short-string",
  "transaction-foundation",
  "transaction-models",
+]
+
+[[package]]
+name = "radix-connect-models"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "bytes 1.1.99",
+ "core-misc",
+ "derive_more",
+ "error",
+ "has-sample-values",
+ "network",
+ "serde",
 ]
 
 [[package]]
@@ -3692,6 +3827,7 @@ dependencies = [
  "profile-security-structures",
  "radix-common",
  "radix-connect",
+ "radix-connect-models",
  "radix-engine-interface",
  "radix-engine-toolkit-common",
  "radix-transactions",
@@ -3701,6 +3837,7 @@ dependencies = [
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
+ "signing",
  "transaction-foundation",
  "transaction-models",
 ]
@@ -3742,13 +3879,16 @@ dependencies = [
  "pretty_assertions",
  "pretty_env_logger",
  "profile",
+ "profile-account",
  "profile-logic",
+ "profile-persona",
  "profile-security-structures",
  "radix-engine-toolkit",
  "rand",
  "regex 1.9.3 (git+https://github.com/rust-lang/regex/?rev=72f889ef3cca59ebac6a026f3646e8d92f056d88)",
  "sargon",
  "sargon-uniffi-conversion-macros",
+ "signing",
  "strum 0.26.1",
  "thiserror 1.0.50",
  "transaction-models",
@@ -4168,6 +4308,42 @@ checksum = "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de"
 dependencies = [
  "digest",
  "rand_core 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "signing"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "assert-json",
+ "async-trait",
+ "bytes 1.1.99",
+ "cap26-models",
+ "core-collections",
+ "core-misc",
+ "derive_more",
+ "ecc",
+ "entity-by-address",
+ "entity-foundation",
+ "has-sample-values",
+ "hash",
+ "identified-vec-of",
+ "log",
+ "metadata",
+ "network",
+ "pretty_assertions",
+ "profile-account",
+ "profile-account-or-persona",
+ "profile-base-entity",
+ "profile-persona",
+ "profile-security-structures",
+ "radix-connect-models",
+ "radix-engine-interface",
+ "radix-transactions",
+ "serde",
+ "serde_json 1.0.108",
+ "transaction-models",
 ]
 
 [[package]]

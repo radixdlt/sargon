@@ -378,6 +378,7 @@ mod test {
             .iter()
             .map(|a| a.address)
             .collect_vec();
+
         (
             S::sample_entity_addresses_requiring_auth(
                 accounts_addresses_involved.clone(),
