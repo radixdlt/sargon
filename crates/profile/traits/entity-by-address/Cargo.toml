@@ -16,4 +16,4 @@ profile-persona = { path = "../../../profile/models/persona" }
 # None
 
 # === EXTERNAL DEPENDENCIES ===
-# serde = { workspace = true }
+# None

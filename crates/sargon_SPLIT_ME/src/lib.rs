@@ -11,10 +11,17 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
-mod system;
+mod bios;
+mod interactors;
+mod sargon_os;
+mod subsystems;
+mod test_diagnose_instance_duplicates;
 
 pub mod prelude {
-    pub use crate::system::*;
+    pub use crate::bios::*;
+    pub use crate::interactors::*;
+    pub use crate::sargon_os::*;
+    pub use crate::subsystems::*;
 
     pub use clients::prelude::*;
     pub use factor_instances_provider::prelude::*;
