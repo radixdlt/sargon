@@ -278,26 +278,26 @@ impl<S: Signable + ProvidesSamplesByBuildingManifest> HasSampleValues
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[allow(clippy::upper_case_acronyms)]
-//     type SUT = Petitions<TransactionIntent>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = Petitions<TransactionIntent>;
 
-//     #[test]
-//     fn equality_of_samples() {
-//         assert_eq!(SUT::sample(), SUT::sample());
-//         assert_eq!(SUT::sample_other(), SUT::sample_other());
-//     }
+    #[test]
+    fn equality_of_samples() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
 
-//     #[test]
-//     fn inequality_of_samples() {
-//         assert_ne!(SUT::sample(), SUT::sample_other());
-//     }
+    #[test]
+    fn inequality_of_samples() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
-//     #[test]
-//     fn debug() {
-//         assert!(!format!("{:?}", SUT::sample()).is_empty());
-//     }
-// }
+    #[test]
+    fn debug() {
+        assert!(!format!("{:?}", SUT::sample()).is_empty());
+    }
+}

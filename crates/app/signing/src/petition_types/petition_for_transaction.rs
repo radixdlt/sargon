@@ -310,112 +310,112 @@ impl<S: Signable + ProvidesSamplesByBuildingManifest> HasSampleValues
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[allow(clippy::upper_case_acronyms)]
-//     type SUT = PetitionForTransaction<TransactionIntent>;
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = PetitionForTransaction<TransactionIntent>;
 
-//     #[test]
-//     fn equality() {
-//         assert_eq!(SUT::sample(), SUT::sample());
-//         assert_eq!(SUT::sample_other(), SUT::sample_other());
-//     }
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
 
-//     #[test]
-//     fn inequality() {
-//         assert_ne!(SUT::sample(), SUT::sample_other());
-//     }
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
 
-//     #[test]
-//     fn debug() {
-//         assert!(!format!("{:?}", SUT::sample()).is_empty());
-//     }
+    #[test]
+    fn debug() {
+        assert!(!format!("{:?}", SUT::sample()).is_empty());
+    }
 
-//     #[test]
-//     fn all_relevant_factor_instances_of_source_ok() {
-//         let account = Account::sample_at(5);
-//         let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
-//             [account.address],
-//             [],
-//         );
-//         let matrix = match account.security_state {
-//             EntitySecurityState::Securified { value } => {
-//                 value.security_structure.matrix_of_factors.clone()
-//             }
-//             _ => panic!(),
-//         };
-//         let petition = PetitionForEntity::new_securified(
-//             intent.transaction_intent_hash(),
-//             AddressOfAccountOrPersona::from(account.address),
-//             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
-//                 (matrix, RoleKind::Primary),
-//             )
-//             .unwrap(),
-//         );
+    #[test]
+    fn all_relevant_factor_instances_of_source_ok() {
+        let account = Account::sample_at(5);
+        let intent = TransactionIntent::sample_entity_addresses_requiring_auth(
+            [account.address],
+            [],
+        );
+        let matrix = match &account.security_state {
+            EntitySecurityState::Securified { value } => {
+                value.security_structure.matrix_of_factors.clone()
+            }
+            _ => panic!(),
+        };
+        let petition = PetitionForEntity::new_securified(
+            intent.transaction_intent_hash(),
+            AddressOfAccountOrPersona::from(account.address),
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+                (matrix, RoleKind::Primary),
+            )
+            .unwrap(),
+        );
 
-//         let sut = SUT::new(
-//             intent,
-//             HashMap::just((
-//                 AddressOfAccountOrPersona::from(account.address),
-//                 petition,
-//             )),
-//         );
-//         sut.neglect_factor_source(NeglectedFactor::new(
-//             NeglectFactorReason::Failure,
-//             FactorSourceIDFromHash::sample_at(1),
-//         ));
+        let sut = SUT::new(
+            intent,
+            HashMap::just((
+                AddressOfAccountOrPersona::from(account.address),
+                petition,
+            )),
+        );
+        sut.neglect_factor_source(NeglectedFactor::new(
+            NeglectFactorReason::Failure,
+            FactorSourceIDFromHash::sample_at(1),
+        ));
 
-//         assert_eq!(
-//             sut.all_relevant_factor_instances_of_source(
-//                 &FactorSourceIDFromHash::sample_at(4)
-//             )
-//             .len(),
-//             1
-//         );
-//     }
+        assert_eq!(
+            sut.all_relevant_factor_instances_of_source(
+                &FactorSourceIDFromHash::sample_at(4)
+            )
+            .len(),
+            1
+        );
+    }
 
-//     #[test]
-//     #[should_panic]
-//     fn all_relevant_factor_instances_of_source_panics_if_invalid() {
-//         let intent_hash = TransactionIntentHash::sample();
+    #[test]
+    #[should_panic]
+    fn all_relevant_factor_instances_of_source_panics_if_invalid() {
+        let intent_hash = TransactionIntentHash::sample();
 
-//         let account = Account::sample_at(5);
-//         let intent =
-//             TransactionIntent::sample_entities_requiring_auth([&account], []);
-//         let matrix = match account.security_state {
-//             EntitySecurityState::Securified { value } => {
-//                 value.security_structure.matrix_of_factors.clone()
-//             }
-//             _ => panic!(),
-//         };
-//         let petition = PetitionForEntity::new_securified(
-//             intent_hash.clone(),
-//             AddressOfAccountOrPersona::from(account.address),
-//             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
-//                 (matrix, RoleKind::Primary),
-//             )
-//             .unwrap(),
-//         );
+        let account = Account::sample_at(5);
+        let intent =
+            TransactionIntent::sample_entities_requiring_auth([&account], []);
+        let matrix = match &account.security_state {
+            EntitySecurityState::Securified { value } => {
+                value.security_structure.matrix_of_factors.clone()
+            }
+            _ => panic!(),
+        };
+        let petition = PetitionForEntity::new_securified(
+            intent_hash.clone(),
+            AddressOfAccountOrPersona::from(account.address),
+            GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
+                (matrix, RoleKind::Primary),
+            )
+            .unwrap(),
+        );
 
-//         let sut = SUT::new(
-//             intent.clone(),
-//             HashMap::just((
-//                 AddressOfAccountOrPersona::from(account.address),
-//                 petition,
-//             )),
-//         );
-//         sut.neglect_factor_source(NeglectedFactor::new(
-//             NeglectFactorReason::Failure,
-//             FactorSourceIDFromHash::sample_at(1),
-//         ));
-//         sut.neglect_factor_source(NeglectedFactor::new(
-//             NeglectFactorReason::Failure,
-//             FactorSourceIDFromHash::sample_at(4),
-//         ));
-//         let _ = sut.all_relevant_factor_instances_of_source(
-//             &FactorSourceIDFromHash::sample_at(4),
-//         );
-//     }
-// }
+        let sut = SUT::new(
+            intent.clone(),
+            HashMap::just((
+                AddressOfAccountOrPersona::from(account.address),
+                petition,
+            )),
+        );
+        sut.neglect_factor_source(NeglectedFactor::new(
+            NeglectFactorReason::Failure,
+            FactorSourceIDFromHash::sample_at(1),
+        ));
+        sut.neglect_factor_source(NeglectedFactor::new(
+            NeglectFactorReason::Failure,
+            FactorSourceIDFromHash::sample_at(4),
+        ));
+        let _ = sut.all_relevant_factor_instances_of_source(
+            &FactorSourceIDFromHash::sample_at(4),
+        );
+    }
+}
