@@ -1,0 +1,26 @@
+[package]
+name = "profile-account"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+account-for-display = { path = "../../../profile/models/account-for-display" }
+transaction-models = { path = "../../../transaction/models" }
+addresses = { path = "../../../crypto/addresses" }
+has-sample-values = { path = "../../../core/has-sample-values" }
+cap26-models = { path = "../../../crypto/cap26-models" }
+entity-foundation = { path = "../../../common/entity-foundation" }
+short-string = { path = "../../../common/short-string" }
+profile-base-entity = { path = "../../../profile/models/base-entity" }
+profile-security-structures = { path = "../../../profile/models/security-structures" }
+
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+once_cell = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

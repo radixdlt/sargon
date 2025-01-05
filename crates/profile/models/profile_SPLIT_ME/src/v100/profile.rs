@@ -47,6 +47,54 @@ pub struct Profile {
     pub networks: ProfileNetworks,
 }
 
+impl HasFactorSources for Profile {
+    fn factor_sources(&self) -> IndexSet<FactorSource> {
+        self.factor_sources.iter().collect()
+    }
+}
+
+impl ProfileAccountByAddress for Profile {
+    /// Looks up the account by account address, returns Err if the account is
+    /// unknown, will return a hidden, or tombstoned account if queried for.
+    fn account_by_address(&self, address: AccountAddress) -> Result<Account> {
+        for network in self.networks.iter() {
+            if let Some(account) = network.accounts.get_id(address) {
+                return Ok(account.clone());
+            }
+        }
+        Err(CommonError::UnknownAccount)
+    }
+}
+
+impl ProfilePersonaByAddress for Profile {
+    /// Looks up the persona by identity address, returns Err if the persona is
+    /// unknown, will return a hidden persona if queried for.
+    fn persona_by_address(&self, address: IdentityAddress) -> Result<Persona> {
+        for network in self.networks.iter() {
+            if let Some(persona) = network.personas.get_id(address) {
+                return Ok(persona.clone());
+            }
+        }
+        Err(CommonError::UnknownPersona)
+    }
+}
+
+impl ProfileEntityByAddress for Profile {
+    fn entity_by_address(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<AccountOrPersona> {
+        self.networks
+            .get_id(entity_address.network_id())
+            .and_then(|n| n.entity_by_address(&entity_address))
+            .ok_or(if entity_address.is_account() {
+                CommonError::UnknownAccount
+            } else {
+                CommonError::UnknownPersona
+            })
+    }
+}
+
 impl Profile {
     pub fn new_from_json_string(json_str: impl AsRef<str>) -> Result<Profile> {
         let json_str = json_str.as_ref();

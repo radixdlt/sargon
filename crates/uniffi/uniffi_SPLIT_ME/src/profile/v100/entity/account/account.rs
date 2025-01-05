@@ -20,7 +20,7 @@ decl_vec_samples_for!(Accounts, Account);
 /// An account can be either controlled by a "Babylon" DeviceFactorSource or a
 /// Legacy one imported from Olympia, or a Ledger hardware wallet, which too might
 /// have been imported from Olympia.
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
 pub struct Account {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
@@ -59,6 +59,40 @@ pub struct Account {
     /// The on ledger synced settings for this account, contains e.g.
     /// ThirdPartyDeposit settings, with deposit rules for assets.
     pub on_ledger_settings: OnLedgerSettings,
+}
+
+impl Account {
+    pub fn into_internal(&self) -> InternalAccount {
+        self.clone().into()
+    }
+}
+
+impl From<Account> for InternalAccount {
+    fn from(value: Account) -> Self {
+        Self::with(
+            value.network_id,
+            value.address,
+            value.display_name,
+            value.security_state,
+            value.flags.into_iter().map(Into::into),
+            value.appearance_id,
+            value.on_ledger_settings,
+        )
+    }
+}
+
+impl From<InternalAccount> for Account {
+    fn from(value: InternalAccount) -> Self {
+        Self {
+            network_id: value.network_id.into(),
+            address: value.address.into(),
+            display_name: value.display_name.into(),
+            security_state: value.security_state.clone().into(),
+            appearance_id: value.appearance_id.into(),
+            flags: value.flags.clone().into_iter().map(Into::into).collect(),
+            on_ledger_settings: value.on_ledger_settings.into(),
+        }
+    }
 }
 
 #[uniffi::export]

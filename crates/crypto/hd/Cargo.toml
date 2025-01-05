@@ -8,6 +8,7 @@ edition = "2021"
 identified-vec-of = { path = "../../common/identified-vec-of" }
 ecc = { path = "../../crypto/ecc" }
 hash = { path = "../../crypto/hash" }
+cap26-models = { path = "../../crypto/cap26-models" }
 bytes = { path = "../../common/bytes" }
 has-sample-values = { path = "../../core/has-sample-values" }
 assert-json = { path = "../../core/assert-json" }

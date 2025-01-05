@@ -22,7 +22,7 @@ decl_vec_samples_for!(Personas, Persona);
 /// technically, nothing stops a user from building their own wallet and uploading
 /// personal information to the metadata of the Identity component... but `Sargon`
 /// never will, nor will the Radix Wallet.).
-#[derive(Clone, PartialEq, Hash, Eq, InternalConversion, uniffi::Record)]
+#[derive(Clone, PartialEq, Hash, Eq, uniffi::Record)]
 pub struct Persona {
     /// The ID of the network this account can be used with.
     pub network_id: NetworkID,
@@ -50,6 +50,38 @@ pub struct Persona {
     /// email address(es) or phone number(s). This information is only ever stored in Profile and is never
     /// uploaded to the Radix Network.
     pub persona_data: PersonaData,
+}
+
+impl Persona {
+    pub fn into_internal(&self) -> InternalPersona {
+        self.clone().into()
+    }
+}
+
+impl From<Persona> for InternalPersona {
+    fn from(value: Persona) -> Self {
+        Self::with(
+            value.network_id,
+            value.address,
+            value.display_name,
+            value.security_state,
+            value.flags.into_iter().map(Into::into),
+            value.persona_data,
+        )
+    }
+}
+
+impl From<InternalPersona> for Persona {
+    fn from(value: InternalPersona) -> Self {
+        Self {
+            network_id: value.network_id.into(),
+            address: value.address.into(),
+            display_name: value.display_name.into(),
+            security_state: value.security_state.clone().into(),
+            flags: value.flags.clone().into_iter().map(Into::into).collect(),
+            persona_data: value.persona_data.into(),
+        }
+    }
 }
 
 #[uniffi::export]

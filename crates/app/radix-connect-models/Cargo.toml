@@ -1,0 +1,20 @@
+[package]
+name = "radix-connect-models"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+error = { path = "../../core/error" }
+has-sample-values = { path = "../../core/has-sample-values" }
+core-misc = { path = "../../core/misc" }
+bytes = { path = "../../common/bytes" }
+network = { path = "../../common/network" }
+addresses = { path = "../../crypto/addresses" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+serde = { workspace = true }

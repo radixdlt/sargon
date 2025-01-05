@@ -11,11 +11,6 @@ mod modify_manifest;
 mod third_party_deposit_update;
 
 pub mod prelude {
-    pub use factors::prelude::*;
-    pub use gateway_models::prelude::*;
-    pub use hierarchical_deterministic::prelude::*;
-    pub use metadata::prelude::*;
-    pub use profile::prelude::*;
 
     pub(crate) use crate::bucket_factory;
 
@@ -28,6 +23,12 @@ pub mod prelude {
     pub use crate::manifests_create_tokens::*;
     pub use crate::modify_manifest::*;
     pub use crate::third_party_deposit_update::*;
+
+    pub use factors::prelude::*;
+    pub use gateway_models::prelude::*;
+    pub use hierarchical_deterministic::prelude::*;
+    pub use metadata::prelude::*;
+    pub use profile::prelude::*;
 
     pub use std::str::FromStr;
 

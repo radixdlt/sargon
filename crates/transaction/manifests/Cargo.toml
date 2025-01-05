@@ -6,7 +6,7 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-sargon-core-utils = { path = "../../core/utils" }
+core-utils = { path = "../../core/utils" }
 identified-vec-of = { path = "../../common/identified-vec-of" }
 hierarchical-deterministic = { path = "../../crypto/hd" }
 factors = { path = "../../factors/factors" }
@@ -15,6 +15,8 @@ metadata = { path = "../../common/metadata" }
 transaction-models = { path = "../../transaction/models" }
 gateway-models = { path = "../../gateway/models" }
 profile = { path = "../../profile/models/profile_SPLIT_ME" }
+profile-account-or-persona = { path = "../../profile/models/account-or-persona" }
+profile-base-entity = { path = "../../profile/models/base-entity" }
 account-for-display = { path = "../../profile/models/account-for-display" }
 
 # === RADIX DEPENDENCIES ===

@@ -1,0 +1,31 @@
+[package]
+name = "home-cards"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+identified-vec-of = { path = "../../common/identified-vec-of" }
+addresses = { path = "../../crypto/addresses" }
+bytes = { path = "../../common/bytes" }
+core-utils = { path = "../../core/utils" }
+network = { path = "../../common/network" }
+metadata = { path = "../../common/metadata" }
+drivers = { path = "../../system/drivers" }
+gateway-client-and-api = { path = "../../gateway/client-and-api" }
+gateway-models = { path = "../../gateway/models" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+actix-rt = { workspace = true }
+async-trait = { workspace = true }
+base64 = { workspace = true }
+derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

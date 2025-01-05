@@ -12,13 +12,14 @@ hierarchical-deterministic = { path = "../../crypto/hd" }
 encryption = { path = "../../crypto/encryption" }
 hash = { path = "../../crypto/hash" }
 ecc = { path = "../../crypto/ecc" }
+cap26-models = { path = "../../crypto/cap26-models" }
 numeric = { path = "../../common/numeric" }
 network = { path = "../../common/network" }
 time-utils = { path = "../../core/time-utils" }
 short-string = { path = "../../common/short-string" }
 host-info = { path = "../../common/host-info" }
 core-misc = { path = "../../core/misc" }
-sargon-core-utils = { path = "../../core/utils" }
+core-utils = { path = "../../core/utils" }
 core-collections = { path = "../../core/collections" }
 
 # ==== RADIX DEPENDENCIES ====

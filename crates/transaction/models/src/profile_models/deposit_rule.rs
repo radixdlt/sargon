@@ -67,7 +67,7 @@ impl From<ScryptoDefaultDepositRule> for DepositRule {
 
 #[cfg(test)]
 mod tests {
-    use sargon_core_utils::prelude::DeserializeStr;
+    use core_utils::prelude::DeserializeStr;
 
     use super::*;
 

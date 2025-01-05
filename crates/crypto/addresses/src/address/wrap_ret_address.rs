@@ -127,7 +127,7 @@ macro_rules! decl_ret_wrapped_address {
             }
 
             use bytes::prelude::generate_byte_array;
-            use sargon_core_utils::prelude::format_string;
+            use core_utils::prelude::format_string;
 
             impl [< $address_type:camel Address >] {
 

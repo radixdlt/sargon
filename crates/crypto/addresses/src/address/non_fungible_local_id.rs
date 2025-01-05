@@ -1,4 +1,4 @@
-use sargon_core_utils::prelude::format_string;
+use core_utils::prelude::format_string;
 
 use crate::prelude::*;
 

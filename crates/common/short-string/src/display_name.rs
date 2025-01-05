@@ -1,4 +1,4 @@
-use sargon_core_utils::prelude::prefix_str;
+use core_utils::prelude::prefix_str;
 
 use crate::prelude::*;
 

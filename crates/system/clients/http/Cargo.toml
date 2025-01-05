@@ -8,7 +8,7 @@ edition = "2021"
 drivers = { path = "../../../system/drivers" }
 bytes = { path = "../../../common/bytes" }
 error = { path = "../../../core/error" }
-sargon-core-utils = { path = "../../../core/utils" }
+core-utils = { path = "../../../core/utils" }
 
 # === RADIX DEPENDENCIES ===
 

@@ -10,8 +10,10 @@ hierarchical-deterministic = { path = "../../../crypto/hd" }
 factors = { path = "../../../factors/factors" }
 addresses = { path = "../../../crypto/addresses" }
 profile = { path = "../../../profile/models/profile_SPLIT_ME" }
+profile-persona = { path = "../../../profile/models/persona" }
 profile-supporting-types = { path = "../../../profile/models/supporting-types" }
 time-utils = { path = "../../../core/time-utils" }
+entity-by-address = { path = "../../../profile/traits/entity-by-address" }
 
 # === RADIX DEPENDENCIES ===
 # None

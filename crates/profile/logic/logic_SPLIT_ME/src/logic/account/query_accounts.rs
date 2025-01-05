@@ -14,46 +14,6 @@ impl ProfileAccountsOnAllNetworksIncludingHidden for Profile {
     }
 }
 
-pub trait ProfileAccountByAddress {
-    fn account_by_address(&self, address: AccountAddress) -> Result<Account>;
-}
-
-impl ProfileAccountByAddress for Profile {
-    /// Looks up the account by account address, returns Err if the account is
-    /// unknown, will return a hidden, or tombstoned account if queried for.
-    fn account_by_address(&self, address: AccountAddress) -> Result<Account> {
-        for network in self.networks.iter() {
-            if let Some(account) = network.accounts.get_id(address) {
-                return Ok(account.clone());
-            }
-        }
-        Err(CommonError::UnknownAccount)
-    }
-}
-
-pub trait ProfileEntityByAddress {
-    fn entity_by_address(
-        &self,
-        entity_address: AddressOfAccountOrPersona,
-    ) -> Result<AccountOrPersona>;
-}
-
-impl ProfileEntityByAddress for Profile {
-    fn entity_by_address(
-        &self,
-        entity_address: AddressOfAccountOrPersona,
-    ) -> Result<AccountOrPersona> {
-        self.networks
-            .get_id(entity_address.network_id())
-            .and_then(|n| n.entity_by_address(&entity_address))
-            .ok_or(if entity_address.is_account() {
-                CommonError::UnknownAccount
-            } else {
-                CommonError::UnknownPersona
-            })
-    }
-}
-
 pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
     fn get_entities_of_kind_on_network_in_key_space(
         &self,
@@ -149,10 +109,6 @@ pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
 
     /// Returns **ALL** personas - including hidden/deleted ones, on **ALL** networks.
     fn personas_on_all_networks_including_hidden(&self) -> Personas;
-
-    /// Looks up the persona by identity address, returns Err if the persona is
-    /// unknown, will return a hidden persona if queried for.
-    fn persona_by_address(&self, address: IdentityAddress) -> Result<Persona>;
 }
 
 impl ProfileEntitiesOfKindOnNetworkInKeySpace for Profile {
@@ -174,17 +130,6 @@ impl ProfileEntitiesOfKindOnNetworkInKeySpace for Profile {
             .iter()
             .flat_map(|n| n.personas.clone().into_iter())
             .collect::<Personas>()
-    }
-
-    /// Looks up the persona by identity address, returns Err if the persona is
-    /// unknown, will return a hidden persona if queried for.
-    fn persona_by_address(&self, address: IdentityAddress) -> Result<Persona> {
-        for network in self.networks.iter() {
-            if let Some(persona) = network.personas.get_id(address) {
-                return Ok(persona.clone());
-            }
-        }
-        Err(CommonError::UnknownPersona)
     }
 
     fn get_entities_of_kind_on_network_in_key_space(

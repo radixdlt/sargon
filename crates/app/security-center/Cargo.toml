@@ -1,0 +1,19 @@
+[package]
+name = "security-center"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+assert-json = { path = "../../core/assert-json" }
+addresses = { path = "../../crypto/addresses" }
+has-sample-values = { path = "../../core/has-sample-values" }
+core-misc = { path = "../../core/misc" }
+profile-app-preferences = { path = "../../profile/models/app-preferences" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+serde = { workspace = true }

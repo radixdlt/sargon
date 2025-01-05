@@ -11,45 +11,35 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
-mod home_cards;
-mod radix_connect;
-mod security_center;
-mod signing;
-mod system;
-mod types;
+mod bios;
+mod interactors;
+mod sargon_os;
+mod subsystems;
+mod test_diagnose_instance_duplicates;
 
 pub mod prelude {
-    pub use clients::prelude::*;
+    pub use crate::bios::*;
+    pub use crate::interactors::*;
+    pub use crate::sargon_os::*;
+    pub use crate::subsystems::*;
 
+    pub use clients::prelude::*;
     pub use factor_instances_provider::prelude::*;
+    pub use home_cards::prelude::*;
     pub use keys_collector::prelude::*;
     pub use manifests::prelude::*;
     pub use profile_logic::prelude::*;
-
-    pub use crate::home_cards::*;
-    pub use crate::radix_connect::*;
-    pub use crate::security_center::*;
-    pub use crate::signing::*;
-    pub use crate::system::*;
-    pub use crate::types::*;
+    pub use radix_connect::prelude::*;
+    pub use radix_connect_models::prelude::*;
+    pub use security_center::prelude::*;
+    pub use signing::prelude::*;
 
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
 
-    pub(crate) use serde::{
-        de, ser::SerializeStruct, Deserializer, Serializer,
-    };
-
-    pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use serde_with::{serde_as, DisplayFromStr};
     pub(crate) use std::collections::HashSet;
 
     #[cfg(test)]
     pub(crate) use radix_common::math::Decimal as ScryptoDecimal192;
-    #[cfg(test)]
-    pub(crate) use std::collections::BTreeSet;
-
-    #[cfg(test)]
-    pub(crate) use serde_json::json;
 }
 
 pub use prelude::*;

@@ -1,4 +1,4 @@
-use sargon_core_utils::prelude::url_encode;
+use core_utils::prelude::url_encode;
 
 use crate::prelude::*;
 use std::collections::HashMap;

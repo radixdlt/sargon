@@ -1,6 +1,10 @@
+mod has_indexed_sample_values;
+mod has_many_sample_values;
 mod has_sample_values;
 
 pub mod prelude {
+    pub use crate::has_indexed_sample_values::*;
+    pub use crate::has_many_sample_values::*;
     pub use crate::has_sample_values::*;
 
     pub use error::prelude::*;

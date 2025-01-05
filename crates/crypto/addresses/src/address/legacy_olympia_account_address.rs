@@ -4,8 +4,8 @@ use radix_engine_toolkit::functions::derive::{
     public_key_from_olympia_account_address as RET_public_key_from_olympia_account_address,
 };
 
+use core_utils::prelude::format_string;
 use radix_engine_toolkit::functions::derive::OlympiaNetwork as ScryptoOlympiaNetwork;
-use sargon_core_utils::prelude::format_string;
 
 #[derive(
     Clone,

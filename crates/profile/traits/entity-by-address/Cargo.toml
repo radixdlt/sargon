@@ -1,0 +1,19 @@
+[package]
+name = "entity-by-address"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+error = { path = "../../../core/error" }
+addresses = { path = "../../../crypto/addresses" }
+profile-account = { path = "../../../profile/models/account" }
+profile-account-or-persona = { path = "../../../profile/models/account-or-persona" }
+profile-persona = { path = "../../../profile/models/persona" }
+
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+# None
