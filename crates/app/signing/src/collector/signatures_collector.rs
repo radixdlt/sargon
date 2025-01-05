@@ -530,7 +530,6 @@ impl<S: Signable> SignaturesCollector<S> {
 
 #[cfg(test)]
 mod tests {
-    use std::iter;
 
     use super::*;
 

@@ -7,7 +7,6 @@ pub mod prelude {
     pub use crate::access_controller_address_samples_for_personas::*;
     pub use crate::identity_address_samples::*;
     pub use crate::persona::*;
-    pub use crate::persona_samples::*;
 
     pub(crate) use addresses::prelude::*;
     pub(crate) use cap26_models::prelude::*;
@@ -19,7 +18,6 @@ pub mod prelude {
     pub(crate) use profile_persona_data::prelude::*;
     pub(crate) use profile_security_structures::prelude::*;
 
-    pub(crate) use once_cell::sync::Lazy;
     pub(crate) use serde::{Deserialize, Serialize};
 }
 

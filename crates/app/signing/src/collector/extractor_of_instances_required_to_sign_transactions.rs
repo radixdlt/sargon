@@ -90,13 +90,13 @@ impl ProfileEntityByAddress for ProtoProfile {
     ) -> Result<AccountOrPersona> {
         if let Some(account_address) = address.as_account() {
             return self
-                .account_by_address(account_address.clone())
+                .account_by_address(*account_address)
                 .map(AccountOrPersona::AccountEntity);
         }
 
         if let Some(identity_address) = address.as_identity() {
             return self
-                .persona_by_address(identity_address.clone())
+                .persona_by_address(*identity_address)
                 .map(AccountOrPersona::PersonaEntity);
         }
 

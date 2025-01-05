@@ -1,8 +1,6 @@
-use crate::prelude::*;
-
 #[cfg(test)]
 mod personas_tests {
-    use super::*;
+    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Personas;
@@ -34,7 +32,7 @@ mod personas_tests {
 
 #[cfg(test)]
 mod profile_tests {
-    use super::*;
+    use crate::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Profile;

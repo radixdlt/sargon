@@ -138,7 +138,7 @@ unsafe impl<S: Signable> Send for SimulatedUser<S> {}
 /// factor. But since user is so lazy, she defers signing with that override
 /// factor if prompted for it first.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum Laziness {
+pub enum Laziness {
     SignMinimum,
     AlwaysSkip,
 }

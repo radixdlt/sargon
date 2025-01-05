@@ -3113,6 +3113,7 @@ dependencies = [
  "paste 1.0.14",
  "pretty_assertions",
  "profile",
+ "profile-persona",
  "profile-supporting-types",
  "serde",
  "serde_json 1.0.108",

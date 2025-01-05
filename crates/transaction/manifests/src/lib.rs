@@ -29,8 +29,6 @@ pub mod prelude {
     pub use hierarchical_deterministic::prelude::*;
     pub use metadata::prelude::*;
     pub use profile::prelude::*;
-    pub use profile_account_or_persona::prelude::*;
-    pub use profile_base_entity::prelude::*;
 
     pub use std::str::FromStr;
 

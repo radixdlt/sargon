@@ -5,7 +5,6 @@ pub use paths::*;
 #[cfg(test)]
 mod tests {
 
-    use super::*;
     use crate::GET_ID_CAP26_LOCAL;
 
     #[test]

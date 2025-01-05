@@ -15,7 +15,7 @@ pub mod prelude {
     pub use crate::extractor_of_entities_requiring_auth::*;
     pub use crate::host_interaction::*;
     pub use crate::petition_types::*;
-    pub use crate::signable_with_entities::*;
+    pub(crate) use crate::signable_with_entities::*;
     pub use crate::signables::*;
     pub use crate::signatures_outcome_types::*;
     pub use crate::testing::*;
@@ -49,9 +49,11 @@ pub mod prelude {
     };
 
     pub(crate) use log::*;
-    pub(crate) use serde::{Deserialize, Serialize};
     pub(crate) use std::collections::{HashMap, HashSet};
     pub(crate) use std::sync::{Arc, RwLock};
+
+    #[cfg(test)]
+    pub(crate) use serde::Deserialize;
 }
 
 pub use prelude::*;

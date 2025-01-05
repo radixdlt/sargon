@@ -14,7 +14,7 @@ pub mod prelude {
 
     pub use crate::encrypted_profile::*;
     pub use crate::profilesnapshot_version::*;
-    pub use crate::samples::*;
+
     pub use crate::supporting_types::*;
     pub use crate::v100::*;
 
@@ -36,11 +36,7 @@ pub mod prelude {
     pub use profile_persona_data::prelude::*;
     pub use transaction_models::prelude::*;
 
-    pub(crate) use enum_as_inner::EnumAsInner;
-
-    pub(crate) use serde::{
-        ser::SerializeStruct, Deserialize, Deserializer, Serialize, Serializer,
-    };
+    pub(crate) use serde::{Deserialize, Serialize};
 
     #[cfg(test)]
     pub(crate) use serde_json::json;

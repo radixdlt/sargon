@@ -102,6 +102,9 @@ impl<ID: SignableID> HDSignature<ID> {
 }
 
 impl<ID: SignableID> HDSignature<ID> {
+    /// # Safety
+    /// Not Rust unsafe, as in memory-unsafe, but unsafe since it
+    /// only uses signatures amongst sample value mnemonics.
     pub unsafe fn produced_signing_with_input(
         input: HDSignatureInput<ID>,
     ) -> Self {

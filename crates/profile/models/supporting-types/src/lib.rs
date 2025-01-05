@@ -21,8 +21,6 @@ pub mod prelude {
 
     pub use hierarchical_deterministic::prelude::*;
     pub use profile::prelude::*;
-    pub use profile_account_or_persona::prelude::*;
-    pub use profile_base_entity::prelude::*;
 
     pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use serde::{Deserialize, Serialize};

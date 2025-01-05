@@ -10,7 +10,7 @@ pub mod prelude {
     pub(crate) use numeric::prelude::*;
 
     pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use serde::{Deserialize, Serialize};
+
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use strum::FromRepr;
 
@@ -20,7 +20,6 @@ pub mod prelude {
         pub(crate) use serde_json::json;
         pub(crate) use std::collections::BTreeSet;
     }
-
     #[cfg(test)]
     pub(crate) use testing::*;
 }
