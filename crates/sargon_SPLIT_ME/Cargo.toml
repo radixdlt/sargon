@@ -31,7 +31,8 @@ gateway-models = { path = "../gateway/models" }
 clients = { path = "../system/clients/clients" }
 drivers = { path = "../system/drivers" }
 home-cards = { path = "../app/home-cards" }
-radix-connect = { path = "../radix-connect" }
+security-center = { path = "../app/security-center" }
+radix-connect = { path = "../app/radix-connect" }
 gateway-client-and-api = { path = "../gateway/client-and-api" }
 
 # === RADIX DEPENDENCIES ===

@@ -3695,6 +3695,7 @@ dependencies = [
  "radix-engine-interface",
  "radix-engine-toolkit-common",
  "radix-transactions",
+ "security-center",
  "security-framework",
  "security-framework-sys",
  "serde",
@@ -3929,6 +3930,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5d1746aae42c19d583c3c1a8c646bfad910498e2051c551a7f2e3c0c9fbb7eb"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "security-center"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "assert-json",
+ "core-misc",
+ "derive_more",
+ "has-sample-values",
+ "profile-app-preferences",
+ "serde",
 ]
 
 [[package]]

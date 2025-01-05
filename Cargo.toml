@@ -3,6 +3,8 @@ resolver = "2"
 members = [
     # === FOR APP ===
     "crates/app/home-cards",
+    "crates/app/radix-connect",
+    "crates/app/security-center",
 
     # === COMMON ===
     "crates/common/bytes",
@@ -50,9 +52,6 @@ members = [
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
     "crates/profile/models/supporting-types",
-
-    # === RADIX CONNECT ===
-    "crates/radix-connect",
 
     # === SARGON - SPLIT ME ===
     "crates/sargon_SPLIT_ME",
@@ -75,6 +74,8 @@ members = [
 default-members = [
     # === FOR APP ===
     "crates/app/home-cards",
+    "crates/app/radix-connect",
+    "crates/app/security-center",
 
     # === COMMON ===
     "crates/common/bytes",
@@ -122,9 +123,6 @@ default-members = [
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
     "crates/profile/models/supporting-types",
-
-    # === RADIX CONNECT ===
-    "crates/radix-connect",
 
     # === SARGON - SPLIT ME ===
     "crates/sargon_SPLIT_ME",
