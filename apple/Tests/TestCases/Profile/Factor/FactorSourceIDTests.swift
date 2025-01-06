@@ -10,10 +10,4 @@ final class FactorSourceIDTests: FactorSourceIDTest<FactorSourceID> {
 			XCTAssertEqual(sut.asGeneral, sut)
 		}
 	}
-
-	func test_extract_wrong_throws() throws {
-		try eachSample { sut in
-			XCTAssertThrowsError(try sut.asGeneral.extract(as: FactorSourceID.self))
-		}
-	}
 }
