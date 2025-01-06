@@ -35,7 +35,30 @@ class FactorSourceIdTest {
     }
 
     @Test
-    fun testJsonRoundtrip() {
+    fun testFactorSourceIdJsonRoundTrip() {
+        val hashFactorSourceId = FactorSourceIdFromHash(
+            kind = FactorSourceKind.DEVICE,
+            body = Exactly32Bytes.init(randomBagOfBytes(32))
+        )
+        val factorSourceIdHash = FactorSourceId.Hash(hashFactorSourceId) as FactorSourceId
+        assertEquals(
+            hashFactorSourceId.asGeneral(),
+            FactorSourceId.fromJson(factorSourceIdHash.toJson())
+        )
+
+        val addressFactorSourceId = FactorSourceIdFromAddress(
+            kind = FactorSourceKind.TRUSTED_CONTACT,
+            body = AccountAddress.sampleMainnet()
+        )
+        val factorSourceIdAddress = FactorSourceId.Address(addressFactorSourceId) as FactorSourceId
+        assertEquals(
+            addressFactorSourceId.asGeneral(),
+            FactorSourceId.fromJson(factorSourceIdAddress.toJson())
+        )
+    }
+
+    @Test
+    fun testFactorSourceIdFromHashAndAddressJsonRoundTrip() {
         val sutHash = FactorSourceIdFromHash(
             kind = FactorSourceKind.DEVICE,
             body = Exactly32Bytes.init(randomBagOfBytes(32))

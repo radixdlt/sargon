@@ -44,3 +44,13 @@ fun FactorSourceId.Hash.Companion.fromJson(
 
 fun FactorSourceId.Hash.toJson(): String =
     factorSourceIDFromHashToJsonBytes(factorSourceIDFromHash = value).string
+
+@Throws(SargonException::class)
+fun FactorSourceId.Companion.fromJson(
+    jsonString: String
+): FactorSourceId = newFactorSourceIDFromJsonBytes(
+    jsonBytes = bagOfBytes(fromString = jsonString)
+)
+
+fun FactorSourceId.toJson(): String =
+    factorSourceIDToJsonBytes(factorSourceID = this).string
