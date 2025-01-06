@@ -14,6 +14,7 @@ crate-type = ["staticlib", "cdylib", "lib"]
 [dependencies]
 # === SARGON CRATES ===
 identified-vec-of = { path = "../common/identified-vec-of" }
+build-info = { path = "../common/build-info" }
 hierarchical-deterministic = { path = "../crypto/hd" }
 factors = { path = "../factors/factors" }
 core-misc = { path = "../core/misc" }
@@ -36,6 +37,18 @@ security-center = { path = "../app/security-center" }
 radix-connect = { path = "../app/radix-connect" }
 radix-connect-models = { path = "../app/radix-connect-models" }
 signing = { path = "../app/signing" }
+network = { path = "../common/network" }
+next-derivation-index-ephemeral = { path = "../factors/next-derivation-index-ephemeral" }
+sub-systems = { path = "../system/sub-systems" }
+interactors = { path = "../system/interactors" }
+key-derivation-traits = { path = "../app/key-derivation-traits" }
+signing-traits = { path = "../app/signing-traits" }
+sargon-os = { path = "../system/os/os" }
+sargon-os-transaction = { path = "../system/os/transaction" }
+sargon-os-accounts = { path = "../system/os/accounts" }
+sargon-os-factors = { path = "../system/os/factors" }
+sargon-os-security-center = { path = "../system/os/security-center" }
+sargon-os-signing = { path = "../system/os/signing" }
 gateway-client-and-api = { path = "../gateway/client-and-api" }
 
 # === RADIX DEPENDENCIES ===

@@ -546,6 +546,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "build-info"
+version = "1.1.99"
+dependencies = [
+ "assert-json",
+ "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
+ "derive_more",
+ "enum-as-inner",
+ "error",
+ "has-sample-values",
+ "radix-engine",
+ "radix-engine-toolkit",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1413,6 +1427,7 @@ dependencies = [
  "hierarchical-deterministic",
  "identified-vec-of",
  "indexmap 2.7.0",
+ "key-derivation-traits",
  "keys-collector",
  "next-derivation-index-ephemeral",
  "profile",
@@ -2257,6 +2272,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "interactors"
+version = "1.1.99"
+dependencies = [
+ "async-trait",
+ "derive_more",
+ "key-derivation-traits",
+ "log",
+ "serde",
+ "signing-traits",
+ "transaction-models",
+]
+
+[[package]]
 name = "iota-crypto"
 version = "0.23.2"
 source = "git+https://github.com/iotaledger/crypto.rs?rev=8c13125541e762206e2dc57b8bfde89c7f6ce8e3#8c13125541e762206e2dc57b8bfde89c7f6ce8e3"
@@ -2373,6 +2401,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "key-derivation-traits"
+version = "1.1.99"
+dependencies = [
+ "addresses",
+ "async-trait",
+ "cap26-models",
+ "core-collections",
+ "error",
+ "factors",
+ "factors-supporting-types",
+ "has-sample-values",
+ "hierarchical-deterministic",
+ "indexmap 2.7.0",
+ "itertools 0.12.0",
+]
+
+[[package]]
 name = "keys-collector"
 version = "1.1.99"
 dependencies = [
@@ -2390,6 +2435,7 @@ dependencies = [
  "hierarchical-deterministic",
  "indexmap 2.7.0",
  "itertools 0.12.0",
+ "key-derivation-traits",
  "log",
  "network",
  "numeric",
@@ -3185,6 +3231,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "profile-state-holder"
+version = "1.1.99"
+dependencies = [
+ "derive_more",
+ "error",
+ "log",
+ "pretty_assertions",
+ "profile",
+ "profile-logic",
+ "profile-supporting-types",
+ "serde",
+]
+
+[[package]]
 name = "profile-supporting-types"
 version = "1.1.99"
 dependencies = [
@@ -3801,6 +3861,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
+ "build-info",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "clients",
  "core-misc",
@@ -3817,9 +3878,13 @@ dependencies = [
  "hierarchical-deterministic",
  "home-cards",
  "identified-vec-of",
+ "interactors",
+ "key-derivation-traits",
  "keys-collector",
  "log",
  "manifests",
+ "network",
+ "next-derivation-index-ephemeral",
  "paste 1.0.14",
  "pretty_assertions",
  "profile",
@@ -3832,6 +3897,12 @@ dependencies = [
  "radix-engine-interface",
  "radix-engine-toolkit-common",
  "radix-transactions",
+ "sargon-os",
+ "sargon-os-accounts",
+ "sargon-os-factors",
+ "sargon-os-security-center",
+ "sargon-os-signing",
+ "sargon-os-transaction",
  "security-center",
  "security-framework",
  "security-framework-sys",
@@ -3839,7 +3910,143 @@ dependencies = [
  "serde_json 1.0.108",
  "serde_with 3.4.0",
  "signing",
+ "signing-traits",
+ "sub-systems",
  "transaction-foundation",
+ "transaction-models",
+]
+
+[[package]]
+name = "sargon-os"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "build-info",
+ "clients",
+ "derive_more",
+ "drivers",
+ "factor-instances-provider",
+ "futures",
+ "host-info",
+ "interactors",
+ "key-derivation-traits",
+ "log",
+ "pretty_assertions",
+ "profile",
+ "profile-logic",
+ "profile-state-holder",
+ "serde",
+ "serde_json 1.0.108",
+ "signing-traits",
+ "sub-systems",
+]
+
+[[package]]
+name = "sargon-os-accounts"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "async-trait",
+ "core-collections",
+ "derive_more",
+ "error",
+ "gateway-client-and-api",
+ "indexmap 2.7.0",
+ "log",
+ "manifests",
+ "network",
+ "radix-common",
+ "radix-engine-interface",
+ "sargon-os",
+ "serde",
+ "transaction-models",
+]
+
+[[package]]
+name = "sargon-os-factors"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "async-trait",
+ "clients",
+ "derive_more",
+ "drivers",
+ "error",
+ "interactors",
+ "log",
+ "profile",
+ "profile-logic",
+ "sargon-os",
+ "serde",
+ "serde_json 1.0.108",
+]
+
+[[package]]
+name = "sargon-os-security-center"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "derive_more",
+ "drivers",
+ "error",
+ "has-sample-values",
+ "log",
+ "sargon-os",
+ "security-center",
+ "serde",
+]
+
+[[package]]
+name = "sargon-os-signing"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "async-trait",
+ "clients",
+ "derive_more",
+ "drivers",
+ "error",
+ "factor-instances-provider",
+ "interactors",
+ "key-derivation-traits",
+ "log",
+ "profile",
+ "profile-logic",
+ "profile-security-structures",
+ "radix-connect-models",
+ "sargon-os",
+ "serde",
+ "signing",
+ "signing-traits",
+ "transaction-models",
+]
+
+[[package]]
+name = "sargon-os-transaction"
+version = "1.1.99"
+dependencies = [
+ "actix-rt",
+ "async-std",
+ "async-trait",
+ "derive_more",
+ "entity-by-address",
+ "gateway-client-and-api",
+ "itertools 0.12.0",
+ "log",
+ "manifests",
+ "pretty_assertions",
+ "profile",
+ "profile-account-or-persona",
+ "radix-common",
+ "radix-connect-models",
+ "radix-engine-interface",
+ "radix-engine-toolkit-common",
+ "sargon-os",
+ "serde",
+ "serde_json 1.0.108",
+ "signing",
+ "signing-traits",
  "transaction-models",
 ]
 
@@ -4344,6 +4551,32 @@ dependencies = [
  "radix-transactions",
  "serde",
  "serde_json 1.0.108",
+ "signing-traits",
+ "transaction-models",
+]
+
+[[package]]
+name = "signing-traits"
+version = "1.1.99"
+dependencies = [
+ "async-trait",
+ "bytes 1.1.99",
+ "core-collections",
+ "derive_more",
+ "ecc",
+ "entity-by-address",
+ "error",
+ "hash",
+ "indexmap 2.7.0",
+ "metadata",
+ "pretty_assertions",
+ "profile-account",
+ "profile-account-or-persona",
+ "profile-persona",
+ "radix-connect-models",
+ "radix-engine-interface",
+ "radix-transactions",
+ "serde",
  "transaction-models",
 ]
 
@@ -4484,6 +4717,18 @@ dependencies = [
  "quote",
  "rustversion",
  "syn 2.0.94",
+]
+
+[[package]]
+name = "sub-systems"
+version = "1.1.99"
+dependencies = [
+ "derive_more",
+ "drivers",
+ "enum-iterator",
+ "itertools 0.12.0",
+ "log",
+ "serde",
 ]
 
 [[package]]

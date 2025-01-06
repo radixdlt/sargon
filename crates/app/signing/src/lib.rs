@@ -1,25 +1,16 @@
-mod authentication;
 mod collector;
-mod extractor_of_entities_requiring_auth;
-mod host_interaction;
 mod petition_types;
 mod signable_with_entities;
-mod signables;
 mod signatures_outcome_types;
-mod testing;
-mod types;
+
+#[cfg(test)]
+mod tests;
 
 pub mod prelude {
-    pub use crate::authentication::*;
     pub use crate::collector::*;
-    pub use crate::extractor_of_entities_requiring_auth::*;
-    pub use crate::host_interaction::*;
     pub use crate::petition_types::*;
     pub(crate) use crate::signable_with_entities::*;
-    pub use crate::signables::*;
     pub use crate::signatures_outcome_types::*;
-    pub use crate::testing::*;
-    pub use crate::types::*;
 
     pub(crate) use addresses::prelude::*;
     pub(crate) use bytes::prelude::*;
@@ -40,6 +31,7 @@ pub mod prelude {
         GeneralRoleWithHierarchicalDeterministicFactorInstances, RoleKind,
     };
     pub(crate) use radix_connect_models::prelude::*;
+    pub(crate) use signing_traits::prelude::*;
     pub(crate) use transaction_models::prelude::*;
 
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;

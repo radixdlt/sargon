@@ -1,3 +1,5 @@
+use sargon::OsAnalyseTxPreview;
+
 use crate::prelude::*;
 
 #[uniffi::export]

@@ -7,8 +7,11 @@ members = [
     "crates/app/radix-connect-models",
     "crates/app/security-center",
     "crates/app/signing",
+    "crates/app/signing-traits",
+    "crates/app/key-derivation-traits",
 
     # === COMMON ===
+    "crates/common/build-info",
     "crates/common/bytes",
     "crates/common/entity-foundation",
     "crates/common/host-info",
@@ -68,6 +71,15 @@ members = [
     "crates/system/clients/clients",
     "crates/system/clients/http",
     "crates/system/drivers",
+    "crates/system/sub-systems",
+    "crates/system/profile-state-holder",
+    "crates/system/interactors",
+    "crates/system/os/accounts",
+    "crates/system/os/factors",
+    "crates/system/os/os",
+    "crates/system/os/security-center",
+    "crates/system/os/signing",
+    "crates/system/os/transaction",
 
     # === TRANSACTION ===
     "crates/transaction/foundation",
@@ -86,9 +98,12 @@ default-members = [
     "crates/app/radix-connect-models",
     "crates/app/security-center",
     "crates/app/signing",
+    "crates/app/signing-traits",
+    "crates/app/key-derivation-traits",
 
     # === COMMON ===
     "crates/common/bytes",
+    "crates/common/build-info",
     "crates/common/entity-foundation",
     "crates/common/host-info",
     "crates/common/identified-vec-of",
@@ -147,6 +162,15 @@ default-members = [
     "crates/system/clients/clients",
     "crates/system/clients/http",
     "crates/system/drivers",
+    "crates/system/sub-systems",
+    "crates/system/profile-state-holder",
+    "crates/system/interactors",
+    "crates/system/os/accounts",
+    "crates/system/os/factors",
+    "crates/system/os/os",
+    "crates/system/os/security-center",
+    "crates/system/os/signing",
+    "crates/system/os/transaction",
 
     # === TRANSACTION ===
     "crates/transaction/foundation",

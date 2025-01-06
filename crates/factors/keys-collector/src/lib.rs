@@ -1,7 +1,6 @@
 #![feature(async_closure)]
 
 mod collector;
-mod host_interaction;
 
 #[cfg(test)]
 mod tests;
@@ -20,10 +19,10 @@ pub mod prelude {
     pub(crate) use factors::prelude::*;
     pub(crate) use factors_supporting_types::prelude::*;
     pub(crate) use hierarchical_deterministic::prelude::*;
+    pub(crate) use key_derivation_traits::prelude::*;
 
     pub use crate::collector::*;
     pub use crate::derivation_testing::*;
-    pub use crate::host_interaction::*;
 
     pub(crate) use std::sync::{Arc, RwLock};
 

@@ -27,6 +27,7 @@ profile-account = { path = "../../profile/models/account" }
 entity-foundation = { path = "../../common/entity-foundation" }
 profile-security-structures = { path = "../../profile/models/security-structures" } # TODO only RoleKind and FactorListKind and GeneralRoleWithHierarchicalDeterministicFactorInstances? maybe move to a smaller crate?
 entity-by-address = { path = "../../profile/traits/entity-by-address" }
+signing-traits = { path = "../../app/signing-traits" }
 
 # === RADIX DEPENDENCIES ===
 radix-engine-interface = { workspace = true }

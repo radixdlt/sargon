@@ -1,3 +1,5 @@
+use sargon::OSPollPreAuthorizationStatus;
+
 use crate::prelude::*;
 
 // ==================

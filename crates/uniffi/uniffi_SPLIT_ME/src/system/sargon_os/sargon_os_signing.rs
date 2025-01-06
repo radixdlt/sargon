@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::AuthIntent as InternalAuthIntent;
+use sargon::{AuthIntent as InternalAuthIntent, OsSigning};
 
 #[uniffi::export]
 impl SargonOS {

@@ -5,6 +5,7 @@ mod types;
 pub mod prelude {
     pub(crate) use addresses::*;
     pub(crate) use clients::prelude::*;
+    pub(crate) use key_derivation_traits::prelude::*;
     pub(crate) use keys_collector::prelude::*;
     pub(crate) use profile_logic::prelude::*;
 

@@ -11,28 +11,31 @@
 #![feature(trivial_bounds)]
 #![allow(trivial_bounds)]
 
-mod bios;
-mod interactors;
-mod sargon_os;
-mod subsystems;
 mod test_diagnose_instance_duplicates;
 
 pub mod prelude {
-    pub use crate::bios::*;
-    pub use crate::interactors::*;
-    pub use crate::sargon_os::*;
-    pub use crate::subsystems::*;
 
+    pub use build_info::prelude::*;
     pub use clients::prelude::*;
     pub use factor_instances_provider::prelude::*;
     pub use home_cards::prelude::*;
+    pub use interactors::prelude::*;
+    pub use key_derivation_traits::prelude::*;
     pub use keys_collector::prelude::*;
     pub use manifests::prelude::*;
     pub use profile_logic::prelude::*;
     pub use radix_connect::prelude::*;
     pub use radix_connect_models::prelude::*;
+    pub use sargon_os::prelude::*;
+    pub use sargon_os_accounts::prelude::*;
+    pub use sargon_os_factors::prelude::*;
+    pub use sargon_os_security_center::prelude::*;
+    pub use sargon_os_signing::prelude::*;
+    pub use sargon_os_transaction::prelude::*;
     pub use security_center::prelude::*;
     pub use signing::prelude::*;
+    pub use signing_traits::prelude::*;
+    pub use sub_systems::prelude::*;
 
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
 

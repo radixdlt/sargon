@@ -1,0 +1,27 @@
+[package]
+name = "sargon-os-accounts"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-os = { path = "../../../system/os/os" }
+error = { path = "../../../core/error" }
+core-collections = { path = "../../../core/collections" }
+network = { path = "../../../common/network" }
+addresses = { path = "../../../crypto/addresses" }
+transaction-models = { path = "../../../transaction/models" }
+manifests = { path = "../../../transaction/manifests" }
+gateway-client-and-api = { path = "../../../gateway/client-and-api" }
+
+# ==== RADIX DEPENDENCIES ====
+radix-engine-interface = { workspace = true }
+radix-common = { workspace = true }
+
+# ==== EXTERNAL DEPENDENCIES ====
+actix-rt = { workspace = true }
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+indexmap = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }

@@ -1,3 +1,5 @@
+use sargon::OsSyncAccountsDeletedOnLedger;
+
 use crate::prelude::*;
 
 // ==================
@@ -29,7 +31,10 @@ impl SargonOS {
             .wrapped
             .check_accounts_deleted_on_ledger(
                 network_id.into_internal(),
-                account_addresses.iter().map(|a| a.into_internal()),
+                account_addresses
+                    .iter()
+                    .map(|a| a.into_internal())
+                    .collect(),
             )
             .await
             .map_err(CommonError::from)?;

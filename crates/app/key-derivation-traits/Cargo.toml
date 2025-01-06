@@ -1,0 +1,23 @@
+[package]
+name = "key-derivation-traits"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+core-collections = { path = "../../core/collections" }
+error = { path = "../../core/error" }
+has-sample-values = { path = "../../core/has-sample-values" }
+addresses = { path = "../../crypto/addresses" }
+factors = { path = "../../factors/factors" }
+cap26-models = { path = "../../crypto/cap26-models" }
+hierarchical-deterministic = { path = "../../crypto/hd" }
+factors-supporting-types = { path = "../../factors/supporting-types" }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+async-trait = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }

@@ -1,0 +1,34 @@
+[package]
+name = "sargon-os-signing"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-os = { path = "../../../system/os/os" }
+error = { path = "../../../core/error" }
+signing = { path = "../../../app/signing" }
+signing-traits = { path = "../../../app/signing-traits" }
+transaction-models = { path = "../../../transaction/models" }
+profile-security-structures = { path = "../../../profile/models/security-structures" }
+radix-connect-models = { path = "../../../app/radix-connect-models" }
+profile = { path = "../../../profile/models/profile_SPLIT_ME" }
+profile-logic = { path = "../../../profile/logic/logic_SPLIT_ME" }
+
+# ==== RADIX DEPENDENCIES ====
+# None
+
+# ==== EXTERNAL DEPENDENCIES ====
+actix-rt = { workspace = true }
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+# === SARGON CRATES ===
+drivers = { path = "../../../system/drivers" }
+interactors = { path = "../../../system/interactors" }
+clients = { path = "../../../system/clients/clients" }
+factor-instances-provider = { path = "../../../factors/instances-provider" }
+key-derivation-traits = { path = "../../../app/key-derivation-traits" }
