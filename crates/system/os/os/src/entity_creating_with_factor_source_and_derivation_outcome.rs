@@ -1,8 +1,10 @@
 use crate::prelude::*;
 
+#[async_trait::async_trait]
 pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
     async fn create_unsaved_entities_with_factor_source_with_derivation_outcome<
         E: IsEntity + Identifiable,
+        F: Send + Fn(u32) -> DisplayName,
     >(
         &self,
         factor_source: FactorSource,
@@ -10,7 +12,7 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
-        get_name: impl Fn(u32) -> DisplayName, // name of entity at index
+        get_name: F, // name of entity at index
     ) -> Result<(
         FactorSourceID,
         IdentifiedVecOf<E>,
@@ -60,30 +62,37 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
         ))
     }
 
-    async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+    async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome<
+        F,
+    >(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
-        get_name: impl Fn(u32) -> DisplayName, // name of account at index
+        get_name: F, // name of account at index
     ) -> Result<(
         FactorSourceID,
         Accounts,
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
-    )>;
+    )>
+    where
+        F: Send + Fn(u32) -> DisplayName;
 
-    async fn create_unsaved_accounts_with_factor_source(
+    async fn create_unsaved_accounts_with_factor_source<F>(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
-        get_name: impl Fn(u32) -> DisplayName, // name of account at index
-    ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)> {
+        get_name: F, // name of account at index
+    ) -> Result<(FactorSourceID, Accounts, InstancesInCacheConsumer)>
+    where
+        F: Send + Fn(u32) -> DisplayName,
+    {
         self.create_unsaved_accounts_with_factor_source_with_derivation_outcome(
             factor_source,
             network_id,
@@ -138,21 +147,26 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
         ))
     }
 
-    async fn create_unsaved_personas_with_factor_source_with_derivation_outcome(
+    async fn create_unsaved_personas_with_factor_source_with_derivation_outcome<
+        F,
+    >(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
-        get_name: impl Fn(u32) -> DisplayName, // name of persona at index
+        get_name: F, // name of persona at index
     ) -> Result<(
         FactorSourceID,
         Personas,
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
-    )> {
-        self.create_unsaved_entities_with_factor_source_with_derivation_outcome::<Persona>(
+    )>
+    where
+        F: Send + Fn(u32) -> DisplayName,
+    {
+        self.create_unsaved_entities_with_factor_source_with_derivation_outcome::<Persona, _>(
             factor_source,
             network_id,
             count,
@@ -164,21 +178,27 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
     }
 }
 
+#[async_trait::async_trait]
 impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
-    async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome(
+    async fn create_unsaved_accounts_with_factor_source_with_derivation_outcome<
+        F,
+    >(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
-        get_name: impl Fn(u32) -> DisplayName, // name of account at index
+        get_name: F, // name of account at index
     ) -> Result<(
         FactorSourceID,
         Accounts,
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
-    )> {
+    )>
+    where
+        F: Send + Fn(u32) -> DisplayName,
+    {
         let number_of_accounts_on_network = self
             .networks
             .get_id(network_id)
@@ -186,7 +206,7 @@ impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
             .unwrap_or(0);
 
         let (factor_source_id, accounts, instances_in_cache_consumer, derivation_outcome) = self
-            .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account>(
+            .create_unsaved_entities_with_factor_source_with_derivation_outcome::<Account, _>(
                 factor_source,
                 network_id,
                 count,
@@ -230,7 +250,8 @@ impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
     /// is safe to delete the instances from the cache - e.g. after having saved the new
     /// entities into the Profile and persisted it into SecureStorage.
     async fn create_unsaved_entities_with_factor_source_with_derivation_outcome<
-        E: IsEntity + Identifiable,
+        E,
+        F,
     >(
         &self,
         factor_source: FactorSource,
@@ -238,13 +259,17 @@ impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
         count: u16,
         factor_instances_cache_client: Arc<FactorInstancesCacheClient>,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
-        get_name: impl Fn(u32) -> DisplayName, // name of entity at index
+        get_name: F, // name of entity at index
     ) -> Result<(
         FactorSourceID,
         IdentifiedVecOf<E>,
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
-    )> {
+    )>
+    where
+        E: IsEntity + Identifiable,
+        F: Send + Fn(u32) -> DisplayName,
+    {
         let count = count as usize;
 
         let fsid = factor_source.factor_source_id();

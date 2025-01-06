@@ -587,6 +587,21 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn profile_not_loaded_error() {
+        let os = SUT::fast_boot().await;
+        os.profile_state_holder
+            .replace_profile_state_with(ProfileState::None)
+            .unwrap();
+
+        let result = os.profile();
+
+        assert!(matches!(
+            result,
+            Err(CommonError::ProfileStateNotLoaded { .. })
+        ));
+    }
+
+    #[actix_rt::test]
     async fn test_boot_when_existing_profile_with_no_networks_profile_state_considered_none(
     ) {
         // ARRANGE

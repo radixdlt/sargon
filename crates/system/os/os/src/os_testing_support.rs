@@ -1,3 +1,6 @@
+#![allow(non_snake_case)]
+
+#[cfg(test)]
 use crate::prelude::*;
 
 #[cfg(test)]
@@ -123,7 +126,7 @@ impl SargonOS {
     /// Uses FactorInstancesProvider to get factor instances for the `shield`.
     /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
     /// security state on chain
-    async fn __OFFLINE_ONLY_securify_accounts(
+    pub(crate) async fn __OFFLINE_ONLY_securify_accounts(
         &self,
         account_addresses: IndexSet<AccountAddress>,
         shield: &SecurityStructureOfFactorSources,
@@ -142,7 +145,7 @@ impl SargonOS {
         Ok((accounts, outcome))
     }
 
-    async fn __OFFLINE_ONLY_securify_entities(
+    pub(crate) async fn __OFFLINE_ONLY_securify_entities(
         &self,
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
         shield: &SecurityStructureOfFactorSources,
@@ -208,7 +211,7 @@ impl SargonOS {
     /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
     /// security state on chain
     #[allow(non_camel_case_types)]
-    async fn __OFFLINE_ONLY_securify_account(
+    pub(crate) async fn __OFFLINE_ONLY_securify_account(
         &self,
         account_address: AccountAddress,
         shield: &SecurityStructureOfFactorSources,

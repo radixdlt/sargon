@@ -19,7 +19,7 @@ pub mod prelude {
     pub(crate) use core_collections::prelude::*;
     pub(crate) use ecc::prelude::*;
     pub(crate) use entity_by_address::prelude::*;
-    pub(crate) use error::prelude::*;
+
     pub(crate) use hash::prelude::*;
     pub(crate) use metadata::prelude::*;
     pub(crate) use profile_account::prelude::*;
@@ -35,11 +35,16 @@ pub mod prelude {
     };
 
     pub(crate) use indexmap::{IndexMap, IndexSet};
-    pub(crate) use serde::{Deserialize, Serialize};
 
-    pub(crate) use std::collections::HashSet;
     pub(crate) use std::fmt::Debug;
     pub(crate) use std::sync::Arc;
+
+    #[cfg(test)]
+    mod testing {
+        pub(crate) use std::collections::HashSet;
+    }
+    #[cfg(test)]
+    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

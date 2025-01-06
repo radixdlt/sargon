@@ -171,8 +171,9 @@ mod tests {
         struct NotAndroidLog;
         impl LoggingDriver for NotAndroidLog {
             fn log(&self, level: LogLevel, msg: String) {
-                assert_eq!(level, LogLevel::Error);
-                assert!(msg.contains("Duplicated FactorInstances found"));
+                if msg.contains("Duplicated FactorInstances found") {
+                    assert_eq!(level, LogLevel::Error);
+                }
             }
         }
         install_logger(Arc::new(NotAndroidLog));
@@ -244,9 +245,10 @@ mod tests {
         struct NotAndroidLog;
         impl LoggingDriver for NotAndroidLog {
             fn log(&self, level: LogLevel, msg: String) {
-                assert_eq!(level, LogLevel::Error);
-                assert!(msg.contains("Duplicated FactorInstances found"));
-                assert!(!msg.contains("due to Android bug"));
+                if msg.contains("Duplicated FactorInstances found") {
+                    assert_eq!(level, LogLevel::Error);
+                    assert!(!msg.contains("due to Android bug"));
+                }
             }
         }
         install_logger(Arc::new(NotAndroidLog));

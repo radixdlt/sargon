@@ -167,32 +167,31 @@ impl OsExecutionSummary for SargonOS {
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
-        return Err(CommonError::Unknown);
-        // let signer_public_keys =
-        //     self.extract_signer_public_keys(manifest.summary(network_id)?)?;
+        let signer_public_keys =
+            self.extract_signer_public_keys(manifest.summary(network_id)?)?;
 
-        // let gateway_client =
-        //     GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let gateway_client =
+            GatewayClient::new(self.http_client.driver.clone(), network_id);
 
-        // let epoch = gateway_client.current_epoch().await?;
+        let epoch = gateway_client.current_epoch().await?;
 
-        // let receipts = manifest
-        //     .fetch_preview(
-        //         &gateway_client,
-        //         network_id,
-        //         epoch,
-        //         signer_public_keys,
-        //         notary_public_key,
-        //         nonce,
-        //     )
-        //     .await?;
+        let receipts = manifest
+            .fetch_preview(
+                &gateway_client,
+                network_id,
+                epoch,
+                signer_public_keys,
+                notary_public_key,
+                nonce,
+            )
+            .await?;
 
-        // Self::extract_execution_summary(
-        //     &manifest,
-        //     receipts,
-        //     network_id,
-        //     are_instructions_originating_from_host,
-        // )
+        Self::extract_execution_summary(
+            &manifest,
+            receipts,
+            network_id,
+            are_instructions_originating_from_host,
+        )
     }
 
     fn extract_signer_public_keys(
@@ -346,7 +345,7 @@ impl PreviewableManifest for TransactionManifest {
     }
 }
 
-struct PreviewResponseReceipts {
+pub struct PreviewResponseReceipts {
     receipt: Option<TransactionReceipt>,
     engine_toolkit_receipt:
         Option<ScryptoSerializableToolkitTransactionReceipt>,
@@ -381,30 +380,6 @@ mod transaction_preview_analysis_tests {
             result,
             Err(CommonError::InvalidInstructionsString { .. })
         ));
-    }
-
-    #[actix_rt::test]
-    async fn profile_not_loaded_error() {
-        todo!();
-        // let os = SUT::fast_boot().await;
-        // os.profile_state_holder
-        //     .replace_profile_state_with(ProfileState::None)
-        //     .unwrap();
-
-        // let result = os
-        //     .analyse_transaction_preview(
-        //         TransactionManifest::sample().instructions_string(),
-        //         Blobs::sample(),
-        //         false,
-        //         Nonce::sample(),
-        //         PublicKey::sample(),
-        //     )
-        //     .await;
-
-        // assert!(matches!(
-        //     result,
-        //     Err(CommonError::ProfileStateNotLoaded { .. })
-        // ));
     }
 
     #[actix_rt::test]
@@ -926,14 +901,15 @@ mod transaction_preview_analysis_tests {
                 .await
                 .unwrap()
                 .unwrap();
-        todo!()
-        // os.update_profile_with(|profile| {
-        //     profile.networks.insert(ProfileNetwork::sample_mainnet());
-        //     profile.factor_sources.insert(FactorSource::sample());
-        //     Ok(())
-        // })
-        // .unwrap();
-        // os
+
+        os.update_profile_with(|profile| {
+            profile.networks.insert(ProfileNetwork::sample_mainnet());
+            profile.factor_sources.insert(FactorSource::sample());
+            Ok(())
+        })
+        .await
+        .unwrap();
+        os
     }
 
     fn prepare_manifest_with_account_entity() -> TransactionManifest {

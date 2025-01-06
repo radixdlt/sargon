@@ -15,7 +15,6 @@ pub mod prelude {
     pub(crate) use error::prelude::*;
     pub(crate) use factors::prelude::*;
     pub(crate) use factors_supporting_types::prelude::*;
-    pub(crate) use has_sample_values::prelude::*;
     pub(crate) use hierarchical_deterministic::prelude::*;
 
     pub(crate) use indexmap::{IndexMap, IndexSet};

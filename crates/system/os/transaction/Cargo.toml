@@ -13,6 +13,7 @@ radix-connect-models = { path = "../../../app/radix-connect-models" }
 signing = { path = "../../../app/signing" }
 entity-by-address = { path = "../../../profile/traits/entity-by-address" }
 profile = { path = "../../../profile/models/profile_SPLIT_ME" }
+# profile-state-holder = { path = "../../../system/profile-state-holder" }
 profile-account-or-persona = { path = "../../../profile/models/account-or-persona" }
 gateway-client-and-api = { path = "../../../gateway/client-and-api" }
 

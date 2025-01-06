@@ -18,7 +18,8 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             purpose,
         )
     }
-    pub fn new_test(
+
+    pub(crate) fn new_test(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
@@ -34,7 +35,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
         )
     }
 
-    pub fn test_prudent_with_factors_and_finish_early(
+    pub(crate) fn test_prudent_with_factors_and_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
@@ -48,7 +49,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
         )
     }
 
-    pub fn test_prudent_with_finish_early(
+    pub(crate) fn test_prudent_with_finish_early(
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
@@ -59,7 +60,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
         )
     }
 
-    pub fn test_prudent(
+    pub(crate) fn test_prudent(
         transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
     ) -> Self {
         Self::test_prudent_with_finish_early(
@@ -68,7 +69,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
         )
     }
 
-    pub fn test_prudent_with_failures(
+    pub(crate) fn test_prudent_with_failures(
         transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
         simulated_failures: SimulatedFailures,
     ) -> Self {

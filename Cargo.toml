@@ -155,8 +155,7 @@ default-members = [
     "crates/profile/models/supporting-types",
     "crates/profile/traits/entity-by-address",
 
-    # === SARGON - SPLIT ME ===
-    "crates/sargon_SPLIT_ME",
+    # === SARGON - NOT included! no need ===
 
     # === SYSTEM ===
     "crates/system/clients/clients",

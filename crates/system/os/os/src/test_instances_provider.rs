@@ -1,5 +1,5 @@
 #![allow(non_snake_case)]
-use sargon::*;
+use crate::prelude::*;
 
 #[actix_rt::test]
 async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis_and_if_profile_is_used_a_new_account_is_created(
@@ -205,6 +205,7 @@ async fn adding_personas_and_clearing_cache_in_between() {
     );
 }
 
+#[cfg(test)]
 trait AllHdFactorsFromRole {
     fn all_hd_factors(&self) -> Vec<HierarchicalDeterministicFactorInstance>;
 }

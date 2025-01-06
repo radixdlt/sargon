@@ -3921,6 +3921,7 @@ name = "sargon-os"
 version = "1.1.99"
 dependencies = [
  "actix-rt",
+ "async-trait",
  "build-info",
  "clients",
  "derive_more",

@@ -10,5 +10,6 @@ pub use petition_for_transaction::*;
 pub(crate) use petition_status::*;
 pub use petitions::*;
 
-pub use petition_for_factors_types::*;
 pub use signing_purpose::*;
+
+pub(crate) use petition_for_factors_types::*;

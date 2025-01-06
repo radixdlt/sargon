@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 #![feature(let_chains)]
 #![feature(trait_upcasting)]
 
@@ -10,6 +11,7 @@ mod sargon_os_factors;
 mod sargon_os_gateway;
 mod sargon_os_personas;
 mod sargon_os_profile;
+mod test_instances_provider;
 mod testing_interactors;
 
 pub mod prelude {
@@ -45,5 +47,5 @@ pub mod prelude {
     }
 
     #[cfg(test)]
-    use testing::*;
+    pub(crate) use testing::*;
 }

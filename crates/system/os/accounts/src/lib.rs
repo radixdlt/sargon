@@ -6,16 +6,19 @@ pub mod prelude {
     pub use super::sargon_os_sync_accounts::*;
 
     pub(crate) use addresses::prelude::*;
-    pub(crate) use core_collections::prelude::*;
     pub(crate) use error::prelude::*;
     pub(crate) use gateway_client_and_api::prelude::*;
     pub(crate) use manifests::prelude::*;
-    pub(crate) use network::prelude::*;
     pub(crate) use sargon_os::prelude::*;
-    pub(crate) use transaction_models::prelude::*;
 
     pub(crate) use indexmap::IndexMap;
-    pub(crate) use std::sync::Arc;
+
+    #[cfg(test)]
+    mod testing {
+        pub(crate) use std::sync::Arc;
+    }
+    #[cfg(test)]
+    pub(crate) use testing::*;
 }
 
 pub use prelude::*;
