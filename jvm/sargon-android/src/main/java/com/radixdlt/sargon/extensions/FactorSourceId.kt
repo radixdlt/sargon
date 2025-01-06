@@ -7,8 +7,10 @@ import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.factorSourceIDFromAddressToJsonBytes
 import com.radixdlt.sargon.factorSourceIDFromHashToJsonBytes
+import com.radixdlt.sargon.factorSourceIDToJsonBytes
 import com.radixdlt.sargon.newFactorSourceIDFromAddressFromJsonBytes
 import com.radixdlt.sargon.newFactorSourceIDFromHashFromJsonBytes
+import com.radixdlt.sargon.newFactorSourceIDFromJsonBytes
 import com.radixdlt.sargon.newFactorSourceIdFromHashFromMnemonicWithPassphrase
 
 fun FactorSourceIdFromHash.asGeneral() = FactorSourceId.Hash(value = this)
