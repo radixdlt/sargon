@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-error = { path = "../../core/error" }
+error = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
 iso8601-timestamp = { workspace = true }

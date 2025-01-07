@@ -5,19 +5,20 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../common/identified-vec-of" }
-assert-json = { path = "../../core/assert-json" }
-core-utils = { path = "../../core/utils" }
-error = { path = "../../core/error" }
-factors = { path = "../../factors/factors" }
-hierarchical-deterministic = { path = "../../crypto/hd" }
-keys-collector = { path = "../../factors/keys-collector" }
-addresses = { path = "../../crypto/addresses" }
-profile = { path = "../../profile/models/profile_SPLIT_ME" }
-profile-logic = { path = "../../profile/logic/logic_SPLIT_ME" }
-clients = { path = "../../system/clients/clients" }
-profile-supporting-types = { path = "../../profile/models/supporting-types" }
-next-derivation-index-ephemeral = { path = "../../factors/next-derivation-index-ephemeral" }
+identified-vec-of = { workspace = true }
+assert-json = { workspace = true }
+core-utils = { workspace = true }
+error = { workspace = true }
+factors = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+keys-collector = { workspace = true }
+addresses = { workspace = true }
+profile = { workspace = true }
+profile-logic = { workspace = true }
+clients = { workspace = true }
+key-derivation-traits = { workspace = true }
+profile-supporting-types = { workspace = true }
+next-derivation-index-ephemeral = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

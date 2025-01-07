@@ -5,16 +5,16 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-short-string = { path = "../../../common/short-string" }
-hierarchical-deterministic = { path = "../../../crypto/hd" }
-has-sample-values = { path = "../../../core/has-sample-values" }
-addresses = { path = "../../../crypto/addresses" }
-host-info = { path = "../../../common/host-info" }
-core-misc = { path = "../../../core/misc" }
-cap26-models = { path = "../../../crypto/cap26-models" }
-profile-base-entity = { path = "../../../profile/models/base-entity" }
-profile-persona-data = { path = "../../../profile/models/persona-data" }
-profile-security-structures = { path = "../../../profile/models/security-structures" }
+short-string = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+has-sample-values = { workspace = true }
+addresses = { workspace = true }
+host-info = { workspace = true }
+core-misc = { workspace = true }
+cap26-models = { workspace = true }
+profile-base-entity = { workspace = true }
+profile-persona-data = { workspace = true }
+profile-security-structures = { workspace = true }
 
 
 # === RADIX DEPENDENCIES ===

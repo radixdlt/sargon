@@ -3,6 +3,7 @@ mod error_from;
 mod is_intent_signing;
 mod low_level;
 mod profile_models;
+mod transaction_status;
 mod unvalidated_transaction_manifest;
 
 pub mod prelude {
@@ -24,6 +25,7 @@ pub mod prelude {
     pub use crate::is_intent_signing::*;
     pub use crate::low_level::*;
     pub use crate::profile_models::*;
+    pub use crate::transaction_status::*;
     pub use crate::unvalidated_transaction_manifest::*;
 
     pub(crate) use radix_common::{

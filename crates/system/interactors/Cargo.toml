@@ -1,0 +1,19 @@
+[package]
+name = "interactors"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+signing-traits = { workspace = true }
+key-derivation-traits = { workspace = true }
+transaction-models = { workspace = true }
+
+# ==== RADIX DEPENDENCIES ====
+# None
+
+# ==== EXTERNAL DEPENDENCIES ====
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }

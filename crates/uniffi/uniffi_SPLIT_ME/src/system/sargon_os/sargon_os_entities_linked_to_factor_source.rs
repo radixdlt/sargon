@@ -1,3 +1,5 @@
+use sargon::OsEntitiesLinkedToFactorSource;
+
 use crate::prelude::*;
 
 #[uniffi::export]

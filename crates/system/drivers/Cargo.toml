@@ -6,11 +6,11 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-hierarchical-deterministic = { path = "../../crypto/hd" }
-addresses = { path = "../../crypto/addresses" }
-profile = { path = "../../profile/models/profile_SPLIT_ME" }
-profile-supporting-types = { path = "../../profile/models/supporting-types" }
-time-utils = { path = "../../core/time-utils" }
+hierarchical-deterministic = { workspace = true }
+addresses = { workspace = true }
+profile = { workspace = true }
+profile-supporting-types = { workspace = true }
+time-utils = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

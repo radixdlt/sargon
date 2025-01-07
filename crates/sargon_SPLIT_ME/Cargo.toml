@@ -13,30 +13,43 @@ crate-type = ["staticlib", "cdylib", "lib"]
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../crypto/hd" }
-factors = { path = "../factors/factors" }
-core-misc = { path = "../core/misc" }
-transaction-foundation = { path = "../transaction/foundation" }
-keys-collector = { path = "../factors/keys-collector" }
-encryption = { path = "../crypto/encryption" }
-addresses = { path = "../crypto/addresses" }
-transaction-models = { path = "../transaction/models" }
-manifests = { path = "../transaction/manifests" }
-profile = { path = "../profile/models/profile_SPLIT_ME" }
-profile-gateway = { path = "../profile/models/gateway" }
-profile-logic = { path = "../profile/logic/logic_SPLIT_ME" }
-profile-security-structures = { path = "../profile/models/security-structures" }
-factor-instances-provider = { path = "../factors/instances-provider" }
-gateway-models = { path = "../gateway/models" }
-clients = { path = "../system/clients/clients" }
-drivers = { path = "../system/drivers" }
-home-cards = { path = "../app/home-cards" }
-security-center = { path = "../app/security-center" }
-radix-connect = { path = "../app/radix-connect" }
-radix-connect-models = { path = "../app/radix-connect-models" }
-signing = { path = "../app/signing" }
-gateway-client-and-api = { path = "../gateway/client-and-api" }
+identified-vec-of = { workspace = true }
+build-info = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+core-misc = { workspace = true }
+transaction-foundation = { workspace = true }
+keys-collector = { workspace = true }
+encryption = { workspace = true }
+addresses = { workspace = true }
+transaction-models = { workspace = true }
+manifests = { workspace = true }
+profile = { workspace = true }
+profile-gateway = { workspace = true }
+profile-logic = { workspace = true }
+profile-security-structures = { workspace = true }
+factor-instances-provider = { workspace = true }
+gateway-models = { workspace = true }
+clients = { workspace = true }
+drivers = { workspace = true }
+home-cards = { workspace = true }
+security-center = { workspace = true }
+radix-connect = { workspace = true }
+radix-connect-models = { workspace = true }
+signing = { workspace = true }
+network = { workspace = true }
+next-derivation-index-ephemeral = { workspace = true }
+sub-systems = { workspace = true }
+interactors = { workspace = true }
+key-derivation-traits = { workspace = true }
+signing-traits = { workspace = true }
+sargon-os = { path = "../system/os/os" }
+sargon-os-transaction = { path = "../system/os/transaction" }
+sargon-os-accounts = { workspace = true }
+sargon-os-factors = { workspace = true }
+sargon-os-security-center = { workspace = true }
+sargon-os-signing = { workspace = true }
+gateway-client-and-api = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

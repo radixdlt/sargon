@@ -1,0 +1,23 @@
+[package]
+name = "key-derivation-traits"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+core-collections = { workspace = true }
+error = { workspace = true }
+has-sample-values = { workspace = true }
+addresses = { workspace = true }
+factors = { workspace = true }
+cap26-models = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors-supporting-types = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+async-trait = { workspace = true }
+indexmap = { workspace = true }
+itertools = { workspace = true }

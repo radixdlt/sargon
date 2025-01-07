@@ -1,3 +1,7 @@
+use sargon::{
+    OsSecurityShieldPrerequisiteStatus, OsSecurityStructuresQuerying,
+};
+
 use crate::prelude::*;
 
 #[uniffi::export]

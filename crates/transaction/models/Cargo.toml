@@ -6,21 +6,21 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../crypto/hd" }
-factors = { path = "../../factors/factors" }
-addresses = { path = "../../crypto/addresses" }
-hash = { path = "../../crypto/hash" }
-bytes = { path = "../../common/bytes" }
-ecc = { path = "../../crypto/ecc" }
-numeric = { path = "../../common/numeric" }
-has-sample-values = { path = "../../core/has-sample-values" }
-metadata = { path = "../../common/metadata" }
-network = { path = "../../common/network" }
-core-utils = { path = "../../core/utils" }
-transaction-foundation = { path = "../../transaction/foundation" }
-core-collections = { path = "../../core/collections" }
-core-misc = { path = "../../core/misc" }                           # Instant
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+addresses = { workspace = true }
+hash = { workspace = true }
+bytes = { workspace = true }
+ecc = { workspace = true }
+numeric = { workspace = true }
+has-sample-values = { workspace = true }
+metadata = { workspace = true }
+network = { workspace = true }
+core-utils = { workspace = true }
+transaction-foundation = { workspace = true }
+core-collections = { workspace = true }
+core-misc = { workspace = true }                  # Instant
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

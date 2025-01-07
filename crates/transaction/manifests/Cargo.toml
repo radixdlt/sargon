@@ -6,18 +6,18 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-core-utils = { path = "../../core/utils" }
-identified-vec-of = { path = "../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../crypto/hd" }
-factors = { path = "../../factors/factors" }
-addresses = { path = "../../crypto/addresses" }
-metadata = { path = "../../common/metadata" }
-transaction-models = { path = "../../transaction/models" }
-gateway-models = { path = "../../gateway/models" }
-profile = { path = "../../profile/models/profile_SPLIT_ME" }
-profile-account-or-persona = { path = "../../profile/models/account-or-persona" }
-profile-base-entity = { path = "../../profile/models/base-entity" }
-account-for-display = { path = "../../profile/models/account-for-display" }
+core-utils = { workspace = true }
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+addresses = { workspace = true }
+metadata = { workspace = true }
+transaction-models = { workspace = true }
+gateway-models = { workspace = true }
+profile = { workspace = true }
+profile-account-or-persona = { workspace = true }
+profile-base-entity = { workspace = true }
+account-for-display = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

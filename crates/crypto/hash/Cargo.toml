@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-bytes = { path = "../../common/bytes" }
+bytes = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }

@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-assert-json = { path = "../../core/assert-json" }
-error = { path = "../../core/error" }
+assert-json = { workspace = true }
+error = { workspace = true }
 
 # === RADIX DEPENDENCIES
 # None

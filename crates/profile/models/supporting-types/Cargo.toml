@@ -5,13 +5,13 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../../crypto/hd" }
-factors = { path = "../../../factors/factors" }
-addresses = { path = "../../../crypto/addresses" }
-profile = { path = "../../../profile/models/profile_SPLIT_ME" }
-profile-base-entity = { path = "../../../profile/models/base-entity" }
-profile-account-or-persona = { path = "../../../profile/models/account-or-persona" }
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+addresses = { workspace = true }
+profile = { workspace = true }
+profile-base-entity = { workspace = true }
+profile-account-or-persona = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

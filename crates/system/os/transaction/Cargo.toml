@@ -1,0 +1,34 @@
+[package]
+name = "sargon-os-transaction"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-os = { path = "../../../system/os/os" }
+transaction-models = { workspace = true }
+manifests = { workspace = true }
+signing-traits = { workspace = true }
+radix-connect-models = { workspace = true }
+signing = { workspace = true }
+entity-by-address = { workspace = true }
+profile = { workspace = true }
+# profile-state-holder = { workspace = true }
+profile-account-or-persona = { workspace = true }
+gateway-client-and-api = { workspace = true }
+
+# ==== RADIX DEPENDENCIES ====
+radix-engine-interface = { workspace = true }
+radix-engine-toolkit-common = { workspace = true }
+radix-common = { workspace = true }
+
+# ==== EXTERNAL DEPENDENCIES ====
+actix-rt = { workspace = true }
+async-std = { workspace = true }
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+itertools = { workspace = true }
+log = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

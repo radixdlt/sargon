@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-addresses = { path = "../../../crypto/addresses" }
-short-string = { path = "../../../common/short-string" }
-entity-foundation = { path = "../../../common/entity-foundation" }
-identified-vec-of = { path = "../../../common/identified-vec-of" }
-network = { path = "../../../common/network" }
-has-sample-values = { path = "../../../core/has-sample-values" }
+addresses = { workspace = true }
+short-string = { workspace = true }
+entity-foundation = { workspace = true }
+identified-vec-of = { workspace = true }
+network = { workspace = true }
+has-sample-values = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None
