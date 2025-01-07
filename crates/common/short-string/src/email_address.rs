@@ -41,9 +41,8 @@ impl FromStr for EmailAddress {
 impl EmailAddress {
     pub fn new(email: impl AsRef<str>) -> Result<Self> {
         let email = email.as_ref().to_owned();
-        if email.is_empty() {
-            return Err(CommonError::EmailAddressEmpty);
-        }
+        // Apparently we allows empty string?
+        // https://rdxworks.slack.com/archives/C031A0V1A1W/p1736262231737039?thread_ts=1736236976.987429&cid=C031A0V1A1W
         ShortString::new(email).map(Self)
     }
 }
@@ -75,8 +74,8 @@ mod tests {
     }
 
     #[test]
-    fn invalid_empty() {
-        assert_eq!(EmailAddress::new(""), Err(CommonError::EmailAddressEmpty));
+    fn empty_is_valid() {
+        assert_eq!(EmailAddress::new("").unwrap().to_string(), String::new());
     }
 
     #[test]
