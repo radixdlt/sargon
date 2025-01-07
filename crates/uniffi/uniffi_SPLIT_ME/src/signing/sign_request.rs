@@ -6,7 +6,9 @@ macro_rules! decl_sign_request {
         struct_name: $struct_name:ident,
         internal_struct_name: $internal_struct_name:ident,
         per_factor_source_input: $per_factor_source_input:ident,
-        internal_per_factor_source_input: $internal_per_factor_source_input:ident
+        internal_per_factor_source_input: $internal_per_factor_source_input:ident,
+        new_sample: $new_sample:ident,
+        new_sample_other: $new_sample_other:ident,
     ) => {
         #[derive(Clone, PartialEq, Eq, uniffi::Record)]
         pub struct $struct_name {
@@ -78,6 +80,16 @@ macro_rules! decl_sign_request {
             }
         }
 
+        #[uniffi::export]
+        pub fn $new_sample() -> $struct_name {
+            $internal_struct_name::sample().into()
+        }
+
+        #[uniffi::export]
+        pub fn $new_sample_other() -> $struct_name {
+            $internal_struct_name::sample_other().into()
+        }
+
         decl_conversion_tests_for!($struct_name);
     };
     (signable: $signable:ty, signable_id: $signable_id:ty) => {
@@ -94,7 +106,9 @@ macro_rules! decl_sign_request {
                 struct_name: [< SignRequestOf $signable >],
                 internal_struct_name: [< InternalSignRequestOf $signable >],
                 per_factor_source_input: [< PerFactorSourceInputOf $signable >],
-                internal_per_factor_source_input: [< InternalPerFactorSourceInputOf $signable >]
+                internal_per_factor_source_input: [< InternalPerFactorSourceInputOf $signable >],
+                new_sample: [< new_sign_request_of_ $signable:snake _sample >],
+                new_sample_other: [< new_sign_request_of_ $signable:snake _sample_other >],
             );
         }
     };
