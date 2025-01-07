@@ -74,7 +74,6 @@ jobs:
           NEXT_TAG: ${{ steps.tags.outputs.NEXT_TAG }}
 
       - name: Push release tag
-        if: github.ref == 'refs/heads/main'
         run: |
           set -euo pipefail
 
@@ -104,7 +103,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release
-        if: github.ref == 'refs/heads/main'
         run: |
           set -eux
 
