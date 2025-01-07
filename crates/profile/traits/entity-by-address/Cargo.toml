@@ -5,11 +5,11 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-error = { path = "../../../core/error" }
-addresses = { path = "../../../crypto/addresses" }
-profile-account = { path = "../../../profile/models/account" }
-profile-account-or-persona = { path = "../../../profile/models/account-or-persona" }
-profile-persona = { path = "../../../profile/models/persona" }
+error = { workspace = true }
+addresses = { workspace = true }
+profile-account = { workspace = true }
+profile-account-or-persona = { workspace = true }
+profile-persona = { workspace = true }
 
 
 # === RADIX DEPENDENCIES ===

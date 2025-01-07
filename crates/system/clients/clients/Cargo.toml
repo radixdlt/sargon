@@ -6,14 +6,14 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-core-collections = { path = "../../../core/collections" }
-profile = { path = "../../../profile/models/profile_SPLIT_ME" }
-factors-supporting-types = { path = "../../../factors/supporting-types" }
-profile-supporting-types = { path = "../../../profile/models/supporting-types" }
-drivers = { path = "../../../system/drivers" }
-http-client = { path = "../../../system/clients/http" }
-gateway-client-and-api = { path = "../../../gateway/client-and-api" }
-hierarchical-deterministic = { path = "../../../crypto/hd" }
+core-collections = { workspace = true }
+profile = { workspace = true }
+factors-supporting-types = { workspace = true }
+profile-supporting-types = { workspace = true }
+drivers = { workspace = true }
+http-client = { workspace = true }
+gateway-client-and-api = { workspace = true }
+hierarchical-deterministic = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-has-sample-values = { path = "../../core/has-sample-values" }
-error = { path = "../../core/error" }
-assert-json = { path = "../../core/assert-json" }
-bytes = { path = "../../common/bytes" }
+has-sample-values = { workspace = true }
+error = { workspace = true }
+assert-json = { workspace = true }
+bytes = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

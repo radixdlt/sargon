@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../common/identified-vec-of" }
-assert-json = { path = "../../core/assert-json" }
-core-utils = { path = "../../core/utils" }
-has-sample-values = { path = "../../core/has-sample-values" }
+identified-vec-of = { workspace = true }
+assert-json = { workspace = true }
+core-utils = { workspace = true }
+has-sample-values = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

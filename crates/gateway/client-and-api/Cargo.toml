@@ -5,15 +5,15 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-assert-json = { path = "../../core/assert-json" }
-core-utils = { path = "../../core/utils" }
-metadata = { path = "../../common/metadata" }
-addresses = { path = "../../crypto/addresses" }
-drivers = { path = "../../system/drivers" }
-http-client = { path = "../../system/clients/http" }
-gateway-models = { path = "../../gateway/models" }
-transaction-models = { path = "../../transaction/models" }
-profile-gateway = { path = "../../profile/models/gateway" }
+assert-json = { workspace = true }
+core-utils = { workspace = true }
+metadata = { workspace = true }
+addresses = { workspace = true }
+drivers = { workspace = true }
+http-client = { workspace = true }
+gateway-models = { workspace = true }
+transaction-models = { workspace = true }
+profile-gateway = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

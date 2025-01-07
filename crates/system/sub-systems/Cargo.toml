@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-drivers = { path = "../../system/drivers" } # Actually need only logging driver.. TODO split out?
+drivers = { workspace = true } # Actually need only logging driver.. TODO split out?
 
 # ==== RADIX DEPENDENCIES ====
 # None

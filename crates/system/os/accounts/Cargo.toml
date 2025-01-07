@@ -6,13 +6,13 @@ edition = "2021"
 [dependencies]
 # === SARGON CRATES ===
 sargon-os = { path = "../../../system/os/os" }
-error = { path = "../../../core/error" }
-core-collections = { path = "../../../core/collections" }
-network = { path = "../../../common/network" }
-addresses = { path = "../../../crypto/addresses" }
-transaction-models = { path = "../../../transaction/models" }
-manifests = { path = "../../../transaction/manifests" }
-gateway-client-and-api = { path = "../../../gateway/client-and-api" }
+error = { workspace = true }
+core-collections = { workspace = true }
+network = { workspace = true }
+addresses = { workspace = true }
+transaction-models = { workspace = true }
+manifests = { workspace = true }
+gateway-client-and-api = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-engine-interface = { workspace = true }

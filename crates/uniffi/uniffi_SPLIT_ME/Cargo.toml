@@ -4,9 +4,6 @@ version = "1.1.99"
 edition = "2021"
 build = "build.rs"
 
-[[test]]
-name = "vectors"
-
 [lib]
 crate-type = ["staticlib", "cdylib", "lib"]
 
@@ -16,29 +13,29 @@ path = "src/bindgen/bin.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-identified-vec-of = { path = "../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../crypto/hd" }
-encryption = { path = "../../crypto/encryption" }
-factors = { path = "../../factors/factors" }
-keys-collector = { path = "../../factors/keys-collector" }
-addresses = { path = "../../crypto/addresses" }
-transaction-models = { path = "../../transaction/models" }
-manifests = { path = "../../transaction/manifests" }
-profile = { path = "../../profile/models/profile_SPLIT_ME" }
-profile-logic = { path = "../../profile/logic/logic_SPLIT_ME" }
-profile-security-structures = { path = "../../profile/models/security-structures" }
-factor-instances-provider = { path = "../../factors/instances-provider" }
-gateway-models = { path = "../../gateway/models" }
-core-misc = { path = "../../core/misc" }
-clients = { path = "../../system/clients/clients" }
-drivers = { path = "../../system/drivers" }
-signing = { path = "../../app/signing" }
-profile-persona = { path = "../../profile/models/persona" }
-profile-account = { path = "../../profile/models/account" }
-gateway-client-and-api = { path = "../../gateway/client-and-api" }
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+encryption = { workspace = true }
+factors = { workspace = true }
+keys-collector = { workspace = true }
+addresses = { workspace = true }
+transaction-models = { workspace = true }
+manifests = { workspace = true }
+profile = { workspace = true }
+profile-logic = { workspace = true }
+profile-security-structures = { workspace = true }
+factor-instances-provider = { workspace = true }
+gateway-models = { workspace = true }
+core-misc = { workspace = true }
+clients = { workspace = true }
+drivers = { workspace = true }
+signing = { workspace = true }
+profile-persona = { workspace = true }
+profile-account = { workspace = true }
+gateway-client-and-api = { workspace = true }
 
-sargon = { path = "../../sargon_SPLIT_ME" }
-sargon-uniffi-conversion-macros = { path = "../../uniffi/conversion-macros" }
+sargon = { workspace = true }
+sargon-uniffi-conversion-macros = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-engine-toolkit = { workspace = true }

@@ -6,16 +6,16 @@ edition = "2021"
 [dependencies]
 # === SARGON CRATES ===
 sargon-os = { path = "../../../system/os/os" }
-transaction-models = { path = "../../../transaction/models" }
-manifests = { path = "../../../transaction/manifests" }
-signing-traits = { path = "../../../app/signing-traits" }
-radix-connect-models = { path = "../../../app/radix-connect-models" }
-signing = { path = "../../../app/signing" }
-entity-by-address = { path = "../../../profile/traits/entity-by-address" }
-profile = { path = "../../../profile/models/profile_SPLIT_ME" }
-# profile-state-holder = { path = "../../../system/profile-state-holder" }
-profile-account-or-persona = { path = "../../../profile/models/account-or-persona" }
-gateway-client-and-api = { path = "../../../gateway/client-and-api" }
+transaction-models = { workspace = true }
+manifests = { workspace = true }
+signing-traits = { workspace = true }
+radix-connect-models = { workspace = true }
+signing = { workspace = true }
+entity-by-address = { workspace = true }
+profile = { workspace = true }
+# profile-state-holder = { workspace = true }
+profile-account-or-persona = { workspace = true }
+gateway-client-and-api = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-engine-interface = { workspace = true }

@@ -6,12 +6,12 @@ edition = "2021"
 [dependencies]
 # === SARGON CRATES ===
 sargon-os = { path = "../../../system/os/os" }
-error = { path = "../../../core/error" }
-profile = { path = "../../../profile/models/profile_SPLIT_ME" }
-interactors = { path = "../../../system/interactors" }
-drivers = { path = "../../../system/drivers" }
-clients = { path = "../../../system/clients/clients" }
-profile-logic = { path = "../../../profile/logic/logic_SPLIT_ME" }
+error = { workspace = true }
+profile = { workspace = true }
+interactors = { workspace = true }
+drivers = { workspace = true }
+clients = { workspace = true }
+profile-logic = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

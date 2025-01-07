@@ -5,15 +5,15 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-identified-vec-of = { path = "../../common/identified-vec-of" }
-ecc = { path = "../../crypto/ecc" }
-hash = { path = "../../crypto/hash" }
-cap26-models = { path = "../../crypto/cap26-models" }
-bytes = { path = "../../common/bytes" }
-has-sample-values = { path = "../../core/has-sample-values" }
-assert-json = { path = "../../core/assert-json" }
-network = { path = "../../common/network" }
-numeric = { path = "../../common/numeric" }
+identified-vec-of = { workspace = true }
+ecc = { workspace = true }
+hash = { workspace = true }
+cap26-models = { workspace = true }
+bytes = { workspace = true }
+has-sample-values = { workspace = true }
+assert-json = { workspace = true }
+network = { workspace = true }
+numeric = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-common = { workspace = true }

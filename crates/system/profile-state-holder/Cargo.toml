@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-profile = { path = "../../profile/models/profile_SPLIT_ME" }
-error = { path = "../../core/error" }
-profile-supporting-types = { path = "../../profile/models/supporting-types" }
-profile-logic = { path = "../../profile/logic/logic_SPLIT_ME" }
+profile = { workspace = true }
+error = { workspace = true }
+profile-supporting-types = { workspace = true }
+profile-logic = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

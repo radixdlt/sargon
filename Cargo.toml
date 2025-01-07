@@ -192,8 +192,103 @@ inherits = "release"
 debug = true
 
 [workspace.dependencies]
+# With `path-bases` we can simplify the path handling for internal crates:
+# https://github.com/rust-lang/cargo/issues/14355#issuecomment-2573582438
+# e.g.:
+# core = "../crates/core"
+# error = { path = "error", base = "core "}
 
-# ===== RADIX DEPENDENCIES ========
+# === FOR APP ===
+home-cards = { path = "crates/app/home-cards" }
+radix-connect = { path = "crates/app/radix-connect" }
+radix-connect-models = { path = "crates/app/radix-connect-models" }
+security-center = { path = "crates/app/security-center" }
+signing = { path = "crates/app/signing" }
+signing-traits = { path = "crates/app/signing-traits" }
+key-derivation-traits = { path = "crates/app/key-derivation-traits" }
+
+# === COMMON ===
+build-info = { path = "crates/common/build-info" }
+bytes = { path = "crates/common/bytes" }
+entity-foundation = { path = "crates/common/entity-foundation" }
+host-info = { path = "crates/common/host-info" }
+identified-vec-of = { path = "crates/common/identified-vec-of" }
+metadata = { path = "crates/common/metadata" }
+network = { path = "crates/common/network" }
+numeric = { path = "crates/common/numeric" }
+short-string = { path = "crates/common/short-string" }
+
+# === CORE ===
+assert-json = { path = "crates/core/assert-json" }
+core-collections = { path = "crates/core/collections" }
+error = { path = "crates/core/error" }
+has-sample-values = { path = "crates/core/has-sample-values" }
+core-misc = { path = "crates/core/misc" }
+time-utils = { path = "crates/core/time-utils" }
+core-utils = { path = "crates/core/utils" }
+
+# === CRYPTO ===
+cap26-models = { path = "crates/crypto/cap26-models" }
+addresses = { path = "crates/crypto/addresses" }
+ecc = { path = "crates/crypto/ecc" }
+encryption = { path = "crates/crypto/encryption" }
+hash = { path = "crates/crypto/hash" }
+hierarchical-deterministic = { path = "crates/crypto/hd" }
+
+# === FACTORS ===
+factors = { path = "crates/factors/factors" }
+factor-instances-provider = { path = "crates/factors/instances-provider" }
+keys-collector = { path = "crates/factors/keys-collector" }
+next-derivation-index-ephemeral = { path = "crates/factors/next-derivation-index-ephemeral" }
+factors-supporting-types = { path = "crates/factors/supporting-types" }
+
+# === GATEWAY ===
+gateway-client-and-api = { path = "crates/gateway/client-and-api" }
+gateway-models = { path = "crates/gateway/models" }
+
+# === PROFILE ===
+profile-logic = { path = "crates/profile/logic/logic_SPLIT_ME" }
+account-for-display = { path = "crates/profile/models/account-for-display" }
+profile-account-or-persona = { path = "crates/profile/models/account-or-persona" }
+profile-account = { path = "crates/profile/models/account" }
+profile-app-preferences = { path = "crates/profile/models/app-preferences" }
+profile-base-entity = { path = "crates/profile/models/base-entity" }
+profile-gateway = { path = "crates/profile/models/gateway" }
+profile-persona-data = { path = "crates/profile/models/persona-data" }
+profile-persona = { path = "crates/profile/models/persona" }
+profile = { path = "crates/profile/models/profile_SPLIT_ME" }
+profile-security-structures = { path = "crates/profile/models/security-structures" }
+profile-supporting-types = { path = "crates/profile/models/supporting-types" }
+entity-by-address = { path = "crates/profile/traits/entity-by-address" }
+
+# === SARGON - SPLIT ME ===
+sargon = { path = "crates/sargon_SPLIT_ME" }
+
+# === SYSTEM ===
+clients = { path = "crates/system/clients/clients" }
+http-client = { path = "crates/system/clients/http" }
+drivers = { path = "crates/system/drivers" }
+sub-systems = { path = "crates/system/sub-systems" }
+profile-state-holder = { path = "crates/system/profile-state-holder" }
+interactors = { path = "crates/system/interactors" }
+sargon-os-accounts = { path = "crates/system/os/accounts" }
+sargon-os-factors = { path = "crates/system/os/factors" }
+sargon-os = { path = "crates/system/os/os" }
+sargon-os-security-center = { path = "crates/system/os/security-center" }
+sargon-os-signing = { path = "crates/system/os/signing" }
+sargon-os-transaction = { path = "crates/system/os/transaction" }
+
+# === TRANSACTION ===
+transaction-foundation = { path = "crates/transaction/foundation" }
+manifests = { path = "crates/transaction/manifests" }
+transaction-models = { path = "crates/transaction/models" }
+
+# === UNIFFI ===
+sargon-uniffi = { path = "crates/uniffi/uniffi_SPLIT_ME" }
+sargon-uniffi-conversion-macros = { path = "crates/uniffi/conversion-macros" }
+
+
+# ==== RADIX DEPENDENCIES ====
 radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
     "serde",
     "secp256k1_sign_and_validate",
@@ -209,7 +304,8 @@ radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3
 radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 
-# ===== EXTERNAL DEPENDENCIES ========
+
+# ==== EXTERNAL DEPENDENCIES ====
 
 # actix-rt = "3.3.0"
 actix-rt = { git = "https://github.com/actix/actix-net", rev = "57fd6ea8098d1f2d281c305fc331216c4fe1992e" }

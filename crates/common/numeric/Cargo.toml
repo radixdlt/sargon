@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-error = { path = "../../core/error" }
-has-sample-values = { path = "../../core/has-sample-values" }
-bytes = { path = "../../common/bytes" }
+error = { workspace = true }
+has-sample-values = { workspace = true }
+bytes = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

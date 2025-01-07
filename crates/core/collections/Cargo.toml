@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-has-sample-values = { path = "../../core/has-sample-values" }
+has-sample-values = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-error = { path = "../../core/error" }
-has-sample-values = { path = "../../core/has-sample-values" }
-core-misc = { path = "../../core/misc" }
-bytes = { path = "../../common/bytes" }
-network = { path = "../../common/network" }
-addresses = { path = "../../crypto/addresses" }
+error = { workspace = true }
+has-sample-values = { workspace = true }
+core-misc = { workspace = true }
+bytes = { workspace = true }
+network = { workspace = true }
+addresses = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

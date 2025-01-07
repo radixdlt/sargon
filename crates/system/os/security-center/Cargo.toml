@@ -6,10 +6,10 @@ edition = "2021"
 [dependencies]
 # === SARGON CRATES ===
 sargon-os = { path = "../../../system/os/os" }
-drivers = { path = "../../../system/drivers" }
-has-sample-values = { path = "../../../core/has-sample-values" }
-error = { path = "../../../core/error" }
-security-center = { path = "../../../app/security-center" }
+drivers = { workspace = true }
+has-sample-values = { workspace = true }
+error = { workspace = true }
+security-center = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

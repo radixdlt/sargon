@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-signing-traits = { path = "../../app/signing-traits" }
-key-derivation-traits = { path = "../../app/key-derivation-traits" }
-transaction-models = { path = "../../transaction/models" }
+signing-traits = { workspace = true }
+key-derivation-traits = { workspace = true }
+transaction-models = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

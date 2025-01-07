@@ -5,18 +5,18 @@ edition = "2021"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-identified-vec-of = { path = "../../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../../crypto/hd" }
-factors = { path = "../../../factors/factors" }
-has-sample-values = { path = "../../../core/has-sample-values" }
-addresses = { path = "../../../crypto/addresses" }
-cap26-models = { path = "../../../crypto/cap26-models" }
-next-derivation-index-ephemeral = { path = "../../../factors/next-derivation-index-ephemeral" }
-network = { path = "../../../common/network" }
-core-collections = { path = "../../../core/collections" }
-time-utils = { path = "../../../core/time-utils" }
-short-string = { path = "../../../common/short-string" }
-core-utils = { path = "../../../core/utils" }
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+has-sample-values = { workspace = true }
+addresses = { workspace = true }
+cap26-models = { workspace = true }
+next-derivation-index-ephemeral = { workspace = true }
+network = { workspace = true }
+core-collections = { workspace = true }
+time-utils = { workspace = true }
+short-string = { workspace = true }
+core-utils = { workspace = true }
 
 
 # === RADIX DEPENDENCIES ===

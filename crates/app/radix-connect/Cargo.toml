@@ -6,24 +6,24 @@ build = "build.rs"
 
 [dependencies]
 # === SARGON CRATES ===
-assert-json = { path = "../../core/assert-json" }
-core-utils = { path = "../../core/utils" }
-addresses = { path = "../../crypto/addresses" }
-identified-vec-of = { path = "../../common/identified-vec-of" }
-ecc = { path = "../../crypto/ecc" }
-hash = { path = "../../crypto/hash" }
-bytes = { path = "../../common/bytes" }
-profile-persona-data = { path = "../../profile/models/persona-data" }
-core-misc = { path = "../../core/misc" }
-http-client = { path = "../../system/clients/http" }
-drivers = { path = "../../system/drivers" }
-encryption = { path = "../../crypto/encryption" }
-transaction-foundation = { path = "../../transaction/foundation" }
-transaction-models = { path = "../../transaction/models" }
-entity-foundation = { path = "../../common/entity-foundation" }
-short-string = { path = "../../common/short-string" }
-has-sample-values = { path = "../../core/has-sample-values" }
-radix-connect-models = { path = "../../app/radix-connect-models" }
+assert-json = { workspace = true }
+core-utils = { workspace = true }
+addresses = { workspace = true }
+identified-vec-of = { workspace = true }
+ecc = { workspace = true }
+hash = { workspace = true }
+bytes = { workspace = true }
+profile-persona-data = { workspace = true }
+core-misc = { workspace = true }
+http-client = { workspace = true }
+drivers = { workspace = true }
+encryption = { workspace = true }
+transaction-foundation = { workspace = true }
+transaction-models = { workspace = true }
+entity-foundation = { workspace = true }
+short-string = { workspace = true }
+has-sample-values = { workspace = true }
+radix-connect-models = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

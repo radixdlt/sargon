@@ -5,18 +5,18 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-profile = { path = "../../../profile/models/profile_SPLIT_ME" }
-profile-logic = { path = "../../../profile/logic/logic_SPLIT_ME" }
-profile-state-holder = { path = "../../../system/profile-state-holder" }
-drivers = { path = "../../../system/drivers" }
-clients = { path = "../../../system/clients/clients" }
-build-info = { path = "../../../common/build-info" }
-interactors = { path = "../../../system/interactors" }
-sub-systems = { path = "../../../system/sub-systems" }
-host-info = { path = "../../../common/host-info" }
-key-derivation-traits = { path = "../../../app/key-derivation-traits" }
-signing-traits = { path = "../../../app/signing-traits" }
-factor-instances-provider = { path = "../../../factors/instances-provider" }
+profile = { workspace = true }
+profile-logic = { workspace = true }
+profile-state-holder = { workspace = true }
+drivers = { workspace = true }
+clients = { workspace = true }
+build-info = { workspace = true }
+interactors = { workspace = true }
+sub-systems = { workspace = true }
+host-info = { workspace = true }
+key-derivation-traits = { workspace = true }
+signing-traits = { workspace = true }
+factor-instances-provider = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

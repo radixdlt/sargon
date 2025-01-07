@@ -5,18 +5,18 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-error = { path = "../../core/error" }
-ecc = { path = "../../crypto/ecc" }
-core-collections = { path = "../../core/collections" }
-bytes = { path = "../../common/bytes" }
-hash = { path = "../../crypto/hash" }
-radix-connect-models = { path = "../../app/radix-connect-models" }
-transaction-models = { path = "../../transaction/models" }
-entity-by-address = { path = "../../profile/traits/entity-by-address" }
-profile-account-or-persona = { path = "../../profile/models/account-or-persona" }
-profile-persona = { path = "../../profile/models/persona" }
-profile-account = { path = "../../profile/models/account" }
-metadata = { path = "../../common/metadata" }
+error = { workspace = true }
+ecc = { workspace = true }
+core-collections = { workspace = true }
+bytes = { workspace = true }
+hash = { workspace = true }
+radix-connect-models = { workspace = true }
+transaction-models = { workspace = true }
+entity-by-address = { workspace = true }
+profile-account-or-persona = { workspace = true }
+profile-persona = { workspace = true }
+profile-account = { workspace = true }
+metadata = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-engine-interface = { workspace = true }

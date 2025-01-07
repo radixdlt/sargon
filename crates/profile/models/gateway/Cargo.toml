@@ -5,17 +5,17 @@ edition = "2021"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-identified-vec-of = { path = "../../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../../crypto/hd" }
-factors = { path = "../../../factors/factors" }
-keys-collector = { path = "../../../factors/keys-collector" }
-addresses = { path = "../../../crypto/addresses" }
-transaction-models = { path = "../../../transaction/models" }
-network = { path = "../../../common/network" }
-error = { path = "../../../core/error" }
-core-misc = { path = "../../../core/misc" }
-assert-json = { path = "../../../core/assert-json" }
-has-sample-values = { path = "../../../core/has-sample-values" }
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+keys-collector = { workspace = true }
+addresses = { workspace = true }
+transaction-models = { workspace = true }
+network = { workspace = true }
+error = { workspace = true }
+core-misc = { workspace = true }
+assert-json = { workspace = true }
+has-sample-values = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
-identified-vec-of = { path = "../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../crypto/hd" }
-factors = { path = "../../factors/factors" }
-error = { path = "../../core/error" }
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+error = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

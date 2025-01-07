@@ -6,27 +6,27 @@ build = "build.rs"
 
 [dependencies]
 # === INTERNAL DEPENDENCIES ===
-encryption = { path = "../../../crypto/encryption" }
-identified-vec-of = { path = "../../../common/identified-vec-of" }
-hierarchical-deterministic = { path = "../../../crypto/hd" }
-factors = { path = "../../../factors/factors" }
-core-misc = { path = "../../../core/misc" }
-profile-persona-data = { path = "../../../profile/models/persona-data" }
-entity-foundation = { path = "../../../common/entity-foundation" }
-has-sample-values = { path = "../../../core/has-sample-values" }
-keys-collector = { path = "../../../factors/keys-collector" }
-addresses = { path = "../../../crypto/addresses" }
-transaction-models = { path = "../../../transaction/models" }
-profile-app-preferences = { path = "../../../profile/models/app-preferences" }
-account-for-display = { path = "../../../profile/models/account-for-display" }
-profile-security-structures = { path = "../../../profile/models/security-structures" }
-time-utils = { path = "../../../core/time-utils" }
-host-info = { path = "../../../common/host-info" }
-profile-base-entity = { path = "../../../profile/models/base-entity" }
-profile-account-or-persona = { path = "../../../profile/models/account-or-persona" }
-profile-account = { path = "../../../profile/models/account" }
-profile-persona = { path = "../../../profile/models/persona" }
-entity-by-address = { path = "../../../profile/traits/entity-by-address" }
+encryption = { workspace = true }
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+core-misc = { workspace = true }
+profile-persona-data = { workspace = true }
+entity-foundation = { workspace = true }
+has-sample-values = { workspace = true }
+keys-collector = { workspace = true }
+addresses = { workspace = true }
+transaction-models = { workspace = true }
+profile-app-preferences = { workspace = true }
+account-for-display = { workspace = true }
+profile-security-structures = { workspace = true }
+time-utils = { workspace = true }
+host-info = { workspace = true }
+profile-base-entity = { workspace = true }
+profile-account-or-persona = { workspace = true }
+profile-account = { workspace = true }
+profile-persona = { workspace = true }
+entity-by-address = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

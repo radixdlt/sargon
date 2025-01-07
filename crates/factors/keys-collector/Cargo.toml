@@ -5,18 +5,18 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-has-sample-values = { path = "../../core/has-sample-values" }
-factors = { path = "../../factors/factors" }
-numeric = { path = "../../common/numeric" }
-hierarchical-deterministic = { path = "../../crypto/hd" }
-addresses = { path = "../../crypto/addresses" }
-cap26-models = { path = "../../crypto/cap26-models" }
-network = { path = "../../common/network" }
-error = { path = "../../core/error" }
-core-misc = { path = "../../core/misc" }                               # HiddenConstructor
-core-collections = { path = "../../core/collections" }
-factors-supporting-types = { path = "../../factors/supporting-types" }
-key-derivation-traits = { path = "../../app/key-derivation-traits" }
+has-sample-values = { workspace = true }
+factors = { workspace = true }
+numeric = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+addresses = { workspace = true }
+cap26-models = { workspace = true }
+network = { workspace = true }
+error = { workspace = true }
+core-misc = { workspace = true }                  # HiddenConstructor
+core-collections = { workspace = true }
+factors-supporting-types = { workspace = true }
+key-derivation-traits = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None
