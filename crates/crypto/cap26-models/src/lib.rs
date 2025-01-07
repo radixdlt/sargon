@@ -13,6 +13,8 @@ pub mod prelude {
 
     pub(crate) use serde_repr::{Deserialize_repr, Serialize_repr};
     pub(crate) use strum::FromRepr;
+    #[cfg(test)]
+    pub(crate) use testing::*;
 
     #[cfg(test)]
     mod testing {
@@ -20,8 +22,6 @@ pub mod prelude {
         pub(crate) use serde_json::json;
         pub(crate) use std::collections::BTreeSet;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

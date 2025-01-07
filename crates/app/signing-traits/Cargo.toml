@@ -8,6 +8,7 @@ edition = "2021"
 prelude = { workspace = true }
 error = { workspace = true }
 ecc = { workspace = true }
+enum-as-inner = { workspace = true }
 core-collections = { workspace = true }
 bytes = { workspace = true }
 hash = { workspace = true }

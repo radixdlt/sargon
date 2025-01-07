@@ -4633,6 +4633,7 @@ dependencies = [
  "derive_more",
  "ecc",
  "entity-by-address",
+ "enum-as-inner",
  "error",
  "hash",
  "indexmap 2.7.0",

@@ -35,6 +35,10 @@ impl FactorSourcesOfKind {
     pub fn factor_sources(&self) -> IndexSet<FactorSource> {
         self.factor_sources.clone().into_iter().collect()
     }
+
+    pub fn supports_poly_sign(&self) -> bool {
+        self.kind == FactorSourceKind::Device
+    }
 }
 
 pub fn sort_group_factors(
