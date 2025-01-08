@@ -13,6 +13,7 @@ path = "src/bindgen/bin.rs"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 identified-vec-of = { workspace = true }
 hierarchical-deterministic = { workspace = true }
 encryption = { workspace = true }

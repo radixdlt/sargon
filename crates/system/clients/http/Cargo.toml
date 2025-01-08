@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 drivers = { workspace = true }
 bytes = { workspace = true }
 error = { workspace = true }

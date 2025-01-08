@@ -2,6 +2,7 @@ use std::ops::Deref;
 
 use crate::prelude::*;
 
+use prelude::fixture_rtm;
 #[cfg(test)]
 use radix_common::prelude::MANIFEST_SBOR_V1_MAX_DEPTH;
 #[cfg(test)]
@@ -156,8 +157,7 @@ impl InstructionsV2 {
 
 impl InstructionsV2 {
     pub(crate) fn sample_mainnet_instructions_string() -> String {
-        include_str!(concat!(env!("FIXTURES_TX"), "resource_transfer.rtm"))
-            .to_owned()
+        fixture_rtm!("resource_transfer").to_owned()
     }
 
     pub fn sample_mainnet() -> Self {
@@ -197,11 +197,7 @@ impl InstructionsV2 {
     // https://github.com/radixdlt/radix-engine-toolkit/blob/cf2f4b4d6de56233872e11959861fbf12db8ddf6/crates/radix-engine-toolkit/tests/manifests/account/multi_account_resource_transfer.rtm
     // but modified, changed `None` -> `Enum<0u8>()`, also changed `"account_a_bucket"` -> `"bucket1"`, `"account_b_bucket"` -> `"bucket2"`, etc.
     pub(crate) fn sample_other_simulator_instructions_string() -> String {
-        include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "multi_account_resource_transfer.rtm"
-        ))
-        .to_owned()
+        fixture_rtm!("multi_account_resource_transfer").to_owned()
     }
 
     pub fn sample_simulator_other() -> Self {

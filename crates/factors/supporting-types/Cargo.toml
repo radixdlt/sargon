@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
+prelude = { workspace = true }
 identified-vec-of = { workspace = true }
 hierarchical-deterministic = { workspace = true }
 factors = { workspace = true }

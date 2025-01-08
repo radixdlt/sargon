@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
+prelude = { workspace = true }
 has-sample-values = { workspace = true }
 error = { workspace = true }
 numeric = { workspace = true }

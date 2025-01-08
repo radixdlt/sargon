@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 assert-json = { workspace = true }
 addresses = { workspace = true }
 core-misc = { workspace = true }

@@ -5,7 +5,8 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-# None
+# None besides 'prelude'
+prelude = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

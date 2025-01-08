@@ -2,10 +2,11 @@
 name = "signing"
 version = "1.1.100"
 edition = "2021"
-build = "build.rs"
+
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 assert-json = { workspace = true }
 addresses = { workspace = true }
 has-sample-values = { workspace = true }

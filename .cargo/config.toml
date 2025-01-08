@@ -1,0 +1,9 @@
+[env]
+CARGO_WORKSPACE_DIR = { value = "", relative = true }
+TARGET_DIR = { value = "target", relative = true }
+TMP_DIR = { value = "target/tmp", relative = true }
+FIXTURES = "fixtures"
+FIXTURES_TX = "fixtures/transaction"
+FIXTURES_VECTOR = "fixtures/vector"
+FIXTURES_MODELS = "fixtures/models"
+FIXTURES_MODELS_GW = "fixtures/models/gateway"

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 sargon-os = { path = "../../../system/os/os" }
 error = { workspace = true }
 signing = { workspace = true }
@@ -27,6 +28,7 @@ serde = { workspace = true }
 
 [dev-dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 drivers = { workspace = true }
 interactors = { workspace = true }
 clients = { workspace = true }

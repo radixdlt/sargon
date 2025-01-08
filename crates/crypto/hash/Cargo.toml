@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
+prelude = { workspace = true }
 bytes = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 sargon-os = { path = "../../../system/os/os" }
 error = { workspace = true }
 core-collections = { workspace = true }
