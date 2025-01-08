@@ -39,3 +39,17 @@ pub enum SelectedPrimaryThresholdFactorsStatusInvalidReason {
         underlying: SecurityShieldBuilderInvalidReason,
     },
 }
+
+impl HasSampleValues for SelectedPrimaryThresholdFactorsStatusInvalidReason {
+    fn sample() -> Self {
+        SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
+            factor_source_kind: FactorSourceKind::Password,
+        }
+    }
+
+    fn sample_other() -> Self {
+        SelectedPrimaryThresholdFactorsStatusInvalidReason::Other {
+            underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices,
+        }
+    }
+}

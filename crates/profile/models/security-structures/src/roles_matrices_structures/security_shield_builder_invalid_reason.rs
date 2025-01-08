@@ -249,3 +249,13 @@ pub enum SecurityShieldBuilderInvalidReason {
     #[error("Confirmation role cannot contain Trusted Contact")]
     ConfirmationRoleTrustedContactNotSupported,
 }
+
+impl HasSampleValues for SecurityShieldBuilderInvalidReason {
+    fn sample() -> Self {
+        SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+    }
+
+    fn sample_other() -> Self {
+        SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+    }
+}
