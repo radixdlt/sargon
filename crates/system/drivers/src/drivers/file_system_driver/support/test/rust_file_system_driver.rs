@@ -25,7 +25,7 @@ pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
 
 impl RustFileSystemDriver {
     pub(crate) fn tmp_dir() -> PathBuf {
-        fs::canonicalize(Path::new(env!("TMP_DIR"))).unwrap()
+        fs::canonicalize(Path::new(env!("TARGET_DIR"))).unwrap()
     }
 }
 

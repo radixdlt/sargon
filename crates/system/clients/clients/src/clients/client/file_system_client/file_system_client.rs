@@ -126,7 +126,7 @@ mod tests {
     }
 
     fn file_in_tmp() -> PathBuf {
-        let dir_path = Path::new(env!("TMP_DIR"));
+        let dir_path = Path::new(env!("TARGET_DIR"));
         file_in_dir(dir_path)
     }
 
