@@ -209,7 +209,7 @@ impl<S: Signable> SignaturesCollector<S> {
             &factor_sources_of_kind.kind
         );
 
-        if factor_sources_of_kind.supports_poly_sign() {
+        if factor_sources_of_kind.kind.support_poly_sign() {
             self.sign_poly(factor_sources_of_kind).await
         } else {
             self.sign_mono(factor_sources_of_kind).await
@@ -1083,7 +1083,14 @@ mod tests {
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
-                assert_eq!(signatures.len(), 2);
+                assert_eq!(
+                    signatures.len(),
+                    if FactorSourceKind::Device.support_poly_sign() {
+                        2
+                    } else {
+                        1
+                    }
+                );
 
                 assert!(signatures
                     .into_iter()
