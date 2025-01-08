@@ -21,19 +21,19 @@ data class PerFactorSourceInput<SP : Signable.Payload, ID : Signable.ID>(
     val invalidTransactionsIfNeglected: List<InvalidTransactionIfNeglected<ID>>
 )
 
-internal fun PerFactorSourceInputOfTransactionIntent.into() = PerFactorSourceInput(
+fun PerFactorSourceInputOfTransactionIntent.into() = PerFactorSourceInput(
     factorSourceId = factorSourceId,
     perTransaction = perTransaction.map { it.into() },
     invalidTransactionsIfNeglected = invalidTransactionsIfNeglected.map { it.into() }
 )
 
-internal fun PerFactorSourceInputOfSubintent.into() = PerFactorSourceInput(
+fun PerFactorSourceInputOfSubintent.into() = PerFactorSourceInput(
     factorSourceId = factorSourceId,
     perTransaction = perTransaction.map { it.into() },
     invalidTransactionsIfNeglected = invalidTransactionsIfNeglected.map { it.into() }
 )
 
-internal fun PerFactorSourceInputOfAuthIntent.into() = PerFactorSourceInput(
+fun PerFactorSourceInputOfAuthIntent.into() = PerFactorSourceInput(
     factorSourceId = factorSourceId,
     perTransaction = perTransaction.map { it.into() },
     invalidTransactionsIfNeglected = invalidTransactionsIfNeglected.map { it.into() }

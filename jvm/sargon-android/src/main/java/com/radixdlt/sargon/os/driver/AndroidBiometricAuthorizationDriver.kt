@@ -40,7 +40,7 @@ class BiometricsFailure(
         key: SecureStorageKey
     ): CommonException = CommonException.SecureStorageAccessException(
         key = secureStorageKeyIdentifier(key),
-        errorKind = secureStorageAccessErrorKindToString(kind = when (errorCode) {
+        errorKind = when (errorCode) {
             BiometricPrompt.ERROR_CANCELED -> SecureStorageAccessErrorKind.CANCELLED
             BiometricPrompt.ERROR_HW_NOT_PRESENT -> SecureStorageAccessErrorKind.HARDWARE_NOT_PRESENT
             BiometricPrompt.ERROR_HW_UNAVAILABLE -> SecureStorageAccessErrorKind.HARDWARE_UNAVAILABLE
@@ -55,7 +55,7 @@ class BiometricsFailure(
             BiometricPrompt.ERROR_USER_CANCELED -> SecureStorageAccessErrorKind.USER_CANCELLED
             BiometricPrompt.ERROR_VENDOR -> SecureStorageAccessErrorKind.VENDOR
             else -> throw CommonException.Unknown()
-        }),
+        },
         errorMessage = errorMessage.orEmpty()
     )
 

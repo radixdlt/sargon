@@ -1374,9 +1374,11 @@ dependencies = [
 name = "error"
 version = "1.1.101"
 dependencies = [
+ "derive_more",
  "log",
  "prelude",
  "serde_json 1.0.108",
+ "strum 0.26.1",
  "thiserror 1.0.50",
 ]
 

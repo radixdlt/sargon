@@ -107,6 +107,11 @@ class SignableTest {
                 Signable.ID.Transaction(intent.hash()),
                 signable.getId()
             )
+
+            assertEquals(
+                intent.hash().hash,
+                signable.hash()
+            )
         }
 
         @Test
@@ -123,6 +128,11 @@ class SignableTest {
                 Signable.ID.Subintent(intent.hash()),
                 signable.getId()
             )
+
+            assertEquals(
+                intent.hash().hash,
+                signable.hash()
+            )
         }
 
         @Test
@@ -138,6 +148,11 @@ class SignableTest {
             assertEquals(
                 Signable.ID.Auth(intent.hash()),
                 signable.getId()
+            )
+
+            assertEquals(
+                intent.hash().payload.hash(),
+                signable.hash()
             )
         }
     }

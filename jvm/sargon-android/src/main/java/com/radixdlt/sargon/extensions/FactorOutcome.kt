@@ -56,22 +56,3 @@ fun FactorOutcomeOfAuthIntentHash.Companion.skipped(
 ): FactorOutcomeOfAuthIntentHash = newSkippedFactorOutcomeOfAuthIntentHash(
     factorSourceId = factorSourceId
 )
-
-fun FactorOutcomeOfTransactionIntentHash.Companion.failure(
-    factorSourceId: FactorSourceIdFromHash
-): FactorOutcomeOfTransactionIntentHash = newFailureFactorOutcomeOfTransactionIntentHash(
-    factorSourceId = factorSourceId
-)
-
-fun FactorOutcomeOfSubintentHash.Companion.failure(
-    factorSourceId: FactorSourceIdFromHash
-): FactorOutcomeOfSubintentHash = newFailureFactorOutcomeOfSubintentHash(
-    factorSourceId = factorSourceId
-)
-
-fun FactorOutcomeOfAuthIntentHash.Companion.failure(
-    factorSourceId: FactorSourceIdFromHash
-): FactorOutcomeOfAuthIntentHash = newFailureFactorOutcomeOfAuthIntentHash(
-    factorSourceId = factorSourceId
-)
-

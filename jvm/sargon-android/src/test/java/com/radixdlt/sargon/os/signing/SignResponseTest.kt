@@ -292,7 +292,6 @@ class SignResponseTest {
 
     @Test
     fun testSignResponseForTransactionIntentHashInvalidOutcomesWhenNeglected() {
-        val payload = TransactionIntent.sample()
         val signResponse = SignResponse<Signable.ID.Transaction>(
             perFactorOutcome = listOf(
                 PerFactorOutcome(
@@ -358,7 +357,6 @@ class SignResponseTest {
 
     @Test
     fun testSignResponseForSubintentHashInvalidOutcomesWhenNeglected() {
-        val payload = TransactionIntent.sample()
         val signResponse = SignResponse<Signable.ID.Subintent>(
             perFactorOutcome = listOf(
                 PerFactorOutcome(
@@ -424,7 +422,6 @@ class SignResponseTest {
 
     @Test
     fun testSignResponseForAuthIntentHashInvalidOutcomesWhenNeglected() {
-        val payload = TransactionIntent.sample()
         val signResponse = SignResponse<Signable.ID.Auth>(
             perFactorOutcome = listOf(
                 PerFactorOutcome(
