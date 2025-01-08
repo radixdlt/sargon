@@ -1,4 +1,4 @@
-use has_sample_values::HasSampleValues;
+use crate::prelude::*;
 
 /// A kind of factor list, either threshold, or override kind.
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
