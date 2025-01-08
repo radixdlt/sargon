@@ -455,14 +455,11 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn selected_factor_sources_for_role_status(
+    pub fn selected_primary_threshold_factors_status(
         &self,
-        role: RoleKind,
-    ) -> SelectedFactorSourcesForRoleStatus {
+    ) -> SelectedPrimaryThresholdFactorsStatus {
         self.get(|builder| {
-            builder
-                .selected_factor_sources_for_role_status(role.into_internal())
-                .into()
+            builder.selected_primary_threshold_factors_status().into()
         })
     }
 

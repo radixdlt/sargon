@@ -214,6 +214,15 @@ impl MatrixBuilder {
         Ok(())
     }
 
+    pub fn validate_primary_threshold_factors_in_isolation(
+        &self,
+    ) -> MatrixBuilderMutateResult {
+        self.primary_role
+            .validate_threshold_factors()
+            .into_matrix_err(RoleKind::Primary)?;
+        Ok(())
+    }
+
     pub fn validate_recovery_role_in_isolation(
         &self,
     ) -> MatrixBuilderMutateResult {

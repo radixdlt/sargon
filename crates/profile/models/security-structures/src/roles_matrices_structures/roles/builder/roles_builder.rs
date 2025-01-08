@@ -475,6 +475,45 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         Ok(())
     }
 
+    fn validate_threshold_factors_only(
+        &self,
+        simulation: &mut RoleBuilder<ROLE>,
+    ) -> RoleBuilderMutateResult {
+        for f in self.get_threshold_factors() {
+            let validation = simulation._add_factor_source_to_list(
+                *f,
+                Threshold,
+                SecurityShieldBuilderMode::Strict,
+            );
+            match validation.as_ref() {
+                Ok(()) | Err(NotYetValid(_)) => continue,
+                Err(ForeverInvalid(_)) | Err(BasicViolation(_)) => {
+                    return validation
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn validate_addition_of_password_and_minimum_factor_count(
+        &self,
+    ) -> RoleBuilderMutateResult {
+        if self.threshold_contains_factor_source_of_kind(
+            FactorSourceKind::Password,
+        ) {
+            self.validation_for_addition_of_password_to_primary(Threshold)?;
+        }
+
+        if self.all_factors().is_empty() {
+            return RoleBuilderMutateResult::not_yet_valid(
+                RoleMustHaveAtLeastOneFactor,
+            );
+        }
+
+        Ok(())
+    }
+
     /// Validates `self` by "replaying" the addition of each factor source in `self` to a
     /// "simulation" (clone). If the simulation is valid, then `self` is valid.
     pub(crate) fn validate(&self) -> RoleBuilderMutateResult {
@@ -492,19 +531,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         }
 
         // Validate threshold factors
-        for f in self.get_threshold_factors() {
-            let validation = simulation._add_factor_source_to_list(
-                *f,
-                Threshold,
-                SecurityShieldBuilderMode::Strict,
-            );
-            match validation.as_ref() {
-                Ok(()) | Err(NotYetValid(_)) => continue,
-                Err(ForeverInvalid(_)) | Err(BasicViolation(_)) => {
-                    return validation
-                }
-            }
-        }
+        self.validate_threshold_factors_only(&mut simulation)?;
 
         // Validate threshold count
         if self.role() == RoleKind::Primary {
@@ -527,19 +554,20 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             }
         }
 
-        if self.threshold_contains_factor_source_of_kind(
-            FactorSourceKind::Password,
-        ) {
-            self.validation_for_addition_of_password_to_primary(Threshold)?;
-        }
-
-        if self.all_factors().is_empty() {
-            return RoleBuilderMutateResult::not_yet_valid(
-                RoleMustHaveAtLeastOneFactor,
-            );
-        }
+        self.validate_addition_of_password_and_minimum_factor_count()?;
 
         Ok(())
+    }
+
+    /// Validates `self` by "replaying" the addition of each threshold factor source in self` to a
+    /// "simulation" (clone). If the simulation is valid, then `self` is valid.
+    pub(crate) fn validate_threshold_factors(&self) -> RoleBuilderMutateResult {
+        let mut simulation = Self::new();
+
+        // Validate threshold factors
+        self.validate_threshold_factors_only(&mut simulation)?;
+
+        self.validate_addition_of_password_and_minimum_factor_count()
     }
 
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(

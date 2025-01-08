@@ -687,29 +687,32 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn selected_factor_sources_for_role_status(
+    pub fn selected_primary_threshold_factors_status(
         &self,
-        role: RoleKind,
-    ) -> SelectedFactorSourcesForRoleStatus {
-        // Validate the role in isolation
-        if let Some(reason) = self.validate_role_in_isolation(role) {
+    ) -> SelectedPrimaryThresholdFactorsStatus {
+        let reason = self.get(|builder| {
+            let validation =
+                builder.validate_primary_threshold_factors_in_isolation();
+            validation.as_shield_validation()
+        });
+
+        if let Some(reason) = reason {
             return match reason {
-                SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
-                | SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
-                | SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor => {
-                    SelectedFactorSourcesForRoleStatus::Insufficient
+                SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor => {
+                    SelectedPrimaryThresholdFactorsStatus::Insufficient
                 }
-                _ => SelectedFactorSourcesForRoleStatus::Invalid,
+                _ => SelectedPrimaryThresholdFactorsStatus::Invalid,
             };
         }
 
         // Check conditions for Primary role
         let primary_factors_len =
             self.get(|builder| builder.get_primary_threshold_factors().len());
-        if role == RoleKind::Primary && primary_factors_len < 2 {
-            SelectedFactorSourcesForRoleStatus::Suboptimal
+
+        if primary_factors_len < 2 {
+            SelectedPrimaryThresholdFactorsStatus::Suboptimal
         } else {
-            SelectedFactorSourcesForRoleStatus::Optimal
+            SelectedPrimaryThresholdFactorsStatus::Optimal
         }
     }
 
@@ -1167,7 +1170,7 @@ mod tests {
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_optimal() {
+    fn selected_primary_threshold_factors_status_is_optimal() {
         let sut = SUT::default();
 
         let _ = sut
@@ -1178,28 +1181,26 @@ mod tests {
             .add_factor_source_to_primary_threshold(
                 FactorSourceID::sample_device(),
             );
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+        let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(
             status,
-            SelectedFactorSourcesForRoleStatus::Optimal
+            SelectedPrimaryThresholdFactorsStatus::Optimal
         );
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_suboptimal() {
+    fn selected_primary_threshold_factors_status_is_suboptimal() {
         let sut = SUT::default();
 
         let _ = sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_ledger(),
         );
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+        let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(
             status,
-            SelectedFactorSourcesForRoleStatus::Suboptimal
+            SelectedPrimaryThresholdFactorsStatus::Suboptimal
         );
     }
 }
@@ -1519,30 +1520,28 @@ mod test_invalid {
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_insufficient() {
+    fn selected_primary_threshold_factors_status_is_insufficient() {
         let sut = SUT::default();
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+        let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(
             status,
-            SelectedFactorSourcesForRoleStatus::Insufficient
+            SelectedPrimaryThresholdFactorsStatus::Insufficient
         );
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_invalid() {
+    fn selected_primary_threshold_factors_status_is_invalid() {
         let sut = SUT::default();
 
         let _ = sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+        let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(
             status,
-            SelectedFactorSourcesForRoleStatus::Invalid
+            SelectedPrimaryThresholdFactorsStatus::Invalid
         );
     }
 }
