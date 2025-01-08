@@ -1,10 +1,11 @@
 [package]
 name = "account-for-display"
-version = "1.1.99"
+version = "1.1.100"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 addresses = { workspace = true }
 short-string = { workspace = true }
 entity-foundation = { workspace = true }

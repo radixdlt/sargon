@@ -126,7 +126,7 @@ mod tests {
     }
 
     fn file_in_tmp() -> PathBuf {
-        let dir_path = Path::new(env!("TMP_PATH"));
+        let dir_path = Path::new(env!("TMP_DIR"));
         file_in_dir(dir_path)
     }
 
@@ -253,7 +253,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_delete_dir_does_not_work() {
         let path =
-            String::from(Path::new(env!("TARGET_PATH")).to_string_lossy());
+            String::from(Path::new(env!("TARGET_DIR")).to_string_lossy());
         let sut = SUT::test();
         let res = sut.delete_file(path.clone()).await;
         assert_eq!(res, Err(CommonError::FailedToDeleteFile { path }));

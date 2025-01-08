@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "account-for-display"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "derive_more",
@@ -12,6 +12,7 @@ dependencies = [
  "has-sample-values",
  "identified-vec-of",
  "network",
+ "prelude",
  "serde",
  "short-string",
 ]
@@ -47,10 +48,10 @@ dependencies = [
 
 [[package]]
 name = "addresses"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "cap26-models",
  "core-utils",
  "derive_more",
@@ -65,6 +66,7 @@ dependencies = [
  "log",
  "network",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "radix-common",
  "radix-engine",
@@ -240,11 +242,12 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "assert-json"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json-diff",
  "error",
  "log",
+ "prelude",
  "pretty_assertions",
  "serde",
  "serde_json 1.0.108",
@@ -547,7 +550,7 @@ dependencies = [
 
 [[package]]
 name = "build-info"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
@@ -555,6 +558,7 @@ dependencies = [
  "enum-as-inner",
  "error",
  "has-sample-values",
+ "prelude",
  "radix-engine",
  "radix-engine-toolkit",
 ]
@@ -579,7 +583,7 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "delegate",
@@ -588,6 +592,7 @@ dependencies = [
  "has-sample-values",
  "hex 0.4.3 (git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc92233e8de3f2de792)",
  "paste 1.0.14",
+ "prelude",
  "rand",
  "serde",
  "serde_json 1.0.108",
@@ -617,7 +622,7 @@ dependencies = [
 
 [[package]]
 name = "cap26-models"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -625,6 +630,7 @@ dependencies = [
  "error",
  "has-sample-values",
  "numeric",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
  "serde_repr",
@@ -800,7 +806,7 @@ checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "clients"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -812,6 +818,7 @@ dependencies = [
  "gateway-client-and-api",
  "hierarchical-deterministic",
  "http-client",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-supporting-types",
@@ -859,10 +866,11 @@ checksum = "0d8a42181e0652c2997ae4d217f25b63c5337a52fd2279736e97b832fa0a3cff"
 
 [[package]]
 name = "core-collections"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "has-sample-values",
  "indexmap 2.7.0",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
 ]
@@ -885,7 +893,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "core-misc"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "core-utils",
@@ -895,6 +903,7 @@ dependencies = [
  "iso8601-timestamp",
  "itertools 0.12.0",
  "log",
+ "prelude",
  "pretty_assertions",
  "radix-common",
  "serde",
@@ -904,11 +913,12 @@ dependencies = [
 
 [[package]]
 name = "core-utils"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "error",
  "iso8601-timestamp",
  "log",
+ "prelude",
  "pretty_assertions",
  "serde",
  "serde_json 1.0.108",
@@ -1129,7 +1139,7 @@ checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
 name = "drivers"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1140,6 +1150,7 @@ dependencies = [
  "indexmap 2.7.0",
  "itertools 0.12.0",
  "log",
+ "prelude",
  "pretty_env_logger",
  "profile",
  "profile-supporting-types",
@@ -1152,10 +1163,10 @@ dependencies = [
 
 [[package]]
 name = "ecc"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "derive_more",
  "enum-as-inner",
  "error",
@@ -1166,6 +1177,7 @@ dependencies = [
  "iota-crypto",
  "k256 0.13.3",
  "log",
+ "prelude",
  "pretty_assertions",
  "radix-common",
  "radix-transactions",
@@ -1255,11 +1267,11 @@ dependencies = [
 
 [[package]]
 name = "encryption"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "aes-gcm",
  "assert-json",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "derive_more",
  "error",
  "has-sample-values",
@@ -1268,6 +1280,7 @@ dependencies = [
  "iota-crypto",
  "k256 0.13.3",
  "log",
+ "prelude",
  "serde",
  "serde_repr",
  "zeroize 1.7.0",
@@ -1275,10 +1288,11 @@ dependencies = [
 
 [[package]]
 name = "entity-by-address"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "error",
+ "prelude",
  "profile-account",
  "profile-account-or-persona",
  "profile-persona",
@@ -1286,13 +1300,14 @@ dependencies = [
 
 [[package]]
 name = "entity-foundation"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "derive_more",
  "error",
  "has-sample-values",
  "itertools 0.12.0",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
 ]
@@ -1357,9 +1372,10 @@ dependencies = [
 
 [[package]]
 name = "error"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "log",
+ "prelude",
  "serde_json 1.0.108",
  "thiserror 1.0.50",
 ]
@@ -1413,7 +1429,7 @@ dependencies = [
 
 [[package]]
 name = "factor-instances-provider"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1430,6 +1446,7 @@ dependencies = [
  "key-derivation-traits",
  "keys-collector",
  "next-derivation-index-ephemeral",
+ "prelude",
  "profile",
  "profile-logic",
  "profile-supporting-types",
@@ -1438,9 +1455,9 @@ dependencies = [
 
 [[package]]
 name = "factors"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -1462,6 +1479,7 @@ dependencies = [
  "numeric",
  "once_cell 1.19.0",
  "paste 1.0.14",
+ "prelude",
  "radix-common",
  "radix-engine-interface",
  "serde",
@@ -1474,13 +1492,14 @@ dependencies = [
 
 [[package]]
 name = "factors-supporting-types"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "async-trait",
  "error",
  "factors",
  "hierarchical-deterministic",
  "identified-vec-of",
+ "prelude",
 ]
 
 [[package]]
@@ -1654,7 +1673,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-client-and-api"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1664,6 +1683,7 @@ dependencies = [
  "gateway-models",
  "http-client",
  "metadata",
+ "prelude",
  "profile-gateway",
  "radix-common",
  "serde",
@@ -1673,7 +1693,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-models"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "assert-json",
@@ -1681,6 +1701,7 @@ dependencies = [
  "derive_more",
  "enum-as-inner",
  "metadata",
+ "prelude",
  "radix-engine-interface",
  "radix-engine-toolkit-common",
  "radix-transactions",
@@ -1777,7 +1798,7 @@ dependencies = [
 
 [[package]]
 name = "has-sample-values"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "error",
  "indexmap 2.7.0",
@@ -1788,10 +1809,11 @@ dependencies = [
 
 [[package]]
 name = "hash"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "derive_more",
+ "prelude",
  "radix-common",
  "serde",
 ]
@@ -1858,11 +1880,11 @@ source = "git+https://github.com/KokaKiwi/rust-hex/?rev=b2b4370b5bf021b98ee7adc9
 
 [[package]]
 name = "hierarchical-deterministic"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "bip39",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "cap26-models",
  "derive_more",
  "ecc",
@@ -1876,6 +1898,7 @@ dependencies = [
  "network",
  "numeric",
  "paste 1.0.14",
+ "prelude",
  "radix-common",
  "serde",
  "serde_json 1.0.108",
@@ -1903,13 +1926,13 @@ dependencies = [
 
 [[package]]
 name = "home-cards"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
  "async-trait",
  "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "core-utils",
  "derive_more",
  "drivers",
@@ -1921,6 +1944,7 @@ dependencies = [
  "metadata",
  "network",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "serde",
  "serde_json 1.0.108",
@@ -1928,11 +1952,12 @@ dependencies = [
 
 [[package]]
 name = "host-info"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "derive_more",
  "has-sample-values",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
  "time-utils",
@@ -1974,13 +1999,14 @@ dependencies = [
 
 [[package]]
 name = "http-client"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "core-utils",
  "drivers",
  "error",
+ "prelude",
  "reqwest",
  "serde",
  "serde_json 1.0.108",
@@ -2201,7 +2227,7 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "identified-vec-of"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -2209,6 +2235,7 @@ dependencies = [
  "indexmap 2.7.0",
  "itertools 0.12.0",
  "paste 1.0.14",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
 ]
@@ -2273,12 +2300,13 @@ dependencies = [
 
 [[package]]
 name = "interactors"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "async-trait",
  "derive_more",
  "key-derivation-traits",
  "log",
+ "prelude",
  "serde",
  "signing-traits",
  "transaction-models",
@@ -2402,7 +2430,7 @@ dependencies = [
 
 [[package]]
 name = "key-derivation-traits"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "async-trait",
@@ -2415,11 +2443,12 @@ dependencies = [
  "hierarchical-deterministic",
  "indexmap 2.7.0",
  "itertools 0.12.0",
+ "prelude",
 ]
 
 [[package]]
 name = "keys-collector"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -2439,6 +2468,7 @@ dependencies = [
  "log",
  "network",
  "numeric",
+ "prelude",
 ]
 
 [[package]]
@@ -2507,7 +2537,7 @@ dependencies = [
 
 [[package]]
 name = "manifests"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "account-for-display",
  "addresses",
@@ -2522,6 +2552,7 @@ dependencies = [
  "itertools 0.12.0",
  "metadata",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-account-or-persona",
@@ -2546,10 +2577,11 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
 name = "metadata"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "derive_more",
  "has-sample-values",
+ "prelude",
  "radix-engine-interface",
  "serde",
  "serde_json 1.0.108",
@@ -2645,12 +2677,13 @@ dependencies = [
 
 [[package]]
 name = "network"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
  "enum-iterator",
  "has-sample-values",
  "numeric",
+ "prelude",
  "radix-common",
  "serde",
  "serde_json 1.0.108",
@@ -2660,7 +2693,7 @@ dependencies = [
 
 [[package]]
 name = "next-derivation-index-ephemeral"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "assert-json",
@@ -2674,6 +2707,7 @@ dependencies = [
  "identified-vec-of",
  "indexmap 2.7.0",
  "network",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -2735,9 +2769,9 @@ dependencies = [
 
 [[package]]
 name = "numeric"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "delegate",
  "derive_more",
  "enum-iterator",
@@ -2974,6 +3008,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "prelude"
+version = "1.1.99"
+dependencies = [
+ "radix-engine",
+ "radix-engine-toolkit",
+]
+
+[[package]]
 name = "pretty_assertions"
 version = "1.4.0"
 source = "git+https://github.com/rust-pretty-assertions/rust-pretty-assertions?rev=3f1ebc0cac5f88e875f036bf16636e15fa935c8d#3f1ebc0cac5f88e875f036bf16636e15fa935c8d"
@@ -3002,7 +3044,7 @@ dependencies = [
 
 [[package]]
 name = "profile"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "account-for-display",
  "addresses",
@@ -3026,6 +3068,7 @@ dependencies = [
  "log",
  "once_cell 1.19.0",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "profile-account",
  "profile-account-or-persona",
@@ -3045,7 +3088,7 @@ dependencies = [
 
 [[package]]
 name = "profile-account"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "account-for-display",
  "addresses",
@@ -3054,6 +3097,7 @@ dependencies = [
  "entity-foundation",
  "has-sample-values",
  "once_cell 1.19.0",
+ "prelude",
  "profile-base-entity",
  "profile-security-structures",
  "serde",
@@ -3064,12 +3108,13 @@ dependencies = [
 
 [[package]]
 name = "profile-account-or-persona"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "cap26-models",
  "derive_more",
  "enum-as-inner",
  "hierarchical-deterministic",
+ "prelude",
  "profile-account",
  "profile-base-entity",
  "profile-persona",
@@ -3080,7 +3125,7 @@ dependencies = [
 
 [[package]]
 name = "profile-app-preferences"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "core-misc",
@@ -3093,6 +3138,7 @@ dependencies = [
  "log",
  "numeric",
  "paste 1.0.14",
+ "prelude",
  "profile-gateway",
  "profile-security-structures",
  "serde",
@@ -3102,7 +3148,7 @@ dependencies = [
 
 [[package]]
 name = "profile-base-entity"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3114,6 +3160,7 @@ dependencies = [
  "identified-vec-of",
  "network",
  "paste 1.0.14",
+ "prelude",
  "profile-security-structures",
  "serde",
  "serde_json 1.0.108",
@@ -3124,7 +3171,7 @@ dependencies = [
 
 [[package]]
 name = "profile-gateway"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "assert-json",
@@ -3139,6 +3186,7 @@ dependencies = [
  "log",
  "network",
  "paste 1.0.14",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
  "transaction-models",
@@ -3147,7 +3195,7 @@ dependencies = [
 
 [[package]]
 name = "profile-logic"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3157,6 +3205,7 @@ dependencies = [
  "identified-vec-of",
  "itertools 0.12.0",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-persona",
@@ -3168,7 +3217,7 @@ dependencies = [
 
 [[package]]
 name = "profile-persona"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "cap26-models",
@@ -3178,6 +3227,7 @@ dependencies = [
  "hierarchical-deterministic",
  "host-info",
  "once_cell 1.19.0",
+ "prelude",
  "profile-base-entity",
  "profile-persona-data",
  "profile-security-structures",
@@ -3188,7 +3238,7 @@ dependencies = [
 
 [[package]]
 name = "profile-persona-data"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "assert-json",
@@ -3199,6 +3249,7 @@ dependencies = [
  "identified-vec-of",
  "network",
  "paste 1.0.14",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
  "short-string",
@@ -3206,7 +3257,7 @@ dependencies = [
 
 [[package]]
 name = "profile-security-structures"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "cap26-models",
@@ -3221,6 +3272,7 @@ dependencies = [
  "log",
  "network",
  "next-derivation-index-ephemeral",
+ "prelude",
  "pretty_assertions",
  "radix-engine-interface",
  "serde",
@@ -3232,11 +3284,12 @@ dependencies = [
 
 [[package]]
 name = "profile-state-holder"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "derive_more",
  "error",
  "log",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-logic",
@@ -3246,7 +3299,7 @@ dependencies = [
 
 [[package]]
 name = "profile-supporting-types"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3255,6 +3308,7 @@ dependencies = [
  "hierarchical-deterministic",
  "identified-vec-of",
  "itertools 0.12.0",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-account-or-persona",
@@ -3334,14 +3388,14 @@ dependencies = [
 
 [[package]]
 name = "radix-connect"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
  "assert-json",
  "async-trait",
  "base64 0.22.1 (git+https://github.com/marshallpierce/rust-base64.git?rev=e14400697453bcc85997119b874bc03d9601d0af)",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "core-misc",
  "core-utils",
  "derive_more",
@@ -3355,6 +3409,7 @@ dependencies = [
  "http-client",
  "identified-vec-of",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "profile-persona-data",
  "radix-connect-models",
@@ -3368,15 +3423,16 @@ dependencies = [
 
 [[package]]
 name = "radix-connect-models"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "core-misc",
  "derive_more",
  "error",
  "has-sample-values",
  "network",
+ "prelude",
  "serde",
 ]
 
@@ -3854,7 +3910,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -3886,6 +3942,7 @@ dependencies = [
  "network",
  "next-derivation-index-ephemeral",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-gateway",
@@ -3918,7 +3975,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -3932,6 +3989,7 @@ dependencies = [
  "interactors",
  "key-derivation-traits",
  "log",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-logic",
@@ -3944,7 +4002,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-accounts"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -3957,6 +4015,7 @@ dependencies = [
  "log",
  "manifests",
  "network",
+ "prelude",
  "radix-common",
  "radix-engine-interface",
  "sargon-os",
@@ -3966,7 +4025,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-factors"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -3976,6 +4035,7 @@ dependencies = [
  "error",
  "interactors",
  "log",
+ "prelude",
  "profile",
  "profile-logic",
  "sargon-os",
@@ -3985,7 +4045,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-security-center"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "derive_more",
@@ -3993,6 +4053,7 @@ dependencies = [
  "error",
  "has-sample-values",
  "log",
+ "prelude",
  "sargon-os",
  "security-center",
  "serde",
@@ -4000,7 +4061,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-signing"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -4012,6 +4073,7 @@ dependencies = [
  "interactors",
  "key-derivation-traits",
  "log",
+ "prelude",
  "profile",
  "profile-logic",
  "profile-security-structures",
@@ -4025,7 +4087,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-transaction"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "async-std",
@@ -4036,6 +4098,7 @@ dependencies = [
  "itertools 0.12.0",
  "log",
  "manifests",
+ "prelude",
  "pretty_assertions",
  "profile",
  "profile-account-or-persona",
@@ -4053,7 +4116,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4085,6 +4148,7 @@ dependencies = [
  "manifests",
  "paste 1.0.14",
  "preinterpret",
+ "prelude",
  "pretty_assertions",
  "pretty_env_logger",
  "profile",
@@ -4109,7 +4173,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi-conversion-macros"
-version = "0.1.0"
+version = "1.1.100"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4283,13 +4347,14 @@ dependencies = [
 
 [[package]]
 name = "security-center"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
  "assert-json",
  "core-misc",
  "derive_more",
  "has-sample-values",
+ "prelude",
  "profile-app-preferences",
  "serde",
 ]
@@ -4487,7 +4552,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "short-string"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "arraystring",
  "assert-json",
@@ -4495,6 +4560,7 @@ dependencies = [
  "derive_more",
  "has-sample-values",
  "identified-vec-of",
+ "prelude",
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
@@ -4521,13 +4587,13 @@ dependencies = [
 
 [[package]]
 name = "signing"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "actix-rt",
  "addresses",
  "assert-json",
  "async-trait",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -4541,6 +4607,7 @@ dependencies = [
  "log",
  "metadata",
  "network",
+ "prelude",
  "pretty_assertions",
  "profile-account",
  "profile-account-or-persona",
@@ -4558,10 +4625,10 @@ dependencies = [
 
 [[package]]
 name = "signing-traits"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "async-trait",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "core-collections",
  "derive_more",
  "ecc",
@@ -4570,6 +4637,7 @@ dependencies = [
  "hash",
  "indexmap 2.7.0",
  "metadata",
+ "prelude",
  "pretty_assertions",
  "profile-account",
  "profile-account-or-persona",
@@ -4722,13 +4790,14 @@ dependencies = [
 
 [[package]]
 name = "sub-systems"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "derive_more",
  "drivers",
  "enum-iterator",
  "itertools 0.12.0",
  "log",
+ "prelude",
  "serde",
 ]
 
@@ -4895,9 +4964,10 @@ dependencies = [
 
 [[package]]
 name = "time-utils"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "iso8601-timestamp",
+ "prelude",
  "serde_json 1.0.108",
 ]
 
@@ -5023,13 +5093,14 @@ dependencies = [
 
 [[package]]
 name = "transaction-foundation"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "assert-json",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "derive_more",
  "has-sample-values",
  "paste 1.0.14",
+ "prelude",
  "radix-engine-interface",
  "serde",
  "serde_json 1.0.108",
@@ -5037,10 +5108,10 @@ dependencies = [
 
 [[package]]
 name = "transaction-models"
-version = "1.1.99"
+version = "1.1.100"
 dependencies = [
  "addresses",
- "bytes 1.1.99",
+ "bytes 1.1.100",
  "cargo_toml 0.15.3 (git+https://gitlab.com/lib.rs/cargo_toml?rev=e498c94fc42a660c1ca1a28999ce1d757cfe77fe)",
  "core-collections",
  "core-misc",
@@ -5059,6 +5130,7 @@ dependencies = [
  "network",
  "numeric",
  "paste 1.0.14",
+ "prelude",
  "pretty_assertions",
  "radix-common",
  "radix-common-derive",

@@ -399,6 +399,8 @@ impl HasSampleValues for Profile {
 
 #[cfg(test)]
 mod tests {
+    use prelude::fixture_vector;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -635,10 +637,8 @@ mod tests {
     #[test]
     fn check_if_profile_json_contains_legacy_p2p_links_in_profile_snapshot_version_100(
     ) {
-        let json = include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "only_plaintext_profile_snapshot_version_100.json"
-        ));
+        let json =
+            fixture_vector!("only_plaintext_profile_snapshot_version_100");
         assert!(SUT::check_if_profile_json_contains_legacy_p2p_links(json));
     }
 

@@ -646,10 +646,10 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
             networkId = NetworkId.STOKENET
         )
 
-    private fun engineToolkitReceipt(name: String): String = openFileInTxModels(name, "dat").readText()
+    private fun engineToolkitReceipt(name: String): String = openFileInTxModels(name, "json").readText()
 
     private fun openFileInCrate(crate: String, name: String, extension: String) =
-        File("../../" + "crates/" + crate + "/fixtures/transaction/$name.$extension")
+        File("../../" + "fixtures/transaction/$name.$extension")
 
     private fun openFileInTxModels(name: String, extension: String) = openFileInCrate("transaction/models", name, extension)
     private fun openFileInManifests(name: String, extension: String) = openFileInCrate("transaction/manifests", name, extension)

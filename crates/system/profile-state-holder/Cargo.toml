@@ -1,10 +1,11 @@
 [package]
 name = "profile-state-holder"
-version = "1.1.99"
+version = "1.1.100"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 profile = { workspace = true }
 error = { workspace = true }
 profile-supporting-types = { workspace = true }

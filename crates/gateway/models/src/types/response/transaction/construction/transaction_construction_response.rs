@@ -14,6 +14,8 @@ pub struct TransactionConstructionResponse {
 
 #[cfg(test)]
 mod tests {
+    use prelude::fixture_gw_model;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -21,10 +23,9 @@ mod tests {
 
     #[test]
     fn response_json_test() {
-        let (sut, json) = fixture_and_json::<SUT>(include_str!(concat!(
-            env!("FIXTURES_MODELS_GW"),
-            "transaction/response_construction.json"
-        )))
+        let (sut, json) = fixture_and_json::<SUT>(fixture_gw_model!(
+            "transaction/response_construction"
+        ))
         .unwrap();
         assert_json_value_eq_after_roundtrip(&sut, json)
     }
