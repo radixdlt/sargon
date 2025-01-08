@@ -9,8 +9,7 @@ final class WalletToDappInteractionResponseTests: Test<WalletToDappInteractionRe
 		let json = try openFile(
 			subPath: "vector",
 			"wallet_interactions_wallet_to_dapp",
-			extension: "json",
-			in: "sargon"
+			extension: "json"
 		)
 		let sut = try JSONDecoder().decode([SUT].self, from: json)
 		let encoded = try JSONEncoder().encode(sut)
