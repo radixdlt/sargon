@@ -1,171 +1,189 @@
 [
-        {
-            "discriminator" : "success",
-            "interactionId" : "06f00fbc-67ed-4a22-a122-1da719b25b6f",
-            "items" : {
-                "discriminator" : "authorizedRequest",
-                "auth" : {
-                    "discriminator" : "loginWithChallenge",
-                    "persona" : {
-                        "identityAddress" : "identity_tdx_2_12twas58v4sthsmuky5653dup0drez3vcfwsfm6kp40qu9qyt8fgts6",
-                        "label" : "Usdudh"
-                    },
-                    "challenge" : "069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7",
-                    "proof" : {
-                      "publicKey" : "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
-                      "curve" : "curve25519",
-                      "signature" : "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
-                    }
+    {
+        "discriminator" : "success",
+        "interactionId" : "06f00fbc-67ed-4a22-a122-1da719b25b6f",
+        "items" : {
+            "discriminator" : "authorizedRequest",
+            "auth" : {
+                "discriminator" : "loginWithChallenge",
+                "persona" : {
+                    "identityAddress" : "identity_tdx_2_12twas58v4sthsmuky5653dup0drez3vcfwsfm6kp40qu9qyt8fgts6",
+                    "label" : "Usdudh"
                 },
-              "ongoingAccounts" : {
-                "accounts" : [
-                    {
-                      "address" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz",
-                      "label" : "Spending Account",
-                      "appearanceId" : 0
-                    },
-                    {
-                      "address" : "account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n",
-                      "label" : "Savings Account",
-                      "appearanceId" : 1
-                    }
-                  ],
                 "challenge" : "069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7",
-                "proofs" : [
-                  {
-                    "proof" : {
-                      "publicKey" : "11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566",
-                      "curve" : "curve25519",
-                      "signature" : "e18617b527d4d33607a8adb6a040c26ca97642ec89dd8a6fe7a41fa724473e4cc69b0729c1df57aba77455801f2eef6f28848a5d206e3739de29ca2288957502"
-                    },
-                    "accountAddress" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz"
-                  },
-                  {
-                    "proof" : {
-                      "publicKey" : "5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d",
-                      "curve" : "curve25519",
-                      "signature" : "0143fd941d51f531c8265b0f6b24f4cfcdfd24b40aac47dee6fb3386ce0d400563c892e3894a33840d1c7af2dd43ecd0729fd209171003765d109a04d7485605"
-                    },
-                    "accountAddress" : "account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n"
-                  }
-                ]
-              },
-              "ongoingPersonaData" : {
-                "name" : {
-                    "variant" : "western",
-                    "familyName" : "Family",
-                    "givenNames" : "Given",
-                    "nickname" : "Nick"
-                  },
-                  "emailAddresses" : [
-                    "some@gmail.com"
-                  ],
-                "phoneNumbers" : [
-                  "071234579"
-                ]
-              }
-            }
-        },
-        {
-            "discriminator" : "success",
-            "interactionId" : "278608e0-e5ca-416e-8339-f2d2695651c4",
-            "items" : {
-              "oneTimeAccounts" : {
-                "accounts" : [
-                  {
-                    "address" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz",
-                    "label" : "Spending Account",
-                    "appearanceId" : 0
-                  }
-                ]
-              },
-              "discriminator" : "unauthorizedRequest",
-              "oneTimePersonaData" : {
-                "name" : {
-                    "variant" : "western",
-                    "familyName" : "Family",
-                    "givenNames" : "Given",
-                  "nickname" : "Nick"
-                },
-                "emailAddresses" : [
-                  "some@gmail.com"
-                ],
-                "phoneNumbers" : [
-                    "071234579"
-                  ]
-              }
-            }
-        },
-        {
-          "discriminator" : "failure",
-          "interactionId" : "278608e0-e5ca-416e-8339-f2d2695651c4",
-          "error" : "rejectedByUser",
-          "message" : "User rejected the request"
-        },
-        {
-          "discriminator" : "success",
-          "interactionId" : "c42f8825-4bbb-4ce2-a646-776b529e2f51",
-          "items" : {
-            "send" : {
-              "transactionIntentHash" : "txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n"
-            },
-            "discriminator" : "transaction"
-          }
-        },
-        {
-          "discriminator" : "success",
-          "interactionId" : "2916ad16-52a0-4564-a611-4971883c1322",
-          "items" : {
-            "discriminator" : "unauthorizedRequest",
-            "proofOfOwnership": {
-              "challenge": "4c85e4a903ab97450ef83763f8d4ca55a43efe843e1d2ced78a4940e5c397c9c",
-              "proofs": [
-                {
-                    "accountAddress": "account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90",
-                    "proof": {
-                        "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
-                        "curve": "curve25519",
-                        "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
-                    }
+                "proof" : {
+                  "publicKey" : "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
+                  "curve" : "curve25519",
+                  "signature" : "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
                 }
-              ]
-            }
-          }
-        },
-        {
-          "discriminator" : "success",
-          "interactionId" : "17d530f6-0cb6-4122-8540-64e46a2e0f84",
-          "items" : {
-            "discriminator" : "unauthorizedRequest",
-            "proofOfOwnership": {
-              "challenge": "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
-              "proofs": [
+            },
+          "ongoingAccounts" : {
+            "accounts" : [
                 {
-                    "accountAddress": "account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90",
-                    "proof": {
-                        "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
-                        "curve": "curve25519",
-                        "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
-                    }
+                  "address" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz",
+                  "label" : "Spending Account",
+                  "appearanceId" : 0
                 },
                 {
-                  "identityAddress": "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
-                  "proof": {
-                      "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
-                      "curve": "curve25519",
-                      "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
-                  }
+                  "address" : "account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n",
+                  "label" : "Savings Account",
+                  "appearanceId" : 1
+                }
+              ],
+            "challenge" : "069ef236486d4cd5706b5e5b168e19f750ffd1b4876529a0a9de966d50a15ab7",
+            "proofs" : [
+              {
+                "proof" : {
+                  "publicKey" : "11b162e3343ce770b6e9ed8a29d125b5580d1272b0dc4e2bd0fcae33320d9566",
+                  "curve" : "curve25519",
+                  "signature" : "e18617b527d4d33607a8adb6a040c26ca97642ec89dd8a6fe7a41fa724473e4cc69b0729c1df57aba77455801f2eef6f28848a5d206e3739de29ca2288957502"
+                },
+                "accountAddress" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz"
+              },
+              {
+                "proof" : {
+                  "publicKey" : "5386353e4cc27e3d27d064d777d811e242a16ba7aefd425062ed46631739619d",
+                  "curve" : "curve25519",
+                  "signature" : "0143fd941d51f531c8265b0f6b24f4cfcdfd24b40aac47dee6fb3386ce0d400563c892e3894a33840d1c7af2dd43ecd0729fd209171003765d109a04d7485605"
+                },
+                "accountAddress" : "account_tdx_2_128928hvf6pjr3rx2xvdw6ulf7pc8g88ya8ma3j8dtjmntckz09fr3n"
               }
-              ]
-            }
-          }
-        },
-        {
-          "discriminator": "success",
-          "interactionId": "17d530f6-0cb6-4122-8540-64e46a2e0f84",
-          "items": {
-            "discriminator": "preAuthorizationResponse",
-            "signedPartialTransaction": "replace_actual_encoded_string_here"
+            ]
+          },
+          "ongoingPersonaData" : {
+            "name" : {
+                "variant" : "western",
+                "familyName" : "Family",
+                "givenNames" : "Given",
+                "nickname" : "Nick"
+              },
+              "emailAddresses" : [
+                "some@gmail.com"
+              ],
+            "phoneNumbers" : [
+              "071234579"
+            ]
           }
         }
+    },
+    {
+        "discriminator" : "success",
+        "interactionId" : "278608e0-e5ca-416e-8339-f2d2695651c4",
+        "items" : {
+          "oneTimeAccounts" : {
+            "accounts" : [
+              {
+                "address" : "account_tdx_2_129qeystv8tufmkmjrry2g6kadhhfh4f7rd0x3t9yagcvfhspt62paz",
+                "label" : "Spending Account",
+                "appearanceId" : 0
+              }
+            ]
+          },
+          "discriminator" : "unauthorizedRequest",
+          "oneTimePersonaData" : {
+            "name" : {
+                "variant" : "western",
+                "familyName" : "Family",
+                "givenNames" : "Given",
+              "nickname" : "Nick"
+            },
+            "emailAddresses" : [
+              "some@gmail.com"
+            ],
+            "phoneNumbers" : [
+                "071234579"
+              ]
+          }
+        }
+    },
+    {
+      "discriminator" : "failure",
+      "interactionId" : "278608e0-e5ca-416e-8339-f2d2695651c4",
+      "error" : "rejectedByUser",
+      "message" : "User rejected the request"
+    },
+    {
+      "discriminator" : "success",
+      "interactionId" : "c42f8825-4bbb-4ce2-a646-776b529e2f51",
+      "items" : {
+        "send" : {
+          "transactionIntentHash" : "txid_tdx_2_1mwuvufnewv6qkxdaesx0gcwap7n79knhkn0crsc8dg9g9k7qknjs6vkd3n"
+        },
+        "discriminator" : "transaction"
+      }
+    },
+    {
+      "discriminator" : "success",
+      "interactionId" : "2916ad16-52a0-4564-a611-4971883c1322",
+      "items" : {
+        "discriminator" : "authorizedRequest",
+        "auth" : {
+          "discriminator" : "usePersona",
+          "persona" : {
+            "identityAddress" : "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+            "label" : "alfz_psf"
+          }
+        },
+        "proofOfOwnership": {
+          "challenge": "4c85e4a903ab97450ef83763f8d4ca55a43efe843e1d2ced78a4940e5c397c9c",
+          "proofs": [
+            {
+                "accountAddress": "account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90",
+                "proof": {
+                    "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
+                    "curve": "curve25519",
+                    "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
+                }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "discriminator" : "success",
+      "interactionId" : "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+      "items" : {
+        "discriminator" : "authorizedRequest",
+        "auth" : {
+          "discriminator" : "usePersona",
+          "persona" : {
+            "identityAddress" : "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+            "label" : "pao13"
+          }
+        },
+        "proofOfOwnership": {
+          "challenge": "e280cfa39e1499f2862e59759cc2fc990cce28b70a7989324fe91c47814d0630",
+          "proofs": [
+            {
+                "accountAddress": "account_tdx_2_12ytkalad6hfxamsz4a7r8tevz7ahurfj58dlp4phl4nca5hs0hpu90",
+                "proof": {
+                    "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
+                    "curve": "curve25519",
+                    "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
+                }
+            },
+            {
+              "identityAddress": "identity_tdx_2_12fat0nh0gymw9j4rqka5344p3h3r86x4z0hkw2v78r03pt0kfv0qva",
+              "proof": {
+                  "publicKey": "ff8aee4c625738e35d837edb11e33b8abe0d6f40849ca1451edaba84d04d0699",
+                  "curve": "curve25519",
+                  "signature": "10177ac7d486691777133ffe59d46d55529d86cb1c4ce66aa82f432372f33e24d803d8498f42e26fe113c030fce68c526aeacff94334ba5a7f7ef84c2936eb05"
+              }
+          }
+          ]
+        }
+      }
+    },
+    {
+      "discriminator": "success",
+      "interactionId": "17d530f6-0cb6-4122-8540-64e46a2e0f84",
+      "items": {
+        "discriminator": "preAuthorizationResponse",
+        "response" : {
+          "signedPartialTransaction": "4d220e03210221012105210607f20a00000000000000000a0a000000000000002200002200000ab168de3a00000000202000220000202000202200202100202200202000",
+          "subintentHash": "subtxid_sim1kdwxe9mkpgn2n5zplvh4kcu0d69k5qcz679xhxfa8ulcjtjqsvtq799xkn",
+          "expirationTimestamp": 1694448356
+        }
+      }
+    }
 ]
