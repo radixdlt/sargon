@@ -352,8 +352,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         is AccountOrAddressOf.ProfileAccount ->
                             assertTrue(
                                 contains(
-                                    recipient.value
-                                        .address
+                                    recipient.value.address
                                         .string
                                 )
                             )
@@ -588,7 +587,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     @Test
     fun testAccountLockerClaim() {
         val expectedManifest = TransactionManifest.init(
-            instructionsString = openFile("account_locker_claim", "rtm").readText(),
+            instructionsString = openFileInManifests("account_locker_claim", "rtm").readText(),
             networkId = NetworkId.MAINNET
         )
         var actualManifest = TransactionManifest.accountLockerClaim(
@@ -643,12 +642,15 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
     private fun manifest(name: String) =
         TransactionManifest.init(
-            instructionsString = openFile(name, "rtm").readText(),
+            instructionsString = openFileInTxModels(name, "rtm").readText(),
             networkId = NetworkId.STOKENET
         )
 
-    private fun engineToolkitReceipt(name: String): String = openFile(name, "dat").readText()
+    private fun engineToolkitReceipt(name: String): String = openFileInTxModels(name, "dat").readText()
 
-    private fun openFile(name: String, extension: String) =
-        File("../../" + "crates/sargon/fixtures/transaction/$name.$extension")
+    private fun openFileInCrate(crate: String, name: String, extension: String) =
+        File("../../" + "crates/" + crate + "/fixtures/transaction/$name.$extension")
+
+    private fun openFileInTxModels(name: String, extension: String) = openFileInCrate("transaction/models", name, extension)
+    private fun openFileInManifests(name: String, extension: String) = openFileInCrate("transaction/manifests", name, extension)
 }

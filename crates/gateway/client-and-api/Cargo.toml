@@ -1,0 +1,26 @@
+[package]
+name = "gateway-client-and-api"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+assert-json = { workspace = true }
+core-utils = { workspace = true }
+metadata = { workspace = true }
+addresses = { workspace = true }
+drivers = { workspace = true }
+http-client = { workspace = true }
+gateway-models = { workspace = true }
+transaction-models = { workspace = true }
+profile-gateway = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+radix-common = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

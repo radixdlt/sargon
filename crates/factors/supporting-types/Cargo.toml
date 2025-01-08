@@ -1,0 +1,17 @@
+[package]
+name = "factors-supporting-types"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# ==== INTERNAL DEPENDENCIES ====
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+error = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+async-trait = { workspace = true }

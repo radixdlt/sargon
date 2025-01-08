@@ -1,0 +1,23 @@
+[package]
+name = "numeric"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === INTERNAL DEPENDENCIES ===
+error = { workspace = true }
+has-sample-values = { workspace = true }
+bytes = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+radix-common = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+enum-iterator = { workspace = true }
+delegate = { workspace = true }
+derive_more = { workspace = true }
+serde = { workspace = true }
+serde_repr = { workspace = true }
+serde_with = { workspace = true }
+serde_json = { workspace = true }
+strum = { workspace = true }

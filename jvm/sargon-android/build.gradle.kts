@@ -97,6 +97,7 @@ cargoNdk {
     targets = arrayListOf("arm64", "arm")
     module = "../"
     librariesNames = arrayListOf("libsargon_uniffi.so")
+    extraCargoBuildArguments = arrayListOf("--all")
 }
 
 tasks.withType<Test> {
@@ -283,7 +284,6 @@ afterEvaluate {
                 commandLine(
                     "cargo", "run",
                     "-p", "sargon-uniffi",
-                    "--features", "build-binary",
                     "--bin", "sargon-bindgen",
                     "generate", "--library", binaryFile.toString(),
                     "--language", "kotlin",

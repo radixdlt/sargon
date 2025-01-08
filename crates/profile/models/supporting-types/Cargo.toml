@@ -1,0 +1,25 @@
+[package]
+name = "profile-supporting-types"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+addresses = { workspace = true }
+profile = { workspace = true }
+profile-base-entity = { workspace = true }
+profile-account-or-persona = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
+itertools = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

@@ -1,0 +1,18 @@
+[package]
+name = "host-info"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+assert-json = { workspace = true }
+has-sample-values = { workspace = true }
+time-utils = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

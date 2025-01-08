@@ -12,6 +12,8 @@ import androidx.lifecycle.lifecycleScope
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.SecureStorageAccessErrorKind
 import com.radixdlt.sargon.SecureStorageKey
+import com.radixdlt.sargon.secureStorageKeyIdentifier
+import com.radixdlt.sargon.secureStorageAccessErrorKindToString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
@@ -37,8 +39,8 @@ class BiometricsFailure(
     fun toCommonException(
         key: SecureStorageKey
     ): CommonException = CommonException.SecureStorageAccessException(
-        key = key,
-        errorKind = when (errorCode) {
+        key = secureStorageKeyIdentifier(key),
+        errorKind = secureStorageAccessErrorKindToString(kind = when (errorCode) {
             BiometricPrompt.ERROR_CANCELED -> SecureStorageAccessErrorKind.CANCELLED
             BiometricPrompt.ERROR_HW_NOT_PRESENT -> SecureStorageAccessErrorKind.HARDWARE_NOT_PRESENT
             BiometricPrompt.ERROR_HW_UNAVAILABLE -> SecureStorageAccessErrorKind.HARDWARE_UNAVAILABLE
@@ -53,7 +55,7 @@ class BiometricsFailure(
             BiometricPrompt.ERROR_USER_CANCELED -> SecureStorageAccessErrorKind.USER_CANCELLED
             BiometricPrompt.ERROR_VENDOR -> SecureStorageAccessErrorKind.VENDOR
             else -> throw CommonException.Unknown()
-        },
+        }),
         errorMessage = errorMessage.orEmpty()
     )
 
