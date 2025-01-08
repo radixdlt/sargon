@@ -36,7 +36,7 @@ impl Default for FeeLocks {
 #[cfg(test)]
 mod tests {
 
-    use prelude::{fixture_dat, fixture_rtm};
+    use prelude::{fixture_rtm, fixture_tx};
 
     use super::*;
 
@@ -63,7 +63,7 @@ mod tests {
         let instructions_string =
             fixture_rtm!("transfer_1to2_multiple_nf_and_f_tokens");
 
-        let receipt = deserialize_receipt(fixture_dat!(
+        let receipt = deserialize_receipt(fixture_tx!(
             "transfer_1to2_multiple_nf_and_f_tokens"
         ));
 
@@ -168,7 +168,7 @@ mod tests {
     fn third_party_deposits_update() {
         let instructions_string = fixture_rtm!("third_party_deposits_update");
         let receipt =
-            deserialize_receipt(fixture_dat!("third_party_deposits_update"));
+            deserialize_receipt(fixture_tx!("third_party_deposits_update"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -229,7 +229,7 @@ mod tests {
     fn create_single_fungible() {
         let instructions_string = fixture_rtm!("create_single_fungible");
         let receipt =
-            deserialize_receipt(fixture_dat!("create_single_fungible"));
+            deserialize_receipt(fixture_tx!("create_single_fungible"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -279,8 +279,7 @@ mod tests {
     #[test]
     fn create_nft_collection() {
         let instructions_string = fixture_rtm!("create_nft_collection");
-        let receipt =
-            deserialize_receipt(fixture_dat!("create_nft_collection"));
+        let receipt = deserialize_receipt(fixture_tx!("create_nft_collection"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -361,8 +360,7 @@ mod tests {
     #[test]
     fn mint_nft_gumball_card() {
         let instructions_string = fixture_rtm!("mint_nft_gumball_card");
-        let receipt =
-            deserialize_receipt(fixture_dat!("mint_nft_gumball_card"));
+        let receipt = deserialize_receipt(fixture_tx!("mint_nft_gumball_card"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -430,7 +428,7 @@ mod tests {
     fn present_proof_swap_candy() {
         let instructions_string = fixture_rtm!("present_proof_swap_candy");
         let receipt =
-            deserialize_receipt(fixture_dat!("present_proof_swap_candy"));
+            deserialize_receipt(fixture_tx!("present_proof_swap_candy"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -483,7 +481,7 @@ mod tests {
     fn create_pool() {
         let instructions_string = fixture_rtm!("create_pool");
 
-        let receipt = deserialize_receipt(fixture_dat!("create_pool"));
+        let receipt = deserialize_receipt(fixture_tx!("create_pool"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -519,8 +517,7 @@ mod tests {
     fn contribute_to_bi_pool() {
         let instructions_string = fixture_rtm!("contribute_to_bi_pool");
 
-        let receipt =
-            deserialize_receipt(fixture_dat!("contribute_to_bi_pool"));
+        let receipt = deserialize_receipt(fixture_tx!("contribute_to_bi_pool"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -576,7 +573,7 @@ mod tests {
     fn stake_to_three_validators() {
         let instructions_string = fixture_rtm!("stake_to_three_validators");
         let receipt =
-            deserialize_receipt(fixture_dat!("stake_to_three_validators"));
+            deserialize_receipt(fixture_tx!("stake_to_three_validators"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -654,7 +651,7 @@ mod tests {
     #[test]
     fn redeem_from_bi_pool() {
         let instructions_string = fixture_rtm!("redeem_from_bi_pool");
-        let receipt = deserialize_receipt(fixture_dat!("redeem_from_bi_pool"));
+        let receipt = deserialize_receipt(fixture_tx!("redeem_from_bi_pool"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -706,7 +703,7 @@ mod tests {
     fn unstake_partially_from_one_validator() {
         let instructions_string =
             fixture_rtm!("unstake_partially_from_one_validator");
-        let receipt = deserialize_receipt(fixture_dat!(
+        let receipt = deserialize_receipt(fixture_tx!(
             "unstake_partially_from_one_validator"
         ));
 
@@ -784,7 +781,7 @@ mod tests {
     fn claim_two_stakes_from_one_validator() {
         let instructions_string =
             fixture_rtm!("claim_two_stakes_from_one_validator");
-        let receipt = deserialize_receipt(fixture_dat!(
+        let receipt = deserialize_receipt(fixture_tx!(
             "claim_two_stakes_from_one_validator"
         ));
 
@@ -858,7 +855,7 @@ mod tests {
         let instructions_string =
             fixture_rtm!("account_locker_claim_fungibles_and_non_fungibles");
 
-        let receipt = deserialize_receipt(fixture_dat!(
+        let receipt = deserialize_receipt(fixture_tx!(
             "account_locker_claim_fungibles_and_non_fungibles"
         ));
 
@@ -914,7 +911,7 @@ mod tests {
     fn account_delete() {
         let instructions_string = fixture_rtm!("account_delete");
 
-        let receipt = deserialize_receipt(fixture_dat!("account_delete"));
+        let receipt = deserialize_receipt(fixture_tx!("account_delete"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,

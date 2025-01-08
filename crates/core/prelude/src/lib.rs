@@ -6,7 +6,7 @@ macro_rules! fixture_in {
 }
 
 #[macro_export]
-macro_rules! fixture_tx {
+macro_rules! fixture_tx_file {
     ($file: expr) => {
         $crate::fixture_in!(env!("FIXTURES_TX"), $file)
     };
@@ -15,14 +15,14 @@ macro_rules! fixture_tx {
 #[macro_export]
 macro_rules! fixture_rtm {
     ($file: expr) => {
-        $crate::fixture_tx!(concat!($file, ".rtm"))
+        $crate::fixture_tx_file!(concat!($file, ".rtm"))
     };
 }
 
 #[macro_export]
-macro_rules! fixture_dat {
+macro_rules! fixture_tx {
     ($file: expr) => {
-        $crate::fixture_tx!(concat!($file, ".dat"))
+        $crate::fixture_tx_file!(concat!($file, ".json"))
     };
 }
 

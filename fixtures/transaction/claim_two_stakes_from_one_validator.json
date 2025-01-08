@@ -1,3 +1,4 @@
+
 {
   "kind": "CommitSuccess",
   "state_updates_summary": {
@@ -15,7 +16,7 @@
           "resource_address": "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw",
           "ids": [
             "{1c1ce92c810094a7-65659db6a666c19c-6cea4367bb789b55-276b137712ceecce}",
-            "{5aebd0270calf3f87-51031498741f57b5-d24fe0d62a976589-519c6a92423888cc}"
+            "{5aebd0270caf3f87-51031498741f57b5-d24fe0d62a976589-519c6a92423888cc}"
           ]
         }
       }
@@ -28,7 +29,7 @@
           "resource_address": "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw",
           "ids": [
             "{1c1ce92c810094a7-65659db6a666c19c-6cea4367bb789b55-276b137712ceecce}",
-            "{5aebd0270calf3f87-51031498741f57b5-d24fe0d62a976589-519c6a92423888cc}"
+            "{5aebd0270caf3f87-51031498741f57b5-d24fe0d62a976589-519c6a92423888cc}"
           ]
         }
       }
