@@ -241,15 +241,6 @@ mod tests {
     use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 
     #[test]
-    fn aaaaparse_url_into_request() {
-        let request_params = SampleRequestParams::new_from_text_vector();
-        assert_eq!(
-            request_params.session_id,
-            Some("37a817c9-d71a-4926-b749-efef2d0b1304".to_string())
-        );
-    }
-
-    #[test]
     fn parse_url_into_request() {
         let request_params = SampleRequestParams::new_from_text_vector();
 
