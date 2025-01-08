@@ -1,0 +1,15 @@
+[package]
+name = "hash"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# ==== INTERNAL DEPENDENCIES ====
+bytes = { workspace = true }
+
+# ==== RADIX DEPENDENCIES ====
+radix-common = { workspace = true }
+
+# ==== EXTERNAL DEPENDENCIES ====
+derive_more = { workspace = true }
+serde = { workspace = true }

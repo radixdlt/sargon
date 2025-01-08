@@ -1,0 +1,28 @@
+[package]
+name = "profile-app-preferences"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === INTERNAL DEPENDENCIES ===
+identified-vec-of = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+factors = { workspace = true }
+numeric = { workspace = true }
+core-misc = { workspace = true }                   # decl_bool_Type
+keys-collector = { workspace = true }
+addresses = { workspace = true }
+transaction-models = { workspace = true }
+profile-gateway = { workspace = true }
+profile-security-structures = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+indexmap = { workspace = true }
+log = { workspace = true }
+paste = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

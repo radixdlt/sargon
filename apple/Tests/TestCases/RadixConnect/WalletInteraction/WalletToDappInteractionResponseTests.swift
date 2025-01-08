@@ -6,7 +6,12 @@ import XCTest
 
 final class WalletToDappInteractionResponseTests: Test<WalletToDappInteractionResponse> {
 	func test_codable() throws {
-		let json = try openFile(subPath: "vector", "wallet_interactions_wallet_to_dapp", extension: "json")
+		let json = try openFile(
+			subPath: "vector",
+			"wallet_interactions_wallet_to_dapp",
+			extension: "json",
+			in: "sargon_SPLIT_ME"
+		)
 		let sut = try JSONDecoder().decode([SUT].self, from: json)
 		let encoded = try JSONEncoder().encode(sut)
 		try XCTAssertEqual(JSONDecoder().decode([SUT].self, from: encoded), sut)

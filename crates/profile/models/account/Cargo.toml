@@ -1,0 +1,26 @@
+[package]
+name = "profile-account"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+account-for-display = { workspace = true }
+transaction-models = { workspace = true }
+addresses = { workspace = true }
+has-sample-values = { workspace = true }
+cap26-models = { workspace = true }
+entity-foundation = { workspace = true }
+short-string = { workspace = true }
+profile-base-entity = { workspace = true }
+profile-security-structures = { workspace = true }
+
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+once_cell = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

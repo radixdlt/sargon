@@ -1,0 +1,15 @@
+[package]
+name = "time-utils"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+# None
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+iso8601-timestamp = { workspace = true }
+serde_json = { workspace = true }

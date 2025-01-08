@@ -1,0 +1,17 @@
+[package]
+name = "core-utils"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+error = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+iso8601-timestamp = { workspace = true }
+log = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }

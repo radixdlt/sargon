@@ -1,0 +1,19 @@
+[package]
+name = "entity-by-address"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+error = { workspace = true }
+addresses = { workspace = true }
+profile-account = { workspace = true }
+profile-account-or-persona = { workspace = true }
+profile-persona = { workspace = true }
+
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+# None

@@ -1,0 +1,3 @@
+mod test_derivation_interactor_from_secure_storage_client;
+
+pub use test_derivation_interactor_from_secure_storage_client::*;

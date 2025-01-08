@@ -1,0 +1,23 @@
+[package]
+name = "profile-account-or-persona"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+profile-base-entity = { workspace = true }
+profile-account = { workspace = true }
+profile-persona = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+cap26-models = { workspace = true }
+profile-security-structures = { workspace = true }
+
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

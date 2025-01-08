@@ -1,0 +1,21 @@
+[package]
+name = "sargon-os-security-center"
+version = "1.1.99"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+sargon-os = { path = "../../../system/os/os" }
+drivers = { workspace = true }
+has-sample-values = { workspace = true }
+error = { workspace = true }
+security-center = { workspace = true }
+
+# ==== RADIX DEPENDENCIES ====
+# None
+
+# ==== EXTERNAL DEPENDENCIES ====
+actix-rt = { workspace = true }
+derive_more = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }
