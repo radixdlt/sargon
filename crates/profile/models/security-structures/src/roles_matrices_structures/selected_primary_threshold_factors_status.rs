@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Represents the status of selected threshold factor sources in the Security Shield building process.
 /// Primarily used for UI logic representation in host applications.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SelectedPrimaryThresholdFactorsStatus {
     /// The selected factor sources are optimal
     /// in the Security Shield building process.
@@ -22,5 +22,20 @@ pub enum SelectedPrimaryThresholdFactorsStatus {
     /// in the Security Shield building process.
     ///
     /// Example: A Password factor source cannot be used alone.
-    Invalid,
+    Invalid {
+        /// The reason why the selected factor sources are invalid.
+        reason: SelectedPrimaryThresholdFactorsStatusInvalidReason,
+    },
+}
+
+/// Represents the reason why the selected primary threshold factor sources are invalid.
+/// Primarily used for UI logic representation in host applications.
+#[derive(Clone, Debug, PartialEq)]
+pub enum SelectedPrimaryThresholdFactorsStatusInvalidReason {
+    CannotBeUsedAlone {
+        factor_source_kind: FactorSourceKind,
+    },
+    Other {
+        underlying: SecurityShieldBuilderInvalidReason,
+    },
 }

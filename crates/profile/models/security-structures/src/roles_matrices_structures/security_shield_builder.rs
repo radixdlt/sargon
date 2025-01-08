@@ -709,7 +709,20 @@ impl SecurityShieldBuilder {
                 SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor => {
                     SelectedPrimaryThresholdFactorsStatus::Insufficient
                 }
-                _ => SelectedPrimaryThresholdFactorsStatus::Invalid,
+                SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor => {
+                    SelectedPrimaryThresholdFactorsStatus::Invalid {
+                        reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
+                            factor_source_kind: FactorSourceKind::Password,
+                        }
+                    }
+                },
+                _ => {
+                    SelectedPrimaryThresholdFactorsStatus::Invalid {
+                        reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::Other {
+                            underlying: reason,
+                        }
+                    }
+                }
             };
         }
 
@@ -1218,6 +1231,7 @@ mod tests {
 #[cfg(test)]
 mod test_invalid {
     use super::*;
+    use crate::prelude::SelectedPrimaryThresholdFactorsStatusInvalidReason::Other;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
@@ -1541,7 +1555,8 @@ mod test_invalid {
     }
 
     #[test]
-    fn selected_primary_threshold_factors_status_is_invalid() {
+    fn selected_primary_threshold_factors_status_is_invalid_when_only_password_is_selected(
+    ) {
         let sut = SUT::default();
 
         let _ = sut.add_factor_source_to_primary_threshold(
@@ -1551,7 +1566,35 @@ mod test_invalid {
 
         pretty_assertions::assert_eq!(
             status,
-            SelectedPrimaryThresholdFactorsStatus::Invalid
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
+                    factor_source_kind: FactorSourceKind::Password
+                }
+            }
+        );
+    }
+
+    #[test]
+    fn selected_primary_threshold_factors_status_is_invalid() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device_other(),
+            );
+        let _ = sut.set_threshold(0);
+        let status = sut.selected_primary_threshold_factors_status();
+
+        pretty_assertions::assert_eq!(
+            status,
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: Other {
+                    underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices
+                }
+            }
         );
     }
 }
