@@ -19,6 +19,11 @@ pub trait OsSecurityStructuresQuerying {
         &self,
         structure: &SecurityStructureOfFactorSources,
     ) -> Result<bool>;
+
+    async fn add_security_structure_of_factor_source_ids(
+        &self,
+        structure_ids: &SecurityStructureOfFactorSourceIDs,
+    ) -> Result<bool>;
 }
 
 #[async_trait::async_trait]
@@ -77,12 +82,33 @@ impl OsSecurityStructuresQuerying for SargonOS {
         &self,
         structure: &SecurityStructureOfFactorSources,
     ) -> Result<bool> {
-        let id = structure.id();
         let structure_id_level =
             SecurityStructureOfFactorSourceIDs::from(structure.clone());
+        self.add_security_structure_of_factor_source_ids(&structure_id_level)
+            .await
+    }
 
+    /// Adds the `SecurityStructureOfFactorSourceIDs` to Profile if none with the
+    /// same ID already exists, and if all factors it references are found in Profile.
+    ///
+    /// If `structure` references a FactorSource by ID which is unknown to Profile,
+    /// `Err(CommonError::StructureReferencesUnknownFactorSource)` is returned.
+    ///
+    /// If Profile already contains a structure with the same ID, `Ok(false)` is
+    /// returned **without** modifying the existing one.
+    ///
+    /// # Emits Events
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// And also emits `Event::ProfileModified { change: EventProfileModified::SecurityStructureAdded { id } }`
+    async fn add_security_structure_of_factor_source_ids(
+        &self,
+        structure_ids: &SecurityStructureOfFactorSourceIDs,
+    ) -> Result<bool> {
+        let id = structure_ids.metadata.id;
         let ids_of_factors_in_profile = self.factor_source_ids()?;
-        let ids_in_structure = structure_id_level
+        let ids_in_structure = structure_ids
             .all_factors()
             .into_iter()
             .cloned()
@@ -105,7 +131,7 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 Ok(p.app_preferences
                     .security
                     .security_structures_of_factor_source_ids
-                    .append(structure_id_level.clone())
+                    .append(structure_ids.clone())
                     .0)
             })
             .await?;
