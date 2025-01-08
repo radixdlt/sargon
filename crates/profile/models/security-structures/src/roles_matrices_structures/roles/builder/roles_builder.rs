@@ -688,6 +688,8 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             || self.threshold_contains_factor_source_of_kind(factor_source_kind)
     }
 
+    /// Removes a factor source from the list of `factor_list_kind`.
+    ///
     /// Lowers the threshold if the deleted factor source is in the threshold list
     /// and if after removal of `factor_source_id` `self.threshold > self.threshold_factors.len()`
     ///
@@ -697,36 +699,35 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn remove_factor_source(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> RoleBuilderMutateResult {
-        if !self.contains_factor_source(factor_source_id) {
-            return RoleBuilderMutateResult::basic_violation(
-                FactorSourceNotFound,
-            );
-        }
-
         let remove = |xs: &mut Vec<FactorSourceID>| {
-            let index = xs
-                    .iter()
-                    .position(|f| f == factor_source_id)
-                    .expect("Called remove of non existing FactorSourceID, this is a programmer error, should have checked if it exists before calling remove.");
-            xs.remove(index);
+            let index = xs.iter().position(|f| f == factor_source_id);
+            if let Some(index) = index {
+                xs.remove(index);
+                Ok(())
+            } else {
+                RoleBuilderMutateResult::basic_violation(FactorSourceNotFound)
+            }
         };
 
-        if self.override_contains_factor_source(factor_source_id) {
-            remove(self.mut_override_factors())
-        } else if self.threshold_contains_factor_source(factor_source_id) {
-            // We use `else if` to highlight the fact that a factor cannot
-            // ever be in both override and threshold list.
-            remove(self.mut_threshold_factors());
-            let threshold_factors_len =
-                self.get_threshold_factors().len() as u8;
-            if self.get_threshold() > threshold_factors_len {
-                // N.B. we don't use `set_threshold` since this might be a
-                // temporary invalid state, if e.g. primary role does not have
-                // any factors.
-                self.unchecked_set_threshold(threshold_factors_len);
+        match factor_list_kind {
+            Threshold => {
+                remove(self.mut_threshold_factors())?;
+                let threshold_factors_len =
+                    self.get_threshold_factors().len() as u8;
+                if self.get_threshold() > threshold_factors_len {
+                    // N.B. we don't use `set_threshold` since this might be a
+                    // temporary invalid state, if e.g. primary role does not have
+                    // any factors.
+                    self.unchecked_set_threshold(threshold_factors_len);
+                }
+            }
+            Override => {
+                remove(self.mut_override_factors())?;
             }
         }
+
         Ok(())
     }
 

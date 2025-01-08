@@ -347,13 +347,15 @@ impl SecurityShieldBuilder {
         })
     }
 
-    /// Removes factor **only** from the primary role.
+    /// Removes factor **only** from the primary role based on the [FactorListKind].
     pub fn remove_factor_from_primary(
         &self,
         factor_source_id: FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> &Self {
         self.set(|builder| {
-            builder.remove_factor_from_primary(&factor_source_id)
+            builder
+                .remove_factor_from_primary(&factor_source_id, factor_list_kind)
         })
     }
 
@@ -363,7 +365,10 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.remove_factor_from_recovery(&factor_source_id)
+            builder.remove_factor_from_recovery(
+                &factor_source_id,
+                FactorListKind::Override,
+            )
         })
     }
 
@@ -373,7 +378,10 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.remove_factor_from_confirmation(&factor_source_id)
+            builder.remove_factor_from_confirmation(
+                &factor_source_id,
+                FactorListKind::Override,
+            )
         })
     }
 
@@ -554,7 +562,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_primary_threshold(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 
     pub fn addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
@@ -562,7 +570,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_primary_override(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 
     pub fn addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
@@ -570,7 +578,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_recovery_override(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 
     pub fn addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
@@ -578,7 +586,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_confirmation_override(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 }
 
@@ -629,7 +637,7 @@ impl SecurityShieldBuilder {
             |builder, input| {
                 builder.validation_for_addition_of_factor_source_to_confirmation_override_for_each_with_mode(
                     input,
-                    self.mode
+                    self.mode,
                 )
             },
         )
@@ -787,7 +795,6 @@ impl SecurityShieldBuilder {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -925,7 +932,10 @@ mod tests {
             .add_factor_source_to_confirmation_override(
                 FactorSourceID::sample_device(),
             )
-            .remove_factor_from_primary(FactorSourceID::sample_arculus_other())
+            .remove_factor_from_primary(
+                FactorSourceID::sample_arculus_other(),
+                FactorListKind::Override,
+            )
             .remove_factor_from_recovery(FactorSourceID::sample_ledger_other());
 
         let shield0 = sut.build().unwrap();
@@ -1099,19 +1109,19 @@ mod tests {
                 FactorSourceID::sample_security_questions(),
                 FactorSourceID::sample_security_questions_other(),
             ]
-            .into_iter()
-            .map(
-                |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                    RoleKind::Recovery,
-                    fsid,
-                    if fsid.get_factor_source_kind() == FactorSourceKind::SecurityQuestions {
-                        ForeverInvalidReason::RecoveryRoleSecurityQuestionsNotSupported
-                    } else {
-                        ForeverInvalidReason::RecoveryRolePasswordNotSupported
-                    }
+                .into_iter()
+                .map(
+                    |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                        RoleKind::Recovery,
+                        fsid,
+                        if fsid.get_factor_source_kind() == FactorSourceKind::SecurityQuestions {
+                            ForeverInvalidReason::RecoveryRoleSecurityQuestionsNotSupported
+                        } else {
+                            ForeverInvalidReason::RecoveryRolePasswordNotSupported
+                        }
+                    )
                 )
-            )
-            .collect::<Vec<_>>()
+                .collect::<Vec<_>>()
         );
     }
 
@@ -1132,15 +1142,15 @@ mod tests {
                 FactorSourceID::sample_trusted_contact(),
                 FactorSourceID::sample_trusted_contact_other(),
             ]
-            .into_iter()
-            .map(
-                |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                    RoleKind::Confirmation,
-                    fsid,
-                    ForeverInvalidReason::ConfirmationRoleTrustedContactNotSupported
+                .into_iter()
+                .map(
+                    |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                        RoleKind::Confirmation,
+                        fsid,
+                        ForeverInvalidReason::ConfirmationRoleTrustedContactNotSupported
+                    )
                 )
-            )
-            .collect::<Vec<_>>()
+                .collect::<Vec<_>>()
         );
     }
 

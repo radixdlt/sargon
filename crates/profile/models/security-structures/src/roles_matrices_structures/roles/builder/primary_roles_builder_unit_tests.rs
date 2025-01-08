@@ -156,7 +156,8 @@ mod threshold_suite {
         assert_eq!(sut.get_threshold(), 0);
         sut.add_factor_source_to_threshold(fs).unwrap(); // should automatically increase threshold to 1
         assert_eq!(sut.get_threshold(), 1);
-        sut.remove_factor_source(&fs).unwrap();
+        sut.remove_factor_source(&fs, FactorListKind::Threshold)
+            .unwrap();
         assert_eq!(sut.get_threshold(), 0);
     }
 
@@ -173,9 +174,11 @@ mod threshold_suite {
         .unwrap();
         sut.set_threshold(2).unwrap();
         assert_eq!(sut.get_threshold(), 2);
-        sut.remove_factor_source(&fs0).unwrap();
+        sut.remove_factor_source(&fs0, FactorListKind::Threshold)
+            .unwrap();
         assert_eq!(sut.get_threshold(), 2); // assert that we DIDN'T lower the threshold, since we have 2 factors
-        sut.remove_factor_source(&fs1).unwrap();
+        sut.remove_factor_source(&fs1, FactorListKind::Threshold)
+            .unwrap();
         assert_eq!(sut.get_threshold(), 1); // assert that we DID lower the threshold now that we have 1 factor
     }
 
@@ -191,7 +194,8 @@ mod threshold_suite {
         sut.set_threshold(2).unwrap();
         let _ = sut.build(); // build should not mutate neither consume
         assert_eq!(sut.get_threshold(), 2);
-        sut.remove_factor_source(&fs).unwrap();
+        sut.remove_factor_source(&fs, FactorListKind::Override)
+            .unwrap();
         assert_eq!(sut.get_threshold(), 2);
 
         let built = sut.build().unwrap();

@@ -142,7 +142,7 @@ impl MatrixBuilder {
         self.recovery_role
             .validation_for_addition_of_factor_source_of_kind_to_override_with_mode(
                 factor_source_kind,
-                mode
+                mode,
             )
     }
 
@@ -181,7 +181,7 @@ impl MatrixBuilder {
         self.confirmation_role
             .validation_for_addition_of_factor_source_of_kind_to_override_with_mode(
                 factor_source_kind,
-                mode
+                mode,
             )
     }
 
@@ -396,8 +396,12 @@ impl MatrixBuilder {
     fn remove_factor_from_role<const ROLE: u8>(
         role: &mut RoleBuilder<{ ROLE }>,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
-        if role.remove_factor_source(factor_source_id).is_ok() {
+        if role
+            .remove_factor_source(factor_source_id, factor_list_kind)
+            .is_ok()
+        {
             Ok(())
         } else {
             MatrixBuilderMutateResult::Err(MatrixBuilderValidation::CombinationViolation(
@@ -411,24 +415,36 @@ impl MatrixBuilder {
     pub fn remove_factor_from_primary(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
-        Self::remove_factor_from_role(&mut self.primary_role, factor_source_id)
+        Self::remove_factor_from_role(
+            &mut self.primary_role,
+            factor_source_id,
+            factor_list_kind,
+        )
     }
 
     pub fn remove_factor_from_recovery(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
-        Self::remove_factor_from_role(&mut self.recovery_role, factor_source_id)
+        Self::remove_factor_from_role(
+            &mut self.recovery_role,
+            factor_source_id,
+            factor_list_kind,
+        )
     }
 
     pub fn remove_factor_from_confirmation(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
         Self::remove_factor_from_role(
             &mut self.confirmation_role,
             factor_source_id,
+            factor_list_kind,
         )
     }
 
@@ -442,10 +458,21 @@ impl MatrixBuilder {
         factor_source_id: &FactorSourceID,
     ) -> MatrixBuilderMutateResult {
         let fsid = factor_source_id;
-        let r0 = self.remove_factor_from_primary(fsid);
-        let r1 = self.remove_factor_from_recovery(fsid);
-        let r2 = self.remove_factor_from_confirmation(fsid);
-        r0.or(r1).or(r2)
+
+        let r0 =
+            self.remove_factor_from_primary(fsid, FactorListKind::Threshold);
+        let r1 =
+            self.remove_factor_from_primary(fsid, FactorListKind::Override);
+        let r2 =
+            self.remove_factor_from_recovery(fsid, FactorListKind::Threshold);
+        let r3 =
+            self.remove_factor_from_recovery(fsid, FactorListKind::Override);
+        let r4 = self
+            .remove_factor_from_confirmation(fsid, FactorListKind::Threshold);
+        let r5 = self
+            .remove_factor_from_confirmation(fsid, FactorListKind::Override);
+
+        r0.or(r1).or(r2).or(r3).or(r4).or(r5)
     }
 }
 

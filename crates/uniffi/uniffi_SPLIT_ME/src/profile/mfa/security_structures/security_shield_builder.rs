@@ -2,10 +2,9 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::{borrow::Borrow, sync::Arc};
-
 #[cfg(test)]
 use sargon::FactorSourceWithExtraSampleValues;
+use std::{borrow::Borrow, sync::Arc};
 
 use crate::prelude::*;
 
@@ -160,9 +159,13 @@ impl SecurityShieldBuilder {
     pub fn remove_factor_from_primary(
         self: Arc<Self>,
         factor_source_id: FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> Arc<Self> {
         self.set(|builder| {
-            builder.remove_factor_from_primary(factor_source_id.clone().into())
+            builder.remove_factor_from_primary(
+                factor_source_id.clone().into(),
+                factor_list_kind.into(),
+            )
         })
     }
 
@@ -660,10 +663,10 @@ mod tests {
             FactorSourceID::sample_password_other(),
         );
         assert_eq!(sut.clone().get_primary_threshold(), 1);
-        sut =
-            sut.remove_factor_from_primary(
-                FactorSourceID::sample_password_other(),
-            );
+        sut = sut.remove_factor_from_primary(
+            FactorSourceID::sample_password_other(),
+            FactorListKind::Threshold,
+        );
 
         assert_eq!(
             sut.clone().get_primary_threshold_factors(),
@@ -816,7 +819,7 @@ mod tests {
 
         sut = sut
             .remove_factor_from_all_roles(
-                FactorSourceID::sample_arculus_other(),
+                FactorSourceID::sample_arculus_other()
             )
             .remove_factor_from_all_roles(
                 FactorSourceID::sample_ledger_other(),
@@ -826,7 +829,7 @@ mod tests {
         let xs = sut.clone().get_primary_override_factors();
         sut = sut
             .add_factor_source_to_primary_override(f.clone())
-            .remove_factor_from_primary(f.clone());
+            .remove_factor_from_primary(f.clone(), FactorListKind::Override);
         assert_eq!(xs, sut.clone().get_primary_override_factors());
 
         let xs = sut.clone().get_recovery_factors();

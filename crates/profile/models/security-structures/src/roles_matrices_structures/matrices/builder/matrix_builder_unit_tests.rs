@@ -417,8 +417,10 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
-        let res =
-            sut.remove_factor_from_primary(&FactorSourceID::sample_device());
+        let res = sut.remove_factor_from_primary(
+            &FactorSourceID::sample_device(),
+            FactorListKind::Override,
+        );
         assert_eq!(res, Ok(()));
     }
 
@@ -429,8 +431,10 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
-        let res =
-            sut.remove_factor_from_recovery(&FactorSourceID::sample_device());
+        let res = sut.remove_factor_from_recovery(
+            &FactorSourceID::sample_device(),
+            FactorListKind::Override,
+        );
         assert_eq!(res, Ok(()));
     }
 
@@ -441,8 +445,10 @@ mod remove {
             FactorSourceID::sample_device(),
         )
         .unwrap();
-        let res = sut
-            .remove_factor_from_confirmation(&FactorSourceID::sample_device());
+        let res = sut.remove_factor_from_confirmation(
+            &FactorSourceID::sample_device(),
+            FactorListKind::Override,
+        );
         assert_eq!(res, Ok(()));
     }
 }
