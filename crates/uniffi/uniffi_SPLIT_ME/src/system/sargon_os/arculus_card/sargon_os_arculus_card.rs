@@ -1,3 +1,4 @@
+use sargon::OsArculusCard;
 use crate::prelude::*;
 
 #[uniffi::export]
@@ -58,7 +59,7 @@ impl SargonOS {
                     .collect::<Vec<sargon::HierarchicalDeterministicPublicKey>>(
                     )
             })
-            .into_result()
+            .into_iter_result()
     }
 
     pub async fn sign_hash(

@@ -119,6 +119,8 @@ impl Drivers {
             Self::file_system(),
             unsafe_storage,
             RustProfileStateChangeDriver::new(),
+            RustArculusCSDKDriver::new(),
+            RustNFCTagDriver::new(),
         )
     }
 

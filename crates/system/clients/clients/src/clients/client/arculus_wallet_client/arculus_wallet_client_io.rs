@@ -1026,13 +1026,16 @@ mod tests {
         fn read_firmware_version(
             &mut self
         ) -> &mut Self {
+            let request = BagOfBytes::from_hex("80ef000010be5d7d3929bb96637a4aeca143e9d00e").unwrap();
+            let nfc_response = BagOfBytes::from_hex("24ad24564f18ba954ad9a643f1e948e29000").unwrap();
+
             self.csdk_driver
                 .expect_get_firmware_version_request()
                 .with(eq(self.wallet_pointer.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_get_firmware_version_response()
                 .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
@@ -1140,13 +1143,16 @@ mod tests {
             &mut self,
             seed: BagOfBytes
         ) -> &mut Self {
+            let request = BagOfBytes::from_hex("80ef0000201a3ee2b393a32d8f53deff8bb32617eedb42a23e2221e31236401799676a8971").unwrap();
+            let nfc_response = BagOfBytes::from_hex("24ad24564f18ba954ad9a643f1e948e29000").unwrap();
+            
             self.csdk_driver
                 .expect_finish_recover_wallet_request()
                 .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(BagOfBytes::sample()));
-            self.nfc_send_receive();
+            self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_finish_recover_wallet_response()
                 .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))

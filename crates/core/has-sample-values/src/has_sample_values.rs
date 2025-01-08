@@ -139,16 +139,6 @@ where
     }
 }
 
-impl HasSampleValues for Url {
-    fn sample() -> Self {
-        "http://example.com".parse().unwrap()
-    }
-
-    fn sample_other() -> Self {
-        "http://example.org".parse().unwrap()
-    }
-}
-
 impl HasSampleValues for Uuid {
     fn sample() -> Self {
         Self::from_bytes([0xff; 16])

@@ -10,7 +10,7 @@ core-collections = { workspace = true }
 profile = { workspace = true }
 factors-supporting-types = { workspace = true }
 profile-supporting-types = { workspace = true }
-drivers = { workspace = true }
+drivers = { workspace = true, features = ["mock"] }
 http-client = { workspace = true }
 gateway-client-and-api = { workspace = true }
 hierarchical-deterministic = { workspace = true }
@@ -29,3 +29,4 @@ serde_with = { workspace = true }
 
 [dev-dependencies]
 actix-rt = { workspace = true }
+mockall = { workspace = true }

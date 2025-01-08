@@ -1,10 +1,10 @@
 use crate::prelude::*;
 
-#[cfg(test)]
+#[cfg(any(test, feature = "mock"))]
 use mockall::automock;
 
 /// Driver to interact with natice Arculus CSDK library
-#[cfg_attr(test, automock)]
+#[cfg_attr(any(test, feature = "mock"), automock)]
 pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// Initialize Wallet "session" in the Arculus CSDK
     ///
@@ -383,7 +383,6 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
 }
 
 /// Pointer to the wallet instance in the Arculus CSDK.
-
 #[derive(Clone, Copy, PartialEq, Eq, Hash, derive_more::Debug)]
 pub struct ArculusWalletPointer {
     /// The pointer bit pattern to the wallet instance.

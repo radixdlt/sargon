@@ -113,9 +113,7 @@ impl TryFrom<i32> for ArculusWalletCSDKResponseStatus {
             -115 => Ok(Self::ExtApduSupportRequired),
             -116 => Ok(Self::ApduTooBig),
             -117 => Ok(Self::WalletNotSelected),
-            _ => Err(CommonError::ArculusCSDKUnknownResponseStatusCode {
-                status_code: value,
-            }),
+            _ => panic!("Invalid error code"),
         }
     }
 }

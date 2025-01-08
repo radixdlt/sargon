@@ -7,6 +7,7 @@ mod entity_creating_with_factor_source_and_derivation_outcome;
 mod os_testing_support;
 mod sargon_os;
 mod sargon_os_accounts;
+mod sargon_os_arculus_card;
 mod sargon_os_factors;
 mod sargon_os_gateway;
 mod sargon_os_personas;
@@ -20,6 +21,7 @@ pub mod prelude {
     pub use crate::os_testing_support::*;
     pub use crate::sargon_os::*;
     pub use crate::sargon_os_accounts::*;
+    pub use crate::sargon_os_arculus_card::*;
     pub use crate::sargon_os_factors::*;
     pub use crate::sargon_os_gateway::*;
     pub use crate::sargon_os_personas::*;

@@ -1,9 +1,4 @@
 use std::future::Future;
-
-use crypto::keys::slip10::ed25519;
-use indexmap::IndexSet;
-use radix_engine_interface::freeze_roles;
-
 pub use crate::prelude::*;
 
 #[derive(Debug)]
@@ -74,7 +69,7 @@ impl ArculusWalletClient {
             .await?;
 
         Ok(version
-            .bytes
+            .to_vec()
             .iter()
             .map(|byte| byte.to_string())
             .collect::<Vec<String>>()
