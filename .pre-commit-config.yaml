@@ -41,5 +41,5 @@ repos:
         name: unit tests
         language: system
         types: [file, rust]
-        entry: cargo test --workspace --lib
+        entry: cargo nextest run --all
         pass_filenames: false
