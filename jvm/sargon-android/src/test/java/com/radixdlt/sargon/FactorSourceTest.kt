@@ -247,7 +247,8 @@ class FactorSourceTest : SampleTestable<FactorSource> {
                 flags = emptyList()
             ),
             hint = OffDeviceMnemonicHint(
-                label = DisplayName("My mnemonic stored somewhere")
+                label = DisplayName("My mnemonic stored somewhere"),
+                wordCount = Bip39WordCount.TWENTY_FOUR
             )
         )
     )
