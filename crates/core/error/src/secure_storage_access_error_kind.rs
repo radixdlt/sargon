@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 /// An error kind that might be returned during access to secure storage driver. These errors are
 /// android specific and are defined [here](https://developer.android.com/reference/android/hardware/biometrics/BiometricPrompt#constants_1)
 /// Hosts, can print the error message provided by the system, and can ignore the error if
@@ -62,16 +60,6 @@ pub enum SecureStorageAccessErrorKind {
 
     /// The device does not have pin, pattern, or password set up.
     NoDeviceCredential,
-}
-
-impl HasSampleValues for SecureStorageAccessErrorKind {
-    fn sample() -> Self {
-        SecureStorageAccessErrorKind::HardwareUnavailable
-    }
-
-    fn sample_other() -> Self {
-        SecureStorageAccessErrorKind::UnableToProcess
-    }
 }
 
 impl SecureStorageAccessErrorKind {

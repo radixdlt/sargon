@@ -7,18 +7,18 @@ import com.radixdlt.sargon.KeyDerivationResponse
 import com.radixdlt.sargon.SignRequestOfAuthIntent
 import com.radixdlt.sargon.SignRequestOfSubintent
 import com.radixdlt.sargon.SignRequestOfTransactionIntent
-import com.radixdlt.sargon.SignWithFactorsOutcomeOfAuthIntentHash
-import com.radixdlt.sargon.SignWithFactorsOutcomeOfSubintentHash
-import com.radixdlt.sargon.SignWithFactorsOutcomeOfTransactionIntentHash
+import com.radixdlt.sargon.SignResponseOfAuthIntentHash
+import com.radixdlt.sargon.SignResponseOfSubintentHash
+import com.radixdlt.sargon.SignResponseOfTransactionIntentHash
 
 class FakeHostInteractor: HostInteractor {
     override suspend fun signTransactions(
         request: SignRequestOfTransactionIntent
-    ): SignWithFactorsOutcomeOfTransactionIntentHash {
+    ): SignResponseOfTransactionIntentHash {
         throw CommonException.SigningRejected()
     }
 
-    override suspend fun signSubintents(request: SignRequestOfSubintent): SignWithFactorsOutcomeOfSubintentHash {
+    override suspend fun signSubintents(request: SignRequestOfSubintent): SignResponseOfSubintentHash {
         throw CommonException.SigningRejected()
     }
 
@@ -26,7 +26,7 @@ class FakeHostInteractor: HostInteractor {
         throw CommonException.SigningRejected()
     }
 
-    override suspend fun signAuth(request: SignRequestOfAuthIntent): SignWithFactorsOutcomeOfAuthIntentHash {
+    override suspend fun signAuth(request: SignRequestOfAuthIntent): SignResponseOfAuthIntentHash {
         throw CommonException.SigningRejected()
     }
 
