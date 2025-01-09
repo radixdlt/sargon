@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use thiserror::Error as ThisError;
 
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
@@ -222,7 +223,7 @@ pub enum CommonError {
     #[error("Failed to access secure storage due to \"{error_message}\" for key {} ", key)]
     SecureStorageAccessError {
         key: String,
-        error_kind: String,
+        error_kind: SecureStorageAccessErrorKind,
         error_message: String,
     } = 10063,
 
@@ -849,6 +850,9 @@ pub enum CommonError {
 
     #[error("SecurityStateAccessController address mismatch")]
     SecurityStateAccessControllerAddressMismatch = 10244,
+
+    #[error("Not all signatures are produced with the same factor source.")]
+    FactorOutcomeSignedFactorSourceIDMismatch = 10245,
 }
 
 impl CommonError {

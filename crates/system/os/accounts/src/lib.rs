@@ -12,13 +12,13 @@ pub mod prelude {
     pub(crate) use sargon_os::prelude::*;
 
     pub(crate) use indexmap::IndexMap;
+    #[cfg(test)]
+    pub(crate) use testing::*;
 
     #[cfg(test)]
     mod testing {
         pub(crate) use std::sync::Arc;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

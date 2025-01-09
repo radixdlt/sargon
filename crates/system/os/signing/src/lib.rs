@@ -11,6 +11,8 @@ pub mod prelude {
     pub(crate) use signing_traits::prelude::*;
 
     pub(crate) use std::sync::Arc;
+    #[cfg(test)]
+    pub(crate) use testing::*;
 
     #[cfg(test)]
     mod testing {
@@ -21,8 +23,6 @@ pub mod prelude {
         pub(crate) use profile_logic::prelude::*;
         pub(crate) use radix_connect_models::prelude::*;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;
