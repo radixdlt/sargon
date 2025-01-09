@@ -59,8 +59,8 @@ pub struct IdentifiedVecOfIterator<
     pub index: usize,
 }
 
-impl<'a, V: Debug + PartialEq + Eq + Clone + Identifiable> Iterator
-    for IdentifiedVecOfIterator<'a, V>
+impl<V: Debug + PartialEq + Eq + Clone + Identifiable> Iterator
+    for IdentifiedVecOfIterator<'_, V>
 {
     type Item = V;
 

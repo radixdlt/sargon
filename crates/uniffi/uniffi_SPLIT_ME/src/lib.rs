@@ -1,4 +1,3 @@
-#![feature(async_closure)]
 #![feature(let_chains)]
 #![feature(core_intrinsics)]
 #![allow(unused_imports)]

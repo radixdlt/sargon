@@ -1,8 +1,6 @@
 #![allow(trivial_bounds)]
-#![allow(incomplete_features)]
 #![feature(trivial_bounds)]
 #![feature(let_chains)]
-#![feature(generic_const_exprs)]
 
 mod encrypted_profile;
 mod profilesnapshot_version;
