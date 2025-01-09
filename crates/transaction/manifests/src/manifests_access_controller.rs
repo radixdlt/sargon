@@ -110,6 +110,8 @@ impl TransactionManifestSecurifyEntity for TransactionManifest {
 #[cfg(test)]
 mod tests {
 
+    use prelude::fixture_rtm;
+
     use super::*;
 
     #[test]
@@ -145,10 +147,8 @@ mod tests {
 
     #[test]
     fn test_securify_unsecurified_account() {
-        let expected_manifest_str = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_access_controller_for_account.rtm"
-        ));
+        let expected_manifest_str =
+            fixture_rtm!("create_access_controller_for_account");
         let entity = Account::sample();
         let security_structure_of_factor_instances =
             SecurityStructureOfFactorInstances::sample();
@@ -179,10 +179,8 @@ mod tests {
 
     #[test]
     fn test_securify_unsecurified_persona() {
-        let expected_manifest_str = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_access_controller_for_persona.rtm"
-        ));
+        let expected_manifest_str =
+            fixture_rtm!("create_access_controller_for_persona");
         let entity = Persona::sample_other();
         let security_structure_of_factor_instances =
             SecurityStructureOfFactorInstances::sample_other();

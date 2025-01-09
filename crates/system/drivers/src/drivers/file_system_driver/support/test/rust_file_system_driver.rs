@@ -25,7 +25,7 @@ pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
 
 impl RustFileSystemDriver {
     pub(crate) fn tmp_dir() -> PathBuf {
-        fs::canonicalize(Path::new(env!("TMP_PATH"))).unwrap()
+        fs::canonicalize(Path::new(env!("TARGET_DIR"))).unwrap()
     }
 }
 
@@ -169,7 +169,7 @@ mod tests {
     async fn test_delete_dir_does_not_work() {
         let sut = SUT::new();
         let path =
-            String::from(Path::new(env!("TARGET_PATH")).to_string_lossy());
+            String::from(Path::new(env!("TARGET_DIR")).to_string_lossy());
         let res = sut.delete_file(path.clone()).await;
         assert_eq!(res, Err(CommonError::FailedToDeleteFile { path }));
     }

@@ -1,11 +1,12 @@
 [package]
 name = "gateway-models"
-version = "1.1.99"
+version = "1.1.101"
 edition = "2021"
-build = "build.rs"
+
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 assert-json = { workspace = true }
 addresses = { workspace = true }
 transaction-models = { workspace = true }

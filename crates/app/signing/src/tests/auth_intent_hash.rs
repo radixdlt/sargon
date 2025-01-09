@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    use prelude::fixture_vector;
     use serde::{de, Deserializer};
 
     use crate::prelude::*;
@@ -51,10 +52,7 @@ mod tests {
 
     #[test]
     fn test_from_vectors() {
-        let json = include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "rola_challenge_payload_hash_vectors.json"
-        ));
+        let json = fixture_vector!("rola_challenge_payload_hash_vectors");
         let vector =
             serde_json::from_str::<Vec<AuthIntentHashVectorItem>>(json)
                 .unwrap();

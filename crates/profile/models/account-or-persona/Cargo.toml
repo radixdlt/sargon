@@ -1,10 +1,11 @@
 [package]
 name = "profile-account-or-persona"
-version = "1.1.99"
+version = "1.1.101"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 profile-base-entity = { workspace = true }
 profile-account = { workspace = true }
 profile-persona = { workspace = true }

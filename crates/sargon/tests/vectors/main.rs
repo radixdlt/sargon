@@ -6,6 +6,8 @@ use std::str::FromStr;
 
 #[cfg(test)]
 mod profile_snapshot_tests {
+    use prelude::fixture_vector;
+
     use super::*;
 
     /// We cannot do a roundtrip test here because
@@ -15,16 +17,17 @@ mod profile_snapshot_tests {
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3251863610/CAP-36+WebRTC+Clients+Protocol
     #[test]
     fn v100_100() {
-        fixture_and_json::<Profile>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "only_plaintext_profile_snapshot_version_100.json"
-        )))
+        fixture_and_json::<Profile>(fixture_vector!(
+            "only_plaintext_profile_snapshot_version_100"
+        ))
         .expect("V100 Profile to deserialize");
     }
 }
 
 #[cfg(test)]
 mod cap26_tests {
+
+    use prelude::fixture_vector;
 
     use super::*;
 
@@ -97,16 +100,12 @@ mod cap26_tests {
 
     #[test]
     fn test_vectors() {
-        let secp256k1 = fixture::<CAP26Group>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "cap26_secp256k1.json"
-        )))
-        .expect("CAP26 Secp256k1 vectors");
-        let curve25519 = fixture::<CAP26Group>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "cap26_curve25519.json"
-        )))
-        .expect("CAP26 Curve25519 vectors");
+        let secp256k1 =
+            fixture::<CAP26Group>(fixture_vector!("cap26_secp256k1"))
+                .expect("CAP26 Secp256k1 vectors");
+        let curve25519 =
+            fixture::<CAP26Group>(fixture_vector!("cap26_curve25519"))
+                .expect("CAP26 Curve25519 vectors");
 
         secp256k1.test::<Secp256k1PrivateKey, Secp256k1PublicKey>();
         curve25519.test::<Ed25519PrivateKey, Ed25519PublicKey>();
@@ -115,6 +114,8 @@ mod cap26_tests {
 
 #[cfg(test)]
 mod bip44_tests {
+    use prelude::fixture_vector;
+
     use super::*;
 
     #[derive(Debug, Deserialize)]
@@ -175,11 +176,8 @@ mod bip44_tests {
 
     #[test]
     fn test_vectors() {
-        let fixture = fixture::<Fixture>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "bip44_secp256k1.json"
-        )))
-        .expect("BIP44 fixture");
+        let fixture = fixture::<Fixture>(fixture_vector!("bip44_secp256k1"))
+            .expect("BIP44 fixture");
 
         fixture.test();
     }
@@ -187,6 +185,8 @@ mod bip44_tests {
 
 #[cfg(test)]
 mod slip10_tests {
+    use prelude::fixture_vector;
+
     use super::*;
 
     #[allow(dead_code)]
@@ -281,16 +281,11 @@ mod slip10_tests {
 
     #[test]
     fn test_vectors() {
-        let ten = fixture::<Fixture>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "slip10_tests_#10.json"
-        )))
-        .expect("SLIP10 #10 fixture");
-        let thousand = fixture::<Fixture>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "slip10_tests_#1000.json"
-        )))
-        .expect("SLIP10 #1000 fixture");
+        let ten = fixture::<Fixture>(fixture_vector!("slip10_tests_#10"))
+            .expect("SLIP10 #10 fixture");
+        let thousand =
+            fixture::<Fixture>(fixture_vector!("slip10_tests_#1000"))
+                .expect("SLIP10 #1000 fixture");
 
         ten.test();
         thousand.test();
@@ -300,6 +295,7 @@ mod slip10_tests {
 mod encrypted_profile_tests {
     use std::collections::HashSet;
 
+    use prelude::fixture_vector;
     use serde::Serialize;
 
     use super::*;
@@ -451,10 +447,9 @@ mod encrypted_profile_tests {
 
     #[test]
     fn test_vectors() {
-        let fixture = fixture::<Fixture>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "multi_profile_snapshots_test_version_100_patch_after_app_version_120.json"
-        )))
+        let fixture = fixture::<Fixture>(fixture_vector!(
+            "multi_profile_snapshots_test_version_100_patch_after_app_version_120"
+        ))
         .expect("Encrypted Profile tests");
 
         fixture.test();
@@ -464,15 +459,15 @@ mod encrypted_profile_tests {
 #[cfg(test)]
 mod dapp_to_wallet_interaction_tests {
     use super::*;
+    use prelude::fixture_vector;
     use serde_json::Value;
 
     #[test]
     fn test_vector() {
         let decoded_wallet_interactions =
-            fixture::<Vec<DappToWalletInteraction>>(include_str!(concat!(
-                env!("FIXTURES_VECTOR"),
-                "wallet_interactions_dapp_to_wallet.json"
-            )))
+            fixture::<Vec<DappToWalletInteraction>>(fixture_vector!(
+                "wallet_interactions_dapp_to_wallet"
+            ))
             .expect("wallet_interactions_dapp_to_wallet fixture");
 
         let metadata = DappToWalletInteractionMetadata::new(
@@ -700,12 +695,10 @@ mod dapp_to_wallet_interaction_tests {
             pretty_assertions::assert_eq!(fixture, expected);
         }
 
-        let raw_wallet_interactions =
-            fixture::<Vec<Value>>(include_str!(concat!(
-                env!("FIXTURES_VECTOR"),
-                "wallet_interactions_dapp_to_wallet.json"
-            )))
-            .expect("wallet_interactions_dapp_to_wallet fixture");
+        let raw_wallet_interactions = fixture::<Vec<Value>>(fixture_vector!(
+            "wallet_interactions_dapp_to_wallet"
+        ))
+        .expect("wallet_interactions_dapp_to_wallet fixture");
 
         let encoded_interactions =
             serde_json::to_string(&interactions).unwrap();
@@ -724,6 +717,7 @@ mod dapp_to_wallet_interaction_tests {
 mod wallet_to_dapp_interaction_tests {
     use super::*;
 
+    use prelude::fixture_vector;
     use serde_json::Value;
 
     #[test]
@@ -989,10 +983,9 @@ mod wallet_to_dapp_interaction_tests {
 
         let encoded = serde_json::to_string(&responses).unwrap();
         let serde_value: Vec<Value> = serde_json::from_str(&encoded).unwrap();
-        let fixture = fixture::<Vec<Value>>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "wallet_interactions_wallet_to_dapp.json"
-        )))
+        let fixture = fixture::<Vec<Value>>(fixture_vector!(
+            "wallet_interactions_wallet_to_dapp"
+        ))
         .expect("wallet_interactions_wallet_to_dapp fixture");
 
         for (serde_value, fixture) in serde_value.iter().zip(fixture.iter()) {

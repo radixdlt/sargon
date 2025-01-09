@@ -32,6 +32,7 @@ impl HasSampleValues for DappWellKnownData {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use prelude::fixture_model;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DappWellKnownData;
@@ -49,11 +50,8 @@ mod tests {
 
     #[test]
     fn request_json_test() {
-        let (sut, json) = fixture_and_json::<SUT>(include_str!(concat!(
-            env!("FIXTURES_MODELS"),
-            "well_known.json"
-        )))
-        .unwrap();
+        let (sut, json) =
+            fixture_and_json::<SUT>(fixture_model!("well_known")).unwrap();
         assert_json_value_eq_after_roundtrip(&sut, json)
     }
 }

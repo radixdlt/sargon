@@ -318,6 +318,7 @@ impl ScryptoNonFungibleData for NonFungibleTokenData {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
+    use prelude::fixture_rtm;
     use pretty_assertions::assert_eq;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -840,10 +841,7 @@ CALL_METHOD
                 3,
                 2,
             );
-        let expected_manifest = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_3_nft_collections.rtm"
-        ));
+        let expected_manifest = fixture_rtm!("create_3_nft_collections");
         manifest_eq(manifest, expected_manifest);
     }
 

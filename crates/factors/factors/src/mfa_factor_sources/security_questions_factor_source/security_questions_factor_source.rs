@@ -1,4 +1,5 @@
 use encryption::EncryptionScheme;
+use prelude::fixture_vector;
 
 use crate::prelude::*;
 
@@ -194,10 +195,7 @@ impl SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
 
 impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     fn sample() -> Self {
-        let json = include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "security_questions_factor_source_sample.json"
-        ));
+        let json = fixture_vector!("security_questions_factor_source_sample");
         let sut = serde_json::from_str::<Self>(json).unwrap();
         let decrypted =
             sut.decrypt(
@@ -209,10 +207,8 @@ impl HasSampleValues for SecurityQuestions_NOT_PRODUCTION_READY_FactorSource {
     }
 
     fn sample_other() -> Self {
-        let json = include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "security_questions_factor_source_sample_other.json"
-        ));
+        let json =
+            fixture_vector!("security_questions_factor_source_sample_other");
         let sut = serde_json::from_str::<Self>(json).unwrap();
         let decrypted = sut
             .decrypt(
