@@ -21,7 +21,7 @@ impl HasProvisionalSecurifiedConfig for UnsecuredEntityControl {
         self.provisional_securified_config.clone()
     }
 
-    fn set_provisional_unchecked(
+    fn set_provisional(
         &mut self,
         provisional_securified_config: impl Into<
             Option<ProvisionalSecurifiedConfig>,

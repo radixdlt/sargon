@@ -34,7 +34,7 @@ impl HasProvisionalSecurifiedConfig for EntitySecurityState {
         }
     }
 
-    fn set_provisional_unchecked(
+    fn set_provisional(
         &mut self,
         provisional_securified_config: impl Into<
             Option<ProvisionalSecurifiedConfig>,
@@ -42,10 +42,10 @@ impl HasProvisionalSecurifiedConfig for EntitySecurityState {
     ) {
         match self {
             Self::Unsecured { value } => {
-                value.set_provisional_unchecked(provisional_securified_config)
+                value.set_provisional(provisional_securified_config)
             }
             Self::Securified { value } => {
-                value.set_provisional_unchecked(provisional_securified_config)
+                value.set_provisional(provisional_securified_config)
             }
         }
     }
