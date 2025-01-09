@@ -36,7 +36,8 @@ impl SecurityCenterClient {
             !is_cloud_profile_sync_enabled
                 && input
                     .last_manual_backup
-                    .as_ref().is_some_and(|backup| !*backup.is_current)
+                    .as_ref()
+                    .is_some_and(|backup| !*backup.is_current)
         };
 
         let has_problem_9 = || {
