@@ -1,5 +1,3 @@
-#![allow(incomplete_features)]
-#![feature(generic_const_exprs)]
 #![feature(let_chains)]
 
 mod factor_list_kind;

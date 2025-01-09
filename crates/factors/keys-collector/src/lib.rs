@@ -1,5 +1,3 @@
-#![feature(async_closure)]
-
 mod collector;
 
 #[cfg(test)]
