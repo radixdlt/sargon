@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+use crate::threshold::Threshold;
 use FactorListKind::*;
 
 pub type PrimaryRoleBuilder = RoleBuilder<{ ROLE_PRIMARY }>;
@@ -229,14 +230,7 @@ where
         factor_source_id: FactorSourceID,
         mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
-        let should_set_threshold_to_one = self.get_threshold() == 0
-            && self.get_threshold_factors().is_empty();
         self._add_factor_source_to_list(factor_source_id, Threshold, mode)
-            .inspect(|_| {
-                if should_set_threshold_to_one {
-                    let _ = self.set_threshold(1);
-                }
-            })
     }
 
     /// If we would add a factor of kind `factor_source_kind` to the list of kind `Threshold`
@@ -399,9 +393,16 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         })
     }
 
-    pub(crate) fn set_threshold(
+    pub(crate) fn set_specific_threshold(
         &mut self,
         threshold: u8,
+    ) -> RoleBuilderMutateResult {
+        self.set_threshold(Threshold::Specific(threshold))
+    }
+
+    pub(crate) fn set_threshold(
+        &mut self,
+        threshold: Threshold,
     ) -> RoleBuilderMutateResult {
         match self.role() {
             Primary => {
@@ -716,11 +717,12 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                 remove(self.mut_threshold_factors())?;
                 let threshold_factors_len =
                     self.get_threshold_factors().len() as u8;
-                if self.get_threshold() > threshold_factors_len {
-                    // N.B. we don't use `set_threshold` since this might be a
-                    // temporary invalid state, if e.g. primary role does not have
-                    // any factors.
-                    self.unchecked_set_threshold(threshold_factors_len);
+                if threshold_factors_len == 0 {
+                    self.unchecked_set_threshold(Threshold::All);
+                } else if self.get_threshold() > threshold_factors_len {
+                    self.unchecked_set_threshold(Threshold::Specific(
+                        threshold_factors_len,
+                    ));
                 }
             }
             Override => {

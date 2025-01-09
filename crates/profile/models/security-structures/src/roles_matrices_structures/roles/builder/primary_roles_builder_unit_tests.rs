@@ -172,7 +172,7 @@ mod threshold_suite {
             FactorSourceID::sample_arculus_other(),
         )
         .unwrap();
-        sut.set_threshold(2).unwrap();
+        sut.set_specific_threshold(2).unwrap();
         assert_eq!(sut.get_threshold(), 2);
         sut.remove_factor_source(&fs0, FactorListKind::Threshold)
             .unwrap();
@@ -191,7 +191,7 @@ mod threshold_suite {
         let fs = FactorSourceID::sample_arculus_other();
         sut.add_factor_source_to_override(fs).unwrap();
         let _ = sut.build(); // build should not mutate neither consume
-        sut.set_threshold(2).unwrap();
+        sut.set_specific_threshold(2).unwrap();
         let _ = sut.build(); // build should not mutate neither consume
         assert_eq!(sut.get_threshold(), 2);
         sut.remove_factor_source(&fs, FactorListKind::Override)
@@ -220,7 +220,7 @@ mod threshold_suite {
 
         // Act
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
-        sut.set_threshold(1).unwrap();
+        sut.set_specific_threshold(1).unwrap();
 
         // Assert
         let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -239,7 +239,7 @@ mod threshold_suite {
 
         // Act
         assert_eq!(
-            sut.set_threshold(1),
+            sut.set_specific_threshold(1),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -263,7 +263,7 @@ mod threshold_suite {
 
         // Act
         assert_eq!(
-            sut.set_threshold(2),
+            sut.set_specific_threshold(2),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -290,7 +290,7 @@ mod threshold_suite {
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
 
         // Act
-        assert_eq!(sut.set_threshold(2), Ok(()));
+        assert_eq!(sut.set_specific_threshold(2), Ok(()));
 
         // Assert
         let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -312,7 +312,7 @@ mod threshold_suite {
 
         // Act
         assert_eq!(
-            sut.set_threshold(3),
+            sut.set_specific_threshold(3),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -336,7 +336,7 @@ mod threshold_suite {
 
         // Act
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
-        sut.set_threshold(1).unwrap();
+        sut.set_specific_threshold(1).unwrap();
 
         // Assert
         let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -355,7 +355,7 @@ mod threshold_suite {
         // Act
         sut.add_factor_source_to_override(sample_other()).unwrap();
         assert_eq!(
-            sut.set_threshold(1),
+            sut.set_specific_threshold(1),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -395,7 +395,7 @@ mod threshold_suite {
             ]
         );
         _ = sut.add_factor_source_to_threshold(fs0);
-        _ = sut.set_threshold(2);
+        _ = sut.set_specific_threshold(2);
 
         let xs = sut.validation_for_addition_of_factor_source_for_each(
             FactorListKind::Threshold,
@@ -449,7 +449,7 @@ mod password {
             let mut sut = make();
             sut.add_factor_source_to_threshold(FactorSourceID::sample_device())
                 .unwrap();
-            _ = sut.set_threshold(2);
+            _ = sut.set_specific_threshold(2);
             test_duplicates_not_allowed(
                 sut,
                 FactorListKind::Threshold,
@@ -461,7 +461,7 @@ mod password {
         fn alone_is_not_ok() {
             // Arrange
             let mut sut = make();
-            let _ = sut.set_threshold(1);
+            let _ = sut.set_specific_threshold(1);
             // Act
             let res = sut.add_factor_source_to_threshold(sample());
 
@@ -525,7 +525,7 @@ mod password {
                     FactorSourceID::sample_device(),
                 )
                 .unwrap();
-                _ = sut.set_threshold(2);
+                _ = sut.set_specific_threshold(2);
             });
 
             not_ok(SecurityQuestions);
@@ -652,7 +652,7 @@ mod ledger {
 
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected =
@@ -668,7 +668,7 @@ mod ledger {
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap(); // should automatically bump threshold to 1
 
-            let _ = sut.set_threshold(0);
+            let _ = sut.set_specific_threshold(0);
 
             // Assert
             assert_eq!(
@@ -687,7 +687,7 @@ mod ledger {
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
             sut.add_factor_source_to_threshold(sample_other()).unwrap();
-            sut.set_threshold(2).unwrap();
+            sut.set_specific_threshold(2).unwrap();
 
             // Assert
             let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -781,7 +781,7 @@ mod arculus {
 
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected =
@@ -797,7 +797,7 @@ mod arculus {
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
             sut.add_factor_source_to_threshold(sample_other()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -893,7 +893,7 @@ mod device_factor_source {
 
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected =

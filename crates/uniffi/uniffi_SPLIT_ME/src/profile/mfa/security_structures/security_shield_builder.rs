@@ -189,8 +189,8 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn set_threshold(self: Arc<Self>, threshold: u8) -> Arc<Self> {
-        self.set(|builder| builder.set_threshold(threshold))
+    pub fn set_threshold(self: Arc<Self>, threshold: Threshold) -> Arc<Self> {
+        self.set(|builder| builder.set_threshold(threshold.into()))
     }
 
     pub fn set_number_of_days_until_auto_confirm(
@@ -652,6 +652,32 @@ mod tests {
                 FactorSourceKind::Device,
             );
 
+        // Threshold increases when adding a factor, because it's being set to All by default
+        sut = sut.add_factor_source_to_primary_threshold(
+            // should bump threshold to 1
+            FactorSourceID::sample_device(),
+        );
+        assert_eq!(sut.clone().get_primary_threshold(), 1);
+
+        sut = sut.add_factor_source_to_primary_threshold(
+            // should bump threshold to 2
+            FactorSourceID::sample_password_other(),
+        );
+        assert_eq!(sut.clone().get_primary_threshold(), 2);
+
+        sut = sut
+            .remove_factor_from_primary(
+                FactorSourceID::sample_device(),
+                FactorListKind::Threshold,
+            )
+            .remove_factor_from_primary(
+                FactorSourceID::sample_password_other(),
+                FactorListKind::Threshold,
+            );
+
+        // Setting a specific threshold explicitly
+        sut = sut.set_threshold(Threshold::Specific(1));
+
         sut = sut.add_factor_source_to_primary_threshold(
             // should also bump threshold to 1
             FactorSourceID::sample_device(),
@@ -901,7 +927,7 @@ mod tests {
         sut = sut
             .set_name(name.to_owned())
             .set_number_of_days_until_auto_confirm(days_to_auto_confirm)
-            .set_threshold(2)
+            .set_threshold(Threshold::Specific(2))
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )

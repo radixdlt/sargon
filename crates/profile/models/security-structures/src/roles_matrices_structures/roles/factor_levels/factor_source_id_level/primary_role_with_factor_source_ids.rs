@@ -15,7 +15,7 @@ impl PrimaryRoleWithFactorSourceIds {
         builder
             .add_factor_source_to_threshold(FactorSourceID::sample_ledger())
             .unwrap();
-        builder.set_threshold(2).unwrap();
+        builder.set_specific_threshold(2).unwrap();
         builder.build().unwrap()
     }
 }
@@ -34,7 +34,7 @@ impl HasSampleValues for PrimaryRoleWithFactorSourceIds {
         builder
             .add_factor_source_to_threshold(FactorSourceID::sample_ledger())
             .unwrap();
-        builder.set_threshold(1).unwrap();
+        builder.set_specific_threshold(1).unwrap();
         builder.build().unwrap()
     }
 }

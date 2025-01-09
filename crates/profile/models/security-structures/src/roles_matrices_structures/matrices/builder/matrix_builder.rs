@@ -369,7 +369,7 @@ impl MatrixBuilder {
     /// Sets the threshold on the primary role builder.
     pub fn set_threshold(
         &mut self,
-        threshold: u8,
+        threshold: Threshold,
     ) -> MatrixBuilderMutateResult {
         self.primary_role
             .set_threshold(threshold)

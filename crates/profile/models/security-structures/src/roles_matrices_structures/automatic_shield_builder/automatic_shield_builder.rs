@@ -128,7 +128,7 @@ impl SecurityShieldBuilder {
         self.set_authentication_signing_factor(Some(
             proto_shield.authentication_signing_factor,
         ));
-        self.set_threshold(proto_shield.primary.len() as u8);
+        self.set_threshold(Threshold::All);
         proto_shield.primary.into_iter().for_each(|f| {
             self.add_factor_source_to_primary_threshold(f);
         });
@@ -452,7 +452,7 @@ mod tests {
             AutoBuildOutcomeForTesting,
         )> {
             let shield_builder = SecurityShieldBuilder::default();
-            shield_builder.set_threshold(pick_primary_role_factors.len() as u8);
+            shield_builder.set_threshold(Threshold::All);
             pick_primary_role_factors.into_iter().for_each(|f| {
                 shield_builder.add_factor_source_to_primary_threshold(f);
             });

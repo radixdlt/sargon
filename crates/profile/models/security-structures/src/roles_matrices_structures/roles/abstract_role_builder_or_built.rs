@@ -201,7 +201,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         }
     }
 
-    pub(crate) fn unchecked_set_threshold(&mut self, threshold: u8) {
-        self.threshold = Threshold::Specific(threshold);
+    pub(crate) fn unchecked_set_threshold(&mut self, threshold: Threshold) {
+        self.threshold = threshold;
     }
 }
