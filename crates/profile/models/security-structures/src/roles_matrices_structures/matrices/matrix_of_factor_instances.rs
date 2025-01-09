@@ -405,7 +405,9 @@ mod tests {
             r#"
             {
               "primaryRole": {
-                "threshold": 2,
+                "threshold": {
+                  "specific": 2
+                },
                 "thresholdFactors": [
                   {
                     "factorSourceID": {
@@ -461,7 +463,9 @@ mod tests {
                 "overrideFactors": []
               },
               "recoveryRole": {
-                "threshold": 0,
+                "threshold": {
+                  "specific": 0
+                },
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {
@@ -517,7 +521,9 @@ mod tests {
                 ]
               },
               "confirmationRole": {
-                "threshold": 0,
+                "threshold": {
+                  "specific": 0
+                },
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {

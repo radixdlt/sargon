@@ -82,7 +82,9 @@ mod tests {
             &sut,
             r#"
             {
-              "threshold": 2,
+              "threshold": {
+                "specific": 2
+              },
               "thresholdFactors": [
                 {
                   "discriminator": "fromHash",

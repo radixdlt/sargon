@@ -368,6 +368,7 @@ mod tests {
         let model = EntitySecurityState::Securified {
             value: secured_entity_control,
         };
+        let value = serde_json::to_string(&model).unwrap();
         assert_eq_after_json_roundtrip(
             &model,
             r#"
@@ -404,7 +405,9 @@ mod tests {
                   "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                   "matrixOfFactors": {
                     "primaryRole": {
-                      "threshold": 2,
+                      "threshold": {
+                        "specific": 2
+                      },
                       "thresholdFactors": [
                         {
                           "factorSourceID": {
@@ -460,7 +463,9 @@ mod tests {
                       "overrideFactors": []
                     },
                     "recoveryRole": {
-                      "threshold": 0,
+                      "threshold": {
+                        "specific": 0
+                      },
                       "thresholdFactors": [],
                       "overrideFactors": [
                         {
@@ -516,7 +521,9 @@ mod tests {
                       ]
                     },
                     "confirmationRole": {
-                      "threshold": 0,
+                      "threshold": {
+                        "specific": 0
+                      },
                       "thresholdFactors": [],
                       "overrideFactors": [
                         {
@@ -580,7 +587,9 @@ mod tests {
                     "securityStructureId": "dededede-dede-dede-dede-dededededede",
                     "matrixOfFactors": {
                       "primaryRole": {
-                        "threshold": 1,
+                        "threshold": {
+                          "specific": 1
+                        },
                         "thresholdFactors": [
                           {
                             "factorSourceID": {
@@ -611,7 +620,9 @@ mod tests {
                         "overrideFactors": []
                       },
                       "recoveryRole": {
-                        "threshold": 0,
+                        "threshold": {
+                          "specific": 0
+                        },
                         "thresholdFactors": [],
                         "overrideFactors": [
                           {
@@ -642,7 +653,9 @@ mod tests {
                         ]
                       },
                       "confirmationRole": {
-                        "threshold": 0,
+                        "threshold": {
+                          "specific": 0
+                        },
                         "thresholdFactors": [],
                         "overrideFactors": [
                           {

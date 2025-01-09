@@ -41,7 +41,9 @@ mod tests {
             &sut,
             r#"
             {
-              "threshold": 0,
+              "threshold": {
+                "specific": 0
+              },
               "thresholdFactors": [],
               "overrideFactors": [
                 {
