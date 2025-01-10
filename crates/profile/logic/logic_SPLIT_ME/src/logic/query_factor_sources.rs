@@ -17,6 +17,11 @@ pub trait ProfileFactorSourceQuerying {
 
     fn device_factor_sources(&self) -> Vec<DeviceFactorSource>;
 
+    fn main_factor_source_of_kind(
+        &self,
+        kind: FactorSourceKind,
+    ) -> Result<Option<FactorSourceID>>;
+
     fn bdfs(&self) -> DeviceFactorSource {
         let device_factor_sources = self.device_factor_sources();
         let explicit_main = device_factor_sources
@@ -67,6 +72,24 @@ impl ProfileFactorSourceQuerying for Profile {
             .iter()
             .filter_map(|f| f.as_device().cloned())
             .collect_vec()
+    }
+
+    fn main_factor_source_of_kind(
+        &self,
+        kind: FactorSourceKind,
+    ) -> Result<Option<FactorSourceID>> {
+        let main_factor_sources = self
+            .factor_sources
+            .iter()
+            .filter(|f| {
+                f.factor_source_kind() == kind
+                    && f.common_properties().is_main()
+            })
+            .map(|f| f.factor_source_id())
+            .collect::<Vec<_>>();
+        assert!(main_factor_sources.len() <= 1, "We should never have more than 1 main FactorSource of a given FactorSourceKind");
+
+        Ok(main_factor_sources.first().cloned())
     }
 }
 

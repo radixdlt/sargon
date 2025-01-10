@@ -363,6 +363,48 @@ impl SargonOS {
 
         Ok(())
     }
+
+    /// Set the given `factor_source_id` as the main factor source for the given `kind`.
+    /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
+    ///
+    /// If there is any main `FactorSource` of the given `FactorSourceKind`, such events are emitted also when
+    /// removing the flag from the old main factor source.
+    pub async fn set_main_factor_source_of_kind(
+        &self,
+        factor_source_id: impl Into<FactorSourceID>,
+        kind: FactorSourceKind,
+    ) -> Result<()> {
+        // If there is an existent main factor source of the same kind, remove the main flag
+        if let Some(current_main) = self
+            .profile_state_holder
+            .access_profile_with(|p| p.main_factor_source_of_kind(kind))??
+        {
+            self.update_factor_source_remove_flag_main(current_main)
+                .await?;
+        }
+
+        // Add the flag to the new main factor source
+        let new_main_id = factor_source_id.into();
+        self.update_profile_with(|p| {
+            p.update_factor_source_add_flag_main(&new_main_id)
+        })
+        .await?;
+
+        // Emit event
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourceUpdated { id: new_main_id },
+            ))
+            .await;
+
+        Ok(())
+    }
 }
 
 impl SargonOS {

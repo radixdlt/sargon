@@ -291,6 +291,15 @@ pub trait ProfileFactorSourceUpdating {
             common.flags.remove_id(&FactorSourceFlag::Main);
         })
     }
+
+    fn update_factor_source_add_flag_main(
+        &mut self,
+        id: &FactorSourceID,
+    ) -> Result<()> {
+        self.update_any_factor_source_common(id, |common| {
+            common.flags.insert(FactorSourceFlag::Main);
+        })
+    }
 }
 
 impl ProfileFactorSourceUpdating for Profile {
