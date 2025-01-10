@@ -15,26 +15,37 @@ use crate::prelude::*;
     derive_more::Display,
 )]
 #[serde(rename_all = "camelCase")]
+#[display("{label} {word_count}")]
 pub struct OffDeviceMnemonicHint {
     /// A user-assigned name for the passphrase, intended to help users
     /// differentiate between multiple passphrases.
     pub label: DisplayName,
+
+    /// The number of words the `OffDeviceMnemonic` has, intended to help the host provide
+    /// the correct input form for validation when the user enters the words.
+    pub word_count: BIP39WordCount,
 }
 
 impl OffDeviceMnemonicHint {
-    pub fn new(label: DisplayName) -> Self {
-        Self { label }
+    pub fn new(label: DisplayName, word_count: BIP39WordCount) -> Self {
+        Self { label, word_count }
     }
 }
 
 impl HasSampleValues for OffDeviceMnemonicHint {
     fn sample() -> Self {
         // https://xkcd.com/936/
-        Self::new(DisplayName::new("Story about a horse").unwrap())
+        Self::new(
+            DisplayName::new("Story about a horse").unwrap(),
+            BIP39WordCount::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::new(DisplayName::new("Thrilled with a shark").unwrap())
+        Self::new(
+            DisplayName::new("Thrilled with a shark").unwrap(),
+            BIP39WordCount::sample_other(),
+        )
     }
 }
 

@@ -56,6 +56,11 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             FactorSourceKind.SECURITY_QUESTIONS,
             sequrityQuestions.kind
         )
+
+        assertEquals(
+            FactorSourceKind.PASSWORD,
+            password.kind
+        )
     }
 
     @Test
@@ -102,6 +107,13 @@ class FactorSourceTest : SampleTestable<FactorSource> {
                 value.id.asGeneral()
             )
         }
+
+        with(password) {
+            assertEquals(
+                id,
+                value.id.asGeneral()
+            )
+        }
     }
 
     @Test
@@ -134,6 +146,11 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         assertEquals(
             sequrityQuestions,
             sequrityQuestions.value.asGeneral()
+        )
+
+        assertEquals(
+            password,
+            password.value.asGeneral()
         )
     }
 
@@ -188,98 +205,13 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         assertFalse(factorSource.supportsBabylon)
     }
 
-    private val trustedContact = FactorSource.TrustedContact(
-        value = TrustedContactFactorSource(
-            id = FactorSourceIdFromAddress(
-                kind = FactorSourceKind.TRUSTED_CONTACT, body = AccountAddress.sampleMainnet().string
-            ),
-            common = FactorSourceCommon(
-                cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = listOf(Slip10Curve.CURVE25519),
-                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
-                ),
-                addedOn = Timestamp.now(),
-                lastUsedOn = Timestamp.now(),
-                flags = emptyList()
-            ),
-            contact = TrustedContactFactorSourceContact(
-                emailAddress = EmailAddress("mail@email.com"),
-                name = DisplayName("Trusted contact")
-            )
-        )
-    )
+    private val trustedContact = TrustedContactFactorSource.sample().asGeneral()
 
-    private val arculusCard = FactorSource.ArculusCard(
-        value = ArculusCardFactorSource(
-            id = FactorSourceIdFromHash(
-                kind = FactorSourceKind.ARCULUS_CARD,
-                body = Exactly32Bytes.sample()
-            ),
-            common = FactorSourceCommon(
-                cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = listOf(Slip10Curve.CURVE25519),
-                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
-                ),
-                addedOn = Timestamp.now(),
-                lastUsedOn = Timestamp.now(),
-                flags = emptyList()
-            ),
-            hint = ArculusCardHint(
-                label = "My Arculus",
-                model = ArculusCardModel.ARCULUS_COLD_STORAGE_WALLET
-            )
-        )
-    )
+    private val arculusCard = ArculusCardFactorSource.sample().asGeneral()
 
-    private val offDeviceMnemonic = FactorSource.OffDeviceMnemonic(
-        value = OffDeviceMnemonicFactorSource(
-            id = FactorSourceIdFromHash(
-                kind = FactorSourceKind.ARCULUS_CARD,
-                body = Exactly32Bytes.sample()
-            ),
-            common = FactorSourceCommon(
-                cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = listOf(Slip10Curve.CURVE25519),
-                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
-                ),
-                addedOn = Timestamp.now(),
-                lastUsedOn = Timestamp.now(),
-                flags = emptyList()
-            ),
-            hint = OffDeviceMnemonicHint(
-                label = DisplayName("My mnemonic stored somewhere")
-            )
-        )
-    )
+    private val offDeviceMnemonic = OffDeviceMnemonicFactorSource.sample().asGeneral()
 
-    private val sequrityQuestions = FactorSource.SecurityQuestions(
-        value = SecurityQuestionsNotProductionReadyFactorSource(
-            id = FactorSourceIdFromHash(
-                kind = FactorSourceKind.SECURITY_QUESTIONS,
-                body = Exactly32Bytes.sample()
-            ),
-            common = FactorSourceCommon(
-                cryptoParameters = FactorSourceCryptoParameters(
-                    supportedCurves = listOf(Slip10Curve.CURVE25519),
-                    supportedDerivationPathSchemes = listOf(DerivationPathScheme.CAP26)
-                ),
-                addedOn = Timestamp.now(),
-                lastUsedOn = Timestamp.now(),
-                flags = emptyList()
-            ),
-            sealedMnemonic = SecurityQuestionsSealedNotProductionReadyMnemonic(
-                securityQuestions = emptyList(),
-                kdfScheme = SecurityQuestionsNotProductionReadyKdfScheme.Version1(
-                    v1 = SecurityQuestionsNotProductionReadyKdfSchemeVersion1(
-                        kdfEncryptionKeysFromKeyExchangeKeys = SecurityQuestionsNotProductionReadyEncryptionKeysByDiffieHellmanFold(),
-                        kdfKeyExchangesKeysFromQuestionsAndAnswers = SecurityQuestionsNotProductionReadyKeyExchangeKeysFromQandAsLowerTrimUtf8()
-                    )
-                ),
-                encryptionScheme = EncryptionScheme.Version1(
-                    v1 = AesGcm256()
-                ),
-                encryptions = emptyList()
-            ),
-        )
-    )
+    private val sequrityQuestions = SecurityQuestionsNotProductionReadyFactorSource.sample().asGeneral()
+
+    private val password = PasswordFactorSource.sample().asGeneral()
 }
