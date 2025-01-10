@@ -22,6 +22,7 @@ members = [
     "crates/common/short-string",
 
     # === CORE ===
+    "crates/core/prelude",
     "crates/core/assert-json",
     "crates/core/collections",
     "crates/core/error",
@@ -64,8 +65,8 @@ members = [
     "crates/profile/models/supporting-types",
     "crates/profile/traits/entity-by-address",
 
-    # === SARGON - SPLIT ME ===
-    "crates/sargon_SPLIT_ME",
+    # === SARGON - Umbrella Crate ===
+    "crates/sargon",
 
     # === SYSTEM ===
     "crates/system/clients/clients",
@@ -114,6 +115,7 @@ default-members = [
     "crates/common/short-string",
 
     # === CORE ===
+    "crates/core/prelude",
     "crates/core/assert-json",
     "crates/core/collections",
     "crates/core/error",
@@ -221,6 +223,7 @@ numeric = { path = "crates/common/numeric" }
 short-string = { path = "crates/common/short-string" }
 
 # === CORE ===
+prelude = { path = "crates/core/prelude" }
 assert-json = { path = "crates/core/assert-json" }
 core-collections = { path = "crates/core/collections" }
 error = { path = "crates/core/error" }
@@ -263,8 +266,8 @@ profile-security-structures = { path = "crates/profile/models/security-structure
 profile-supporting-types = { path = "crates/profile/models/supporting-types" }
 entity-by-address = { path = "crates/profile/traits/entity-by-address" }
 
-# === SARGON - SPLIT ME ===
-sargon = { path = "crates/sargon_SPLIT_ME" }
+# === SARGON - Umbrella crate ===
+sargon = { path = "crates/sargon" }
 
 # === SYSTEM ===
 clients = { path = "crates/system/clients/clients" }

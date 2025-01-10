@@ -33,7 +33,7 @@ jobs:
             binary: libsargon_uniffi.dylib
     runs-on: ${{ matrix.build-target.runner }}
     env:
-      RUST_TOOLCHAIN: nightly-2024-07-30
+      RUST_TOOLCHAIN: nightly-2024-12-14
       RUST_COMPONENTS: "rust-std"
     steps:
       - uses: RDXWorks-actions/checkout@main

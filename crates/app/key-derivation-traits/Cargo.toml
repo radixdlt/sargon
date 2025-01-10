@@ -1,10 +1,11 @@
 [package]
 name = "key-derivation-traits"
-version = "1.1.99"
+version = "1.1.105"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 core-collections = { workspace = true }
 error = { workspace = true }
 has-sample-values = { workspace = true }

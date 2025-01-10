@@ -200,6 +200,7 @@ impl HasSampleValues for TransactionManifestV2 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use prelude::fixture_rtm;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
         CallMethod, DropAllProofs, DropAuthZoneProofs,
@@ -529,10 +530,7 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn involved_pool_addresses() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "redeem_from_bi_pool.rtm"
-        ));
+        let instructions_string = fixture_rtm!("redeem_from_bi_pool");
         let sut = SUT::new(
             instructions_string,
             NetworkID::Stokenet,

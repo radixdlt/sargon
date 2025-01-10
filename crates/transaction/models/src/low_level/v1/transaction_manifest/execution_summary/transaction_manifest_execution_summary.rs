@@ -36,6 +36,8 @@ impl Default for FeeLocks {
 #[cfg(test)]
 mod tests {
 
+    use prelude::{fixture_rtm, fixture_tx};
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -58,14 +60,12 @@ mod tests {
 
     #[test]
     fn transfer_1to2_multiple_nf_and_f_tokens() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "transfer_1to2_multiple_nf_and_f_tokens.rtm"
+        let instructions_string =
+            fixture_rtm!("transfer_1to2_multiple_nf_and_f_tokens");
+
+        let receipt = deserialize_receipt(fixture_tx!(
+            "transfer_1to2_multiple_nf_and_f_tokens"
         ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "transfer_1to2_multiple_nf_and_f_tokens.dat"
-        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -166,14 +166,9 @@ mod tests {
 
     #[test]
     fn third_party_deposits_update() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "third_party_deposits_update.rtm"
-        ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "third_party_deposits_update.dat"
-        )));
+        let instructions_string = fixture_rtm!("third_party_deposits_update");
+        let receipt =
+            deserialize_receipt(fixture_tx!("third_party_deposits_update"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -232,14 +227,9 @@ mod tests {
 
     #[test]
     fn create_single_fungible() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_single_fungible.rtm"
-        ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_single_fungible.dat"
-        )));
+        let instructions_string = fixture_rtm!("create_single_fungible");
+        let receipt =
+            deserialize_receipt(fixture_tx!("create_single_fungible"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -288,14 +278,8 @@ mod tests {
 
     #[test]
     fn create_nft_collection() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_nft_collection.rtm"
-        ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_nft_collection.dat"
-        )));
+        let instructions_string = fixture_rtm!("create_nft_collection");
+        let receipt = deserialize_receipt(fixture_tx!("create_nft_collection"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -375,14 +359,8 @@ mod tests {
 
     #[test]
     fn mint_nft_gumball_card() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "mint_nft_gumball_card.rtm"
-        ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "mint_nft_gumball_card.dat"
-        )));
+        let instructions_string = fixture_rtm!("mint_nft_gumball_card");
+        let receipt = deserialize_receipt(fixture_tx!("mint_nft_gumball_card"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -448,14 +426,9 @@ mod tests {
 
     #[test]
     fn present_proof_swap_candy() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "present_proof_swap_candy.rtm"
-        ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "present_proof_swap_candy.dat"
-        )));
+        let instructions_string = fixture_rtm!("present_proof_swap_candy");
+        let receipt =
+            deserialize_receipt(fixture_tx!("present_proof_swap_candy"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -506,13 +479,9 @@ mod tests {
 
     #[test]
     fn create_pool() {
-        let instructions_string =
-            include_str!(concat!(env!("FIXTURES_TX"), "create_pool.rtm"));
+        let instructions_string = fixture_rtm!("create_pool");
 
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "create_pool.dat"
-        )));
+        let receipt = deserialize_receipt(fixture_tx!("create_pool"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -546,15 +515,9 @@ mod tests {
 
     #[test]
     fn contribute_to_bi_pool() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "contribute_to_bi_pool.rtm"
-        ));
+        let instructions_string = fixture_rtm!("contribute_to_bi_pool");
 
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "contribute_to_bi_pool.dat"
-        )));
+        let receipt = deserialize_receipt(fixture_tx!("contribute_to_bi_pool"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -608,14 +571,9 @@ mod tests {
 
     #[test]
     fn stake_to_three_validators() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "stake_to_three_validators.rtm"
-        ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "stake_to_three_validators.dat"
-        )));
+        let instructions_string = fixture_rtm!("stake_to_three_validators");
+        let receipt =
+            deserialize_receipt(fixture_tx!("stake_to_three_validators"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -692,14 +650,8 @@ mod tests {
 
     #[test]
     fn redeem_from_bi_pool() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "redeem_from_bi_pool.rtm"
-        ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "redeem_from_bi_pool.dat"
-        )));
+        let instructions_string = fixture_rtm!("redeem_from_bi_pool");
+        let receipt = deserialize_receipt(fixture_tx!("redeem_from_bi_pool"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -749,14 +701,11 @@ mod tests {
 
     #[test]
     fn unstake_partially_from_one_validator() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "unstake_partially_from_one_validator.rtm"
+        let instructions_string =
+            fixture_rtm!("unstake_partially_from_one_validator");
+        let receipt = deserialize_receipt(fixture_tx!(
+            "unstake_partially_from_one_validator"
         ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "unstake_partially_from_one_validator.dat"
-        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -830,14 +779,11 @@ mod tests {
 
     #[test]
     fn claim_two_stakes_from_one_validator() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "claim_two_stakes_from_one_validator.rtm"
+        let instructions_string =
+            fixture_rtm!("claim_two_stakes_from_one_validator");
+        let receipt = deserialize_receipt(fixture_tx!(
+            "claim_two_stakes_from_one_validator"
         ));
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "claim_two_stakes_from_one_validator.dat"
-        )));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -906,15 +852,12 @@ mod tests {
 
     #[test]
     fn account_locker_claim_fungibles_and_non_fungibles() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "account_locker_claim_fungibles_and_non_fungibles.rtm"
-        ));
+        let instructions_string =
+            fixture_rtm!("account_locker_claim_fungibles_and_non_fungibles");
 
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "account_locker_claim_fungibles_and_non_fungibles.dat"
-        )));
+        let receipt = deserialize_receipt(fixture_tx!(
+            "account_locker_claim_fungibles_and_non_fungibles"
+        ));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,
@@ -966,13 +909,9 @@ mod tests {
 
     #[test]
     fn account_delete() {
-        let instructions_string =
-            include_str!(concat!(env!("FIXTURES_TX"), "account_delete.rtm"));
+        let instructions_string = fixture_rtm!("account_delete");
 
-        let receipt = deserialize_receipt(include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "account_delete.dat"
-        )));
+        let receipt = deserialize_receipt(fixture_tx!("account_delete"));
 
         let transaction_manifest = TransactionManifest::new(
             instructions_string,

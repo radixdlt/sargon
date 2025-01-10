@@ -1,11 +1,11 @@
 [package]
 name = "factors"
-version = "1.1.99"
+version = "1.1.105"
 edition = "2021"
-build = "build.rs"
 
 [dependencies]
 # ==== INTERNAL DEPENDENCIES ====
+prelude = { workspace = true }
 identified-vec-of = { workspace = true }
 bytes = { workspace = true }
 hierarchical-deterministic = { workspace = true }
@@ -40,3 +40,6 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
 zeroize = { workspace = true }
+
+[build-dependencies]
+prelude = { workspace = true }

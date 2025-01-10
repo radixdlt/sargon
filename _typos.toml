@@ -1,12 +1,11 @@
 [files]
 extend-exclude = [
-    "crates/**/fixtures/**/**",
+    "fixtures/**",
     "scripts/**",
     "apple/Sources/UniFFI/Sargon.swift",
     "examples/iOS/Backend/Sources/Planbok/Features/DebugProfileFeature.swift",
     "tarpaulin-report.html",
 ]
-
 
 [default.extend-identifiers]
 inout = "inout"
@@ -24,6 +23,7 @@ fo = "fo"
 aer264 = "aer264"
 imeAction = "imeAction"
 ImeAction = "ImeAction"
+evice = "evice"
 
 [default.extend-words]
 inout = "inout"

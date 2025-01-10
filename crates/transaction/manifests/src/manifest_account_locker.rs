@@ -92,6 +92,7 @@ impl ManifestForAccountLockerClaim for TransactionManifest {
 mod tests {
     use super::*;
     use addresses::ResourceAddress;
+    use prelude::fixture_rtm;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
@@ -108,10 +109,7 @@ mod tests {
 
     #[test]
     fn claim_fungibles_and_non_fungibles() {
-        let expected_manifest = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "account_locker_claim.rtm"
-        ));
+        let expected_manifest = fixture_rtm!("account_locker_claim");
 
         let manifest = SUT::account_locker_claim(
             &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".parse::<LockerAddress>().unwrap(),
@@ -141,10 +139,8 @@ mod tests {
 
     #[test]
     fn claim_limited_to_required_batch_size() {
-        let expected_manifest = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "account_locker_claim_max_nft_items.rtm"
-        ));
+        let expected_manifest =
+            fixture_rtm!("account_locker_claim_max_nft_items");
         let manifest = SUT::account_locker_claim(
             &"locker_rdx1drn4q2zk6dvljehytnhfah330xk7emfznv59rqlps5ayy52d7xkzzz".parse::<LockerAddress>().unwrap(),
             &"account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr".parse::<AccountAddress>().unwrap(),

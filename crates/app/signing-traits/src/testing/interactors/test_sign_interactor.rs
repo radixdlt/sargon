@@ -3,7 +3,7 @@
 use crate::prelude::*;
 
 pub struct TestSignInteractor<S: Signable> {
-    pub simulated_user: SimulatedUser<S>,
+    pub(crate) simulated_user: SimulatedUser<S>,
 }
 
 impl<S: Signable> TestSignInteractor<S> {
@@ -23,10 +23,12 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
     async fn sign(
         &self,
         request: SignRequest<S>,
-    ) -> Result<SignWithFactorsOutcome<S::ID>> {
+    ) -> Result<SignResponse<S::ID>> {
         self.simulated_user.spy_on_request_before_handled(
             request.factor_source_kind(),
-            request.invalid_transactions_if_neglected.clone(),
+            request
+                .invalid_transactions_if_all_factors_neglected()
+                .clone(),
         );
         let ids = request
             .per_factor_source
@@ -35,44 +37,41 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
             .collect::<IndexSet<_>>();
 
         if self.should_simulate_failure(ids.clone()) {
-            return Ok(SignWithFactorsOutcome::failure_with_factors(ids));
+            return Ok(SignResponse::failure_with_factors(ids));
         }
 
-        match self
-            .simulated_user
-            .sign_or_skip(request.invalid_transactions_if_neglected.clone())
-        {
+        match self.simulated_user.sign_or_skip(
+            request
+                .invalid_transactions_if_all_factors_neglected()
+                .clone(),
+        ) {
             SigningUserInput::Sign => {
-                let signatures = request
+                let per_factor_outcome = IndexMap::from_iter(request
                     .per_factor_source
                     .iter()
-                    .flat_map(|(_, v)| {
-                        v.iter()
+                    .map(|(id, input)| {
+                        let signatures = input.per_transaction
+                            .iter()
                             .flat_map(|x| {
                                 x.signature_inputs()
                                     .iter()
-                                    .map(|y| unsafe { HDSignature::produced_signing_with_input(y.clone())})
+                                    .map(|y|
+                                        unsafe {
+                                            HDSignature::produced_signing_with_input(y.clone())
+                                        }
+                                    )
                                     .collect_vec()
                             })
-                            .collect::<IndexSet<HDSignature<S::ID>>>()
-                    })
-                    .collect::<IndexSet<HDSignature<S::ID>>>();
+                            .collect::<IndexSet<HDSignature<S::ID>>>();
 
-                let signatures = signatures
-                    .into_iter()
-                    .into_group_map_by(|x| x.factor_source_id());
-                let response = SignResponse::new(
-                    signatures
-                        .into_iter()
-                        .map(|(k, v)| (k, IndexSet::from_iter(v)))
-                        .collect(),
-                );
+                        (*id, signatures)
+                    }));
 
-                Ok(SignWithFactorsOutcome::signed(response))
+                SignResponse::signed(per_factor_outcome)
             }
 
             SigningUserInput::Skip => {
-                Ok(SignWithFactorsOutcome::user_skipped_factors(ids))
+                Ok(SignResponse::user_skipped_factors(ids))
             }
 
             SigningUserInput::Reject => Err(CommonError::SigningRejected),

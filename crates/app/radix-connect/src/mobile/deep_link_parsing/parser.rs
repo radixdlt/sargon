@@ -171,10 +171,9 @@ impl SampleRequestParams {
     }
 
     pub fn new_from_text_vector() -> Self {
-        fixture::<SampleRequestParams>(include_str!(concat!(
-            env!("FIXTURES_VECTOR"),
-            "deep_link_request_params.json"
-        )))
+        fixture::<SampleRequestParams>(prelude::fixture_vector!(
+            "deep_link_request_params"
+        ))
         .unwrap()
     }
 

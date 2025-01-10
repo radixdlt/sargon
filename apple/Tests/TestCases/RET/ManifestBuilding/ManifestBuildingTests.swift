@@ -249,6 +249,6 @@ extension TestCase {
 		extension fileExtension: String,
 		in crate: String = "transaction/models"
 	) throws -> Data {
-		try openFile(subPath: "transaction", fileName, extension: fileExtension, in: crate)
+		try openFile(subPath: "transaction", fileName, extension: fileExtension)
 	}
 }

@@ -16,6 +16,11 @@ Named after [Sargon of Akkad](https://en.wikipedia.org/wiki/Sargon_of_Akkad) the
 
 # Development
 
+## Workspace
+Sargon uses a workspace with many crates (50+).
+
+All crates except `sargon` and `uniffi` (and `uniffi macros`) are checked and unit tested by default. Those three excluded are excluded to minimize the time running `cargo check`. Since **any** change in any crate would cause the huge `uniffi` crate to be recompiled. You can check it with `--workspace` and `--all` flags.
+
 ## Setup
 
 We recommend installing the Radix [Transaction Manifest Extension for VS Code][vscodeext] if you use that IDE
@@ -336,11 +341,11 @@ cd jvm
 Install [cargo-workspaces](https://crates.io/crates/cargo-workspaces)
 
 ```sh
-cargo install cargo-workspaces
+make bump
 ```
 
 ```sh
-cargo ws version patch --allow-branch $(git_current_branch) --yes --no-git-tag
+make bump_and_commit
 ```
 
 To `patch` bump all crates

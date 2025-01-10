@@ -1,10 +1,11 @@
 [package]
 name = "gateway-client-and-api"
-version = "1.1.99"
+version = "1.1.105"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+prelude = { workspace = true }
 assert-json = { workspace = true }
 core-utils = { workspace = true }
 metadata = { workspace = true }

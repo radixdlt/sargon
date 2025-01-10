@@ -75,6 +75,8 @@ impl StateEntityDetailsResponseItemDetails {
 
 #[cfg(test)]
 mod tests {
+    use prelude::fixture_gw_model;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -234,20 +236,18 @@ mod tests {
         // are multiple fields that we aren't parsing, so we can't compare the entire struct.
 
         // Fungible Resource (XRD)
-        let result = fixture_and_json::<SUT>(include_str!(concat!(
-            env!("FIXTURES_MODELS_GW"),
-            "state/response_entity_details_details__fungible_resource.json"
-        )))
+        let result = fixture_and_json::<SUT>(fixture_gw_model!(
+            "state/response_entity_details_details__fungible_resource"
+        ))
         .unwrap()
         .0;
 
         assert!(matches!(result, SUT::FungibleResource(_)));
 
         // Non-Fungible Resource (XRD)
-        let result = fixture_and_json::<SUT>(include_str!(concat!(
-            env!("FIXTURES_MODELS_GW"),
-            "state/response_entity_details_details__non_fungible_resource.json"
-        )))
+        let result = fixture_and_json::<SUT>(fixture_gw_model!(
+            "state/response_entity_details_details__non_fungible_resource"
+        ))
         .unwrap()
         .0;
 

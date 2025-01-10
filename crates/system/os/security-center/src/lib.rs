@@ -6,6 +6,8 @@ pub mod prelude {
     pub(crate) use error::prelude::*;
     pub(crate) use sargon_os::prelude::*;
     pub(crate) use security_center::prelude::*;
+    #[cfg(test)]
+    pub(crate) use testing::*;
 
     #[cfg(test)]
     mod testing {
@@ -13,8 +15,6 @@ pub mod prelude {
         pub(crate) use has_sample_values::prelude::*;
         pub(crate) use std::sync::Arc;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

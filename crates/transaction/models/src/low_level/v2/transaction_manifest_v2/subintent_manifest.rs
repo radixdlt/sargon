@@ -1,3 +1,5 @@
+use prelude::fixture_rtm;
+
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
@@ -194,11 +196,7 @@ impl SubintentManifest {
 
 impl SubintentManifest {
     pub(crate) fn sample_mainnet_instructions_string() -> String {
-        include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "resource_transfer_subintent.rtm"
-        ))
-        .to_owned()
+        fixture_rtm!("resource_transfer_subintent").to_owned()
     }
 
     pub fn sample_mainnet_instructions() -> InstructionsV2 {
@@ -210,11 +208,7 @@ impl SubintentManifest {
     }
 
     pub(crate) fn sample_other_simulator_instructions_string() -> String {
-        include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "multi_account_resource_transfer_subintent.rtm"
-        ))
-        .to_owned()
+        fixture_rtm!("multi_account_resource_transfer_subintent").to_owned()
     }
 
     pub fn sample_simulator_other_instructions() -> InstructionsV2 {
@@ -247,6 +241,7 @@ impl HasSampleValues for SubintentManifest {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use prelude::fixture_rtm;
     use radix_rust::hashmap;
     use radix_transactions::manifest::{
         BlobProvider, CallMethod, DropAllProofs, DropAuthZoneProofs,
@@ -577,10 +572,7 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn involved_pool_addresses() {
-        let instructions_string = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "redeem_from_bi_pool.rtm"
-        ));
+        let instructions_string = fixture_rtm!("redeem_from_bi_pool");
         let sut = SUT::new(
             instructions_string,
             NetworkID::Stokenet,
@@ -607,10 +599,7 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn open_pre_auth_fungibles_deposit_summary() {
-        let manifest_str = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "open_subintent_fungibles.rtm"
-        ));
+        let manifest_str = fixture_rtm!("open_subintent_fungibles");
 
         let network = NetworkID::Stokenet.network_definition();
         let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
@@ -644,10 +633,8 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn open_pre_auth_non_fungibles_no_certain_ids_deposit_summary() {
-        let manifest_str = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "open_subintent_non_fungibles_no_certain_ids.rtm"
-        ));
+        let manifest_str =
+            fixture_rtm!("open_subintent_non_fungibles_no_certain_ids");
 
         let network = NetworkID::Stokenet.network_definition();
         let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
@@ -696,10 +683,8 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn open_pre_auth_non_fungibles_with_certain_ids_deposit_summary() {
-        let manifest_str = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "open_subintent_non_fungibles_with_certain_ids.rtm"
-        ));
+        let manifest_str =
+            fixture_rtm!("open_subintent_non_fungibles_with_certain_ids");
 
         let network = NetworkID::Stokenet.network_definition();
         let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(
@@ -773,10 +758,7 @@ DROP_AUTH_ZONE_PROOFS;
 
     #[test]
     fn test_multiple_deposits() {
-        let manifest_str = include_str!(concat!(
-            env!("FIXTURES_TX"),
-            "open_subintent_mix_multiple_deposits.rtm"
-        ));
+        let manifest_str = fixture_rtm!("open_subintent_mix_multiple_deposits");
 
         let network = NetworkID::Stokenet.network_definition();
         let man: ScryptoSubintentManifestV2 = scrypto_compile_manifest(

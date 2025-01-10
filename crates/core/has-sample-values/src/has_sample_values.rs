@@ -15,6 +15,16 @@ impl HasSampleValues for CommonError {
     }
 }
 
+impl HasSampleValues for SecureStorageAccessErrorKind {
+    fn sample() -> Self {
+        SecureStorageAccessErrorKind::HardwareUnavailable
+    }
+
+    fn sample_other() -> Self {
+        SecureStorageAccessErrorKind::UnableToProcess
+    }
+}
+
 impl HasSampleValues for String {
     fn sample() -> Self {
         "sample".to_string()

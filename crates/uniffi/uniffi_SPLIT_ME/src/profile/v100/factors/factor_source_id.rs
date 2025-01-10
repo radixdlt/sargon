@@ -17,6 +17,8 @@ pub enum FactorSourceID {
 
 delegate_display_debug_into!(FactorSourceID, InternalFactorSourceID);
 
+json_data_convertible!(FactorSourceID);
+
 #[uniffi::export]
 pub fn factor_source_id_to_string(factor_source_id: &FactorSourceID) -> String {
     factor_source_id.into_internal().to_string()

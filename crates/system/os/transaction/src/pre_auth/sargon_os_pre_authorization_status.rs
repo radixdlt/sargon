@@ -137,11 +137,7 @@ impl OSPollPreAuthorizationStatusWithDelays for SargonOS {
     fn seconds_until_expiration(&self, expiration_timestamp: Instant) -> u64 {
         let expiration = expiration_timestamp.seconds_since_unix_epoch as u64;
         let now = seconds_since_unix_epoch();
-        if expiration > now {
-            expiration - now
-        } else {
-            0
-        }
+        expiration.saturating_sub(now)
     }
 }
 
