@@ -21,8 +21,8 @@ pub struct OffDeviceMnemonicHint {
     /// differentiate between multiple passphrases.
     pub label: DisplayName,
 
-    /// The number of words the `OffDeviceMnemonic`, intended to help the host provide the correct
-    /// input form for validation when the user enters the words.
+    /// The number of words the `OffDeviceMnemonic` has, intended to help the host provide
+    /// the correct input form for validation when the user enters the words.
     pub word_count: BIP39WordCount,
 }
 
