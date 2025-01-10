@@ -467,14 +467,15 @@ impl SargonOS {
 }
 
 #[allow(unused)]
-#[cfg(test)]
 impl SargonOS {
+    /// For tests
     pub async fn clear_cache(&self) {
         println!("💣 CLEAR CACHE");
         self.clients.factor_instances_cache.clear().await.unwrap();
     }
 
-    pub(crate) async fn set_cache(
+    /// For tests
+    pub async fn set_cache(
         &self,
         cache_snapshot: FactorInstancesCacheSnapshot,
     ) {

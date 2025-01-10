@@ -3,11 +3,10 @@ mod log_system;
 pub mod prelude {
     pub use crate::log_system::*;
 
+    pub use prelude::prelude::*;
     pub(crate) use drivers::prelude::*;
-
     pub(crate) use log::*;
 
-    pub(crate) use std::sync::{Arc, RwLock};
 
     #[cfg(test)]
     mod testing {

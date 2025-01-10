@@ -15,14 +15,12 @@ pub mod prelude {
 
     pub(crate) use hierarchical_deterministic::prelude::*;
     pub(crate) use key_derivation_traits::prelude::*;
+    pub use prelude::prelude::*;
 
     pub use crate::collector::*;
 
-    pub(crate) use std::sync::{Arc, RwLock};
-
-    pub(crate) use log::*;
-
     pub(crate) use indexmap::{IndexMap, IndexSet};
+    pub(crate) use log::*;
     pub(crate) use std::collections::{HashMap, HashSet};
 
     #[cfg(test)]

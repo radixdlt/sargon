@@ -1,6 +1,65 @@
 #![allow(non_snake_case)]
 use crate::prelude::*;
 
+#[async_trait::async_trait]
+pub trait OsTestDummySecurifyEntities {
+    async fn __OFFLINE_ONLY_securify_accounts(
+        &self,
+        account_addresses: IndexSet<AccountAddress>,
+        shield: &SecurityStructureOfFactorSources,
+    ) -> Result<(Accounts, FactorInstancesProviderOutcome)>;
+
+    async fn __OFFLINE_ONLY_securify_account(
+        &self,
+        account_address: AccountAddress,
+        shield: &SecurityStructureOfFactorSources,
+    ) -> Result<(Account, FactorInstancesProviderOutcome)>;
+}
+
+#[async_trait::async_trait]
+impl OsTestDummySecurifyEntities for SargonOS {
+    /// Uses FactorInstancesProvider to get factor instances for the `shield`.
+    /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
+    /// security state on chain
+    async fn __OFFLINE_ONLY_securify_accounts(
+        &self,
+        account_addresses: IndexSet<AccountAddress>,
+        shield: &SecurityStructureOfFactorSources,
+    ) -> Result<(Accounts, FactorInstancesProviderOutcome)> {
+        let (entities, outcome) = self
+            ._apply_shield_to_entities_with_diagnostics(
+                shield,
+                account_addresses.into_iter().map(Into::into).collect(),
+            )
+            .await?;
+
+        let accounts = entities
+            .into_iter()
+            .map(|e| e.into_account_entity().unwrap())
+            .collect();
+        Ok((accounts, outcome))
+    }
+
+    /// Uses FactorInstancesProvider to get factor instances for the `shield`.
+    /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
+    /// security state on chain
+    async fn __OFFLINE_ONLY_securify_account(
+        &self,
+        account_address: AccountAddress,
+        shield: &SecurityStructureOfFactorSources,
+    ) -> Result<(Account, FactorInstancesProviderOutcome)> {
+        let (accounts, outcome) = self
+            .__OFFLINE_ONLY_securify_accounts(
+                IndexSet::just(account_address),
+                shield,
+            )
+            .await?;
+        assert_eq!(accounts.len(), 1);
+        let account = accounts.first().unwrap().clone();
+        Ok((account, outcome))
+    }
+}
+
 #[actix_rt::test]
 async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis_and_if_profile_is_used_a_new_account_is_created(
 ) {

@@ -13,6 +13,7 @@ pub mod prelude {
     pub use crate::observer::*;
     pub use crate::storage::*;
 
+    pub use prelude::prelude::*;
     pub(crate) use addresses::prelude::*;
     pub(crate) use bytes::prelude::*;
     pub(crate) use core_utils::prelude::*;
@@ -21,7 +22,6 @@ pub mod prelude {
     pub(crate) use identified_vec_of::prelude::*;
     pub(crate) use network::prelude::*;
     pub(crate) use serde::{Deserialize, Serialize};
-    pub(crate) use std::sync::Arc;
 
     #[cfg(test)]
     pub(crate) use gateway_models::prelude::*;

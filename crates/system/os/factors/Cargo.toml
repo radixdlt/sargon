@@ -14,6 +14,7 @@ drivers = { workspace = true }
 clients = { workspace = true }
 profile-logic = { workspace = true }
 factor-instances-provider = { workspace = true }
+key-derivation-traits = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
