@@ -1,4 +1,3 @@
-#![feature(async_closure)]
 #![feature(iter_repeat_n)]
 
 #[cfg(test)]

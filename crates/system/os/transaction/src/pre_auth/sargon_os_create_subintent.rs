@@ -78,11 +78,7 @@ impl OSCreateSubintent for SargonOS {
             DappToWalletInteractionSubintentExpiration::AtTime(at_time) => {
                 let now = seconds_since_unix_epoch();
                 let expiration = at_time.unix_timestamp_seconds;
-                if expiration > now {
-                    expiration - now
-                } else {
-                    0
-                }
+                expiration.saturating_sub(now)
             }
             DappToWalletInteractionSubintentExpiration::AfterDelay(delay) => {
                 delay.expire_after_seconds

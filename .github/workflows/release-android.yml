@@ -24,7 +24,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      RUST_TOOLCHAIN: nightly-2024-07-30
+      RUST_TOOLCHAIN: nightly-2024-12-14
       RUST_COMPONENTS: "rust-std"
       CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
     steps:

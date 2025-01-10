@@ -199,14 +199,9 @@ use RoleKind::*;
 
 pub type RoleBuilderMutateResult = Result<(), RoleBuilderValidation>;
 
-pub enum Assert<const CHECK: bool> {}
-pub trait IsTrue {}
-impl IsTrue for Assert<true> {}
-
-impl<const ROLE: u8> RoleBuilder<ROLE>
-where
-    Assert<{ ROLE == ROLE_PRIMARY }>: IsTrue,
-{
+// When `generic_const_exprs` feature is complete
+// we can specify that this is only for ROLE_PRIMARY
+impl<const ROLE: u8> RoleBuilder<ROLE> {
     /// ```ignore
     /// If Ok | Err(NotYetValid) => self is mutated
     /// If Err(ForeverInvalid) => self is NOT mutated
@@ -218,6 +213,7 @@ where
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> RoleBuilderMutateResult {
+        assert_eq!(ROLE, ROLE_PRIMARY);
         self.add_factor_source_to_threshold_with_mode(
             factor_source_id,
             SecurityShieldBuilderMode::Strict,
@@ -229,6 +225,7 @@ where
         factor_source_id: FactorSourceID,
         mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
+        assert_eq!(ROLE, ROLE_PRIMARY);
         let should_set_threshold_to_one = self.get_threshold() == 0
             && self.get_threshold_factors().is_empty();
         self._add_factor_source_to_list(factor_source_id, Threshold, mode)
@@ -245,6 +242,7 @@ where
         &self,
         factor_source_kind: FactorSourceKind,
     ) -> RoleBuilderMutateResult {
+        assert_eq!(ROLE, ROLE_PRIMARY);
         self.validation_for_addition_of_factor_source_of_kind_to_threshold_with_mode(factor_source_kind, SecurityShieldBuilderMode::Strict)
     }
 
@@ -253,6 +251,7 @@ where
         factor_source_kind: FactorSourceKind,
         mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
+        assert_eq!(ROLE, ROLE_PRIMARY);
         self._validation_add(factor_source_kind, Threshold, mode)
     }
 
@@ -262,6 +261,7 @@ where
         factor_source_kind: FactorSourceKind,
         list: FactorListKind,
     ) -> RoleBuilderMutateResult {
+        assert_eq!(ROLE, ROLE_PRIMARY);
         self._validation_add(
             factor_source_kind,
             list,
@@ -270,10 +270,9 @@ where
     }
 }
 
-impl<const ROLE: u8> RoleBuilder<ROLE>
-where
-    Assert<{ ROLE > ROLE_PRIMARY }>: IsTrue,
-{
+/// When `generic_const_exprs` feature is complete
+// we can specify that this is NOT for ROLE_PRIMARY
+impl<const ROLE: u8> RoleBuilder<ROLE> {
     /// ```ignore
     /// Ok | Err(NotYetValid) => self is mutated
     /// Err(ForeverInvalid) => self is NOT mutated
@@ -282,6 +281,7 @@ where
         &mut self,
         factor_source_id: FactorSourceID,
     ) -> RoleBuilderMutateResult {
+        assert_ne!(ROLE, ROLE_PRIMARY);
         self.add_factor_source_to_override(factor_source_id)
     }
 }
