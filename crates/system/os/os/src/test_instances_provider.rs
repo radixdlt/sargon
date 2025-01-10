@@ -312,14 +312,22 @@ async fn cache_is_unchanged_in_case_of_failure() {
         3 * n
     );
 
-    let (security_structure_of_factor_instances_first_half, instances_in_cache_consumer, derivation_outcome) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        first_half_of_accounts
+    let (
+        security_structure_of_factor_instances_first_half,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            first_half_of_accounts
                 .clone()
                 .into_iter()
                 .map(|a| a.address())
                 .map(AddressOfAccountOrPersona::from)
                 .collect(),
-                shield_0.clone()).await.unwrap();
+        )
+        .await
+        .unwrap();
 
     // consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -384,16 +392,16 @@ async fn cache_is_unchanged_in_case_of_failure() {
     assert_eq!(os.bdfs().unwrap().id_from_hash(), bdfs.id_from_hash());
 
     let res = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        second_half_of_accounts
-        .clone()
-        .into_iter()
-        .map(|a| a.address())
-        .map(AddressOfAccountOrPersona::from)
-        .collect(),
-        shield_0.clone()
-    )
-    .await;
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            second_half_of_accounts
+                .clone()
+                .into_iter()
+                .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
+                .collect(),
+        )
+        .await;
 
     assert!(res.is_err());
     let cache_after_fail = os.cache_snapshot().await;
@@ -441,7 +449,15 @@ async fn test_assert_factor_instances_invalid() {
         matrix_0,
         bdfs.clone(),
     );
-    let (security_structure_of_fis, _, _) = os.make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(IndexSet::from_iter([AddressOfAccountOrPersona::from(alice.address())]), shield_0.clone()).await.unwrap();
+    let (security_structure_of_fis, _, _) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(
+                alice.address(),
+            )]),
+        )
+        .await
+        .unwrap();
 
     let security_structure_of_fi =
         security_structure_of_fis.values().next().unwrap().clone();
@@ -785,10 +801,17 @@ async fn test_securified_accounts() {
         bdfs.clone(),
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([AddressOfAccountOrPersona::from(alice.address()), AddressOfAccountOrPersona::from(bob.address())]),
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
             shield_0,
+            IndexSet::from_iter([
+                AddressOfAccountOrPersona::from(alice.address()),
+                AddressOfAccountOrPersona::from(bob.address()),
+            ]),
         )
         .await
         .unwrap();
@@ -929,9 +952,11 @@ async fn test_securified_accounts() {
     );
 
     let (security_structures_of_fis, instances_in_cache_consumer, _) = os
-        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([AddressOfAccountOrPersona::from(carol.address())]),
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
             shield_1.clone(),
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(
+                carol.address(),
+            )]),
         )
         .await
         .unwrap();
@@ -971,13 +996,19 @@ async fn test_securified_accounts() {
     }
 
     // Update Alice's shield 1 -  only Passphrase as override factor
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        IndexSet::from_iter([AddressOfAccountOrPersona::from(alice.address())]),
-        shield_1,
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_1,
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(
+                alice.address(),
+            )]),
+        )
+        .await
+        .unwrap();
 
     // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1084,13 +1115,22 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
         3 * n
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        first_half_of_accounts.clone().into_iter().map(|a| a.address()).map(AddressOfAccountOrPersona::from).collect(),
-        shield_0.clone(),
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            first_half_of_accounts
+                .clone()
+                .into_iter()
+                .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
+                .collect(),
+        )
+        .await
+        .unwrap();
 
     // dont forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1120,15 +1160,22 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
             .collect_vec()
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        second_half_of_accounts.clone().into_iter().map(|a| a.address())
-        .map(AddressOfAccountOrPersona::from)
-        .collect(),
-        shield_0.clone(),
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            second_half_of_accounts
+                .clone()
+                .into_iter()
+                .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
+                .collect(),
+        )
+        .await
+        .unwrap();
 
     // dont forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1239,13 +1286,22 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         3 * n
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        first_half_of_accounts.clone().into_iter().map(|a| a.address()).map(AddressOfAccountOrPersona::from).collect(),
-        shield_0.clone(),
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            first_half_of_accounts
+                .clone()
+                .into_iter()
+                .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
+                .collect(),
+        )
+        .await
+        .unwrap();
 
     // dont forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1317,15 +1373,22 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         expected.clone()
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        second_half_of_accounts.clone().into_iter().map(|a| a.address())
-        .map(AddressOfAccountOrPersona::from)
-        .collect(),
-        shield_0.clone(),
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            second_half_of_accounts
+                .clone()
+                .into_iter()
+                .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
+                .collect(),
+        )
+        .await
+        .unwrap();
 
     // dont forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1475,15 +1538,22 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         3 * n
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        first_half_of_personas.clone().into_iter().map(|a| a.address())
-        .map(AddressOfAccountOrPersona::from)
-        .collect(),
-        shield_0.clone(),
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            first_half_of_personas
+                .clone()
+                .into_iter()
+                .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
+                .collect(),
+        )
+        .await
+        .unwrap();
 
     // dont forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1512,13 +1582,22 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         ]
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        second_half_of_personas.clone().into_iter().map(|a| a.address()).map(AddressOfAccountOrPersona::from).collect(),
-        shield_0.clone(),
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            second_half_of_personas
+                .clone()
+                .into_iter()
+                .map(|a| a.address())
+                .map(AddressOfAccountOrPersona::from)
+                .collect(),
+        )
+        .await
+        .unwrap();
 
     // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1585,13 +1664,17 @@ async fn create_single_account() {
         matrix_0,
         bdfs.clone(),
     );
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-       IndexSet::just(AddressOfAccountOrPersona::from(alice.address())),
-        shield_0.clone(),
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_0.clone(),
+            IndexSet::just(AddressOfAccountOrPersona::from(alice.address())),
+        )
+        .await
+        .unwrap();
 
     // Don't forget to consume!
     instances_in_cache_consumer.consume().await.unwrap();
@@ -1681,10 +1764,17 @@ async fn securified_personas() {
         bdfs.clone(),
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([AddressOfAccountOrPersona::from(batman.address()), AddressOfAccountOrPersona::from(satoshi.address())]),
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
             shield_0,
+            IndexSet::from_iter([
+                AddressOfAccountOrPersona::from(batman.address()),
+                AddressOfAccountOrPersona::from(satoshi.address()),
+            ]),
         )
         .await
         .unwrap();
@@ -1827,10 +1917,16 @@ async fn securified_personas() {
         bdfs.clone(),
     );
 
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-        .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-            IndexSet::from_iter([AddressOfAccountOrPersona::from(hyde.address())]),
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
             shield_1.clone(),
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(
+                hyde.address(),
+            )]),
         )
         .await
         .unwrap();
@@ -1875,13 +1971,19 @@ async fn securified_personas() {
     }
 
     // Update Batman's shield 1 -  only Passphrase as override factor
-    let (security_structures_of_fis, instances_in_cache_consumer, derivation_outcome) = os
-    .make_security_structure_of_factor_instances_for_entities_without_consuming_cache_with_derivation_outcome(
-        IndexSet::from_iter([AddressOfAccountOrPersona::from(batman.address())]),
-        shield_1,
-    )
-    .await
-    .unwrap();
+    let (
+        security_structures_of_fis,
+        instances_in_cache_consumer,
+        derivation_outcome,
+    ) = os
+        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+            shield_1,
+            IndexSet::from_iter([AddressOfAccountOrPersona::from(
+                batman.address(),
+            )]),
+        )
+        .await
+        .unwrap();
 
     instances_in_cache_consumer.consume().await.unwrap();
 
@@ -2216,9 +2318,9 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     );
 
     let (_, derivation_outcome) = os
-        .__OFFLINE_ONLY_securify_entities(
-            unnamed_accounts_and_personas_mixed_addresses,
+        ._apply_shield_to_entities_with_diagnostics(
             &shield_0,
+            unnamed_accounts_and_personas_mixed_addresses,
         )
         .await
         .unwrap();
@@ -2592,9 +2694,9 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     );
 
     let (many_securified_entities, derivation_outcome) = os
-        .__OFFLINE_ONLY_securify_entities(
-            unnamed_accounts_and_personas_mixed_addresses.clone(),
+        ._apply_shield_to_entities_with_diagnostics(
             &shield_3fa,
+            unnamed_accounts_and_personas_mixed_addresses.clone(),
         )
         .await
         .unwrap();

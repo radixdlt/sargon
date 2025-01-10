@@ -72,10 +72,6 @@ impl SecurifyEntityFactorInstancesProvider {
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
     pub async fn securifying_unsecurified(
-        // if you need to UPDATE already securified, upgrade this to conditionally consume ROLA
-        // factors, by not using `QuantifiedDerivationPreset::securifying_unsecurified_entities`
-        // below. I.e. create the set of `QuantifiedDerivationPreset` which does not unconditionally
-        // specify ROLA factors.
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources,
@@ -83,6 +79,40 @@ impl SecurifyEntityFactorInstancesProvider {
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
+        Self::apply_security_shield(
+            cache_client,
+            profile,
+            security_structure_of_factor_sources,
+            addresses_of_entities.clone(),
+            addresses_of_entities,
+            interactor,
+        )
+        .await
+    }
+
+    /// Reads FactorInstances for every `factor_source` in matrix_of_factor_sources
+    /// on `network_id` of kind `account_mfa` or `identity_mfa` depending on Entity kind,
+    /// meaning `(EntityKind::_, KeyKind::TransactionSigning, KeySpace::Securified)`,
+    /// from cache, if any, otherwise derives more of that kind AND other kinds:
+    /// identity_veci, account_veci, identity_mfa/account_mfa
+    /// and saves into the cache and returns a collection of instances, per factor source,
+    /// split into factor instance to use directly and factor instances which was cached, into
+    /// the mutable `cache` parameter.
+    ///
+    /// We are always reading from the beginning of each FactorInstance collection in the cache,
+    /// and we are always appending to the end.
+    pub async fn apply_security_shield(
+        cache_client: Arc<FactorInstancesCacheClient>,
+        profile: Arc<Profile>,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources,
+        addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
+        include_rola_key_for_entities: IndexSet<AddressOfAccountOrPersona>,
+        interactor: Arc<dyn KeyDerivationInteractor>,
+    ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
+    {
+        assert!(
+            addresses_of_entities.is_superset(&include_rola_key_for_entities)
+        );
         let factor_sources_to_use = security_structure_of_factor_sources
             .all_factors()
             .into_iter()
@@ -134,8 +164,9 @@ impl SecurifyEntityFactorInstancesProvider {
         );
 
         let quantified_derivation_presets =
-            QuantifiedDerivationPreset::securifying_unsecurified_entities(
+            QuantifiedDerivationPreset::apply_shield_to_entities(
                 &addresses_of_entities,
+                &include_rola_key_for_entities,
             );
 
         assert!(quantified_derivation_presets.len() >= 2); // at least one entity kind, and ROLA + TX: at least 2
