@@ -303,7 +303,8 @@
             "flags": []
           },
           "hint": {
-            "label": "Story about a horse"
+            "label": "Story about a horse",
+            "wordCount": 24
           }
         }
       },
@@ -328,7 +329,8 @@
             "flags": []
           },
           "hint": {
-            "label": "Thrilled with a shark"
+            "label": "Thrilled with a shark",
+            "wordCount": 12
           }
         }
       },
