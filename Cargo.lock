@@ -4040,6 +4040,7 @@ dependencies = [
  "key-derivation-traits",
  "log",
  "prelude",
+ "pretty_assertions",
  "profile",
  "profile-logic",
  "sargon-os",

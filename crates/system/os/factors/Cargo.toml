@@ -24,5 +24,6 @@ actix-rt = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }
 log = { workspace = true }
+pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

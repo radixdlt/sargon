@@ -14,10 +14,74 @@ pub trait OsTestDummySecurifyEntities {
         account_address: AccountAddress,
         shield: &SecurityStructureOfFactorSources,
     ) -> Result<(Account, FactorInstancesProviderOutcome)>;
+
+    fn __OFFLINE_ONLY_securify_entity_without_saving(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+        security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
+    ) -> Result<AccountOrPersona>;
+
+    /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
+    /// security state on chain
+    fn __OFFLINE_ONLY_securify_account_without_saving(
+        &self,
+        account_address: AccountAddress,
+        security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
+    ) -> Result<Account> {
+        let entity = self.__OFFLINE_ONLY_securify_entity_without_saving(
+            AddressOfAccountOrPersona::Account(account_address),
+            security_structure_of_factor_instances,
+        )?;
+
+        entity
+            .clone()
+            .as_account_entity()
+            .ok_or(CommonError::ExpectedAccountButGotPersona {
+                address: entity.address().to_string(),
+            })
+            .cloned()
+    }
 }
 
 #[async_trait::async_trait]
 impl OsTestDummySecurifyEntities for SargonOS {
+    fn __OFFLINE_ONLY_securify_entity_without_saving(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+        security_structure_of_factor_instances: SecurityStructureOfFactorInstances,
+    ) -> Result<AccountOrPersona> {
+        let mut entity = self.entity_by_address(entity_address)?;
+
+        let veci: HierarchicalDeterministicFactorInstance;
+        let access_controller_address: AccessControllerAddress;
+
+        match entity.security_state() {
+            EntitySecurityState::Unsecured { value } => {
+                veci = value.transaction_signing.clone();
+                // THIS IS COMPLETELY WRONG!
+                // The real solution should get the AccessControllerAddress on chain
+                access_controller_address =
+                    AccessControllerAddress::with_node_id_of(&entity.address());
+            }
+            EntitySecurityState::Securified { value } => {
+                veci = value.veci.clone().unwrap();
+                access_controller_address = value.access_controller_address;
+            }
+        };
+
+        let securified_control = SecuredEntityControl::new(
+            veci,
+            access_controller_address,
+            security_structure_of_factor_instances,
+        )?;
+
+        entity.set_security_state(EntitySecurityState::Securified {
+            value: securified_control,
+        })?;
+
+        Ok(entity)
+    }
+
     /// Uses FactorInstancesProvider to get factor instances for the `shield`.
     /// Mutates Accounts in Profile ONLY, DOES NOT submit any transaction changing
     /// security state on chain
@@ -2864,7 +2928,7 @@ async fn securify_accounts_and_personas_with_override_factor() {
         bdfs.clone(),
     );
 
-    let cache_client = Arc::new(os.clients.factor_instances_cache.clone());
+    let cache_client = Arc::new(os.factor_instances_cache.clone());
     let profile = Arc::new(os.profile().unwrap());
     let derivation_interactors = os.keys_derivation_interactor();
 
