@@ -855,6 +855,9 @@ pub enum CommonError {
 
     #[error("Not all signatures are produced with the same factor source.")]
     FactorOutcomeSignedFactorSourceIDMismatch = 10245,
+
+    #[error("Unknown SecurityStructureID {id}")]
+    UnknownSecurityStructureID { id: String } = 10246,
 }
 
 #[uniffi::export]

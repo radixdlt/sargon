@@ -6,9 +6,7 @@ pub trait OsShieldApplying {
         &self,
         security_shield_id: SecurityStructureID,
         addresses: IndexSet<AddressOfAccountOrPersona>,
-    ) -> Result<()> {
-        todo!()
-    }
+    ) -> Result<()>;
 
     async fn _apply_shield_to_entities_with_diagnostics(
         &self,
@@ -18,6 +16,16 @@ pub trait OsShieldApplying {
         IdentifiedVecOf<AccountOrPersona>,
         FactorInstancesProviderOutcome,
     )>;
+
+    async fn apply_shield_to_entities(
+        &self,
+        shield: &SecurityStructureOfFactorSources,
+        entity_addresses: IndexSet<AddressOfAccountOrPersona>,
+    ) -> Result<()> {
+        self._apply_shield_to_entities_with_diagnostics(shield, entity_addresses)
+            .await
+            .map(|_| ())
+    }
 
     async fn _provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
         &self,
@@ -43,6 +51,16 @@ pub trait OsShieldApplying {
 
 #[async_trait::async_trait]
 impl OsShieldApplying for SargonOS {
+
+    async fn apply_security_shield_to_entities(
+        &self,
+        security_shield_id: SecurityStructureID,
+        addresses: IndexSet<AddressOfAccountOrPersona>,
+    ) -> Result<()> {
+        let shield = self.security_structure_of_factor_sources_from_security_structure_id(security_shield_id)?;
+        self.apply_shield_to_entities(&shield, addresses).await
+    }
+
     async fn _apply_shield_to_entities_with_diagnostics(
         &self,
         shield: &SecurityStructureOfFactorSources,
@@ -192,7 +210,7 @@ impl OsShieldApplying for SargonOS {
 
         let (instances_in_cache_consumer, outcome) =
             SecurifyEntityFactorInstancesProvider::apply_security_shield(
-                Arc::new(self.clients.factor_instances_cache.clone()),
+                Arc::new(self.factor_instances_cache.clone()),
                 Arc::new(profile_snapshot.clone()),
                 security_structure_of_factor_sources.clone(),
                 addresses_of_entities.clone(),

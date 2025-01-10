@@ -308,7 +308,7 @@ impl SargonOS {
             as Arc<dyn SignInteractor<AuthIntent>>
     }
 
-    pub(crate) fn keys_derivation_interactor(
+    pub fn keys_derivation_interactor(
         &self,
     ) -> Arc<dyn KeyDerivationInteractor> {
         self.interactors.use_factor_sources_interactor.clone()

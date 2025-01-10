@@ -10,6 +10,22 @@ pub trait OsSecurityStructuresQuerying {
         &self,
     ) -> Result<SecurityStructuresOfFactorSourceIDs>;
 
+    fn security_structure_of_factor_source_ids_from_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSourceIDs>;
+
+    fn security_structure_of_factor_sources_from_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSources> {
+        let shield_id_level = self
+            .security_structure_of_factor_source_ids_from_security_structure_id(
+                shield_id,
+            )?;
+        self.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(&shield_id_level)
+    }
+
     fn security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
         &self,
         structure_of_ids: &SecurityStructureOfFactorSourceIDs,
@@ -56,6 +72,22 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 structure_of_ids,
                 &p.factor_sources,
             ))
+        })
+    }
+
+    fn security_structure_of_factor_source_ids_from_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSourceIDs> {
+        self.profile().and_then(|p| {
+            p.app_preferences
+                .security
+                .security_structures_of_factor_source_ids
+                .get_id(&shield_id)
+                .ok_or(CommonError::UnknownSecurityStructureID {
+                    id: shield_id.to_string(),
+                })
+                .cloned()
         })
     }
 
