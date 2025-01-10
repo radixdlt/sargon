@@ -364,7 +364,7 @@ impl SargonOS {
         Ok(())
     }
 
-    /// Set the given `factor_source_id` as the main factor source for the given `kind`.
+    /// Set the given `factor_source` as the main factor source of its kind.
     /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
     ///
     /// # Emits Event
@@ -375,24 +375,26 @@ impl SargonOS {
     ///
     /// If there is any main `FactorSource` of the given `FactorSourceKind`, such events are emitted also when
     /// removing the flag from the old main factor source.
-    pub async fn set_main_factor_source_of_kind(
+    pub async fn set_main_factor_source(
         &self,
-        factor_source_id: impl Into<FactorSourceID>,
-        kind: FactorSourceKind,
+        factor_source: FactorSource,
     ) -> Result<()> {
-        // If there is an existent main factor source of the same kind, remove the main flag
-        if let Some(current_main) = self
-            .profile_state_holder
-            .access_profile_with(|p| p.main_factor_source_of_kind(kind))??
+        // If there is an existent main factor source of the same kind, remove its main flag
+        if let Some(current_main) =
+            self.profile_state_holder.access_profile_with(|p| {
+                p.main_factor_source_of_kind(factor_source.factor_source_kind())
+            })?
         {
             self.update_factor_source_remove_flag_main(current_main)
                 .await?;
         }
 
         // Add the flag to the new main factor source
-        let new_main_id = factor_source_id.into();
+        let new_main_id = factor_source.factor_source_id();
+
         self.update_profile_with(|p| {
             p.update_factor_source_add_flag_main(&new_main_id)
+                .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
         })
         .await?;
 
@@ -914,5 +916,160 @@ mod tests {
                 _ => false,
             }
         }));
+    }
+
+    #[actix_rt::test]
+    async fn set_main_factor_source_fails_if_factor_source_not_added() {
+        let os = SUT::fast_boot().await;
+
+        let error = os
+            .with_timeout(|x| {
+                x.set_main_factor_source(FactorSource::sample_password())
+            })
+            .await
+            .expect_err("Expected an error");
+
+        assert_eq!(error, CommonError::UpdateFactorSourceMutateFailed);
+    }
+
+    #[actix_rt::test]
+    async fn set_main_factor_source_with_previous_main() {
+        // Set up OS with `previous_main` as the main device factor source
+        let event_bus_driver = RustEventBusDriver::new();
+        let os = boot(event_bus_driver.clone()).await;
+
+        let previous_main = DeviceFactorSource::sample();
+        let new_main = DeviceFactorSource::sample_other();
+        let factor_sources = FactorSources::from_iter([
+            previous_main.clone().into(),
+            new_main.clone().into(),
+        ]);
+
+        os.with_timeout(|x| {
+            x.add_factor_sources_without_emitting_factor_sources_added(
+                factor_sources.clone(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // Verify that `previous_main` is the main device factor source
+        assert!(os
+            .profile()
+            .unwrap()
+            .device_factor_source_by_id(&previous_main.id)
+            .unwrap()
+            .is_main_bdfs());
+
+        // Clear recorded events
+        event_bus_driver.clear_recorded();
+
+        // Set `new_main` as main
+        os.with_timeout(|x| x.set_main_factor_source(new_main.clone().into()))
+            .await
+            .unwrap();
+
+        // Verify previous is no longer main, while new is
+        let profile = os.profile().unwrap();
+        assert!(!profile
+            .device_factor_source_by_id(&previous_main.id)
+            .unwrap()
+            .common
+            .is_main());
+        assert!(profile
+            .device_factor_source_by_id(&new_main.id)
+            .unwrap()
+            .common
+            .is_main());
+
+        // Verify 4 events are emitted: 2 `ProfileSaved`, and 2 `FactorSourceUpdated`
+        let events = event_bus_driver.recorded();
+        assert_eq!(events.len(), 4);
+        assert_eq!(
+            events
+                .iter()
+                .filter(|e| e.event == Event::ProfileSaved)
+                .collect::<Vec<_>>()
+                .len(),
+            2
+        );
+        assert!(events.iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::FactorSourceUpdated {
+                    id: previous_main.id.into()
+                }
+            }));
+        assert!(events.iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::FactorSourceUpdated {
+                    id: new_main.id.into()
+                }
+            }));
+    }
+
+    #[actix_rt::test]
+    async fn set_main_factor_source_without_previous_main() {
+        // Set up OS with no main arculus factor source
+        let event_bus_driver = RustEventBusDriver::new();
+        let os = boot(event_bus_driver.clone()).await;
+
+        let factor_source = ArculusCardFactorSource::sample();
+        os.with_timeout(|x| x.add_factor_source(factor_source.clone().into()))
+            .await
+            .unwrap();
+
+        // Verify that there is no main arculus factor source
+        assert!(!os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .iter()
+            .any(|f| f.is_arculus_card() && f.common_properties().is_main()));
+
+        // Clear recorded events
+        event_bus_driver.clear_recorded();
+
+        // Set `factor_source` as main
+        os.with_timeout(|x| {
+            x.set_main_factor_source(factor_source.clone().into())
+        })
+        .await
+        .unwrap();
+
+        // Verify we now have a main arculus factor source
+        assert!(os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .iter()
+            .any(|f| f.is_arculus_card() && f.common_properties().is_main()));
+
+        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourceUpdated`
+        let events = event_bus_driver.recorded();
+        assert_eq!(events.len(), 2);
+        assert!(events.iter().any(|e| e.event == Event::ProfileSaved));
+        assert!(events.iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::FactorSourceUpdated {
+                    id: factor_source.id.into()
+                }
+            }));
+    }
+
+    async fn boot(event_bus_driver: Arc<RustEventBusDriver>) -> Arc<SUT> {
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os
     }
 }
