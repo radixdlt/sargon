@@ -364,7 +364,7 @@ impl SargonOS {
         Ok(())
     }
 
-    /// Set the given `factor_source` as the main factor source of its kind.
+    /// Set the FactorSource with the given `factor_source_id` as the main factor source of its kind.
     /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
     ///
     /// # Emits Event
@@ -377,20 +377,19 @@ impl SargonOS {
     /// removing the flag from the old main factor source.
     pub async fn set_main_factor_source(
         &self,
-        factor_source: FactorSource,
+        factor_source_id: FactorSourceID,
     ) -> Result<()> {
-        // Get new main factor source ID
-        let new_main_id = factor_source.factor_source_id();
-
         // Get current main factor source ID (if any)
         let current_main_id =
             self.profile_state_holder.access_profile_with(|p| {
-                p.main_factor_source_of_kind(factor_source.factor_source_kind())
+                p.main_factor_source_of_kind(
+                    factor_source_id.get_factor_source_kind(),
+                )
             })?;
 
         let updated_ids = match current_main_id {
-            Some(current_main_id) => vec![current_main_id, new_main_id],
-            None => vec![new_main_id],
+            Some(current_main_id) => vec![current_main_id, factor_source_id],
+            None => vec![factor_source_id],
         };
 
         self.update_profile_with(|p| {
@@ -401,7 +400,7 @@ impl SargonOS {
             }
 
             // Add the flag to the new main factor source
-            p.update_factor_source_add_flag_main(&new_main_id)
+            p.update_factor_source_add_flag_main(&factor_source_id)
                 .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
         })
         .await?;
@@ -932,7 +931,7 @@ mod tests {
 
         let error = os
             .with_timeout(|x| {
-                x.set_main_factor_source(FactorSource::sample_password())
+                x.set_main_factor_source(FactorSource::sample_password().id())
             })
             .await
             .expect_err("Expected an error");
@@ -973,9 +972,11 @@ mod tests {
         event_bus_driver.clear_recorded();
 
         // Set `new_main` as main
-        os.with_timeout(|x| x.set_main_factor_source(new_main.clone().into()))
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.set_main_factor_source(new_main.clone().factor_source_id())
+        })
+        .await
+        .unwrap();
 
         // Verify previous is no longer main, while new is
         let profile = os.profile().unwrap();
@@ -997,7 +998,10 @@ mod tests {
         assert!(events.iter().any(|e| e.event
             == Event::ProfileModified {
                 change: EventProfileModified::FactorSourcesUpdated {
-                    ids: vec![previous_main.id.into(), new_main.id.into()],
+                    ids: vec![
+                        previous_main.id.into(),
+                        new_main.factor_source_id()
+                    ],
                 }
             }));
     }
@@ -1026,7 +1030,7 @@ mod tests {
 
         // Set `factor_source` as main
         os.with_timeout(|x| {
-            x.set_main_factor_source(factor_source.clone().into())
+            x.set_main_factor_source(factor_source.clone().factor_source_id())
         })
         .await
         .unwrap();
@@ -1046,7 +1050,7 @@ mod tests {
         assert!(events.iter().any(|e| e.event
             == Event::ProfileModified {
                 change: EventProfileModified::FactorSourcesUpdated {
-                    ids: vec![factor_source.id.into()],
+                    ids: vec![factor_source.factor_source_id()],
                 }
             }));
     }

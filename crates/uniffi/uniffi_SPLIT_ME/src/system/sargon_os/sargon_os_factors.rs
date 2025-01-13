@@ -196,7 +196,7 @@ impl SargonOS {
             .into_result()
     }
 
-    /// Set the given `factor_source` as the main factor source of its kind.
+    /// Set the FactorSource with the given `factor_source_id` as the main factor source of its kind.
     /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
     ///
     /// # Emits Event
@@ -209,10 +209,10 @@ impl SargonOS {
     /// removing the flag from the old main factor source.
     pub async fn set_main_factor_source(
         &self,
-        factor_source: FactorSource,
+        factor_source_id: FactorSourceID,
     ) -> Result<()> {
         self.wrapped
-            .set_main_factor_source(factor_source.into_internal())
+            .set_main_factor_source(factor_source_id.into_internal())
             .await
             .into_result()
     }
