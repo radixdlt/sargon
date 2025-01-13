@@ -379,20 +379,28 @@ impl SargonOS {
         &self,
         factor_source: FactorSource,
     ) -> Result<()> {
-        // If there is an existent main factor source of the same kind, remove its main flag
-        if let Some(current_main) =
-            self.profile_state_holder.access_profile_with(|p| {
-                p.main_factor_source_of_kind(factor_source.factor_source_kind())
-            })?
-        {
-            self.update_factor_source_remove_flag_main(current_main)
-                .await?;
-        }
-
-        // Add the flag to the new main factor source
+        // Get new main factor source ID
         let new_main_id = factor_source.factor_source_id();
 
+        // Get current main factor source ID (if any)
+        let current_main_id =
+            self.profile_state_holder.access_profile_with(|p| {
+                p.main_factor_source_of_kind(factor_source.factor_source_kind())
+            })?;
+
+        let updated_ids = match current_main_id {
+            Some(current_main_id) => vec![current_main_id, new_main_id],
+            None => vec![new_main_id],
+        };
+
         self.update_profile_with(|p| {
+            // Remove main flag from current main (if any)
+            if let Some(current_main_id) = current_main_id {
+                p.update_factor_source_remove_flag_main(&current_main_id)
+                    .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)?;
+            }
+
+            // Add the flag to the new main factor source
             p.update_factor_source_add_flag_main(&new_main_id)
                 .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
         })
@@ -401,7 +409,7 @@ impl SargonOS {
         // Emit event
         self.event_bus
             .emit(EventNotification::profile_modified(
-                EventProfileModified::FactorSourceUpdated { id: new_main_id },
+                EventProfileModified::FactorSourcesUpdated { ids: updated_ids },
             ))
             .await;
 
@@ -982,27 +990,14 @@ mod tests {
             .common
             .is_main());
 
-        // Verify 4 events are emitted: 2 `ProfileSaved`, and 2 `FactorSourceUpdated`
+        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourcesUpdated`
         let events = event_bus_driver.recorded();
-        assert_eq!(events.len(), 4);
-        assert_eq!(
-            events
-                .iter()
-                .filter(|e| e.event == Event::ProfileSaved)
-                .collect::<Vec<_>>()
-                .len(),
-            2
-        );
+        assert_eq!(events.len(), 2);
+        assert!(events.iter().any(|e| e.event == Event::ProfileSaved),);
         assert!(events.iter().any(|e| e.event
             == Event::ProfileModified {
-                change: EventProfileModified::FactorSourceUpdated {
-                    id: previous_main.id.into()
-                }
-            }));
-        assert!(events.iter().any(|e| e.event
-            == Event::ProfileModified {
-                change: EventProfileModified::FactorSourceUpdated {
-                    id: new_main.id.into()
+                change: EventProfileModified::FactorSourcesUpdated {
+                    ids: vec![previous_main.id.into(), new_main.id.into()],
                 }
             }));
     }
@@ -1050,8 +1045,8 @@ mod tests {
         assert!(events.iter().any(|e| e.event == Event::ProfileSaved));
         assert!(events.iter().any(|e| e.event
             == Event::ProfileModified {
-                change: EventProfileModified::FactorSourceUpdated {
-                    id: factor_source.id.into()
+                change: EventProfileModified::FactorSourcesUpdated {
+                    ids: vec![factor_source.id.into()],
                 }
             }));
     }

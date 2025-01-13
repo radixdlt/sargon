@@ -54,6 +54,9 @@ pub enum EventKind {
     /// An existing factor source has been updated
     FactorSourceUpdated,
 
+    /// A collection of existing factor sources have been updated
+    FactorSourcesUpdated,
+
     /// Profile updated with a new Security Structure.
     SecurityStructureAdded,
 }
@@ -147,6 +150,7 @@ impl EventKind {
                 | FactorSourceAdded
                 | FactorSourceUpdated
                 | FactorSourcesAdded
+                | FactorSourcesUpdated
         )
     }
 }
@@ -199,6 +203,7 @@ mod tests {
                 | FactorSourceAdded
                 | FactorSourcesAdded
                 | FactorSourceUpdated
+                | FactorSourcesUpdated
                 | PersonaAdded
                 | PersonasAdded
                 | PersonasUpdated
@@ -228,6 +233,7 @@ mod tests {
                 | FactorSourceAdded
                 | FactorSourcesAdded
                 | FactorSourceUpdated
+                | FactorSourcesUpdated
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
@@ -250,6 +256,7 @@ mod tests {
                 ProfileUsedOnOtherDevice
                 | FactorSourceAdded
                 | FactorSourceUpdated
+                | FactorSourcesUpdated
                 | ProfileSaved
                 | AccountAdded
                 | SecurityStructureAdded
@@ -277,6 +284,7 @@ mod tests {
                 ProfileUsedOnOtherDevice
                 | FactorSourceAdded
                 | FactorSourceUpdated
+                | FactorSourcesUpdated
                 | ProfileSaved
                 | AccountAdded
                 | GatewayChangedCurrent
@@ -304,6 +312,7 @@ mod tests {
                 ProfileUsedOnOtherDevice
                 | FactorSourceAdded
                 | FactorSourceUpdated
+                | FactorSourcesUpdated
                 | ProfileSaved
                 | AccountAdded
                 | FactorSourcesAdded
@@ -326,7 +335,8 @@ mod tests {
             .map(|sut| (sut, sut.affects_factor_sources()))
             .for_each(|(sut, affects)| match sut {
                 Booted | ProfileImported | FactorSourceAdded
-                | FactorSourcesAdded | FactorSourceUpdated => {
+                | FactorSourcesAdded | FactorSourceUpdated
+                | FactorSourcesUpdated => {
                     assert!(affects)
                 }
                 ProfileUsedOnOtherDevice
