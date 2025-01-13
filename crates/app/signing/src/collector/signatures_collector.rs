@@ -246,9 +246,6 @@ impl<S: Signable> SignaturesCollector<S> {
     ) -> Result<()> {
         let factor_sources = factor_sources_of_kind.factor_sources();
         for factor_source in factor_sources {
-            if self.continuation() == FinishEarly {
-                continue;
-            }
             // Prepare the request for the interactor
             debug!("Creating mono request for interactor");
             let factor_source_id =
