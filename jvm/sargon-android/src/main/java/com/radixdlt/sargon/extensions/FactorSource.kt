@@ -48,6 +48,7 @@ fun OffDeviceMnemonicFactorSource.asGeneral() = FactorSource.OffDeviceMnemonic(v
 fun SecurityQuestionsNotProductionReadyFactorSource.asGeneral() =
     FactorSource.SecurityQuestions(value = this)
 fun TrustedContactFactorSource.asGeneral() = FactorSource.TrustedContact(value = this)
+fun PasswordFactorSource.asGeneral() = FactorSource.Password(value = this)
 
 fun FactorSource.Device.Companion.olympia(
     mnemonicWithPassphrase: MnemonicWithPassphrase,

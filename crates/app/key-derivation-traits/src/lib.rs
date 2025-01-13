@@ -1,4 +1,4 @@
-#![feature(async_closure)]
+#![feature(async_trait_bounds)]
 
 mod derivation_purpose;
 mod host_interaction;

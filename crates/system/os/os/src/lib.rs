@@ -42,10 +42,10 @@ pub mod prelude {
     pub(crate) use std::sync::Arc;
 
     #[cfg(test)]
+    pub(crate) use testing::*;
+
+    #[cfg(test)]
     mod testing {
         pub(crate) use serde_json::json;
     }
-
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }

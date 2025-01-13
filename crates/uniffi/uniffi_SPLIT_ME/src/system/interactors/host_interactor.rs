@@ -15,13 +15,13 @@ use sargon::UseFactorSourcesInteractor as InternalUseFactorSourcesInteractor;
 type InternalSignRequestForTransactionIntent =
     sargon::SignRequest<InternalTransactionIntent>;
 type InternalSignWithFactorsOutcomeForTransactionIntent =
-    sargon::SignWithFactorsOutcome<InternalTransactionIntentHash>;
+    sargon::SignResponse<InternalTransactionIntentHash>;
 type InternalSignRequestForSubintent = sargon::SignRequest<InternalSubintent>;
 type InternalSignWithFactorsOutcomeForSubintent =
-    sargon::SignWithFactorsOutcome<InternalSubintentHash>;
+    sargon::SignResponse<InternalSubintentHash>;
 type InternalSignRequestForAuthIntent = sargon::SignRequest<InternalAuthIntent>;
 type InternalSignWithFactorsOutcomeForAuthIntent =
-    sargon::SignWithFactorsOutcome<InternalAuthIntentHash>;
+    sargon::SignResponse<InternalAuthIntentHash>;
 
 /// Sargon os
 #[uniffi::export(with_foreign)]
@@ -30,12 +30,12 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
     async fn sign_transactions(
         &self,
         request: SignRequestOfTransactionIntent,
-    ) -> Result<SignWithFactorsOutcomeOfTransactionIntentHash>;
+    ) -> Result<SignResponseOfTransactionIntentHash>;
 
     async fn sign_subintents(
         &self,
         request: SignRequestOfSubintent,
-    ) -> Result<SignWithFactorsOutcomeOfSubintentHash>;
+    ) -> Result<SignResponseOfSubintentHash>;
 
     async fn derive_keys(
         &self,
@@ -45,7 +45,7 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
     async fn sign_auth(
         &self,
         request: SignRequestOfAuthIntent,
-    ) -> Result<SignWithFactorsOutcomeOfAuthIntentHash>;
+    ) -> Result<SignResponseOfAuthIntentHash>;
 }
 
 #[derive(Debug)]

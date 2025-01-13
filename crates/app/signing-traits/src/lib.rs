@@ -38,13 +38,13 @@ pub mod prelude {
 
     pub(crate) use std::fmt::Debug;
     pub(crate) use std::sync::Arc;
+    #[cfg(test)]
+    pub(crate) use testing::*;
 
     #[cfg(test)]
     mod testing {
         pub(crate) use std::collections::HashSet;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

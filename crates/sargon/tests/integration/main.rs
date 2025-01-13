@@ -1,4 +1,3 @@
-#![feature(async_closure)]
 #![feature(iter_repeat_n)]
 
 #[cfg(test)]
@@ -384,14 +383,12 @@ mod integration_tests {
                 transactions_to_sign: &IndexSet<
                     TransactionSignRequestInput<TransactionIntent>,
                 >,
-            ) -> SignWithFactorsOutcome<TransactionIntentHash> {
-                if request.invalid_transactions_if_neglected.is_empty() {
-                    return SignWithFactorsOutcome::Neglected(
-                        NeglectedFactors::new(
-                            NeglectFactorReason::UserExplicitlySkipped,
-                            IndexSet::just(factor_source_id),
-                        ),
-                    );
+            ) -> Result<FactorOutcome<TransactionIntentHash>> {
+                if request
+                    .invalid_transactions_if_factor_neglected(&factor_source_id)
+                    .is_empty()
+                {
+                    return Ok(FactorOutcome::skipped(factor_source_id));
                 }
 
                 let signatures = transactions_to_sign
@@ -405,11 +402,7 @@ mod integration_tests {
                     })
                     .collect::<IndexSet<HDSignature<TransactionIntentHash>>>();
 
-                SignWithFactorsOutcome::Signed {
-                    produced_signatures: SignResponse::with_signatures(
-                        signatures,
-                    ),
-                }
+                FactorOutcome::signed(signatures)
             }
         }
 
@@ -768,43 +761,27 @@ mod integration_tests {
             async fn sign(
                 &self,
                 request: SignRequest<TransactionIntent>,
-            ) -> Result<SignWithFactorsOutcome<TransactionIntentHash>>
-            {
-                let mut signatures =
-                    IndexSet::<HDSignature<TransactionIntentHash>>::new();
+            ) -> Result<SignResponse<TransactionIntentHash>> {
+                let mut per_factor_outcome = IndexMap::<
+                    FactorSourceIDFromHash,
+                    FactorOutcome<TransactionIntentHash>,
+                >::new();
 
                 for (factor_source_id, inputs) in
                     request.per_factor_source.iter()
                 {
-                    let result = self
-                        .sign_mono(*factor_source_id, &request, inputs)
-                        .await;
+                    let outcome = self
+                        .sign_mono(
+                            *factor_source_id,
+                            &request,
+                            &inputs.per_transaction,
+                        )
+                        .await?;
 
-                    match result {
-                        SignWithFactorsOutcome::Signed {
-                            produced_signatures,
-                        } => {
-                            signatures.extend(
-                                produced_signatures
-                                    .signatures
-                                    .into_iter()
-                                    .flat_map(|(_, xs)| xs)
-                                    .collect::<IndexSet<_>>(),
-                            );
-                        }
-                        SignWithFactorsOutcome::Neglected(_) => {
-                            return Ok(SignWithFactorsOutcome::Neglected(
-                                NeglectedFactors::new(
-                                    NeglectFactorReason::UserExplicitlySkipped,
-                                    request.factor_source_ids(),
-                                ),
-                            ));
-                        }
-                    }
+                    per_factor_outcome.insert(*factor_source_id, outcome);
                 }
-                Ok(SignWithFactorsOutcome::signed(
-                    SignResponse::with_signatures(signatures),
-                ))
+
+                SignResponse::new_from_outcomes(per_factor_outcome)
             }
         }
 

@@ -37,7 +37,7 @@ impl SecurityCenterClient {
                 && input
                     .last_manual_backup
                     .as_ref()
-                    .map_or(false, |backup| !*backup.is_current)
+                    .is_some_and(|backup| !*backup.is_current)
         };
 
         let has_problem_9 = || {

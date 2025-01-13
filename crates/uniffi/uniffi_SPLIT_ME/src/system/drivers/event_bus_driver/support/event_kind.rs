@@ -55,6 +55,9 @@ pub enum EventKind {
     /// An existing factor source has been updated
     FactorSourceUpdated,
 
+    /// A collection of existing factor sources have been updated
+    FactorSourcesUpdated,
+
     /// Profile updated with a new Security Structure.
     SecurityStructureAdded,
 }

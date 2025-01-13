@@ -1,16 +1,3 @@
-#![allow(async_fn_in_trait)]
-#![allow(internal_features)]
-#![allow(incomplete_features)]
-#![feature(async_closure)]
-#![feature(let_chains)]
-#![feature(core_intrinsics)]
-#![feature(iter_repeat_n)]
-#![feature(future_join)]
-#![feature(generic_const_exprs)]
-#![feature(trait_upcasting)]
-#![feature(trivial_bounds)]
-#![allow(trivial_bounds)]
-
 mod test_diagnose_instance_duplicates;
 
 pub mod prelude {

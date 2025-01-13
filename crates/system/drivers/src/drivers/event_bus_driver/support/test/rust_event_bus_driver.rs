@@ -34,4 +34,8 @@ impl RustEventBusDriver {
             recorded: RwLock::new(Vec::new()),
         })
     }
+
+    pub fn clear_recorded(&self) {
+        self.recorded.try_write().unwrap().clear();
+    }
 }

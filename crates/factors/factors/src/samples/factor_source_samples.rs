@@ -74,6 +74,7 @@ impl FactorSource {
                             id.body.to_hex()
                         ))
                         .unwrap(),
+                        BIP39WordCount::TwentyFour,
                     ),
                 )
                 .into()
