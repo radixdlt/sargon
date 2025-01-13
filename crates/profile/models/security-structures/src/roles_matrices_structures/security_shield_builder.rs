@@ -960,7 +960,7 @@ mod tests {
             shield.matrix_of_factors.primary().get_override_factors(),
             &vec![FactorSourceID::sample_arculus()]
         );
-        assert_eq!(shield.matrix_of_factors.primary().get_threshold(), 1);
+        assert_eq!(shield.matrix_of_factors.primary().get_threshold_value(), 1);
         assert_eq!(
             shield.matrix_of_factors.recovery().get_override_factors(),
             &vec![FactorSourceID::sample_ledger()]
@@ -1257,7 +1257,7 @@ mod test_invalid {
             FactorSourceID::sample_device(),
         );
         assert_eq!(sut.get_threshold(), 1);
-        sut.set_threshold(Threshold::Specific(0));
+        sut.set_threshold(Threshold::zero());
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
@@ -1585,7 +1585,7 @@ mod test_invalid {
             .add_factor_source_to_primary_threshold(
                 FactorSourceID::sample_device_other(),
             );
-        let _ = sut.set_threshold(Threshold::Specific(0));
+        let _ = sut.set_threshold(Threshold::zero());
         let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(

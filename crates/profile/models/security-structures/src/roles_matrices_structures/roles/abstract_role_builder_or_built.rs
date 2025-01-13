@@ -159,13 +159,13 @@ impl<const ROLE: u8, const MODE: u8, FACTOR>
 
     /// How many threshold factors that must be used to perform some function with
     /// this role.
-    pub fn get_threshold(&self) -> u8 {
+    pub fn get_threshold_value(&self) -> u8 {
         self.threshold.value(self.threshold_factors.len())
     }
 
     /// How many threshold factors that must be used to perform some function with
     /// this role.
-    pub fn get_threshold_kind(&self) -> Threshold {
+    pub fn get_threshold(&self) -> Threshold {
         self.threshold
     }
 }

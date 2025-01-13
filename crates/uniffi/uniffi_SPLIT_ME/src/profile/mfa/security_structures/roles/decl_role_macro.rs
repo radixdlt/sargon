@@ -64,7 +64,7 @@ macro_rules! role_conversion_inner {
         impl From<$internal> for $uniffi {
             fn from(value: $internal) -> Self {
                 Self {
-                    threshold: value.get_threshold_kind().into(),
+                    threshold: value.get_threshold().into(),
                     threshold_factors: value
                         .get_threshold_factors()
                         .into_iter()

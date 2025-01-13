@@ -8,7 +8,7 @@ impl<const ROLE: u8> RoleWithFactorSources<ROLE> {
         other: &RoleWithFactorSources<ROLE_FROM>,
     ) -> Self {
         Self::with_factors_and_threshold_kind(
-            other.get_threshold_kind(),
+            other.get_threshold(),
             other.get_threshold_factors().clone(),
             other.get_override_factors().clone(),
         )
@@ -59,7 +59,7 @@ impl<const ROLE: u8> RoleWithFactorSources<ROLE> {
             lookup(role_with_factor_source_ids.get_override_factors())?;
 
         Ok(Self::with_factors_and_threshold_kind(
-            role_with_factor_source_ids.get_threshold_kind(),
+            role_with_factor_source_ids.get_threshold(),
             threshold_factors,
             override_factors,
         ))

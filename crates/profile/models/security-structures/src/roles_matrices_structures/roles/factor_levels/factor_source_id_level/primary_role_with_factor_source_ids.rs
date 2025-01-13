@@ -71,7 +71,7 @@ mod tests {
     #[test]
     fn get_threshold() {
         let sut = SUT::sample_primary();
-        assert_eq!(sut.get_threshold(), 2);
+        assert_eq!(sut.get_threshold_value(), 2);
     }
 
     #[test]

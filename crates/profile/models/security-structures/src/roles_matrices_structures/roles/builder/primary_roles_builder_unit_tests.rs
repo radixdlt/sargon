@@ -153,12 +153,12 @@ mod threshold_suite {
     fn remove_lowers_threshold_from_1_to_0() {
         let mut sut = make();
         let fs = sample();
-        assert_eq!(sut.get_threshold_kind(), Threshold::All);
+        assert_eq!(sut.get_threshold(), Threshold::All);
         sut.add_factor_source_to_threshold(fs).unwrap();
-        assert_eq!(sut.get_threshold(), 1);
+        assert_eq!(sut.get_threshold_value(), 1);
         sut.remove_factor_source(&fs, FactorListKind::Threshold)
             .unwrap();
-        assert_eq!(sut.get_threshold(), 0);
+        assert_eq!(sut.get_threshold_value(), 0);
     }
 
     #[test]
@@ -173,13 +173,13 @@ mod threshold_suite {
         )
         .unwrap();
         sut.set_specific_threshold(2).unwrap();
-        assert_eq!(sut.get_threshold(), 2);
+        assert_eq!(sut.get_threshold_value(), 2);
         sut.remove_factor_source(&fs0, FactorListKind::Threshold)
             .unwrap();
-        assert_eq!(sut.get_threshold(), 2); // assert that we DIDN'T lower the threshold, since we have 2 factors
+        assert_eq!(sut.get_threshold_value(), 2); // assert that we DIDN'T lower the threshold, since we have 2 factors
         sut.remove_factor_source(&fs1, FactorListKind::Threshold)
             .unwrap();
-        assert_eq!(sut.get_threshold(), 1); // assert that we DID lower the threshold now that we have 1 factor
+        assert_eq!(sut.get_threshold_value(), 1); // assert that we DID lower the threshold now that we have 1 factor
     }
 
     #[test]
@@ -189,12 +189,12 @@ mod threshold_suite {
         let fs1 = sample_other();
         sut.add_factor_source_to_threshold(fs0).unwrap();
         sut.add_factor_source_to_threshold(fs1).unwrap();
-        assert_eq!(sut.get_threshold_kind(), Threshold::All);
-        assert_eq!(sut.get_threshold(), 2);
+        assert_eq!(sut.get_threshold(), Threshold::All);
+        assert_eq!(sut.get_threshold_value(), 2);
         sut.remove_factor_source(&fs0, FactorListKind::Threshold)
             .unwrap();
-        assert_eq!(sut.get_threshold_kind(), Threshold::All); // assert that we DIDN'T change the threshold kind from All to Specific
-        assert_eq!(sut.get_threshold(), 1);
+        assert_eq!(sut.get_threshold(), Threshold::All); // assert that we DIDN'T change the threshold kind from All to Specific
+        assert_eq!(sut.get_threshold_value(), 1);
 
         sut.add_factor_source_to_threshold(fs0).unwrap();
         sut.add_factor_source_to_threshold(
@@ -203,15 +203,15 @@ mod threshold_suite {
         .unwrap(); // now we have 3 factors
 
         sut.set_threshold(Threshold::Specific(1)).unwrap();
-        assert_eq!(sut.get_threshold_kind(), Threshold::Specific(1));
+        assert_eq!(sut.get_threshold(), Threshold::Specific(1));
         sut.remove_factor_source(&fs0, FactorListKind::Threshold)
             .unwrap();
-        assert_eq!(sut.get_threshold_kind(), Threshold::Specific(1)); // assert that we DIDN'T change the threshold specific value
+        assert_eq!(sut.get_threshold(), Threshold::Specific(1)); // assert that we DIDN'T change the threshold specific value
 
         sut.remove_factor_source(&fs1, FactorListKind::Threshold)
             .unwrap();
 
-        assert_eq!(sut.get_threshold(), 1); // assert that we DIDN'T change the threshold kind from Specific to All
+        assert_eq!(sut.get_threshold_value(), 1); // assert that we DIDN'T change the threshold kind from Specific to All
     }
 
     #[test]
@@ -221,10 +221,10 @@ mod threshold_suite {
         let fs1 = sample_other();
         sut.add_factor_source_to_threshold(fs0).unwrap();
         sut.set_specific_threshold(1).unwrap();
-        assert_eq!(sut.get_threshold(), 1);
+        assert_eq!(sut.get_threshold_value(), 1);
         sut.remove_factor_source(&fs0, FactorListKind::Threshold)
             .unwrap();
-        assert_eq!(sut.get_threshold_kind(), Threshold::All);
+        assert_eq!(sut.get_threshold(), Threshold::All);
     }
 
     #[test]
@@ -238,14 +238,14 @@ mod threshold_suite {
         let _ = sut.build(); // build should not mutate neither consume
         sut.set_specific_threshold(2).unwrap();
         let _ = sut.build(); // build should not mutate neither consume
-        assert_eq!(sut.get_threshold(), 2);
+        assert_eq!(sut.get_threshold_value(), 2);
         sut.remove_factor_source(&fs, FactorListKind::Override)
             .unwrap();
-        assert_eq!(sut.get_threshold(), 2);
+        assert_eq!(sut.get_threshold_value(), 2);
 
         let built = sut.build().unwrap();
         let built2 = sut.build().unwrap();
-        assert_eq!(built.get_threshold(), 2);
+        assert_eq!(built.get_threshold_value(), 2);
         assert_eq!(built2, built); // can built many times
 
         assert_eq!(built.role(), RoleKind::Primary);

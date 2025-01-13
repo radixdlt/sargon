@@ -13,7 +13,7 @@ impl<const ROLE: u8> From<RoleWithFactorInstances<ROLE>> for ScryptoAccessRule {
         ScryptoAccessRule::Protected(ScryptoCompositeRequirement::AnyOf(vec![
             ScryptoCompositeRequirement::BasicRequirement(
                 ScryptoBasicRequirement::CountOf(
-                    value.get_threshold(),
+                    value.get_threshold_value(),
                     from_factors(value.get_threshold_factors()),
                 ),
             ),

@@ -18,12 +18,12 @@ fn wrong_entity_kind() {
                 1,
             ).into()], []),
             RecoveryRoleWithFactorInstances::unbuilt_with_factors(
-                Threshold::Specific(0),
+                Threshold::zero(),
                 [],
                 [],
             ),
             ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
-                Threshold::Specific(0),
+                Threshold::zero(),
                 [],
                 [],
             ),
@@ -53,12 +53,12 @@ fn wrong_key_kind() {
                 SecurifiedU30::ZERO
             ).into()], []),
             RecoveryRoleWithFactorInstances::unbuilt_with_factors(
-                Threshold::Specific(0),
+                Threshold::zero(),
                 [],
                 [],
             ),
             ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
-                Threshold::Specific(0),
+                Threshold::zero(),
                 [],
                 [],
             ),

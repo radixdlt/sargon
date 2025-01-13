@@ -806,7 +806,7 @@ async fn test_securified_accounts() {
         .unwrap();
 
     let alice_matrix = alice_sec.matrix_of_factors.clone();
-    assert_eq!(alice_matrix.primary().get_threshold(), 2);
+    assert_eq!(alice_matrix.primary().get_threshold_value(), 2);
 
     assert_eq!(
         alice_matrix
@@ -847,7 +847,7 @@ async fn test_securified_accounts() {
         .unwrap();
 
     let bob_matrix = bob_sec.matrix_of_factors.clone();
-    assert_eq!(bob_matrix.primary().get_threshold(), 2);
+    assert_eq!(bob_matrix.primary().get_threshold_value(), 2);
 
     assert_eq!(
         bob_matrix
@@ -1702,7 +1702,7 @@ async fn securified_personas() {
         .unwrap();
 
     let batman_matrix = batman_sec.matrix_of_factors.clone();
-    assert_eq!(batman_matrix.primary().get_threshold(), 2);
+    assert_eq!(batman_matrix.primary().get_threshold_value(), 2);
 
     assert_eq!(
         batman_matrix
@@ -1743,7 +1743,7 @@ async fn securified_personas() {
         .unwrap();
 
     let satoshi_matrix = satoshi_sec.matrix_of_factors.clone();
-    assert_eq!(satoshi_matrix.primary().get_threshold(), 2);
+    assert_eq!(satoshi_matrix.primary().get_threshold_value(), 2);
 
     assert_eq!(
         satoshi_matrix

@@ -368,12 +368,12 @@ mod tests {
                     [],
                 ),
                 RecoveryRoleWithFactorInstances::unbuilt_with_factors(
-                    Threshold::Specific(0),
+                    Threshold::zero(),
                     [],
                     [],
                 ),
                 ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
-                    Threshold::Specific(0),
+                    Threshold::zero(),
                     [],
                     [],
                 ),

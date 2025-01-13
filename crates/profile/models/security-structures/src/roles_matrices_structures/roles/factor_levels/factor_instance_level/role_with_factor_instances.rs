@@ -12,7 +12,7 @@ impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
 
         let role_of_sources = matrix_of_factor_sources.get_role::<ROLE>();
         assert_eq!(role_of_sources.role(), role_kind);
-        let threshold: Threshold = role_of_sources.get_threshold_kind();
+        let threshold: Threshold = role_of_sources.get_threshold();
 
         // Threshold factors
         let threshold_factors =

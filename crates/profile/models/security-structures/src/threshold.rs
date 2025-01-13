@@ -12,6 +12,10 @@ pub enum Threshold {
 }
 
 impl Threshold {
+    pub fn zero() -> Self {
+        Threshold::Specific(0)
+    }
+
     /// Returns the threshold value considering the number of threshold factors for `ThresholdKind::All`.
     pub fn value(&self, threshold_factor_count: usize) -> u8 {
         match self {

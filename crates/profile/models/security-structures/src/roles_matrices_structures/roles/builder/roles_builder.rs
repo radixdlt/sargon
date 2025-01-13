@@ -394,7 +394,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
         self.validate().map(|_| {
             RoleWithFactorSourceIds::with_factors_and_threshold_kind(
-                self.get_threshold_kind(),
+                self.get_threshold(),
                 self.get_threshold_factors().clone(),
                 self.get_override_factors().clone(),
             )
@@ -461,12 +461,15 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn check_threshold_for_primary(
         &self,
     ) -> Option<NotYetValidReason> {
-        if self.get_threshold_factors().len() < self.get_threshold() as usize {
+        if self.get_threshold_factors().len()
+            < self.get_threshold_value() as usize
+        {
             return Some(
                 NotYetValidReason::ThresholdHigherThanThresholdFactorsLen,
             );
         }
-        if self.get_threshold() == 0 && !self.get_threshold_factors().is_empty()
+        if self.get_threshold_value() == 0
+            && !self.get_threshold_factors().is_empty()
         {
             return Some(
                 NotYetValidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero,
@@ -545,7 +548,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         // Validate threshold count
         if self.role() == RoleKind::Primary {
             self.validate_threshold_for_primary()?;
-        } else if self.get_threshold() != 0 {
+        } else if self.get_threshold_value() != 0 {
             match self.role() {
                 Primary => unreachable!(
                     "Primary role should have been handled earlier"
@@ -724,12 +727,13 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             Threshold => {
                 remove(self.mut_threshold_factors())?;
 
-                if let Threshold::Specific(_) = self.get_threshold_kind() {
+                if let Threshold::Specific(_) = self.get_threshold() {
                     let threshold_factors_len =
                         self.get_threshold_factors().len() as u8;
                     if threshold_factors_len == 0 {
                         self.unchecked_set_threshold(Threshold::All);
-                    } else if self.get_threshold() > threshold_factors_len {
+                    } else if self.get_threshold_value() > threshold_factors_len
+                    {
                         self.unchecked_set_threshold(Threshold::Specific(
                             threshold_factors_len,
                         ));
@@ -888,7 +892,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             );
         }
 
-        if self.get_threshold() < 2 {
+        if self.get_threshold_value() < 2 {
             return RoleBuilderMutateResult::not_yet_valid(
                 PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
             );
