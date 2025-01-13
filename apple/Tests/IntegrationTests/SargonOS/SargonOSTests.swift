@@ -27,7 +27,8 @@ final class SargonOSTests: OSTest {
 				secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
 					keychainService: "test"
 				)
-			)
+			),
+			hostInteractor: ThrowingHostInteractor.shared
 		)
 		XCTAssertTrue(SUT.shared === sut)
 	}
@@ -38,9 +39,9 @@ final class SargonOSTests: OSTest {
 				keychainService: "test"
 			)
 		)
-		let _ = try await SUT.creatingShared(bootingWith: bios)
+		let _ = try await SUT.creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared)
 		do {
-			let _ = try await SUT.creatingShared(bootingWith: bios)
+			let _ = try await SUT.creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared)
 			XCTFail("Should have thrown")
 		} catch let err as SargonOSAlreadyBooted {
 			XCTAssertEqual(err.errorDescription, "Radix Wallet core already initialized, should not have been initialized twice. This is a Radix developer error.")
@@ -53,8 +54,8 @@ final class SargonOSTests: OSTest {
 				keychainService: "test"
 			)
 		)
-		let first = try await SUT.creatingShared(bootingWith: bios)
-		let second = try await SUT._creatingShared(bootingWith: bios, isEmulatingFreshInstall: true)
+		let first = try await SUT.creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared)
+		let second = try await SUT._creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared, isEmulatingFreshInstall: true)
 		XCTAssertFalse(first === second)
 		XCTAssertTrue(SUT.shared === second)
 	}
