@@ -2568,11 +2568,12 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
         !derivation_outcome.derived_any_new_instance_for_any_factor_source()
     );
 
-    assert_eq!(
+    pretty_assertions::assert_eq!(
         securified_alice
-            .try_get_secured_control()
+            .get_provisional()
             .unwrap()
-            .security_structure
+            .as_factor_instances_derived()
+            .unwrap()
             .matrix_of_factors
             .primary()
             .all_hd_factors()
