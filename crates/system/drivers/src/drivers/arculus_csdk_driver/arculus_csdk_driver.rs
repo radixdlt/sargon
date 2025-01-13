@@ -49,7 +49,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> Result<BagOfBytes>;
 
     /// Create seed phrase request.
     ///

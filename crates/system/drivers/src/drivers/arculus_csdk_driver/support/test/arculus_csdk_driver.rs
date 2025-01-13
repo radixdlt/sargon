@@ -29,8 +29,8 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
     fn select_wallet_response(
         &self,
         wallet: ArculusWalletPointer,
-        respose: BagOfBytes,
-    ) -> Result<i32> {
+        response: BagOfBytes,
+    ) -> Result<BagOfBytes> {
         todo!()
     }
 

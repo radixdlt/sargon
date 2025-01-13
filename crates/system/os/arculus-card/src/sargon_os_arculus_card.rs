@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait OsArculusCard {
-    async fn arculus_card_read_firmware_version(&self) -> Result<String>;
     async fn read_card_factor_source_id(
         &self,
     ) -> Result<FactorSourceIDFromHash>;
@@ -18,10 +17,12 @@ pub trait OsArculusCard {
     ) -> Result<()>;
     async fn derive_public_keys(
         &self,
+        factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>>;
     async fn sign_hash(
         &self,
+        factor_source: ArculusCardFactorSource,
         pin: String,
         hash: Hash,
         derivation_path: DerivationPath,
@@ -30,10 +31,6 @@ pub trait OsArculusCard {
 
 #[async_trait::async_trait]
 impl OsArculusCard for SargonOS {
-    async fn arculus_card_read_firmware_version(&self) -> Result<String> {
-        self.arculus_card_read_firmware_version().await
-    }
-
     async fn read_card_factor_source_id(
         &self,
     ) -> Result<FactorSourceIDFromHash> {
@@ -58,17 +55,19 @@ impl OsArculusCard for SargonOS {
 
     async fn derive_public_keys(
         &self,
+        factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
-        self.derive_public_keys(paths).await
+        self.derive_public_keys(factor_source, paths).await
     }
 
     async fn sign_hash(
         &self,
+        factor_source: ArculusCardFactorSource,
         pin: String,
         hash: Hash,
         derivation_path: DerivationPath,
     ) -> Result<SignatureWithPublicKey> {
-        self.sign_hash(pin, hash, derivation_path).await
+        self.sign_hash(factor_source, pin, hash, derivation_path).await
     }
 }

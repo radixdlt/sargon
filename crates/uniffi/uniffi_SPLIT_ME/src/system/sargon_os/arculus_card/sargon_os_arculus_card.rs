@@ -3,13 +3,6 @@ use sargon::OsArculusCard;
 
 #[uniffi::export]
 impl SargonOS {
-    pub async fn arculus_card_read_firmware_version(&self) -> Result<String> {
-        self.wrapped
-            .arculus_card_read_firmware_version()
-            .await
-            .into_result()
-    }
-
     pub async fn read_card_factor_source_id(
         &self,
     ) -> Result<FactorSourceIDFromHash> {
@@ -43,10 +36,12 @@ impl SargonOS {
 
     pub async fn derive_public_keys(
         &self,
+        factor_source: ArculusCardFactorSource,
         paths: Vec<DerivationPath>,
     ) -> Result<Vec<HierarchicalDeterministicPublicKey>> {
         self.wrapped
             .derive_public_keys(
+                factor_source.into_internal(),
                 paths
                     .into_iter()
                     .map(|path| path.into_internal())
@@ -64,12 +59,14 @@ impl SargonOS {
 
     pub async fn sign_hash(
         &self,
+        factor_source: ArculusCardFactorSource,
         pin: String,
         hash: Hash,
         derivation_path: DerivationPath,
     ) -> Result<SignatureWithPublicKey> {
         self.wrapped
             .sign_hash(
+                factor_source.into_internal(),
                 pin,
                 hash.into_internal(),
                 derivation_path.into_internal(),

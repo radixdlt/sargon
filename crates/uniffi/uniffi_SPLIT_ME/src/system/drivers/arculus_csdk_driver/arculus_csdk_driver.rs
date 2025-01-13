@@ -15,7 +15,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> Result<BagOfBytes>;
 
     fn create_wallet_seed_request(
         &self,
@@ -179,10 +179,10 @@ impl InternalArculusCSDKDriver for ArculusCSDKDriverAdapter {
     fn select_wallet_response(
         &self,
         wallet: InternalArculusWalletPointer,
-        respose: sargon::BagOfBytes,
-    ) -> sargon::Result<i32> {
+        response: sargon::BagOfBytes,
+    ) -> sargon::Result<sargon::BagOfBytes> {
         self.wrapped
-            .select_wallet_response(wallet.into(), respose.into())
+            .select_wallet_response(wallet.into(), response.into())
             .into_internal_result()
     }
 

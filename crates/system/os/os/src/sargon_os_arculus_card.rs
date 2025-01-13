@@ -1,19 +1,12 @@
 use crate::prelude::*;
 
 impl SargonOS {
-    pub async fn arculus_card_read_firmware_version(&self) -> Result<String> {
-        self.clients
-            .arculus_wallet_client
-            .read_card_firmware_version()
-            .await
-    }
-
-    pub async fn read_card_factor_source_id(
+    pub async fn read_arculus_card_factor_source_id(
         &self,
     ) -> Result<FactorSourceIDFromHash> {
         self.clients
             .arculus_wallet_client
-            .read_card_factor_source_id()
+            .get_factor_source_id()
             .await
     }
 
@@ -41,23 +34,25 @@ impl SargonOS {
 
     pub async fn derive_public_keys(
         &self,
+        factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
         self.clients
             .arculus_wallet_client
-            .derive_public_keys(paths)
+            .derive_public_keys(factor_source, paths)
             .await
     }
 
     pub async fn sign_hash(
         &self,
+        factor_source: ArculusCardFactorSource,
         pin: String,
         hash: Hash,
         derivation_path: DerivationPath,
     ) -> Result<SignatureWithPublicKey> {
         self.clients
             .arculus_wallet_client
-            .sign_hash(pin, hash, derivation_path)
+            .sign_hash(factor_source, pin, hash, derivation_path)
             .await
     }
 }

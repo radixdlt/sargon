@@ -216,8 +216,6 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
         let response = response.toArray
         var extendedKey = ArculusCSDK.getPublicKeyFromPathResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count).pointee
         let parsed_response = try cArrayToData(val: extendedKey.publicKey, len: extendedKey.pubKeyLe)
-        let chain_code = try cArrayToData(val: extendedKey.chainCodeKey, len: extendedKey.chainCodeKey);
-
 
         logData(response: parsed_response)
         return parsed_response
