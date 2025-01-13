@@ -83,7 +83,7 @@ impl OsSecurityStructuresQuerying for SargonOS {
             p.app_preferences
                 .security
                 .security_structures_of_factor_source_ids
-                .get_id(&shield_id)
+                .get_id(shield_id)
                 .ok_or(CommonError::UnknownSecurityStructureID {
                     id: shield_id.to_string(),
                 })

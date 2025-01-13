@@ -211,9 +211,7 @@ impl SecurityStructureOfFactorInstances {
             FactorSourceIDFromHash,
             FactorInstances,
         >,
-        reuse_existing_rola_key: Option<
-            HierarchicalDeterministicFactorInstance,
-        >,
+        existing_rola_key: Option<HierarchicalDeterministicFactorInstance>,
         security_structure_of_factor_sources: &SecurityStructureOfFactorSources,
     ) -> Result<Self, CommonError> {
         let matrix_of_factors = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
@@ -221,7 +219,7 @@ impl SecurityStructureOfFactorInstances {
         security_structure_of_factor_sources.matrix_of_factors.clone(),
       )?;
 
-        let authentication_signing = match reuse_existing_rola_key {
+        let authentication_signing = match existing_rola_key {
             Some(existing) => Ok(existing),
             None => {
                 if let Some(existing) = consuming_instances.get_mut(

@@ -2329,8 +2329,13 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         .unwrap()
         .account_by_address(alice.address())
         .unwrap();
-    let alice_sec = alice.try_get_secured_control().unwrap();
-    let alice_matrix = alice_sec.security_structure.matrix_of_factors.clone();
+    let alice_matrix = alice
+        .get_provisional()
+        .unwrap()
+        .as_factor_instances_derived()
+        .unwrap()
+        .matrix_of_factors
+        .clone();
     for factors_for_role in [
         &alice_matrix.primary().all_hd_factors(),
         &alice_matrix.recovery().all_hd_factors(),
@@ -2440,13 +2445,38 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
             .map(AddressOfAccountOrPersona::from),
     );
 
-    let (_, derivation_outcome) = os
+    let (updated_instances, derivation_outcome) = os
         ._apply_shield_to_entities_with_diagnostics(
             &shield_0,
             unnamed_accounts_and_personas_mixed_addresses,
         )
         .await
         .unwrap();
+
+    println!("🔮🔮🔮🔮");
+
+    for ui in updated_instances {
+        println!(
+            "{:?}",
+            ui.entity_security_state()
+                .get_provisional()
+                .unwrap()
+                .as_factor_instances_derived()
+                .unwrap()
+                .matrix_of_factors
+                .primary()
+                .all_factors()
+                .iter()
+                .map(|f| (
+                    f.factor_source_id.to_string(),
+                    f.try_as_hd_factor_instances()
+                        .unwrap()
+                        .derivation_entity_index()
+                ))
+                .collect_vec()
+        );
+    }
+    println!("🔮🔮🔮🔮");
 
     assert!(
         !derivation_outcome.derived_any_new_instance_for_any_factor_source(),
@@ -2641,9 +2671,10 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
 
     assert_eq!(
         securified_bob
-            .try_get_secured_control()
+            .get_provisional()
             .unwrap()
-            .security_structure
+            .as_factor_instances_derived()
+            .unwrap()
             .matrix_of_factors
             .primary()
             .all_hd_factors()
@@ -2680,9 +2711,10 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
 
     assert_eq!(
         securified_carol
-            .try_get_secured_control()
+            .get_provisional()
             .unwrap()
-            .security_structure
+            .as_factor_instances_derived()
+            .unwrap()
             .matrix_of_factors
             .primary()
             .all_hd_factors()
@@ -2753,9 +2785,10 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
 
     assert_eq!(
         securified_diana
-            .try_get_secured_control()
+            .get_provisional()
             .unwrap()
-            .security_structure
+            .as_factor_instances_derived()
+            .unwrap()
             .matrix_of_factors
             .primary()
             .all_hd_factors()
@@ -2854,9 +2887,10 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
 
         pretty_assertions::assert_eq!(
             securified_entity
-                .try_get_secured_control()
+                .get_provisional()
                 .unwrap()
-                .security_structure
+                .as_factor_instances_derived()
+                .unwrap()
                 .matrix_of_factors
                 .primary()
                 .all_hd_factors()

@@ -3,8 +3,8 @@ mod sargon_os_signing;
 pub mod prelude {
     pub use crate::sargon_os_signing::*;
 
-    pub use prelude::prelude::*;
     pub(crate) use error::prelude::*;
+    pub use prelude::prelude::*;
     pub(crate) use profile::prelude::*;
     pub(crate) use sargon_os::prelude::*;
     pub(crate) use signing::prelude::*;

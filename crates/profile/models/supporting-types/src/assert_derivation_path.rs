@@ -32,14 +32,79 @@ impl HighestDerivationPathIndex for MatrixOfFactorInstances {
         factor_source_id: FactorSourceIDFromHash,
         assert_matches: AssertMatches,
     ) -> Option<HDPathComponent> {
-        self.all_factors()
+        highest_derivation_index_of(
+            self.all_factors().into_iter().cloned(),
+            factor_source_id,
+            assert_matches,
+        )
+    }
+}
+
+pub fn highest_derivation_index_of(
+    instances: impl IntoIterator<Item = impl Into<Option<FactorInstance>>>,
+    factor_source_id: FactorSourceIDFromHash,
+    assert_matches: AssertMatches,
+) -> Option<HDPathComponent> {
+    highest_derivation_index_of_hd_factors(
+        instances
             .into_iter()
-            .flat_map(|f| f.try_as_hd_factor_instances().ok())
-            .filter(|f| f.factor_source_id == factor_source_id)
-            .map(|f| f.derivation_path())
-            .map(|p| assert_matches.matches(&p))
-            .map(|p| p.index())
-            .max()
+            .filter_map(Into::into)
+            .flat_map(|f| f.try_as_hd_factor_instances().ok()),
+        factor_source_id,
+        assert_matches,
+    )
+}
+
+pub fn highest_derivation_index_of_hd_factors(
+    hd_instances: impl IntoIterator<
+        Item = impl Into<Option<HierarchicalDeterministicFactorInstance>>,
+    >,
+    factor_source_id: FactorSourceIDFromHash,
+    assert_matches: AssertMatches,
+) -> Option<HDPathComponent> {
+    hd_instances
+        .into_iter()
+        .filter_map(Into::into)
+        .filter(|f| f.factor_source_id == factor_source_id)
+        .map(|f| f.derivation_path())
+        .map(|p| assert_matches.matches(&p))
+        .map(|p| p.index())
+        .max()
+}
+
+pub trait MaxDerivationEntityQuerying {
+    fn highest_derivation_path_index(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        assert_matches: AssertMatches,
+    ) -> Option<HDPathComponent>;
+}
+
+impl MaxDerivationEntityQuerying for ProvisionalSecurifiedConfig {
+    fn highest_derivation_path_index(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        assert_matches: AssertMatches,
+    ) -> Option<HDPathComponent> {
+        match self {
+            ProvisionalSecurifiedConfig::FactorInstancesDerived { value } => {
+                value.highest_derivation_path_index(
+                    factor_source_id,
+                    assert_matches,
+                )
+            }
+        }
+    }
+}
+
+impl MaxDerivationEntityQuerying for SecurityStructureOfFactorInstances {
+    fn highest_derivation_path_index(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        assert_matches: AssertMatches,
+    ) -> Option<HDPathComponent> {
+        self.matrix_of_factors
+            .highest_derivation_path_index(factor_source_id, assert_matches)
     }
 }
 
@@ -49,8 +114,26 @@ impl HighestDerivationPathIndex for SecuredEntityControl {
         factor_source_id: FactorSourceIDFromHash,
         assert_matches: AssertMatches,
     ) -> Option<HDPathComponent> {
-        self.security_structure
+        let committed = self
+            .security_structure
             .matrix_of_factors
-            .highest_derivation_path_index(factor_source_id, assert_matches)
+            .highest_derivation_path_index(factor_source_id, assert_matches);
+
+        let provisional =
+            self.provisional_securified_config.as_ref().and_then(|psc| {
+                psc.highest_derivation_path_index(
+                    factor_source_id,
+                    assert_matches,
+                )
+            });
+
+        match (committed, provisional) {
+            (Some(committed), Some(provisional)) => {
+                Some(committed.max(provisional))
+            }
+            (Some(committed), None) => Some(committed),
+            (None, Some(provisional)) => Some(provisional),
+            (None, None) => None,
+        }
     }
 }

@@ -14,7 +14,6 @@ pub mod prelude {
 
     #[cfg(test)]
     pub(crate) use serde_json::json;
-  
 }
 
 pub use prelude::*;

@@ -35,7 +35,6 @@ pub mod prelude {
 
     #[cfg(test)]
     mod testing {
-
         pub(crate) use radix_connect_models::prelude::*;
         pub(crate) use serde::Deserialize;
     }

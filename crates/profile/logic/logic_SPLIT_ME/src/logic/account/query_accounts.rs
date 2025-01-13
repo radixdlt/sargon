@@ -44,7 +44,11 @@ pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
                     "Should already have filtered out securified entities"
                 ),
             };
-            UnsecurifiedEntity::new(e.address(), factor_instance)
+            UnsecurifiedEntity::new(
+                e.address(),
+                factor_instance,
+                e.get_provisional(),
+            )
         })
         .collect()
     }

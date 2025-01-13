@@ -142,20 +142,108 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     /// factor source id found.
     /// By "controlled by" we mean having a MatrixOfFactorInstances which has that
     /// factor in **any role** in its MatrixOfFactorInstances.
+    fn max_entity_mfa<E: IsBaseEntity + std::hash::Hash + Eq + Clone>(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        unsecurified_entities: &IndexSet<UnsecurifiedEntity>,
+        securified_entities: &IndexSet<AbstractSecurifiedEntity<E>>,
+        entity_kind: CAP26EntityKind,
+    ) -> Option<HDPathComponent> {
+        let predicate = AssertMatches {
+            network_id: self.network_id,
+            key_kind: CAP26KeyKind::TransactionSigning,
+            entity_kind,
+            key_space: KeySpace::Securified,
+        };
+        let max_securified = securified_entities
+            .iter()
+            .flat_map(|e| {
+                e.highest_derivation_path_index(factor_source_id, predicate)
+            })
+            .max();
+
+        let max_provisional_unsecurified = unsecurified_entities
+            .iter()
+            .filter_map(|e| e.provisional_security_config.as_ref())
+            .flat_map(|x| {
+                x.highest_derivation_path_index(factor_source_id, predicate)
+            })
+            .max();
+
+        max_securified.max(max_provisional_unsecurified)
+    }
+
+    /// Returns the Max Derivation Entity Index of Securified Accounts controlled
+    /// by `factor_source_id`, or `None` if no securified account controlled by that
+    /// factor source id found.
+    /// By "controlled by" we mean having a MatrixOfFactorInstances which has that
+    /// factor in **any role** in its MatrixOfFactorInstances.
     fn max_account_mfa(
         &self,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Option<HDPathComponent> {
-        self.securified_accounts_on_network
-            .clone()
-            .into_iter()
-            .flat_map(|e: SecurifiedAccount| {
-                e.highest_derivation_path_index(
+        self.max_entity_mfa(
+            factor_source_id,
+            &self.unsecurified_accounts_on_network,
+            &self.securified_accounts_on_network,
+            CAP26EntityKind::Account,
+        )
+    }
+
+    /// Returns the Max Derivation Entity Index of Securified Persona controlled
+    /// by `factor_source_id`, or `None` if no securified persona controlled by that
+    /// factor source id found.
+    /// By "controlled by" we mean having a MatrixOfFactorInstances which has that
+    /// factor in **any role** in its MatrixOfFactorInstances.
+    fn max_identity_mfa(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Option<HDPathComponent> {
+        self.max_entity_mfa(
+            factor_source_id,
+            &self.unsecurified_personas_on_network,
+            &self.securified_personas_on_network,
+            CAP26EntityKind::Identity,
+        )
+    }
+
+    fn max_entity_rola<E: IsBaseEntity + std::hash::Hash + Eq + Clone>(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        securified_entities: &IndexSet<AbstractSecurifiedEntity<E>>,
+        entity_kind: CAP26EntityKind,
+    ) -> Option<HDPathComponent> {
+        securified_entities
+            .iter()
+            .flat_map(|e| {
+
+                // Check if the non-provisional's FactorSourceID matches the specified one.
+                let non_provisional_matching = {
+                    let maybe_wrong_factor = e.securified_entity_control.authentication_signing_factor_instance();
+
+                    if maybe_wrong_factor.factor_source_id == factor_source_id {
+                        Some(maybe_wrong_factor.clone())
+                    } else {
+                        None
+                    }
+                };
+
+                // Check if this entity's security state has a provisional securified config and if
+                // the factor source id matches the specified one.
+                let provisional = e.securified_entity_control.provisional_securified_config.as_ref().and_then(|x|
+                    match x {
+                        ProvisionalSecurifiedConfig::FactorInstancesDerived { value } => if value.authentication_signing_factor_instance.factor_source_id == factor_source_id {
+                        // Matches
+                        Some(value.authentication_signing_factor_instance.clone())
+                    } else { None }});
+
+                highest_derivation_index_of_hd_factors(
+                    [provisional, non_provisional_matching],
                     factor_source_id,
                     AssertMatches {
                         network_id: self.network_id,
-                        key_kind: CAP26KeyKind::TransactionSigning,
-                        entity_kind: CAP26EntityKind::Account,
+                        key_kind: CAP26KeyKind::AuthenticationSigning,
+                        entity_kind,
                         key_space: KeySpace::Securified,
                     },
                 )
@@ -169,25 +257,11 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
         &self,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Option<HDPathComponent> {
-        self.securified_accounts_on_network
-            .clone()
-            .into_iter()
-            .map(|e: SecurifiedAccount| {
-                e.securified_entity_control
-                    .authentication_signing_factor_instance()
-            })
-            .filter(|f| f.factor_source_id() == factor_source_id)
-            .map(|fi| {
-                AssertMatches {
-                    network_id: self.network_id,
-                    key_kind: CAP26KeyKind::AuthenticationSigning,
-                    entity_kind: CAP26EntityKind::Account,
-                    key_space: KeySpace::Securified,
-                }
-                .matches(&fi.derivation_path())
-                .index()
-            })
-            .max()
+        self.max_entity_rola(
+            factor_source_id,
+            &self.securified_accounts_on_network,
+            CAP26EntityKind::Account,
+        )
     }
 
     /// Returns the max index of true ROLA keys of securified personas with
@@ -196,51 +270,11 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
         &self,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Option<HDPathComponent> {
-        self.securified_personas_on_network
-            .clone()
-            .into_iter()
-            .map(|e: SecurifiedPersona| {
-                e.securified_entity_control
-                    .authentication_signing_factor_instance()
-            })
-            .filter(|f| f.factor_source_id() == factor_source_id)
-            .map(|fi| {
-                AssertMatches {
-                    network_id: self.network_id,
-                    key_kind: CAP26KeyKind::AuthenticationSigning,
-                    entity_kind: CAP26EntityKind::Identity,
-                    key_space: KeySpace::Securified,
-                }
-                .matches(&fi.derivation_path())
-                .index()
-            })
-            .max()
-    }
-
-    /// Returns the Max Derivation Entity Index of Securified Persona controlled
-    /// by `factor_source_id`, or `None` if no securified persona controlled by that
-    /// factor source id found.
-    /// By "controlled by" we mean having a MatrixOfFactorInstances which has that
-    /// factor in **any role** in its MatrixOfFactorInstances.
-    fn max_identity_mfa(
-        &self,
-        factor_source_id: FactorSourceIDFromHash,
-    ) -> Option<HDPathComponent> {
-        self.securified_personas_on_network
-            .clone()
-            .into_iter()
-            .flat_map(|e: SecurifiedPersona| {
-                e.highest_derivation_path_index(
-                    factor_source_id,
-                    AssertMatches {
-                        network_id: self.network_id,
-                        key_kind: CAP26KeyKind::TransactionSigning,
-                        entity_kind: CAP26EntityKind::Identity,
-                        key_space: KeySpace::Securified,
-                    },
-                )
-            })
-            .max()
+        self.max_entity_rola(
+            factor_source_id,
+            &self.securified_personas_on_network,
+            CAP26EntityKind::Identity,
+        )
     }
 
     /// Finds the "next" derivation entity index `HDPathComponent`, for

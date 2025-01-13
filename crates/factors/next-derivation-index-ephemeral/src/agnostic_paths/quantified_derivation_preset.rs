@@ -31,7 +31,9 @@ impl QuantifiedDerivationPreset {
     /// We will derive ` `addresses_of_entities_to_derive_rola_key_for.len()` many
     /// ROLA keys.
     pub fn apply_shield_to_entities(
-        addresses_of_entities_to_derive_tx_key_for: &IndexSet<AddressOfAccountOrPersona>,
+        addresses_of_entities_to_derive_tx_key_for: &IndexSet<
+            AddressOfAccountOrPersona,
+        >,
         addresses_of_entities_to_derive_rola_key_for: &IndexSet<
             AddressOfAccountOrPersona,
         >,

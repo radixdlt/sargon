@@ -22,9 +22,12 @@ pub trait OsShieldApplying {
         shield: &SecurityStructureOfFactorSources,
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<()> {
-        self._apply_shield_to_entities_with_diagnostics(shield, entity_addresses)
-            .await
-            .map(|_| ())
+        self._apply_shield_to_entities_with_diagnostics(
+            shield,
+            entity_addresses,
+        )
+        .await
+        .map(|_| ())
     }
 
     async fn _provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
@@ -51,13 +54,15 @@ pub trait OsShieldApplying {
 
 #[async_trait::async_trait]
 impl OsShieldApplying for SargonOS {
-
     async fn apply_security_shield_to_entities(
         &self,
         security_shield_id: SecurityStructureID,
         addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<()> {
-        let shield = self.security_structure_of_factor_sources_from_security_structure_id(security_shield_id)?;
+        let shield = self
+            .security_structure_of_factor_sources_from_security_structure_id(
+                security_shield_id,
+            )?;
         self.apply_shield_to_entities(&shield, addresses).await
     }
 
@@ -181,26 +186,30 @@ impl OsShieldApplying for SargonOS {
         // We only consume ROLA factors for:
         // * Unsecured entities (because they do not yet have nay ROLA key)
         // * Securified entities where the ROLA key's FactorSource does not match the one of the shield
-        let mut existing_rola_key_for_entities =
-            IndexMap::<AddressOfAccountOrPersona, HierarchicalDeterministicFactorInstance>::new();
-            let mut include_rola_key_for_entities =
+        let mut existing_rola_key_for_entities = IndexMap::<
+            AddressOfAccountOrPersona,
+            HierarchicalDeterministicFactorInstance,
+        >::new();
+        let mut include_rola_key_for_entities =
             IndexSet::<AddressOfAccountOrPersona>::new();
 
         for entity in entities.iter() {
             match entity.entity_security_state() {
-                EntitySecurityState::Unsecured { .. } => { include_rola_key_for_entities.insert(entity.address()); },
+                EntitySecurityState::Unsecured { .. } => {
+                    include_rola_key_for_entities.insert(entity.address());
+                }
                 EntitySecurityState::Securified { value: sec } => {
-                    let existing =   sec
+                    let existing = sec
                         .security_structure
                         .authentication_signing_factor_instance;
-                     
-                      if existing
-                       .factor_source_id
+
+                    if existing.factor_source_id
                         == security_structure_of_factor_sources
                             .authentication_signing_factor
                             .id_from_hash()
                     {
-                        existing_rola_key_for_entities.insert(entity.address(), existing);
+                        existing_rola_key_for_entities
+                            .insert(entity.address(), existing);
                     } else {
                         include_rola_key_for_entities.insert(entity.address());
                     }
@@ -291,9 +300,7 @@ impl OsShieldApplying for SargonOS {
                 };
 
                 for entity_address in addresses_of_kind.clone().into_iter() {
-       
-                    let security_structure_of_factor_instances = 
-                    SecurityStructureOfFactorInstances::fulfilling_structure_of_factor_sources_with_instances(
+                    let security_structure_of_factor_instances = SecurityStructureOfFactorInstances::fulfilling_structure_of_factor_sources_with_instances(
                         &mut instances_per_factor_source,
                         existing_rola_key_for_entities.get(entity_address).cloned(),
                         &security_structure_of_factor_sources

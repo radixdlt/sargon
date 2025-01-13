@@ -9,8 +9,8 @@ pub mod prelude {
     pub(crate) use profile::prelude::*;
     pub(crate) use profile_supporting_types::prelude::*;
 
-    pub use prelude::prelude::*;
     pub use crate::drivers::*;
+    pub use prelude::prelude::*;
 
     pub(crate) use enum_iterator::*;
     pub(crate) use indexmap::{IndexMap, IndexSet};
