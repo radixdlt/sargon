@@ -51,7 +51,6 @@ pub struct FactorInstancesProviderOutcomeForFactor {
 
 #[allow(dead_code)]
 impl FactorInstancesProviderOutcomeForFactor {
-    #[cfg(test)]
     fn debug_string_for_tests(&self) -> String {
         format!(
             "OutcomeForFactor[factor: {}\n\n\t⚡️to_use_directly: {:?}, \n\n\t➡️💾was_cached: {:?}, \n\n\t💾➡️found_in_cache: {:?}\n\n\t🔮was_derived: {:?}\n\n]",
@@ -67,10 +66,10 @@ impl FactorInstancesProviderOutcomeForFactor {
     }
 
     fn debug_string(&self) -> String {
-        #[cfg(test)]
+        #[cfg(debug_assertions)]
         return self.debug_string_for_tests();
 
-        #[cfg(not(test))]
+        #[cfg(not(debug_assertions))]
         return self.debug_string_no_test();
     }
 }

@@ -23,15 +23,15 @@ impl QuantifiedDerivationPreset {
     }
 
     /// Returns a the QuantifiedDerivationPresets needed apply a shield update
-    /// to `addresses_of_entities`. Will return the `Account` variant of each
-    /// DerivationPreset for each Account in `addresses_of_entities` and the
+    /// to `addresses_of_entities_to_derive_tx_key_for`. Will return the `Account` variant of each
+    /// DerivationPreset for each Account in `addresses_of_entities_to_derive_tx_key_for` and the
     /// `Identity` variant of each DerivationPreset for each Persona
-    /// in `addresses_of_entities`.
+    /// in `addresses_of_entities_to_derive_tx_key_for`.
     ///
     /// We will derive ` `addresses_of_entities_to_derive_rola_key_for.len()` many
     /// ROLA keys.
     pub fn apply_shield_to_entities(
-        addresses_of_entities: &IndexSet<AddressOfAccountOrPersona>,
+        addresses_of_entities_to_derive_tx_key_for: &IndexSet<AddressOfAccountOrPersona>,
         addresses_of_entities_to_derive_rola_key_for: &IndexSet<
             AddressOfAccountOrPersona,
         >,
@@ -75,7 +75,7 @@ impl QuantifiedDerivationPreset {
         }
 
         let mut transaction = from_addresses_for_entity(
-            addresses_of_entities,
+            addresses_of_entities_to_derive_tx_key_for,
             DerivationPreset::mfa_entity_kind,
         );
         let authentication = from_addresses_for_entity(

@@ -2,6 +2,7 @@
 
 use crate::prelude::*;
 
+#[cfg(debug_assertions)]
 impl SargonOS {
     pub async fn with_bdfs() -> (Arc<Self>, FactorSource) {
         let os = Self::fast_boot().await;

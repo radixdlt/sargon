@@ -277,8 +277,8 @@ impl SargonOS {
                 continue;
             }
             // Use FactorInstancesProvider to eagerly fill cache...
-            #[cfg(test)]
             // only test for now, need to do more integration work in hosts before enabling this
+            #[cfg(debug_assertions)]
             let _ = self
                 .pre_derive_and_fill_cache_with_instances_for_factor_source(
                     factor_source,
@@ -466,7 +466,7 @@ impl SargonOS {
     }
 }
 
-#[allow(unused)]
+#[cfg(debug_assertions)]
 impl SargonOS {
     /// For tests
     pub async fn clear_cache(&self) {
