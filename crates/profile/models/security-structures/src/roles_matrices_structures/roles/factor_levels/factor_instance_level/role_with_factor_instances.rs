@@ -28,7 +28,7 @@ impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
                 role_of_sources.get_override_factors(),
             )?;
 
-        let role_with_instances = Self::with_factors_and_threshold_kind(
+        let role_with_instances = Self::with_factors_and_threshold(
             threshold,
             threshold_factors,
             override_factors,

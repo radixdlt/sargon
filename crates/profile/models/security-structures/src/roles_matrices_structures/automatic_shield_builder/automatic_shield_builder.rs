@@ -575,7 +575,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                 Threshold::All,
                 [FactorSourceID::sample_ledger()],
                 []
@@ -646,7 +646,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                 Threshold::All,
                 factors.clone().into_iter().map(|f| f.id()),
                 []
@@ -706,7 +706,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                 Threshold::All,
                 [FactorSourceID::sample_device()],
                 []
@@ -767,7 +767,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                 Threshold::All,
                 [FactorSourceID::sample_device()],
                 []
@@ -828,7 +828,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                 Threshold::All,
                 [FactorSourceID::sample_device()],
                 []
@@ -895,7 +895,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                 Threshold::All,
                 [
                     FactorSourceID::sample_device(),

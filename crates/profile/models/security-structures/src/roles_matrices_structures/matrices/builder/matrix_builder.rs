@@ -210,8 +210,7 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.primary_role
             .validate()
-            .into_matrix_err(RoleKind::Primary)?;
-        Ok(())
+            .into_matrix_err(RoleKind::Primary)
     }
 
     pub fn validate_primary_threshold_factors_in_isolation(
@@ -219,8 +218,7 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.primary_role
             .validate_threshold_factors()
-            .into_matrix_err(RoleKind::Primary)?;
-        Ok(())
+            .into_matrix_err(RoleKind::Primary)
     }
 
     pub fn validate_recovery_role_in_isolation(
@@ -228,8 +226,7 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.recovery_role
             .validate()
-            .into_matrix_err(RoleKind::Recovery)?;
-        Ok(())
+            .into_matrix_err(RoleKind::Recovery)
     }
 
     pub fn validate_confirmation_role_in_isolation(
@@ -237,8 +234,7 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.confirmation_role
             .validate()
-            .into_matrix_err(RoleKind::Confirmation)?;
-        Ok(())
+            .into_matrix_err(RoleKind::Confirmation)
     }
 
     fn validate_each_role_in_isolation(&self) -> MatrixBuilderMutateResult {

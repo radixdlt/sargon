@@ -118,7 +118,7 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
         }
     }
 
-    pub fn with_factors_and_threshold_kind(
+    pub fn with_factors_and_threshold(
         threshold: Threshold,
         threshold_factors: impl IntoIterator<Item = FACTOR>,
         override_factors: impl IntoIterator<Item = FACTOR>,

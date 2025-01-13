@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// Represents the status of selected threshold factor sources in the Security Shield building process.
+/// Represents the status of selected Primary Threshold factor sources in the Security Shield building process.
 /// Primarily used for UI logic representation in host applications.
 #[derive(Clone, Debug, PartialEq)]
 pub enum SelectedPrimaryThresholdFactorsStatus {

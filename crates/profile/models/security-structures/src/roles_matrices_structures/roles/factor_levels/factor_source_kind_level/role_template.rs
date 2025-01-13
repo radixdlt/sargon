@@ -26,11 +26,7 @@ impl PrimaryRoleTemplate {
         threshold_factors: impl IntoIterator<Item = FactorSourceTemplate>,
     ) -> Self {
         let threshold_factors = threshold_factors.into_iter().collect_vec();
-        Self::with_factors_and_threshold_kind(
-            Threshold::All,
-            threshold_factors,
-            [],
-        )
+        Self::with_factors_and_threshold(Threshold::All, threshold_factors, [])
     }
 }
 
@@ -38,11 +34,7 @@ impl RecoveryRoleTemplate {
     pub(crate) fn new(
         override_factors: impl IntoIterator<Item = FactorSourceTemplate>,
     ) -> Self {
-        Self::with_factors_and_threshold_kind(
-            Threshold::All,
-            [],
-            override_factors,
-        )
+        Self::with_factors_and_threshold(Threshold::All, [], override_factors)
     }
 }
 
@@ -50,11 +42,7 @@ impl ConfirmationRoleTemplate {
     pub(crate) fn new(
         override_factors: impl IntoIterator<Item = FactorSourceTemplate>,
     ) -> Self {
-        Self::with_factors_and_threshold_kind(
-            Threshold::All,
-            [],
-            override_factors,
-        )
+        Self::with_factors_and_threshold(Threshold::All, [], override_factors)
     }
 }
 

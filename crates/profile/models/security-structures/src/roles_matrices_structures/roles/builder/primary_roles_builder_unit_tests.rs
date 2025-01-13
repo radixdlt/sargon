@@ -765,7 +765,7 @@ mod ledger {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                     Threshold::All,
                     [],
                     [sample()],
@@ -784,7 +784,7 @@ mod ledger {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                     Threshold::All,
                     [],
                     [sample(), sample_other()],
@@ -880,7 +880,7 @@ mod arculus {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                     Threshold::All,
                     [],
                     [sample()],
@@ -899,7 +899,7 @@ mod arculus {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                     Threshold::All,
                     [],
                     [sample(), sample_other()],
@@ -999,7 +999,7 @@ mod device_factor_source {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                     Threshold::All,
                     [],
                     [sample()],

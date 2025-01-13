@@ -12,7 +12,7 @@ impl RecoveryRoleWithFactorSourceIds {
     pub(crate) fn override_only(
         override_factors: impl IntoIterator<Item = FactorSourceID>,
     ) -> Self {
-        Self::with_factors_and_threshold_kind(
+        Self::with_factors_and_threshold(
             Threshold::All,
             vec![],
             override_factors,
@@ -25,7 +25,7 @@ impl ConfirmationRoleWithFactorSourceIds {
     pub(crate) fn override_only(
         override_factors: impl IntoIterator<Item = FactorSourceID>,
     ) -> Self {
-        Self::with_factors_and_threshold_kind(
+        Self::with_factors_and_threshold(
             Threshold::All,
             vec![],
             override_factors,
@@ -393,7 +393,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &self,
     ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
         self.validate().map(|_| {
-            RoleWithFactorSourceIds::with_factors_and_threshold_kind(
+            RoleWithFactorSourceIds::with_factors_and_threshold(
                 self.get_threshold(),
                 self.get_threshold_factors().clone(),
                 self.get_override_factors().clone(),
@@ -461,16 +461,13 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn check_threshold_for_primary(
         &self,
     ) -> Option<NotYetValidReason> {
-        if self.get_threshold_factors().len()
-            < self.get_threshold_value() as usize
-        {
+        let threshold_value = self.get_threshold_value();
+        if self.get_threshold_factors().len() < threshold_value as usize {
             return Some(
                 NotYetValidReason::ThresholdHigherThanThresholdFactorsLen,
             );
         }
-        if self.get_threshold_value() == 0
-            && !self.get_threshold_factors().is_empty()
-        {
+        if threshold_value == 0 && !self.get_threshold_factors().is_empty() {
             return Some(
                 NotYetValidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero,
             );

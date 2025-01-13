@@ -1397,7 +1397,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [
                             FactorSourceID::sample_device(),
@@ -1517,7 +1517,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [
                             FactorSourceID::sample_device(),
@@ -1568,7 +1568,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [FactorSourceID::sample_device(),],
                         [],
@@ -1616,7 +1616,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [FactorSourceID::sample_ledger(),],
                         [],
@@ -1672,7 +1672,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [
                             FactorSourceID::sample_device(),
@@ -1732,7 +1732,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [
                             FactorSourceID::sample_ledger(),
@@ -1784,7 +1784,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [FactorSourceID::sample_ledger(),],
                         [],
@@ -1832,7 +1832,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [FactorSourceID::sample_device(),],
                         [],
@@ -1892,7 +1892,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [
                             FactorSourceID::sample_device(),
@@ -1961,7 +1961,7 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
                         Threshold::All,
                         [
                             FactorSourceID::sample_device(),
