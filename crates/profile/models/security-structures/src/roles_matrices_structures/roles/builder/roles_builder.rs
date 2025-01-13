@@ -699,7 +699,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
 
     /// Removes a factor source from the list of `factor_list_kind`.
     ///
-    /// Lowers the threshold if the deleted factor source is in the threshold list
+    /// Lowers the threshold if the deleted factor source is in the `factor_list_kind` list
     /// and if after removal of `factor_source_id` `self.threshold > self.threshold_factors.len()`
     ///
     /// Returns `Ok` if `factor_source_id` was found and deleted. However, does not call `self.validate()`,
@@ -729,7 +729,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                         self.get_threshold_factors().len() as u8;
                     if threshold_factors_len == 0 {
                         self.unchecked_set_threshold(Threshold::All);
-                    } else {
+                    } else if self.get_threshold() > threshold_factors_len {
                         self.unchecked_set_threshold(Threshold::Specific(
                             threshold_factors_len,
                         ));

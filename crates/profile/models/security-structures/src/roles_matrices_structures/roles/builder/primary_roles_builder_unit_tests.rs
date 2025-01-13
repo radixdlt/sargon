@@ -197,12 +197,21 @@ mod threshold_suite {
         assert_eq!(sut.get_threshold(), 1);
 
         sut.add_factor_source_to_threshold(fs0).unwrap();
-        sut.set_threshold(Threshold::Specific(2)).unwrap();
-        assert_eq!(sut.get_threshold_kind(), Threshold::Specific(2));
+        sut.add_factor_source_to_threshold(
+            FactorSourceID::sample_arculus_other(),
+        )
+        .unwrap(); // now we have 3 factors
+
+        sut.set_threshold(Threshold::Specific(1)).unwrap();
+        assert_eq!(sut.get_threshold_kind(), Threshold::Specific(1));
         sut.remove_factor_source(&fs0, FactorListKind::Threshold)
             .unwrap();
-        assert_eq!(sut.get_threshold_kind(), Threshold::Specific(1)); // assert that we DIDN'T change the threshold kind from Specific to All
-        assert_eq!(sut.get_threshold(), 1);
+        assert_eq!(sut.get_threshold_kind(), Threshold::Specific(1)); // assert that we DIDN'T change the threshold specific value
+
+        sut.remove_factor_source(&fs1, FactorListKind::Threshold)
+            .unwrap();
+
+        assert_eq!(sut.get_threshold(), 1); // assert that we DIDN'T change the threshold kind from Specific to All
     }
 
     #[test]
