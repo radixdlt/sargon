@@ -362,14 +362,18 @@ mod tests {
     fn empty_is_err() {
         let invalid = unsafe {
             SUT::unbuilt_with_roles_and_days(
-                PrimaryRoleWithFactorInstances::unbuilt_with_factors(0, [], []),
+                PrimaryRoleWithFactorInstances::unbuilt_with_factors(
+                    Threshold::All,
+                    [],
+                    [],
+                ),
                 RecoveryRoleWithFactorInstances::unbuilt_with_factors(
-                    0,
+                    Threshold::zero(),
                     [],
                     [],
                 ),
                 ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
-                    0,
+                    Threshold::zero(),
                     [],
                     [],
                 ),
@@ -383,6 +387,7 @@ mod tests {
             Err(CommonError::NoTransactionSigningFactorInstance)
         ));
     }
+
     #[test]
     fn err_if_empty_instance_found_for_factor_source() {
         assert!(matches!(
@@ -405,7 +410,7 @@ mod tests {
             r#"
             {
               "primaryRole": {
-                "threshold": 2,
+                "threshold": "all",
                 "thresholdFactors": [
                   {
                     "factorSourceID": {
@@ -461,7 +466,7 @@ mod tests {
                 "overrideFactors": []
               },
               "recoveryRole": {
-                "threshold": 0,
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {
@@ -517,7 +522,7 @@ mod tests {
                 ]
               },
               "confirmationRole": {
-                "threshold": 0,
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {

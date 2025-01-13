@@ -11,6 +11,7 @@ mod security_structure_metadata;
 mod security_structure_of_factors;
 mod selected_primary_threshold_factors_status;
 
+pub use crate::threshold::*;
 pub use automatic_shield_builder::*;
 pub use has_role_kind::*;
 pub use matrices::*;

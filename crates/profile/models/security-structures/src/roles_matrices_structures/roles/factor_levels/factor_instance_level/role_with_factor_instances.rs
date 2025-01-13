@@ -12,7 +12,7 @@ impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
 
         let role_of_sources = matrix_of_factor_sources.get_role::<ROLE>();
         assert_eq!(role_of_sources.role(), role_kind);
-        let threshold: u8 = role_of_sources.get_threshold();
+        let threshold: Threshold = role_of_sources.get_threshold();
 
         // Threshold factors
         let threshold_factors =
@@ -28,8 +28,11 @@ impl<const ROLE: u8> RoleWithFactorInstances<ROLE> {
                 role_of_sources.get_override_factors(),
             )?;
 
-        let role_with_instances =
-            Self::with_factors(threshold, threshold_factors, override_factors);
+        let role_with_instances = Self::with_factors_and_threshold_kind(
+            threshold,
+            threshold_factors,
+            override_factors,
+        );
 
         assert_eq!(role_with_instances.role(), role_kind);
         Ok(role_with_instances)

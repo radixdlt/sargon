@@ -21,7 +21,7 @@ impl<const ROLE: u8> AbstractBuiltRoleWithFactor<ROLE, FactorSourceTemplate> {
                     .map(|f| factor_source_id_assigner.next(f))
                     .collect::<Result<Vec<_>, CommonError>>()
             };
-        Ok(RoleWithFactorSourceIds::with_factors(
+        Ok(RoleWithFactorSourceIds::with_factors_and_threshold_kind(
             self.get_threshold(),
             fulfill(self.get_threshold_factors())?,
             fulfill(self.get_override_factors())?,

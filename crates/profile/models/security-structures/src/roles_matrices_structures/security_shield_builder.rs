@@ -385,7 +385,7 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn set_threshold(&self, threshold: u8) -> &Self {
+    pub fn set_threshold(&self, threshold: Threshold) -> &Self {
         self.set(|builder| builder.set_threshold(threshold))
     }
 
@@ -863,7 +863,7 @@ mod tests {
     #[test]
     fn add_factor_to_primary_threshold_does_not_change_already_set_threshold() {
         let sut = SUT::strict();
-        sut.set_threshold(42);
+        sut.set_threshold(Threshold::Specific(42));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
         );
@@ -960,7 +960,7 @@ mod tests {
             shield.matrix_of_factors.primary().get_override_factors(),
             &vec![FactorSourceID::sample_arculus()]
         );
-        assert_eq!(shield.matrix_of_factors.primary().get_threshold(), 1);
+        assert_eq!(shield.matrix_of_factors.primary().get_threshold_value(), 1);
         assert_eq!(
             shield.matrix_of_factors.recovery().get_override_factors(),
             &vec![FactorSourceID::sample_ledger()]
@@ -992,7 +992,7 @@ mod tests {
             add(sut, FactorSourceID::sample_device());
             add(sut, FactorSourceID::sample_ledger());
 
-            sut.set_threshold(2);
+            sut.set_threshold(Threshold::Specific(2));
             assert!(is_fully_valid(sut, FactorSourceKind::Password)); // not alone any more!
             assert!(can_be(sut, FactorSourceKind::Password));
         } else {
@@ -1197,7 +1197,7 @@ mod tests {
         let sut = SUT::default();
 
         let _ = sut
-            .set_threshold(2)
+            .set_threshold(Threshold::Specific(2))
             .add_factor_source_to_primary_threshold(
                 FactorSourceID::sample_password(),
             )
@@ -1257,7 +1257,7 @@ mod test_invalid {
             FactorSourceID::sample_device(),
         );
         assert_eq!(sut.get_threshold(), 1);
-        sut.set_threshold(0);
+        sut.set_threshold(Threshold::zero());
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
@@ -1437,7 +1437,7 @@ mod test_invalid {
             FactorSourceID::sample_arculus(),
         );
 
-        sut.set_threshold(1);
+        sut.set_threshold(Threshold::Specific(1));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
@@ -1466,7 +1466,7 @@ mod test_invalid {
             FactorSourceID::sample_arculus(),
         );
 
-        sut.set_threshold(1);
+        sut.set_threshold(Threshold::Specific(1));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
@@ -1492,7 +1492,7 @@ mod test_invalid {
             FactorSourceID::sample_arculus(),
         );
 
-        sut.set_threshold(2);
+        sut.set_threshold(Threshold::Specific(2));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
@@ -1585,7 +1585,7 @@ mod test_invalid {
             .add_factor_source_to_primary_threshold(
                 FactorSourceID::sample_device_other(),
             );
-        let _ = sut.set_threshold(0);
+        let _ = sut.set_threshold(Threshold::zero());
         let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(

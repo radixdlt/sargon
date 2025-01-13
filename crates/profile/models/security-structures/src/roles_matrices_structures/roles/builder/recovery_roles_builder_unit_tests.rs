@@ -58,7 +58,7 @@ fn validation_for_addition_of_factor_source_of_kind_to_list() {
 fn set_threshold_is_unsupported() {
     let mut sut = make();
     assert_eq!(
-        sut.set_threshold(1),
+        sut.set_specific_threshold(1),
         MutRes::basic_violation(BasicViolation::RecoveryCannotSetThreshold)
     );
 }

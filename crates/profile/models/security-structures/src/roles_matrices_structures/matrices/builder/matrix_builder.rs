@@ -369,7 +369,7 @@ impl MatrixBuilder {
     /// Sets the threshold on the primary role builder.
     pub fn set_threshold(
         &mut self,
-        threshold: u8,
+        threshold: Threshold,
     ) -> MatrixBuilderMutateResult {
         self.primary_role
             .set_threshold(threshold)
@@ -377,7 +377,7 @@ impl MatrixBuilder {
     }
 
     pub fn get_threshold(&self) -> u8 {
-        self.primary_role.get_threshold()
+        self.primary_role.get_threshold_value()
     }
 
     pub fn set_number_of_days_until_auto_confirm(
