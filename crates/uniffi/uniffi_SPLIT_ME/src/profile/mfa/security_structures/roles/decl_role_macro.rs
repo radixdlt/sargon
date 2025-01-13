@@ -3,7 +3,7 @@
 // or `FactorSourceID` etc.
 // It will generate the following:
 // struct PrimaryRoleWithFactor<$FACTOR_LEVEL> {
-//     threshold: u8,
+//     threshold: Threshold,
 //     threshold_factors: Vec<$FACTOR_LEVEL>,
 //     override_factors: Vec<$FACTOR_LEVEL>,
 // }
@@ -64,7 +64,7 @@ macro_rules! role_conversion_inner {
         impl From<$internal> for $uniffi {
             fn from(value: $internal) -> Self {
                 Self {
-                    threshold: value.get_threshold(),
+                    threshold: value.get_threshold_kind().into(),
                     threshold_factors: value
                         .get_threshold_factors()
                         .into_iter()
@@ -86,7 +86,7 @@ macro_rules! role_conversion_inner {
             pub fn into_internal(&self) -> $internal {
                 unsafe {
                     <$internal>::unbuilt_with_factors(
-                        self.threshold,
+                        self.threshold.into_internal(),
                         self.threshold_factors.clone().into_iter().map(|x| Into::<$internal_factor>::into(x.clone())).collect::<Vec<_>>(),
                         self.override_factors.clone().into_iter().map(|x| Into::<$internal_factor>::into(x.clone())).collect::<Vec<_>>(),
                     )
@@ -150,7 +150,7 @@ macro_rules! role_conversion_inner {
 
             /// How many threshold factors that must be used to perform some function with
             /// this role.
-            pub threshold: u8,
+            pub threshold: Threshold,
 
             /// Factors which are used in combination with other factors, amounting to at
             /// least `threshold` many factors to perform some function with this role.

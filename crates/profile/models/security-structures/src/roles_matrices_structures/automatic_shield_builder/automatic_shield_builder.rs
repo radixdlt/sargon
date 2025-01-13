@@ -575,8 +575,8 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors(
-                1,
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                Threshold::All,
                 [FactorSourceID::sample_ledger()],
                 []
             )
@@ -646,8 +646,8 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors(
-                3,
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                Threshold::All,
                 factors.clone().into_iter().map(|f| f.id()),
                 []
             )
@@ -706,8 +706,8 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors(
-                1,
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                Threshold::All,
                 [FactorSourceID::sample_device()],
                 []
             )
@@ -767,8 +767,8 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors(
-                1,
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                Threshold::All,
                 [FactorSourceID::sample_device()],
                 []
             )
@@ -828,8 +828,8 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors(
-                1,
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                Threshold::All,
                 [FactorSourceID::sample_device()],
                 []
             )
@@ -895,8 +895,8 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             matrix.primary(),
-            &PrimaryRoleWithFactorSourceIds::with_factors(
-                2,
+            &PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                Threshold::All,
                 [
                     FactorSourceID::sample_device(),
                     FactorSourceID::sample_ledger()

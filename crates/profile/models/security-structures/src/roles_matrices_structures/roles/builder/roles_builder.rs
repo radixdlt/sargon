@@ -12,7 +12,11 @@ impl RecoveryRoleWithFactorSourceIds {
     pub(crate) fn override_only(
         override_factors: impl IntoIterator<Item = FactorSourceID>,
     ) -> Self {
-        Self::with_factors(0, vec![], override_factors)
+        Self::with_factors_and_threshold_kind(
+            Threshold::All,
+            vec![],
+            override_factors,
+        )
     }
 }
 
@@ -21,7 +25,11 @@ impl ConfirmationRoleWithFactorSourceIds {
     pub(crate) fn override_only(
         override_factors: impl IntoIterator<Item = FactorSourceID>,
     ) -> Self {
-        Self::with_factors(0, vec![], override_factors)
+        Self::with_factors_and_threshold_kind(
+            Threshold::All,
+            vec![],
+            override_factors,
+        )
     }
 }
 
@@ -385,8 +393,8 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &self,
     ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
         self.validate().map(|_| {
-            RoleWithFactorSourceIds::with_factors(
-                self.get_threshold(),
+            RoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                self.get_threshold_kind(),
                 self.get_threshold_factors().clone(),
                 self.get_override_factors().clone(),
             )
@@ -715,14 +723,17 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         match factor_list_kind {
             Threshold => {
                 remove(self.mut_threshold_factors())?;
-                let threshold_factors_len =
-                    self.get_threshold_factors().len() as u8;
-                if threshold_factors_len == 0 {
-                    self.unchecked_set_threshold(Threshold::All);
-                } else if self.get_threshold() > threshold_factors_len {
-                    self.unchecked_set_threshold(Threshold::Specific(
-                        threshold_factors_len,
-                    ));
+
+                if let Threshold::Specific(_) = self.get_threshold_kind() {
+                    let threshold_factors_len =
+                        self.get_threshold_factors().len() as u8;
+                    if threshold_factors_len == 0 {
+                        self.unchecked_set_threshold(Threshold::All);
+                    } else {
+                        self.unchecked_set_threshold(Threshold::Specific(
+                            threshold_factors_len,
+                        ));
+                    }
                 }
             }
             Override => {

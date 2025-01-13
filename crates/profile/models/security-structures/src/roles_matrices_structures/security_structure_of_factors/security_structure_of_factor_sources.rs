@@ -81,8 +81,8 @@ impl<const ROLE: u8>
     fn from(
         value: AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSource>,
     ) -> Self {
-        Self::with_factors(
-            value.get_threshold(),
+        Self::with_factors_and_threshold_kind(
+            value.get_threshold_kind(),
             value
                 .get_threshold_factors()
                 .iter()

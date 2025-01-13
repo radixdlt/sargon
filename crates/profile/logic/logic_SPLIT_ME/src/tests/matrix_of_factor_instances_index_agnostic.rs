@@ -9,7 +9,7 @@ type SUT = MatrixOfFactorInstances;
 fn wrong_entity_kind() {
     let invalid = unsafe {
         SUT::unbuilt_with_roles_and_days(
-            PrimaryRoleWithFactorInstances::unbuilt_with_factors(0, [
+            PrimaryRoleWithFactorInstances::unbuilt_with_factors(Threshold::All, [
                 HierarchicalDeterministicFactorInstance::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
                 CAP26EntityKind::Account,
                 0,
@@ -18,12 +18,12 @@ fn wrong_entity_kind() {
                 1,
             ).into()], []),
             RecoveryRoleWithFactorInstances::unbuilt_with_factors(
-                0,
+                Threshold::Specific(0),
                 [],
                 [],
             ),
             ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
-                0,
+                Threshold::Specific(0),
                 [],
                 [],
             ),
@@ -41,7 +41,7 @@ fn wrong_entity_kind() {
 fn wrong_key_kind() {
     let invalid = unsafe {
         SUT::unbuilt_with_roles_and_days(
-            PrimaryRoleWithFactorInstances::unbuilt_with_factors(0, [
+            PrimaryRoleWithFactorInstances::unbuilt_with_factors(Threshold::All, [
                 HierarchicalDeterministicFactorInstance::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
                 CAP26EntityKind::Account,
                 0,
@@ -53,12 +53,12 @@ fn wrong_key_kind() {
                 SecurifiedU30::ZERO
             ).into()], []),
             RecoveryRoleWithFactorInstances::unbuilt_with_factors(
-                0,
+                Threshold::Specific(0),
                 [],
                 [],
             ),
             ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
-                0,
+                Threshold::Specific(0),
                 [],
                 [],
             ),

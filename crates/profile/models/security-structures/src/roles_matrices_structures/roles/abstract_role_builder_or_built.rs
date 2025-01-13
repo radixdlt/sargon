@@ -67,7 +67,7 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     /// of unsafe - as in application **unsecure** - Role of Factors, which might
     /// lead to increase risk for end user to loose funds.
     pub unsafe fn unbuilt_with_factors(
-        threshold: u8,
+        threshold: Threshold,
         threshold_factors: impl IntoIterator<Item = FACTOR>,
         override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
@@ -98,7 +98,7 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
             .expect("Should not have allowed building of invalid Role");
 
         Self {
-            threshold: Threshold::Specific(threshold),
+            threshold,
             threshold_factors,
             override_factors,
         }
@@ -106,6 +106,20 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
 
     pub fn with_factors(
         threshold: u8,
+        threshold_factors: impl IntoIterator<Item = FACTOR>,
+        override_factors: impl IntoIterator<Item = FACTOR>,
+    ) -> Self {
+        unsafe {
+            Self::unbuilt_with_factors(
+                Threshold::Specific(threshold),
+                threshold_factors,
+                override_factors,
+            )
+        }
+    }
+
+    pub fn with_factors_and_threshold_kind(
+        threshold: Threshold,
         threshold_factors: impl IntoIterator<Item = FACTOR>,
         override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
@@ -147,6 +161,12 @@ impl<const ROLE: u8, const MODE: u8, FACTOR>
     /// this role.
     pub fn get_threshold(&self) -> u8 {
         self.threshold.value(self.threshold_factors.len())
+    }
+
+    /// How many threshold factors that must be used to perform some function with
+    /// this role.
+    pub fn get_threshold_kind(&self) -> Threshold {
+        self.threshold
     }
 }
 pub(crate) const ROLE_PRIMARY: u8 = 1;

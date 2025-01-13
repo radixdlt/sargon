@@ -270,9 +270,7 @@ mod tests {
                "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                "matrixOfFactors": {
                  "primaryRole": {
-                   "threshold": {
-                      "specific": 2
-                    },
+                   "threshold": "all",
                    "thresholdFactors": [
                      {
                        "factorSourceID": {
@@ -328,9 +326,7 @@ mod tests {
                    "overrideFactors": []
                  },
                  "recoveryRole": {
-                   "threshold": {
-                      "specific": 0
-                    },
+                   "threshold": "all",
                    "thresholdFactors": [],
                    "overrideFactors": [
                      {
@@ -386,9 +382,7 @@ mod tests {
                    ]
                  },
                  "confirmationRole": {
-                   "threshold": {
-                      "specific": 0
-                    },
+                   "threshold": "all",
                    "thresholdFactors": [],
                    "overrideFactors": [
                      {
@@ -452,9 +446,7 @@ mod tests {
                  "securityStructureId": "dededede-dede-dede-dede-dededededede",
                  "matrixOfFactors": {
                    "primaryRole": {
-                     "threshold": {
-                      "specific": 1
-                    },
+                     "threshold": "all",
                      "thresholdFactors": [
                        {
                          "factorSourceID": {
@@ -485,9 +477,7 @@ mod tests {
                      "overrideFactors": []
                    },
                    "recoveryRole": {
-                     "threshold": {
-                      "specific": 0
-                    },
+                     "threshold": "all",                   
                      "thresholdFactors": [],
                      "overrideFactors": [
                        {
@@ -518,9 +508,7 @@ mod tests {
                      ]
                    },
                    "confirmationRole": {
-                     "threshold": {
-                      "specific": 0
-                    },
+                     "threshold": "all",                   
                      "thresholdFactors": [],
                      "overrideFactors": [
                        {

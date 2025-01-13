@@ -269,9 +269,7 @@ mod tests {
             r#"
             {
               "primaryRole": {
-                "threshold": {
-                  "specific": 2
-                },
+                "threshold": "all",
                 "thresholdFactors": [
                   {
                     "discriminator": "fromHash",
@@ -291,9 +289,7 @@ mod tests {
                 "overrideFactors": []
               },
               "recoveryRole": {
-                "threshold": {
-                  "specific": 0
-                },
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {
@@ -313,9 +309,7 @@ mod tests {
                 ]
               },
               "confirmationRole": {
-                "threshold": {
-                  "specific": 0
-                },
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {
@@ -341,9 +335,7 @@ mod tests {
             r#"
             {
               "primaryRole": {
-                "threshold": {
-                  "specific": 1
-                },
+                "threshold": "all",
                 "thresholdFactors": [
                     {
                     "discriminator": "fromHash",
@@ -356,9 +348,7 @@ mod tests {
                 "overrideFactors": []
               },
               "recoveryRole": {
-                "threshold": {
-                  "specific": 0
-                },
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {
@@ -371,9 +361,7 @@ mod tests {
                 ]
               },
               "confirmationRole": {
-                "threshold": {
-                  "specific": 0
-                },
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {

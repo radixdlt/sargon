@@ -1367,7 +1367,6 @@ mod shield_configs {
             .unwrap();
             let build0 = sut.build(); // build err
             assert!(build0.is_err());
-            sut.set_threshold(Threshold::Specific(2)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1398,8 +1397,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        2,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [
                             FactorSourceID::sample_device(),
                             FactorSourceID::sample_ledger()
@@ -1495,7 +1494,6 @@ mod shield_configs {
                         res,
                         Err(MatrixBuilderValidation::RoleInIsolation { role: RoleKind::Primary, violation: RoleBuilderValidation::NotYetValid(NotYetValidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne)}
                     ));
-            sut.set_threshold(Threshold::Specific(2)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1519,8 +1517,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        2,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [
                             FactorSourceID::sample_device(),
                             FactorSourceID::sample_password()
@@ -1551,7 +1549,6 @@ mod shield_configs {
                 FactorSourceID::sample_device(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(1)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1571,8 +1568,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        1,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [FactorSourceID::sample_device(),],
                         [],
                     ),
@@ -1600,7 +1597,6 @@ mod shield_configs {
                 FactorSourceID::sample_ledger(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(1)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1620,8 +1616,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        1,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [FactorSourceID::sample_ledger(),],
                         [],
                     ),
@@ -1653,7 +1649,6 @@ mod shield_configs {
                 FactorSourceID::sample_ledger(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(2)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1677,8 +1672,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        2,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [
                             FactorSourceID::sample_device(),
                             FactorSourceID::sample_ledger()
@@ -1714,7 +1709,6 @@ mod shield_configs {
                 FactorSourceID::sample_ledger_other(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(2)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1738,8 +1732,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        2,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [
                             FactorSourceID::sample_ledger(),
                             FactorSourceID::sample_ledger_other()
@@ -1771,7 +1765,6 @@ mod shield_configs {
                 FactorSourceID::sample_ledger(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(1)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1791,8 +1784,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        1,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [FactorSourceID::sample_ledger(),],
                         [],
                     ),
@@ -1820,7 +1813,6 @@ mod shield_configs {
                 FactorSourceID::sample_device(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(1)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1840,8 +1832,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        1,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [FactorSourceID::sample_device(),],
                         [],
                     ),
@@ -1873,7 +1865,6 @@ mod shield_configs {
                 FactorSourceID::sample_ledger(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(2)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1901,8 +1892,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        2,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [
                             FactorSourceID::sample_device(),
                             FactorSourceID::sample_ledger()
@@ -1939,7 +1930,6 @@ mod shield_configs {
                 FactorSourceID::sample_ledger(),
             )
             .unwrap();
-            sut.set_threshold(Threshold::Specific(2)).unwrap();
 
             // Recovery
             sut.add_factor_source_to_recovery_override(
@@ -1971,8 +1961,8 @@ mod shield_configs {
             pretty_assertions::assert_eq!(
                 built,
                 MatrixOfFactorSourceIds::with_roles(
-                    PrimaryRoleWithFactorSourceIds::with_factors(
-                        2,
+                    PrimaryRoleWithFactorSourceIds::with_factors_and_threshold_kind(
+                        Threshold::All,
                         [
                             FactorSourceID::sample_device(),
                             FactorSourceID::sample_ledger()

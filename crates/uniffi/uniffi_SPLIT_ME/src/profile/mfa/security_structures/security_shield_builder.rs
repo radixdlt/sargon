@@ -927,7 +927,6 @@ mod tests {
         sut = sut
             .set_name(name.to_owned())
             .set_number_of_days_until_auto_confirm(days_to_auto_confirm)
-            .set_threshold(Threshold::Specific(2))
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )
@@ -936,7 +935,8 @@ mod tests {
             )
             .auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
                 all_factors_in_profile.clone(),
-            );
+            )
+            .set_threshold(Threshold::Specific(2));
 
         let shield = sut.clone().build().unwrap();
 
@@ -950,7 +950,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             matrix.primary_role,
             PrimaryRoleWithFactorSourceIDs {
-                threshold: 2,
+                threshold: Threshold::Specific(2),
                 threshold_factors: vec![
                     FactorSourceID::sample_device(),
                     FactorSourceID::sample_ledger()
@@ -962,7 +962,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             matrix.recovery_role,
             RecoveryRoleWithFactorSourceIDs {
-                threshold: 0,
+                threshold: Threshold::All,
                 threshold_factors: Vec::new(),
                 override_factors: vec![
                     FactorSourceID::sample_trusted_contact(),
@@ -976,7 +976,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             matrix.confirmation_role,
             ConfirmationRoleWithFactorSourceIDs {
-                threshold: 0,
+                threshold: Threshold::All,
                 threshold_factors: Vec::new(),
                 override_factors: vec![
                     FactorSourceID::sample_password(),
