@@ -218,7 +218,6 @@ mod threshold_suite {
     fn remove_single_factor_changes_threshold_to_all() {
         let mut sut = make();
         let fs0 = sample();
-        let fs1 = sample_other();
         sut.add_factor_source_to_threshold(fs0).unwrap();
         sut.set_specific_threshold(1).unwrap();
         assert_eq!(sut.get_threshold_value(), 1);
