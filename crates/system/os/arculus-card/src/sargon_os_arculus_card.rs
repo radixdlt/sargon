@@ -28,7 +28,6 @@ pub trait OsArculusCard {
     ) -> Result<SignatureWithPublicKey>;
 }
 
-
 #[async_trait::async_trait]
 impl OsArculusCard for SargonOS {
     async fn arculus_card_read_firmware_version(&self) -> Result<String> {
@@ -38,8 +37,7 @@ impl OsArculusCard for SargonOS {
     async fn read_card_factor_source_id(
         &self,
     ) -> Result<FactorSourceIDFromHash> {
-        self.read_card_factor_source_id()
-            .await
+        self.read_card_factor_source_id().await
     }
 
     async fn create_wallet_seed(
@@ -47,8 +45,7 @@ impl OsArculusCard for SargonOS {
         pin: String,
         word_count: i64,
     ) -> Result<Mnemonic> {
-        self.create_wallet_seed(pin, word_count)
-            .await
+        self.create_wallet_seed(pin, word_count).await
     }
 
     async fn restore_wallet_seed(
@@ -56,16 +53,14 @@ impl OsArculusCard for SargonOS {
         mnemonic: Mnemonic,
         pin: String,
     ) -> Result<()> {
-        self.restore_wallet_seed(mnemonic, pin)
-            .await
+        self.restore_wallet_seed(mnemonic, pin).await
     }
 
     async fn derive_public_keys(
         &self,
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
-        self.derive_public_keys(paths)
-            .await
+        self.derive_public_keys(paths).await
     }
 
     async fn sign_hash(
@@ -74,7 +69,6 @@ impl OsArculusCard for SargonOS {
         hash: Hash,
         derivation_path: DerivationPath,
     ) -> Result<SignatureWithPublicKey> {
-        self.sign_hash(pin, hash, derivation_path)
-            .await
+        self.sign_hash(pin, hash, derivation_path).await
     }
 }

@@ -215,7 +215,12 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
         logData(response: response)
         let response = response.toArray
         var extendedKey = ArculusCSDK.getPublicKeyFromPathResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count).pointee
-        return try cArrayToData(val: extendedKey.publicKey, len: extendedKey.pubKeyLe)
+        let parsed_response = try cArrayToData(val: extendedKey.publicKey, len: extendedKey.pubKeyLe)
+        let chain_code = try cArrayToData(val: extendedKey.chainCodeKey, len: extendedKey.chainCodeKey);
+
+
+        logData(response: parsed_response)
+        return parsed_response
     }
     
     func signHashPathRequest(wallet: SargonUniFFI.ArculusWalletPointer, path: Data, curve: UInt16, algorithm: UInt8, hash: Data) throws -> [Data] {
@@ -237,7 +242,11 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
         guard let pointer = requestApduPtrPtr.pointee else {
             fatalError()
         }
-        return try cApduSequenceToData(buf: pointer)
+        let request = try cApduSequenceToData(buf: pointer)
+        for request in request {
+            logData(response: request)
+        }
+        return request
     }
     
     func signHashPathResponse(wallet: SargonUniFFI.ArculusWalletPointer, response: Data) throws -> Data {

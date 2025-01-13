@@ -1,4 +1,6 @@
+use serde_json::value::Index;
 use std::future::Future;
+
 pub use crate::prelude::*;
 
 #[derive(Debug)]
@@ -13,6 +15,12 @@ pub struct ArculusCSDKClient {
 pub struct ArculusWalletClient {
     pub(crate) csdk_driver: Arc<dyn ArculusCSDKDriver>,
     pub(crate) nfc_tag_driver: Arc<dyn NFCTagDriver>,
+}
+
+pub struct ArculusCardInfo {
+    pub firmware_version: String,
+    pub gguid: Uuid,
+    pub factor_source_id: Option<FactorSourceIDFromHash>,
 }
 
 impl ArculusWalletClient {
@@ -61,28 +69,9 @@ impl ArculusWalletClient {
 }
 
 impl ArculusWalletClient {
-    pub async fn read_card_firmware_version(&self) -> Result<String> {
-        let version: BagOfBytes = self
-            .execute_card_operation(|wallet| {
-                self.get_firmware_version_io(wallet)
-            })
-            .await?;
-
-        Ok(version
-            .to_vec()
-            .iter()
-            .map(|byte| byte.to_string())
-            .collect::<Vec<String>>()
-            .join("."))
-    }
-
-    pub async fn read_card_factor_source_id(
-        &self,
-    ) -> Result<FactorSourceIDFromHash> {
-        self.execute_card_operation(|wallet| {
-            self._read_card_factor_source_id(wallet)
-        })
-        .await
+    pub async fn get_card_info(&self) -> Result<ArculusCardInfo> {
+        self.execute_card_operation(|wallet| self._get_card_info(wallet))
+            .await
     }
 
     pub async fn create_wallet_seed(
@@ -131,6 +120,28 @@ impl ArculusWalletClient {
 }
 
 impl ArculusWalletClient {
+    pub async fn _get_card_info(
+        &self,
+        wallet: ArculusWalletPointer,
+    ) -> Result<ArculusCardInfo> {
+        let firmware_version = self
+            .get_firmware_version_io(wallet)
+            .await?
+            .to_vec()
+            .iter()
+            .map(|byte| byte.to_string())
+            .collect::<Vec<String>>()
+            .join(".");
+        let gguid = self.get_gguid_io(wallet).await?;
+        let factor_source_id = self._read_card_factor_source_id(wallet).await?;
+
+        Ok(ArculusCardInfo {
+            firmware_version,
+            gguid: Uuid::from_str(&gguid.to_hex()).unwrap(),
+            factor_source_id: Some(factor_source_id),
+        })
+    }
+
     pub async fn _sign_hash(
         &self,
         wallet: ArculusWalletPointer,
@@ -142,22 +153,16 @@ impl ArculusWalletClient {
         let signature_bytes = self
             .sign_hash_path_io(
                 wallet,
-                derivation_path.clone(),
+                derivation_path.to_hd_path().clone(),
                 hash,
                 CardCurve::Ed25519Curve,
                 CardAlgorithm::Eddsa,
             )
             .await?;
-        let public_key_bytes = self
-            .get_public_key_by_path_io(
-                wallet,
-                derivation_path,
-                CardCurve::Ed25519Curve,
-            )
-            .await?;
+        let public_key =
+            self._derive_public_key(wallet, derivation_path).await?;
 
         let ed25519_signature = Ed25519Signature::try_from(signature_bytes)?;
-        let public_key = Ed25519PublicKey::try_from(public_key_bytes.bytes())?;
 
         Ok(SignatureWithPublicKey::Ed25519 {
             public_key: public_key,
@@ -173,20 +178,31 @@ impl ArculusWalletClient {
         let mut keys = IndexSet::new();
 
         for path in paths {
-            // Each task starts only after the previous one completes
-            let result = self
-                .get_public_key_by_path_io(
-                    wallet,
-                    path.clone(),
-                    CardCurve::Ed25519Curve,
-                )
-                .await?;
-            let public_key = PublicKey::ed25519_from_bytes(&result)?;
-            let key = HierarchicalDeterministicPublicKey::new(public_key, path);
+            let public_key =
+                self._derive_public_key(wallet, path.clone()).await?;
+            let key = HierarchicalDeterministicPublicKey::new(
+                public_key.into(),
+                path,
+            );
             keys.insert(key);
         }
 
         Ok(keys)
+    }
+
+    pub async fn _derive_public_key(
+        &self,
+        wallet: ArculusWalletPointer,
+        path: DerivationPath,
+    ) -> Result<Ed25519PublicKey> {
+        let public_key_bytes = self
+            .get_public_key_by_path_io(
+                wallet,
+                path.clone().to_hd_path(),
+                CardCurve::Ed25519Curve,
+            )
+            .await?;
+        Ed25519PublicKey::try_from(public_key_bytes.bytes())
     }
 
     pub async fn _restore_wallet_seed(
@@ -215,13 +231,16 @@ impl ArculusWalletClient {
         &self,
         wallet: ArculusWalletPointer,
     ) -> Result<FactorSourceIDFromHash> {
-        let gguid_raw = self.get_gguid_io(wallet).await?;
+        let public_key_bytes = self
+            .get_public_key_by_path_io(
+                wallet,
+                GetIDPath.to_hd_path(),
+                CardCurve::Ed25519Curve,
+            )
+            .await?;
 
-        let bytes = Exactly32Bytes::try_from(gguid_raw)?;
-
-        Ok(FactorSourceIDFromHash::new(
-            FactorSourceKind::ArculusCard,
-            bytes,
+        Ok(FactorSourceIDFromHash::new_for_arculus(
+            public_key_bytes.to_vec(),
         ))
     }
 

@@ -1,4 +1,3 @@
-
 use crate::prelude::*;
 
 pub struct ArculusWalletSession {
@@ -15,7 +14,10 @@ impl Drop for ArculusWalletSession {
 }
 
 impl ArculusWalletSession {
-    pub fn new(csdk_driver: Arc<dyn ArculusCSDKDriver>,  nfc_tag_driver: Arc<dyn NFCTagDriver>) -> ArculusWalletSession {
+    pub fn new(
+        csdk_driver: Arc<dyn ArculusCSDKDriver>,
+        nfc_tag_driver: Arc<dyn NFCTagDriver>,
+    ) -> ArculusWalletSession {
         let wallet = csdk_driver.wallet_init();
         Self {
             csdk_driver,
@@ -24,12 +26,10 @@ impl ArculusWalletSession {
         }
     }
 
-    async fn start_arculus_wallet_session(
-        &self,
-    ) -> Result<()> {
+    async fn start_arculus_wallet_session(&self) -> Result<()> {
         let aid: Vec<u8> =
             vec![0x41, 0x52, 0x43, 0x55, 0x4C, 0x55, 0x53, 0x01, 0x01, 0x57];
-        self.select_wallet( aid.into()).await?;
+        self.select_wallet(aid.into()).await?;
         self.init_encrypted_session().await?;
 
         Ok(())
@@ -40,20 +40,37 @@ impl ArculusWalletSession {
         self.start_arculus_wallet_session().await
     }
 
-    pub async fn verify_pin(&self, pin: String) -> Result<ArculusWalletCSDKResponseStatus> {
+    pub async fn verify_pin(
+        &self,
+        pin: String,
+    ) -> Result<ArculusWalletCSDKResponseStatus> {
         self.verify_pin_io(self.wallet, pin).await
     }
 
-    pub async fn init_encrypted_session(&self) -> Result<ArculusWalletCSDKResponseStatus> {
+    pub async fn init_encrypted_session(
+        &self,
+    ) -> Result<ArculusWalletCSDKResponseStatus> {
         self.init_encrypted_session_io(self.wallet).await
     }
 
-    pub async fn get_public_key_by_path(&self, path: DerivationPath, curve: CardCurve) -> Result<BagOfBytes> {
-        self.get_public_key_by_path_io(self.wallet, path, curve).await
+    pub async fn get_public_key_by_path(
+        &self,
+        path: DerivationPath,
+        curve: CardCurve,
+    ) -> Result<BagOfBytes> {
+        self.get_public_key_by_path_io(self.wallet, path, curve)
+            .await
     }
 
-    pub async fn sign_hash_path(&self, path: DerivationPath, hash: Hash, curve: CardCurve, algorithm: CardAlgorithm) -> Result<BagOfBytes> {
-        self.sign_hash_path_io(self.wallet, path, hash, curve, algorithm).await
+    pub async fn sign_hash_path(
+        &self,
+        path: DerivationPath,
+        hash: Hash,
+        curve: CardCurve,
+        algorithm: CardAlgorithm,
+    ) -> Result<BagOfBytes> {
+        self.sign_hash_path_io(self.wallet, path, hash, curve, algorithm)
+            .await
     }
 
     pub async fn get_gguid(&self) -> Result<BagOfBytes> {
@@ -64,31 +81,48 @@ impl ArculusWalletSession {
         self.get_firmware_version_io(self.wallet).await
     }
 
-    pub async fn select_wallet(&self, aid: BagOfBytes) -> Result<ArculusWalletCSDKResponseStatus> {
+    pub async fn select_wallet(
+        &self,
+        aid: BagOfBytes,
+    ) -> Result<ArculusWalletCSDKResponseStatus> {
         self.select_card_io(self.wallet, aid).await
     }
 
-    pub async fn reset_wallet(&self) -> Result<ArculusWalletCSDKResponseStatus> {
+    pub async fn reset_wallet(
+        &self,
+    ) -> Result<ArculusWalletCSDKResponseStatus> {
         self.reset_wallet_io(self.wallet).await
     }
 
-    pub async fn create_wallet_seed(&self, word_count: i64) -> Result<BagOfBytes> {
+    pub async fn create_wallet_seed(
+        &self,
+        word_count: i64,
+    ) -> Result<BagOfBytes> {
         self.create_wallet_seed_io(self.wallet, word_count).await
     }
 
-    pub async fn init_recover_wallet(&self, seed_words_count: i64) -> Result<ArculusWalletCSDKResponseStatus> {
-        self.init_recover_wallet_io(self.wallet, seed_words_count).await
+    pub async fn init_recover_wallet(
+        &self,
+        seed_words_count: i64,
+    ) -> Result<ArculusWalletCSDKResponseStatus> {
+        self.init_recover_wallet_io(self.wallet, seed_words_count)
+            .await
     }
 
-    pub async fn finish_recover_wallet(&self, seed: BagOfBytes) -> Result<ArculusWalletCSDKResponseStatus> {
+    pub async fn finish_recover_wallet(
+        &self,
+        seed: BagOfBytes,
+    ) -> Result<ArculusWalletCSDKResponseStatus> {
         self.finish_recover_wallet_io(self.wallet, seed).await
     }
 
-    pub async fn store_pin(&self, pin: String) -> Result<ArculusWalletCSDKResponseStatus> {
+    pub async fn store_pin(
+        &self,
+        pin: String,
+    ) -> Result<ArculusWalletCSDKResponseStatus> {
         self.store_pin_io(self.wallet, pin).await
     }
 }
-
 
 impl ArculusWalletSession {
     pub(crate) async fn do_card_io_1<Command, Response, F>(
@@ -104,7 +138,6 @@ impl ArculusWalletSession {
         let response = self.nfc_tag_driver.send_receive(command).await?;
         response_map(response)
     }
-
 
     pub(crate) async fn do_card_io<Response, F>(
         &self,
@@ -368,7 +401,12 @@ mod tests {
             Arc::new(nfc_tag_driver),
         );
 
-        let result: Result<()> = sut.do_card_io_1(|| Err(CommonError::Unknown), |_| Err(CommonError::Unknown)).await;
+        let result: Result<()> = sut
+            .do_card_io_1(
+                || Err(CommonError::Unknown),
+                |_| Err(CommonError::Unknown),
+            )
+            .await;
 
         pretty_assertions::assert_eq!(result, Err(CommonError::Unknown))
     }
@@ -379,20 +417,19 @@ mod tests {
         let mut nfc_tag_driver = MockNFCTagDriver::new();
 
         nfc_tag_driver
-        .expect_send_receive()
-        .with(eq(command.clone()))
-        .once()
-        .return_const(Err(CommonError::BytesEmpty));
+            .expect_send_receive()
+            .with(eq(command.clone()))
+            .once()
+            .return_const(Err(CommonError::BytesEmpty));
 
         let sut = ArculusWalletClient::new(
             Arc::new(MockArculusCSDKDriver::new()),
             Arc::new(nfc_tag_driver),
         );
 
-        let result: Result<()> = sut.do_card_io_1(
-            || Ok(command), 
-            |_| Err(CommonError::Unknown)
-        ).await;
+        let result: Result<()> = sut
+            .do_card_io_1(|| Ok(command), |_| Err(CommonError::Unknown))
+            .await;
 
         pretty_assertions::assert_eq!(result, Err(CommonError::BytesEmpty))
     }
@@ -404,23 +441,25 @@ mod tests {
         let mut nfc_tag_driver = MockNFCTagDriver::new();
 
         nfc_tag_driver
-        .expect_send_receive()
-        .with(eq(command.clone()))
-        .once()
-        .return_const(Ok(response_bytes.clone()));
+            .expect_send_receive()
+            .with(eq(command.clone()))
+            .once()
+            .return_const(Ok(response_bytes.clone()));
 
         let sut = ArculusWalletClient::new(
             Arc::new(MockArculusCSDKDriver::new()),
             Arc::new(nfc_tag_driver),
         );
 
-        let result: Result<()> = sut.do_card_io_1(
-            || Ok(command), 
-            |bytes| {
-                pretty_assertions::assert_eq!(bytes, response_bytes);
-                Err(CommonError::Unknown)
-            }
-        ).await;
+        let result: Result<()> = sut
+            .do_card_io_1(
+                || Ok(command),
+                |bytes| {
+                    pretty_assertions::assert_eq!(bytes, response_bytes);
+                    Err(CommonError::Unknown)
+                },
+            )
+            .await;
 
         pretty_assertions::assert_eq!(result, Err(CommonError::Unknown))
     }
@@ -432,23 +471,25 @@ mod tests {
         let mut nfc_tag_driver = MockNFCTagDriver::new();
 
         nfc_tag_driver
-        .expect_send_receive()
-        .with(eq(command.clone()))
-        .once()
-        .return_const(Ok(response_bytes.clone()));
+            .expect_send_receive()
+            .with(eq(command.clone()))
+            .once()
+            .return_const(Ok(response_bytes.clone()));
 
         let sut = ArculusWalletClient::new(
             Arc::new(MockArculusCSDKDriver::new()),
             Arc::new(nfc_tag_driver),
         );
 
-        let result: Result<i32> = sut.do_card_io_1(
-            || Ok(command), 
-            |bytes| {
-                pretty_assertions::assert_eq!(bytes, response_bytes);
-                Ok(42)
-            }
-        ).await;
+        let result: Result<i32> = sut
+            .do_card_io_1(
+                || Ok(command),
+                |bytes| {
+                    pretty_assertions::assert_eq!(bytes, response_bytes);
+                    Ok(42)
+                },
+            )
+            .await;
 
         pretty_assertions::assert_eq!(result, Ok(42))
     }
@@ -469,7 +510,7 @@ mod tests {
             .once()
             .return_const(Ok(firmware_version_request.clone()));
 
-            nfc_tag_driver
+        nfc_tag_driver
             .expect_send_receive()
             .with(eq(firmware_version_request))
             .once()
@@ -477,10 +518,7 @@ mod tests {
 
         csdk_driver
             .expect_get_firmware_version_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(firmware_version_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(firmware_version_response))
             .once()
             .return_const(Ok(parsed_firmware_version.clone()));
 
@@ -517,10 +555,7 @@ mod tests {
 
         csdk_driver
             .expect_get_gguid_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(get_gguid_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(get_gguid_response))
             .once()
             .return_const(Ok(get_gguid_parsed_response.clone()));
 
@@ -556,10 +591,7 @@ mod tests {
 
         csdk_driver
             .expect_reset_wallet_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(reset_wallet_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(reset_wallet_response))
             .once()
             .return_const(Ok(0));
 
@@ -569,7 +601,10 @@ mod tests {
         );
 
         let result = sut.reset_wallet_io(wallet_pointer).await;
-        pretty_assertions::assert_eq!(result, Ok(ArculusWalletCSDKResponseStatus::Ok))
+        pretty_assertions::assert_eq!(
+            result,
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        )
     }
 
     #[actix_rt::test]
@@ -596,10 +631,7 @@ mod tests {
 
         csdk_driver
             .expect_create_wallet_seed_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(create_wallet_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(create_wallet_response))
             .once()
             .return_const(Ok(create_wallet_parsed_response.clone()));
 
@@ -635,10 +667,7 @@ mod tests {
 
         csdk_driver
             .expect_init_recover_wallet_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(init_recover_wallet_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(init_recover_wallet_response))
             .once()
             .return_const(Ok(0));
 
@@ -648,7 +677,10 @@ mod tests {
         );
 
         let result = sut.init_recover_wallet_io(wallet_pointer, 24).await;
-        pretty_assertions::assert_eq!(result, Ok(ArculusWalletCSDKResponseStatus::Ok))
+        pretty_assertions::assert_eq!(
+            result,
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        )
     }
 
     #[actix_rt::test]
@@ -688,7 +720,10 @@ mod tests {
         );
 
         let result = sut.finish_recover_wallet_io(wallet_pointer, seed).await;
-        pretty_assertions::assert_eq!(result, Ok(ArculusWalletCSDKResponseStatus::Ok))
+        pretty_assertions::assert_eq!(
+            result,
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        )
     }
 
     #[actix_rt::test]
@@ -715,10 +750,7 @@ mod tests {
 
         csdk_driver
             .expect_select_wallet_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(select_card_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(select_card_response))
             .once()
             .return_const(Ok(0));
 
@@ -728,7 +760,10 @@ mod tests {
         );
 
         let result = sut.select_card_io(wallet_pointer, aid).await;
-        pretty_assertions::assert_eq!(result, Ok(ArculusWalletCSDKResponseStatus::Ok))
+        pretty_assertions::assert_eq!(
+            result,
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        )
     }
 
     #[actix_rt::test]
@@ -755,10 +790,7 @@ mod tests {
 
         csdk_driver
             .expect_store_data_pin_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(store_pin_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(store_pin_response))
             .once()
             .return_const(Ok(0));
 
@@ -768,7 +800,10 @@ mod tests {
         );
 
         let result = sut.store_pin_io(wallet_pointer, pin).await;
-        pretty_assertions::assert_eq!(result, Ok(ArculusWalletCSDKResponseStatus::Ok))
+        pretty_assertions::assert_eq!(
+            result,
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        )
     }
 
     #[actix_rt::test]
@@ -795,10 +830,7 @@ mod tests {
 
         csdk_driver
             .expect_verify_pin_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(verify_pin_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(verify_pin_response))
             .once()
             .return_const(Ok(0));
 
@@ -808,8 +840,10 @@ mod tests {
         );
 
         let result = sut.verify_pin_io(wallet_pointer, pin).await;
-        pretty_assertions::assert_eq!(result, Ok(ArculusWalletCSDKResponseStatus::Ok))
-
+        pretty_assertions::assert_eq!(
+            result,
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        )
     }
 
     #[actix_rt::test]
@@ -848,13 +882,16 @@ mod tests {
         );
 
         let result = sut.init_encrypted_session_io(wallet_pointer).await;
-        pretty_assertions::assert_eq!(result, Ok(ArculusWalletCSDKResponseStatus::Ok))
+        pretty_assertions::assert_eq!(
+            result,
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        )
     }
 
     #[actix_rt::test]
     async fn get_public_key_by_path_io() {
         let wallet_pointer = ArculusWalletPointer::sample();
-        let path = DerivationPath::sample();
+        let path = HDPath::sample();
         let path_bytes: BagOfBytes = path.to_string().into_bytes().into();
         let curve = CardCurve::Secp256k1;
         let get_public_key_by_path_request = BagOfBytes::sample();
@@ -894,14 +931,16 @@ mod tests {
             Arc::new(nfc_tag_driver),
         );
 
-        let result = sut.get_public_key_by_path_io(wallet_pointer, path, curve).await;
+        let result = sut
+            .get_public_key_by_path_io(wallet_pointer, path, curve)
+            .await;
         pretty_assertions::assert_eq!(result, Ok(get_public_key_by_path_parsed))
     }
 
     #[actix_rt::test]
     async fn sign_hash_path_io() {
         let wallet_pointer = ArculusWalletPointer::sample();
-        let path = DerivationPath::sample();
+        let path = HDPath::sample();
         let path_bytes: BagOfBytes = path.to_string().into_bytes().into();
         let hash = Hash::sample();
         let hash_bytes: BagOfBytes = hash.bytes().into();
@@ -934,10 +973,7 @@ mod tests {
 
         csdk_driver
             .expect_sign_hash_path_response()
-            .with(
-                eq(wallet_pointer.clone()),
-                eq(sign_hash_path_response),
-            )
+            .with(eq(wallet_pointer.clone()), eq(sign_hash_path_response))
             .once()
             .return_const(Ok(sign_hash_path_parsed.clone()));
 
@@ -946,7 +982,9 @@ mod tests {
             Arc::new(nfc_tag_driver),
         );
 
-        let result = sut.sign_hash_path_io(wallet_pointer, path, hash, curve, algorithm).await;
+        let result = sut
+            .sign_hash_path_io(wallet_pointer, path, hash, curve, algorithm)
+            .await;
         pretty_assertions::assert_eq!(result, Ok(sign_hash_path_parsed))
     }
 
@@ -961,16 +999,45 @@ mod tests {
         let mut csdk_driver = MockArculusCSDKDriver::new();
         let mut nfc_tag_driver = MockNFCTagDriver::new();
 
-        nfc_tag_driver.expect_start_session().once().return_const(Ok(()));
-        csdk_driver.expect_wallet_init().once().return_const(wallet_pointer.clone());
+        nfc_tag_driver
+            .expect_start_session()
+            .once()
+            .return_const(Ok(()));
+        csdk_driver
+            .expect_wallet_init()
+            .once()
+            .return_const(wallet_pointer.clone());
 
-        csdk_driver.expect_select_wallet_request().with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample())).once().return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver.expect_send_receive().with(eq(BagOfBytes::sample())).once().return_const(Ok(BagOfBytes::sample()));
-        csdk_driver.expect_select_wallet_response().with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample())).once().return_const(Ok(0));
-        
-        csdk_driver.expect_init_encrypted_session_request().once().return_const(Ok(BagOfBytes::sample()));
-        nfc_tag_driver.expect_send_receive().with(eq(BagOfBytes::sample())).once().return_const(Ok(BagOfBytes::sample()));
-        csdk_driver.expect_init_encrypted_session_response().with(eq(wallet_pointer), eq(BagOfBytes::sample())).once().return_const(Ok(0));
+        csdk_driver
+            .expect_select_wallet_request()
+            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
+            .once()
+            .return_const(Ok(BagOfBytes::sample()));
+        nfc_tag_driver
+            .expect_send_receive()
+            .with(eq(BagOfBytes::sample()))
+            .once()
+            .return_const(Ok(BagOfBytes::sample()));
+        csdk_driver
+            .expect_select_wallet_response()
+            .with(eq(wallet_pointer.clone()), eq(BagOfBytes::sample()))
+            .once()
+            .return_const(Ok(0));
+
+        csdk_driver
+            .expect_init_encrypted_session_request()
+            .once()
+            .return_const(Ok(BagOfBytes::sample()));
+        nfc_tag_driver
+            .expect_send_receive()
+            .with(eq(BagOfBytes::sample()))
+            .once()
+            .return_const(Ok(BagOfBytes::sample()));
+        csdk_driver
+            .expect_init_encrypted_session_response()
+            .with(eq(wallet_pointer), eq(BagOfBytes::sample()))
+            .once()
+            .return_const(Ok(0));
 
         // csdk_driver
         //     .expect_create_wallet_seed_request()

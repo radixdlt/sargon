@@ -1,5 +1,5 @@
-use sargon::OsArculusCard;
 use crate::prelude::*;
+use sargon::OsArculusCard;
 
 #[uniffi::export]
 impl SargonOS {
