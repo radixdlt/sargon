@@ -43,16 +43,15 @@ impl SargonOS {
             .await
     }
 
-    pub async fn sign_hash(
+    pub async fn sign_hashes(
         &self,
         factor_source: ArculusCardFactorSource,
         pin: String,
-        hash: Hash,
-        derivation_path: DerivationPath,
-    ) -> Result<SignatureWithPublicKey> {
+        hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
+    ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>> {
         self.clients
             .arculus_wallet_client
-            .sign_hash(factor_source, pin, hash, derivation_path)
+            .sign_hashes(factor_source, pin, hashes)
             .await
     }
 }

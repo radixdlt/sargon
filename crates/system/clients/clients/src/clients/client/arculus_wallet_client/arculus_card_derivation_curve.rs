@@ -23,7 +23,7 @@ impl From<SLIP10Curve> for CardCurve {
     fn from(value: SLIP10Curve) -> Self {
         match value {
             SLIP10Curve::Curve25519 => CardCurve::Ed25519Curve,
-            SLIP10Curve::Secp256k1 => CardCurve::Secp256k1
+            SLIP10Curve::Secp256k1 => CardCurve::Secp256k1,
         }
     }
 }

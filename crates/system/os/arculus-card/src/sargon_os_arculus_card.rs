@@ -68,6 +68,7 @@ impl OsArculusCard for SargonOS {
         hash: Hash,
         derivation_path: DerivationPath,
     ) -> Result<SignatureWithPublicKey> {
-        self.sign_hash(factor_source, pin, hash, derivation_path).await
+        self.sign_hash(factor_source, pin, hash, derivation_path)
+            .await
     }
 }

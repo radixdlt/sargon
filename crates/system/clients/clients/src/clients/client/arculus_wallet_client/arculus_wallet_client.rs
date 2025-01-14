@@ -25,22 +25,34 @@ pub struct ArculusCardInfo {
 }
 
 impl ArculusCardInfo {
-    pub fn new(firmware_version: String, gguid: Uuid, factor_source_id: Option<FactorSourceIDFromHash>) -> Self {
+    pub fn new(
+        firmware_version: String,
+        gguid: Uuid,
+        factor_source_id: Option<FactorSourceIDFromHash>,
+    ) -> Self {
         Self {
             firmware_version,
             gguid,
-            factor_source_id
+            factor_source_id,
         }
     }
 }
 
 impl HasSampleValues for ArculusCardInfo {
     fn sample() -> Self {
-        Self::new("2.2.7.0".to_string(), Uuid::sample(), Some(FactorSourceIDFromHash::sample_arculus()))
+        Self::new(
+            "2.2.7.0".to_string(),
+            Uuid::sample(),
+            Some(FactorSourceIDFromHash::sample_arculus()),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::new("2.2.7.6".to_string(), Uuid::sample(), Some(FactorSourceIDFromHash::sample_arculus_other()))
+        Self::new(
+            "2.2.7.6".to_string(),
+            Uuid::sample(),
+            Some(FactorSourceIDFromHash::sample_arculus_other()),
+        )
     }
 }
 
@@ -57,9 +69,10 @@ impl ArculusWalletClient {
 }
 
 impl ArculusWalletClient {
-    const AID: [u8; 10] = [0x41, 0x52, 0x43, 0x55, 0x4C, 0x55, 0x53, 0x01, 0x01, 0x57];
+    const AID: [u8; 10] =
+        [0x41, 0x52, 0x43, 0x55, 0x4C, 0x55, 0x53, 0x01, 0x01, 0x57];
 
-    async fn execute_card_operation<Response, Op, Fut>(
+    pub(crate) async fn execute_card_operation<Response, Op, Fut>(
         &self,
         op: Op,
     ) -> Result<Response>
@@ -86,9 +99,10 @@ impl ArculusWalletClient {
     }
 
     pub async fn get_factor_source_id(&self) -> Result<FactorSourceIDFromHash> {
-        self.execute_card_operation(|wallet|
+        self.execute_card_operation(|wallet| {
             self._read_card_factor_source_id(wallet)
-        ).await
+        })
+        .await
     }
 
     pub async fn create_wallet_seed(
@@ -119,20 +133,7 @@ impl ArculusWalletClient {
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
         self.execute_card_operation(|wallet| {
-            self._derive_public_keys(wallet,factor_source, paths)
-        })
-        .await
-    }
-
-    pub async fn sign_hash(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        pin: String,
-        hash: Hash,
-        derivation_path: DerivationPath,
-    ) -> Result<SignatureWithPublicKey> {
-        self.execute_card_operation(|wallet| {
-            self._sign_hash(wallet, factor_source, pin, hash, derivation_path)
+            self._derive_public_keys(wallet, factor_source, paths)
         })
         .await
     }
@@ -143,8 +144,11 @@ impl ArculusWalletClient {
         &self,
     ) -> Result<ArculusWalletPointer> {
         let wallet = self.csdk_driver.wallet_init();
-        let card_aid_to_select = BagOfBytes::from(ArculusWalletClient::AID.to_vec());
-        let card_aid = self.select_card_io(wallet, card_aid_to_select.clone()).await?;
+        let card_aid_to_select =
+            BagOfBytes::from(ArculusWalletClient::AID.to_vec());
+        let card_aid = self
+            .select_card_io(wallet, card_aid_to_select.clone())
+            .await?;
 
         if card_aid != card_aid_to_select {
             self.select_card_io(wallet, card_aid).await?;
@@ -177,53 +181,22 @@ impl ArculusWalletClient {
         })
     }
 
-    async fn _sign_hash(
-        &self,
-        wallet: ArculusWalletPointer,
-        factor_source: ArculusCardFactorSource,
-        pin: String,
-        hash: Hash,
-        derivation_path: DerivationPath,
-    ) -> Result<SignatureWithPublicKey> {
-        self.validate_factor_source(wallet, factor_source).await?;
-
-        self.verify_pin_io(wallet, pin.clone()).await?;
-
-        let signature_bytes = self
-            .sign_hash_path_io(
-                wallet,
-                derivation_path.to_hd_path().clone(),
-                hash,
-                CardCurve::Ed25519Curve,
-                CardAlgorithm::Eddsa,
-            )
-            .await?;
-        let public_key =
-            self._derive_public_key(wallet, derivation_path).await?;
-
-        let ed25519_signature = Ed25519Signature::try_from(signature_bytes)?;
-
-        Ok(SignatureWithPublicKey::Ed25519 {
-            public_key: public_key,
-            signature: ed25519_signature,
-        })
-    }
-
-    async fn validate_factor_source(
+    pub(crate) async fn validate_factor_source(
         &self,
         wallet: ArculusWalletPointer,
         factor_source: ArculusCardFactorSource,
     ) -> Result<()> {
-        let on_card_factor_source_id = self._read_card_factor_source_id(wallet).await?;
+        let on_card_factor_source_id =
+            self._read_card_factor_source_id(wallet).await?;
 
         if on_card_factor_source_id != factor_source.id {
-            return Err(CommonError::AESDecryptionFailed)
+            return Err(CommonError::AESDecryptionFailed);
         }
 
         Ok(())
     }
 
-    async fn _derive_public_keys(
+    pub(crate) async fn _derive_public_keys(
         &self,
         wallet: ArculusWalletPointer,
         factor_source: ArculusCardFactorSource,
@@ -246,7 +219,7 @@ impl ArculusWalletClient {
         Ok(keys)
     }
 
-    async fn _derive_public_key(
+    pub(crate) async fn _derive_public_key(
         &self,
         wallet: ArculusWalletPointer,
         path: DerivationPath,

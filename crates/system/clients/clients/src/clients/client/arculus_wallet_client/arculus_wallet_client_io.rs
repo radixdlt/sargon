@@ -60,8 +60,7 @@ impl ArculusWalletClient {
         self.do_card_io(
             self.csdk_driver.select_wallet_request(wallet, aid)?,
             |response| {
-                self.csdk_driver
-                    .select_wallet_response(wallet, response)
+                self.csdk_driver.select_wallet_response(wallet, response)
             },
         )
         .await
@@ -233,30 +232,6 @@ impl ArculusWalletClient {
         )
         .await
     }
-
-    /// Signs the hash by path on the card
-    pub(crate) async fn sign_hash_path_io(
-        &self,
-        wallet: ArculusWalletPointer,
-        path: HDPath,
-        hash: Hash,
-        curve: CardCurve,
-        algorithm: CardAlgorithm,
-    ) -> Result<BagOfBytes> {
-        self.do_chainned_card_io(
-            self.csdk_driver.sign_hash_path_request(
-                wallet,
-                path.to_string().into_bytes().into(),
-                curve.val(),
-                algorithm.val(),
-                hash.bytes().into(),
-            )?,
-            |response| {
-                self.csdk_driver.sign_hash_path_response(wallet, response)
-            },
-        )
-        .await
-    }
 }
 
 #[cfg(test)]
@@ -383,8 +358,9 @@ mod tests {
             stubbed_card_info: ArculusCardInfo,
             stubbed_factor_source_id_pub_key: PublicKey,
         ) -> &mut Self {
-            self
-            .expect_read_firmware_version(stubbed_card_info.firmware_version)
+            self.expect_read_firmware_version(
+                stubbed_card_info.firmware_version,
+            )
             .expect_read_card_gguid(stubbed_card_info.gguid)
             .expect_read_factor_source_id(stubbed_factor_source_id_pub_key)
         }
@@ -393,7 +369,10 @@ mod tests {
             &mut self,
             stubbed_factor_source_id_pub_key: PublicKey,
         ) -> &mut Self {
-            self.expect_derive_public_key(GetIDPath.to_hd_path(), stubbed_factor_source_id_pub_key)
+            self.expect_derive_public_key(
+                GetIDPath.to_hd_path(),
+                stubbed_factor_source_id_pub_key,
+            )
         }
 
         fn expect_read_firmware_version(
@@ -404,9 +383,9 @@ mod tests {
             let nfc_response = BagOfBytes::random();
 
             let stubbed_response_bytes: Vec<u8> = stubbed_response
-            .split('.')          // Split by '.'
-            .map(|s| s.parse::<u8>().unwrap())  // Convert each part to u8
-            .collect(); 
+                .split('.') // Split by '.'
+                .map(|s| s.parse::<u8>().unwrap()) // Convert each part to u8
+                .collect();
 
             self.csdk_driver
                 .expect_get_firmware_version_request()
@@ -427,26 +406,29 @@ mod tests {
 
         fn expect_read_card_gguid(
             &mut self,
-            stubbed_response: Uuid
+            stubbed_response: Uuid,
         ) -> &mut Self {
             let request = BagOfBytes::random();
             let nfc_response = BagOfBytes::random();
 
             self.csdk_driver
-            .expect_get_gguid_request()
-            .with(eq(self.wallet_pointer.clone()))
-            .once()
-            .in_sequence(&mut self.sequence)
-            .return_const(Ok(request.clone()));
+                .expect_get_gguid_request()
+                .with(eq(self.wallet_pointer.clone()))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(request.clone()));
 
             self.nfc_send_receive(request, nfc_response.clone());
 
             self.csdk_driver
-            .expect_get_gguid_response()
-            .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
-            .once()
-            .in_sequence(&mut self.sequence)
-            .return_const(Ok(stubbed_response.into_bytes().to_vec().into()));
+                .expect_get_gguid_response()
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
+                .once()
+                .in_sequence(&mut self.sequence)
+                .return_const(Ok(stubbed_response
+                    .into_bytes()
+                    .to_vec()
+                    .into()));
 
             self
         }
@@ -630,9 +612,7 @@ mod tests {
                 .with(
                     eq(self.wallet_pointer.clone()),
                     eq(BagOfBytes::from(
-                        expected_derivation_path
-                            .to_string()
-                            .into_bytes(),
+                        expected_derivation_path.to_string().into_bytes(),
                     )),
                     eq(CardCurve::Ed25519Curve.val()),
                 )
@@ -688,6 +668,26 @@ mod tests {
                 .return_const(Ok(stubbed_signature_response.to_bytes().into()));
 
             self
+        }
+
+        fn expect_to_sign_hash(
+            &mut self,
+            hash: Hash,
+            derivation_path: DerivationPath,
+            expected_signature_with_pub_key: SignatureWithPublicKey,
+        ) -> &mut Self {
+            self.sign_hash(
+                derivation_path.to_hd_path(),
+                hash,
+                expected_signature_with_pub_key
+                    .signature()
+                    .into_ed25519()
+                    .unwrap(),
+            )
+            .expect_derive_public_key(
+                derivation_path.to_hd_path(),
+                expected_signature_with_pub_key.public_key(),
+            )
         }
 
         fn nfc_send_receive(
@@ -872,12 +872,17 @@ mod tests {
         let paths = IndexSet::from([path1.clone(), path2.clone()]);
 
         let factor_source_id_pub_key = PublicKey::sample_ed25519();
-        let factor_source_id = FactorSourceIDFromHash::from_public_key_bytes(FactorSourceKind::ArculusCard, factor_source_id_pub_key.to_bytes());
-        let factor_source = ArculusCardFactorSource::new(factor_source_id, ArculusCardHint::sample());
+        let factor_source_id = FactorSourceIDFromHash::from_public_key_bytes(
+            FactorSourceKind::ArculusCard,
+            factor_source_id_pub_key.to_bytes(),
+        );
+        let factor_source = ArculusCardFactorSource::new(
+            factor_source_id,
+            ArculusCardHint::sample(),
+        );
 
-        stub
-        .initialize_session()
-        .expect_read_factor_source_id(factor_source_id_pub_key)
+        stub.initialize_session()
+            .expect_read_factor_source_id(factor_source_id_pub_key)
             .expect_derive_public_key(path1.clone().to_hd_path(), pub_key1)
             .expect_derive_public_key(path2.clone().to_hd_path(), pub_key2)
             .end_session();
@@ -900,32 +905,78 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn sign_hash() {
+    async fn sign_hashes() {
+        let input = IndexMap::from([
+            (
+                Hash::sample(),
+                IndexSet::from([
+                    DerivationPath::sample(),
+                    DerivationPath::sample_other(),
+                ]),
+            ),
+            (
+                Hash::sample_other(),
+                IndexSet::from([
+                    DerivationPath::sample(),
+                    DerivationPath::sample_other(),
+                ]),
+            ),
+        ]);
         let pin = "123456".to_string();
-        let hash = Hash::sample();
-        let derivation_path = DerivationPath::sample();
-        let expected_signature_with_pub_key = SignatureWithPublicKey::sample();
+        let expected_signature_with_pub_key_1 =
+            SignatureWithPublicKey::Ed25519 {
+                public_key: Ed25519PublicKey::sample_aced(),
+                signature: Ed25519Signature::sample(),
+            };
+        let expected_signature_with_pub_key_2 =
+            SignatureWithPublicKey::Ed25519 {
+                public_key: Ed25519PublicKey::sample_alice(),
+                signature: Ed25519Signature::sample_other(),
+            };
+        let expected_signature_with_pub_key_3 =
+            SignatureWithPublicKey::Ed25519 {
+                public_key: Ed25519PublicKey::sample_bob(),
+                signature: Ed25519Signature::sample_another(),
+            };
+        let expected_signature_with_pub_key_4 =
+            SignatureWithPublicKey::Ed25519 {
+                public_key: Ed25519PublicKey::sample_fade(),
+                signature: Ed25519Signature::sample_extra(),
+            };
 
         let factor_source_id_pub_key = PublicKey::sample_ed25519();
-        let factor_source_id = FactorSourceIDFromHash::from_public_key_bytes(FactorSourceKind::ArculusCard, factor_source_id_pub_key.to_bytes());
-        let factor_source = ArculusCardFactorSource::new(factor_source_id, ArculusCardHint::sample());
+        let factor_source_id = FactorSourceIDFromHash::new_for_arculus(
+            factor_source_id_pub_key.to_bytes(),
+        );
+        let factor_source = ArculusCardFactorSource::new(
+            factor_source_id,
+            ArculusCardHint::sample(),
+        );
 
         let mut stub = ArculusWalletTestStub::new();
 
         stub.initialize_session()
             .expect_read_factor_source_id(factor_source_id_pub_key)
             .verify_pin(pin.clone())
-            .sign_hash(
-                derivation_path.to_hd_path(),
-                hash.clone(),
-                expected_signature_with_pub_key
-                    .signature()
-                    .into_ed25519()
-                    .unwrap(),
+            .expect_to_sign_hash(
+                Hash::sample(),
+                DerivationPath::sample(),
+                expected_signature_with_pub_key_1.clone(),
             )
-            .expect_derive_public_key(
-                derivation_path.to_hd_path().clone(),
-                expected_signature_with_pub_key.public_key(),
+            .expect_to_sign_hash(
+                Hash::sample(),
+                DerivationPath::sample_other(),
+                expected_signature_with_pub_key_2.clone(),
+            )
+            .expect_to_sign_hash(
+                Hash::sample_other(),
+                DerivationPath::sample(),
+                expected_signature_with_pub_key_3.clone(),
+            )
+            .expect_to_sign_hash(
+                Hash::sample_other(),
+                DerivationPath::sample_other(),
+                expected_signature_with_pub_key_4.clone(),
             )
             .end_session();
 
@@ -934,11 +985,26 @@ mod tests {
             Arc::new(stub.nfc_tag_driver),
         );
 
-        let result = sut.sign_hash(factor_source, pin, hash, derivation_path).await;
-        pretty_assertions::assert_eq!(
-            result,
-            Ok(expected_signature_with_pub_key)
-        );
+        let result = sut.sign_hashes(factor_source, pin, input).await;
+
+        let expected_output = IndexMap::from([
+            (
+                Hash::sample(),
+                IndexSet::from([
+                    expected_signature_with_pub_key_1.clone(),
+                    expected_signature_with_pub_key_2.clone(),
+                ]),
+            ),
+            (
+                Hash::sample_other(),
+                IndexSet::from([
+                    expected_signature_with_pub_key_3.clone(),
+                    expected_signature_with_pub_key_4.clone(),
+                ]),
+            ),
+        ]);
+
+        pretty_assertions::assert_eq!(result, Ok(expected_output));
     }
 
     #[actix_rt::test]
@@ -946,13 +1012,19 @@ mod tests {
         let mut stub = ArculusWalletTestStub::new();
 
         let factor_source_id_pub_key = PublicKey::sample_ed25519();
-        let factor_source_id = FactorSourceIDFromHash::from_public_key_bytes(FactorSourceKind::ArculusCard, factor_source_id_pub_key.to_bytes());
-        let card_info = ArculusCardInfo::new("2.2.7.6".to_string(), Uuid::sample(), Some(factor_source_id));
+        let factor_source_id = FactorSourceIDFromHash::from_public_key_bytes(
+            FactorSourceKind::ArculusCard,
+            factor_source_id_pub_key.to_bytes(),
+        );
+        let card_info = ArculusCardInfo::new(
+            "2.2.7.6".to_string(),
+            Uuid::sample(),
+            Some(factor_source_id),
+        );
 
-        stub
-        .initialize_session()
-        .expect_read_card_info(card_info.clone(), factor_source_id_pub_key)
-        .end_session();
+        stub.initialize_session()
+            .expect_read_card_info(card_info.clone(), factor_source_id_pub_key)
+            .end_session();
 
         let sut = ArculusWalletClient::new(
             Arc::new(stub.csdk_driver),
