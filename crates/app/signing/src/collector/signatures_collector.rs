@@ -246,10 +246,6 @@ impl<S: Signable> SignaturesCollector<S> {
     ) -> Result<()> {
         let factor_sources = factor_sources_of_kind.factor_sources();
         for factor_source in factor_sources {
-            if self.continuation() == FinishEarly {
-                continue;
-            }
-
             // Prepare the request for the interactor
             debug!("Creating mono request for interactor");
             let factor_source_id =
@@ -257,30 +253,33 @@ impl<S: Signable> SignaturesCollector<S> {
                     "Signature Collector only works with HD FactorSources.",
                 );
 
-            let request = self.request_for_mono_sign(
+            if let Some(request) = self.request_for_mono_sign(
                 factor_sources_of_kind.kind,
                 &factor_source_id,
-            );
+            ) {
+                let invalid_transactions = request
+                    .invalid_transactions_if_factor_neglected(
+                        &factor_source_id,
+                    );
+                if !invalid_transactions.is_empty() {
+                    info!(
+                        "If factor {:?} are neglected, invalid TXs: {:?}",
+                        factor_source_id, invalid_transactions
+                    )
+                }
 
-            let invalid_transactions = request
-                .invalid_transactions_if_factor_neglected(&factor_source_id);
-            if !invalid_transactions.is_empty() {
-                info!(
-                    "If factor {:?} are neglected, invalid TXs: {:?}",
-                    factor_source_id, invalid_transactions
-                )
-            }
+                debug!("Dispatching mono request to interactor: {:?}", request);
+                // Produce the results from the interactor
+                let response =
+                    self.dependencies.interactor.sign(request).await?;
+                debug!("Got response from mono interactor: {:?}", response);
 
-            debug!("Dispatching mono request to interactor: {:?}", request);
-            // Produce the results from the interactor
-            let response = self.dependencies.interactor.sign(request).await?;
-            debug!("Got response from mono interactor: {:?}", response);
+                // Report the results back to the collector
+                self.process_batch_response(response);
 
-            // Report the results back to the collector
-            self.process_batch_response(response);
-
-            if self.continuation() == FinishEarly {
-                break;
+                if self.continuation() == FinishEarly {
+                    break;
+                }
             }
         }
 
@@ -324,8 +323,11 @@ impl<S: Signable> SignaturesCollector<S> {
         &self,
         factor_source_kind: FactorSourceKind,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> SignRequest<S> {
+    ) -> Option<SignRequest<S>> {
         let per_transaction = self.per_transaction_input(factor_source_id);
+        if per_transaction.is_empty() {
+            return None;
+        }
 
         let invalid_transactions_if_neglected = self
             .invalid_transactions_if_neglected_factor_sources(IndexSet::just(
@@ -340,10 +342,10 @@ impl<S: Signable> SignaturesCollector<S> {
             invalid_transactions_if_neglected,
         );
 
-        SignRequest::new(
+        Some(SignRequest::new(
             factor_source_kind,
             IndexMap::just((*factor_source_id, per_factor_source_input)),
-        )
+        ))
     }
 
     fn request_for_poly_sign(

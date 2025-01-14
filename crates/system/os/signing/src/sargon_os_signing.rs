@@ -348,8 +348,7 @@ mod test {
             .sign_transaction(signable.clone(), RoleKind::Primary)
             .await;
 
-        println!("{:?}", outcome);
-        //assert_eq!(outcome, Err(CommonError::SigningRejected));
+        assert_eq!(outcome, Err(CommonError::SigningRejected));
     }
 
     #[actix_rt::test]

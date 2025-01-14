@@ -58,37 +58,23 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
                     {
                         let outcome = FactorOutcome::skipped(id);
                         outcomes.insert(id, outcome);
-                        continue;
-                    }
+                    } else {
+                        let signatures = input.per_transaction
+                            .iter()
+                            .flat_map(|x| {
+                                x.signature_inputs()
+                                    .iter()
+                                    .map(|y|
+                                        unsafe {
+                                            HDSignature::produced_signing_with_input(y.clone())
+                                        }
+                                    )
+                                    .collect_vec()
+                            })
+                            .collect::<IndexSet<HDSignature<S::ID>>>();
 
-                    match self.simulated_user.sign_or_skip(
-                        request.invalid_transactions_if_factor_neglected(&id),
-                    ) {
-                        SigningUserInput::Sign => {
-                            let signatures = input.per_transaction
-                                .iter()
-                                .flat_map(|x| {
-                                    x.signature_inputs()
-                                        .iter()
-                                        .map(|y|
-                                            unsafe {
-                                                HDSignature::produced_signing_with_input(y.clone())
-                                            }
-                                        )
-                                        .collect_vec()
-                                })
-                                .collect::<IndexSet<HDSignature<S::ID>>>();
-
-                            let outcome = FactorOutcome::signed(signatures)?;
-                            outcomes.insert(id, outcome);
-                        }
-                        SigningUserInput::Skip => {
-                            let outcome = FactorOutcome::skipped(id);
-                            outcomes.insert(id, outcome);
-                        }
-                        SigningUserInput::Reject => {
-                            return Err(CommonError::SigningRejected);
-                        }
+                        let outcome = FactorOutcome::signed(signatures)?;
+                        outcomes.insert(id, outcome);
                     }
                 }
 
