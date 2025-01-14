@@ -90,7 +90,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             SigningFinishEarlyStrategy::default(),
             all_factor_sources_in_profile,
             transactions,
-            SimulatedUser::lazy_sign_minimum([]),
+            SimulatedUser::lazy_sign_minimum([], []),
             SigningPurpose::sign_transaction_primary(),
         )
     }
@@ -113,24 +113,6 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             SimulatedUser::lazy_always_skip_no_fail(),
-            SigningPurpose::sign_transaction_primary(),
-        )
-    }
-
-    pub(crate) fn test_lazy_skip_some_factors(
-        transactions: impl IntoIterator<Item = SignableWithEntities<S>>,
-        skipping_factors: impl IntoIterator<Item = FactorSourceIDFromHash>,
-    ) -> Self {
-        Self::new_test(
-            SigningFinishEarlyStrategy::default(),
-            FactorSource::sample_all(),
-            transactions,
-            SimulatedUser::new(
-                SimulatedUserMode::Lazy(Laziness::SignMinimum),
-                Some(SimulatedFailures::with_simulated_failures(
-                    skipping_factors,
-                )),
-            ),
             SigningPurpose::sign_transaction_primary(),
         )
     }
