@@ -15,11 +15,6 @@ pub trait OsSecurityStructuresQuerying {
         structure_of_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<SecurityStructureOfFactorSources>;
 
-    async fn add_security_structure_of_factor_sources(
-        &self,
-        structure: &SecurityStructureOfFactorSources,
-    ) -> Result<bool>;
-
     async fn add_security_structure_of_factor_source_ids(
         &self,
         structure_ids: &SecurityStructureOfFactorSourceIDs,
@@ -62,30 +57,6 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 &p.factor_sources,
             ))
         })
-    }
-
-    /// Adds the `SecurityStructureOfFactorSources` to Profile if none with the
-    /// same ID already exists, and if all factors it references are found in Profile.
-    ///
-    /// If `structure` references a FactorSource by ID which is unknown to Profile,
-    /// `Err(CommonError::StructureReferencesUnknownFactorSource)` is returned.
-    ///
-    /// If Profile already contains a structure with the same ID, `Ok(false)` is
-    /// returned **without** modifying the existing one.
-    ///  
-    /// # Emits Events
-    /// Emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage.
-    ///
-    /// And also emits `Event::ProfileModified { change: EventProfileModified::SecurityStructureAdded { id } }`
-    async fn add_security_structure_of_factor_sources(
-        &self,
-        structure: &SecurityStructureOfFactorSources,
-    ) -> Result<bool> {
-        let structure_id_level =
-            SecurityStructureOfFactorSourceIDs::from(structure.clone());
-        self.add_security_structure_of_factor_source_ids(&structure_id_level)
-            .await
     }
 
     /// Adds the `SecurityStructureOfFactorSourceIDs` to Profile if none with the
@@ -196,21 +167,16 @@ mod tests {
             .unwrap();
 
         // ACT
-        let structure_factor_source_level =
-            SecurityStructureOfFactorSources::sample();
+        let structure_factor_id_level =
+            SecurityStructureOfFactorSourceIDs::sample();
         let inserted = os
             .with_timeout(|x| {
-                x.add_security_structure_of_factor_sources(
-                    &structure_factor_source_level,
+                x.add_security_structure_of_factor_source_ids(
+                    &structure_factor_id_level,
                 )
             })
             .await
             .unwrap();
-
-        let structure_factor_id_level =
-            SecurityStructureOfFactorSourceIDs::from(
-                structure_factor_source_level.clone(),
-            );
 
         // ASSERT
         assert!(inserted);
@@ -221,11 +187,6 @@ mod tests {
             .security
             .security_structures_of_factor_source_ids
             .contains_by_id(&structure_factor_id_level));
-
-        let structures =
-            os.security_structures_of_factor_sources().unwrap().items();
-
-        assert!(structures.contains(&structure_factor_source_level));
     }
 
     #[actix_rt::test]
@@ -235,10 +196,10 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        let structure = SecurityStructureOfFactorSources::sample();
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
         let res = os
             .with_timeout(|x| {
-                x.add_security_structure_of_factor_sources(&structure)
+                x.add_security_structure_of_factor_source_ids(&structure_ids)
             })
             .await;
 
@@ -270,10 +231,10 @@ mod tests {
         .unwrap();
 
         // ACT
-        let structure = SecurityStructureOfFactorSources::sample();
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
         let res = os
             .with_timeout(|x| {
-                x.add_security_structure_of_factor_sources(&structure)
+                x.add_security_structure_of_factor_source_ids(&structure_ids)
             })
             .await;
 
@@ -308,11 +269,11 @@ mod tests {
             .unwrap();
 
         // ACT
-        let structure = SecurityStructureOfFactorSources::sample();
-        let id = structure.metadata.id;
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
+        let id = structure_ids.metadata.id;
         let inserted = os
             .with_timeout(|x| {
-                x.add_security_structure_of_factor_sources(&structure)
+                x.add_security_structure_of_factor_source_ids(&structure_ids)
             })
             .await
             .unwrap();
@@ -335,14 +296,14 @@ mod tests {
         }
 
         // ACT
-        let structure_source_sample =
-            SecurityStructureOfFactorSources::sample();
-        let structure_source_sample_other =
-            SecurityStructureOfFactorSources::sample_other();
+        let structure_source_ids_sample =
+            SecurityStructureOfFactorSourceIDs::sample();
+        let structure_source__ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample_other();
         let inserted = os
             .with_timeout(|x| {
-                x.add_security_structure_of_factor_sources(
-                    &structure_source_sample,
+                x.add_security_structure_of_factor_source_ids(
+                    &structure_source_ids_sample,
                 )
             })
             .await
@@ -351,8 +312,8 @@ mod tests {
 
         let inserted = os
             .with_timeout(|x| {
-                x.add_security_structure_of_factor_sources(
-                    &structure_source_sample_other,
+                x.add_security_structure_of_factor_source_ids(
+                    &structure_source__ids_sample_other,
                 )
             })
             .await
@@ -360,11 +321,11 @@ mod tests {
         assert!(inserted);
 
         let structure_id_sample = SecurityStructureOfFactorSourceIDs::from(
-            structure_source_sample.clone(),
+            structure_source_ids_sample.clone(),
         );
         let structure_id_sample_other =
             SecurityStructureOfFactorSourceIDs::from(
-                structure_source_sample_other.clone(),
+                structure_source__ids_sample_other.clone(),
             );
 
         // ASSERT
