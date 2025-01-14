@@ -46,28 +46,53 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
                 .clone(),
         ) {
             SigningUserInput::Sign => {
-                let per_factor_outcome = IndexMap::from_iter(request
-                    .per_factor_source
-                    .iter()
-                    .map(|(id, input)| {
-                        let signatures = input.per_transaction
-                            .iter()
-                            .flat_map(|x| {
-                                x.signature_inputs()
-                                    .iter()
-                                    .map(|y|
-                                        unsafe {
-                                            HDSignature::produced_signing_with_input(y.clone())
-                                        }
-                                    )
-                                    .collect_vec()
-                            })
-                            .collect::<IndexSet<HDSignature<S::ID>>>();
+                let mut outcomes = IndexMap::<
+                    FactorSourceIDFromHash,
+                    FactorOutcome<S::ID>,
+                >::new();
 
-                        (*id, signatures)
-                    }));
+                for (id, input) in request.per_factor_source.clone() {
+                    if self
+                        .simulated_user
+                        .simulate_skip_if_needed(IndexSet::just(id))
+                    {
+                        let outcome = FactorOutcome::skipped(id);
+                        outcomes.insert(id, outcome);
+                        continue;
+                    }
 
-                SignResponse::signed(per_factor_outcome)
+                    match self.simulated_user.sign_or_skip(
+                        request.invalid_transactions_if_factor_neglected(&id),
+                    ) {
+                        SigningUserInput::Sign => {
+                            let signatures = input.per_transaction
+                                .iter()
+                                .flat_map(|x| {
+                                    x.signature_inputs()
+                                        .iter()
+                                        .map(|y|
+                                            unsafe {
+                                                HDSignature::produced_signing_with_input(y.clone())
+                                            }
+                                        )
+                                        .collect_vec()
+                                })
+                                .collect::<IndexSet<HDSignature<S::ID>>>();
+
+                            let outcome = FactorOutcome::signed(signatures)?;
+                            outcomes.insert(id, outcome);
+                        }
+                        SigningUserInput::Skip => {
+                            let outcome = FactorOutcome::skipped(id);
+                            outcomes.insert(id, outcome);
+                        }
+                        SigningUserInput::Reject => {
+                            return Err(CommonError::SigningRejected);
+                        }
+                    }
+                }
+
+                SignResponse::new_from_outcomes(outcomes)
             }
 
             SigningUserInput::Skip => {

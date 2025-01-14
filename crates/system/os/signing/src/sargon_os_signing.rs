@@ -114,7 +114,7 @@ mod test {
     #[actix_rt::test]
     async fn test_sign_auth_success() {
         let profile = Profile::sample();
-        let sut = boot_with_profile(&profile, None).await;
+        let sut = boot(Some(profile.clone()), None).await;
         let all_accounts = profile.accounts_on_current_network().unwrap();
         let account = all_accounts.first().unwrap();
         let nonce = DappToWalletInteractionAuthChallengeNonce::sample();
@@ -150,7 +150,7 @@ mod test {
         let profile = Profile::sample();
 
         let sut =
-            boot_with_profile(&profile, Some(SigningFailure::UserRejected))
+            boot(Some(profile.clone()), Some(SigningFailure::UserRejected))
                 .await;
 
         let all_accounts = profile.accounts_on_current_network().unwrap();
@@ -178,7 +178,7 @@ mod test {
     #[actix_rt::test]
     async fn test_sign_transaction_intent_success() {
         let profile = Profile::sample();
-        let sut = boot_with_profile(&profile, None).await;
+        let sut = boot(Some(profile.clone()), None).await;
 
         let (signable, entities) = get_signable_with_entities::<
             TransactionIntent,
@@ -196,7 +196,7 @@ mod test {
     #[actix_rt::test]
     async fn test_sign_subintent_success() {
         let profile = Profile::sample();
-        let sut = boot_with_profile(&profile, None).await;
+        let sut = boot(Some(profile.clone()), None).await;
 
         let (signable, entities) =
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
@@ -216,7 +216,7 @@ mod test {
     #[actix_rt::test]
     async fn test_sign_transaction_intent_only_with_irrelevant_entity() {
         let profile = Profile::sample();
-        let sut = boot_with_profile(&profile, None).await;
+        let sut = boot(Some(profile.clone()), None).await;
 
         let irrelevant_account = Account::sample_mainnet_third();
         let transaction = TransactionIntent::sample_entities_requiring_auth(
@@ -235,7 +235,7 @@ mod test {
     #[actix_rt::test]
     async fn test_sign_transaction_intent_containing_irrelevant_entity() {
         let profile = Profile::sample();
-        let sut = boot_with_profile(&profile, None).await;
+        let sut = boot(Some(profile.clone()), None).await;
 
         let irrelevant_account = Account::sample_mainnet_third();
         let relevant_account = Account::sample_mainnet();
@@ -256,8 +256,8 @@ mod test {
     async fn test_sign_transaction_intent_rejected_due_to_all_factors_neglected(
     ) {
         let profile = Profile::sample();
-        let sut = boot_with_profile(
-            &profile,
+        let sut = boot(
+            Some(profile.clone()),
             Some(SigningFailure::NeglectedFactorSources(vec![
                 profile.device_factor_sources().first().unwrap().id,
             ])),
@@ -276,11 +276,88 @@ mod test {
     }
 
     #[actix_rt::test]
+    async fn test_sign_transaction_prudent_user_skips_factor() {
+        let device = FactorSource::sample_at(0);
+        let account_device = Account::sample_unsecurified_mainnet(
+            "Device",
+            HierarchicalDeterministicFactorInstance::new_for_entity(
+                device.clone().as_device().unwrap().id,
+                CAP26EntityKind::Account,
+                Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
+            ),
+        );
+        let ledger1 = FactorSource::sample_at(1);
+        let account_ledger1 = Account::sample_unsecurified_mainnet(
+            "Ledger1",
+            HierarchicalDeterministicFactorInstance::new_for_entity(
+                ledger1.clone().as_ledger().unwrap().id,
+                CAP26EntityKind::Account,
+                Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
+            ),
+        );
+        let ledger2 = FactorSource::sample_at(2);
+        let account_ledger2 = Account::sample_unsecurified_mainnet(
+            "Ledger2",
+            HierarchicalDeterministicFactorInstance::new_for_entity(
+                ledger2.clone().as_ledger().unwrap().id,
+                CAP26EntityKind::Account,
+                Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
+            ),
+        );
+
+        let profile = Profile::with(
+            Header::sample(),
+            FactorSources::from_iter([
+                device.clone(),
+                ledger1.clone(),
+                ledger2.clone(),
+            ]),
+            AppPreferences::default(),
+            ProfileNetworks::just(ProfileNetwork::new(
+                NetworkID::Mainnet,
+                [
+                    account_device.clone(),
+                    account_ledger1.clone(),
+                    account_ledger2.clone(),
+                ],
+                [],
+                AuthorizedDapps::new(),
+                ResourcePreferences::new(),
+            )),
+        );
+
+        let sut = boot(
+            Some(profile.clone()),
+            Some(SigningFailure::SkippingFactorSources(vec![
+                ledger1.as_ledger().unwrap().id,
+            ])),
+        )
+        .await;
+
+        let signable =
+            TransactionIntent::sample_entity_addresses_requiring_auth(
+                [
+                    account_device.address.clone(),
+                    account_ledger1.address.clone(),
+                    account_ledger2.address.clone(),
+                ],
+                [],
+            );
+
+        let outcome = sut
+            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .await;
+
+        println!("{:?}", outcome);
+        //assert_eq!(outcome, Err(CommonError::SigningRejected));
+    }
+
+    #[actix_rt::test]
     async fn test_sign_transaction_subintent_rejected_due_to_all_factors_neglected(
     ) {
         let profile = Profile::sample();
-        let sut = boot_with_profile(
-            &profile,
+        let sut = boot(
+            Some(profile.clone()),
             Some(SigningFailure::NeglectedFactorSources(vec![
                 profile.device_factor_sources().first().unwrap().id,
             ])),
@@ -328,7 +405,7 @@ mod test {
     async fn test_sign_fail_due_to_user_rejecting() {
         let profile = Profile::sample();
         let sut =
-            boot_with_profile(&profile, Some(SigningFailure::UserRejected))
+            boot(Some(profile.clone()), Some(SigningFailure::UserRejected))
                 .await;
 
         let (signable, _) =
@@ -341,14 +418,17 @@ mod test {
         assert_eq!(outcome, Err(CommonError::SigningRejected));
     }
 
-    async fn boot_with_profile(
-        profile: &Profile,
+    async fn boot(
+        profile: Option<Profile>,
         maybe_signing_failure: Option<SigningFailure>,
     ) -> Arc<SUT> {
         let secure_storage_driver = EphemeralSecureStorage::new();
-        let secure_storage_client =
-            SecureStorageClient::new(secure_storage_driver.clone());
-        secure_storage_client.save_profile(profile).await.unwrap();
+
+        if let Some(profile) = profile {
+            let secure_storage_client =
+                SecureStorageClient::new(secure_storage_driver.clone());
+            secure_storage_client.save_profile(&profile).await.unwrap();
+        }
 
         let test_drivers = Drivers::with_secure_storage(secure_storage_driver);
         let mut clients = Clients::new(Bios::new(test_drivers));
@@ -391,6 +471,13 @@ mod test {
                     )
                 }
                 SigningFailure::UserRejected => SimulatedUser::<S>::rejecting(),
+                SigningFailure::SkippingFactorSources(factor_sources) => {
+                    SimulatedUser::<S>::prudent_with_skips(
+                        SimulatedSkips::with_simulated_skips(
+                            factor_sources.clone(),
+                        ),
+                    )
+                }
             },
         }
     }
@@ -418,6 +505,7 @@ mod test {
 
     enum SigningFailure {
         NeglectedFactorSources(Vec<FactorSourceIDFromHash>),
+        SkippingFactorSources(Vec<FactorSourceIDFromHash>),
         UserRejected,
     }
 }
