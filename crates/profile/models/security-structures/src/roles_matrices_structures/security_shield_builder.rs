@@ -925,8 +925,10 @@ mod tests {
             // Primary
             .set_number_of_days_until_auto_confirm(42)
             .add_factor_source_to_primary_threshold(
-                // also sets threshold -> 1
                 FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
             )
             .add_factor_source_to_primary_override(
                 FactorSourceID::sample_arculus(),
@@ -944,6 +946,10 @@ mod tests {
             // Confirmation
             .add_factor_source_to_confirmation_override(
                 FactorSourceID::sample_device(),
+            )
+            .remove_factor_from_primary(
+                FactorSourceID::sample_password(),
+                FactorListKind::Threshold,
             )
             .remove_factor_from_primary(
                 FactorSourceID::sample_arculus_other(),
@@ -1193,37 +1199,72 @@ mod tests {
     }
 
     #[test]
-    fn selected_primary_threshold_factors_status_is_optimal() {
+    fn selected_primary_threshold_factors_status_invalid() {
         let sut = SUT::default();
 
-        let _ = sut
-            .set_threshold(Threshold::Specific(2))
-            .add_factor_source_to_primary_threshold(
-                FactorSourceID::sample_password(),
-            )
-            .add_factor_source_to_primary_threshold(
-                FactorSourceID::sample_device(),
-            );
-        let status = sut.selected_primary_threshold_factors_status();
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        );
 
         pretty_assertions::assert_eq!(
-            status,
-            SelectedPrimaryThresholdFactorsStatus::Optimal
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
+                    factor_source_kind: FactorSourceKind::Password,
+                }
+            }
+        );
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device_other(),
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::Other {
+                    underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices
+                }
+            }
         );
     }
 
     #[test]
-    fn selected_primary_threshold_factors_status_is_suboptimal() {
+    fn selected_primary_threshold_factors_status() {
         let sut = SUT::default();
 
-        let _ = sut.add_factor_source_to_primary_threshold(
-            FactorSourceID::sample_ledger(),
+        pretty_assertions::assert_eq!(
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Insufficient
         );
-        let status = sut.selected_primary_threshold_factors_status();
+
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
 
         pretty_assertions::assert_eq!(
-            status,
+            sut.selected_primary_threshold_factors_status(),
             SelectedPrimaryThresholdFactorsStatus::Suboptimal
+        );
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        )
+        .add_factor_source_to_primary_override(FactorSourceID::sample_device());
+
+        // making the primary role invalid DOESN'T affect the primary threshold factors status
+        pretty_assertions::assert_eq!(
+            sut.validate(),
+            Some(
+                SecurityShieldBuilderInvalidReason::FactorSourceAlreadyPresent
+            )
+        );
+        pretty_assertions::assert_eq!(
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Optimal
         );
     }
 }
