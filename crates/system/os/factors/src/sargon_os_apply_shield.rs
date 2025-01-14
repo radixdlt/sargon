@@ -329,3 +329,61 @@ impl OsShieldApplying for SargonOS {
         ))
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    fn unsafe_shield_with_bdfs(
+        bdfs: &FactorSource,
+    ) -> SecurityStructureOfFactorSourceIDs {
+        let id = bdfs.factor_source_id();
+
+        // This is an invalid shield, but it's just for testing
+        let matrix = unsafe {
+            MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    0,
+                    [],
+                    [id],
+                ),
+                RecoveryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    0,
+                    [],
+                    [id],
+                ),
+                ConfirmationRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    0,
+                    [],
+                    [id],
+                ),
+                14,
+            )
+        };
+        SecurityStructureOfFactorSourceIds::new(
+            DisplayName::new("Invalid Shield").unwrap(),
+            matrix,
+            id,
+        )
+    }
+
+    async fn add_unsafe_shield(os: &SargonOS) -> Result<SecurityStructureID> {
+        let bdsf = os.bdfs()?;
+        let shield_of_ids = unsafe_shield_with_bdfs(&bdsf.into());
+        os.add_security_structure_of_factor_source_ids(&shield_of_ids)
+            .await?;
+        Ok(shield_of_ids.id())
+    }
+
+    #[actix_rt::test]
+    async fn test_apply_security_shield_to_entities() {
+        let os = SargonOS::fast_boot().await;
+        let shield_id = add_unsafe_shield(&os);
+        let network = NetworkID::Mainnet;
+        let account = os.create_and_save_new_account_with_bdfs(network, DisplayName::sample()).await.unwrap();
+        let persona = os.create_unsaved_persona_with_bdfs(network, DisplayName::sample_other()).await.unwrap();
+        
+
+    }
+}
