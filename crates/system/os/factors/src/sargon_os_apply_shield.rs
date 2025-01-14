@@ -109,7 +109,9 @@ impl OsShieldApplying for SargonOS {
                 let security_structure_of_factor_instances =
                     security_structures_of_factor_instances
                         .shift_remove(&entity_address)
-                        .unwrap();
+                        .expect(
+                            "Should have a security structure for each entity",
+                        );
 
                 let mut entity = self.entity_by_address(entity_address)?;
                 entity.set_provisional(
@@ -184,7 +186,7 @@ impl OsShieldApplying for SargonOS {
         let key_derivation_interactors = self.keys_derivation_interactor();
 
         // We only consume ROLA factors for:
-        // * Unsecured entities (because they do not yet have nay ROLA key)
+        // * Unsecured entities (because they do not yet have any ROLA key)
         // * Securified entities where the ROLA key's FactorSource does not match the one of the shield
         let mut existing_rola_key_for_entities = IndexMap::<
             AddressOfAccountOrPersona,

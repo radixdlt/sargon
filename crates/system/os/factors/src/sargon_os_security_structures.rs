@@ -10,7 +10,7 @@ pub trait OsSecurityStructuresQuerying {
         &self,
     ) -> Result<SecurityStructuresOfFactorSourceIDs>;
 
-    fn security_structure_of_factor_source_ids_from_security_structure_id(
+    fn security_structure_of_factor_source_ids_by_security_structure_id(
         &self,
         shield_id: SecurityStructureID,
     ) -> Result<SecurityStructureOfFactorSourceIDs>;
@@ -20,7 +20,7 @@ pub trait OsSecurityStructuresQuerying {
         shield_id: SecurityStructureID,
     ) -> Result<SecurityStructureOfFactorSources> {
         let shield_id_level = self
-            .security_structure_of_factor_source_ids_from_security_structure_id(
+            .security_structure_of_factor_source_ids_by_security_structure_id(
                 shield_id,
             )?;
         self.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(&shield_id_level)
@@ -84,7 +84,7 @@ impl OsSecurityStructuresQuerying for SargonOS {
         })
     }
 
-    fn security_structure_of_factor_source_ids_from_security_structure_id(
+    fn security_structure_of_factor_source_ids_by_security_structure_id(
         &self,
         shield_id: SecurityStructureID,
     ) -> Result<SecurityStructureOfFactorSourceIDs> {
