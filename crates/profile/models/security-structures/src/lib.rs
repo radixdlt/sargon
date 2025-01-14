@@ -3,6 +3,7 @@
 mod factor_list_kind;
 mod role_kind;
 mod roles_matrices_structures;
+mod threshold;
 
 pub mod prelude {
     pub use crate::factor_list_kind::*;

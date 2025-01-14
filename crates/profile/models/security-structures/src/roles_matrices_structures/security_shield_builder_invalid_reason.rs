@@ -249,3 +249,32 @@ pub enum SecurityShieldBuilderInvalidReason {
     #[error("Confirmation role cannot contain Trusted Contact")]
     ConfirmationRoleTrustedContactNotSupported,
 }
+
+impl HasSampleValues for SecurityShieldBuilderInvalidReason {
+    fn sample() -> Self {
+        SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+    }
+
+    fn sample_other() -> Self {
+        SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurityShieldBuilderInvalidReason;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+}

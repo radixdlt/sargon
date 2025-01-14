@@ -153,11 +153,12 @@ mod threshold_suite {
     fn remove_lowers_threshold_from_1_to_0() {
         let mut sut = make();
         let fs = sample();
-        assert_eq!(sut.get_threshold(), 0);
-        sut.add_factor_source_to_threshold(fs).unwrap(); // should automatically increase threshold to 1
-        assert_eq!(sut.get_threshold(), 1);
-        sut.remove_factor_source(&fs).unwrap();
-        assert_eq!(sut.get_threshold(), 0);
+        assert_eq!(sut.get_threshold(), Threshold::All);
+        sut.add_factor_source_to_threshold(fs).unwrap();
+        assert_eq!(sut.get_threshold_value(), 1);
+        sut.remove_factor_source(&fs, FactorListKind::Threshold)
+            .unwrap();
+        assert_eq!(sut.get_threshold_value(), 0);
     }
 
     #[test]
@@ -171,12 +172,58 @@ mod threshold_suite {
             FactorSourceID::sample_arculus_other(),
         )
         .unwrap();
-        sut.set_threshold(2).unwrap();
-        assert_eq!(sut.get_threshold(), 2);
-        sut.remove_factor_source(&fs0).unwrap();
-        assert_eq!(sut.get_threshold(), 2); // assert that we DIDN'T lower the threshold, since we have 2 factors
-        sut.remove_factor_source(&fs1).unwrap();
-        assert_eq!(sut.get_threshold(), 1); // assert that we DID lower the threshold now that we have 1 factor
+        sut.set_specific_threshold(2).unwrap();
+        assert_eq!(sut.get_threshold_value(), 2);
+        sut.remove_factor_source(&fs0, FactorListKind::Threshold)
+            .unwrap();
+        assert_eq!(sut.get_threshold_value(), 2); // assert that we DIDN'T lower the threshold, since we have 2 factors
+        sut.remove_factor_source(&fs1, FactorListKind::Threshold)
+            .unwrap();
+        assert_eq!(sut.get_threshold_value(), 1); // assert that we DID lower the threshold now that we have 1 factor
+    }
+
+    #[test]
+    fn remove_does_not_change_threshold_kind() {
+        let mut sut = make();
+        let fs0 = sample();
+        let fs1 = sample_other();
+        sut.add_factor_source_to_threshold(fs0).unwrap();
+        sut.add_factor_source_to_threshold(fs1).unwrap();
+        assert_eq!(sut.get_threshold(), Threshold::All);
+        assert_eq!(sut.get_threshold_value(), 2);
+        sut.remove_factor_source(&fs0, FactorListKind::Threshold)
+            .unwrap();
+        assert_eq!(sut.get_threshold(), Threshold::All); // assert that we DIDN'T change the threshold kind from All to Specific
+        assert_eq!(sut.get_threshold_value(), 1);
+
+        sut.add_factor_source_to_threshold(fs0).unwrap();
+        sut.add_factor_source_to_threshold(
+            FactorSourceID::sample_arculus_other(),
+        )
+        .unwrap(); // now we have 3 factors
+
+        sut.set_threshold(Threshold::Specific(1)).unwrap();
+        assert_eq!(sut.get_threshold(), Threshold::Specific(1));
+        sut.remove_factor_source(&fs0, FactorListKind::Threshold)
+            .unwrap();
+        assert_eq!(sut.get_threshold(), Threshold::Specific(1)); // assert that we DIDN'T change the threshold specific value
+
+        sut.remove_factor_source(&fs1, FactorListKind::Threshold)
+            .unwrap();
+
+        assert_eq!(sut.get_threshold_value(), 1); // assert that we DIDN'T change the threshold kind from Specific to All
+    }
+
+    #[test]
+    fn remove_single_factor_changes_threshold_to_all() {
+        let mut sut = make();
+        let fs0 = sample();
+        sut.add_factor_source_to_threshold(fs0).unwrap();
+        sut.set_specific_threshold(1).unwrap();
+        assert_eq!(sut.get_threshold_value(), 1);
+        sut.remove_factor_source(&fs0, FactorListKind::Threshold)
+            .unwrap();
+        assert_eq!(sut.get_threshold(), Threshold::All);
     }
 
     #[test]
@@ -188,15 +235,16 @@ mod threshold_suite {
         let fs = FactorSourceID::sample_arculus_other();
         sut.add_factor_source_to_override(fs).unwrap();
         let _ = sut.build(); // build should not mutate neither consume
-        sut.set_threshold(2).unwrap();
+        sut.set_specific_threshold(2).unwrap();
         let _ = sut.build(); // build should not mutate neither consume
-        assert_eq!(sut.get_threshold(), 2);
-        sut.remove_factor_source(&fs).unwrap();
-        assert_eq!(sut.get_threshold(), 2);
+        assert_eq!(sut.get_threshold_value(), 2);
+        sut.remove_factor_source(&fs, FactorListKind::Override)
+            .unwrap();
+        assert_eq!(sut.get_threshold_value(), 2);
 
         let built = sut.build().unwrap();
         let built2 = sut.build().unwrap();
-        assert_eq!(built.get_threshold(), 2);
+        assert_eq!(built.get_threshold_value(), 2);
         assert_eq!(built2, built); // can built many times
 
         assert_eq!(built.role(), RoleKind::Primary);
@@ -216,7 +264,7 @@ mod threshold_suite {
 
         // Act
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
-        sut.set_threshold(1).unwrap();
+        sut.set_specific_threshold(1).unwrap();
 
         // Assert
         let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -235,7 +283,7 @@ mod threshold_suite {
 
         // Act
         assert_eq!(
-            sut.set_threshold(1),
+            sut.set_specific_threshold(1),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -259,7 +307,7 @@ mod threshold_suite {
 
         // Act
         assert_eq!(
-            sut.set_threshold(2),
+            sut.set_specific_threshold(2),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -286,7 +334,7 @@ mod threshold_suite {
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
 
         // Act
-        assert_eq!(sut.set_threshold(2), Ok(()));
+        assert_eq!(sut.set_specific_threshold(2), Ok(()));
 
         // Assert
         let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -308,7 +356,7 @@ mod threshold_suite {
 
         // Act
         assert_eq!(
-            sut.set_threshold(3),
+            sut.set_specific_threshold(3),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -332,7 +380,7 @@ mod threshold_suite {
 
         // Act
         sut.add_factor_source_to_threshold(sample_other()).unwrap();
-        sut.set_threshold(1).unwrap();
+        sut.set_specific_threshold(1).unwrap();
 
         // Assert
         let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -351,7 +399,7 @@ mod threshold_suite {
         // Act
         sut.add_factor_source_to_override(sample_other()).unwrap();
         assert_eq!(
-            sut.set_threshold(1),
+            sut.set_specific_threshold(1),
             Err(Validation::NotYetValid(
                 ThresholdHigherThanThresholdFactorsLen
             ))
@@ -391,7 +439,7 @@ mod threshold_suite {
             ]
         );
         _ = sut.add_factor_source_to_threshold(fs0);
-        _ = sut.set_threshold(2);
+        _ = sut.set_specific_threshold(2);
 
         let xs = sut.validation_for_addition_of_factor_source_for_each(
             FactorListKind::Threshold,
@@ -445,7 +493,7 @@ mod password {
             let mut sut = make();
             sut.add_factor_source_to_threshold(FactorSourceID::sample_device())
                 .unwrap();
-            _ = sut.set_threshold(2);
+            _ = sut.set_specific_threshold(2);
             test_duplicates_not_allowed(
                 sut,
                 FactorListKind::Threshold,
@@ -457,7 +505,7 @@ mod password {
         fn alone_is_not_ok() {
             // Arrange
             let mut sut = make();
-            let _ = sut.set_threshold(1);
+            let _ = sut.set_specific_threshold(1);
             // Act
             let res = sut.add_factor_source_to_threshold(sample());
 
@@ -521,7 +569,7 @@ mod password {
                     FactorSourceID::sample_device(),
                 )
                 .unwrap();
-                _ = sut.set_threshold(2);
+                _ = sut.set_specific_threshold(2);
             });
 
             not_ok(SecurityQuestions);
@@ -648,7 +696,7 @@ mod ledger {
 
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected =
@@ -664,7 +712,7 @@ mod ledger {
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap(); // should automatically bump threshold to 1
 
-            let _ = sut.set_threshold(0);
+            let _ = sut.set_specific_threshold(0);
 
             // Assert
             assert_eq!(
@@ -683,7 +731,7 @@ mod ledger {
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
             sut.add_factor_source_to_threshold(sample_other()).unwrap();
-            sut.set_threshold(2).unwrap();
+            sut.set_specific_threshold(2).unwrap();
 
             // Assert
             let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -716,7 +764,11 @@ mod ledger {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors(0, [], [sample()]);
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
+                    Threshold::All,
+                    [],
+                    [sample()],
+                );
             assert_eq!(sut.build().unwrap(), expected);
         }
 
@@ -730,11 +782,12 @@ mod ledger {
             sut.add_factor_source_to_override(sample_other()).unwrap();
 
             // Assert
-            let expected = PrimaryRoleWithFactorSourceIds::with_factors(
-                0,
-                [],
-                [sample(), sample_other()],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
+                    Threshold::All,
+                    [],
+                    [sample(), sample_other()],
+                );
             assert_eq!(sut.build().unwrap(), expected);
         }
     }
@@ -777,7 +830,7 @@ mod arculus {
 
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected =
@@ -793,7 +846,7 @@ mod arculus {
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
             sut.add_factor_source_to_threshold(sample_other()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected = PrimaryRoleWithFactorSourceIds::with_factors(
@@ -826,7 +879,11 @@ mod arculus {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors(0, [], [sample()]);
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
+                    Threshold::All,
+                    [],
+                    [sample()],
+                );
             assert_eq!(sut.build().unwrap(), expected);
         }
 
@@ -840,11 +897,12 @@ mod arculus {
             sut.add_factor_source_to_override(sample_other()).unwrap();
 
             // Assert
-            let expected = PrimaryRoleWithFactorSourceIds::with_factors(
-                0,
-                [],
-                [sample(), sample_other()],
-            );
+            let expected =
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
+                    Threshold::All,
+                    [],
+                    [sample(), sample_other()],
+                );
             assert_eq!(sut.build().unwrap(), expected);
         }
     }
@@ -889,7 +947,7 @@ mod device_factor_source {
 
             // Act
             sut.add_factor_source_to_threshold(sample()).unwrap();
-            sut.set_threshold(1).unwrap();
+            sut.set_specific_threshold(1).unwrap();
 
             // Assert
             let expected =
@@ -940,7 +998,11 @@ mod device_factor_source {
 
             // Assert
             let expected =
-                PrimaryRoleWithFactorSourceIds::with_factors(0, [], [sample()]);
+                PrimaryRoleWithFactorSourceIds::with_factors_and_threshold(
+                    Threshold::All,
+                    [],
+                    [sample()],
+                );
             assert_eq!(sut.build().unwrap(), expected);
         }
     }

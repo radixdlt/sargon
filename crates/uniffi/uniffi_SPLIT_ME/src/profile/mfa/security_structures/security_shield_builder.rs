@@ -2,10 +2,9 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use std::{borrow::Borrow, sync::Arc};
-
 #[cfg(test)]
 use sargon::FactorSourceWithExtraSampleValues;
+use std::{borrow::Borrow, sync::Arc};
 
 use crate::prelude::*;
 
@@ -160,9 +159,13 @@ impl SecurityShieldBuilder {
     pub fn remove_factor_from_primary(
         self: Arc<Self>,
         factor_source_id: FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> Arc<Self> {
         self.set(|builder| {
-            builder.remove_factor_from_primary(factor_source_id.clone().into())
+            builder.remove_factor_from_primary(
+                factor_source_id.clone().into(),
+                factor_list_kind.into(),
+            )
         })
     }
 
@@ -186,8 +189,8 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn set_threshold(self: Arc<Self>, threshold: u8) -> Arc<Self> {
-        self.set(|builder| builder.set_threshold(threshold))
+    pub fn set_threshold(self: Arc<Self>, threshold: Threshold) -> Arc<Self> {
+        self.set(|builder| builder.set_threshold(threshold.into()))
     }
 
     pub fn set_number_of_days_until_auto_confirm(
@@ -455,14 +458,11 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn selected_factor_sources_for_role_status(
+    pub fn selected_primary_threshold_factors_status(
         &self,
-        role: RoleKind,
-    ) -> SelectedFactorSourcesForRoleStatus {
+    ) -> SelectedPrimaryThresholdFactorsStatus {
         self.get(|builder| {
-            builder
-                .selected_factor_sources_for_role_status(role.into_internal())
-                .into()
+            builder.selected_primary_threshold_factors_status().into()
         })
     }
 
@@ -652,6 +652,32 @@ mod tests {
                 FactorSourceKind::Device,
             );
 
+        // Threshold increases when adding a factor, because it's being set to All by default
+        sut = sut.add_factor_source_to_primary_threshold(
+            // should bump threshold to 1
+            FactorSourceID::sample_device(),
+        );
+        assert_eq!(sut.clone().get_primary_threshold(), 1);
+
+        sut = sut.add_factor_source_to_primary_threshold(
+            // should bump threshold to 2
+            FactorSourceID::sample_password_other(),
+        );
+        assert_eq!(sut.clone().get_primary_threshold(), 2);
+
+        sut = sut
+            .remove_factor_from_primary(
+                FactorSourceID::sample_device(),
+                FactorListKind::Threshold,
+            )
+            .remove_factor_from_primary(
+                FactorSourceID::sample_password_other(),
+                FactorListKind::Threshold,
+            );
+
+        // Setting a specific threshold explicitly
+        sut = sut.set_threshold(Threshold::Specific(1));
+
         sut = sut.add_factor_source_to_primary_threshold(
             // should also bump threshold to 1
             FactorSourceID::sample_device(),
@@ -663,10 +689,10 @@ mod tests {
             FactorSourceID::sample_password_other(),
         );
         assert_eq!(sut.clone().get_primary_threshold(), 1);
-        sut =
-            sut.remove_factor_from_primary(
-                FactorSourceID::sample_password_other(),
-            );
+        sut = sut.remove_factor_from_primary(
+            FactorSourceID::sample_password_other(),
+            FactorListKind::Threshold,
+        );
 
         assert_eq!(
             sut.clone().get_primary_threshold_factors(),
@@ -819,7 +845,7 @@ mod tests {
 
         sut = sut
             .remove_factor_from_all_roles(
-                FactorSourceID::sample_arculus_other(),
+                FactorSourceID::sample_arculus_other()
             )
             .remove_factor_from_all_roles(
                 FactorSourceID::sample_ledger_other(),
@@ -829,7 +855,7 @@ mod tests {
         let xs = sut.clone().get_primary_override_factors();
         sut = sut
             .add_factor_source_to_primary_override(f.clone())
-            .remove_factor_from_primary(f.clone());
+            .remove_factor_from_primary(f.clone(), FactorListKind::Override);
         assert_eq!(xs, sut.clone().get_primary_override_factors());
 
         let xs = sut.clone().get_recovery_factors();
@@ -901,7 +927,6 @@ mod tests {
         sut = sut
             .set_name(name.to_owned())
             .set_number_of_days_until_auto_confirm(days_to_auto_confirm)
-            .set_threshold(2)
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )
@@ -910,7 +935,8 @@ mod tests {
             )
             .auto_assign_factors_to_recovery_and_confirmation_based_on_primary(
                 all_factors_in_profile.clone(),
-            );
+            )
+            .set_threshold(Threshold::Specific(2));
 
         let shield = sut.clone().build().unwrap();
 
@@ -924,7 +950,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             matrix.primary_role,
             PrimaryRoleWithFactorSourceIDs {
-                threshold: 2,
+                threshold: Threshold::Specific(2),
                 threshold_factors: vec![
                     FactorSourceID::sample_device(),
                     FactorSourceID::sample_ledger()
@@ -936,7 +962,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             matrix.recovery_role,
             RecoveryRoleWithFactorSourceIDs {
-                threshold: 0,
+                threshold: Threshold::All,
                 threshold_factors: Vec::new(),
                 override_factors: vec![
                     FactorSourceID::sample_trusted_contact(),
@@ -950,7 +976,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             matrix.confirmation_role,
             ConfirmationRoleWithFactorSourceIDs {
-                threshold: 0,
+                threshold: Threshold::All,
                 threshold_factors: Vec::new(),
                 override_factors: vec![
                     FactorSourceID::sample_password(),
