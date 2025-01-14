@@ -1350,6 +1350,7 @@ mod integration_tests {
                                 SimulatedFailures::with_simulated_failures([
                                     FactorSourceIDFromHash::sample_at(2), // will cause any TX with a7 to fail
                                 ]),
+                                SimulatedSkips::with_simulated_skips([]),
                             ),
                         )),
                         &profile,
@@ -1459,7 +1460,7 @@ mod integration_tests {
 
                     // Same result with lazy user, not able to skip without failures.
                     multi_accounts_multi_personas_all_single_factor_controlled_with_sim_user(
-                        SimulatedUser::lazy_sign_minimum([]),
+                        SimulatedUser::lazy_sign_minimum([], []),
                     )
                         .await
                 }
@@ -1488,7 +1489,10 @@ mod integration_tests {
                     .await;
 
                     multi_securified_entities_with_sim_user(Vector {
-                        simulated_user: SimulatedUser::lazy_sign_minimum([]),
+                        simulated_user: SimulatedUser::lazy_sign_minimum(
+                            [],
+                            [],
+                        ),
                         expected: Expected {
                             successful_txs_signature_count: 24,
                             // We always end early, this lazy user was able to skip
