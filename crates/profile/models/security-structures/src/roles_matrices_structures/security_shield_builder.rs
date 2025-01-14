@@ -947,6 +947,9 @@ mod tests {
             .add_factor_source_to_confirmation_override(
                 FactorSourceID::sample_device(),
             )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_device_other(),
+            )
             .remove_factor_from_primary(
                 FactorSourceID::sample_password(),
                 FactorListKind::Threshold,
@@ -955,7 +958,10 @@ mod tests {
                 FactorSourceID::sample_arculus_other(),
                 FactorListKind::Override,
             )
-            .remove_factor_from_recovery(FactorSourceID::sample_ledger_other());
+            .remove_factor_from_recovery(FactorSourceID::sample_ledger_other())
+            .remove_factor_from_confirmation(
+                FactorSourceID::sample_device_other(),
+            );
 
         let shield0 = sut.build().unwrap();
         let shield = sut.build().unwrap();
@@ -1342,6 +1348,29 @@ mod test_invalid {
             sut.validate_role_in_isolation(RoleKind::Confirmation).unwrap(),
             SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor
         );
+    }
+
+    #[test]
+    fn shield_must_have_authentication_signing_factor() {
+        let sut = SUT::strict();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_ledger_other(),
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+        assert!(sut.validate_role_in_isolation(RoleKind::Primary).is_none());
+        sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device(),
+        ));
+        assert!(sut.validate().is_none());
     }
 
     #[test]
