@@ -127,13 +127,6 @@ impl HighestDerivationPathIndex for SecuredEntityControl {
                 )
             });
 
-        match (committed, provisional) {
-            (Some(committed), Some(provisional)) => {
-                Some(committed.max(provisional))
-            }
-            (Some(committed), None) => Some(committed),
-            (None, Some(provisional)) => Some(provisional),
-            (None, None) => None,
-        }
+        committed.max(provisional)
     }
 }

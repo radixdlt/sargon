@@ -41,7 +41,7 @@ pub trait OsShieldApplying {
     )>;
 
     /// Without consuming cache, providers instances for the shield for the entities.
-    async fn _provider_instances_for_shield_for_entities_without_consuming_cache(
+    async fn _provide_instances_for_shield_for_entities_without_consuming_cache(
         &self,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
         entities: IndexSet<AccountOrPersona>,
@@ -153,14 +153,14 @@ impl OsShieldApplying for SargonOS {
             .map(|a| self.entity_by_address(*a))
             .collect::<Result<IndexSet<AccountOrPersona>>>()?;
 
-        self._provider_instances_for_shield_for_entities_without_consuming_cache(
+        self._provide_instances_for_shield_for_entities_without_consuming_cache(
             security_structure_of_factor_sources,
             entities,
         )
         .await
     }
 
-    async fn _provider_instances_for_shield_for_entities_without_consuming_cache(
+    async fn _provide_instances_for_shield_for_entities_without_consuming_cache(
         &self,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
         entities: IndexSet<AccountOrPersona>,
