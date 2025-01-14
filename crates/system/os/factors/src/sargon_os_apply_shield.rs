@@ -378,12 +378,57 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_apply_security_shield_to_entities() {
-        let os = SargonOS::fast_boot().await;
-        let shield_id = add_unsafe_shield(&os);
-        let network = NetworkID::Mainnet;
-        let account = os.create_and_save_new_account_with_bdfs(network, DisplayName::sample()).await.unwrap();
-        let persona = os.create_unsaved_persona_with_bdfs(network, DisplayName::sample_other()).await.unwrap();
-        
+        // ARRANGE
+        let (os, shield_id, account, persona) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let account = os
+                .create_and_save_new_account_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+            let persona = os
+                .create_and_save_new_persona_with_bdfs(
+                    network,
+                    DisplayName::sample_other(),
+                )
+                .await
+                .unwrap();
+            (os, shield_id, account, persona)
+        };
 
+        // ACT
+        let (account_provisional, persona_provisional) = {
+            os.apply_security_shield_to_entities(
+                shield_id,
+                [
+                    AddressOfAccountOrPersona::from(account.address()),
+                    AddressOfAccountOrPersona::from(persona.address()),
+                ]
+                .iter()
+                .cloned()
+                .collect(),
+            )
+            .await
+            .unwrap();
+            let account = os.account_by_address(account.address()).unwrap();
+            let persona = os.persona_by_address(persona.address()).unwrap();
+            let account_provisional = account
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            let persona_provisional = persona
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            (account_provisional, persona_provisional)
+        };
+
+        // ASSERT
+        assert_eq!(account_provisional.security_structure_id, shield_id);
+        assert_eq!(persona_provisional.security_structure_id, shield_id);
     }
 }

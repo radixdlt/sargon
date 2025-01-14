@@ -35,7 +35,7 @@ pub trait OsSecurityStructuresQuerying {
         &self,
         structure_of_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<bool> {
-        let shield_of_sources = self.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(&structure_of_ids)?;
+        let shield_of_sources = self.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(structure_of_ids)?;
         self.add_security_structure_of_factor_sources(&shield_of_sources)
             .await
     }
