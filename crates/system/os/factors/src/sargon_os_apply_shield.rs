@@ -30,7 +30,7 @@ pub trait OsShieldApplying {
         .map(|_| ())
     }
 
-    async fn _provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+    async fn _provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
         &self,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
         addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
@@ -90,7 +90,7 @@ impl OsShieldApplying for SargonOS {
             );
         }
 
-        let outcome = self._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        let outcome = self._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield.clone(),
             entity_addresses.clone().into_iter().map(Into::into).collect()).await?;
 
@@ -106,7 +106,7 @@ impl OsShieldApplying for SargonOS {
         // consume!
         instances_in_cache_consumer.consume().await?;
 
-        let securified_entities = entity_addresses
+        let entities_with_provisional_config = entity_addresses
             .into_iter()
             .map(|entity_address| {
                 let security_structure_of_factor_instances =
@@ -132,19 +132,19 @@ impl OsShieldApplying for SargonOS {
         self.profile()
             .unwrap()
             .assert_new_factor_instances_not_already_used_erased(
-                securified_entities.clone(),
+                entities_with_provisional_config.clone(),
             )?;
 
-        self.update_entities_erased(securified_entities.clone())
+        self.update_entities_erased(entities_with_provisional_config.clone())
             .await?;
 
         Ok((
-            securified_entities.into_iter().collect(),
+            entities_with_provisional_config.into_iter().collect(),
             derivation_outcome,
         ))
     }
 
-    async fn _provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+    async fn _provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
         &self,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
         addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,

@@ -10,6 +10,7 @@ exclude-files = [
     "crates/profile/models/profile_SPLIT_ME/src/profile/v100/address/non_fungible_resource_address.rs",
     "crates/profile/models/profile_SPLIT_ME/src/profile/v100/address/wrap_ret_address.rs",
     "crates/crypto/addresses/src/address/address_union.rs",
+    "crates/core/assert-json/src/assert_json.rs",
     # Rest
     "crates/sargon/src/bindgen/*",
     "example/*",

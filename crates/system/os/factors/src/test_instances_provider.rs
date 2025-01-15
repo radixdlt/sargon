@@ -440,7 +440,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             first_half_of_accounts
                 .clone()
@@ -515,7 +515,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
     assert_eq!(os.bdfs().unwrap().id_from_hash(), bdfs.id_from_hash());
 
     let res = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             second_half_of_accounts
                 .clone()
@@ -573,7 +573,7 @@ async fn test_assert_factor_instances_invalid() {
         bdfs.clone(),
     );
     let (security_structure_of_fis, _, _) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             IndexSet::from_iter([AddressOfAccountOrPersona::from(
                 alice.address(),
@@ -929,7 +929,7 @@ async fn test_securified_accounts() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0,
             IndexSet::from_iter([
                 AddressOfAccountOrPersona::from(alice.address()),
@@ -1075,7 +1075,7 @@ async fn test_securified_accounts() {
     );
 
     let (security_structures_of_fis, instances_in_cache_consumer, _) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_1.clone(),
             IndexSet::from_iter([AddressOfAccountOrPersona::from(
                 carol.address(),
@@ -1124,7 +1124,7 @@ async fn test_securified_accounts() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_1,
             IndexSet::from_iter([AddressOfAccountOrPersona::from(
                 alice.address(),
@@ -1243,7 +1243,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             first_half_of_accounts
                 .clone()
@@ -1288,7 +1288,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             second_half_of_accounts
                 .clone()
@@ -1414,7 +1414,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             first_half_of_accounts
                 .clone()
@@ -1501,7 +1501,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             second_half_of_accounts
                 .clone()
@@ -1666,7 +1666,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             first_half_of_personas
                 .clone()
@@ -1710,7 +1710,7 @@ async fn securify_personas_when_cache_is_half_full_single_factor_source() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             second_half_of_personas
                 .clone()
@@ -1792,7 +1792,7 @@ async fn create_single_account() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0.clone(),
             IndexSet::just(AddressOfAccountOrPersona::from(alice.address())),
         )
@@ -1892,7 +1892,7 @@ async fn securified_personas() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_0,
             IndexSet::from_iter([
                 AddressOfAccountOrPersona::from(batman.address()),
@@ -2045,7 +2045,7 @@ async fn securified_personas() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_1.clone(),
             IndexSet::from_iter([AddressOfAccountOrPersona::from(
                 hyde.address(),
@@ -2099,7 +2099,7 @@ async fn securified_personas() {
         instances_in_cache_consumer,
         derivation_outcome,
     ) = os
-        ._provider_instances_for_shield_for_entities_by_address_without_consuming_cache(
+        ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield_1,
             IndexSet::from_iter([AddressOfAccountOrPersona::from(
                 batman.address(),

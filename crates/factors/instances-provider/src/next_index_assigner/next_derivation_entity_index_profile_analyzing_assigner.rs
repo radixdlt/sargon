@@ -225,8 +225,6 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
         .iter()
         .filter(|e| e.network_id() == self.network_id)
         .flat_map(|e| {
-
-
             // Check if this entity's security state has a provisional securified config and if
             // the factor source id matches the specified one.
             e
