@@ -164,7 +164,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
 
         let max_provisional_unsecurified = unsecurified_entities
             .iter()
-            .filter_map(|e| e.provisional_security_config.as_ref())
+            .filter_map(|e| e.provisional_securified_config.as_ref())
             .flat_map(|x| {
                 x.highest_derivation_path_index(factor_source_id, predicate)
             })
@@ -210,10 +210,38 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     fn max_entity_rola<E: IsBaseEntity + std::hash::Hash + Eq + Clone>(
         &self,
         factor_source_id: FactorSourceIDFromHash,
+        unsecurified_entities: &IndexSet<UnsecurifiedEntity>,
         securified_entities: &IndexSet<AbstractSecurifiedEntity<E>>,
         entity_kind: CAP26EntityKind,
     ) -> Option<HDPathComponent> {
-        securified_entities
+        let predicate = AssertMatches {
+            network_id: self.network_id,
+            key_kind: CAP26KeyKind::AuthenticationSigning,
+            entity_kind,
+            key_space: KeySpace::Securified,
+        };
+
+        let max_unsecurified = unsecurified_entities
+        .iter()
+        .filter(|e| e.network_id() == self.network_id)
+        .flat_map(|e| {
+
+
+            // Check if this entity's security state has a provisional securified config and if
+            // the factor source id matches the specified one.
+            e
+            .provisional_securified_config
+            .as_ref()
+            .and_then(|x|
+                match x {
+                    ProvisionalSecurifiedConfig::FactorInstancesDerived { value } => if value.authentication_signing_factor_instance.factor_source_id == factor_source_id {
+                    // Matches
+                    Some(value.authentication_signing_factor_instance.derivation_entity_index())
+                } else { None }})
+        })
+        .max();
+
+        let max_securified = securified_entities
             .iter()
             .flat_map(|e| {
 
@@ -240,15 +268,12 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
                 highest_derivation_index_of_hd_factors(
                     [provisional, non_provisional_matching],
                     factor_source_id,
-                    AssertMatches {
-                        network_id: self.network_id,
-                        key_kind: CAP26KeyKind::AuthenticationSigning,
-                        entity_kind,
-                        key_space: KeySpace::Securified,
-                    },
+                    predicate,
                 )
             })
-            .max()
+            .max();
+
+        max_unsecurified.max(max_securified)
     }
 
     /// Returns the max index of true ROLA keys of securified accounts with
@@ -259,6 +284,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     ) -> Option<HDPathComponent> {
         self.max_entity_rola(
             factor_source_id,
+            &self.unsecurified_accounts_on_network,
             &self.securified_accounts_on_network,
             CAP26EntityKind::Account,
         )
@@ -272,6 +298,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     ) -> Option<HDPathComponent> {
         self.max_entity_rola(
             factor_source_id,
+            &self.unsecurified_personas_on_network,
             &self.securified_personas_on_network,
             CAP26EntityKind::Identity,
         )
@@ -323,6 +350,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -651,6 +679,95 @@ mod tests {
             let fid = F::sample_device();
             let next = sut
                 .next(fid, preset.index_agnostic_path_on_network(network_id))
+                .unwrap();
+
+            assert_eq!(
+                next,
+                HDPathComponent::from_local_key_space(8, KeySpace::Securified)
+                    .ok()
+            )
+        }
+    }
+
+    #[test]
+    fn test_next_identity_rola_at_7_other_with_provisional_13_is_14() {
+        let preset = DerivationPreset::IdentityRola;
+        let network_id = NetworkID::Mainnet;
+        let persona = Persona::sample_at(7);
+        type F = FactorSourceIDFromHash;
+        let fsid = F::sample_device();
+        let mut persona_with_provisional = Persona::sample_mainnet();
+        assert!(!persona_with_provisional.is_securified());
+        let mut sec_struct_factor_instances =
+            SecurityStructureOfFactorInstances::sample();
+        sec_struct_factor_instances.authentication_signing_factor_instance =
+            HierarchicalDeterministicFactorInstance::new_for_entity_with_key_kind_on_network(
+                CAP26KeyKind::AuthenticationSigning,
+                network_id,
+                fsid,
+                CAP26EntityKind::Identity,
+                Hardened::Securified(SecurifiedU30::try_from(13u32).unwrap()),
+            );
+
+        persona_with_provisional.set_provisional(
+            ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                value: sec_struct_factor_instances,
+            },
+        );
+        let profile = Profile::sample_from(
+            FactorSource::sample_all(),
+            [],
+            [&persona, &persona_with_provisional],
+        );
+        let sut = SUT::new(network_id, Arc::new(profile));
+        {
+            let next = sut
+                .next(fsid, preset.index_agnostic_path_on_network(network_id))
+                .unwrap();
+
+            assert_eq!(
+                next,
+                HDPathComponent::from_local_key_space(14, KeySpace::Securified)
+                    .ok()
+            )
+        }
+    }
+
+    #[test]
+    fn test_next_identity_rola_at_7_other_with_provisional_4_is_8() {
+        let preset = DerivationPreset::IdentityRola;
+        let network_id = NetworkID::Mainnet;
+        let persona = Persona::sample_at(7);
+        assert!(persona.is_securified());
+        type F = FactorSourceIDFromHash;
+        let fsid = F::sample_device();
+        let mut persona_with_provisional = Persona::sample_mainnet();
+        assert!(!persona_with_provisional.is_securified());
+        let mut sec_struct_factor_instances =
+            SecurityStructureOfFactorInstances::sample();
+        sec_struct_factor_instances.authentication_signing_factor_instance =
+            HierarchicalDeterministicFactorInstance::new_for_entity_with_key_kind_on_network(
+                CAP26KeyKind::AuthenticationSigning,
+                network_id,
+                fsid,
+                CAP26EntityKind::Identity,
+                Hardened::Securified(SecurifiedU30::try_from(4u32).unwrap()),
+            );
+
+        persona_with_provisional.set_provisional(
+            ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                value: sec_struct_factor_instances,
+            },
+        );
+        let profile = Profile::sample_from(
+            FactorSource::sample_all(),
+            [],
+            [&persona, &persona_with_provisional],
+        );
+        let sut = SUT::new(network_id, Arc::new(profile));
+        {
+            let next = sut
+                .next(fsid, preset.index_agnostic_path_on_network(network_id))
                 .unwrap();
 
             assert_eq!(

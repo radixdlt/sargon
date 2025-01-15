@@ -83,25 +83,20 @@ impl HierarchicalDeterministicFactorInstance {
         )
     }
 
-    pub fn new_for_entity_on_network(
+    pub fn new_for_entity_with_key_kind_on_network(
+        key_kind: CAP26KeyKind,
         network_id: NetworkID,
         factor_source_id: FactorSourceIDFromHash,
         entity_kind: CAP26EntityKind,
         index: Hardened,
     ) -> Self {
         let derivation_path: DerivationPath = match entity_kind {
-            CAP26EntityKind::Account => AccountPath::new(
-                network_id,
-                CAP26KeyKind::TransactionSigning,
-                index,
-            )
-            .into(),
-            CAP26EntityKind::Identity => IdentityPath::new(
-                network_id,
-                CAP26KeyKind::TransactionSigning,
-                index,
-            )
-            .into(),
+            CAP26EntityKind::Account => {
+                AccountPath::new(network_id, key_kind, index).into()
+            }
+            CAP26EntityKind::Identity => {
+                IdentityPath::new(network_id, key_kind, index).into()
+            }
         };
 
         let seed = factor_source_id.sample_associated_mnemonic().to_seed();
@@ -112,6 +107,21 @@ impl HierarchicalDeterministicFactorInstance {
         let self_ = Self::new(factor_source_id, hd_private_key.public_key());
         assert_eq!(self_.get_entity_kind(), entity_kind);
         self_
+    }
+
+    pub fn new_for_entity_on_network(
+        network_id: NetworkID,
+        factor_source_id: FactorSourceIDFromHash,
+        entity_kind: CAP26EntityKind,
+        index: Hardened,
+    ) -> Self {
+        Self::new_for_entity_with_key_kind_on_network(
+            CAP26KeyKind::TransactionSigning,
+            network_id,
+            factor_source_id,
+            entity_kind,
+            index,
+        )
     }
 
     /// Mainnet

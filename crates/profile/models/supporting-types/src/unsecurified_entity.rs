@@ -5,17 +5,19 @@ use crate::prelude::*;
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct UnsecurifiedEntity {
     veci: VirtualEntityCreatingInstance,
-    pub provisional_security_config: Option<ProvisionalSecurifiedConfig>,
+    pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
 
 impl UnsecurifiedEntity {
     pub fn with_veci(
         veci: VirtualEntityCreatingInstance,
-        provisional_security_config: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) -> Self {
         Self {
             veci,
-            provisional_security_config: provisional_security_config.into(),
+            provisional_securified_config: provisional_securified_config.into(),
         }
     }
 
@@ -24,10 +26,12 @@ impl UnsecurifiedEntity {
     pub fn new(
         address: AddressOfAccountOrPersona,
         factor_instance: HierarchicalDeterministicFactorInstance,
-        provisional_security_config: impl Into<Option<ProvisionalSecurifiedConfig>>,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
     ) -> Self {
         let veci = VirtualEntityCreatingInstance::new(factor_instance, address);
-        Self::with_veci(veci, provisional_security_config)
+        Self::with_veci(veci, provisional_securified_config)
     }
 
     pub fn network_id(&self) -> NetworkID {
