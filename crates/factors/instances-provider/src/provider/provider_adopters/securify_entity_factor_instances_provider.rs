@@ -164,7 +164,7 @@ impl SecurifyEntityFactorInstancesProvider {
         );
 
         let quantified_derivation_presets =
-            QuantifiedDerivationPreset::apply_shield_to_entities(
+            QuantifiedDerivationPreset::apply_security_structure_of_factor_sources_to_entities(
                 &addresses_of_entities,
                 &include_rola_key_for_entities,
             );

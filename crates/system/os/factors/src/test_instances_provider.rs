@@ -91,7 +91,7 @@ impl OsTestDummySecurifyEntities for SargonOS {
         shield: &SecurityStructureOfFactorSources,
     ) -> Result<(Accounts, FactorInstancesProviderOutcome)> {
         let (entities, outcome) = self
-            ._apply_shield_to_entities_with_diagnostics(
+            ._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
                 shield,
                 account_addresses.into_iter().map(Into::into).collect(),
             )
@@ -2446,7 +2446,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     );
 
     let (updated_instances, derivation_outcome) = os
-        ._apply_shield_to_entities_with_diagnostics(
+        ._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
             &shield_0,
             unnamed_accounts_and_personas_mixed_addresses,
         )
@@ -2851,7 +2851,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
     );
 
     let (many_securified_entities, derivation_outcome) = os
-        ._apply_shield_to_entities_with_diagnostics(
+        ._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
             &shield_3fa,
             unnamed_accounts_and_personas_mixed_addresses.clone(),
         )

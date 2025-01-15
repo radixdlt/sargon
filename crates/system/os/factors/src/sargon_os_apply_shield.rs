@@ -2,13 +2,13 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait OsShieldApplying {
-    async fn apply_security_shield_to_entities(
+    async fn apply_security_shield_with_id_to_entities(
         &self,
         security_shield_id: SecurityStructureID,
         addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<()>;
 
-    async fn _apply_shield_to_entities_with_diagnostics(
+    async fn _apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
         &self,
         shield: &SecurityStructureOfFactorSources,
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
@@ -17,12 +17,12 @@ pub trait OsShieldApplying {
         FactorInstancesProviderOutcome,
     )>;
 
-    async fn apply_shield_to_entities(
+    async fn apply_security_structure_of_factor_sources_to_entities(
         &self,
         shield: &SecurityStructureOfFactorSources,
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<()> {
-        self._apply_shield_to_entities_with_diagnostics(
+        self._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
             shield,
             entity_addresses,
         )
@@ -54,7 +54,7 @@ pub trait OsShieldApplying {
 
 #[async_trait::async_trait]
 impl OsShieldApplying for SargonOS {
-    async fn apply_security_shield_to_entities(
+    async fn apply_security_shield_with_id_to_entities(
         &self,
         security_shield_id: SecurityStructureID,
         addresses: IndexSet<AddressOfAccountOrPersona>,
@@ -63,10 +63,13 @@ impl OsShieldApplying for SargonOS {
             .security_structure_of_factor_sources_from_security_structure_id(
                 security_shield_id,
             )?;
-        self.apply_shield_to_entities(&shield, addresses).await
+        self.apply_security_structure_of_factor_sources_to_entities(
+            &shield, addresses,
+        )
+        .await
     }
 
-    async fn _apply_shield_to_entities_with_diagnostics(
+    async fn _apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
         &self,
         shield: &SecurityStructureOfFactorSources,
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
@@ -218,6 +221,18 @@ impl OsShieldApplying for SargonOS {
                 }
             }
         }
+        let derived_any_rola_key_for_any_account =
+            !include_rola_key_for_entities
+                .iter()
+                .filter(|e| e.is_account())
+                .collect_vec()
+                .is_empty();
+        let derived_any_rola_key_for_any_persona =
+            !include_rola_key_for_entities
+                .iter()
+                .filter(|e| e.is_identity())
+                .collect_vec()
+                .is_empty();
 
         let (instances_in_cache_consumer, outcome) =
             SecurifyEntityFactorInstancesProvider::apply_security_shield(
@@ -268,7 +283,9 @@ impl OsShieldApplying for SargonOS {
         >::new();
 
         let mut distribute_instances_for_entity_of_kind_if_needed =
-            |entity_kind: CAP26EntityKind| -> Result<()> {
+            |entity_kind: CAP26EntityKind,
+             derived_any_rola_key: bool|
+             -> Result<()> {
                 let addresses_of_kind = addresses_of_entities
                     .iter()
                     .filter(|a| a.get_entity_kind() == entity_kind)
@@ -288,9 +305,15 @@ impl OsShieldApplying for SargonOS {
                     .swap_remove(&tx_preset)
                     .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", tx_preset));
 
-                    let instances_per_factor_source_rola = instances_per_preset_per_factor_source
-                    .swap_remove(&rola_preset)
-                    .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", rola_preset));
+                    let instances_per_factor_source_rola =
+                        if derived_any_rola_key {
+                            instances_per_preset_per_factor_source
+                        .swap_remove(&rola_preset)
+                        .unwrap_or_else(|| panic!("Expected to find instances for derivation preset: {:?}", rola_preset))
+                        } else {
+                            // No ROLA keys derived, every entity reused existing instances.
+                            IndexMap::new()
+                        };
 
                     // Merge `instances_per_factor_source_mfa` and `instances_per_factor_source_rola` together
                     let mut instances_per_factor_source =
@@ -319,9 +342,11 @@ impl OsShieldApplying for SargonOS {
 
         distribute_instances_for_entity_of_kind_if_needed(
             CAP26EntityKind::Account,
+            derived_any_rola_key_for_any_account,
         )?;
         distribute_instances_for_entity_of_kind_if_needed(
             CAP26EntityKind::Identity,
+            derived_any_rola_key_for_any_persona,
         )?;
 
         Ok((
@@ -370,16 +395,23 @@ mod tests {
         )
     }
 
-    async fn add_unsafe_shield(os: &SargonOS) -> Result<SecurityStructureID> {
+    async fn add_unsafe_shield_with_matrix(
+        os: &SargonOS,
+    ) -> Result<SecurityStructureOfFactorSourceIDs> {
         let bdsf = os.bdfs()?;
         let shield_of_ids = unsafe_shield_with_bdfs(&bdsf.into());
         os.add_security_structure_of_factor_source_ids(&shield_of_ids)
             .await?;
-        Ok(shield_of_ids.id())
+        Ok(shield_of_ids)
+    }
+
+    async fn add_unsafe_shield(os: &SargonOS) -> Result<SecurityStructureID> {
+        add_unsafe_shield_with_matrix(os).await.map(|s| s.id())
     }
 
     #[actix_rt::test]
-    async fn test_apply_security_shield_to_entities() {
+    async fn test_apply_security_shield_with_id_to_unsecurified_entities_only()
+    {
         // ARRANGE
         let (os, shield_id, account, persona) = {
             let os = SargonOS::fast_boot().await;
@@ -404,7 +436,7 @@ mod tests {
 
         // ACT
         let (account_provisional, persona_provisional) = {
-            os.apply_security_shield_to_entities(
+            os.apply_security_shield_with_id_to_entities(
                 shield_id,
                 [
                     AddressOfAccountOrPersona::from(account.address()),
@@ -432,5 +464,399 @@ mod tests {
         // ASSERT
         assert_eq!(account_provisional.security_structure_id, shield_id);
         assert_eq!(persona_provisional.security_structure_id, shield_id);
+    }
+
+    #[actix_rt::test]
+    async fn test_apply_security_shield_with_id_to_securified_entities_only() {
+        // ARRANGE
+        let (os, shield_id, account, persona) = {
+            let os = SargonOS::fast_boot().await;
+            let shield = add_unsafe_shield_with_matrix(&os).await.unwrap();
+            let shield_id = shield.id();
+            let network = NetworkID::Mainnet;
+            let account = os
+                .create_and_save_new_account_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+            let persona = os
+                .create_and_save_new_persona_with_bdfs(
+                    network,
+                    DisplayName::sample_other(),
+                )
+                .await
+                .unwrap();
+
+            os.apply_security_shield_with_id_to_entities(
+                shield_id,
+                IndexSet::from_iter([
+                    AddressOfAccountOrPersona::from(account.address()),
+                    AddressOfAccountOrPersona::from(persona.address()),
+                ]),
+            )
+            .await
+            .unwrap();
+
+            // Dummy impl of securifying entities
+            let (securified_account, securified_persona) = {
+                let mut account =
+                    os.account_by_address(account.address()).unwrap();
+                let mut persona =
+                    os.persona_by_address(persona.address()).unwrap();
+
+                let mut account_security_structure_of_instances = account
+                    .get_provisional()
+                    .unwrap()
+                    .as_factor_instances_derived()
+                    .unwrap()
+                    .clone();
+
+                // Here we ensure that we test that we reuse the existing ROLA key for the persona below, but not for this account, i.e. the existing ROLA key of this account will mismatch that of the shield.
+                account_security_structure_of_instances
+                    .authentication_signing_factor_instance =
+                    HierarchicalDeterministicFactorInstance::sample_other();
+                assert_ne!(
+                    FactorSourceID::from(
+                        account_security_structure_of_instances
+                            .authentication_signing_factor_instance
+                            .factor_source_id
+                    ),
+                    shield.authentication_signing_factor
+                );
+
+                let account_secured_control = SecuredEntityControl::new(
+                    account
+                        .clone()
+                        .security_state()
+                        .as_unsecured()
+                        .unwrap()
+                        .transaction_signing
+                        .clone(),
+                    AccessControllerAddress::sample_mainnet(),
+                    account_security_structure_of_instances,
+                )
+                .unwrap();
+                account
+                    .set_security_state(EntitySecurityState::Securified {
+                        value: account_secured_control,
+                    })
+                    .unwrap();
+                os.update_account(account.clone()).await.unwrap();
+
+                let persona_security_structure_of_instances = persona
+                    .get_provisional()
+                    .unwrap()
+                    .as_factor_instances_derived()
+                    .unwrap()
+                    .clone();
+                let persona_secured_control = SecuredEntityControl::new(
+                    persona
+                        .clone()
+                        .security_state()
+                        .as_unsecured()
+                        .unwrap()
+                        .transaction_signing
+                        .clone(),
+                    AccessControllerAddress::sample_mainnet_other(),
+                    persona_security_structure_of_instances,
+                )
+                .unwrap();
+                persona
+                    .set_security_state(EntitySecurityState::Securified {
+                        value: persona_secured_control,
+                    })
+                    .unwrap();
+                os.update_persona(persona.clone()).await.unwrap();
+
+                (account, persona)
+            };
+
+            (os, shield_id, securified_account, securified_persona)
+        };
+
+        // ACT
+        let (account_provisional, persona_provisional) = {
+            os.apply_security_shield_with_id_to_entities(
+                shield_id,
+                [
+                    AddressOfAccountOrPersona::from(account.address()),
+                    AddressOfAccountOrPersona::from(persona.address()),
+                ]
+                .iter()
+                .cloned()
+                .collect(),
+            )
+            .await
+            .unwrap();
+            let account = os.account_by_address(account.address()).unwrap();
+            let persona = os.persona_by_address(persona.address()).unwrap();
+            let account_provisional = account
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            let persona_provisional = persona
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            (account_provisional, persona_provisional)
+        };
+
+        // ASSERT
+        assert_eq!(account_provisional.security_structure_id, shield_id);
+        assert_eq!(persona_provisional.security_structure_id, shield_id);
+    }
+
+    #[actix_rt::test]
+    async fn test_one_unsecurified_account_has_provisional_fails() {
+        // ARRANGE
+        let (os, shield_id, account) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let mut account = os
+                .create_and_save_new_account_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+
+            account.set_provisional(ProvisionalSecurifiedConfig::sample());
+
+            os.update_account(account.clone()).await.unwrap();
+            (os, shield_id, account)
+        };
+
+        // ACT
+        let result = os
+            .apply_security_shield_with_id_to_entities(
+                shield_id,
+                IndexSet::just(account.address().into()),
+            )
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_one_securified_account_has_provisional_fails() {
+        // ARRANGE
+        let (os, shield_id, account) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let mut account = os
+                .create_and_save_new_account_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+
+            // this is ofc SUPER WRONG! no clue if these factors actually exist in profile...
+            account
+                .set_security_state(EntitySecurityState::Securified {
+                    value: SecuredEntityControl::sample(),
+                })
+                .unwrap();
+            account.set_provisional(ProvisionalSecurifiedConfig::sample());
+
+            os.update_account(account.clone()).await.unwrap();
+            (os, shield_id, account)
+        };
+
+        // ACT
+        let result = os
+            .apply_security_shield_with_id_to_entities(
+                shield_id,
+                IndexSet::just(account.address().into()),
+            )
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_one_unsecurified_persona_has_provisional_fails() {
+        // ARRANGE
+        let (os, shield_id, persona) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let mut persona = os
+                .create_and_save_new_persona_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+
+            persona.set_provisional(ProvisionalSecurifiedConfig::sample());
+
+            os.update_persona(persona.clone()).await.unwrap();
+            (os, shield_id, persona)
+        };
+
+        // ACT
+        let result = os
+            .apply_security_shield_with_id_to_entities(
+                shield_id,
+                IndexSet::just(persona.address().into()),
+            )
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_one_securified_persona_has_provisional_fails() {
+        // ARRANGE
+        let (os, shield_id, persona) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let mut persona = os
+                .create_and_save_new_persona_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+
+            // this is ofc SUPER WRONG! no clue if these factors actually exist in profile...
+            persona
+                .set_security_state(EntitySecurityState::Securified {
+                    value: SecuredEntityControl::sample_other(),
+                })
+                .unwrap();
+            persona
+                .set_provisional(ProvisionalSecurifiedConfig::sample_other());
+
+            os.update_persona(persona.clone()).await.unwrap();
+            (os, shield_id, persona)
+        };
+
+        // ACT
+        let result = os
+            .apply_security_shield_with_id_to_entities(
+                shield_id,
+                IndexSet::just(persona.address().into()),
+            )
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_one_unsecurified_account_of_many_entities_has_provisional_fails_the_rest_unchanged(
+    ) {
+        // ARRANGE
+        let (os, shield_id, account, personas) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let mut account = os
+                .create_and_save_new_account_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+
+            account.set_provisional(ProvisionalSecurifiedConfig::sample());
+
+            os.update_account(account.clone()).await.unwrap();
+
+            let personas = os
+                .batch_create_many_personas_with_bdfs_then_save_once(
+                    3,
+                    network,
+                    "Persona".to_owned(),
+                )
+                .await
+                .unwrap();
+
+            (os, shield_id, account, personas)
+        };
+
+        // ACT
+        let mut addresses = personas
+            .iter()
+            .map(|p| p.address())
+            .map(AddressOfAccountOrPersona::from)
+            .collect::<IndexSet<_>>();
+        addresses.insert(account.address().into());
+
+        let result = os
+            .apply_security_shield_with_id_to_entities(shield_id, addresses)
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig)
+        );
+        assert_eq!(os.personas_on_current_network().unwrap(), personas); // assert unchanged
+    }
+
+    #[actix_rt::test]
+    async fn test_low_level_one_account_has_provisional_fails() {
+        // ARRANGE
+        let (os, shield_id, account) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+
+            let network = NetworkID::Mainnet;
+            let mut account = os
+                .create_and_save_new_account_with_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+
+            account.set_provisional(ProvisionalSecurifiedConfig::sample());
+
+            os.update_account(account.clone()).await.unwrap();
+            (os, shield_id, account)
+        };
+
+        // ACT
+        let shield = os
+            .security_structure_of_factor_sources_from_security_structure_id(
+                shield_id,
+            )
+            .unwrap();
+
+        let result = os
+            ._provide_instances_for_shield_for_entities_without_consuming_cache(
+                shield,
+                IndexSet::just(account.into()),
+            )
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result.err().unwrap(),
+            CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig
+        );
     }
 }
