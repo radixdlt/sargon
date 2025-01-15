@@ -947,6 +947,20 @@ mod tests {
     }
 
     #[test]
+    fn test_get_number_of_days_until_auto_confirm() {
+        let sut = SUT::strict();
+        assert_eq!(
+            sut.get_time_period_until_auto_confirm(),
+            TimePeriod::with_days(14)
+        );
+        sut.set_time_period_until_auto_confirm(TimePeriod::with_days(42));
+        assert_eq!(
+            sut.get_time_period_until_auto_confirm(),
+            TimePeriod::with_days(42)
+        );
+    }
+
+    #[test]
     fn test() {
         let sut = SUT::default();
 

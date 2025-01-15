@@ -13,6 +13,16 @@ pub struct TimePeriod {
 }
 
 #[uniffi::export]
+pub fn new_time_period_sample() -> TimePeriod {
+    InternalTimePeriod::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_time_period_sample_other() -> TimePeriod {
+    InternalTimePeriod::sample_other().into()
+}
+
+#[uniffi::export]
 pub fn new_time_period_with_days(value: u16) -> TimePeriod {
     InternalTimePeriod::with_days(value).into()
 }
