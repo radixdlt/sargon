@@ -192,6 +192,30 @@ impl HasSampleValues for SecurityShieldBuilder {
 }
 
 impl SecurityShieldBuilder {
+    pub fn sample_strict_with_auth_signing() -> Self {
+        Self::with_details(
+            SecurityShieldBuilderMode::Strict,
+            RwLock::new(MatrixBuilder::new()),
+            RwLock::new("My Shield".to_owned()),
+            RwLock::new(Some(FactorSourceID::sample_ledger())),
+            SecurityStructureID::from(Uuid::new_v4()),
+            now(),
+        )
+    }
+
+    pub fn sample_lenient_with_auth_signing() -> Self {
+        Self::with_details(
+            SecurityShieldBuilderMode::Lenient,
+            RwLock::new(MatrixBuilder::new()),
+            RwLock::new("My Shield".to_owned()),
+            RwLock::new(Some(FactorSourceID::sample_ledger())),
+            SecurityStructureID::from(Uuid::new_v4()),
+            now(),
+        )
+    }
+}
+
+impl SecurityShieldBuilder {
     fn get<R>(&self, access: impl Fn(&MatrixBuilder) -> R) -> R {
         let binding = self.matrix_builder.read().unwrap();
         access(&binding)
@@ -656,17 +680,17 @@ impl SecurityShieldBuilder {
             return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
         }
 
+        if self.get_authentication_signing_factor().is_none() {
+            return Some(
+                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+            );
+        }
+
         if let Some(matrix_invalid_reason) = self.get(|builder| {
             let r = builder.validate();
             r.as_shield_validation()
         }) {
             return Some(matrix_invalid_reason);
-        }
-
-        if self.get_authentication_signing_factor().is_none() {
-            return Some(
-                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
-            );
         }
 
         None
@@ -1245,7 +1269,7 @@ mod tests {
 
     #[test]
     fn selected_primary_threshold_factors_status() {
-        let sut = SUT::default();
+        let sut = SUT::sample_lenient_with_auth_signing();
 
         pretty_assertions::assert_eq!(
             sut.selected_primary_threshold_factors_status(),
@@ -1314,8 +1338,17 @@ mod test_invalid {
     type SUT = SecurityShieldBuilder;
 
     #[test]
-    fn primary_role_must_have_at_least_one_factor() {
+    fn must_have_auth_signing_factor() {
         let sut = SUT::strict();
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+    }
+
+    #[test]
+    fn primary_role_must_have_at_least_one_factor() {
+        let sut = SUT::sample_strict_with_auth_signing();
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
@@ -1328,7 +1361,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_threshold_cannot_be_zero_with_factors() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
         );
@@ -1346,7 +1379,7 @@ mod test_invalid {
 
     #[test]
     fn recovery_role_must_have_at_least_one_factor() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1362,7 +1395,7 @@ mod test_invalid {
 
     #[test]
     fn confirmation_role_must_have_at_least_one_factor() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1470,7 +1503,7 @@ mod test_invalid {
 
     #[test]
     fn recovery_and_confirmation_factors_overlap() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1489,7 +1522,7 @@ mod test_invalid {
     #[test]
     fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_recovery(
     ) {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         let same = FactorSourceID::sample_ledger();
         sut.add_factor_source_to_primary_override(same);
 
@@ -1508,7 +1541,7 @@ mod test_invalid {
     #[test]
     fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_confirmation(
     ) {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         let same = FactorSourceID::sample_ledger();
         sut.add_factor_source_to_primary_override(same);
 
@@ -1527,7 +1560,7 @@ mod test_invalid {
     #[test]
     fn primary_role_with_password_in_threshold_list_must_threshold_greater_than_one(
     ) {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1556,7 +1589,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_password_in_threshold_list_must_have_another_factor() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1582,7 +1615,7 @@ mod test_invalid {
 
     #[test]
     fn two_different_password_only_not_valid_for_primary() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1607,7 +1640,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_password_in_override_does_not_get_added() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
