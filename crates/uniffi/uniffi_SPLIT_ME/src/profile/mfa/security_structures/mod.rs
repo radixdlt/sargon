@@ -7,7 +7,7 @@ mod security_shield_prerequisites_status;
 mod security_structure_id;
 mod security_structure_metadata;
 mod security_structures;
-mod selected_factor_sources_status;
+mod selected_primary_threshold_factors_status;
 
 pub use matrices::*;
 pub use models::*;
@@ -17,4 +17,4 @@ pub use security_shield_prerequisites_status::*;
 pub use security_structure_id::*;
 pub use security_structure_metadata::*;
 pub use security_structures::*;
-pub use selected_factor_sources_status::*;
+pub use selected_primary_threshold_factors_status::*;

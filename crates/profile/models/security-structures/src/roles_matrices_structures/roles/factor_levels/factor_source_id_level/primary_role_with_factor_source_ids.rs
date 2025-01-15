@@ -15,7 +15,6 @@ impl PrimaryRoleWithFactorSourceIds {
         builder
             .add_factor_source_to_threshold(FactorSourceID::sample_ledger())
             .unwrap();
-        builder.set_threshold(2).unwrap();
         builder.build().unwrap()
     }
 }
@@ -34,7 +33,7 @@ impl HasSampleValues for PrimaryRoleWithFactorSourceIds {
         builder
             .add_factor_source_to_threshold(FactorSourceID::sample_ledger())
             .unwrap();
-        builder.set_threshold(1).unwrap();
+        builder.set_specific_threshold(1).unwrap();
         builder.build().unwrap()
     }
 }
@@ -72,7 +71,7 @@ mod tests {
     #[test]
     fn get_threshold() {
         let sut = SUT::sample_primary();
-        assert_eq!(sut.get_threshold(), 2);
+        assert_eq!(sut.get_threshold_value(), 2);
     }
 
     #[test]
@@ -82,7 +81,39 @@ mod tests {
             &sut,
             r#"
             {
-              "threshold": 2,
+              "threshold": "all",
+              "thresholdFactors": [
+                {
+                  "discriminator": "fromHash",
+                  "fromHash": {
+                    "kind": "device",
+                    "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                  }
+                },
+                {
+                  "discriminator": "fromHash",
+                  "fromHash": {
+                    "kind": "ledgerHQHardwareWallet",
+                    "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                  }
+                }
+              ],
+              "overrideFactors": []
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn assert_json_sample_other_primary() {
+        let sut = SUT::sample_other();
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+              "threshold": {
+                 "specific": 1
+              },
               "thresholdFactors": [
                 {
                   "discriminator": "fromHash",

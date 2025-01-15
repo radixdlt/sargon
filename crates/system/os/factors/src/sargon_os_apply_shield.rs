@@ -346,17 +346,17 @@ mod tests {
         let matrix = unsafe {
             MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
                 PrimaryRoleWithFactorSourceIDs::unbuilt_with_factors(
-                    0,
+                    Threshold::zero(),
                     [],
                     [id],
                 ),
                 RecoveryRoleWithFactorSourceIDs::unbuilt_with_factors(
-                    0,
+                    Threshold::zero(),
                     [],
                     [id],
                 ),
                 ConfirmationRoleWithFactorSourceIDs::unbuilt_with_factors(
-                    0,
+                    Threshold::zero(),
                     [],
                     [id],
                 ),

@@ -142,7 +142,7 @@ impl MatrixBuilder {
         self.recovery_role
             .validation_for_addition_of_factor_source_of_kind_to_override_with_mode(
                 factor_source_kind,
-                mode
+                mode,
             )
     }
 
@@ -181,7 +181,7 @@ impl MatrixBuilder {
         self.confirmation_role
             .validation_for_addition_of_factor_source_of_kind_to_override_with_mode(
                 factor_source_kind,
-                mode
+                mode,
             )
     }
 
@@ -210,8 +210,15 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.primary_role
             .validate()
-            .into_matrix_err(RoleKind::Primary)?;
-        Ok(())
+            .into_matrix_err(RoleKind::Primary)
+    }
+
+    pub fn validate_primary_threshold_factors_in_isolation(
+        &self,
+    ) -> MatrixBuilderMutateResult {
+        self.primary_role
+            .validate_threshold_factors()
+            .into_matrix_err(RoleKind::Primary)
     }
 
     pub fn validate_recovery_role_in_isolation(
@@ -219,8 +226,7 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.recovery_role
             .validate()
-            .into_matrix_err(RoleKind::Recovery)?;
-        Ok(())
+            .into_matrix_err(RoleKind::Recovery)
     }
 
     pub fn validate_confirmation_role_in_isolation(
@@ -228,8 +234,7 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.confirmation_role
             .validate()
-            .into_matrix_err(RoleKind::Confirmation)?;
-        Ok(())
+            .into_matrix_err(RoleKind::Confirmation)
     }
 
     fn validate_each_role_in_isolation(&self) -> MatrixBuilderMutateResult {
@@ -360,7 +365,7 @@ impl MatrixBuilder {
     /// Sets the threshold on the primary role builder.
     pub fn set_threshold(
         &mut self,
-        threshold: u8,
+        threshold: Threshold,
     ) -> MatrixBuilderMutateResult {
         self.primary_role
             .set_threshold(threshold)
@@ -368,7 +373,7 @@ impl MatrixBuilder {
     }
 
     pub fn get_threshold(&self) -> u8 {
-        self.primary_role.get_threshold()
+        self.primary_role.get_threshold_value()
     }
 
     pub fn set_number_of_days_until_auto_confirm(
@@ -387,8 +392,12 @@ impl MatrixBuilder {
     fn remove_factor_from_role<const ROLE: u8>(
         role: &mut RoleBuilder<{ ROLE }>,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
-        if role.remove_factor_source(factor_source_id).is_ok() {
+        if role
+            .remove_factor_source(factor_source_id, factor_list_kind)
+            .is_ok()
+        {
             Ok(())
         } else {
             MatrixBuilderMutateResult::Err(MatrixBuilderValidation::CombinationViolation(
@@ -402,24 +411,36 @@ impl MatrixBuilder {
     pub fn remove_factor_from_primary(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
-        Self::remove_factor_from_role(&mut self.primary_role, factor_source_id)
+        Self::remove_factor_from_role(
+            &mut self.primary_role,
+            factor_source_id,
+            factor_list_kind,
+        )
     }
 
     pub fn remove_factor_from_recovery(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
-        Self::remove_factor_from_role(&mut self.recovery_role, factor_source_id)
+        Self::remove_factor_from_role(
+            &mut self.recovery_role,
+            factor_source_id,
+            factor_list_kind,
+        )
     }
 
     pub fn remove_factor_from_confirmation(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> MatrixBuilderMutateResult {
         Self::remove_factor_from_role(
             &mut self.confirmation_role,
             factor_source_id,
+            factor_list_kind,
         )
     }
 
@@ -433,10 +454,21 @@ impl MatrixBuilder {
         factor_source_id: &FactorSourceID,
     ) -> MatrixBuilderMutateResult {
         let fsid = factor_source_id;
-        let r0 = self.remove_factor_from_primary(fsid);
-        let r1 = self.remove_factor_from_recovery(fsid);
-        let r2 = self.remove_factor_from_confirmation(fsid);
-        r0.or(r1).or(r2)
+
+        let r0 =
+            self.remove_factor_from_primary(fsid, FactorListKind::Threshold);
+        let r1 =
+            self.remove_factor_from_primary(fsid, FactorListKind::Override);
+        let r2 =
+            self.remove_factor_from_recovery(fsid, FactorListKind::Threshold);
+        let r3 =
+            self.remove_factor_from_recovery(fsid, FactorListKind::Override);
+        let r4 = self
+            .remove_factor_from_confirmation(fsid, FactorListKind::Threshold);
+        let r5 = self
+            .remove_factor_from_confirmation(fsid, FactorListKind::Override);
+
+        r0.or(r1).or(r2).or(r3).or(r4).or(r5)
     }
 }
 

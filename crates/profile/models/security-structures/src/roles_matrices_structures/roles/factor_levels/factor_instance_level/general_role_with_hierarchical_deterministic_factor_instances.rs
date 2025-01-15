@@ -88,19 +88,19 @@ impl TryFrom<(MatrixOfFactorInstances, RoleKind)>
         match role_kind {
             RoleKind::Primary => {
                 let role = matrix.primary();
-                threshold = role.get_threshold();
+                threshold = role.get_threshold_value();
                 threshold_factors = role.get_threshold_factors().clone();
                 override_factors = role.get_override_factors().clone();
             }
             RoleKind::Recovery => {
                 let role = matrix.recovery();
-                threshold = role.get_threshold();
+                threshold = role.get_threshold_value();
                 threshold_factors = role.get_threshold_factors().clone();
                 override_factors = role.get_override_factors().clone();
             }
             RoleKind::Confirmation => {
                 let role = matrix.confirmation();
-                threshold = role.get_threshold();
+                threshold = role.get_threshold_value();
                 threshold_factors = role.get_threshold_factors().clone();
                 override_factors = role.get_override_factors().clone();
             }

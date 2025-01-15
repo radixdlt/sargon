@@ -347,13 +347,15 @@ impl SecurityShieldBuilder {
         })
     }
 
-    /// Removes factor **only** from the primary role.
+    /// Removes factor **only** from the primary role based on the [FactorListKind].
     pub fn remove_factor_from_primary(
         &self,
         factor_source_id: FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> &Self {
         self.set(|builder| {
-            builder.remove_factor_from_primary(&factor_source_id)
+            builder
+                .remove_factor_from_primary(&factor_source_id, factor_list_kind)
         })
     }
 
@@ -363,7 +365,10 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.remove_factor_from_recovery(&factor_source_id)
+            builder.remove_factor_from_recovery(
+                &factor_source_id,
+                FactorListKind::Override,
+            )
         })
     }
 
@@ -373,11 +378,14 @@ impl SecurityShieldBuilder {
         factor_source_id: FactorSourceID,
     ) -> &Self {
         self.set(|builder| {
-            builder.remove_factor_from_confirmation(&factor_source_id)
+            builder.remove_factor_from_confirmation(
+                &factor_source_id,
+                FactorListKind::Override,
+            )
         })
     }
 
-    pub fn set_threshold(&self, threshold: u8) -> &Self {
+    pub fn set_threshold(&self, threshold: Threshold) -> &Self {
         self.set(|builder| builder.set_threshold(threshold))
     }
 
@@ -554,7 +562,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_primary_threshold(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 
     pub fn addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
@@ -562,7 +570,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_primary_override(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 
     pub fn addition_of_factor_source_of_kind_to_recovery_is_fully_valid(
@@ -570,7 +578,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_recovery_override(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 
     pub fn addition_of_factor_source_of_kind_to_confirmation_is_fully_valid(
@@ -578,7 +586,7 @@ impl SecurityShieldBuilder {
         factor_source_kind: FactorSourceKind,
     ) -> bool {
         self._validation_for_addition_of_factor_source_of_kind_to_confirmation_override(factor_source_kind)
-        .is_ok()
+            .is_ok()
     }
 }
 
@@ -629,7 +637,7 @@ impl SecurityShieldBuilder {
             |builder, input| {
                 builder.validation_for_addition_of_factor_source_to_confirmation_override_for_each_with_mode(
                     input,
-                    self.mode
+                    self.mode,
                 )
             },
         )
@@ -687,29 +695,45 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn selected_factor_sources_for_role_status(
+    pub fn selected_primary_threshold_factors_status(
         &self,
-        role: RoleKind,
-    ) -> SelectedFactorSourcesForRoleStatus {
-        // Validate the role in isolation
-        if let Some(reason) = self.validate_role_in_isolation(role) {
+    ) -> SelectedPrimaryThresholdFactorsStatus {
+        let reason = self.get(|builder| {
+            let validation =
+                builder.validate_primary_threshold_factors_in_isolation();
+            validation.as_shield_validation()
+        });
+
+        if let Some(reason) = reason {
             return match reason {
-                SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
-                | SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
-                | SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor => {
-                    SelectedFactorSourcesForRoleStatus::Insufficient
+                SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor => {
+                    SelectedPrimaryThresholdFactorsStatus::Insufficient
                 }
-                _ => SelectedFactorSourcesForRoleStatus::Invalid,
+                SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor => {
+                    SelectedPrimaryThresholdFactorsStatus::Invalid {
+                        reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
+                            factor_source_kind: FactorSourceKind::Password,
+                        }
+                    }
+                },
+                _ => {
+                    SelectedPrimaryThresholdFactorsStatus::Invalid {
+                        reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::Other {
+                            underlying: reason,
+                        }
+                    }
+                }
             };
         }
 
         // Check conditions for Primary role
         let primary_factors_len =
             self.get(|builder| builder.get_primary_threshold_factors().len());
-        if role == RoleKind::Primary && primary_factors_len < 2 {
-            SelectedFactorSourcesForRoleStatus::Suboptimal
+
+        if primary_factors_len < 2 {
+            SelectedPrimaryThresholdFactorsStatus::Suboptimal
         } else {
-            SelectedFactorSourcesForRoleStatus::Optimal
+            SelectedPrimaryThresholdFactorsStatus::Optimal
         }
     }
 
@@ -784,7 +808,6 @@ impl SecurityShieldBuilder {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -840,7 +863,7 @@ mod tests {
     #[test]
     fn add_factor_to_primary_threshold_does_not_change_already_set_threshold() {
         let sut = SUT::strict();
-        sut.set_threshold(42);
+        sut.set_threshold(Threshold::Specific(42));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
         );
@@ -902,8 +925,10 @@ mod tests {
             // Primary
             .set_number_of_days_until_auto_confirm(42)
             .add_factor_source_to_primary_threshold(
-                // also sets threshold -> 1
                 FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
             )
             .add_factor_source_to_primary_override(
                 FactorSourceID::sample_arculus(),
@@ -922,8 +947,21 @@ mod tests {
             .add_factor_source_to_confirmation_override(
                 FactorSourceID::sample_device(),
             )
-            .remove_factor_from_primary(FactorSourceID::sample_arculus_other())
-            .remove_factor_from_recovery(FactorSourceID::sample_ledger_other());
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_device_other(),
+            )
+            .remove_factor_from_primary(
+                FactorSourceID::sample_password(),
+                FactorListKind::Threshold,
+            )
+            .remove_factor_from_primary(
+                FactorSourceID::sample_arculus_other(),
+                FactorListKind::Override,
+            )
+            .remove_factor_from_recovery(FactorSourceID::sample_ledger_other())
+            .remove_factor_from_confirmation(
+                FactorSourceID::sample_device_other(),
+            );
 
         let shield0 = sut.build().unwrap();
         let shield = sut.build().unwrap();
@@ -934,7 +972,7 @@ mod tests {
             shield.matrix_of_factors.primary().get_override_factors(),
             &vec![FactorSourceID::sample_arculus()]
         );
-        assert_eq!(shield.matrix_of_factors.primary().get_threshold(), 1);
+        assert_eq!(shield.matrix_of_factors.primary().get_threshold_value(), 1);
         assert_eq!(
             shield.matrix_of_factors.recovery().get_override_factors(),
             &vec![FactorSourceID::sample_ledger()]
@@ -966,7 +1004,7 @@ mod tests {
             add(sut, FactorSourceID::sample_device());
             add(sut, FactorSourceID::sample_ledger());
 
-            sut.set_threshold(2);
+            sut.set_threshold(Threshold::Specific(2));
             assert!(is_fully_valid(sut, FactorSourceKind::Password)); // not alone any more!
             assert!(can_be(sut, FactorSourceKind::Password));
         } else {
@@ -1096,19 +1134,19 @@ mod tests {
                 FactorSourceID::sample_security_questions(),
                 FactorSourceID::sample_security_questions_other(),
             ]
-            .into_iter()
-            .map(
-                |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                    RoleKind::Recovery,
-                    fsid,
-                    if fsid.get_factor_source_kind() == FactorSourceKind::SecurityQuestions {
-                        ForeverInvalidReason::RecoveryRoleSecurityQuestionsNotSupported
-                    } else {
-                        ForeverInvalidReason::RecoveryRolePasswordNotSupported
-                    }
+                .into_iter()
+                .map(
+                    |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                        RoleKind::Recovery,
+                        fsid,
+                        if fsid.get_factor_source_kind() == FactorSourceKind::SecurityQuestions {
+                            ForeverInvalidReason::RecoveryRoleSecurityQuestionsNotSupported
+                        } else {
+                            ForeverInvalidReason::RecoveryRolePasswordNotSupported
+                        }
+                    )
                 )
-            )
-            .collect::<Vec<_>>()
+                .collect::<Vec<_>>()
         );
     }
 
@@ -1129,15 +1167,15 @@ mod tests {
                 FactorSourceID::sample_trusted_contact(),
                 FactorSourceID::sample_trusted_contact_other(),
             ]
-            .into_iter()
-            .map(
-                |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                    RoleKind::Confirmation,
-                    fsid,
-                    ForeverInvalidReason::ConfirmationRoleTrustedContactNotSupported
+                .into_iter()
+                .map(
+                    |fsid| FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                        RoleKind::Confirmation,
+                        fsid,
+                        ForeverInvalidReason::ConfirmationRoleTrustedContactNotSupported
+                    )
                 )
-            )
-            .collect::<Vec<_>>()
+                .collect::<Vec<_>>()
         );
     }
 
@@ -1167,39 +1205,72 @@ mod tests {
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_optimal() {
+    fn selected_primary_threshold_factors_status_invalid() {
         let sut = SUT::default();
 
-        let _ = sut
-            .set_threshold(2)
-            .add_factor_source_to_primary_threshold(
-                FactorSourceID::sample_password(),
-            )
-            .add_factor_source_to_primary_threshold(
-                FactorSourceID::sample_device(),
-            );
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        );
 
         pretty_assertions::assert_eq!(
-            status,
-            SelectedFactorSourcesForRoleStatus::Optimal
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
+                    factor_source_kind: FactorSourceKind::Password,
+                }
+            }
+        );
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device_other(),
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::Other {
+                    underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices
+                }
+            }
         );
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_suboptimal() {
+    fn selected_primary_threshold_factors_status() {
         let sut = SUT::default();
 
-        let _ = sut.add_factor_source_to_primary_threshold(
-            FactorSourceID::sample_ledger(),
+        pretty_assertions::assert_eq!(
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Insufficient
         );
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
 
         pretty_assertions::assert_eq!(
-            status,
-            SelectedFactorSourcesForRoleStatus::Suboptimal
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Suboptimal
+        );
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_password(),
+        )
+        .add_factor_source_to_primary_override(FactorSourceID::sample_device());
+
+        // making the primary role invalid DOESN'T affect the primary threshold factors status
+        pretty_assertions::assert_eq!(
+            sut.validate(),
+            Some(
+                SecurityShieldBuilderInvalidReason::FactorSourceAlreadyPresent
+            )
+        );
+        pretty_assertions::assert_eq!(
+            sut.selected_primary_threshold_factors_status(),
+            SelectedPrimaryThresholdFactorsStatus::Optimal
         );
     }
 }
@@ -1207,6 +1278,7 @@ mod tests {
 #[cfg(test)]
 mod test_invalid {
     use super::*;
+    use crate::prelude::SelectedPrimaryThresholdFactorsStatusInvalidReason::Other;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
@@ -1232,7 +1304,7 @@ mod test_invalid {
             FactorSourceID::sample_device(),
         );
         assert_eq!(sut.get_threshold(), 1);
-        sut.set_threshold(0);
+        sut.set_threshold(Threshold::zero());
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
@@ -1276,6 +1348,29 @@ mod test_invalid {
             sut.validate_role_in_isolation(RoleKind::Confirmation).unwrap(),
             SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor
         );
+    }
+
+    #[test]
+    fn shield_must_have_authentication_signing_factor() {
+        let sut = SUT::strict();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        );
+        sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+        sut.add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_ledger_other(),
+        );
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+        assert!(sut.validate_role_in_isolation(RoleKind::Primary).is_none());
+        sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device(),
+        ));
+        assert!(sut.validate().is_none());
     }
 
     #[test]
@@ -1412,7 +1507,7 @@ mod test_invalid {
             FactorSourceID::sample_arculus(),
         );
 
-        sut.set_threshold(1);
+        sut.set_threshold(Threshold::Specific(1));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
@@ -1441,7 +1536,7 @@ mod test_invalid {
             FactorSourceID::sample_arculus(),
         );
 
-        sut.set_threshold(1);
+        sut.set_threshold(Threshold::Specific(1));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
@@ -1467,7 +1562,7 @@ mod test_invalid {
             FactorSourceID::sample_arculus(),
         );
 
-        sut.set_threshold(2);
+        sut.set_threshold(Threshold::Specific(2));
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
@@ -1519,30 +1614,57 @@ mod test_invalid {
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_insufficient() {
+    fn selected_primary_threshold_factors_status_is_insufficient() {
         let sut = SUT::default();
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+        let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(
             status,
-            SelectedFactorSourcesForRoleStatus::Insufficient
+            SelectedPrimaryThresholdFactorsStatus::Insufficient
         );
     }
 
     #[test]
-    fn selected_factor_sources_for_role_status_is_invalid() {
+    fn selected_primary_threshold_factors_status_is_invalid_when_only_password_is_selected(
+    ) {
         let sut = SUT::default();
 
         let _ = sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_password(),
         );
-        let status =
-            sut.selected_factor_sources_for_role_status(RoleKind::Primary);
+        let status = sut.selected_primary_threshold_factors_status();
 
         pretty_assertions::assert_eq!(
             status,
-            SelectedFactorSourcesForRoleStatus::Invalid
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
+                    factor_source_kind: FactorSourceKind::Password
+                }
+            }
+        );
+    }
+
+    #[test]
+    fn selected_primary_threshold_factors_status_is_invalid() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device_other(),
+            );
+        let _ = sut.set_threshold(Threshold::zero());
+        let status = sut.selected_primary_threshold_factors_status();
+
+        pretty_assertions::assert_eq!(
+            status,
+            SelectedPrimaryThresholdFactorsStatus::Invalid {
+                reason: Other {
+                    underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices
+                }
+            }
         );
     }
 }

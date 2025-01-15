@@ -240,7 +240,7 @@ mod tests {
                   "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                   "matrixOfFactors": {
                     "primaryRole": {
-                      "threshold": 2,
+                      "threshold": "all",
                       "thresholdFactors": [
                         {
                           "factorSourceID": {
@@ -296,7 +296,7 @@ mod tests {
                       "overrideFactors": []
                     },
                     "recoveryRole": {
-                      "threshold": 0,
+                      "threshold": "all",
                       "thresholdFactors": [],
                       "overrideFactors": [
                         {
@@ -352,7 +352,7 @@ mod tests {
                       ]
                     },
                     "confirmationRole": {
-                      "threshold": 0,
+                      "threshold": "all",
                       "thresholdFactors": [],
                       "overrideFactors": [
                         {
@@ -416,7 +416,7 @@ mod tests {
                     "securityStructureId": "dededede-dede-dede-dede-dededededede",
                     "matrixOfFactors": {
                       "primaryRole": {
-                        "threshold": 1,
+                        "threshold": "all",
                         "thresholdFactors": [
                           {
                             "factorSourceID": {
@@ -447,7 +447,7 @@ mod tests {
                         "overrideFactors": []
                       },
                       "recoveryRole": {
-                        "threshold": 0,
+                        "threshold": "all",
                         "thresholdFactors": [],
                         "overrideFactors": [
                           {
@@ -478,7 +478,7 @@ mod tests {
                         ]
                       },
                       "confirmationRole": {
-                        "threshold": 0,
+                        "threshold": "all",
                         "thresholdFactors": [],
                         "overrideFactors": [
                           {
