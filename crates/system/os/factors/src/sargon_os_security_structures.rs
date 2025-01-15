@@ -298,7 +298,7 @@ mod tests {
         // ACT
         let structure_source_ids_sample =
             SecurityStructureOfFactorSourceIDs::sample();
-        let structure_source__ids_sample_other =
+        let structure_source_ids_sample_other =
             SecurityStructureOfFactorSourceIDs::sample_other();
         let inserted = os
             .with_timeout(|x| {
@@ -313,7 +313,7 @@ mod tests {
         let inserted = os
             .with_timeout(|x| {
                 x.add_security_structure_of_factor_source_ids(
-                    &structure_source__ids_sample_other,
+                    &structure_source_ids_sample_other,
                 )
             })
             .await
@@ -325,7 +325,7 @@ mod tests {
         );
         let structure_id_sample_other =
             SecurityStructureOfFactorSourceIDs::from(
-                structure_source__ids_sample_other.clone(),
+                structure_source_ids_sample_other.clone(),
             );
 
         // ASSERT

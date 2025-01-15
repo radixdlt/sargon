@@ -264,8 +264,12 @@ impl SecurityShieldBuilder {
         self.get(|builder| builder.get_threshold())
     }
 
-    pub fn get_number_of_days_until_auto_confirm(&self) -> u16 {
-        self.get(|builder| builder.get_number_of_days_until_auto_confirm())
+    pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
+        self.get(|builder| {
+            TimePeriod::with_days(
+                builder.get_number_of_days_until_auto_confirm(),
+            )
+        })
     }
 
     pub fn get_name(&self) -> String {
@@ -418,12 +422,12 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold))
     }
 
-    pub fn set_number_of_days_until_auto_confirm(
+    pub fn set_time_period_until_auto_confirm(
         &self,
-        number_of_days: u16,
+        time_period: TimePeriod,
     ) -> &Self {
         self.set(|builder| {
-            builder.set_number_of_days_until_auto_confirm(number_of_days)
+            builder.set_number_of_days_until_auto_confirm(time_period.days())
         })
     }
 
@@ -952,7 +956,7 @@ mod tests {
                 FactorSourceID::sample_device(),
             ))
             // Primary
-            .set_number_of_days_until_auto_confirm(42)
+            .set_time_period_until_auto_confirm(TimePeriod::with_days(42))
             .add_factor_source_to_primary_threshold(
                 FactorSourceID::sample_device(),
             )
@@ -1347,6 +1351,25 @@ mod test_invalid {
     }
 
     #[test]
+    fn missing_auth_signing_takes_precedence_over_roles_validation() {
+        let sut = SUT::strict();
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_recovery_override(FactorSourceID::sample_device())
+        // This addition results in SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole matrix invalid reason
+        .add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_device(),
+        );
+
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+    }
+
+    #[test]
     fn primary_role_must_have_at_least_one_factor() {
         let sut = SUT::sample_strict_with_auth_signing();
         assert_eq!(
@@ -1494,7 +1517,7 @@ mod test_invalid {
     #[test]
     fn number_of_auto_confirm_days_invalid() {
         let sut = valid();
-        sut.set_number_of_days_until_auto_confirm(0);
+        sut.set_time_period_until_auto_confirm(TimePeriod::with_days(0));
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero
