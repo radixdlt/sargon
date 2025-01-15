@@ -169,6 +169,12 @@ impl SecurityShieldBuilder {
         })
     }
 
+    pub fn remove_all_factors_from_primary_override(
+        self: Arc<Self>,
+    ) -> Arc<Self> {
+        self.set(|builder| builder.remove_all_factors_from_primary_override())
+    }
+
     pub fn remove_factor_from_recovery(
         self: Arc<Self>,
         factor_source_id: FactorSourceID,
@@ -710,6 +716,17 @@ mod tests {
                 FactorSourceID::sample_arculus_other()
             ]
         );
+
+        sut = sut.remove_all_factors_from_primary_override();
+        assert!(sut.clone().get_primary_override_factors().is_empty());
+
+        sut = sut
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus_other(),
+            );
 
         // Recovery
         let sim_rec =

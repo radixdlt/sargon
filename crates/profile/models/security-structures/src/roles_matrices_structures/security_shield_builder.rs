@@ -359,6 +359,11 @@ impl SecurityShieldBuilder {
         })
     }
 
+    /// Removes all factors from the override list of the primary role.
+    pub fn remove_all_factors_from_primary_override(&self) -> &Self {
+        self.set(|builder| builder.remove_all_factors_from_primary_override())
+    }
+
     /// Removes factor **only** from the recovery role.
     pub fn remove_factor_from_recovery(
         &self,
@@ -1272,6 +1277,31 @@ mod tests {
             sut.selected_primary_threshold_factors_status(),
             SelectedPrimaryThresholdFactorsStatus::Optimal
         );
+    }
+
+    #[test]
+    fn remove_all_factors_from_primary_override() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device_other(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.get_primary_override_factors(),
+            vec![
+                FactorSourceID::sample_device(),
+                FactorSourceID::sample_device_other(),
+            ]
+        );
+
+        sut.remove_all_factors_from_primary_override();
+
+        assert!(sut.get_primary_override_factors().is_empty());
     }
 }
 

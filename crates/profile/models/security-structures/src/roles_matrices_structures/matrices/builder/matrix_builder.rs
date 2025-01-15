@@ -420,6 +420,17 @@ impl MatrixBuilder {
         )
     }
 
+    pub fn remove_all_factors_from_primary_override(
+        &mut self,
+    ) -> MatrixBuilderMutateResult {
+        let primary_override_factors =
+            self.primary_role.get_override_factors().clone();
+
+        primary_override_factors.iter().try_for_each(|fsid| {
+            self.remove_factor_from_primary(fsid, FactorListKind::Override)
+        })
+    }
+
     pub fn remove_factor_from_recovery(
         &mut self,
         factor_source_id: &FactorSourceID,
