@@ -4,7 +4,7 @@ use thiserror::Error as ThisError;
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 
 #[repr(u32)]
-#[derive(Clone, Debug, ThisError, PartialEq)]
+#[derive(Clone, Debug, Eq, ThisError, PartialEq)]
 pub enum CommonError {
     #[error("Unknown Error")]
     Unknown = 10000,

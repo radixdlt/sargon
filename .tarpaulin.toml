@@ -7,9 +7,9 @@ exclude-files = [
 
     "crates/sargon/src/lib.rs",
     # Too many false negatives (macro usage)
-    "crates/sargon/src/profile/v100/address/non_fungible_resource_address.rs",
-    "crates/sargon/src/profile/v100/address/wrap_ret_address.rs",
-    "crates/sargon/src/wrapped_radix_engine_toolkit/high_level/sargon_specific_types/address_union.rs",
+    "crates/profile/models/profile_SPLIT_ME/src/profile/v100/address/non_fungible_resource_address.rs",
+    "crates/profile/models/profile_SPLIT_ME/src/profile/v100/address/wrap_ret_address.rs",
+    "crates/crypto/addresses/src/address/address_union.rs",
     # Rest
     "crates/sargon/src/bindgen/*",
     "example/*",
@@ -22,8 +22,7 @@ exclude-files = [
 ]
 verbose = false
 timeout = "2m"
-force-clean = true
 locked = true
 all-features = true
 jobs = 1
-out = ["Xml"]
+out = ["Html"]
