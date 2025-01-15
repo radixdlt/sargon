@@ -236,7 +236,7 @@ impl SecurityShieldBuilder {
 // ==== GET / READ ====
 // ====================
 impl SecurityShieldBuilder {
-    pub fn get_threshold(&self) -> u8 {
+    pub fn get_threshold(&self) -> Threshold {
         self.get(|builder| builder.get_threshold())
     }
 
@@ -867,7 +867,7 @@ mod tests {
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.get_threshold(), 42);
+        assert_eq!(sut.get_threshold(), Threshold::Specific(42));
     }
 
     #[test]
@@ -1300,10 +1300,9 @@ mod test_invalid {
     fn primary_role_with_threshold_cannot_be_zero_with_factors() {
         let sut = SUT::strict();
         sut.add_factor_source_to_primary_threshold(
-            // bumped threshold
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.get_threshold(), 1);
+        assert_eq!(sut.get_threshold(), Threshold::All);
         sut.set_threshold(Threshold::zero());
         assert_eq!(
             sut.validate().unwrap(),

@@ -92,8 +92,8 @@ impl SecurityShieldBuilder {
 // ====================
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn get_primary_threshold(&self) -> u8 {
-        self.get(|builder| builder.get_threshold())
+    pub fn get_primary_threshold(&self) -> Threshold {
+        self.get(|builder| builder.get_threshold()).into()
     }
 
     pub fn get_number_of_days_until_auto_confirm(&self) -> u16 {
@@ -654,16 +654,14 @@ mod tests {
 
         // Threshold increases when adding a factor, because it's being set to All by default
         sut = sut.add_factor_source_to_primary_threshold(
-            // should bump threshold to 1
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::All);
 
         sut = sut.add_factor_source_to_primary_threshold(
-            // should bump threshold to 2
             FactorSourceID::sample_password_other(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 2);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::All);
 
         sut = sut
             .remove_factor_from_primary(
@@ -679,16 +677,15 @@ mod tests {
         sut = sut.set_threshold(Threshold::Specific(1));
 
         sut = sut.add_factor_source_to_primary_threshold(
-            // should also bump threshold to 1
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::Specific(1));
 
         sut = sut.add_factor_source_to_primary_threshold(
             // should NOT bump threshold
             FactorSourceID::sample_password_other(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::Specific(1));
         sut = sut.remove_factor_from_primary(
             FactorSourceID::sample_password_other(),
             FactorListKind::Threshold,

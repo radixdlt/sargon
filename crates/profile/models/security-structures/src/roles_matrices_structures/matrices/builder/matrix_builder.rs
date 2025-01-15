@@ -372,8 +372,8 @@ impl MatrixBuilder {
             .into_matrix_err(RoleKind::Primary)
     }
 
-    pub fn get_threshold(&self) -> u8 {
-        self.primary_role.get_threshold_value()
+    pub fn get_threshold(&self) -> Threshold {
+        self.primary_role.get_threshold()
     }
 
     pub fn set_number_of_days_until_auto_confirm(
