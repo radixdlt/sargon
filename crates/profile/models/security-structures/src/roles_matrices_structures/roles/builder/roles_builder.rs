@@ -7,10 +7,12 @@ pub type PrimaryRoleBuilder = RoleBuilder<{ ROLE_PRIMARY }>;
 pub type RecoveryRoleBuilder = RoleBuilder<{ ROLE_RECOVERY }>;
 pub type ConfirmationRoleBuilder = RoleBuilder<{ ROLE_CONFIRMATION }>;
 
-#[cfg(test)]
-impl RecoveryRoleWithFactorSourceIds {
-    pub(crate) fn override_only(
-        override_factors: impl IntoIterator<Item = FactorSourceID>,
+#[cfg(debug_assertions)]
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_RECOVERY, IS_BUILT_ROLE, FACTOR>
+{
+    pub fn override_only(
+        override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
         Self::with_factors_and_threshold(
             Threshold::All,
@@ -20,10 +22,12 @@ impl RecoveryRoleWithFactorSourceIds {
     }
 }
 
-#[cfg(test)]
-impl ConfirmationRoleWithFactorSourceIds {
-    pub(crate) fn override_only(
-        override_factors: impl IntoIterator<Item = FactorSourceID>,
+#[cfg(debug_assertions)]
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_CONFIRMATION, IS_BUILT_ROLE, FACTOR>
+{
+    pub fn override_only(
+        override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
         Self::with_factors_and_threshold(
             Threshold::All,

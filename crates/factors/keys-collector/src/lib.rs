@@ -24,14 +24,15 @@ pub mod prelude {
     pub(crate) use std::collections::{HashMap, HashSet};
 
     #[cfg(test)]
+    pub(crate) use testing::*;
+
+    #[cfg(test)]
     mod testing {
         pub(crate) use crate::derivation_testing::*;
         pub(crate) use cap26_models::prelude::*;
         pub(crate) use core_collections::prelude::Just;
         pub(crate) use itertools::Itertools;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

@@ -34,12 +34,13 @@ pub mod prelude {
     pub(crate) use std::collections::{HashMap, HashSet};
 
     #[cfg(test)]
+    pub(crate) use testing::*;
+
+    #[cfg(test)]
     mod testing {
         pub(crate) use radix_connect_models::prelude::*;
         pub(crate) use serde::Deserialize;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

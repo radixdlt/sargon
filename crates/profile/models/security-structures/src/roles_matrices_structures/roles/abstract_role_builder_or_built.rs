@@ -46,7 +46,7 @@ pub(crate) type AbstractBuiltRoleWithFactor<const ROLE: u8, FACTOR> =
     AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FACTOR>;
 
 pub(crate) type RoleBuilder<const ROLE: u8> =
-    AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSourceID>;
+    AbstractRoleBuilderOrBuilt<ROLE, IS_ROLE_BUILDER, FactorSourceID>;
 
 impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     AbstractRoleBuilderOrBuilt<ROLE, MODE, FACTOR>

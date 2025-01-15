@@ -181,6 +181,22 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
+    async fn test_unknown_shield_is_err() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        // ACT
+        let result = os
+            .security_structure_of_factor_source_ids_by_security_structure_id(
+                SecurityStructureID::sample_other(),
+            );
+        // ASSERT
+        assert!(matches!(
+            result,
+            Err(CommonError::UnknownSecurityStructureID { id: _ })
+        ));
+    }
+
+    #[actix_rt::test]
     async fn add_structure() {
         // ARRANGE
         let os = SUT::fast_boot().await;

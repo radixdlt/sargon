@@ -246,6 +246,16 @@ impl HierarchicalDeterministicFactorInstance {
         Self::sample_with_key_kind(CAP26KeyKind::AuthenticationSigning, 0)
     }
 
+    /// A sample used to facilitate unit tests.
+    pub fn sample_auth_signing_account_securified() -> Self {
+        Self::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+            NetworkID::Mainnet,
+            CAP26KeyKind::AuthenticationSigning,
+            CAP26EntityKind::Account,
+            Hardened::Securified(SecurifiedU30::ZERO),
+        )
+    }
+
     /// Account | Mainnet
     /// A sample used to facilitate unit tests.
     pub fn sample_with_key_kind(key_kind: CAP26KeyKind, index: u32) -> Self {

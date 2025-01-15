@@ -19,6 +19,7 @@ pub mod prelude {
     pub(crate) use core_collections::prelude::*;
     pub(crate) use ecc::prelude::*;
     pub(crate) use entity_by_address::prelude::*;
+    pub(crate) use prelude::prelude::*;
 
     pub(crate) use hash::prelude::*;
     pub(crate) use metadata::prelude::*;
@@ -37,7 +38,7 @@ pub mod prelude {
     pub(crate) use indexmap::{IndexMap, IndexSet};
 
     pub(crate) use std::fmt::Debug;
-    pub(crate) use std::sync::Arc;
+
     #[cfg(test)]
     pub(crate) use testing::*;
 

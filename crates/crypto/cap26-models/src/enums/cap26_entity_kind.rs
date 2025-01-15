@@ -59,6 +59,9 @@ mod tests {
 
     use crate::prelude::*;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = CAP26EntityKind;
+
     #[test]
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
@@ -72,55 +75,38 @@ mod tests {
 
     #[test]
     fn discriminant() {
-        assert_eq!(CAP26EntityKind::Account.discriminant(), 525);
-        assert_eq!(CAP26EntityKind::Identity.discriminant(), 618);
+        assert_eq!(SUT::Account.discriminant(), 525);
+        assert_eq!(SUT::Identity.discriminant(), 618);
     }
 
     #[test]
     fn display() {
-        assert_eq!(format!("{}", CAP26EntityKind::Account), "Account");
-        assert_eq!(format!("{}", CAP26EntityKind::Identity), "Identity");
+        assert_eq!(format!("{}", SUT::Account), "Account");
+        assert_eq!(format!("{}", SUT::Identity), "Identity");
     }
 
     #[test]
     fn debug() {
-        assert_eq!(format!("{:?}", CAP26EntityKind::Account), "Account");
-        assert_eq!(format!("{:?}", CAP26EntityKind::Identity), "Identity");
-    }
-
-    #[test]
-    fn equality() {
-        assert_eq!(CAP26EntityKind::Account, CAP26EntityKind::Account);
-        assert_eq!(CAP26EntityKind::Identity, CAP26EntityKind::Identity);
-    }
-    #[test]
-    fn inequality() {
-        assert_ne!(CAP26EntityKind::Account, CAP26EntityKind::Identity);
+        assert_eq!(format!("{:?}", SUT::Account), "Account");
+        assert_eq!(format!("{:?}", SUT::Identity), "Identity");
     }
 
     #[test]
     fn hash() {
         assert_eq!(
-            BTreeSet::from_iter(
-                [CAP26EntityKind::Account, CAP26EntityKind::Account]
-                    .into_iter()
-            )
-            .len(),
+            BTreeSet::from_iter([SUT::Account, SUT::Account].into_iter()).len(),
             1
         );
     }
 
     #[test]
     fn ord() {
-        assert!(CAP26EntityKind::Account < CAP26EntityKind::Identity);
+        assert!(SUT::Account < SUT::Identity);
     }
 
     #[test]
     fn json_roundtrip() {
-        assert_json_value_eq_after_roundtrip(
-            &CAP26EntityKind::Account,
-            json!(525),
-        );
-        assert_json_roundtrip(&CAP26EntityKind::Account);
+        assert_json_value_eq_after_roundtrip(&SUT::Account, json!(525));
+        assert_json_roundtrip(&SUT::Account);
     }
 }
