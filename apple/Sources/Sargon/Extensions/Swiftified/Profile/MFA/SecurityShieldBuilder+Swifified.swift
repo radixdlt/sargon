@@ -4,11 +4,11 @@ extension SecurityShieldBuilder {
 	public typealias Factor = FactorSourceID
 
 	/// Confirmation Role
-	public var numberOfDaysUntilAutoConfirm: UInt16 {
-		getNumberOfDaysUntilAutoConfirm()
+	public var timePeriodUntilAutoConfirm: TimePeriod {
+		getTimePeriodUntilAutoConfirm()
 	}
 
-	public var threshold: UInt8 {
+	public var threshold: Threshold {
 		getPrimaryThreshold()
 	}
 

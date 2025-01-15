@@ -4,7 +4,7 @@ import com.radixdlt.sargon.TimePeriod
 import com.radixdlt.sargon.newTimePeriodWithDays
 import com.radixdlt.sargon.timePeriodToDays
 
-fun TimePeriod.Companion.withDays(value: Int): TimePeriod = newTimePeriodWithDays(value.toUShort())
+fun TimePeriod.Companion.init(days: Int): TimePeriod = newTimePeriodWithDays(days.toUShort())
 
 val TimePeriod.days
-    get() = timePeriodToDays(this)
+    get() = timePeriodToDays(this).toInt()
