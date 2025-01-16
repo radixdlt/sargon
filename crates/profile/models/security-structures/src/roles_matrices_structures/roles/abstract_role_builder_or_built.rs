@@ -42,6 +42,36 @@ pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
     override_factors: Vec<FACTOR>,
 }
 
+#[cfg(debug_assertions)]
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_RECOVERY, IS_BUILT_ROLE, FACTOR>
+{
+    pub fn override_only(
+        override_factors: impl IntoIterator<Item = FACTOR>,
+    ) -> Self {
+        Self::with_factors_and_threshold(
+            Threshold::All,
+            vec![],
+            override_factors,
+        )
+    }
+}
+
+#[cfg(debug_assertions)]
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_CONFIRMATION, IS_BUILT_ROLE, FACTOR>
+{
+    pub fn override_only(
+        override_factors: impl IntoIterator<Item = FACTOR>,
+    ) -> Self {
+        Self::with_factors_and_threshold(
+            Threshold::All,
+            vec![],
+            override_factors,
+        )
+    }
+}
+
 pub(crate) type AbstractBuiltRoleWithFactor<const ROLE: u8, FACTOR> =
     AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FACTOR>;
 

@@ -608,6 +608,22 @@ mod tests {
         // ASSERT
         assert_eq!(account_provisional.security_structure_id, shield_id);
         assert_eq!(persona_provisional.security_structure_id, shield_id);
+        assert_eq!(
+            account_provisional
+                .matrix_of_factors
+                .all_factors()
+                .into_iter()
+                .filter_map(|f| f.try_as_hd_factor_instances().ok())
+                .map(|f| f.derivation_entity_index())
+                .collect_vec(),
+            persona_provisional
+                .matrix_of_factors
+                .all_factors()
+                .into_iter()
+                .filter_map(|f| f.try_as_hd_factor_instances().ok())
+                .map(|f| f.derivation_entity_index())
+                .collect_vec()
+        );
     }
 
     #[actix_rt::test]

@@ -444,6 +444,120 @@ mod tests {
     }
 
     #[test]
+    fn test_next_account_mfa_with_single_unsecurified_with_provisional_0_is_1()
+    {
+        let preset = DerivationPreset::AccountMfa;
+        let network_id = NetworkID::Mainnet;
+
+        let mut account = Account::sample_at(0);
+
+        let fi = HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0);
+        let fsid = fi.factor_source_id;
+        let fi = FactorInstance::from(fi);
+
+        let matrix_of_factors = unsafe {
+            // An invalid matrix! Ok for this test...
+            MatrixOfFactorInstances::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorInstances::unbuilt_with_factors(
+                    Threshold::All,
+                    [fi.clone()],
+                    [],
+                ),
+                RecoveryRoleWithFactorInstances::override_only([fi.clone()]),
+                ConfirmationRoleWithFactorInstances::override_only(
+                    [fi.clone()],
+                ),
+                10,
+            )
+        };
+
+        let ssofi = SecurityStructureOfFactorInstances::new(SecurityStructureID::sample(), matrix_of_factors, HierarchicalDeterministicFactorInstance::sample_auth_signing_account_securified()).unwrap();
+
+        account.set_provisional(
+            ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                value: ssofi,
+            },
+        );
+        let sut = SUT::new(
+            network_id,
+            Arc::new(Profile::sample_from(
+                FactorSource::sample_all(),
+                [&account],
+                [],
+            )),
+        );
+        let next = sut
+            .next(fsid, preset.index_agnostic_path_on_network(network_id))
+            .unwrap();
+
+        assert_eq!(
+            next,
+            HDPathComponent::from_local_key_space(1, KeySpace::Securified).ok()
+        )
+    }
+
+    #[test]
+    fn test_next_persona_mfa_with_single_unsecurified_with_provisional_0_is_1()
+    {
+        let preset = DerivationPreset::IdentityMfa;
+        let network_id = NetworkID::Mainnet;
+
+        let mut persona = Persona::sample_at(0);
+
+        let fi = HierarchicalDeterministicFactorInstance::sample_mainnet_entity_device_factor_fs_0_securified_at_index(
+            CAP26EntityKind::Identity,
+            0,
+        );
+        let fsid = fi.factor_source_id;
+        let fi = FactorInstance::from(fi);
+
+        let matrix_of_factors = unsafe {
+            // An invalid matrix! Ok for this test...
+            MatrixOfFactorInstances::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorInstances::unbuilt_with_factors(
+                    Threshold::All,
+                    [fi.clone()],
+                    [],
+                ),
+                RecoveryRoleWithFactorInstances::override_only([fi.clone()]),
+                ConfirmationRoleWithFactorInstances::override_only(
+                    [fi.clone()],
+                ),
+                10,
+            )
+        };
+
+        let ssofi = SecurityStructureOfFactorInstances::new(SecurityStructureID::sample(), matrix_of_factors, HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(
+            NetworkID::Mainnet,
+            CAP26KeyKind::AuthenticationSigning,
+            CAP26EntityKind::Identity,
+            Hardened::Securified(SecurifiedU30::ZERO),
+        )).unwrap();
+
+        persona.set_provisional(
+            ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                value: ssofi,
+            },
+        );
+        let sut = SUT::new(
+            network_id,
+            Arc::new(Profile::sample_from(
+                FactorSource::sample_all(),
+                [],
+                [&persona],
+            )),
+        );
+        let next = sut
+            .next(fsid, preset.index_agnostic_path_on_network(network_id))
+            .unwrap();
+
+        assert_eq!(
+            next,
+            HDPathComponent::from_local_key_space(1, KeySpace::Securified).ok()
+        )
+    }
+
+    #[test]
     fn test_next_account_veci_with_single_at_8_is_9() {
         let preset = DerivationPreset::AccountVeci;
         let network_id = NetworkID::Mainnet;
