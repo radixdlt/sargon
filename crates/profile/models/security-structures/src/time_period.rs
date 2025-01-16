@@ -79,8 +79,8 @@ mod tests {
         assert_eq!(sut.value, 1);
         assert_eq!(sut.unit, TimePeriodUnit::Years);
 
-        sut = SUT::with_days(1092);
-        assert_eq!(sut.days(), 1092);
+        sut = SUT::with_days(1095);
+        assert_eq!(sut.days(), 1095);
         assert_eq!(sut.value, 3);
         assert_eq!(sut.unit, TimePeriodUnit::Years);
 

@@ -11,3 +11,12 @@ pub enum TimePeriodUnit {
     Weeks,
     Years,
 }
+
+#[uniffi::export]
+pub fn time_period_unit_values(time_period_unit: &TimePeriodUnit) -> Vec<u16> {
+    time_period_unit
+        .into_internal()
+        .values()
+        .into_iter()
+        .collect()
+}

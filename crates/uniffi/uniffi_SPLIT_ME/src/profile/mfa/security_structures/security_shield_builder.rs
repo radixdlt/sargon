@@ -95,6 +95,13 @@ impl SecurityShieldBuilder {
         self.get(|builder| builder.get_threshold()).into()
     }
 
+    pub fn get_primary_threshold_values(&self) -> Vec<Threshold> {
+        self.get(|builder| builder.get_threshold_values())
+            .into_iter()
+            .map(|threshold| threshold.into())
+            .collect()
+    }
+
     pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
         self.get(|builder| builder.get_time_period_until_auto_confirm())
             .into()
@@ -678,6 +685,10 @@ mod tests {
             FactorSourceID::sample_password_other(),
         );
         assert_eq!(sut.clone().get_primary_threshold(), Threshold::All);
+        assert_eq!(
+            sut.clone().get_primary_threshold_values(),
+            vec![Threshold::All, Threshold::Specific(1)]
+        );
 
         sut = sut
             .remove_factor_from_primary(

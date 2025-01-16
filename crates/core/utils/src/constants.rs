@@ -31,14 +31,11 @@ pub const POLLING_DELAY_INCREMENT_IN_SECONDS: u64 = 1;
 /// Number of minutes per day.
 pub const MINUTES_PER_DAY: u32 = 24 * 60;
 
-/// Number of weeks per year.
-pub const WEEKS_PER_YEAR: u16 = 52;
-
 /// Number of days per week.
 pub const DAYS_PER_WEEK: u16 = 7;
 
 /// Number of days per year.
-pub const DAYS_PER_YEAR: u16 = DAYS_PER_WEEK * WEEKS_PER_YEAR;
+pub const DAYS_PER_YEAR: u16 = 365;
 
 /// Maximum number of units (days, weeks, years) for the security structure recovery confirmation fallback period.
 pub const MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS: u16 = 9999;

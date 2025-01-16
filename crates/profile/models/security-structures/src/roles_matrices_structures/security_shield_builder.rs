@@ -264,6 +264,14 @@ impl SecurityShieldBuilder {
         self.get(|builder| builder.get_threshold())
     }
 
+    pub fn get_threshold_values(&self) -> Vec<Threshold> {
+        self.get(|builder| {
+            Threshold::values(
+                builder.get_primary_threshold_factors().len() as u8
+            )
+        })
+    }
+
     pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
         self.get(|builder| {
             TimePeriod::with_days(
@@ -947,7 +955,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_number_of_days_until_auto_confirm() {
+    fn test_get_time_period_until_auto_confirm() {
         let sut = SUT::strict();
         assert_eq!(
             sut.get_time_period_until_auto_confirm(),
@@ -957,6 +965,25 @@ mod tests {
         assert_eq!(
             sut.get_time_period_until_auto_confirm(),
             TimePeriod::with_days(42)
+        );
+    }
+
+    #[test]
+    fn test_threshold_values() {
+        let sut = SUT::strict();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+
+        assert_eq!(sut.get_threshold_values(), vec![Threshold::All]);
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_ledger(),
+        );
+
+        assert_eq!(
+            sut.get_threshold_values(),
+            vec![Threshold::All, Threshold::Specific(1)]
         );
     }
 
