@@ -1,5 +1,3 @@
-#![feature(iter_repeat_n)]
-
 #[cfg(test)]
 mod integration_tests {
     use std::time::Duration;

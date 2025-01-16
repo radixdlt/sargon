@@ -10,6 +10,22 @@ pub trait OsSecurityStructuresQuerying {
         &self,
     ) -> Result<SecurityStructuresOfFactorSourceIDs>;
 
+    fn security_structure_of_factor_source_ids_by_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSourceIDs>;
+
+    fn security_structure_of_factor_sources_from_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSources> {
+        let shield_id_level = self
+            .security_structure_of_factor_source_ids_by_security_structure_id(
+                shield_id,
+            )?;
+        self.security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(&shield_id_level)
+    }
+
     fn security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
         &self,
         structure_of_ids: &SecurityStructureOfFactorSourceIDs,
@@ -56,6 +72,22 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 structure_of_ids,
                 &p.factor_sources,
             ))
+        })
+    }
+
+    fn security_structure_of_factor_source_ids_by_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSourceIDs> {
+        self.profile().and_then(|p| {
+            p.app_preferences
+                .security
+                .security_structures_of_factor_source_ids
+                .get_id(shield_id)
+                .ok_or(CommonError::UnknownSecurityStructureID {
+                    id: shield_id.to_string(),
+                })
+                .cloned()
         })
     }
 
@@ -147,6 +179,22 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn test_unknown_shield_is_err() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        // ACT
+        let result = os
+            .security_structure_of_factor_source_ids_by_security_structure_id(
+                SecurityStructureID::sample_other(),
+            );
+        // ASSERT
+        assert!(matches!(
+            result,
+            Err(CommonError::UnknownSecurityStructureID { id: _ })
+        ));
+    }
 
     #[actix_rt::test]
     async fn add_structure() {
@@ -298,7 +346,7 @@ mod tests {
         // ACT
         let structure_source_ids_sample =
             SecurityStructureOfFactorSourceIDs::sample();
-        let structure_source__ids_sample_other =
+        let structure_source_ids_sample_other =
             SecurityStructureOfFactorSourceIDs::sample_other();
         let inserted = os
             .with_timeout(|x| {
@@ -313,7 +361,7 @@ mod tests {
         let inserted = os
             .with_timeout(|x| {
                 x.add_security_structure_of_factor_source_ids(
-                    &structure_source__ids_sample_other,
+                    &structure_source_ids_sample_other,
                 )
             })
             .await
@@ -325,7 +373,7 @@ mod tests {
         );
         let structure_id_sample_other =
             SecurityStructureOfFactorSourceIDs::from(
-                structure_source__ids_sample_other.clone(),
+                structure_source_ids_sample_other.clone(),
             );
 
         // ASSERT

@@ -26,6 +26,6 @@ mod test {
     pub fn all_kinds_supporting_mono_sign() {
         assert!(FactorSourceKind::all()
             .iter()
-            .all(|kind| { kind.support_poly_sign() == false }))
+            .all(|kind| { !kind.support_poly_sign() }))
     }
 }

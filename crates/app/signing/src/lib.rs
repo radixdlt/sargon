@@ -17,8 +17,8 @@ pub mod prelude {
     pub(crate) use cap26_models::prelude::*;
     pub(crate) use core_collections::prelude::*;
     pub(crate) use entity_by_address::prelude::*;
-
     pub(crate) use identified_vec_of::prelude::*;
+    pub use prelude::prelude::*;
     pub(crate) use profile_account::prelude::*;
     pub(crate) use profile_account_or_persona::prelude::*;
     pub(crate) use profile_base_entity::prelude::*;
@@ -32,16 +32,15 @@ pub mod prelude {
 
     pub(crate) use log::*;
     pub(crate) use std::collections::{HashMap, HashSet};
-    pub(crate) use std::sync::{Arc, RwLock};
+
+    #[cfg(test)]
+    pub(crate) use testing::*;
 
     #[cfg(test)]
     mod testing {
-
         pub(crate) use radix_connect_models::prelude::*;
         pub(crate) use serde::Deserialize;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

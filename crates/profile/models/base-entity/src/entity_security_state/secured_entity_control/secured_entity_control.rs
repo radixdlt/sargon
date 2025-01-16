@@ -38,7 +38,7 @@ impl HasProvisionalSecurifiedConfig for SecuredEntityControl {
         self.provisional_securified_config.clone()
     }
 
-    fn set_provisional_unchecked(
+    fn set_provisional(
         &mut self,
         provisional_securified_config: impl Into<
             Option<ProvisionalSecurifiedConfig>,
@@ -52,70 +52,7 @@ impl HasProvisionalSecurifiedConfig for SecuredEntityControl {
 pub trait HasProvisionalSecurifiedConfig {
     fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig>;
 
-    /// # Throws
-    /// Throws if the provisional is already `Some(ProvisionalSecurifiedConfig::TransactionQueued)`,
-    /// you need to first cancel the transaction and then call the method `cancel_queued_transaction` on
-    /// this type
     fn set_provisional(
-        &mut self,
-        provisional_securified_config: impl Into<
-            Option<ProvisionalSecurifiedConfig>,
-        >,
-    ) -> Result<()> {
-        let provisional = provisional_securified_config.into();
-        let maybe_existing = self.get_provisional();
-        let Some(existing) = maybe_existing.as_ref() else {
-            return self.set_provisional_unchecked_ok(provisional);
-        };
-        match existing {
-            ProvisionalSecurifiedConfig::FactorInstancesDerived { value: _ } => {
-                if let Some(new) = provisional.as_ref() {
-                    if new.is_transaction_queued() {
-                        // We allow `FactorInstancesDerived` -> `TransactionQueued` transition ofc...
-                        return self.set_provisional_unchecked_ok(provisional);
-                    }
-                }
-                // We have already consumed FactorInstances from the FactorInstancesCache.
-                // We currently do not have a way of putting these back. We don't want to 
-                // create gaps if we can. Wallet Features might change, to REQUIRE us to
-                // allow this, if so we can change this - allowing transition from 
-                // `FactorInstancesDerived` to Non-TransactionQueued state.
-                Err(
-                CommonError::SecurityEntityControlCannotChangeProvisionalAlreadyDerivedInstances,
-            )},
-            ProvisionalSecurifiedConfig::TransactionQueued { value: _ } => {
-                Err(CommonError::SecurityEntityControlCannotChangeProvisionalAlreadyHasQueuedTransaction)
-            }
-            _ => self.set_provisional_unchecked_ok(provisional),
-        }
-    }
-    /// Call this once you have cancelled the queued transaction from the transaction queue,
-    /// this method will change the provisional state back to `Some(ProvisionalSecurifiedConfig::FactorInstancesDerived(_))`
-    fn cancel_queued_transaction(&mut self) -> Result<()> {
-        if let Some(ProvisionalSecurifiedConfig::TransactionQueued { value }) =
-            self.get_provisional().as_ref()
-        {
-            self.set_provisional_unchecked_ok(
-                ProvisionalSecurifiedConfig::FactorInstancesDerived {
-                    value: value.factor_instances.clone(),
-                },
-            )
-        } else {
-            Err(CommonError::SecurityEntityControlHasNoProvisionallyQueuedTransaction)
-        }
-    }
-
-    fn set_provisional_unchecked_ok(
-        &mut self,
-        provisional_securified_config: impl Into<
-            Option<ProvisionalSecurifiedConfig>,
-        >,
-    ) -> Result<()> {
-        self.set_provisional_unchecked(provisional_securified_config);
-        Ok(())
-    }
-
-    fn set_provisional_unchecked(
         &mut self,
         provisional_securified_config: impl Into<
             Option<ProvisionalSecurifiedConfig>,

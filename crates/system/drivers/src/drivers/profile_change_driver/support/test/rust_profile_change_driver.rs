@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::sync::RwLock;
 
 #[derive(Debug)]
 pub struct RustProfileStateChangeDriver {
