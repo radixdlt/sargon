@@ -28,6 +28,16 @@ pub trait IntoInternal<Type, InternalType> {
     fn into_internal(self) -> InternalType;
 }
 
+impl<InternalElement, Element>
+    IntoInternal<Option<Element>, Option<InternalElement>> for Option<Element>
+where
+    Element: Into<InternalElement>,
+{
+    fn into_internal(self) -> Option<InternalElement> {
+        self.map(Into::into)
+    }
+}
+
 // =====    Vec  ========
 impl<InternalElement, Element> IntoInternal<Vec<Element>, Vec<InternalElement>>
     for Vec<Element>

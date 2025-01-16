@@ -10,7 +10,7 @@ impl RustArculusCSDKDriver {
 }
 
 impl ArculusCSDKDriver for RustArculusCSDKDriver {
-    fn wallet_init(&self) -> ArculusWalletPointer {
+    fn wallet_init(&self) -> Option<ArculusWalletPointer> {
         todo!()
     }
 
@@ -22,7 +22,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         aid: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -30,7 +30,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -38,7 +38,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         seed_phrase_word_count: i64,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -46,7 +46,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -55,7 +55,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         wallet: ArculusWalletPointer,
         mnemonic_sentence: BagOfBytes,
         passphrase: Option<BagOfBytes>,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -63,7 +63,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         seed_phrase_word_count: i64,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -71,7 +71,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32> {
+    ) -> i32 {
         todo!()
     }
 
@@ -79,7 +79,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         seed: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -87,14 +87,14 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32> {
+    ) -> i32 {
         todo!()
     }
 
     fn reset_wallet_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -102,14 +102,14 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32> {
+    ) -> i32 {
         todo!()
     }
 
     fn get_gguid_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -117,14 +117,14 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
     fn get_firmware_version_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -132,7 +132,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -140,7 +140,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         pin: String,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -148,7 +148,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32> {
+    ) -> i32 {
         todo!()
     }
 
@@ -156,7 +156,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         pin: String,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -164,14 +164,14 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32> {
+    ) -> i32 {
         todo!()
     }
 
     fn init_encrypted_session_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -179,7 +179,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32> {
+    ) -> i32 {
         todo!()
     }
 
@@ -188,7 +188,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         wallet: ArculusWalletPointer,
         path: BagOfBytes,
         curve: u16,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -196,7 +196,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 
@@ -207,7 +207,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         curve: u16,
         algorithm: u8,
         hash: BagOfBytes,
-    ) -> Result<Vec<BagOfBytes>> {
+    ) -> Option<Vec<BagOfBytes>> {
         todo!()
     }
 
@@ -215,7 +215,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes> {
+    ) -> Option<BagOfBytes> {
         todo!()
     }
 }

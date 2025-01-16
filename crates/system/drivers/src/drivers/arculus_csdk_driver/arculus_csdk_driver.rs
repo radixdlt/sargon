@@ -12,8 +12,8 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// All of the subsequent calls to Arculus CSDK are made by usingt the pointer.
     /// Should be freed by calling `wallet_free` once all operations are performed.
     ///
-    /// Returns the Wallet pointer to be used.
-    fn wallet_init(&self) -> ArculusWalletPointer;
+    /// Returns the Wallet pointer to be used or None on Error.
+    fn wallet_init(&self) -> Option<ArculusWalletPointer>;
 
     /// Deallocate the Wallet "session" in the Arculus CSDK
     ///
@@ -30,12 +30,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `aid` - The unique wallet identifier to be selected on the card.
     ///
-    /// Returns the request that needs to be sent to the card.
+    /// Returns the request that needs to be sent to the card or None on Error.
     fn select_wallet_request(
         &self,
         wallet: ArculusWalletPointer,
         aid: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Select wallet response.
     ///
@@ -44,12 +44,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `response` - The response bytes received from the card.
     ///
-    /// Returns the response status for wallet selection.
+    /// Returns the response status for wallet selection or None on Error.
     fn select_wallet_response(
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Create seed phrase request.
     ///
@@ -60,12 +60,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `seed_phrase_word_count` - The number of mnemonic words to create the wallet. 12 to 24, if set to 0 , default value is 12.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn create_wallet_seed_request(
         &self,
         wallet: ArculusWalletPointer,
         seed_phrase_word_count: i64,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Parse the Create Wallet Seed response received from the card.
     ///
@@ -74,12 +74,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `response` - The response bytes received from the card.
     ///
-    /// Returns the bytes representation of the mnemonic words non NULL terminated string.
+    /// Returns the bytes representation of the mnemonic words non NULL terminated string or None on Error.
     fn create_wallet_seed_response(
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Generate a seed from a mnemonic sentence.
     ///
@@ -91,13 +91,13 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `mnemonic_sentence` - Byte array containing concatenated words, space-separated
     /// * `passphrase` - (Optional, use `None`) Byte array containing the passphrase
     ///
-    /// Returns the byte array containing the generated seed.
+    /// Returns the byte array containing the generated seed or None on Error.
     fn seed_phrase_from_mnemonic_sentence(
         &self,
         wallet: ArculusWalletPointer,
         mnemonic_sentence: BagOfBytes,
         passphrase: Option<BagOfBytes>,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Init wallet recovery request.
     ///
@@ -107,12 +107,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `seed_phrase_word_count` - The number of mnemonic words for the seed phrase that will be stored on the card.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn init_recover_wallet_request(
         &self,
         wallet: ArculusWalletPointer,
         seed_phrase_word_count: i64,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Init wallet recovery response.
     ///
@@ -126,7 +126,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> i32;
 
     /// Finish wallet recovery request.
     ///
@@ -135,12 +135,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     ///
     /// * `seed` - The seed bytes to be stored on the card. The bytes are created by calling `seed_phrase_from_mnemonic_sentence`.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn finish_recover_wallet_request(
         &self,
         wallet: ArculusWalletPointer,
         seed: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Finish wallet recovery response.
     ///
@@ -154,7 +154,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> i32;
 
     /// Reset wallet request
     ///
@@ -162,11 +162,11 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     ///
     /// * `wallet` - Pointer to the wallet instance.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn reset_wallet_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Reset wallet response.
     ///
@@ -180,7 +180,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> i32;
 
     /// Get GGUID request.
     ///
@@ -188,11 +188,11 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     ///
     /// * `wallet` - Pointer to the wallet instance.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn get_gguid_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Get GGUID response.
     ///
@@ -201,12 +201,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `response` - The response bytes received from the card.
     ///
-    /// Returns the GGUID bytes.
+    /// Returns the GGUID bytes or None on Error.
     fn get_gguid_response(
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Get firmware version request.
     ///
@@ -214,11 +214,11 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     ///
     /// * `wallet` - Pointer to the wallet instance.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn get_firmware_version_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Get firmware version response.
     ///
@@ -227,12 +227,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `response` - The response bytes received from the card.
     ///
-    /// Returns the utf8 representation bytes of firmware version.
+    /// Returns the utf8 representation bytes of firmware version or None on Error.
     fn get_firmware_version_response(
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Store Data PIN request.
     ///
@@ -241,12 +241,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `pin` - The PIN to be stored on the card.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn store_data_pin_request(
         &self,
         wallet: ArculusWalletPointer,
         pin: String,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Store Data PIN response.
     ///
@@ -260,7 +260,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> i32;
 
     /// Verify PIN request.
     ///
@@ -269,12 +269,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `pin` - The PIN to be verified on the card.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn verify_pin_request(
         &self,
         wallet: ArculusWalletPointer,
         pin: String,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Verify PIN response.
     ///
@@ -288,7 +288,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> i32;
 
     /// Init encrypted session request.
     ///
@@ -297,11 +297,11 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     ///
     /// * `wallet` - Pointer to the wallet instance.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn init_encrypted_session_request(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Init encrypted session response.
     ///
@@ -315,7 +315,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<i32>;
+    ) -> i32;
 
     /// Get public key by path request.
     ///
@@ -325,13 +325,13 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `path` - The path to derive the public key.
     /// * `curve` - The curve to derive the public key.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn get_public_key_by_path_request(
         &self,
         wallet: ArculusWalletPointer,
         path: BagOfBytes,
         curve: u16,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Get public key by path response.
     ///
@@ -340,12 +340,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `response` - The response bytes received from the card.
     ///
-    /// Returns the public key bytes.
+    /// Returns the public key bytes or None on Error.
     fn get_public_key_by_path_response(
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 
     /// Sign hash path request.
     ///
@@ -357,7 +357,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `algorithm` - The algorithm to sign the hash.
     /// * `hash` - The hash to be signed.
     ///
-    /// Returns the request to be sent to the card.
+    /// Returns the request to be sent to the card or None on Error.
     fn sign_hash_path_request(
         &self,
         wallet: ArculusWalletPointer,
@@ -365,7 +365,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         curve: u16,
         algorithm: u8,
         hash: BagOfBytes,
-    ) -> Result<Vec<BagOfBytes>>;
+    ) -> Option<Vec<BagOfBytes>>;
 
     /// Sign hash path response.
     ///
@@ -374,12 +374,12 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// * `wallet` - Pointer to the wallet instance.
     /// * `response` - The response bytes received from the card.
     ///
-    /// Returns the signature bytes.
+    /// Returns the signature bytes or None on Error.
     fn sign_hash_path_response(
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> Result<BagOfBytes>;
+    ) -> Option<BagOfBytes>;
 }
 
 /// Pointer to the wallet instance in the Arculus CSDK.

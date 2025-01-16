@@ -29,7 +29,7 @@ use crate::prelude::*;
 
 /// The status of a response from the Arculus wallet.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-#[repr(i16)]
+#[repr(i32)]
 pub enum ArculusWalletCSDKResponseStatus {
     /// Success return code
     Ok = 0,
@@ -113,16 +113,127 @@ impl TryFrom<i32> for ArculusWalletCSDKResponseStatus {
             -115 => Ok(Self::ExtApduSupportRequired),
             -116 => Ok(Self::ApduTooBig),
             -117 => Ok(Self::WalletNotSelected),
-            _ => panic!("Invalid error code"),
+            _ => Err(CommonError::ArculusCSDKUnknownResponseStatusCode {
+                status_code: value,
+            }),
         }
     }
 }
 
-// impl ArculusWalletCSDKResponseStatus {
-//     pub fn as_result(&self) -> Result<()> {
-//         match self {
-//             Self::Ok => Ok(()),
-//             _ => Err(CommonError::ArculusCSDKResponseError { status: *self }),
-//         }
-//     }
-// }
+impl ArculusWalletCSDKResponseStatus {
+    pub fn as_result(self) -> Result<()> {
+        match self {
+            Self::Ok => Ok(()),
+            Self::WrongPin => Err(CommonError::ArculusCardWrongPIN),
+            _ => Err(CommonError::ArculusCSDKBadStatusCode {
+                status_code: self as i32,
+            }),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn try_from_i32() {
+        use super::*;
+
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(0),
+            Ok(ArculusWalletCSDKResponseStatus::Ok)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-100),
+            Ok(ArculusWalletCSDKResponseStatus::NullPointer)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-101),
+            Ok(ArculusWalletCSDKResponseStatus::NullWalletSession)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-102),
+            Ok(ArculusWalletCSDKResponseStatus::NullCalloc)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-103),
+            Ok(ArculusWalletCSDKResponseStatus::WrongResponseLength)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-104),
+            Ok(ArculusWalletCSDKResponseStatus::WrongResponseData)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-105),
+            Ok(ArculusWalletCSDKResponseStatus::WrongStatusWord)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-106),
+            Ok(ArculusWalletCSDKResponseStatus::WrongDataLength)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-107),
+            Ok(ArculusWalletCSDKResponseStatus::WrongParamLength)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-108),
+            Ok(ArculusWalletCSDKResponseStatus::WrongPin)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-109),
+            Ok(ArculusWalletCSDKResponseStatus::InvalidParam)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-110),
+            Ok(ArculusWalletCSDKResponseStatus::EncryptionNotInit)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-111),
+            Ok(ArculusWalletCSDKResponseStatus::ExtOrChainNotSupported)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-112),
+            Ok(ArculusWalletCSDKResponseStatus::ApiChainNotSupported)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-113),
+            Ok(ArculusWalletCSDKResponseStatus::UnknownError)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-114),
+            Ok(ArculusWalletCSDKResponseStatus::ApduExceedsChainLength)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-115),
+            Ok(ArculusWalletCSDKResponseStatus::ExtApduSupportRequired)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-116),
+            Ok(ArculusWalletCSDKResponseStatus::ApduTooBig)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-117),
+            Ok(ArculusWalletCSDKResponseStatus::WalletNotSelected)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::try_from(-118),
+            Err(CommonError::ArculusCSDKUnknownResponseStatusCode {
+                status_code: -118
+            })
+        );
+    }
+
+    #[test]
+    fn as_result() {
+        use super::*;
+
+        assert_eq!(ArculusWalletCSDKResponseStatus::Ok.as_result(), Ok(()));
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::WrongPin.as_result(),
+            Err(CommonError::ArculusCardWrongPIN)
+        );
+        assert_eq!(
+            ArculusWalletCSDKResponseStatus::NullPointer.as_result(),
+            Err(CommonError::ArculusCSDKBadStatusCode { status_code: -100 })
+        );
+    }
+}

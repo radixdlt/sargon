@@ -856,6 +856,75 @@ pub enum CommonError {
 
     #[error("Unknown response status code: {status_code}")]
     ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10246,
+
+    #[error("Unknown response status code: {status_code}")]
+    ArculusCSDKBadStatusCode { status_code: i32 } = 10247,
+
+    #[error("Arculus card created invalid mnemonic words")]
+    ArculusCardInvalidNonUtf8MnemonicPhrase = 10248,
+
+    #[error("Arculus card wrong PIN")]
+    ArculusCardWrongPIN = 10249,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateSelectWalletRequest = 10250,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateSelectWalletResponse = 10251,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateGetPublicKeyByPathRequest = 10252,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateGetPublicKeyByPathResponse = 10253,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateGetGGUIDRequest = 10254,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateGetGGUIDResponse = 10255,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateGetFirmwareVersionRequest = 10256,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateGetFirmwareVersionResponse = 10257,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateStoreDataPINRequest = 10258,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateVerifyPINRequest = 10259,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateaInitEncryptedSessionRequest = 10260,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateWalletSeedRequest = 10261,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateWalletSeedResponse = 10262,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateResetWalletRequest = 10263,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateInitRecoverWalletRequest = 10264,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateFinishRecoverWalletRequest = 10265,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateSignHashPathRequest = 10266,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateSignHashPathResponse = 10267,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateSeedPhraseFromMnemonicSentence = 10268,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToInitWallet = 10269,
 }
 
 impl CommonError {
