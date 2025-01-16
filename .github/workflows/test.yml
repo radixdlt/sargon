@@ -121,7 +121,7 @@ jobs:
           profile: minimal
 
       - name: Cargo Check
-        run: cargo check --all
+        run: cargo check --locked --all
 
   # cargo fmt check
   check-formatting:
@@ -137,7 +137,7 @@ jobs:
           components: rustfmt
 
       - name: Check formatting
-        run: cargo fmt --check
+        run: cargo fmt --locked --check --all
 
   # clippy
   check-clippy:
@@ -153,7 +153,7 @@ jobs:
           components: clippy
 
       - name: Clippy Check
-        run: cargo clippy --all -- -D warnings
+        run: cargo clippy --locked --all -- -D warnings
 
   # Rust unit, doc and integration
   test-rust:
@@ -174,7 +174,7 @@ jobs:
           default: true
 
       - name: Run rust tests
-        run: cargo nextest run --all
+        run: cargo nextest run --locked --all
 
   # Swift formatting
   check-swift-format:

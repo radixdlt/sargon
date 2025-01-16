@@ -53,7 +53,7 @@ impl Mnemonic {
         let language = internal.language();
 
         let words = internal
-            .word_iter()
+            .words()
             .map(|w| BIP39Word::new(w, language.into()))
             .collect::<Result<Vec<BIP39Word>, CommonError>>()
             .expect("Crate bip39 generated words unknown to us.");
