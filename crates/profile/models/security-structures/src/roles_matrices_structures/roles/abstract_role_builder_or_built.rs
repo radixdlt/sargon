@@ -51,10 +51,15 @@ pub(crate) type RoleBuilder<const ROLE: u8> =
 impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     AbstractRoleBuilderOrBuilt<ROLE, MODE, FACTOR>
 {
-    /// Removes all factors from this role and set threshold to 0.
+    /// Removes all factors from this role and set threshold to `All`.
     pub fn reset(&mut self) {
         self.threshold_factors.clear();
         self.threshold = Threshold::All;
+        self.override_factors.clear();
+    }
+
+    /// Removes all override factors from this role.
+    pub fn remove_all_override_factors(&mut self) {
         self.override_factors.clear();
     }
 

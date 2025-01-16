@@ -172,7 +172,7 @@ struct ShieldTests {
 		builder = builder.addFactorSourceToRecoveryOverride(factorSourceId: .sampleArculus)
 			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleArculusOther)
 
-		builder.setAuthenticationSigningFactor(new: .sampleDevice)
+		builder = builder.setAuthenticationSigningFactor(new: .sampleDevice)
 
 		let shield = try! builder.build()
 
@@ -206,7 +206,7 @@ struct ShieldTests {
 			.removeFactorFromPrimary(factorSourceId: .sampleArculusOther, factorListKind: FactorListKind.override)
 			.removeFactorFromRecovery(factorSourceId: .sampleLedgerOther)
 
-		builder.setAuthenticationSigningFactor(new: .sampleDevice)
+		builder = builder.setAuthenticationSigningFactor(new: .sampleDevice)
 
 		// Validate
 		#expect(builder.validate() == nil)

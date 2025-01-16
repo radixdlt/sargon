@@ -20,22 +20,6 @@ impl HasSampleValues for TimePeriodUnit {
     }
 }
 
-impl TimePeriodUnit {
-    pub fn values(&self) -> Vec<u16> {
-        match self {
-            TimePeriodUnit::Days => {
-                (1..=MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS).collect()
-            }
-            TimePeriodUnit::Weeks => {
-                (1..=MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS).collect()
-            }
-            TimePeriodUnit::Years => {
-                (1..=MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS).collect()
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,24 +36,5 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn values() {
-        assert_eq!(
-            SUT::Days.values(),
-            (1..=MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS)
-                .collect::<Vec<u16>>()
-        );
-        assert_eq!(
-            SUT::Weeks.values(),
-            (1..=MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS)
-                .collect::<Vec<u16>>()
-        );
-        assert_eq!(
-            SUT::Years.values(),
-            (1..=MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS)
-                .collect::<Vec<u16>>()
-        );
     }
 }

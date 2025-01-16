@@ -131,6 +131,9 @@ impl std::hash::Hash for SecurityShieldBuilder {
 }
 
 impl SecurityShieldBuilder {
+    /// Maximum number of units (days, weeks, years) for the security structure recovery confirmation fallback period.
+    pub const MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS: u16 = 9999;
+
     pub fn new(mode: SecurityShieldBuilderMode) -> Self {
         let matrix_builder = MatrixBuilder::new();
         let name = RwLock::new("My Shield".to_owned());

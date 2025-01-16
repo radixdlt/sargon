@@ -37,9 +37,6 @@ pub const DAYS_PER_WEEK: u16 = 7;
 /// Number of days per year.
 pub const DAYS_PER_YEAR: u16 = 365;
 
-/// Maximum number of units (days, weeks, years) for the security structure recovery confirmation fallback period.
-pub const MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS: u16 = 9999;
-
 #[cfg(test)]
 mod tests {
     use super::*;
