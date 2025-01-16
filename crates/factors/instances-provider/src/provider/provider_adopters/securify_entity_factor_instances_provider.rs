@@ -21,7 +21,7 @@ impl SecurifyEntityFactorInstancesProvider {
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::securifying_unsecurified(
+        Self::apply_security_shield_with_new_rola_key_for_all(
             cache_client,
             profile,
             security_structure_of_factor_sources,
@@ -50,7 +50,7 @@ impl SecurifyEntityFactorInstancesProvider {
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        Self::securifying_unsecurified(
+        Self::apply_security_shield_with_new_rola_key_for_all(
             cache_client,
             profile,
             security_structure_of_factor_sources,
@@ -71,7 +71,9 @@ impl SecurifyEntityFactorInstancesProvider {
     ///
     /// We are always reading from the beginning of each FactorInstance collection in the cache,
     /// and we are always appending to the end.
-    pub async fn securifying_unsecurified(
+    ///
+    /// Derives a ROLA key for each entity in `addresses_of_entities`.
+    pub async fn apply_security_shield_with_new_rola_key_for_all(
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources,
@@ -105,14 +107,17 @@ impl SecurifyEntityFactorInstancesProvider {
         cache_client: Arc<FactorInstancesCacheClient>,
         profile: Arc<Profile>,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources,
-        addresses_of_entities: IndexSet<AddressOfAccountOrPersona>,
-        include_rola_key_for_entities: IndexSet<AddressOfAccountOrPersona>,
+        addresses_of_entities_to_derive_tx_key_for: IndexSet<
+            AddressOfAccountOrPersona,
+        >,
+        addresses_of_entities_to_derive_rola_key_for: IndexSet<
+            AddressOfAccountOrPersona,
+        >,
         interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<(InstancesInCacheConsumer, FactorInstancesProviderOutcome)>
     {
-        assert!(
-            addresses_of_entities.is_superset(&include_rola_key_for_entities)
-        );
+        assert!(addresses_of_entities_to_derive_tx_key_for
+            .is_superset(&addresses_of_entities_to_derive_rola_key_for));
         let factor_sources_to_use = security_structure_of_factor_sources
             .all_factors()
             .into_iter()
@@ -134,18 +139,24 @@ impl SecurifyEntityFactorInstancesProvider {
             "Missing FactorSources"
         );
 
-        assert!(!addresses_of_entities.is_empty(), "No entities");
+        assert!(
+            !addresses_of_entities_to_derive_tx_key_for.is_empty(),
+            "No entities"
+        );
 
         assert!(
-            addresses_of_entities
+            addresses_of_entities_to_derive_tx_key_for
                 .iter()
                 .all(|a| profile.contains_entity_by_address(a)),
             "unknown entity"
         );
 
-        let network_id = addresses_of_entities.first().unwrap().network_id();
+        let network_id = addresses_of_entities_to_derive_tx_key_for
+            .first()
+            .unwrap()
+            .network_id();
         assert!(
-            addresses_of_entities
+            addresses_of_entities_to_derive_tx_key_for
                 .iter()
                 .all(|a| a.network_id() == network_id),
             "wrong network"
@@ -160,13 +171,13 @@ impl SecurifyEntityFactorInstancesProvider {
         );
 
         let purpose = DerivationPurpose::for_securifying_or_updating(
-            &addresses_of_entities,
+            &addresses_of_entities_to_derive_tx_key_for,
         );
 
         let quantified_derivation_presets =
             QuantifiedDerivationPreset::apply_security_structure_of_factor_sources_to_entities(
-                &addresses_of_entities,
-                &include_rola_key_for_entities,
+                &addresses_of_entities_to_derive_tx_key_for,
+                &addresses_of_entities_to_derive_rola_key_for,
             );
 
         assert!(quantified_derivation_presets.len() >= 2); // at least one entity kind, and ROLA + TX: at least 2

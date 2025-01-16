@@ -2968,7 +2968,7 @@ async fn securify_accounts_and_personas_with_override_factor() {
     let derivation_interactors = os.keys_derivation_interactor();
 
     let (instances_in_cache_consumer, outcome) =
-        SecurifyEntityFactorInstancesProvider::securifying_unsecurified(
+        SecurifyEntityFactorInstancesProvider::apply_security_shield_with_new_rola_key_for_all(
             cache_client.clone(),
             profile,
             shield_0.clone(),

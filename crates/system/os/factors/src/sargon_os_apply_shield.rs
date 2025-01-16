@@ -195,13 +195,14 @@ impl OsShieldApplying for SargonOS {
             AddressOfAccountOrPersona,
             HierarchicalDeterministicFactorInstance,
         >::new();
-        let mut include_rola_key_for_entities =
+        let mut addresses_of_entities_to_derive_rola_key_for =
             IndexSet::<AddressOfAccountOrPersona>::new();
 
         for entity in entities.iter() {
             match entity.entity_security_state() {
                 EntitySecurityState::Unsecured { .. } => {
-                    include_rola_key_for_entities.insert(entity.address());
+                    addresses_of_entities_to_derive_rola_key_for
+                        .insert(entity.address());
                 }
                 EntitySecurityState::Securified { value: sec } => {
                     let existing = sec
@@ -216,19 +217,20 @@ impl OsShieldApplying for SargonOS {
                         existing_rola_key_for_entities
                             .insert(entity.address(), existing);
                     } else {
-                        include_rola_key_for_entities.insert(entity.address());
+                        addresses_of_entities_to_derive_rola_key_for
+                            .insert(entity.address());
                     }
                 }
             }
         }
         let derived_any_rola_key_for_any_account =
-            !include_rola_key_for_entities
+            !addresses_of_entities_to_derive_rola_key_for
                 .iter()
                 .filter(|e| e.is_account())
                 .collect_vec()
                 .is_empty();
         let derived_any_rola_key_for_any_persona =
-            !include_rola_key_for_entities
+            !addresses_of_entities_to_derive_rola_key_for
                 .iter()
                 .filter(|e| e.is_identity())
                 .collect_vec()
@@ -240,7 +242,7 @@ impl OsShieldApplying for SargonOS {
                 Arc::new(profile_snapshot.clone()),
                 security_structure_of_factor_sources.clone(),
                 addresses_of_entities.clone(),
-                include_rola_key_for_entities,
+                addresses_of_entities_to_derive_rola_key_for,
                 key_derivation_interactors,
             )
             .await?;
