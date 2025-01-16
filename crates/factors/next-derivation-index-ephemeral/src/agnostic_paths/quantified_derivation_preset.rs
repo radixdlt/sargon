@@ -22,88 +22,70 @@ impl QuantifiedDerivationPreset {
         }
     }
 
-    /// Returns a the QuantifiedDerivationPresets needed to securify the `addresses_of_entities`, including
-    /// a new Authentication Signing factor instance for each entity. Will return
-    /// the `Account` variant of each DerivationPreset for each Account in `addresses_of_entities`
-    /// and the `Identity` variant of each DerivationPreset for each Persona in `addresses_of_entities`.
-    pub fn securifying_unsecurified_entities(
-        addresses_of_entities: &IndexSet<AddressOfAccountOrPersona>,
-    ) -> IdentifiedVecOf<Self> {
-        Self::mfa_for_entities(addresses_of_entities, true)
-    }
-
-    /// Returns a the QuantifiedDerivationPresets needed to securify the `addresses_of_entities`,  Will return
-    /// the `Account` variant of each DerivationPreset for each Account in `addresses_of_entities`
-    /// and the `Identity` variant of each DerivationPreset for each Persona in `addresses_of_entities`.
+    /// Returns a the QuantifiedDerivationPresets needed apply a shield update
+    /// to `addresses_of_entities_to_derive_tx_key_for`. Will return the `Account` variant of each
+    /// DerivationPreset for each Account in `addresses_of_entities_to_derive_tx_key_for` and the
+    /// `Identity` variant of each DerivationPreset for each Persona
+    /// in `addresses_of_entities_to_derive_tx_key_for`.
     ///
-    /// if `include_rola_key_for_each_entity` is `true` a ROLA key for each entity will be included.
-    /// Typically we only set `include_rola_key_for_each_entity` to `true` for securifying
-    /// unsecurified entities. For already securified entities we might not
-    /// need to change the ROLA key.
-    fn mfa_for_entities(
-        addresses_of_entities: &IndexSet<AddressOfAccountOrPersona>,
-        include_rola_key_for_each_entity: bool,
+    /// We will derive ` `addresses_of_entities_to_derive_rola_key_for.len()` many
+    /// ROLA keys.
+    pub fn apply_security_structure_of_factor_sources_to_entities(
+        addresses_of_entities_to_derive_tx_key_for: &IndexSet<
+            AddressOfAccountOrPersona,
+        >,
+        addresses_of_entities_to_derive_rola_key_for: &IndexSet<
+            AddressOfAccountOrPersona,
+        >,
     ) -> IdentifiedVecOf<Self> {
-        let account_addresses = addresses_of_entities
-            .iter()
-            .filter(|a| a.is_account())
-            .collect_vec();
-        let identity_addresses = addresses_of_entities
-            .iter()
-            .filter(|a| a.is_identity())
-            .collect_vec();
+        fn from_addresses_for_entity(
+            addresses: &IndexSet<AddressOfAccountOrPersona>,
+            make_preset: impl Fn(CAP26EntityKind) -> DerivationPreset,
+        ) -> IdentifiedVecOf<QuantifiedDerivationPreset> {
+            let account_addresses =
+                addresses.iter().filter(|a| a.is_account()).collect_vec();
 
-        match (account_addresses.is_empty(), identity_addresses.is_empty()) {
-            (true, true) => IdentifiedVecOf::new(), // weird!
-            (true, false) => {
-                let mut presets = IdentifiedVecOf::just(Self::new(
-                    DerivationPreset::IdentityMfa,
-                    identity_addresses.len(),
-                ));
-                if include_rola_key_for_each_entity {
-                    presets.append(Self::new(
-                        DerivationPreset::IdentityRola,
+            let identity_addresses =
+                addresses.iter().filter(|a| a.is_identity()).collect_vec();
+
+            match (account_addresses.is_empty(), identity_addresses.is_empty())
+            {
+                (true, true) => IdentifiedVecOf::new(), // weird!
+                (true, false) => {
+                    IdentifiedVecOf::just(QuantifiedDerivationPreset::new(
+                        make_preset(CAP26EntityKind::Identity),
                         identity_addresses.len(),
-                    ));
+                    ))
                 }
-                presets
-            }
-            (false, false) => {
-                let mut presets = IdentifiedVecOf::from_iter([
-                    Self::new(
-                        DerivationPreset::AccountMfa,
+                (false, false) => IdentifiedVecOf::from_iter([
+                    QuantifiedDerivationPreset::new(
+                        make_preset(CAP26EntityKind::Account),
                         account_addresses.len(),
                     ),
-                    Self::new(
-                        DerivationPreset::IdentityMfa,
+                    QuantifiedDerivationPreset::new(
+                        make_preset(CAP26EntityKind::Identity),
                         identity_addresses.len(),
                     ),
-                ]);
-                if include_rola_key_for_each_entity {
-                    presets.append(Self::new(
-                        DerivationPreset::AccountRola,
+                ]),
+                (false, true) => {
+                    IdentifiedVecOf::just(QuantifiedDerivationPreset::new(
+                        make_preset(CAP26EntityKind::Account),
                         account_addresses.len(),
-                    ));
-                    presets.append(Self::new(
-                        DerivationPreset::IdentityRola,
-                        identity_addresses.len(),
-                    ));
+                    ))
                 }
-                presets
-            }
-            (false, true) => {
-                let mut presets = IdentifiedVecOf::just(Self::new(
-                    DerivationPreset::AccountMfa,
-                    account_addresses.len(),
-                ));
-                if include_rola_key_for_each_entity {
-                    presets.append(Self::new(
-                        DerivationPreset::AccountRola,
-                        account_addresses.len(),
-                    ));
-                }
-                presets
             }
         }
+
+        let mut transaction = from_addresses_for_entity(
+            addresses_of_entities_to_derive_tx_key_for,
+            DerivationPreset::mfa_entity_kind,
+        );
+        let authentication = from_addresses_for_entity(
+            addresses_of_entities_to_derive_rola_key_for,
+            DerivationPreset::rola_entity_kind,
+        );
+
+        transaction.extend(authentication);
+        transaction
     }
 }

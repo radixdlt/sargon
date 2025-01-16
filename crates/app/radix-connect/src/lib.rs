@@ -27,6 +27,7 @@ pub mod prelude {
     pub(crate) use entity_foundation::prelude::*;
     pub(crate) use hash::prelude::*;
     pub(crate) use identified_vec_of::prelude::*;
+    pub(crate) use prelude::prelude::*;
     pub(crate) use profile_persona_data::prelude::*;
     pub(crate) use radix_connect_models::prelude::*;
     pub(crate) use short_string::prelude::*;
@@ -40,8 +41,7 @@ pub mod prelude {
 
     // STD DEPENDENCIES
     pub(crate) use std::collections::HashMap;
-    pub(crate) use std::str::FromStr;
-    pub(crate) use std::sync::Arc;
+
     #[cfg(test)]
     pub(crate) use testing::*;
 

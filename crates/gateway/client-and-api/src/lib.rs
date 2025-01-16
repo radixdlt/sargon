@@ -12,11 +12,12 @@ pub mod prelude {
     pub use gateway_models::prelude::*;
     pub use http_client::prelude::*;
     pub use metadata::prelude::*;
+
+    #[allow(unused_imports)]
+    pub use prelude::prelude::*;
     pub use transaction_models::prelude::*;
 
     pub use serde::{Deserialize, Serialize};
-
-    pub(crate) use std::sync::Arc;
 
     #[cfg(test)]
     pub(crate) use std::collections::BTreeSet;

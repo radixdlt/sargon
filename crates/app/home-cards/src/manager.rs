@@ -1,7 +1,7 @@
 use gateway_client_and_api::GatewayClient;
 
 use crate::prelude::*;
-use std::sync::{RwLock, RwLockWriteGuard};
+use std::sync::RwLockWriteGuard;
 
 /// Manages the home cards by handling storage, parsing, and updating operations.
 /// Call `bootstrap` before invoking any other public functions.

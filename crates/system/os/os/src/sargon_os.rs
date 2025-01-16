@@ -130,7 +130,7 @@ impl SargonOS {
         }
 
         if should_pre_derive_instances {
-            #[cfg(test)]
+            #[cfg(debug_assertions)]
             // only tests for now, need more work in hosts before we can do this in prod
             self.pre_derive_and_fill_cache_with_instances_for_factor_source(
                 bdfs.clone().factor_source.into(),
@@ -143,7 +143,8 @@ impl SargonOS {
         Ok(())
     }
 
-    #[cfg(test)] // only for test for now, need integration work in hosts before enabling this
+    // only for debug for now, need integration work in hosts before enabling this for prod
+    #[cfg(debug_assertions)]
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
@@ -308,7 +309,7 @@ impl SargonOS {
             as Arc<dyn SignInteractor<AuthIntent>>
     }
 
-    pub(crate) fn keys_derivation_interactor(
+    pub fn keys_derivation_interactor(
         &self,
     ) -> Arc<dyn KeyDerivationInteractor> {
         self.interactors.use_factor_sources_interactor.clone()
@@ -412,8 +413,7 @@ impl SargonOS {
 pub const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
     std::time::Duration::from_millis(50);
 
-// TODO hide behind a feature flag?
-// #[cfg(test)]
+#[cfg(debug_assertions)]
 impl SargonOS {
     pub async fn with_timeout<'a, F, Fut, T>(&'a self, func: F) -> T
     where

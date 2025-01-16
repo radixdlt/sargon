@@ -4,7 +4,7 @@ use thiserror::Error as ThisError;
 pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 
 #[repr(u32)]
-#[derive(Clone, Debug, ThisError, PartialEq)]
+#[derive(Clone, Debug, Eq, ThisError, PartialEq)]
 pub enum CommonError {
     #[error("Unknown Error")]
     Unknown = 10000,
@@ -853,6 +853,9 @@ pub enum CommonError {
 
     #[error("Not all signatures are produced with the same factor source.")]
     FactorOutcomeSignedFactorSourceIDMismatch = 10245,
+
+    #[error("Unknown SecurityStructureID {id}")]
+    UnknownSecurityStructureID { id: String } = 10246,
 }
 
 impl CommonError {
