@@ -310,7 +310,7 @@ sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 
 # ==== EXTERNAL DEPENDENCIES ====
 actix-rt = { version = "2.10.0", default-features = false, features = ["macros"] }
-aes-gcm = { version = "0.10.3", default-features = false, features = [
+aes-gcm = { version = "=0.10.3", default-features = false, features = [
     "aes",
     "alloc",
     "getrandom",
@@ -322,8 +322,8 @@ arraystring = { version = "0.3.0", default-features = false, features = [
 async-std = "1.13.0"
 async-trait = { version = "0.1.79", default-features = false }
 assert-json-diff = { version = "2.0.2", default-features = false }
-base64 = { version = "0.22.1" }
-bip39 = { version = "2.0.0", default-features = true, features = [
+base64 = { version = "=0.22.1" }
+bip39 = { version = "=2.0.0", default-features = true, features = [
     "serde",
     "zeroize",
     "french",
@@ -350,10 +350,10 @@ enum-as-inner = { version = "0.6.0", default-features = false }
 enum-iterator = { version = "1.4.1", default-features = false }
 delegate = { version = "0.12.0", default-features = false }
 futures = { version = "0.3.31", default-features = false }
-hex = { version = "0.4.3", default-features = false }
-hkdf = { version = "0.12.4", default-features = false }
+hex = { version = "=0.4.3", default-features = false }
+hkdf = { version = "=0.12.4", default-features = false }
 indexmap = { version = "2.2.5", default-features = false }
-iota-crypto = { version = "0.23.2", default-features = false, features = [
+iota-crypto = { version = "=0.23.2", default-features = false, features = [
     "slip10",
     "ed25519",
     "secp256k1",
@@ -365,7 +365,7 @@ iso8601-timestamp = { version = "0.2.16", default-features = false, features = [
 ] }
 
 itertools = { version = "0.12.0", default-features = true }
-k256 = { version = "0.13.3", default-features = false }
+k256 = { version = "=0.13.3", default-features = false }
 log = { version = "0.4.20", default-features = false }
 once_cell = { version = "1.19.0", default-features = false }
 paste = { version = "1.0.14", default-features = false }
