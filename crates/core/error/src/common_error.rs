@@ -853,6 +853,12 @@ pub enum CommonError {
 
     #[error("Not all signatures are produced with the same factor source.")]
     FactorOutcomeSignedFactorSourceIDMismatch = 10245,
+
+    #[error("Failed to create security shield builder status invalid reason.")]
+    FailedToCreateSecurityShieldBuilderStatusInvalidReason = 10246,
+
+    #[error("Failed to create security shield builder status invalid reason.")]
+    FailedToMapSecurityShieldBuilderViolationReasonToInvalidReasonError = 10247,
 }
 
 impl CommonError {

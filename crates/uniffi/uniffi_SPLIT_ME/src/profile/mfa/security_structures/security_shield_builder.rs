@@ -457,14 +457,14 @@ impl SecurityShieldBuilder {
 
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
+    pub fn validate(&self) -> Option<SecurityShieldBuilderRuleViolationReason> {
         self.get(|builder| builder.validate().map(|x| x.into()))
     }
 
     pub fn validate_role_in_isolation(
         &self,
         role: RoleKind,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolationReason> {
         self.get(|builder| {
             builder
                 .validate_role_in_isolation(role.into_internal())
@@ -497,7 +497,7 @@ impl SecurityShieldBuilder {
         &self,
     ) -> Result<
         SecurityStructureOfFactorSourceIDs,
-        SecurityShieldBuilderInvalidReason,
+        SecurityShieldBuilderRuleViolationReason,
     > {
         self.get(|builder| builder.build())
             .map(|shield| shield.into())
@@ -907,7 +907,7 @@ mod tests {
 
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+            SecurityShieldBuilderRuleViolationReason::MissingAuthSigningFactor
         );
         sut = sut.set_authentication_signing_factor(Some(
             FactorSourceID::sample_device_other(),
