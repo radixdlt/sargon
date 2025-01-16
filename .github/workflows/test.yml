@@ -137,7 +137,7 @@ jobs:
           components: rustfmt
 
       - name: Check formatting
-        run: cargo fmt --locked --check --all
+        run: cargo fmt --check --all
 
   # clippy
   check-clippy:
