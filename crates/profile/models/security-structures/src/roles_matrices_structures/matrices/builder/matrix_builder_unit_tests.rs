@@ -425,6 +425,21 @@ mod remove {
     }
 
     #[test]
+    fn remove_all_from_primary_override_is_ok() {
+        let mut sut = make();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_device(),
+        )
+        .unwrap();
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_ledger(),
+        )
+        .unwrap();
+        let res = sut.remove_all_factors_from_primary_override();
+        assert_eq!(res, Ok(()));
+    }
+
+    #[test]
     fn remove_from_recovery_is_ok() {
         let mut sut = make();
         sut.add_factor_source_to_recovery_override(

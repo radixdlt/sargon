@@ -372,8 +372,8 @@ impl MatrixBuilder {
             .into_matrix_err(RoleKind::Primary)
     }
 
-    pub fn get_threshold(&self) -> u8 {
-        self.primary_role.get_threshold_value()
+    pub fn get_threshold(&self) -> Threshold {
+        self.primary_role.get_threshold()
     }
 
     pub fn set_number_of_days_until_auto_confirm(
@@ -418,6 +418,13 @@ impl MatrixBuilder {
             factor_source_id,
             factor_list_kind,
         )
+    }
+
+    pub fn remove_all_factors_from_primary_override(
+        &mut self,
+    ) -> MatrixBuilderMutateResult {
+        self.primary_role.remove_all_override_factors();
+        Ok(())
     }
 
     pub fn remove_factor_from_recovery(

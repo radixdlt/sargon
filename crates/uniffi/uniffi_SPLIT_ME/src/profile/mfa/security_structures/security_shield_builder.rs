@@ -2,11 +2,10 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+use crate::prelude::*;
 #[cfg(test)]
 use sargon::FactorSourceWithExtraSampleValues;
 use std::{borrow::Borrow, sync::Arc};
-
-use crate::prelude::*;
 
 /// A builder of `SecurityStructureOfFactorSourceIds` a.k.a. `SecurityShield`,
 /// which contains a MatrixOfFactorSourceIds - with primary, recovery, and
@@ -92,12 +91,20 @@ impl SecurityShieldBuilder {
 // ====================
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn get_primary_threshold(&self) -> u8 {
-        self.get(|builder| builder.get_threshold())
+    pub fn get_primary_threshold(&self) -> Threshold {
+        self.get(|builder| builder.get_threshold()).into()
     }
 
-    pub fn get_number_of_days_until_auto_confirm(&self) -> u16 {
-        self.get(|builder| builder.get_number_of_days_until_auto_confirm())
+    pub fn get_primary_threshold_values(&self) -> Vec<Threshold> {
+        self.get(|builder| builder.get_threshold_values())
+            .into_iter()
+            .map(|threshold| threshold.into())
+            .collect()
+    }
+
+    pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
+        self.get(|builder| builder.get_time_period_until_auto_confirm())
+            .into()
     }
 
     pub fn get_name(&self) -> String {
@@ -169,6 +176,12 @@ impl SecurityShieldBuilder {
         })
     }
 
+    pub fn remove_all_factors_from_primary_override(
+        self: Arc<Self>,
+    ) -> Arc<Self> {
+        self.set(|builder| builder.remove_all_factors_from_primary_override())
+    }
+
     pub fn remove_factor_from_recovery(
         self: Arc<Self>,
         factor_source_id: FactorSourceID,
@@ -193,12 +206,13 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold.into()))
     }
 
-    pub fn set_number_of_days_until_auto_confirm(
+    pub fn set_time_period_until_auto_confirm(
         self: Arc<Self>,
-        number_of_days: u16,
+        time_period: TimePeriod,
     ) -> Arc<Self> {
         self.set(|builder| {
-            builder.set_number_of_days_until_auto_confirm(number_of_days)
+            builder
+                .set_time_period_until_auto_confirm(time_period.clone().into())
         })
     }
 
@@ -622,10 +636,19 @@ mod tests {
         assert_eq!(sut.clone().get_name(), "My Shield");
         sut = sut.set_name("S.H.I.E.L.D.".to_owned());
 
-        assert_eq!(sut.clone().get_number_of_days_until_auto_confirm(), 14);
-        sut = sut.set_number_of_days_until_auto_confirm(u16::MAX);
         assert_eq!(
-            sut.clone().get_number_of_days_until_auto_confirm(),
+            time_period_to_days(
+                &sut.clone().get_time_period_until_auto_confirm()
+            ),
+            14
+        );
+        sut = sut.set_time_period_until_auto_confirm(
+            new_time_period_with_days(u16::MAX),
+        );
+        assert_eq!(
+            time_period_to_days(
+                &sut.clone().get_time_period_until_auto_confirm()
+            ),
             u16::MAX
         );
         // Primary
@@ -654,16 +677,18 @@ mod tests {
 
         // Threshold increases when adding a factor, because it's being set to All by default
         sut = sut.add_factor_source_to_primary_threshold(
-            // should bump threshold to 1
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::All);
 
         sut = sut.add_factor_source_to_primary_threshold(
-            // should bump threshold to 2
             FactorSourceID::sample_password_other(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 2);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::All);
+        assert_eq!(
+            sut.clone().get_primary_threshold_values(),
+            vec![Threshold::All, Threshold::Specific(1)]
+        );
 
         sut = sut
             .remove_factor_from_primary(
@@ -679,16 +704,15 @@ mod tests {
         sut = sut.set_threshold(Threshold::Specific(1));
 
         sut = sut.add_factor_source_to_primary_threshold(
-            // should also bump threshold to 1
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::Specific(1));
 
         sut = sut.add_factor_source_to_primary_threshold(
             // should NOT bump threshold
             FactorSourceID::sample_password_other(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::Specific(1));
         sut = sut.remove_factor_from_primary(
             FactorSourceID::sample_password_other(),
             FactorListKind::Threshold,
@@ -713,6 +737,17 @@ mod tests {
                 FactorSourceID::sample_arculus_other()
             ]
         );
+
+        sut = sut.remove_all_factors_from_primary_override();
+        assert!(sut.clone().get_primary_override_factors().is_empty());
+
+        sut = sut
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus_other(),
+            );
 
         // Recovery
         let sim_rec =
@@ -926,7 +961,9 @@ mod tests {
         let days_to_auto_confirm = 237;
         sut = sut
             .set_name(name.to_owned())
-            .set_number_of_days_until_auto_confirm(days_to_auto_confirm)
+            .set_time_period_until_auto_confirm(
+                new_time_period_with_days(days_to_auto_confirm).into(),
+            )
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )
