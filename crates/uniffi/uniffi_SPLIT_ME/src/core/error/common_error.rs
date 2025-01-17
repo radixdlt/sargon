@@ -7,10 +7,13 @@ use thiserror::Error as ThisError;
 
 #[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
 pub enum CommonError {
+    // Erased internal errors which we don't have to explicitely expose to the hosts.
     ErasedError {
         internal_error_code: u32,
         error_message: String,
     },
+
+    // Explicit internal errors that are forwarded to the host.
     SecureStorageAccessError {
         key: String,
         error_kind: SecureStorageAccessErrorKind,
@@ -79,6 +82,21 @@ pub enum CommonError {
     },
 }
 
+#[uniffi::export]
+pub fn error_message_from_error(error: &CommonError) -> String {
+    error.to_string()
+}
+
+#[uniffi::export]
+pub fn error_code_from_error(error: &CommonError) -> u32 {
+    error.error_code()
+}
+
+#[uniffi::export]
+pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
+    error.is_safe_to_show_error_message()
+}
+
 impl Display for CommonError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -88,11 +106,6 @@ impl Display for CommonError {
             _ => Display::fmt(&self.into_internal(), f),
         }
     }
-}
-
-#[uniffi::export]
-pub fn error_message_from_error(error: &CommonError) -> String {
-    error.to_string()
 }
 
 impl CommonError {
@@ -109,16 +122,6 @@ impl CommonError {
     pub fn is_safe_to_show_error_message(&self) -> bool {
         matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
     }
-}
-
-#[uniffi::export]
-pub fn error_code_from_error(error: &CommonError) -> u32 {
-    error.error_code()
-}
-
-#[uniffi::export]
-pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
-    error.is_safe_to_show_error_message()
 }
 
 impl CommonError {
@@ -185,7 +188,7 @@ impl CommonError {
             }
             CommonError::InvalidBIP39WordCount { bad_value } => {
                 InternalCommonError::InvalidBIP39WordCount {
-                    bad_value: bad_value.clone(),
+                    bad_value: *bad_value,
                 }
             }
             CommonError::Unknown => InternalCommonError::Unknown,
@@ -252,9 +255,9 @@ impl CommonError {
     }
 }
 
-impl Into<InternalCommonError> for CommonError {
-    fn into(self) -> InternalCommonError {
-        self.into_internal()
+impl From<CommonError> for InternalCommonError {
+    fn from(val: CommonError) -> Self {
+        val.into_internal()
     }
 }
 
@@ -266,59 +269,46 @@ impl From<InternalCommonError> for CommonError {
                 error_kind,
                 error_message,
             } => CommonError::SecureStorageAccessError {
-                key: key,
+                key,
                 error_kind: error_kind.into(),
-                error_message: error_message,
+                error_message,
             },
             InternalCommonError::InvalidISO8601String { bad_value } => {
-                CommonError::InvalidISO8601String {
-                    bad_value: bad_value,
-                }
+                CommonError::InvalidISO8601String { bad_value }
             }
             InternalCommonError::SigningRejected => {
                 CommonError::SigningRejected
             }
             InternalCommonError::WrongEntityKind { expected, found } => {
-                CommonError::WrongEntityKind {
-                    expected: expected,
-                    found: found,
-                }
+                CommonError::WrongEntityKind { expected, found }
             }
             InternalCommonError::NetworkRequestGenericFailure {
                 underlying,
-            } => CommonError::NetworkRequestGenericFailure {
-                underlying: underlying,
-            },
+            } => CommonError::NetworkRequestGenericFailure { underlying },
             InternalCommonError::InvalidURL { bad_value } => {
-                CommonError::InvalidURL {
-                    bad_value: bad_value,
-                }
+                CommonError::InvalidURL { bad_value }
             }
             InternalCommonError::UnknownNetworkForID { bad_value } => {
-                CommonError::UnknownNetworkForID {
-                    bad_value: bad_value,
-                }
+                CommonError::UnknownNetworkForID { bad_value }
             }
             InternalCommonError::FailedToDeserializeJSONToValue {
                 json_byte_count,
                 type_name,
                 serde_message,
             } => CommonError::FailedToDeserializeJSONToValue {
-                json_byte_count: json_byte_count,
-                type_name: type_name,
-                serde_message: serde_message,
+                json_byte_count,
+                type_name,
+                serde_message,
             },
             InternalCommonError::InvalidSecp256k1PublicKeyPointNotOnCurve => {
                 CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve
             }
             InternalCommonError::InvalidBIP39WordCount { bad_value } => {
-                CommonError::InvalidBIP39WordCount {
-                    bad_value: bad_value,
-                }
+                CommonError::InvalidBIP39WordCount { bad_value }
             }
             InternalCommonError::Unknown => CommonError::Unknown,
             InternalCommonError::FileAlreadyExists { path } => {
-                CommonError::FileAlreadyExists { path: path }
+                CommonError::FileAlreadyExists { path }
             }
             InternalCommonError::SecureStorageReadError => {
                 CommonError::SecureStorageReadError
@@ -334,36 +324,22 @@ impl From<InternalCommonError> for CommonError {
             }
             InternalCommonError::FailedToDecodeAddressFromBech32 {
                 bad_value,
-            } => CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: bad_value,
-            },
+            } => CommonError::FailedToDecodeAddressFromBech32 { bad_value },
             InternalCommonError::InvalidAppearanceID { bad_value } => {
-                CommonError::InvalidAppearanceID {
-                    bad_value: bad_value,
-                }
+                CommonError::InvalidAppearanceID { bad_value }
             }
             InternalCommonError::DecimalError => CommonError::DecimalError,
             InternalCommonError::InvalidByteCount { expected, found } => {
-                CommonError::InvalidByteCount {
-                    expected: expected,
-                    found: found,
-                }
+                CommonError::InvalidByteCount { expected, found }
             }
             InternalCommonError::IndexNotHardened { bad_value } => {
-                CommonError::IndexNotHardened {
-                    bad_value: bad_value,
-                }
+                CommonError::IndexNotHardened { bad_value }
             }
             InternalCommonError::UnknownNetworkID { bad_value } => {
-                CommonError::UnknownNetworkID {
-                    bad_value: bad_value,
-                }
+                CommonError::UnknownNetworkID { bad_value }
             }
             InternalCommonError::TooManyBytes { max, found } => {
-                CommonError::TooManyBytes {
-                    max: max,
-                    found: found,
-                }
+                CommonError::TooManyBytes { max, found }
             }
             InternalCommonError::BytesEmpty => CommonError::BytesEmpty,
             InternalCommonError::FactorOutcomeSignedFactorSourceIDMismatch => {
@@ -371,7 +347,7 @@ impl From<InternalCommonError> for CommonError {
             }
             InternalCommonError::UnknownAccount => CommonError::UnknownAccount,
             InternalCommonError::NotPermissionToAccessFile { path } => {
-                CommonError::NotPermissionToAccessFile { path: path }
+                CommonError::NotPermissionToAccessFile { path }
             }
             _ => CommonError::erased(value),
         }
