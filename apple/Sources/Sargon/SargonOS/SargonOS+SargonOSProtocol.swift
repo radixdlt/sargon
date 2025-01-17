@@ -8,9 +8,17 @@ extension SargonOS: SargonOSProtocol {
 // MARK: SargonOSProtocol Conformance
 extension SargonOS {
 	@discardableResult
-	public func createAccount(
+	public func createAccountWithBDFS(
 		named accountName: DisplayName
 	) async throws -> Account {
-		try await createAndSaveNewAccount(networkId: currentNetworkID, name: accountName)
+		try await createAndSaveNewAccountWithBdfs(networkId: currentNetworkID, name: accountName)
+	}
+
+	@discardableResult
+	public func createAccount(
+		named accountName: DisplayName,
+		factorSource: FactorSource
+	) async throws -> Account {
+		try await createAndSaveNewAccountWithFactorSource(factorSource: factorSource, networkId: currentNetworkID, name: accountName)
 	}
 }
