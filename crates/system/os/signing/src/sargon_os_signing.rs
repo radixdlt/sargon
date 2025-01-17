@@ -258,7 +258,7 @@ mod test {
         let profile = Profile::sample();
         let sut = boot(
             Some(profile.clone()),
-            Some(SigningFailure::NeglectedFactorSources(vec![
+            Some(SigningFailure::FailingFactorSources(vec![
                 profile.device_factor_sources().first().unwrap().id,
             ])),
         )
@@ -357,7 +357,7 @@ mod test {
         let profile = Profile::sample();
         let sut = boot(
             Some(profile.clone()),
-            Some(SigningFailure::NeglectedFactorSources(vec![
+            Some(SigningFailure::FailingFactorSources(vec![
                 profile.device_factor_sources().first().unwrap().id,
             ])),
         )
@@ -462,7 +462,7 @@ mod test {
         match maybe_signing_failure {
             None => SimulatedUser::<S>::prudent_no_fail(),
             Some(failure) => match failure {
-                SigningFailure::NeglectedFactorSources(factor_sources) => {
+                SigningFailure::FailingFactorSources(factor_sources) => {
                     SimulatedUser::<S>::prudent_with_failures(
                         SimulatedFailures::with_simulated_failures(
                             factor_sources.clone(),
@@ -503,7 +503,7 @@ mod test {
     }
 
     enum SigningFailure {
-        NeglectedFactorSources(Vec<FactorSourceIDFromHash>),
+        FailingFactorSources(Vec<FactorSourceIDFromHash>),
         SkippingFactorSources(Vec<FactorSourceIDFromHash>),
         UserRejected,
     }
