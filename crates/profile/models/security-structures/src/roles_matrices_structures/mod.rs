@@ -19,6 +19,7 @@ pub use matrices::*;
 pub use roles::*;
 pub use security_shield_builder::*;
 pub use security_shield_builder_rule_violation_reason::*;
+pub use security_shield_builder_status::*;
 pub use security_shield_prerequisites_status::*;
 pub use security_structure_id::*;
 pub use security_structure_metadata::*;

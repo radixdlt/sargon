@@ -656,6 +656,9 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                 if self.contains_factor_source(factor_source_id) {
                     return duplicates_err;
                 }
+                let factor_source_kind =
+                    factor_source_id.get_factor_source_kind();
+                self._validation_add(factor_source_kind, factor_list_kind, mode)
             }
             SecurityShieldBuilderMode::Lenient => {
                 match factor_list_kind {
@@ -675,10 +678,9 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                         }
                     } // but if override contains it, we're good (since mode is lenient)
                 }
+                Ok(())
             }
         }
-        let factor_source_kind = factor_source_id.get_factor_source_kind();
-        self._validation_add(factor_source_kind, factor_list_kind, mode)
     }
 
     fn contains_factor_source(

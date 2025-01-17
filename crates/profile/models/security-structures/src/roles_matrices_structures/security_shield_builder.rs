@@ -1,10 +1,6 @@
 use time_utils::now;
 
 use crate::prelude::*;
-use crate::roles_matrices_structures::security_shield_builder_status::{
-    SecurityShieldBuilderStatus, SecurityShieldBuilderStatusInvalidReason,
-    SecurityShieldBuilderStatusInvalidReasonError,
-};
 
 /// The mode of the shield builder, either `Lenient` or `Strict`, this has
 /// no effect on the validation or building of the shield, which is always
@@ -745,23 +741,33 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn role_in_isolation_invalid_reason(
-        &self,
-        role: RoleKind,
-    ) -> Option<SecurityShieldBuilderStatusInvalidReasonError> {
-        self.validate_role_in_isolation(role).and_then(|reason| {
-            SecurityShieldBuilderStatusInvalidReasonError::try_from(reason).ok()
+    pub fn is_role_in_isolation_invalid(&self, role: RoleKind) -> bool {
+        self.validate_role_in_isolation(role).is_some_and(|reason| {
+            matches!(
+                reason,
+                SecurityShieldBuilderRuleViolationReason::MissingAuthSigningFactor |
+                SecurityShieldBuilderRuleViolationReason::PrimaryRoleMustHaveAtLeastOneFactor |
+                SecurityShieldBuilderRuleViolationReason::RecoveryRoleMustHaveAtLeastOneFactor |
+                SecurityShieldBuilderRuleViolationReason::ConfirmationRoleMustHaveAtLeastOneFactor
+            )
         })
     }
 
     pub fn status(&self) -> SecurityShieldBuilderStatus {
         let invalid_reason = SecurityShieldBuilderStatusInvalidReason::new(
-            self.get_authentication_signing_factor()
-                .map_or(Some(SecurityShieldBuilderStatusInvalidReasonError::MissingFactor), |_| None),
-            self.role_in_isolation_invalid_reason(RoleKind::Primary),
-            self.role_in_isolation_invalid_reason(RoleKind::Recovery),
-            self.role_in_isolation_invalid_reason(RoleKind::Confirmation),
-        ).ok();
+            IsPrimaryRoleFactorListEmpty(
+                self.is_role_in_isolation_invalid(RoleKind::Primary),
+            ),
+            IsRecoveryRoleFactorListEmpty(
+                self.is_role_in_isolation_invalid(RoleKind::Recovery),
+            ),
+            IsConfirmationRoleFactorListEmpty(
+                self.is_role_in_isolation_invalid(RoleKind::Confirmation),
+            ),
+            IsAuthSigningFactorMissing(
+                self.get_authentication_signing_factor().is_none(),
+            ),
+        );
 
         if let Some(invalid_reason) = invalid_reason {
             SecurityShieldBuilderStatus::Invalid {
@@ -1830,6 +1836,162 @@ mod test_invalid {
                 reason: Other {
                     underlying: SecurityShieldBuilderRuleViolationReason::PrimaryCannotHaveMultipleDevices
                 }
+            }
+        );
+    }
+
+    #[test]
+    fn shield_status_strong() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
+            )
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        let status = sut.status();
+
+        pretty_assertions::assert_eq!(
+            status,
+            SecurityShieldBuilderStatus::Strong
+        );
+    }
+
+    #[test]
+    fn shield_status_weak() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
+            )
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolationReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+            }
+        );
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .remove_factor_from_recovery(FactorSourceID::sample_ledger())
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_password(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolationReason::RecoveryRolePasswordNotSupported
+            }
+        );
+
+        let _ = sut
+            .remove_factor_from_recovery(FactorSourceID::sample_password())
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger_other(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_ledger_other(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolationReason::RecoveryAndConfirmationFactorsOverlap
+            }
+        );
+    }
+
+    #[test]
+    fn shield_status_invalid() {
+        let sut = SUT::default();
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(true),
+                    IsRecoveryRoleFactorListEmpty(true),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(true),
+                )
+                .unwrap()
+            }
+        );
+
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(false),
+                    IsRecoveryRoleFactorListEmpty(true),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(true),
+                )
+                .unwrap()
+            }
+        );
+
+        let _ = sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device(),
+        ));
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(false),
+                    IsRecoveryRoleFactorListEmpty(true),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(false),
+                )
+                .unwrap()
+            }
+        );
+
+        let _ = sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(false),
+                    IsRecoveryRoleFactorListEmpty(false),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(false),
+                )
+                .unwrap()
             }
         );
     }

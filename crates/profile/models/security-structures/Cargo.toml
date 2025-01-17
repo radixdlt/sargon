@@ -18,7 +18,7 @@ core-collections = { workspace = true }
 time-utils = { workspace = true }
 short-string = { workspace = true }
 core-utils = { workspace = true }
-
+core-misc = { workspace = true }          # decl_bool_type
 
 # === RADIX DEPENDENCIES ===
 radix-engine-interface = { workspace = true }

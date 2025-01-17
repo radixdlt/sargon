@@ -472,6 +472,10 @@ impl SecurityShieldBuilder {
         })
     }
 
+    pub fn status(&self) -> SecurityShieldBuilderStatus {
+        self.get(|builder| builder.status().into())
+    }
+
     pub fn selected_primary_threshold_factors_status(
         &self,
     ) -> SelectedPrimaryThresholdFactorsStatus {
@@ -920,6 +924,10 @@ mod tests {
         let v0 = sut.validate();
         let v1 = sut.validate(); // can call validate many times!
         assert_eq!(v0, v1);
+
+        let s0 = sut.status();
+        let s1 = sut.status(); // can call status many times!
+        assert_eq!(s0, s1);
 
         let shield0 = sut.clone().build().unwrap();
         let shield = sut.clone().build().unwrap(); // can call build many times!
