@@ -342,7 +342,9 @@ impl SecurityShieldBuilder {
         &self,
         factor_source_id: FactorSourceID,
     ) -> &Self {
-        self.set(|builder| builder.ç(&factor_source_id))
+        self.set(|builder| {
+            builder.remove_factor_from_all_roles(&factor_source_id)
+        })
     }
 
     /// Removes factor **only** from the primary role based on the [FactorListKind].
