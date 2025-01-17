@@ -73,6 +73,7 @@ pub enum CommonError {
     },
     BytesEmpty,
     FactorOutcomeSignedFactorSourceIDMismatch,
+    UnknownAccount,
 }
 
 impl Display for CommonError {
@@ -237,6 +238,7 @@ impl CommonError {
             CommonError::FactorOutcomeSignedFactorSourceIDMismatch => {
                 InternalCommonError::FactorOutcomeSignedFactorSourceIDMismatch
             }
+            CommonError::UnknownAccount => InternalCommonError::UnknownAccount,
             _ => InternalCommonError::Unknown,
         }
     }
@@ -359,13 +361,8 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::FactorOutcomeSignedFactorSourceIDMismatch => {
                 CommonError::FactorOutcomeSignedFactorSourceIDMismatch
             }
+            InternalCommonError::UnknownAccount => CommonError::UnknownAccount,
             _ => CommonError::erased(value),
         }
     }
-}
-
-#[cfg(test)]
-mod test {
-    #[test]
-    fn into_internal_all_cases() {}
 }
