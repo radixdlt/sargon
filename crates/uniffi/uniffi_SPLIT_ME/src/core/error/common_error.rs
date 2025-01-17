@@ -7,7 +7,7 @@ use thiserror::Error as ThisError;
 
 #[derive(Clone, Debug, ThisError, PartialEq, uniffi::Error)]
 pub enum CommonError {
-    // Erased internal errors which we don't have to explicitely expose to the hosts.
+    // Erased internal errors which we don't have to explicitly expose to the hosts.
     ErasedError {
         internal_error_code: u32,
         error_message: String,
