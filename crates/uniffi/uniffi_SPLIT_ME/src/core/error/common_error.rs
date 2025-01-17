@@ -74,6 +74,9 @@ pub enum CommonError {
     BytesEmpty,
     FactorOutcomeSignedFactorSourceIDMismatch,
     UnknownAccount,
+    NotPermissionToAccessFile {
+        path: String,
+    },
 }
 
 impl Display for CommonError {
@@ -239,6 +242,11 @@ impl CommonError {
                 InternalCommonError::FactorOutcomeSignedFactorSourceIDMismatch
             }
             CommonError::UnknownAccount => InternalCommonError::UnknownAccount,
+            CommonError::NotPermissionToAccessFile { path } => {
+                InternalCommonError::NotPermissionToAccessFile {
+                    path: path.clone(),
+                }
+            }
             _ => InternalCommonError::Unknown,
         }
     }
@@ -362,6 +370,9 @@ impl From<InternalCommonError> for CommonError {
                 CommonError::FactorOutcomeSignedFactorSourceIDMismatch
             }
             InternalCommonError::UnknownAccount => CommonError::UnknownAccount,
+            InternalCommonError::NotPermissionToAccessFile { path } => {
+                CommonError::NotPermissionToAccessFile { path: path }
+            }
             _ => CommonError::erased(value),
         }
     }
