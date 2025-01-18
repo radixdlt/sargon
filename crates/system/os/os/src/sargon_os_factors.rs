@@ -277,8 +277,8 @@ impl SargonOS {
                 continue;
             }
             // Use FactorInstancesProvider to eagerly fill cache...
-            #[cfg(test)]
             // only test for now, need to do more integration work in hosts before enabling this
+            #[cfg(debug_assertions)]
             let _ = self
                 .pre_derive_and_fill_cache_with_instances_for_factor_source(
                     factor_source,
@@ -358,6 +358,57 @@ impl SargonOS {
         self.event_bus
             .emit(EventNotification::profile_modified(
                 EventProfileModified::FactorSourceUpdated { id },
+            ))
+            .await;
+
+        Ok(())
+    }
+
+    /// Set the FactorSource with the given `factor_source_id` as the main factor source of its kind.
+    /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
+    ///
+    /// If there is any main `FactorSource` of the given `FactorSourceKind`, such events are emitted also when
+    /// removing the flag from the old main factor source.
+    pub async fn set_main_factor_source(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) -> Result<()> {
+        // Get current main factor source ID (if any)
+        let current_main_id =
+            self.profile_state_holder.access_profile_with(|p| {
+                p.main_factor_source_of_kind(
+                    factor_source_id.get_factor_source_kind(),
+                )
+            })?;
+
+        let updated_ids = match current_main_id {
+            Some(current_main_id) => vec![current_main_id, factor_source_id],
+            None => vec![factor_source_id],
+        };
+
+        self.update_profile_with(|p| {
+            // Remove main flag from current main (if any)
+            if let Some(current_main_id) = current_main_id {
+                p.update_factor_source_remove_flag_main(&current_main_id)
+                    .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)?;
+            }
+
+            // Add the flag to the new main factor source
+            p.update_factor_source_add_flag_main(&factor_source_id)
+                .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
+        })
+        .await?;
+
+        // Emit event
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::FactorSourcesUpdated { ids: updated_ids },
             ))
             .await;
 
@@ -466,15 +517,16 @@ impl SargonOS {
     }
 }
 
-#[allow(unused)]
-#[cfg(test)]
+#[cfg(debug_assertions)]
 impl SargonOS {
+    /// For tests
     pub async fn clear_cache(&self) {
         println!("💣 CLEAR CACHE");
         self.clients.factor_instances_cache.clear().await.unwrap();
     }
 
-    pub(crate) async fn set_cache(
+    /// For tests
+    pub async fn set_cache(
         &self,
         cache_snapshot: FactorInstancesCacheSnapshot,
     ) {
@@ -872,5 +924,152 @@ mod tests {
                 _ => false,
             }
         }));
+    }
+
+    #[actix_rt::test]
+    async fn set_main_factor_source_fails_if_factor_source_not_added() {
+        let os = SUT::fast_boot().await;
+
+        let error = os
+            .with_timeout(|x| {
+                x.set_main_factor_source(FactorSource::sample_password().id())
+            })
+            .await
+            .expect_err("Expected an error");
+
+        assert_eq!(error, CommonError::UpdateFactorSourceMutateFailed);
+    }
+
+    #[actix_rt::test]
+    async fn set_main_factor_source_with_previous_main() {
+        // Set up OS with `previous_main` as the main device factor source
+        let event_bus_driver = RustEventBusDriver::new();
+        let os = boot(event_bus_driver.clone()).await;
+
+        let previous_main = DeviceFactorSource::sample();
+        let new_main = DeviceFactorSource::sample_other();
+        let factor_sources = FactorSources::from_iter([
+            previous_main.clone().into(),
+            new_main.clone().into(),
+        ]);
+
+        os.with_timeout(|x| {
+            x.add_factor_sources_without_emitting_factor_sources_added(
+                factor_sources.clone(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // Verify that `previous_main` is the main device factor source
+        assert!(os
+            .profile()
+            .unwrap()
+            .device_factor_source_by_id(&previous_main.id)
+            .unwrap()
+            .is_main_bdfs());
+
+        // Clear recorded events
+        event_bus_driver.clear_recorded();
+
+        // Set `new_main` as main
+        os.with_timeout(|x| {
+            x.set_main_factor_source(new_main.clone().factor_source_id())
+        })
+        .await
+        .unwrap();
+
+        // Verify previous is no longer main, while new is
+        let profile = os.profile().unwrap();
+        assert!(!profile
+            .device_factor_source_by_id(&previous_main.id)
+            .unwrap()
+            .common
+            .is_main());
+        assert!(profile
+            .device_factor_source_by_id(&new_main.id)
+            .unwrap()
+            .common
+            .is_main());
+
+        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourcesUpdated`
+        let events = event_bus_driver.recorded();
+        assert_eq!(events.len(), 2);
+        assert!(events.iter().any(|e| e.event == Event::ProfileSaved),);
+        assert!(events.iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::FactorSourcesUpdated {
+                    ids: vec![
+                        previous_main.id.into(),
+                        new_main.factor_source_id()
+                    ],
+                }
+            }));
+    }
+
+    #[actix_rt::test]
+    async fn set_main_factor_source_without_previous_main() {
+        // Set up OS with no main arculus factor source
+        let event_bus_driver = RustEventBusDriver::new();
+        let os = boot(event_bus_driver.clone()).await;
+
+        let factor_source = ArculusCardFactorSource::sample();
+        os.with_timeout(|x| x.add_factor_source(factor_source.clone().into()))
+            .await
+            .unwrap();
+
+        // Verify that there is no main arculus factor source
+        assert!(!os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .iter()
+            .any(|f| f.is_arculus_card() && f.common_properties().is_main()));
+
+        // Clear recorded events
+        event_bus_driver.clear_recorded();
+
+        // Set `factor_source` as main
+        os.with_timeout(|x| {
+            x.set_main_factor_source(factor_source.clone().factor_source_id())
+        })
+        .await
+        .unwrap();
+
+        // Verify we now have a main arculus factor source
+        assert!(os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .iter()
+            .any(|f| f.is_arculus_card() && f.common_properties().is_main()));
+
+        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourceUpdated`
+        let events = event_bus_driver.recorded();
+        assert_eq!(events.len(), 2);
+        assert!(events.iter().any(|e| e.event == Event::ProfileSaved));
+        assert!(events.iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::FactorSourcesUpdated {
+                    ids: vec![factor_source.factor_source_id()],
+                }
+            }));
+    }
+
+    async fn boot(event_bus_driver: Arc<RustEventBusDriver>) -> Arc<SUT> {
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os
     }
 }

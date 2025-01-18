@@ -6,10 +6,9 @@ pub mod prelude {
     pub(crate) use bytes::prelude::*;
     pub(crate) use core_utils::prelude::*;
     pub(crate) use drivers::prelude::*;
+    pub use prelude::prelude::*;
 
     pub(crate) use serde::Deserialize;
-
-    pub(crate) use std::sync::Arc;
 }
 
 pub use prelude::*;

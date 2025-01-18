@@ -4,8 +4,6 @@ use factors::FactorSourceKind;
 
 use crate::prelude::*;
 
-#[allow(clippy::upper_case_acronyms)]
-
 type MutRes = RoleBuilderMutateResult;
 
 #[test]
@@ -71,7 +69,7 @@ mod device_in_isolation {
     fn set_threshold_is_unsupported() {
         let mut sut = make();
         assert_eq!(
-            sut.set_threshold(1),
+            sut.set_specific_threshold(1),
             MutRes::basic_violation(
                 BasicViolation::ConfirmationCannotSetThreshold
             )

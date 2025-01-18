@@ -20,8 +20,8 @@ pub mod prelude {
     pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use identified_vec_of::prelude::*;
     pub(crate) use network::prelude::*;
+    pub use prelude::prelude::*;
     pub(crate) use serde::{Deserialize, Serialize};
-    pub(crate) use std::sync::Arc;
 
     #[cfg(test)]
     pub(crate) use gateway_models::prelude::*;

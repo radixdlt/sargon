@@ -308,7 +308,7 @@ jobs:
           locked: true
 
       - name: Code Coverage - Generate
-        run: cargo tarpaulin
+        run: cargo tarpaulin --out=Xml --force-clean
 
       - name: Code Coverage - Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main

@@ -26,7 +26,7 @@ class AndroidFileSystemDriverTest {
     fun given_no_file_when_save_invoked_then_file_is_created() = runTest {
         val sut = sut()
 
-        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD))
+        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD), true)
 
         val retrievedData = sut.loadFromFile(TEMP_FILE_NAME)
         assertEquals(
@@ -39,8 +39,8 @@ class AndroidFileSystemDriverTest {
     fun given_file_exists_when_save_invoked_then_file_contents_are_replaced() = runTest {
         val sut = sut()
 
-        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD))
-        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes("Michael"))
+        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD), true)
+        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes("Michael"), true)
 
         val retrievedData = sut.loadFromFile(TEMP_FILE_NAME)
         assertEquals(
@@ -53,7 +53,7 @@ class AndroidFileSystemDriverTest {
     fun given_file_exists_when_delete_invoked_then_file_deleted() = runTest {
         val sut = sut()
 
-        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD))
+        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD), true)
         // Ensure file exists prior to delete
         assertTrue(
             File(
@@ -97,7 +97,7 @@ class AndroidFileSystemDriverTest {
     @Test
     fun given_file_deleted_when_read_invoked_then_null_returned() = runTest {
         val sut = sut()
-        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD))
+        sut.saveToFile(TEMP_FILE_NAME, bagOfBytes(PAYLOAD), true)
         // Ensure file exists prior to delete
         assertTrue(
             File(

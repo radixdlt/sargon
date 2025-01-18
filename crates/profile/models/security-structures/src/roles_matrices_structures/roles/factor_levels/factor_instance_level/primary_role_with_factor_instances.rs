@@ -50,7 +50,7 @@ mod tests {
             &sut,
             r#"
                         {
-              "threshold": 2,
+              "threshold": "all",
               "thresholdFactors": [
                 {
                   "factorSourceID": {

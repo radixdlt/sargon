@@ -30,7 +30,7 @@ use crate::prelude::*;
 pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
     /// How many threshold factors that must be used to perform some function with
     /// this role.
-    threshold: u8,
+    threshold: Threshold,
 
     /// Factors which are used in combination with other factors, amounting to at
     /// least `threshold` many factors to perform some function with this role.
@@ -42,11 +42,41 @@ pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
     override_factors: Vec<FACTOR>,
 }
 
+#[cfg(debug_assertions)]
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_RECOVERY, IS_BUILT_ROLE, FACTOR>
+{
+    pub fn override_only(
+        override_factors: impl IntoIterator<Item = FACTOR>,
+    ) -> Self {
+        Self::with_factors_and_threshold(
+            Threshold::All,
+            vec![],
+            override_factors,
+        )
+    }
+}
+
+#[cfg(debug_assertions)]
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_CONFIRMATION, IS_BUILT_ROLE, FACTOR>
+{
+    pub fn override_only(
+        override_factors: impl IntoIterator<Item = FACTOR>,
+    ) -> Self {
+        Self::with_factors_and_threshold(
+            Threshold::All,
+            vec![],
+            override_factors,
+        )
+    }
+}
+
 pub(crate) type AbstractBuiltRoleWithFactor<const ROLE: u8, FACTOR> =
     AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FACTOR>;
 
 pub(crate) type RoleBuilder<const ROLE: u8> =
-    AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSourceID>;
+    AbstractRoleBuilderOrBuilt<ROLE, IS_ROLE_BUILDER, FactorSourceID>;
 
 impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     AbstractRoleBuilderOrBuilt<ROLE, MODE, FACTOR>
@@ -54,7 +84,7 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     /// Removes all factors from this role and set threshold to 0.
     pub fn reset(&mut self) {
         self.threshold_factors.clear();
-        self.threshold = 0;
+        self.threshold = Threshold::All;
         self.override_factors.clear();
     }
 
@@ -67,7 +97,7 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     /// of unsafe - as in application **unsecure** - Role of Factors, which might
     /// lead to increase risk for end user to loose funds.
     pub unsafe fn unbuilt_with_factors(
-        threshold: u8,
+        threshold: Threshold,
         threshold_factors: impl IntoIterator<Item = FACTOR>,
         override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
@@ -111,6 +141,20 @@ impl<const ROLE: u8, const MODE: u8, FACTOR: IsMaybeKeySpaceAware>
     ) -> Self {
         unsafe {
             Self::unbuilt_with_factors(
+                Threshold::Specific(threshold),
+                threshold_factors,
+                override_factors,
+            )
+        }
+    }
+
+    pub fn with_factors_and_threshold(
+        threshold: Threshold,
+        threshold_factors: impl IntoIterator<Item = FACTOR>,
+        override_factors: impl IntoIterator<Item = FACTOR>,
+    ) -> Self {
+        unsafe {
+            Self::unbuilt_with_factors(
                 threshold,
                 threshold_factors,
                 override_factors,
@@ -145,7 +189,12 @@ impl<const ROLE: u8, const MODE: u8, FACTOR>
 
     /// How many threshold factors that must be used to perform some function with
     /// this role.
-    pub fn get_threshold(&self) -> u8 {
+    pub fn get_threshold_value(&self) -> u8 {
+        self.threshold.value(self.threshold_factors.len())
+    }
+
+    /// The kind of threshold that must be used to perform some function with this role.
+    pub fn get_threshold(&self) -> Threshold {
         self.threshold
     }
 }
@@ -172,7 +221,7 @@ impl RoleFromDiscriminator for RoleKind {
 impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn new() -> Self {
         Self {
-            threshold: 0,
+            threshold: Threshold::All,
             threshold_factors: Vec::new(),
             override_factors: Vec::new(),
         }
@@ -201,7 +250,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         }
     }
 
-    pub(crate) fn unchecked_set_threshold(&mut self, threshold: u8) {
+    pub(crate) fn unchecked_set_threshold(&mut self, threshold: Threshold) {
         self.threshold = threshold;
     }
 }

@@ -1,28 +1,11 @@
 use crate::prelude::*;
 
+use crate::threshold::Threshold;
 use FactorListKind::*;
 
 pub type PrimaryRoleBuilder = RoleBuilder<{ ROLE_PRIMARY }>;
 pub type RecoveryRoleBuilder = RoleBuilder<{ ROLE_RECOVERY }>;
 pub type ConfirmationRoleBuilder = RoleBuilder<{ ROLE_CONFIRMATION }>;
-
-#[cfg(test)]
-impl RecoveryRoleWithFactorSourceIds {
-    pub(crate) fn override_only(
-        override_factors: impl IntoIterator<Item = FactorSourceID>,
-    ) -> Self {
-        Self::with_factors(0, vec![], override_factors)
-    }
-}
-
-#[cfg(test)]
-impl ConfirmationRoleWithFactorSourceIds {
-    pub(crate) fn override_only(
-        override_factors: impl IntoIterator<Item = FactorSourceID>,
-    ) -> Self {
-        Self::with_factors(0, vec![], override_factors)
-    }
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]
 pub enum RoleBuilderValidation {
@@ -226,14 +209,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         mode: SecurityShieldBuilderMode,
     ) -> RoleBuilderMutateResult {
         assert_eq!(ROLE, ROLE_PRIMARY);
-        let should_set_threshold_to_one = self.get_threshold() == 0
-            && self.get_threshold_factors().is_empty();
         self._add_factor_source_to_list(factor_source_id, Threshold, mode)
-            .inspect(|_| {
-                if should_set_threshold_to_one {
-                    let _ = self.set_threshold(1);
-                }
-            })
     }
 
     /// If we would add a factor of kind `factor_source_kind` to the list of kind `Threshold`
@@ -391,7 +367,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         &self,
     ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
         self.validate().map(|_| {
-            RoleWithFactorSourceIds::with_factors(
+            RoleWithFactorSourceIds::with_factors_and_threshold(
                 self.get_threshold(),
                 self.get_threshold_factors().clone(),
                 self.get_override_factors().clone(),
@@ -399,9 +375,16 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         })
     }
 
-    pub(crate) fn set_threshold(
+    pub(crate) fn set_specific_threshold(
         &mut self,
         threshold: u8,
+    ) -> RoleBuilderMutateResult {
+        self.set_threshold(Threshold::Specific(threshold))
+    }
+
+    pub(crate) fn set_threshold(
+        &mut self,
+        threshold: Threshold,
     ) -> RoleBuilderMutateResult {
         match self.role() {
             Primary => {
@@ -452,13 +435,13 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn check_threshold_for_primary(
         &self,
     ) -> Option<NotYetValidReason> {
-        if self.get_threshold_factors().len() < self.get_threshold() as usize {
+        let threshold_value = self.get_threshold_value();
+        if self.get_threshold_factors().len() < threshold_value as usize {
             return Some(
                 NotYetValidReason::ThresholdHigherThanThresholdFactorsLen,
             );
         }
-        if self.get_threshold() == 0 && !self.get_threshold_factors().is_empty()
-        {
+        if threshold_value == 0 && !self.get_threshold_factors().is_empty() {
             return Some(
                 NotYetValidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero,
             );
@@ -472,6 +455,45 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         if let Some(not_yet_valid) = self.check_threshold_for_primary() {
             return Err(RoleBuilderValidation::NotYetValid(not_yet_valid));
         }
+        Ok(())
+    }
+
+    fn validate_threshold_factors_only(
+        &self,
+        simulation: &mut RoleBuilder<ROLE>,
+    ) -> RoleBuilderMutateResult {
+        for f in self.get_threshold_factors() {
+            let validation = simulation._add_factor_source_to_list(
+                *f,
+                Threshold,
+                SecurityShieldBuilderMode::Strict,
+            );
+            match validation.as_ref() {
+                Ok(()) | Err(NotYetValid(_)) => continue,
+                Err(ForeverInvalid(_)) | Err(BasicViolation(_)) => {
+                    return validation
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn validate_addition_of_password_and_minimum_factor_count(
+        &self,
+    ) -> RoleBuilderMutateResult {
+        if self.threshold_contains_factor_source_of_kind(
+            FactorSourceKind::Password,
+        ) {
+            self.validation_for_addition_of_password_to_primary(Threshold)?;
+        }
+
+        if self.all_factors().is_empty() {
+            return RoleBuilderMutateResult::not_yet_valid(
+                RoleMustHaveAtLeastOneFactor,
+            );
+        }
+
         Ok(())
     }
 
@@ -492,24 +514,12 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         }
 
         // Validate threshold factors
-        for f in self.get_threshold_factors() {
-            let validation = simulation._add_factor_source_to_list(
-                *f,
-                Threshold,
-                SecurityShieldBuilderMode::Strict,
-            );
-            match validation.as_ref() {
-                Ok(()) | Err(NotYetValid(_)) => continue,
-                Err(ForeverInvalid(_)) | Err(BasicViolation(_)) => {
-                    return validation
-                }
-            }
-        }
+        self.validate_threshold_factors_only(&mut simulation)?;
 
         // Validate threshold count
         if self.role() == RoleKind::Primary {
             self.validate_threshold_for_primary()?;
-        } else if self.get_threshold() != 0 {
+        } else if self.get_threshold_value() != 0 {
             match self.role() {
                 Primary => unreachable!(
                     "Primary role should have been handled earlier"
@@ -527,19 +537,20 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             }
         }
 
-        if self.threshold_contains_factor_source_of_kind(
-            FactorSourceKind::Password,
-        ) {
-            self.validation_for_addition_of_password_to_primary(Threshold)?;
-        }
-
-        if self.all_factors().is_empty() {
-            return RoleBuilderMutateResult::not_yet_valid(
-                RoleMustHaveAtLeastOneFactor,
-            );
-        }
+        self.validate_addition_of_password_and_minimum_factor_count()?;
 
         Ok(())
+    }
+
+    /// Validates `self` by "replaying" the addition of each threshold factor source in self` to a
+    /// "simulation" (clone). If the simulation is valid, then `self` is valid.
+    pub(crate) fn validate_threshold_factors(&self) -> RoleBuilderMutateResult {
+        let mut simulation = Self::new();
+
+        // Validate threshold factors
+        self.validate_threshold_factors_only(&mut simulation)?;
+
+        self.validate_addition_of_password_and_minimum_factor_count()
     }
 
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(
@@ -660,7 +671,9 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             || self.threshold_contains_factor_source_of_kind(factor_source_kind)
     }
 
-    /// Lowers the threshold if the deleted factor source is in the threshold list
+    /// Removes a factor source from the list of `factor_list_kind`.
+    ///
+    /// Lowers the threshold if the deleted factor source is in the `factor_list_kind` list
     /// and if after removal of `factor_source_id` `self.threshold > self.threshold_factors.len()`
     ///
     /// Returns `Ok` if `factor_source_id` was found and deleted. However, does not call `self.validate()`,
@@ -669,36 +682,40 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
     pub(crate) fn remove_factor_source(
         &mut self,
         factor_source_id: &FactorSourceID,
+        factor_list_kind: FactorListKind,
     ) -> RoleBuilderMutateResult {
-        if !self.contains_factor_source(factor_source_id) {
-            return RoleBuilderMutateResult::basic_violation(
-                FactorSourceNotFound,
-            );
-        }
-
         let remove = |xs: &mut Vec<FactorSourceID>| {
-            let index = xs
-                    .iter()
-                    .position(|f| f == factor_source_id)
-                    .expect("Called remove of non existing FactorSourceID, this is a programmer error, should have checked if it exists before calling remove.");
-            xs.remove(index);
+            let index = xs.iter().position(|f| f == factor_source_id);
+            if let Some(index) = index {
+                xs.remove(index);
+                Ok(())
+            } else {
+                RoleBuilderMutateResult::basic_violation(FactorSourceNotFound)
+            }
         };
 
-        if self.override_contains_factor_source(factor_source_id) {
-            remove(self.mut_override_factors())
-        } else if self.threshold_contains_factor_source(factor_source_id) {
-            // We use `else if` to highlight the fact that a factor cannot
-            // ever be in both override and threshold list.
-            remove(self.mut_threshold_factors());
-            let threshold_factors_len =
-                self.get_threshold_factors().len() as u8;
-            if self.get_threshold() > threshold_factors_len {
-                // N.B. we don't use `set_threshold` since this might be a
-                // temporary invalid state, if e.g. primary role does not have
-                // any factors.
-                self.unchecked_set_threshold(threshold_factors_len);
+        match factor_list_kind {
+            Threshold => {
+                remove(self.mut_threshold_factors())?;
+
+                if let Threshold::Specific(_) = self.get_threshold() {
+                    let threshold_factors_len =
+                        self.get_threshold_factors().len() as u8;
+                    if threshold_factors_len == 0 {
+                        self.unchecked_set_threshold(Threshold::All);
+                    } else if self.get_threshold_value() > threshold_factors_len
+                    {
+                        self.unchecked_set_threshold(Threshold::Specific(
+                            threshold_factors_len,
+                        ));
+                    }
+                }
+            }
+            Override => {
+                remove(self.mut_override_factors())?;
             }
         }
+
         Ok(())
     }
 
@@ -846,7 +863,7 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             );
         }
 
-        if self.get_threshold() < 2 {
+        if self.get_threshold_value() < 2 {
             return RoleBuilderMutateResult::not_yet_valid(
                 PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne,
             );

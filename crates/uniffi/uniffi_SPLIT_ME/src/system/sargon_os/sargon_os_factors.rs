@@ -195,4 +195,25 @@ impl SargonOS {
             .await
             .into_result()
     }
+
+    /// Set the FactorSource with the given `factor_source_id` as the main factor source of its kind.
+    /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
+    ///
+    /// If there is any main `FactorSource` of the given `FactorSourceKind`, such events are emitted also when
+    /// removing the flag from the old main factor source.
+    pub async fn set_main_factor_source(
+        &self,
+        factor_source_id: FactorSourceID,
+    ) -> Result<()> {
+        self.wrapped
+            .set_main_factor_source(factor_source_id.into_internal())
+            .await
+            .into_result()
+    }
 }

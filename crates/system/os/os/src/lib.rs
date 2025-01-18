@@ -12,7 +12,6 @@ mod sargon_os_factors;
 mod sargon_os_gateway;
 mod sargon_os_personas;
 mod sargon_os_profile;
-mod test_instances_provider;
 mod testing_interactors;
 
 pub mod prelude {
@@ -35,13 +34,13 @@ pub mod prelude {
     pub(crate) use host_info::prelude::*;
     pub(crate) use interactors::prelude::*;
     pub(crate) use key_derivation_traits::prelude::*;
+    pub use prelude::prelude::*;
     pub(crate) use profile_logic::prelude::*;
     pub(crate) use profile_state_holder::prelude::*;
     pub(crate) use signing_traits::prelude::*;
     pub(crate) use sub_systems::prelude::*;
 
     pub(crate) use std::collections::HashSet;
-    pub(crate) use std::sync::Arc;
 
     #[cfg(test)]
     pub(crate) use testing::*;

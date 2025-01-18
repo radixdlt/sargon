@@ -129,12 +129,11 @@ mod tests {
     fn cannot_securify_entity_with_provisional() {
         let mut account = Account::sample_alice();
         assert!(!account.is_securified());
-        account
-            .security_state
-            .set_provisional(ProvisionalSecurifiedConfig::ShieldSelected {
-                value: SecurityStructureID::sample(),
-            })
-            .unwrap();
+        account.security_state.set_provisional(
+            ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                value: SecurityStructureOfFactorInstances::sample(),
+            },
+        );
         let res = TransactionManifest::securify_unsecurified_entity(
             account,
             SecurityStructureOfFactorInstances::sample(),

@@ -25,6 +25,9 @@ pub enum EventProfileModified {
     /// An existing factor source has been updated
     FactorSourceUpdated { id: FactorSourceID },
 
+    /// A collection of existing factor sources have been updated
+    FactorSourcesUpdated { ids: Vec<FactorSourceID> },
+
     /// A new persona with `address` was inserted into the active profile
     PersonaAdded { address: IdentityAddress },
 

@@ -11,19 +11,13 @@ pub mod prelude {
     pub(crate) use gateway_client_and_api::prelude::*;
     pub(crate) use manifests::prelude::*;
 
+    pub use prelude::prelude::*;
     pub(crate) use radix_connect_models::prelude::*;
     pub(crate) use sargon_os::prelude::*;
     pub(crate) use signing::prelude::*;
     pub(crate) use signing_traits::prelude::*;
 
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
-    #[cfg(test)]
-    pub(crate) use testing::*;
-
-    #[cfg(test)]
-    mod testing {
-        pub(crate) use std::sync::Arc;
-    }
 }
 
 pub use prelude::*;

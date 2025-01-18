@@ -16,11 +16,10 @@ pub mod prelude {
     pub(crate) use factors::prelude::*;
     pub(crate) use factors_supporting_types::prelude::*;
     pub(crate) use hierarchical_deterministic::prelude::*;
+    pub use prelude::prelude::*;
 
     pub(crate) use indexmap::{IndexMap, IndexSet};
     pub(crate) use itertools::Itertools;
-
-    pub(crate) use std::sync::Arc;
 }
 
 pub use prelude::*;

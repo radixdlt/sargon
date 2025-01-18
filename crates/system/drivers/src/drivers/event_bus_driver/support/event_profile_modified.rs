@@ -36,6 +36,9 @@ pub enum EventProfileModified {
     /// An existing factor source has been updated
     FactorSourceUpdated { id: FactorSourceID },
 
+    /// A collection of existing factor sources have been updated
+    FactorSourcesUpdated { ids: Vec<FactorSourceID> },
+
     /// Profile updated with a new Security Structure.
     SecurityStructureAdded { id: SecurityStructureID },
 }
@@ -61,6 +64,9 @@ impl HasEventKind for EventProfileModified {
             Self::FactorSourceAdded { id: _ } => EventKind::FactorSourceAdded,
             Self::FactorSourceUpdated { id: _ } => {
                 EventKind::FactorSourceUpdated
+            }
+            Self::FactorSourcesUpdated { ids: _ } => {
+                EventKind::FactorSourcesUpdated
             }
             Self::SecurityStructureAdded { id: _ } => {
                 EventKind::SecurityStructureAdded
@@ -232,6 +238,13 @@ mod tests {
                 id: FactorSourceID::sample(),
             },
             EventKind::FactorSourceUpdated,
+        );
+
+        test(
+            SUT::FactorSourcesUpdated {
+                ids: vec![FactorSourceID::sample()],
+            },
+            EventKind::FactorSourcesUpdated,
         );
     }
 }

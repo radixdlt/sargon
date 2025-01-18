@@ -8,10 +8,9 @@ pub mod prelude {
     pub use crate::use_factor_sources_interactor::*;
 
     pub(crate) use key_derivation_traits::prelude::*;
+    pub use prelude::prelude::*;
     pub(crate) use signing_traits::prelude::*;
     pub(crate) use transaction_models::prelude::*;
-
-    pub(crate) use std::sync::Arc;
 }
 
 pub use prelude::*;

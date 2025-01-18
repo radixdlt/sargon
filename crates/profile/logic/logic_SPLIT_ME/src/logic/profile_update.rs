@@ -291,6 +291,15 @@ pub trait ProfileFactorSourceUpdating {
             common.flags.remove_id(&FactorSourceFlag::Main);
         })
     }
+
+    fn update_factor_source_add_flag_main(
+        &mut self,
+        id: &FactorSourceID,
+    ) -> Result<()> {
+        self.update_any_factor_source_common(id, |common| {
+            common.flags.insert(FactorSourceFlag::Main);
+        })
+    }
 }
 
 impl ProfileFactorSourceUpdating for Profile {
@@ -516,5 +525,34 @@ mod tests {
                 .value(),
             "Batman"
         );
+    }
+
+    #[test]
+    fn add_remove_main() {
+        let mut sut = SUT::sample();
+        let id: &FactorSourceID =
+            &DeviceFactorSource::sample_babylon().id.into();
+
+        fn assert_is_main(sut: &SUT, id: &FactorSourceID, expected: bool) {
+            assert_eq!(
+                sut.factor_sources
+                    .get_id(id)
+                    .unwrap()
+                    .common_properties()
+                    .is_main(),
+                expected
+            );
+        }
+
+        // Verify that the factor source is main
+        assert_is_main(&sut, id, true);
+
+        // Remove the main flag and verify it is updated
+        sut.update_factor_source_remove_flag_main(id).unwrap();
+        assert_is_main(&sut, id, false);
+
+        // Add the main flag and verify it is updated
+        sut.update_factor_source_add_flag_main(id).unwrap();
+        assert_is_main(&sut, id, true);
     }
 }

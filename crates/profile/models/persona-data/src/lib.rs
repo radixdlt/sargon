@@ -14,15 +14,14 @@ pub mod prelude {
     pub(crate) use serde::{Deserialize, Serialize};
 
     pub(crate) use std::str::FromStr;
+
     #[cfg(test)]
     pub(crate) use testing::*;
 
     #[cfg(test)]
     mod testing {
-
-        pub(crate) use std::collections::HashSet;
-
         pub(crate) use serde_json::json;
+        pub(crate) use std::collections::HashSet;
     }
 }
 

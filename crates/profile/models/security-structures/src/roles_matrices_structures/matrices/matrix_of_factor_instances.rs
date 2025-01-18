@@ -211,6 +211,7 @@ impl SecurityStructureOfFactorInstances {
             FactorSourceIDFromHash,
             FactorInstances,
         >,
+        existing_rola_key: Option<HierarchicalDeterministicFactorInstance>,
         security_structure_of_factor_sources: &SecurityStructureOfFactorSources,
     ) -> Result<Self, CommonError> {
         let matrix_of_factors = MatrixOfFactorInstances::fulfilling_matrix_of_factor_sources_with_instances(
@@ -218,20 +219,24 @@ impl SecurityStructureOfFactorInstances {
         security_structure_of_factor_sources.matrix_of_factors.clone(),
       )?;
 
-        let authentication_signing = if let Some(existing) = consuming_instances
-            .get_mut(
-                &security_structure_of_factor_sources
-                    .authentication_signing_factor
-                    .id_from_hash(),
-            ) {
-            let instance = existing.first_authentication_signing().ok_or(
-                CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances,
-                )?;
+        let authentication_signing = match existing_rola_key {
+            Some(existing) => Ok(existing),
+            None => {
+                if let Some(existing) = consuming_instances.get_mut(
+                    &security_structure_of_factor_sources
+                        .authentication_signing_factor
+                        .id_from_hash(),
+                ) {
+                    let instance = existing.first_authentication_signing().ok_or(
+    CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances,
+    )?;
 
-            let _ = existing.shift_remove(&instance); // don't forget to consume it!
-            Ok(instance)
-        } else {
-            Err(CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances)
+                    let _ = existing.shift_remove(&instance); // don't forget to consume it!
+                    Ok(instance)
+                } else {
+                    Err(CommonError::MissingRolaKeyForSecurityStructureOfFactorInstances)
+                }
+            }
         }?;
 
         Self::new(
@@ -362,14 +367,18 @@ mod tests {
     fn empty_is_err() {
         let invalid = unsafe {
             SUT::unbuilt_with_roles_and_days(
-                PrimaryRoleWithFactorInstances::unbuilt_with_factors(0, [], []),
+                PrimaryRoleWithFactorInstances::unbuilt_with_factors(
+                    Threshold::All,
+                    [],
+                    [],
+                ),
                 RecoveryRoleWithFactorInstances::unbuilt_with_factors(
-                    0,
+                    Threshold::zero(),
                     [],
                     [],
                 ),
                 ConfirmationRoleWithFactorInstances::unbuilt_with_factors(
-                    0,
+                    Threshold::zero(),
                     [],
                     [],
                 ),
@@ -383,6 +392,7 @@ mod tests {
             Err(CommonError::NoTransactionSigningFactorInstance)
         ));
     }
+
     #[test]
     fn err_if_empty_instance_found_for_factor_source() {
         assert!(matches!(
@@ -405,7 +415,7 @@ mod tests {
             r#"
             {
               "primaryRole": {
-                "threshold": 2,
+                "threshold": "all",
                 "thresholdFactors": [
                   {
                     "factorSourceID": {
@@ -461,7 +471,7 @@ mod tests {
                 "overrideFactors": []
               },
               "recoveryRole": {
-                "threshold": 0,
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {
@@ -517,7 +527,7 @@ mod tests {
                 ]
               },
               "confirmationRole": {
-                "threshold": 0,
+                "threshold": "all",
                 "thresholdFactors": [],
                 "overrideFactors": [
                   {

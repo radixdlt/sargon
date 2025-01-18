@@ -2,7 +2,9 @@
 /// android specific and are defined [here](https://developer.android.com/reference/android/hardware/biometrics/BiometricPrompt#constants_1)
 /// Hosts, can print the error message provided by the system, and can ignore the error if
 /// it `is_manual_cancellation`.
-#[derive(Clone, Debug, derive_more::Display, PartialEq, strum::EnumIter)]
+#[derive(
+    Clone, Debug, Eq, derive_more::Display, PartialEq, strum::EnumIter,
+)]
 pub enum SecureStorageAccessErrorKind {
     /// The hardware is unavailable. Try again later.
     HardwareUnavailable,

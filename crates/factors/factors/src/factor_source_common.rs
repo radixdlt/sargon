@@ -100,10 +100,14 @@ impl FactorSourceCommon {
         self.crypto_parameters.supports_olympia()
     }
 
-    /// Checks if its Main Babylon Device Factor Source (BDFS).
+    /// Checks if it is Main Babylon Device Factor Source (BDFS).
     pub fn is_main_bdfs(&self) -> bool {
-        self.supports_babylon()
-            && self.flags.contains_by_id(&FactorSourceFlag::Main)
+        self.supports_babylon() && self.is_main()
+    }
+
+    /// Checks if it is a main factor source.
+    pub fn is_main(&self) -> bool {
+        self.flags.contains_by_id(&FactorSourceFlag::Main)
     }
 }
 
@@ -219,5 +223,20 @@ mod tests {
     #[test]
     fn main_flag_not_present_if_not_main() {
         assert!(FactorSourceCommon::new_bdfs(false).flags.is_empty());
+    }
+
+    #[test]
+    fn main() {
+        let sut = FactorSourceCommon::new(
+            FactorSourceCryptoParameters::olympia(),
+            [FactorSourceFlag::Main],
+        );
+        assert!(sut.is_main());
+
+        let sut = FactorSourceCommon::new(
+            FactorSourceCryptoParameters::olympia(),
+            Vec::new(),
+        );
+        assert!(!sut.is_main());
     }
 }
