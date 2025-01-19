@@ -80,6 +80,15 @@ pub enum CommonError {
     NotPermissionToAccessFile {
         path: String,
     },
+    ReservedInstructionsNotAllowedInManifest {
+        reserved_instructions: String,
+    },
+    OneOfReceivingAccountsDoesNotAllowDeposits,
+    FailedTransactionPreview {
+        error_message: String,
+    },
+    FailedToExtractTransactionReceiptBytes,
+    MaxTransfersPerTransactionReached { amount: u64 },
 }
 
 #[uniffi::export]
@@ -250,6 +259,27 @@ impl CommonError {
                     path: path.clone(),
                 }
             }
+            CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions,
+            } => {
+                InternalCommonError::ReservedInstructionsNotAllowedInManifest {
+                    reserved_instructions: reserved_instructions.clone(),
+                }
+            }
+            CommonError::OneOfReceivingAccountsDoesNotAllowDeposits => {
+                InternalCommonError::OneOfReceivingAccountsDoesNotAllowDeposits
+            }
+            CommonError::FailedTransactionPreview { error_message } => {
+                InternalCommonError::FailedTransactionPreview {
+                    error_message: error_message.clone(),
+                }
+            }
+            CommonError::FailedToExtractTransactionReceiptBytes => {
+                InternalCommonError::FailedToExtractTransactionReceiptBytes
+            }
+            CommonError::MaxTransfersPerTransactionReached { amount } => {
+                InternalCommonError::MaxTransfersPerTransactionReached { amount: *amount }
+            }
             _ => InternalCommonError::Unknown,
         }
     }
@@ -348,6 +378,23 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::UnknownAccount => CommonError::UnknownAccount,
             InternalCommonError::NotPermissionToAccessFile { path } => {
                 CommonError::NotPermissionToAccessFile { path }
+            }
+            InternalCommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions,
+            } => CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions,
+            },
+            InternalCommonError::OneOfReceivingAccountsDoesNotAllowDeposits => {
+                CommonError::OneOfReceivingAccountsDoesNotAllowDeposits
+            }
+            InternalCommonError::FailedTransactionPreview { error_message } => {
+                CommonError::FailedTransactionPreview { error_message }
+            }
+            InternalCommonError::FailedToExtractTransactionReceiptBytes => {
+                CommonError::FailedToExtractTransactionReceiptBytes
+            }
+            InternalCommonError::MaxTransfersPerTransactionReached { amount } => {
+                CommonError::MaxTransfersPerTransactionReached { amount }
             }
             _ => CommonError::erased(value),
         }
