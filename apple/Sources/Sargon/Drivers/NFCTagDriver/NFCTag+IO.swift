@@ -22,35 +22,6 @@ extension NFCISO7816Tag {
             }
         }
 
-        throw CardReaderError.operationFailed
-    }
-
-    private func validateStatusBytes(sw1: UInt8, sw2: UInt8) throws {
-        if sw1 != 0x90 && sw2 != 0x00 {
-            throw CardReaderError.operationFailed
-        }
-    }
-}
-
-enum CardReaderError: LocalizedError {
-    case invalidParameter
-    case invalidCard
-    case verifyPinFailed(Int)
-    case operationFailed
-    case connectionLost
-
-    var errorDescription: String? {
-        switch self {
-        case .invalidParameter:
-            return "An invalid parameter was supplied"
-        case .operationFailed:
-            return "The operation couldn't be completed"
-        case .invalidCard:
-            return "Wrong Arculus card"
-        case .connectionLost:
-            return "Connection lost"
-        case let .verifyPinFailed(tries):
-            return "PIN-code doesn’t match. \(tries) \(tries == 1 ? "try" : "tries") remaining before lockout"
-        }
+        fatalError()
     }
 }

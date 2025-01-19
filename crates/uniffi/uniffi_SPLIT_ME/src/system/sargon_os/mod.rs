@@ -1,5 +1,4 @@
 mod arculus_card;
-mod delete_account;
 mod entities;
 mod pre_authorization;
 mod profile_state_holder;
@@ -14,7 +13,6 @@ mod sargon_os_signing;
 mod transactions;
 
 pub use arculus_card::*;
-pub use delete_account::*;
 pub use entities::*;
 pub use pre_authorization::*;
 pub use profile_state_holder::*;

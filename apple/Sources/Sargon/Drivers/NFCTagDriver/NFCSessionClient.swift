@@ -55,7 +55,7 @@ extension NFCSessionClient {
         let session = NFCTagReaderSession(pollingOption: .iso14443, delegate: self.delegate, queue: .main)!
         session.alertMessage = "Tap & hold your card to the back of your phone"
         self.session = session
-        self.session!.begin()
+        session.begin()
         return try await connectTag()
     }
 
