@@ -131,6 +131,9 @@ impl std::hash::Hash for SecurityShieldBuilder {
 }
 
 impl SecurityShieldBuilder {
+    /// Maximum number of units (days, weeks, years) for the security structure recovery confirmation fallback period.
+    pub const MAX_RECOVERY_CONFIRMATION_FALLBACK_PERIOD_UNITS: u16 = 9999;
+
     pub fn new(mode: SecurityShieldBuilderMode) -> Self {
         let matrix_builder = MatrixBuilder::new();
         let name = RwLock::new("My Shield".to_owned());
@@ -192,6 +195,30 @@ impl HasSampleValues for SecurityShieldBuilder {
 }
 
 impl SecurityShieldBuilder {
+    pub fn sample_strict_with_auth_signing() -> Self {
+        Self::with_details(
+            SecurityShieldBuilderMode::Strict,
+            RwLock::new(MatrixBuilder::new()),
+            RwLock::new("My Shield".to_owned()),
+            RwLock::new(Some(FactorSourceID::sample_ledger())),
+            SecurityStructureID::from(Uuid::new_v4()),
+            now(),
+        )
+    }
+
+    pub fn sample_lenient_with_auth_signing() -> Self {
+        Self::with_details(
+            SecurityShieldBuilderMode::Lenient,
+            RwLock::new(MatrixBuilder::new()),
+            RwLock::new("My Shield".to_owned()),
+            RwLock::new(Some(FactorSourceID::sample_ledger())),
+            SecurityStructureID::from(Uuid::new_v4()),
+            now(),
+        )
+    }
+}
+
+impl SecurityShieldBuilder {
     fn get<R>(&self, access: impl Fn(&MatrixBuilder) -> R) -> R {
         let binding = self.matrix_builder.read().unwrap();
         access(&binding)
@@ -236,12 +263,24 @@ impl SecurityShieldBuilder {
 // ==== GET / READ ====
 // ====================
 impl SecurityShieldBuilder {
-    pub fn get_threshold(&self) -> u8 {
+    pub fn get_threshold(&self) -> Threshold {
         self.get(|builder| builder.get_threshold())
     }
 
-    pub fn get_number_of_days_until_auto_confirm(&self) -> u16 {
-        self.get(|builder| builder.get_number_of_days_until_auto_confirm())
+    pub fn get_threshold_values(&self) -> Vec<Threshold> {
+        self.get(|builder| {
+            Threshold::values(
+                builder.get_primary_threshold_factors().len() as u8
+            )
+        })
+    }
+
+    pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
+        self.get(|builder| {
+            TimePeriod::with_days(
+                builder.get_number_of_days_until_auto_confirm(),
+            )
+        })
     }
 
     pub fn get_name(&self) -> String {
@@ -359,6 +398,11 @@ impl SecurityShieldBuilder {
         })
     }
 
+    /// Removes all factors from the override list of the primary role.
+    pub fn remove_all_factors_from_primary_override(&self) -> &Self {
+        self.set(|builder| builder.remove_all_factors_from_primary_override())
+    }
+
     /// Removes factor **only** from the recovery role.
     pub fn remove_factor_from_recovery(
         &self,
@@ -389,12 +433,12 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold))
     }
 
-    pub fn set_number_of_days_until_auto_confirm(
+    pub fn set_time_period_until_auto_confirm(
         &self,
-        number_of_days: u16,
+        time_period: TimePeriod,
     ) -> &Self {
         self.set(|builder| {
-            builder.set_number_of_days_until_auto_confirm(number_of_days)
+            builder.set_number_of_days_until_auto_confirm(time_period.days())
         })
     }
 
@@ -651,17 +695,17 @@ impl SecurityShieldBuilder {
             return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
         }
 
+        if self.get_authentication_signing_factor().is_none() {
+            return Some(
+                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+            );
+        }
+
         if let Some(matrix_invalid_reason) = self.get(|builder| {
             let r = builder.validate();
             r.as_shield_validation()
         }) {
             return Some(matrix_invalid_reason);
-        }
-
-        if self.get_authentication_signing_factor().is_none() {
-            return Some(
-                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
-            );
         }
 
         None
@@ -867,7 +911,7 @@ mod tests {
         sut.add_factor_source_to_primary_threshold(
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.get_threshold(), 42);
+        assert_eq!(sut.get_threshold(), Threshold::Specific(42));
     }
 
     #[test]
@@ -914,6 +958,39 @@ mod tests {
     }
 
     #[test]
+    fn test_get_time_period_until_auto_confirm() {
+        let sut = SUT::strict();
+        assert_eq!(
+            sut.get_time_period_until_auto_confirm(),
+            TimePeriod::with_days(14)
+        );
+        sut.set_time_period_until_auto_confirm(TimePeriod::with_days(42));
+        assert_eq!(
+            sut.get_time_period_until_auto_confirm(),
+            TimePeriod::with_days(42)
+        );
+    }
+
+    #[test]
+    fn test_threshold_values() {
+        let sut = SUT::strict();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+
+        assert_eq!(sut.get_threshold_values(), vec![Threshold::All]);
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_ledger(),
+        );
+
+        assert_eq!(
+            sut.get_threshold_values(),
+            vec![Threshold::All, Threshold::Specific(1)]
+        );
+    }
+
+    #[test]
     fn test() {
         let sut = SUT::default();
 
@@ -923,7 +1000,7 @@ mod tests {
                 FactorSourceID::sample_device(),
             ))
             // Primary
-            .set_number_of_days_until_auto_confirm(42)
+            .set_time_period_until_auto_confirm(TimePeriod::with_days(42))
             .add_factor_source_to_primary_threshold(
                 FactorSourceID::sample_device(),
             )
@@ -1240,7 +1317,7 @@ mod tests {
 
     #[test]
     fn selected_primary_threshold_factors_status() {
-        let sut = SUT::default();
+        let sut = SUT::sample_lenient_with_auth_signing();
 
         pretty_assertions::assert_eq!(
             sut.selected_primary_threshold_factors_status(),
@@ -1273,6 +1350,31 @@ mod tests {
             SelectedPrimaryThresholdFactorsStatus::Optimal
         );
     }
+
+    #[test]
+    fn remove_all_factors_from_primary_override() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device_other(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.get_primary_override_factors(),
+            vec![
+                FactorSourceID::sample_device(),
+                FactorSourceID::sample_device_other(),
+            ]
+        );
+
+        sut.remove_all_factors_from_primary_override();
+
+        assert!(sut.get_primary_override_factors().is_empty());
+    }
 }
 
 #[cfg(test)]
@@ -1284,8 +1386,36 @@ mod test_invalid {
     type SUT = SecurityShieldBuilder;
 
     #[test]
-    fn primary_role_must_have_at_least_one_factor() {
+    fn must_have_auth_signing_factor() {
         let sut = SUT::strict();
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+    }
+
+    #[test]
+    fn missing_auth_signing_takes_precedence_over_roles_validation() {
+        let sut = SUT::strict();
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_recovery_override(FactorSourceID::sample_device())
+        // This addition results in SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole matrix invalid reason
+        .add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_device(),
+        );
+
+        assert_eq!(
+            sut.validate().unwrap(),
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        );
+    }
+
+    #[test]
+    fn primary_role_must_have_at_least_one_factor() {
+        let sut = SUT::sample_strict_with_auth_signing();
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
@@ -1298,12 +1428,11 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_threshold_cannot_be_zero_with_factors() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_threshold(
-            // bumped threshold
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.get_threshold(), 1);
+        assert_eq!(sut.get_threshold(), Threshold::All);
         sut.set_threshold(Threshold::zero());
         assert_eq!(
             sut.validate().unwrap(),
@@ -1317,7 +1446,7 @@ mod test_invalid {
 
     #[test]
     fn recovery_role_must_have_at_least_one_factor() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1333,7 +1462,7 @@ mod test_invalid {
 
     #[test]
     fn confirmation_role_must_have_at_least_one_factor() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1432,7 +1561,7 @@ mod test_invalid {
     #[test]
     fn number_of_auto_confirm_days_invalid() {
         let sut = valid();
-        sut.set_number_of_days_until_auto_confirm(0);
+        sut.set_time_period_until_auto_confirm(TimePeriod::with_days(0));
         assert_eq!(
             sut.validate().unwrap(),
             SecurityShieldBuilderInvalidReason::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero
@@ -1441,7 +1570,7 @@ mod test_invalid {
 
     #[test]
     fn recovery_and_confirmation_factors_overlap() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         sut.add_factor_source_to_primary_override(
             FactorSourceID::sample_device(),
         );
@@ -1460,7 +1589,7 @@ mod test_invalid {
     #[test]
     fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_recovery(
     ) {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         let same = FactorSourceID::sample_ledger();
         sut.add_factor_source_to_primary_override(same);
 
@@ -1479,7 +1608,7 @@ mod test_invalid {
     #[test]
     fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_confirmation(
     ) {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
         let same = FactorSourceID::sample_ledger();
         sut.add_factor_source_to_primary_override(same);
 
@@ -1498,7 +1627,7 @@ mod test_invalid {
     #[test]
     fn primary_role_with_password_in_threshold_list_must_threshold_greater_than_one(
     ) {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1527,7 +1656,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_password_in_threshold_list_must_have_another_factor() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1553,7 +1682,7 @@ mod test_invalid {
 
     #[test]
     fn two_different_password_only_not_valid_for_primary() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),
@@ -1578,7 +1707,7 @@ mod test_invalid {
 
     #[test]
     fn primary_role_with_password_in_override_does_not_get_added() {
-        let sut = SUT::strict();
+        let sut = SUT::sample_strict_with_auth_signing();
 
         sut.add_factor_source_to_recovery_override(
             FactorSourceID::sample_ledger(),

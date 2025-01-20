@@ -12,3 +12,7 @@ extension Account {
 extension Persona {
 	public static let nameMaxLength = Int(constantEntityNameMaxLength())
 }
+
+extension DisplayName {
+	public static let maxLength = Int(constantDisplayNameMaxLength())
+}
