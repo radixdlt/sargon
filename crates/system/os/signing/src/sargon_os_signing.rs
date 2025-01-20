@@ -99,7 +99,7 @@ impl OsSigning for SargonOS {
 
             signable.signed(signatures_per_owner)
         } else {
-            Err(CommonError::SigningRejected)
+            Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
         }
     }
 }
@@ -272,7 +272,10 @@ mod test {
             .sign_transaction(signable.clone(), RoleKind::Primary)
             .await;
 
-        assert_eq!(outcome, Err(CommonError::SigningRejected));
+        assert_eq!(
+            outcome,
+            Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
+        );
     }
 
     #[actix_rt::test]
@@ -348,7 +351,10 @@ mod test {
             .sign_transaction(signable.clone(), RoleKind::Primary)
             .await;
 
-        assert_eq!(outcome, Err(CommonError::SigningRejected));
+        assert_eq!(
+            outcome,
+            Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
+        );
     }
 
     #[actix_rt::test]
@@ -370,7 +376,10 @@ mod test {
             .sign_subintent(signable.clone(), RoleKind::Primary)
             .await;
 
-        assert_eq!(outcome, Err(CommonError::SigningRejected));
+        assert_eq!(
+            outcome,
+            Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
+        );
     }
 
     #[actix_rt::test]
