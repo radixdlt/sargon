@@ -14,8 +14,6 @@ pub mod prelude {
     pub(crate) use network::prelude::*;
     pub(crate) use profile_security_structures::prelude::*;
 
-    pub(crate) use transaction_models::prelude::*;
-
     pub(crate) use enum_as_inner::EnumAsInner;
 
     pub(crate) use serde::{Deserialize, Deserializer, Serialize, Serializer};

@@ -45,7 +45,17 @@ impl HasSampleValues for bool {
     }
 }
 
-impl HasSampleValues for u64 {
+impl HasSampleValues for u8 {
+    fn sample() -> Self {
+        42
+    }
+
+    fn sample_other() -> Self {
+        43
+    }
+}
+
+impl HasSampleValues for u16 {
     fn sample() -> Self {
         42
     }
@@ -65,7 +75,7 @@ impl HasSampleValues for u32 {
     }
 }
 
-impl HasSampleValues for u8 {
+impl HasSampleValues for u64 {
     fn sample() -> Self {
         42
     }
@@ -75,7 +85,37 @@ impl HasSampleValues for u8 {
     }
 }
 
-impl HasSampleValues for u16 {
+impl HasSampleValues for i8 {
+    fn sample() -> Self {
+        42
+    }
+
+    fn sample_other() -> Self {
+        43
+    }
+}
+
+impl HasSampleValues for i16 {
+    fn sample() -> Self {
+        42
+    }
+
+    fn sample_other() -> Self {
+        43
+    }
+}
+
+impl HasSampleValues for i32 {
+    fn sample() -> Self {
+        42
+    }
+
+    fn sample_other() -> Self {
+        43
+    }
+}
+
+impl HasSampleValues for i64 {
     fn sample() -> Self {
         42
     }
@@ -172,5 +212,39 @@ where
         let mut set = Self::new();
         set.insert(T::sample_other());
         set
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_eq<T: HasSampleValues + std::fmt::Debug + std::cmp::Eq>() {
+        assert_eq!(T::sample(), T::sample());
+        assert_eq!(T::sample_other(), T::sample_other());
+        assert_ne!(T::sample(), T::sample_other());
+    }
+
+    #[test]
+    fn test_samples() {
+        test_eq::<u8>();
+        test_eq::<u16>();
+        test_eq::<u32>();
+        test_eq::<u64>();
+        test_eq::<i8>();
+        test_eq::<i16>();
+        test_eq::<i32>();
+        test_eq::<i64>();
+
+        test_eq::<bool>();
+        test_eq::<Option<bool>>();
+        test_eq::<String>();
+
+        test_eq::<Url>();
+        test_eq::<Vec<u8>>();
+        test_eq::<HashMap<u8, i8>>();
+        test_eq::<IndexSet<u8>>();
+        test_eq::<CommonError>();
+        test_eq::<SecureStorageAccessErrorKind>();
     }
 }

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use std::sync::RwLock;
 
 #[derive(Debug)]
 pub struct ProfileStateHolder {
@@ -180,7 +179,6 @@ impl ProfileStateHolder {
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
-    use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
 

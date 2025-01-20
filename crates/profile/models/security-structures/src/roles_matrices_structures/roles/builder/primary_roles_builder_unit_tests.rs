@@ -5,8 +5,6 @@ use crate::prelude::*;
 use NotYetValidReason::*;
 type Validation = RoleBuilderValidation;
 
-#[allow(clippy::upper_case_acronyms)]
-
 type MutRes = RoleBuilderMutateResult;
 
 #[test]

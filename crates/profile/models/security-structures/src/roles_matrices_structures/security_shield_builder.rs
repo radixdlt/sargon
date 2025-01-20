@@ -1452,7 +1452,7 @@ mod test_invalid {
 
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderRuleViolationReason::MissingAuthSigningFactor
+            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
         );
     }
 

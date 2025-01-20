@@ -4,8 +4,6 @@ use factors::FactorSourceKind;
 
 use crate::prelude::*;
 
-#[allow(clippy::upper_case_acronyms)]
-
 type MutRes = RoleBuilderMutateResult;
 
 #[test]

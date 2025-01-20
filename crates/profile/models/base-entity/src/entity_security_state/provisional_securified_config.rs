@@ -1,42 +1,26 @@
 use crate::prelude::*;
 
-/// The different intermediary states of changing the security structure of an entity.
-/// This type is put in an `Option` on either `UnsecuredEntityControl` or `SecurifiedEntityControl`,
-/// and if `None` it means user has no provisionally changed security structure. If set, it contains
-/// these different variants:
-/// * `ShieldSelected` - User has selected which security shield to use for some entity,
-/// * `FactorInstancesDerived` - Sargon has provided a `SecurityStructureOfFactorInstances` but
-///     user has not made a transaction to apply it to the entity yet.
-/// * `TransactionQueued` - User has signed and queued a transaction changing to `SecurityStructureOfFactorInstances`
+/// Intermediary state of changing the security structure of an entity.
+/// Only a single variant for now but we might update it later. E.g.
+/// we could have one state for when user has selected a shield but not
+/// derived the factor instances yet.
 #[derive(
     Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash, EnumAsInner,
 )]
 #[serde(tag = "discriminator")]
 pub enum ProvisionalSecurifiedConfig {
-    /// User has selected which security shield to use for some entity,
-    /// but no FactorInstances has been provided yet.
-    #[serde(rename = "shieldSelected")]
-    ShieldSelected { value: SecurityStructureID },
-
     /// User has fully prepared a `SecurityStructureOfFactorInstances` but
     /// not made a transaction to apply it to the entity yet.
     #[serde(rename = "factorInstancesDerived")]
     FactorInstancesDerived {
         value: SecurityStructureOfFactorInstances,
     },
-
-    /// User has signed and queued a transaction to apply a `SecurityStructureOfFactorInstances`
-    /// but it has not been submitted (confirmed) yet.
-    #[serde(rename = "transactionQueued")]
-    TransactionQueued {
-        value: ProvisionalSecurifiedTransactionQueued,
-    },
 }
 
 impl HasSampleValues for ProvisionalSecurifiedConfig {
     fn sample() -> Self {
-        Self::ShieldSelected {
-            value: SecurityStructureID::sample(),
+        Self::FactorInstancesDerived {
+            value: SecurityStructureOfFactorInstances::sample(),
         }
     }
     fn sample_other() -> Self {

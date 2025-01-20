@@ -7,32 +7,6 @@ pub type PrimaryRoleBuilder = RoleBuilder<{ ROLE_PRIMARY }>;
 pub type RecoveryRoleBuilder = RoleBuilder<{ ROLE_RECOVERY }>;
 pub type ConfirmationRoleBuilder = RoleBuilder<{ ROLE_CONFIRMATION }>;
 
-#[cfg(test)]
-impl RecoveryRoleWithFactorSourceIds {
-    pub(crate) fn override_only(
-        override_factors: impl IntoIterator<Item = FactorSourceID>,
-    ) -> Self {
-        Self::with_factors_and_threshold(
-            Threshold::All,
-            vec![],
-            override_factors,
-        )
-    }
-}
-
-#[cfg(test)]
-impl ConfirmationRoleWithFactorSourceIds {
-    pub(crate) fn override_only(
-        override_factors: impl IntoIterator<Item = FactorSourceID>,
-    ) -> Self {
-        Self::with_factors_and_threshold(
-            Threshold::All,
-            vec![],
-            override_factors,
-        )
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]
 pub enum RoleBuilderValidation {
     #[error("Basic violation: {0}")]

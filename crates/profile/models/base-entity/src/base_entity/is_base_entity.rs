@@ -30,6 +30,23 @@ pub trait IsBaseEntity:
     }
 }
 
+impl<T: HasSecurityState> HasProvisionalSecurifiedConfig for T {
+    fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
+        self.security_state().get_provisional()
+    }
+
+    fn set_provisional(
+        &mut self,
+        provisional_securified_config: impl Into<
+            Option<ProvisionalSecurifiedConfig>,
+        >,
+    ) {
+        let mut security_state = self.security_state();
+        security_state.set_provisional(provisional_securified_config);
+        self.set_security_state_unchecked(security_state);
+    }
+}
+
 /// A trait bridging Account and Persona.
 pub trait IsEntityWithoutConcreteTypes:
     IsBaseEntity
@@ -39,8 +56,6 @@ pub trait IsEntityWithoutConcreteTypes:
     + Eq
     + std::fmt::Debug
     + Clone
-// + TryFrom<AccountOrPersona, Error = CommonError>
-// + Into<AccountOrPersona>
 {
     type Path: IsEntityPath;
 

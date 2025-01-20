@@ -282,7 +282,8 @@ afterEvaluate {
             exec {
                 workingDir = rootDir.parentFile
                 commandLine(
-                    "cargo", "run",
+                    "cargo", "run", 
+                    "--locked",
                     "-p", "sargon-uniffi",
                     "--bin", "sargon-bindgen",
                     "generate", "--library", binaryFile.toString(),

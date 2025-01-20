@@ -49,6 +49,7 @@ macro_rules! fixture_gw_model {
 
 pub mod prelude {
     pub use std::str::FromStr;
+    pub use std::sync::{Arc, RwLock};
 }
 
 pub use prelude::*;

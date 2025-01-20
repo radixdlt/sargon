@@ -20,11 +20,12 @@ pub mod prelude {
     pub(crate) use serde::{Deserialize, Serialize};
 
     #[cfg(test)]
+    pub(crate) use testing::*;
+
+    #[cfg(test)]
     mod testing {
         pub(crate) use std::collections::HashSet;
     }
-    #[cfg(test)]
-    pub(crate) use testing::*;
 }
 
 pub use prelude::*;

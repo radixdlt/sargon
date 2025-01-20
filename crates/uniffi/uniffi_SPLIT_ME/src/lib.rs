@@ -46,6 +46,7 @@ pub mod prelude {
         },
     };
 
+    pub use prelude::prelude::*;
     pub(crate) use sargon::prelude::{
         DeserializeBytes, DeserializeStr, HasSampleValues, HashMap,
         SerializeToBytes, SerializeToString,
@@ -58,8 +59,6 @@ pub mod prelude {
 
     pub(crate) use std::fmt::Debug;
     pub use std::ops::{Add, AddAssign, Deref, Div, Mul, Neg, Sub};
-    pub(crate) use std::str::FromStr;
-    pub(crate) use std::sync::Arc;
 
     pub(crate) use url::Url;
     pub(crate) use uuid::Uuid;
