@@ -19,8 +19,6 @@ pub struct SimulatedUser<S: Signable> {
     mode: SimulatedUserMode,
     /// `None` means never failures
     failures: Option<SimulatedFailures>,
-    /// `None` means no skips
-    skips: Option<SimulatedSkips>,
 }
 
 impl<S: Signable> SimulatedUser<S> {
@@ -29,22 +27,19 @@ impl<S: Signable> SimulatedUser<S> {
             + 'static,
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
-        skips: impl Into<Option<SimulatedSkips>>,
     ) -> Self {
         Self {
             spy_on_request: Arc::new(spy_on_request),
             mode,
             failures: failures.into(),
-            skips: skips.into(),
         }
     }
 
     pub fn new(
         mode: SimulatedUserMode,
         failures: impl Into<Option<SimulatedFailures>>,
-        skips: impl Into<Option<SimulatedSkips>>,
     ) -> Self {
-        Self::with_spy(|_, _| {}, mode, failures, skips)
+        Self::with_spy(|_, _| {}, mode, failures)
     }
 }
 
@@ -78,32 +73,6 @@ impl SimulatedFailures {
     }
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct SimulatedSkips {
-    /// Set of FactorSources which should always be skipped.
-    simulated_skips: IndexSet<FactorSourceIDFromHash>,
-}
-
-impl SimulatedSkips {
-    pub fn with_simulated_skips(
-        skips: impl IntoIterator<Item = FactorSourceIDFromHash>,
-    ) -> Self {
-        Self {
-            simulated_skips: skips.into_iter().collect(),
-        }
-    }
-
-    /// If needed, simulates failure for ALL factor sources or NONE.
-    pub(crate) fn simulate_skip_if_needed(
-        &self,
-        factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> bool {
-        factor_source_ids
-            .into_iter()
-            .all(|id| self.simulated_skips.contains(&id))
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SimulatedUserMode {
     /// Emulation of a "prudent" user, that signs with all factors sources, i.e.
@@ -113,6 +82,9 @@ pub enum SimulatedUserMode {
     /// Emulation of a "lazy" user, that skips signing with as many factor
     /// sources as possible.
     Lazy(Laziness),
+
+    /// Emulation of a user, that skips specific factor sources.
+    Skipping(IndexSet<FactorSourceIDFromHash>),
 
     /// Emulation of a user that dismisses (rejects) the signing process all-together.
     Rejecting,
@@ -127,41 +99,47 @@ impl SimulatedUserMode {
     pub(crate) fn lazy_sign_minimum() -> Self {
         Self::Lazy(Laziness::SignMinimum)
     }
+
+    pub(crate) fn skipping_specific(
+        factor_sources: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
+        Self::Skipping(factor_sources)
+    }
 }
 
 impl<S: Signable> SimulatedUser<S> {
     pub fn prudent_no_fail() -> Self {
-        Self::new(SimulatedUserMode::Prudent, None, None)
+        Self::new(SimulatedUserMode::Prudent, None)
     }
 
     pub fn rejecting() -> Self {
-        Self::new(SimulatedUserMode::Rejecting, None, None)
+        Self::new(SimulatedUserMode::Rejecting, None)
     }
 
     pub fn prudent_with_failures(
         simulated_failures: SimulatedFailures,
     ) -> Self {
-        Self::new(SimulatedUserMode::Prudent, simulated_failures, None)
+        Self::new(SimulatedUserMode::Prudent, simulated_failures)
     }
 
-    pub fn prudent_with_skips(simulated_skips: SimulatedSkips) -> Self {
-        Self::new(SimulatedUserMode::Prudent, None, simulated_skips)
+    pub fn skipping_specific(
+        factor_sources: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
+        Self::new(SimulatedUserMode::skipping_specific(factor_sources), None)
     }
 
     pub fn lazy_always_skip_no_fail() -> Self {
-        Self::new(SimulatedUserMode::lazy_always_skip(), None, None)
+        Self::new(SimulatedUserMode::lazy_always_skip(), None)
     }
 
     /// Skips only if `invalid_tx_if_skipped` is empty
     /// (or if simulated failure for that factor source)
     pub fn lazy_sign_minimum(
         simulated_failures: impl IntoIterator<Item = FactorSourceIDFromHash>,
-        simulated_skips: impl IntoIterator<Item = FactorSourceIDFromHash>,
     ) -> Self {
         Self::new(
             SimulatedUserMode::lazy_sign_minimum(),
             SimulatedFailures::with_simulated_failures(simulated_failures),
-            SimulatedSkips::with_simulated_skips(simulated_skips),
         )
     }
 }
@@ -227,10 +205,13 @@ impl<S: Signable> SimulatedUser<S> {
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> bool {
-        if let Some(skips) = &self.skips {
-            skips.simulate_skip_if_needed(factor_source_ids)
-        } else {
-            false
+        match &self.mode {
+            SimulatedUserMode::Skipping(skipping_factor_source_ids) => {
+                factor_source_ids
+                    .iter()
+                    .all(|id| skipping_factor_source_ids.contains(id))
+            }
+            _ => false,
         }
     }
 
@@ -245,6 +226,7 @@ impl<S: Signable> SimulatedUser<S> {
                 Laziness::SignMinimum => is_prudent(),
             },
             SimulatedUserMode::Rejecting => false,
+            SimulatedUserMode::Skipping(_) => false,
         }
     }
 }

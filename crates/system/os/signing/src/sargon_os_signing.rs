@@ -480,10 +480,8 @@ mod test {
                 }
                 SigningFailure::UserRejected => SimulatedUser::<S>::rejecting(),
                 SigningFailure::SkippingFactorSources(factor_sources) => {
-                    SimulatedUser::<S>::prudent_with_skips(
-                        SimulatedSkips::with_simulated_skips(
-                            factor_sources.clone(),
-                        ),
+                    SimulatedUser::<S>::skipping_specific(
+                        factor_sources.iter().cloned().collect(),
                     )
                 }
             },

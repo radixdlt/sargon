@@ -90,7 +90,7 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             SigningFinishEarlyStrategy::default(),
             all_factor_sources_in_profile,
             transactions,
-            SimulatedUser::lazy_sign_minimum([], []),
+            SimulatedUser::lazy_sign_minimum([]),
             SigningPurpose::sign_transaction_primary(),
         )
     }
