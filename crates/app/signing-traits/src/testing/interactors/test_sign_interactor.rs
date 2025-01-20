@@ -46,10 +46,19 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
                 .clone(),
         ) {
             SigningUserInput::Sign => {
-                let per_factor_outcome = IndexMap::from_iter(request
-                    .per_factor_source
-                    .iter()
-                    .map(|(id, input)| {
+                let mut outcomes = IndexMap::<
+                    FactorSourceIDFromHash,
+                    FactorOutcome<S::ID>,
+                >::new();
+
+                for (id, input) in request.per_factor_source.clone() {
+                    if self
+                        .simulated_user
+                        .simulate_skip_if_needed(IndexSet::just(id))
+                    {
+                        let outcome = FactorOutcome::skipped(id);
+                        outcomes.insert(id, outcome);
+                    } else {
                         let signatures = input.per_transaction
                             .iter()
                             .flat_map(|x| {
@@ -64,10 +73,12 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
                             })
                             .collect::<IndexSet<HDSignature<S::ID>>>();
 
-                        (*id, signatures)
-                    }));
+                        let outcome = FactorOutcome::signed(signatures)?;
+                        outcomes.insert(id, outcome);
+                    }
+                }
 
-                SignResponse::signed(per_factor_outcome)
+                SignResponse::new_from_outcomes(outcomes)
             }
 
             SigningUserInput::Skip => {

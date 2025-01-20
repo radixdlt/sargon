@@ -857,10 +857,13 @@ pub enum CommonError {
     #[error("Unknown SecurityStructureID {id}")]
     UnknownSecurityStructureID { id: String } = 10246,
 
+    #[error("Signing failed due to too many factor sources were neglected.")]
+    SigningFailedTooManyFactorSourcesNeglected = 10247,
+
     #[error(
         "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
     )]
-    StructureAlreadyExists { bad_value: String } = 10247,
+    StructureAlreadyExists { bad_value: String } = 10248,
 }
 
 impl CommonError {

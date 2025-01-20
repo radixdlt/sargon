@@ -1,16 +1,27 @@
 package com.radixdlt.sargon
 
+import com.radixdlt.sargon.extensions.compile
 import com.radixdlt.sargon.extensions.derivePublicKey
+import com.radixdlt.sargon.extensions.factorSourceId
 import com.radixdlt.sargon.extensions.fromJson
+import com.radixdlt.sargon.extensions.hash
 import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.initForEntity
+import com.radixdlt.sargon.extensions.initFromLocal
 import com.radixdlt.sargon.extensions.isValidSignature
 import com.radixdlt.sargon.extensions.phrase
-import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.extensions.sign
 import com.radixdlt.sargon.extensions.signature
 import com.radixdlt.sargon.extensions.string
+import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.extensions.validate
+import com.radixdlt.sargon.os.signing.HdSignature
+import com.radixdlt.sargon.os.signing.HdSignatureInput
+import com.radixdlt.sargon.os.signing.PerFactorSourceInput
+import com.radixdlt.sargon.os.signing.Signable
+import com.radixdlt.sargon.os.signing.TransactionSignRequestInput
 import com.radixdlt.sargon.samples.sample
+import com.radixdlt.sargon.samples.sampleMainnet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -122,6 +133,114 @@ class MnemonicWithPassphraseTest {
         assertEquals(
             HierarchicalDeterministicPublicKey.sample(),
             MnemonicWithPassphrase.sample().derivePublicKey(DerivationPath.sample())
+        )
+    }
+
+    @Test
+    fun testFactorSourceId() {
+        val mnemonic = MnemonicWithPassphrase.sample()
+
+        assertEquals(
+            mnemonic.factorSourceId(kind = FactorSourceKind.DEVICE).kind,
+            FactorSourceKind.DEVICE
+        )
+        assertEquals(
+            mnemonic.factorSourceId(kind = FactorSourceKind.OFF_DEVICE_MNEMONIC).kind,
+            FactorSourceKind.OFF_DEVICE_MNEMONIC
+        )
+    }
+
+    @Test
+    fun testSignSignables() {
+        val mnemonic = MnemonicWithPassphrase.sample()
+        val fs = mnemonic.factorSourceId(kind = FactorSourceKind.DEVICE)
+
+        val tx1 = TransactionIntent.sample()
+        val tx2 = TransactionIntent.sample.other()
+
+        val acc1 = OwnedFactorInstance(
+            owner = AddressOfAccountOrPersona.Account(
+                AccountAddress.sampleMainnet()
+            ),
+            factorInstance = HierarchicalDeterministicFactorInstance(
+                factorSourceId = fs,
+                publicKey = mnemonic.derivePublicKey(
+                    DerivationPath.initForEntity(
+                        kind = EntityKind.ACCOUNT,
+                        networkId = NetworkId.MAINNET,
+                        index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+                    )
+                )
+            )
+        )
+
+        val acc2 = OwnedFactorInstance(
+            owner = AddressOfAccountOrPersona.Account(
+                AccountAddress.sampleMainnet.other()
+            ),
+            factorInstance = HierarchicalDeterministicFactorInstance(
+                factorSourceId = fs,
+                publicKey = mnemonic.derivePublicKey(
+                    DerivationPath.initForEntity(
+                        kind = EntityKind.ACCOUNT,
+                        networkId = NetworkId.MAINNET,
+                        index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(1u))
+                    )
+                )
+            )
+        )
+
+        val input = PerFactorSourceInput<Signable.Payload.Transaction, Signable.ID.Transaction>(
+            factorSourceId = fs,
+            perTransaction = listOf(
+                TransactionSignRequestInput(
+                    payload = Signable.Payload.Transaction(tx1.compile()),
+                    factorSourceId = fs,
+                    ownedFactorInstances = listOf(acc1, acc2)
+                ),
+                TransactionSignRequestInput(
+                    payload = Signable.Payload.Transaction(tx2.compile()),
+                    factorSourceId = fs,
+                    ownedFactorInstances = listOf(acc1, acc2)
+                )
+            ),
+            invalidTransactionsIfNeglected = emptyList()
+        )
+
+        val hdSignatures = mnemonic.sign(input)
+
+        assertEquals(
+            listOf(
+                HdSignature(
+                    input = HdSignatureInput(
+                        payloadId = Signable.ID.Transaction(tx1.hash()),
+                        ownedFactorInstance = acc1
+                    ),
+                    signature = mnemonic.sign(tx1.hash().hash, acc1.factorInstance.publicKey.derivationPath)
+                ),
+                HdSignature(
+                    input = HdSignatureInput(
+                        payloadId = Signable.ID.Transaction(tx1.hash()),
+                        ownedFactorInstance = acc2
+                    ),
+                    signature = mnemonic.sign(tx1.hash().hash, acc2.factorInstance.publicKey.derivationPath)
+                ),
+                HdSignature(
+                    input = HdSignatureInput(
+                        payloadId = Signable.ID.Transaction(tx2.hash()),
+                        ownedFactorInstance = acc1
+                    ),
+                    signature = mnemonic.sign(tx2.hash().hash, acc1.factorInstance.publicKey.derivationPath)
+                ),
+                HdSignature(
+                    input = HdSignatureInput(
+                        payloadId = Signable.ID.Transaction(tx2.hash()),
+                        ownedFactorInstance = acc2
+                    ),
+                    signature = mnemonic.sign(tx2.hash().hash, acc2.factorInstance.publicKey.derivationPath)
+                )
+            ),
+            hdSignatures
         )
     }
 }

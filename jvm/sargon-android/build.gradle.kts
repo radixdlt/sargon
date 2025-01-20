@@ -97,7 +97,7 @@ cargoNdk {
     targets = arrayListOf("arm64", "arm")
     module = "../"
     librariesNames = arrayListOf("libsargon_uniffi.so")
-    extraCargoBuildArguments = arrayListOf("--all")
+    extraCargoBuildArguments = arrayListOf("--locked", "--all")
 }
 
 tasks.withType<Test> {

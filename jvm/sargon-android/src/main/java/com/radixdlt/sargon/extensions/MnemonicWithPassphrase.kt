@@ -3,6 +3,8 @@ package com.radixdlt.sargon.extensions
 import com.radixdlt.sargon.Bip39Passphrase
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.DerivationPath
+import com.radixdlt.sargon.FactorSourceIdFromHash
+import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.Hash
 import com.radixdlt.sargon.HierarchicalDeterministicPublicKey
 import com.radixdlt.sargon.Mnemonic
@@ -13,6 +15,11 @@ import com.radixdlt.sargon.extensions.AndroidMnemonicWithPassphrase.Companion.to
 import com.radixdlt.sargon.mnemonicWithPassphraseDerivePublicKeys
 import com.radixdlt.sargon.mnemonicWithPassphraseSign
 import com.radixdlt.sargon.mnemonicWithPassphraseValidatePublicKeys
+import com.radixdlt.sargon.newFactorSourceIdFromHashFromMnemonicWithPassphrase
+import com.radixdlt.sargon.os.signing.HdSignature
+import com.radixdlt.sargon.os.signing.HdSignatureInput
+import com.radixdlt.sargon.os.signing.PerFactorSourceInput
+import com.radixdlt.sargon.os.signing.Signable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -66,6 +73,31 @@ fun MnemonicWithPassphrase.sign(
     derivationPath = path,
     hashToSign = hash
 )
+
+fun MnemonicWithPassphrase.sign(
+    input: PerFactorSourceInput<out Signable.Payload, out Signable.ID>,
+) = input.perTransaction.map { perTransaction ->
+    perTransaction.ownedFactorInstances.map { perFactorInstance ->
+        val signatureWithPublicKey = sign(
+            hash = perTransaction.payload.getSignable().hash(),
+            path = perFactorInstance.factorInstance.publicKey.derivationPath
+        )
+
+        HdSignature(
+            input = HdSignatureInput(
+                payloadId = perTransaction.payload.getSignable().getId(),
+                ownedFactorInstance = perFactorInstance
+            ),
+            signature = signatureWithPublicKey
+        )
+    }
+}.flatten()
+
+fun MnemonicWithPassphrase.factorSourceId(kind: FactorSourceKind): FactorSourceIdFromHash
+    = newFactorSourceIdFromHashFromMnemonicWithPassphrase(
+        factorSourceKind = kind,
+        mnemonicWithPassphrase = this
+    )
 
 /**
  * Class needed for compatibility for Android Wallet version 1.*.
