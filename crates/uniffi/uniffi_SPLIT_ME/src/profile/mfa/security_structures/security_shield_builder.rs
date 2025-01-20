@@ -457,10 +457,6 @@ impl SecurityShieldBuilder {
 
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn validate(&self) -> Option<SecurityShieldBuilderRuleViolationReason> {
-        self.get(|builder| builder.validate().map(|x| x.into()))
-    }
-
     pub fn validate_role_in_isolation(
         &self,
         role: RoleKind,
@@ -910,8 +906,16 @@ mod tests {
         assert_eq!(xs, sut.clone().get_confirmation_factors());
 
         assert_eq!(
-            sut.validate().unwrap(),
-            SecurityShieldBuilderRuleViolationReason::MissingAuthSigningFactor
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason {
+                    is_primary_role_factor_list_empty: false,
+                    is_recovery_role_factor_list_empty: false,
+                    is_confirmation_role_factor_list_empty: false,
+                    is_auth_signing_factor_missing: true
+                }
+            }
+            .into()
         );
         sut = sut.set_authentication_signing_factor(Some(
             FactorSourceID::sample_device_other(),
@@ -920,10 +924,6 @@ mod tests {
             sut.get_authentication_signing_factor(),
             Some(FactorSourceID::sample_device_other())
         );
-
-        let v0 = sut.validate();
-        let v1 = sut.validate(); // can call validate many times!
-        assert_eq!(v0, v1);
 
         let s0 = sut.status();
         let s1 = sut.status(); // can call status many times!

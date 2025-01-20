@@ -37,19 +37,19 @@ impl MatrixBuilder {
     ///
     /// If valid it returns a "built" `MatrixOfFactorSourceIds`.
     pub fn build(&self) -> MatrixBuilderBuildResult {
-        self.validate_combination()?;
+        self.validate_number_of_days_until_auto_confirm()?;
 
         let primary = self
             .primary_role
-            .build()
+            .build_with_minimum_validation()
             .into_matrix_err(RoleKind::Primary)?;
         let recovery = self
             .recovery_role
-            .build()
+            .build_with_minimum_validation()
             .into_matrix_err(RoleKind::Recovery)?;
         let confirmation = self
             .confirmation_role
-            .build()
+            .build_with_minimum_validation()
             .into_matrix_err(RoleKind::Confirmation)?;
 
         let built = unsafe {

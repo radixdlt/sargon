@@ -401,6 +401,18 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         })
     }
 
+    pub(crate) fn build_with_minimum_validation(
+        &self,
+    ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
+        self.validate_minimum_factor_count().map(|_| {
+            RoleWithFactorSourceIds::with_factors_and_threshold(
+                self.get_threshold(),
+                self.get_threshold_factors().clone(),
+                self.get_override_factors().clone(),
+            )
+        })
+    }
+
     pub(crate) fn set_specific_threshold(
         &mut self,
         threshold: u8,
@@ -514,6 +526,12 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             self.validation_for_addition_of_password_to_primary(Threshold)?;
         }
 
+        self.validate_minimum_factor_count()?;
+
+        Ok(())
+    }
+
+    fn validate_minimum_factor_count(&self) -> RoleBuilderMutateResult {
         if self.all_factors().is_empty() {
             return RoleBuilderMutateResult::not_yet_valid(
                 RoleMustHaveAtLeastOneFactor,
@@ -656,9 +674,6 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                 if self.contains_factor_source(factor_source_id) {
                     return duplicates_err;
                 }
-                let factor_source_kind =
-                    factor_source_id.get_factor_source_kind();
-                self._validation_add(factor_source_kind, factor_list_kind, mode)
             }
             SecurityShieldBuilderMode::Lenient => {
                 match factor_list_kind {
@@ -678,9 +693,10 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                         }
                     } // but if override contains it, we're good (since mode is lenient)
                 }
-                Ok(())
             }
         }
+        let factor_source_kind = factor_source_id.get_factor_source_kind();
+        self._validation_add(factor_source_kind, factor_list_kind, mode)
     }
 
     fn contains_factor_source(

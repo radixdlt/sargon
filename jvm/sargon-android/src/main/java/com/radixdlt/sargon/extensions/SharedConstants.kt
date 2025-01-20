@@ -25,5 +25,6 @@ val Account.Companion.nameMaxLength: Long
 val Persona.Companion.nameMaxLength: Long
     get() = entityNameMaxLength
 
+@KoverIgnore
 val DisplayName.Companion.maxLength: Long
     get() = displayNameMaxLength
