@@ -856,6 +856,11 @@ pub enum CommonError {
 
     #[error("Unknown SecurityStructureID {id}")]
     UnknownSecurityStructureID { id: String } = 10246,
+
+    #[error(
+        "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
+    )]
+    StructureAlreadyExists { bad_value: String } = 10247,
 }
 
 impl CommonError {
