@@ -1350,7 +1350,6 @@ mod integration_tests {
                                 SimulatedFailures::with_simulated_failures([
                                     FactorSourceIDFromHash::sample_at(2), // will cause any TX with a7 to fail
                                 ]),
-                                SimulatedSkips::with_simulated_skips([]),
                             ),
                         )),
                         &profile,
