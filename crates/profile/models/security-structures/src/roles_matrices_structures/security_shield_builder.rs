@@ -1867,6 +1867,7 @@ mod test_invalid {
             status,
             SecurityShieldBuilderStatus::Strong
         );
+        assert!(sut.build().is_ok())
     }
 
     #[test]
@@ -1925,6 +1926,7 @@ mod test_invalid {
                 reason: SecurityShieldBuilderRuleViolationReason::RecoveryAndConfirmationFactorsOverlap
             }
         );
+        assert!(sut.build().is_ok())
     }
 
     #[test]
@@ -1994,6 +1996,7 @@ mod test_invalid {
                 .unwrap()
             }
         );
+        assert!(sut.build().is_err())
     }
 }
 
