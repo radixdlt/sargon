@@ -242,6 +242,7 @@ impl SargonOS {
             factor_source,
             NetworkID::Mainnet,
             name,
+            None,
         )
         .await
     }
@@ -254,12 +255,14 @@ impl SargonOS {
         &self,
         network_id: NetworkID,
         name: DisplayName,
+        persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
         let bdfs = self.bdfs()?;
         self.create_and_save_new_persona_with_factor_source(
             bdfs.into(),
             network_id,
             name,
+            persona_data,
         )
         .await
     }
@@ -273,8 +276,9 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
+        persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
-        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, name).await.map(|(x, _)| x)
+        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, name, persona_data).await.map(|(x, _)| x)
     }
 
     pub async fn create_and_save_new_persona_with_factor_source_with_derivation_outcome(
@@ -282,9 +286,10 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
+        persona_data: Option<PersonaData>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Creating persona.");
-        let (persona, instances_in_cache_consumer, derivation_outcome) = self
+        let (mut persona, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -292,6 +297,11 @@ impl SargonOS {
             )
             .await?;
         debug!("Created persona, now saving it to profile.");
+
+        // If PersonaData is set, assign it before saving it into Profile
+        if let Some(persona_data) = persona_data {
+            persona.persona_data = persona_data;
+        }
 
         // First try save Persona into Profile...
         self.add_persona(persona.clone()).await?;
@@ -916,6 +926,7 @@ mod tests {
             x.create_and_save_new_persona_with_bdfs(
                 NetworkID::Mainnet,
                 DisplayName::sample(),
+                None,
             )
         })
         .await
