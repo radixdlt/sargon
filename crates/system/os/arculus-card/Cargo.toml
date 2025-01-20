@@ -7,28 +7,9 @@ edition = "2021"
 # === SARGON CRATES ===
 sargon-os = { path = "../../../system/os/os" }
 error = { workspace = true }
-signing = { workspace = true }
-signing-traits = { workspace = true }
-transaction-models = { workspace = true }
-profile-security-structures = { workspace = true }
-radix-connect-models = { workspace = true }
-profile = { workspace = true }
-profile-logic = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
 
 # ==== EXTERNAL DEPENDENCIES ====
-actix-rt = { workspace = true }
 async-trait = { workspace = true }
-derive_more = { workspace = true }
-log = { workspace = true }
-serde = { workspace = true }
-
-[dev-dependencies]
-# === SARGON CRATES ===
-drivers = { workspace = true }
-interactors = { workspace = true }
-clients = { workspace = true }
-factor-instances-provider = { workspace = true }
-key-derivation-traits = { workspace = true }

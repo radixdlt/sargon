@@ -25,8 +25,12 @@ public actor NFCSessionClient {
 
 extension NFCSessionClient: SargonUniFFI.NfcTagDriver {
     public func startSession() async throws {
-        let tag = try await self.beginSession()
-        await self.setIsoTag(tag: tag)
+        do {
+            let tag = try await self.beginSession()
+            await self.setIsoTag(tag: tag)
+        } catch {
+            throw error
+        }
     }
 
     public func endSession() async {

@@ -4094,25 +4094,9 @@ dependencies = [
 name = "sargon-os-arculus-card"
 version = "1.1.99"
 dependencies = [
- "actix-rt",
  "async-trait",
- "clients",
- "derive_more",
- "drivers",
  "error",
- "factor-instances-provider",
- "interactors",
- "key-derivation-traits",
- "log",
- "profile",
- "profile-logic",
- "profile-security-structures",
- "radix-connect-models",
  "sargon-os",
- "serde",
- "signing",
- "signing-traits",
- "transaction-models",
 ]
 
 [[package]]

@@ -23,36 +23,16 @@ func cArrayToData<T>(val: T, len: size_t)  -> Data? {
     }
 }
 
-extension ArculusCSDKByteVector {
-    func data() -> UnsafeMutablePointer<UInt8>? {
-        guard let vectorData = addr else {
-            assertionFailure("Bad vector data, missing addr")
-            return nil
-        }
-        return vectorData
-    }
-}
-
-extension ArculusCSDKAPDUSequence {
-    func apdu()  -> UnsafeMutablePointer<ArculusCSDKByteVector>? {
-        guard let apdu = apdu else {
-            assertionFailure("Bad APDU sequence, missing apdu")
-            return nil
-        }
-        return apdu
-    }
-}
-
 func cApduSequenceToData(buf: UnsafePointer<ArculusCSDKAPDUSequence>)  -> [Data] {
     // Need to loop through all the ByteVectors in APDUSequence
     let apduSequence = buf.pointee
     let count = apduSequence.count
-    let byteVectorArrayPtr = apduSequence.apdu
+    let byteVectorArrayPtr = apduSequence.apdu!
     var dataArray = [Data](repeating: Data(), count: Int(count))
 //    let byteVectorPointer = UnsafeMutablePointer<ArculusCSDKByteVector>(byteVectorArrayPtr)
 
     for i in 0 ..< count {
-        let byteVector = byteVectorArrayPtr![Int(i)]
+        let byteVector = byteVectorArrayPtr[Int(i)]
         // Access the fields of each ByteVector element
         let vectorData = byteVector.addr!
         let vectorLength = byteVector.count
