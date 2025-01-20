@@ -856,6 +856,9 @@ pub enum CommonError {
 
     #[error("Unknown SecurityStructureID {id}")]
     UnknownSecurityStructureID { id: String } = 10246,
+
+    #[error("Signing failed due to too many factor sources were neglected.")]
+    SigningFailedTooManyFactorSourcesNeglected = 10247,
 }
 
 impl CommonError {

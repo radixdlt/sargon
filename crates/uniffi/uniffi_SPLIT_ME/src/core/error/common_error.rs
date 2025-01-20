@@ -102,6 +102,7 @@ pub enum CommonError {
     InvalidSecp256k1PublicKeyFromBytes {
         bad_value: String,
     },
+    SigningFailedTooManyFactorSourcesNeglected,
 }
 
 #[uniffi::export]
@@ -304,6 +305,9 @@ impl CommonError {
                     bad_value: bad_value.clone(),
                 }
             }
+            SigningFailedTooManyFactorSourcesNeglected => {
+                InternalCommonError::SigningFailedTooManyFactorSourcesNeglected
+            }
             _ => InternalCommonError::Unknown,
         }
     }
@@ -435,6 +439,9 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::InvalidSecp256k1PublicKeyFromBytes {
                 bad_value,
             } => InvalidSecp256k1PublicKeyFromBytes { bad_value },
+            InternalCommonError::SigningFailedTooManyFactorSourcesNeglected => {
+                SigningFailedTooManyFactorSourcesNeglected
+            }
             _ => Self::erased(value),
         }
     }

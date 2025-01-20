@@ -48,6 +48,7 @@ pub struct SimulatedFailures {
     /// Set of FactorSources which should always fail.
     simulated_failures: IndexSet<FactorSourceIDFromHash>,
 }
+
 impl SimulatedFailures {
     pub fn with_details(
         simulated_failures: IndexSet<FactorSourceIDFromHash>,
@@ -82,6 +83,9 @@ pub enum SimulatedUserMode {
     /// sources as possible.
     Lazy(Laziness),
 
+    /// Emulation of a user, that skips specific factor sources.
+    Skipping(IndexSet<FactorSourceIDFromHash>),
+
     /// Emulation of a user that dismisses (rejects) the signing process all-together.
     Rejecting,
 }
@@ -94,6 +98,12 @@ impl SimulatedUserMode {
     /// Skips only if `invalid_tx_if_skipped` is empty
     pub(crate) fn lazy_sign_minimum() -> Self {
         Self::Lazy(Laziness::SignMinimum)
+    }
+
+    pub(crate) fn skipping_specific(
+        factor_sources: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
+        Self::Skipping(factor_sources)
     }
 }
 
@@ -110,6 +120,12 @@ impl<S: Signable> SimulatedUser<S> {
         simulated_failures: SimulatedFailures,
     ) -> Self {
         Self::new(SimulatedUserMode::Prudent, simulated_failures)
+    }
+
+    pub fn skipping_specific(
+        factor_sources: IndexSet<FactorSourceIDFromHash>,
+    ) -> Self {
+        Self::new(SimulatedUserMode::skipping_specific(factor_sources), None)
     }
 
     pub fn lazy_always_skip_no_fail() -> Self {
@@ -185,6 +201,20 @@ impl<S: Signable> SimulatedUser<S> {
         }
     }
 
+    pub(crate) fn simulate_skip_if_needed(
+        &self,
+        factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+    ) -> bool {
+        match &self.mode {
+            SimulatedUserMode::Skipping(skipping_factor_source_ids) => {
+                factor_source_ids
+                    .iter()
+                    .all(|id| skipping_factor_source_ids.contains(id))
+            }
+            _ => false,
+        }
+    }
+
     fn be_prudent<F>(&self, is_prudent: F) -> bool
     where
         F: Fn() -> bool,
@@ -196,6 +226,7 @@ impl<S: Signable> SimulatedUser<S> {
                 Laziness::SignMinimum => is_prudent(),
             },
             SimulatedUserMode::Rejecting => false,
+            SimulatedUserMode::Skipping(_) => false,
         }
     }
 }
