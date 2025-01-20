@@ -88,7 +88,18 @@ pub enum CommonError {
         error_message: String,
     },
     FailedToExtractTransactionReceiptBytes,
-    MaxTransfersPerTransactionReached { amount: u64 },
+    MaxTransfersPerTransactionReached {
+        amount: u64,
+    },
+    UnknownNetworkWithName {
+        bad_value: String,
+    },
+    InvalidEd25519PublicKeyFromBytes {
+        bad_value: String,
+    },
+    InvalidSecp256k1PublicKeyFromBytes {
+        bad_value: String,
+    },
 }
 
 #[uniffi::export]
@@ -278,7 +289,24 @@ impl CommonError {
                 InternalCommonError::FailedToExtractTransactionReceiptBytes
             }
             CommonError::MaxTransfersPerTransactionReached { amount } => {
-                InternalCommonError::MaxTransfersPerTransactionReached { amount: *amount }
+                InternalCommonError::MaxTransfersPerTransactionReached {
+                    amount: *amount,
+                }
+            }
+            CommonError::UnknownNetworkWithName { bad_value } => {
+                InternalCommonError::UnknownNetworkWithName {
+                    bad_value: bad_value.clone(),
+                }
+            }
+            CommonError::InvalidEd25519PublicKeyFromBytes { bad_value } => {
+                InternalCommonError::InvalidEd25519PublicKeyFromBytes {
+                    bad_value: bad_value.clone(),
+                }
+            }
+            CommonError::InvalidSecp256k1PublicKeyFromBytes { bad_value } => {
+                InternalCommonError::InvalidSecp256k1PublicKeyFromBytes {
+                    bad_value: bad_value.clone(),
+                }
             }
             _ => InternalCommonError::Unknown,
         }
@@ -393,9 +421,18 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::FailedToExtractTransactionReceiptBytes => {
                 CommonError::FailedToExtractTransactionReceiptBytes
             }
-            InternalCommonError::MaxTransfersPerTransactionReached { amount } => {
-                CommonError::MaxTransfersPerTransactionReached { amount }
+            InternalCommonError::MaxTransfersPerTransactionReached {
+                amount,
+            } => CommonError::MaxTransfersPerTransactionReached { amount },
+            InternalCommonError::UnknownNetworkWithName { bad_value } => {
+                CommonError::UnknownNetworkWithName { bad_value }
             }
+            InternalCommonError::InvalidEd25519PublicKeyFromBytes {
+                bad_value,
+            } => CommonError::InvalidEd25519PublicKeyFromBytes { bad_value },
+            InternalCommonError::InvalidSecp256k1PublicKeyFromBytes {
+                bad_value,
+            } => CommonError::InvalidSecp256k1PublicKeyFromBytes { bad_value },
             _ => CommonError::erased(value),
         }
     }
