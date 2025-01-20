@@ -106,7 +106,7 @@ impl HasSampleValues for SecurityShieldBuilderStatusInvalidReason {
 }
 
 #[cfg(test)]
-mod tests {
+mod status_tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -122,9 +122,28 @@ mod tests {
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
+}
+
+#[cfg(test)]
+mod reason_tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurityShieldBuilderStatusInvalidReason;
 
     #[test]
-    fn invalid_reason_new() {
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn new() {
         let invalid_reason = SecurityShieldBuilderStatusInvalidReason::new(
             IsPrimaryRoleFactorListEmpty::default(),
             IsRecoveryRoleFactorListEmpty::default(),
