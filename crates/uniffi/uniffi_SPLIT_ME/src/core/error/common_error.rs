@@ -2,7 +2,6 @@ use std::fmt::{Display, Formatter};
 
 use crate::prelude::*;
 use sargon::CommonError as InternalCommonError;
-use sargon::NetworkID as InternalNetworkID;
 use CommonError::*;
 
 use thiserror::Error as ThisError;
@@ -36,7 +35,7 @@ pub enum CommonError {
         bad_value: String,
     },
     UnknownNetworkForID {
-        bad_value: NetworkID,
+        bad_value: u8,
     },
     FailedToDeserializeJSONToValue {
         json_byte_count: u64,
@@ -70,7 +69,7 @@ pub enum CommonError {
         bad_value: u32,
     },
     UnknownNetworkID {
-        bad_value: NetworkID,
+        bad_value: u8,
     },
     TooManyBytes {
         max: u64,
@@ -190,7 +189,7 @@ impl CommonError {
             },
             UnknownNetworkForID { bad_value } => {
                 InternalCommonError::UnknownNetworkForID {
-                    bad_value: bad_value.into_internal().discriminant(),
+                    bad_value: *bad_value,
                 }
             }
             FailedToDeserializeJSONToValue {
@@ -250,7 +249,7 @@ impl CommonError {
             }
             UnknownNetworkID { bad_value } => {
                 InternalCommonError::UnknownNetworkID {
-                    bad_value: bad_value.into_internal().discriminant(),
+                    bad_value: *bad_value,
                 }
             }
             TooManyBytes { max, found } => InternalCommonError::TooManyBytes {
@@ -345,11 +344,7 @@ impl From<InternalCommonError> for CommonError {
                 InvalidURL { bad_value }
             }
             InternalCommonError::UnknownNetworkForID { bad_value } => {
-                UnknownNetworkForID {
-                    bad_value: InternalNetworkID::from_repr(bad_value)
-                        .unwrap()
-                        .into(),
-                }
+                UnknownNetworkForID { bad_value }
             }
             InternalCommonError::FailedToDeserializeJSONToValue {
                 json_byte_count,
@@ -396,11 +391,7 @@ impl From<InternalCommonError> for CommonError {
                 IndexNotHardened { bad_value }
             }
             InternalCommonError::UnknownNetworkID { bad_value } => {
-                UnknownNetworkID {
-                    bad_value: sargon::NetworkID::from_repr(bad_value)
-                        .unwrap()
-                        .into(),
-                }
+                UnknownNetworkID { bad_value }
             }
             InternalCommonError::TooManyBytes { max, found } => {
                 TooManyBytes { max, found }
