@@ -1,7 +1,9 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.asGeneral
+import com.radixdlt.sargon.extensions.bip32CanonicalString
 import com.radixdlt.sargon.extensions.curve
+import com.radixdlt.sargon.extensions.displayString
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.initForEntity
 import com.radixdlt.sargon.extensions.initFromLocal
@@ -39,53 +41,6 @@ class DerivationPathTest: SampleTestable<DerivationPath> {
     }
 
     @Test
-    fun testInitFromPath() {
-        assertEquals(
-            DerivationPath.init("m/44H/1022H/1H/525H/1460H/0H"),
-            AccountPath.init(
-                networkId = NetworkId.MAINNET,
-                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
-                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
-            ).asGeneral()
-        )
-
-        assertEquals(
-            DerivationPath.init("m/44H/1022H/1H/525H/1460H/0H"),
-            AccountPath.init("m/44H/1022H/1H/525H/1460H/0H").asGeneral()
-        )
-
-        assertThrows<CommonException> {
-            AccountPath.init("m/44H/1022H/1H/618H/1460H/0H")
-        }
-
-        assertThrows<CommonException> {
-            AccountPath.init(Bip44LikePath.sample().string)
-        }
-
-        assertEquals(
-            DerivationPath.init("m/44H/1022H/1H/618H/1460H/0H"),
-            IdentityPath.init(
-                networkId = NetworkId.MAINNET,
-                keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
-                index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
-            ).asGeneral()
-        )
-
-        assertEquals(
-            DerivationPath.init("m/44H/1022H/1H/618H/1460H/0H"),
-            IdentityPath.init("m/44H/1022H/1H/618H/1460H/0H").asGeneral()
-        )
-
-        assertThrows<CommonException> {
-            IdentityPath.init("m/44H/1022H/1H/525H/1460H/0H")
-        }
-
-        assertThrows<CommonException> {
-            IdentityPath.init(Bip44LikePath.sample().string)
-        }
-    }
-
-    @Test
     fun testCurve() {
         assertEquals(
             Slip10Curve.CURVE25519,
@@ -105,9 +60,34 @@ class DerivationPathTest: SampleTestable<DerivationPath> {
 
     @Test
     fun testString() {
+        val accountPathInSecurifiedSpace = AccountPath.init(
+            networkId = NetworkId.MAINNET,
+            keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+            index = Hardened.Securified(SecurifiedU30.initFromLocal(0u))
+        ).asGeneral()
+
         assertEquals(
-            Bip44LikePath.sample().string,
-            Bip44LikePath.sample().asGeneral().string
+            "m/44H/1022H/1H/525H/1460H/0S",
+            accountPathInSecurifiedSpace.displayString
+        )
+        assertEquals(
+            "m/44H/1022H/1H/525H/1460H/2147483648H",
+            accountPathInSecurifiedSpace.bip32CanonicalString
+        )
+
+        val accountPathInUnsecurifiedSpace = AccountPath.init(
+            networkId = NetworkId.MAINNET,
+            keyKind = Cap26KeyKind.TRANSACTION_SIGNING,
+            index = Hardened.Unsecurified(UnsecurifiedHardened(U30.init(0u)))
+        ).asGeneral()
+
+        assertEquals(
+            "m/44H/1022H/1H/525H/1460H/0H",
+            accountPathInUnsecurifiedSpace.displayString
+        )
+        assertEquals(
+            "m/44H/1022H/1H/525H/1460H/0H",
+            accountPathInUnsecurifiedSpace.bip32CanonicalString
         )
     }
 

@@ -55,27 +55,53 @@ impl HDPath {
     pub const SEPARATOR: &str = "/";
     fn to_string_map_with<F>(&self, include_head: bool, map: F) -> String
     where
-        F: Fn(&HDPathComponent) -> String,
+        F: Fn((usize, &HDPathComponent)) -> String,
     {
         let head = "m".to_owned();
-        let mut path = self.components().iter().map(map).collect_vec();
+        let mut path =
+            self.components().iter().enumerate().map(map).collect_vec();
         if include_head {
             path.splice(0..0, vec![head]);
         }
         path.into_iter().join(Self::SEPARATOR)
     }
 
-    pub fn to_bip32_string_with(&self, include_head: bool) -> String {
-        self.to_string_map_with(include_head, |c| format!("{}", c))
+    pub fn to_bip32_string_with(
+        &self,
+        include_head: bool,
+        canonicalize_entity_index: bool,
+    ) -> String {
+        self.to_string_map_with(include_head, |(i, c)| {
+            if canonicalize_entity_index
+                && i == CAP26_PATH_ENTITY_INDEX_POS
+                && c.is_securified()
+            {
+                let securified = c.as_securified().unwrap();
+                let global = securified.map_to_global_key_space();
+                let without_securified =
+                    global - RELATIVELY_LOCAL_OFFSET_SECURIFIED;
+                format!("{}H", without_securified)
+            } else {
+                format!("{}", c)
+            }
+        })
     }
 
     pub fn to_bip32_string_debug_with(&self, include_head: bool) -> String {
-        self.to_string_map_with(include_head, |c| format!("{:?}", c))
+        self.to_string_map_with(include_head, |(_, c)| format!("{:?}", c))
+    }
+
+    /// This method returns the canonical bip32 representation of the path.
+    /// In sargon, paths in the securified space are printed with the `S` notation after the index,
+    /// for readability purposes. Such paths need to be canonicalized in bip32 notation meaning that
+    /// an index of `i S` => `i + 2^31 + 2^30 H` for communication with other external APIs.
+    pub fn to_canonical_bip32_string(&self) -> String {
+        self.to_bip32_string_with(true, true)
     }
 }
 impl ToBIP32Str for HDPath {
     fn to_bip32_string(&self) -> String {
-        self.to_bip32_string_with(true)
+        self.to_bip32_string_with(true, false)
     }
     fn to_bip32_string_debug(&self) -> String {
         self.to_bip32_string_debug_with(true)

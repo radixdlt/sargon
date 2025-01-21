@@ -35,3 +35,10 @@ pub fn derivation_path_to_hd_path(path: &DerivationPath) -> HDPath {
 pub fn derivation_path_to_string(path: &DerivationPath) -> String {
     path.into_internal().to_string()
 }
+
+#[uniffi::export]
+pub fn derivation_path_to_canonical_bip32_string(
+    path: &DerivationPath,
+) -> String {
+    path.into_internal().to_canonical_bip32_string()
+}

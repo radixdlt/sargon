@@ -9,12 +9,9 @@ import com.radixdlt.sargon.newBip44LikePathFromIndex
 import com.radixdlt.sargon.newBip44LikePathFromString
 import kotlin.jvm.Throws
 
-@Throws(SargonException::class)
-fun Bip44LikePath.Companion.init(path: String) = newBip44LikePathFromString(string = path)
-
 fun Bip44LikePath.Companion.init(index: HdPathComponent) = newBip44LikePathFromIndex(index = index)
 
-val Bip44LikePath.string: String
+val Bip44LikePath.displayString: String
     get() = bip44LikePathToString(path = this)
 
 val Bip44LikePath.addressIndex: HdPathComponent
