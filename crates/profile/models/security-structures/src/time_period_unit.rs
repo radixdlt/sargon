@@ -7,7 +7,6 @@ use crate::prelude::*;
 pub enum TimePeriodUnit {
     Days,
     Weeks,
-    Years,
 }
 
 impl HasSampleValues for TimePeriodUnit {

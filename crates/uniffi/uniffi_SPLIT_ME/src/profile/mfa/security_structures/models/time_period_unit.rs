@@ -9,5 +9,4 @@ use sargon::TimePeriodUnit as InternalTimePeriodUnit;
 pub enum TimePeriodUnit {
     Days,
     Weeks,
-    Years,
 }

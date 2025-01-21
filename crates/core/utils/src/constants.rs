@@ -34,9 +34,6 @@ pub const MINUTES_PER_DAY: u32 = 24 * 60;
 /// Number of days per week.
 pub const DAYS_PER_WEEK: u16 = 7;
 
-/// Number of days per year.
-pub const DAYS_PER_YEAR: u16 = 365;
-
 #[cfg(test)]
 mod tests {
     use super::*;

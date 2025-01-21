@@ -11,12 +11,7 @@ pub struct TimePeriod {
 
 impl TimePeriod {
     pub fn with_days(value: u16) -> Self {
-        if (value % DAYS_PER_YEAR) == 0 {
-            Self {
-                value: value / DAYS_PER_YEAR,
-                unit: TimePeriodUnit::Years,
-            }
-        } else if (value % DAYS_PER_WEEK) == 0 {
+        if (value % DAYS_PER_WEEK) == 0 {
             Self {
                 value: value / DAYS_PER_WEEK,
                 unit: TimePeriodUnit::Weeks,
@@ -33,7 +28,6 @@ impl TimePeriod {
         match self.unit {
             TimePeriodUnit::Days => self.value,
             TimePeriodUnit::Weeks => self.value * DAYS_PER_WEEK,
-            TimePeriodUnit::Years => self.value * DAYS_PER_YEAR,
         }
     }
 }
@@ -74,17 +68,7 @@ mod tests {
 
     #[test]
     fn days_conversion() {
-        let mut sut = SUT::with_days(DAYS_PER_YEAR);
-        assert_eq!(sut.days(), DAYS_PER_YEAR);
-        assert_eq!(sut.value, 1);
-        assert_eq!(sut.unit, TimePeriodUnit::Years);
-
-        sut = SUT::with_days(1095);
-        assert_eq!(sut.days(), 1095);
-        assert_eq!(sut.value, 3);
-        assert_eq!(sut.unit, TimePeriodUnit::Years);
-
-        sut = SUT::with_days(DAYS_PER_WEEK);
+        let mut sut = SUT::with_days(DAYS_PER_WEEK);
         assert_eq!(sut.days(), DAYS_PER_WEEK);
         assert_eq!(sut.value, 1);
         assert_eq!(sut.unit, TimePeriodUnit::Weeks);
