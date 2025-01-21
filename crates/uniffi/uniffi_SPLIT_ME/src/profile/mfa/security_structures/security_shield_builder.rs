@@ -969,9 +969,9 @@ mod tests {
         let days_to_auto_confirm = 237;
         sut = sut
             .set_name(name.to_owned())
-            .set_time_period_until_auto_confirm(
-                new_time_period_with_days(days_to_auto_confirm).into(),
-            )
+            .set_time_period_until_auto_confirm(new_time_period_with_days(
+                days_to_auto_confirm,
+            ))
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )
