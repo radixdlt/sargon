@@ -16,7 +16,7 @@ pub struct FactorSourceValidationStatus {
 #[derive(Clone, Debug, PartialEq, uniffi::Enum)]
 pub enum FactorSourceValidationStatusReasonIfInvalid {
     BasicViolation(String),
-    NonBasic(SecurityShieldBuilderRuleViolationReason),
+    NonBasic(SecurityShieldBuilderRuleViolation),
 }
 
 impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
@@ -35,7 +35,7 @@ impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
                 ),
                 Err(sargon::RoleBuilderValidation::ForeverInvalid(v)) => v
                     .as_shield_validation()
-                    .map(SecurityShieldBuilderRuleViolationReason::from)
+                    .map(SecurityShieldBuilderRuleViolation::from)
                     .map(|x| {
                         FactorSourceValidationStatusReasonIfInvalid::NonBasic(x)
                     }),
@@ -43,7 +43,7 @@ impl From<sargon::FactorSourceInRoleBuilderValidationStatus>
                     val.role, v,
                 )
                     .as_shield_validation()
-                    .map(SecurityShieldBuilderRuleViolationReason::from)
+                    .map(SecurityShieldBuilderRuleViolation::from)
                     .map(|x| {
                         FactorSourceValidationStatusReasonIfInvalid::NonBasic(x)
                     }),

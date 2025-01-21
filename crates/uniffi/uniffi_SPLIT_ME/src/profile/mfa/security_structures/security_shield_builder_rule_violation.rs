@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::SecurityShieldBuilderRuleViolationReason as InternalSecurityShieldBuilderRuleViolationReason;
+use sargon::SecurityShieldBuilderRuleViolation as InternalSecurityShieldBuilderRuleViolation;
 
 use thiserror::Error as ThisError;
 
@@ -7,7 +7,7 @@ use thiserror::Error as ThisError;
 #[derive(
     Clone, Debug, ThisError, PartialEq, InternalConversion, uniffi::Error,
 )]
-pub enum SecurityShieldBuilderRuleViolationReason {
+pub enum SecurityShieldBuilderRuleViolation {
     #[error("Auth Signing Factor Missing")]
     MissingAuthSigningFactor,
 

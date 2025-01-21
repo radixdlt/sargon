@@ -15,7 +15,7 @@ pub enum SecurityShieldBuilderStatus {
     /// in the Security Shield building process.
     Weak {
         /// The reason why the built shield would be weak.
-        reason: SecurityShieldBuilderRuleViolationReason,
+        reason: SecurityShieldBuilderRuleViolation,
     },
 
     /// The selected factor sources form an invalid combination
@@ -33,7 +33,7 @@ impl HasSampleValues for SecurityShieldBuilderStatus {
 
     fn sample_other() -> Self {
         SecurityShieldBuilderStatus::Weak {
-            reason: SecurityShieldBuilderRuleViolationReason::RecoveryAndConfirmationFactorsOverlap
+            reason: SecurityShieldBuilderRuleViolation::RecoveryAndConfirmationFactorsOverlap
         }
     }
 }

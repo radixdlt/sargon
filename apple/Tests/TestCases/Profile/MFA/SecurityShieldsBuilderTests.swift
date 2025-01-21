@@ -58,7 +58,7 @@ struct ShieldTests {
 	@Test("primary override validation status trustedContact")
 	func primValidationStatusTrustedContact() {
 		let builder = SecurityShieldBuilder()
-		#expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).compactMap(\.reasonIfInvalid) == [FactorSourceValidationStatusReasonIfInvalid.nonBasic(SecurityShieldBuilderRuleViolationReason.PrimaryCannotContainTrustedContact)])
+		#expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).compactMap(\.reasonIfInvalid) == [FactorSourceValidationStatusReasonIfInvalid.nonBasic(SecurityShieldBuilderRuleViolation.PrimaryCannotContainTrustedContact)])
 	}
 
 	@Test("Auto lowering of threshold upon deletion")

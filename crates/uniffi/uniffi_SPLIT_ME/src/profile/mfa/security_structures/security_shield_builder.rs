@@ -460,7 +460,7 @@ impl SecurityShieldBuilder {
     pub fn validate_role_in_isolation(
         &self,
         role: RoleKind,
-    ) -> Option<SecurityShieldBuilderRuleViolationReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         self.get(|builder| {
             builder
                 .validate_role_in_isolation(role.into_internal())
@@ -497,7 +497,7 @@ impl SecurityShieldBuilder {
         &self,
     ) -> Result<
         SecurityStructureOfFactorSourceIDs,
-        SecurityShieldBuilderRuleViolationReason,
+        SecurityShieldBuilderRuleViolation,
     > {
         self.get(|builder| builder.build())
             .map(|shield| shield.into())
