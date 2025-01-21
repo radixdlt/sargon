@@ -43,7 +43,7 @@ impl SargonOS {
         name: impl AsRef<str>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
         let display_name = DisplayName::new(name)?;
-        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, display_name).await
+        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, display_name, None).await
     }
 
     pub async fn create_and_save_new_account_with_factor_with_derivation_outcome(

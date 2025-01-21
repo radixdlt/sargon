@@ -115,7 +115,27 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_account(
+    pub async fn create_and_save_new_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.wrapped
+            .create_and_save_new_account_with_factor_source(
+                factor_source.into_internal(),
+                network_id.into_internal(),
+                name.into_internal(),
+            )
+            .await
+            .into_result()
+    }
+
+    /// Create a new Account and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_account_with_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
