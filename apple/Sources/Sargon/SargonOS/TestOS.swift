@@ -58,6 +58,7 @@ extension TestOS {
 		} ?? nextAccountName()
 
 		let _ = try await os.createAccountWithBDFS(
+			networkId: nil,
 			name: accountName
 		)
 		return self

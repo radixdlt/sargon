@@ -10,16 +10,18 @@ extension SargonOS {
 	@discardableResult
 	public func createAccount(
 		factorSource: FactorSource,
+		networkId: NetworkID?,
 		name: DisplayName
 	) async throws -> Account {
-		try await createAndSaveNewAccountWithFactorSource(factorSource: factorSource, networkId: currentNetworkID, name: name)
+		try await createAndSaveNewAccountWithFactorSource(factorSource: factorSource, networkId: networkId ?? currentNetworkID, name: name)
 	}
 
 	@discardableResult
 	public func createAccountWithBDFS(
+		networkId: NetworkID?,
 		name: DisplayName
 	) async throws -> Account {
-		try await createAndSaveNewAccountWithBdfs(networkId: currentNetworkID, name: name)
+		try await createAndSaveNewAccountWithBdfs(networkId: networkId ?? currentNetworkID, name: name)
 	}
 
 	public func createPersona(
