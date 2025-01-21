@@ -207,7 +207,6 @@ final class ArculusCSDKDriver: SargonUniFFI.ArculusCsdkDriver {
         let pointer = ArculusCSDK.getPublicKeyFromPathResponse(walletPointer: wallet.toOpaquePointer(), response: response, responseLength: response.count)
 
         guard let pointer else {
-            assertionFailure("Failed to create getPublicKeyFromPathResponse")
             return nil
         }
 

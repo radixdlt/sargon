@@ -5,11 +5,16 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+hash = { workspace = true }
 sargon-os = { path = "../../../system/os/os" }
 error = { workspace = true }
+factors = { workspace = true }
+ecc = { workspace = true }
+hierarchical-deterministic = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
 
 # ==== EXTERNAL DEPENDENCIES ====
 async-trait = { workspace = true }
+indexmap = { workspace = true }

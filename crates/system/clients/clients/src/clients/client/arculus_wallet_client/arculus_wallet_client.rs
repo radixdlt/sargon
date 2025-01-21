@@ -1,4 +1,3 @@
-use serde_json::value::Index;
 use std::future::{self, Future};
 
 pub use crate::prelude::*;
@@ -27,6 +26,16 @@ pub enum ArculusCardState {
     Configured(FactorSourceIDFromHash),
 }
 
+impl HasSampleValues for ArculusCardState {
+    fn sample() -> Self {
+        ArculusCardState::NotConfigured
+    }
+
+    fn sample_other() -> Self {
+        ArculusCardState::Configured(FactorSourceIDFromHash::sample())
+    }
+}
+
 impl ArculusWalletClient {
     pub async fn get_arculus_card_state(&self) -> Result<ArculusCardState> {
         self.execute_card_operation(|wallet| {
@@ -35,7 +44,23 @@ impl ArculusWalletClient {
         .await
     }
 
-    pub async fn create_wallet_seed(
+    pub async fn reset_wallet(&self) -> Result<()> {
+        self.execute_card_operation(|wallet| self.reset_wallet_io(wallet))
+            .await
+    }
+
+    pub async fn configure_card_with_mnemonic(
+        &self,
+        mnemonic: Mnemonic,
+        pin: String,   
+    ) -> Result<FactorSourceIDFromHash> {
+        self.execute_card_operation(|wallet| {
+            self._restore_wallet_seed(wallet, mnemonic, pin)
+        })
+        .await
+    }
+
+    pub async fn configure_card(
         &self,
         pin: String,
         word_count: i64,
@@ -58,6 +83,19 @@ impl ArculusWalletClient {
         .await
     }
 
+    pub async fn sign_hash(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        pin: String,
+        hash: Hash, 
+        paths: IndexSet<DerivationPath>,
+    ) -> Result<IndexSet<SignatureWithPublicKey>> {
+        self.execute_card_operation(|wallet| {
+            self._sign_hash(wallet, factor_source, pin, hash, paths)
+        })
+        .await
+    }
+
     pub async fn derive_public_keys(
         &self,
         factor_source: ArculusCardFactorSource,
@@ -65,25 +103,6 @@ impl ArculusWalletClient {
     ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
         self.execute_card_operation(|wallet| {
             self._derive_public_keys(wallet, factor_source, paths)
-        })
-        .await
-    }
-}
-
-// API for wallet debug mode
-impl ArculusWalletClient {
-    pub async fn reset_wallet(&self) -> Result<()> {
-        self.execute_card_operation(|wallet| self.reset_wallet_io(wallet))
-            .await
-    }
-
-    pub async fn restore_wallet_seed(
-        &self,
-        mnemonic: Mnemonic,
-        pin: String,
-    ) -> Result<FactorSourceIDFromHash> {
-        self.execute_card_operation(|wallet| {
-            self._restore_wallet_seed(wallet, mnemonic, pin)
         })
         .await
     }
@@ -261,6 +280,27 @@ impl ArculusWalletClient {
         }
 
         Ok(per_hash_signatures)
+    }
+
+    async fn _sign_hash(
+        &self,
+        wallet: ArculusWalletPointer,
+        factor_source: ArculusCardFactorSource,
+        pin: String,
+        hash: Hash, 
+        paths: IndexSet<DerivationPath>,
+    ) -> Result<IndexSet<SignatureWithPublicKey>> {
+        self.validate_factor_source(wallet.clone(), factor_source).await?;
+        self.verify_pin_io(wallet, pin).await?;
+
+        let mut signatures = IndexSet::new();
+        for path in paths {
+            let signature = self
+                .sign_hash_path(wallet.clone(), hash.clone(), path)
+                .await?;
+            signatures.insert(signature);
+        }
+        Ok(signatures)
     }
 
     async fn sign_hash_path(
@@ -927,8 +967,7 @@ mod tests {
         let paths = IndexSet::from([path1.clone(), path2.clone()]);
 
         let factor_source_id_pub_key = PublicKey::sample_ed25519();
-        let factor_source_id = FactorSourceIDFromHash::from_public_key_bytes(
-            FactorSourceKind::ArculusCard,
+        let factor_source_id = FactorSourceIDFromHash::new_for_arculus(
             factor_source_id_pub_key.to_bytes(),
         );
         let factor_source = ArculusCardFactorSource::new(

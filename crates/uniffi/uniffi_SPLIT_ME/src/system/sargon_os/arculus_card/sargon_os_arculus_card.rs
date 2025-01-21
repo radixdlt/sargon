@@ -1,46 +1,48 @@
 use crate::prelude::*;
 use sargon::OsArculusCard;
+use sargon::ArculusCardState as InternalArculusCardState;
+
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+pub enum ArculusCardState {
+    NotConfigured,
+    Configured(FactorSourceIDFromHash),
+}
 
 #[uniffi::export]
 impl SargonOS {
-    pub async fn read_card_factor_source_id(
+    async fn arculus_get_card_state(&self) -> Result<ArculusCardState> {
+        self.wrapped
+            .arculus_get_card_state()
+            .await
+            .into_result()
+    }
+
+    pub async fn arculus_configure_card(
         &self,
     ) -> Result<FactorSourceIDFromHash> {
         self.wrapped
-            .read_card_factor_source_id()
+            .arculus_configure_card()
             .await
             .into_result()
     }
 
-    pub async fn create_wallet_seed(
-        &self,
-        pin: String,
-        word_count: i64,
-    ) -> Result<Mnemonic> {
-        self.wrapped
-            .create_wallet_seed(pin, word_count)
-            .await
-            .into_result()
-    }
-
-    pub async fn restore_wallet_seed(
+    pub async fn arculus_configure_card_with_mnemonic(
         &self,
         mnemonic: Mnemonic,
-        pin: String,
-    ) -> Result<()> {
+    ) -> Result<FactorSourceIDFromHash> {
         self.wrapped
-            .restore_wallet_seed(mnemonic.into_internal(), pin)
+            .arculus_configure_card_with_mnemonic(mnemonic.into_internal())
             .await
             .into_result()
     }
 
-    pub async fn derive_public_keys(
+    pub async fn arculus_card_derive_public_keys(
         &self,
         factor_source: ArculusCardFactorSource,
         paths: Vec<DerivationPath>,
     ) -> Result<Vec<HierarchicalDeterministicPublicKey>> {
         self.wrapped
-            .derive_public_keys(
+            .arculus_card_derive_public_keys(
                 factor_source.into_internal(),
                 paths
                     .into_iter()
@@ -57,21 +59,45 @@ impl SargonOS {
             .into_iter_result()
     }
 
-    pub async fn sign_hash(
+    pub async fn arculus_card_sign_hashes(
         &self,
         factor_source: ArculusCardFactorSource,
-        pin: String,
-        hash: Hash,
-        derivation_path: DerivationPath,
-    ) -> Result<SignatureWithPublicKey> {
+        hashes: HashMap<Hash, Vec<DerivationPath>>,
+    ) -> Result<HashMap<Hash, Vec<SignatureWithPublicKey>>> {
         self.wrapped
-            .sign_hash(
+            .arculus_card_sign_hashes(
                 factor_source.into_internal(),
-                pin,
-                hash.into_internal(),
-                derivation_path.into_internal(),
+                hashes.into_iter().map(|(hash, paths)| {
+                    (hash.into_internal(), paths.into_iter().map(|path| path.into_internal()).collect::<sargon::IndexSet<_>>())
+                }).collect::<sargon::IndexMap<sargon::Hash, IndexSet<sargon::DerivationPath>>>(),
             )
             .await
+            .map(|signatures| {
+                signatures.into_iter()
+                    .map(|(hash, sigs)| {
+                        (hash.into(), sigs.into_iter().map(|sig| sig.into()).collect::<Vec<SignatureWithPublicKey>>())
+                    })
+                    .collect::<HashMap<Hash, Vec<SignatureWithPublicKey>>>()
+            })
             .into_result()
+    }
+
+    pub async fn arculus_card_sign_hash(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        hash: Hash,
+        paths: Vec<DerivationPath>,
+    ) -> Result<Vec<SignatureWithPublicKey>> {
+        self.wrapped.arculus_card_sign_hash(
+            factor_source.into_internal(),
+            hash.into(),
+            paths.into_iter().map(|path| path.into_internal()).collect::<sargon::IndexSet<_>>()
+        )
+        .await
+        .into_iter_result()
+    }
+
+    pub async fn arculus_card_reset(&self) -> Result<()> {
+        self.wrapped.arculus_card_reset().await.into_result()
     }
 }

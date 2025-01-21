@@ -1,8 +1,7 @@
 use crate::prelude::*;
 
-impl ArculusWalletClient {}
 impl ArculusWalletClient {
-    pub(crate) async fn do_card_io<Response, F>(
+    pub async fn do_card_io<Response, F>(
         &self,
         command: BagOfBytes,
         response_map: F,
@@ -15,7 +14,7 @@ impl ArculusWalletClient {
         response_map(response)
     }
 
-    pub(crate) async fn do_card_io_validate_status<F>(
+    pub async fn do_card_io_validate_status<F>(
         &self,
         command: BagOfBytes,
         response_map: F,
@@ -30,7 +29,7 @@ impl ArculusWalletClient {
         status.as_result()
     }
 
-    pub(crate) async fn do_chainned_card_io<Response, F>(
+    pub async fn do_chainned_card_io<Response, F>(
         &self,
         commands: Vec<BagOfBytes>,
         response_map: F,
@@ -54,7 +53,7 @@ impl ArculusWalletClient {
 /// 3. Parse the NFC response received from the card using the native Arculus CSDK.
 impl ArculusWalletClient {
     /// Gets the public key by path on the card
-    pub(crate) async fn get_public_key_by_path_io(
+    pub async fn get_public_key_by_path_io(
         &self,
         wallet: ArculusWalletPointer,
         path: HDPath,
@@ -77,7 +76,7 @@ impl ArculusWalletClient {
     }
 
     /// Selects the given wallet on the card
-    pub(crate) async fn select_card_io(
+    pub async fn select_card_io(
         &self,
         wallet: ArculusWalletPointer,
         aid: BagOfBytes,
@@ -98,7 +97,7 @@ impl ArculusWalletClient {
     }
 
     /// Gets the card gguid
-    pub(crate) async fn get_gguid_io(
+    pub async fn get_gguid_io(
         &self,
         wallet: ArculusWalletPointer,
     ) -> Result<BagOfBytes> {
@@ -116,7 +115,7 @@ impl ArculusWalletClient {
     }
 
     /// Gets the card firmware version
-    pub(crate) async fn get_firmware_version_io(
+    pub async fn get_firmware_version_io(
         &self,
         wallet: ArculusWalletPointer,
     ) -> Result<BagOfBytes> {
@@ -131,7 +130,7 @@ impl ArculusWalletClient {
     }
 
     /// Stores the pin on the card
-    pub(crate) async fn store_pin_io(
+    pub async fn store_pin_io(
         &self,
         wallet: ArculusWalletPointer,
         pin: String,
@@ -148,7 +147,7 @@ impl ArculusWalletClient {
     }
 
     /// Verifies the pin on the card
-    pub(crate) async fn verify_pin_io(
+    pub async fn verify_pin_io(
         &self,
         wallet: ArculusWalletPointer,
         pin: String,
@@ -163,7 +162,7 @@ impl ArculusWalletClient {
     }
 
     /// Initializes the encrypted session on the card
-    pub(crate) async fn init_encrypted_session_io(
+    pub async fn init_encrypted_session_io(
         &self,
         wallet: ArculusWalletPointer,
     ) -> Result<()> {
@@ -178,7 +177,7 @@ impl ArculusWalletClient {
     }
 
     /// Creates the new wallet seed for the seed phrase word count
-    pub(crate) async fn create_wallet_seed_io(
+    pub async fn create_wallet_seed_io(
         &self,
         wallet: ArculusWalletPointer,
         word_count: i64,
@@ -196,7 +195,7 @@ impl ArculusWalletClient {
     }
 
     /// Resets the wallet on the card
-    pub(crate) async fn reset_wallet_io(
+    pub async fn reset_wallet_io(
         &self,
         wallet: ArculusWalletPointer,
     ) -> Result<()> {
@@ -210,7 +209,7 @@ impl ArculusWalletClient {
     }
 
     /// Initializes the wallet recovery process
-    pub(crate) async fn init_recover_wallet_io(
+    pub async fn init_recover_wallet_io(
         &self,
         wallet: ArculusWalletPointer,
         seed_words_count: i64,
@@ -227,7 +226,7 @@ impl ArculusWalletClient {
     }
 
     /// Finishes the wallet recovery process
-    pub(crate) async fn finish_recover_wallet_io(
+    pub async fn finish_recover_wallet_io(
         &self,
         wallet: ArculusWalletPointer,
         seed: BagOfBytes,
@@ -244,7 +243,7 @@ impl ArculusWalletClient {
     }
 
     /// Signs the hash by path on the card
-    pub(crate) async fn sign_hash_path_io(
+    pub async fn sign_hash_path_io(
         &self,
         wallet: ArculusWalletPointer,
         path: HDPath,

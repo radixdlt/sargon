@@ -3,27 +3,35 @@ use crate::prelude::*;
 #[async_trait::async_trait]
 pub trait OsArculusCard {
     async fn arculus_get_card_state(&self) -> Result<ArculusCardState>;
-    async fn arculus_card_create_wallet_seed(
-        &self,
-        pin: String,
-        word_count: i64,
-    ) -> Result<Mnemonic>;
-    async fn restore_wallet_seed(
+    async fn arculus_configure_card(
+        &self
+    ) -> Result<FactorSourceIDFromHash>;
+
+    async fn arculus_configure_card_with_mnemonic(
         &self,
         mnemonic: Mnemonic,
-        pin: String,
-    ) -> Result<()>;
-    async fn derive_public_keys(
+    ) -> Result<FactorSourceIDFromHash>;
+
+    async fn arculus_card_derive_public_keys(
         &self,
         factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>>;
+
     async fn arculus_card_sign_hashes(
         &self,
         factor_source: ArculusCardFactorSource,
-        pin: String,
         hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
     ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>>;
+
+    async fn arculus_card_sign_hash(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        hash: Hash,
+        paths: IndexSet<DerivationPath>,
+    ) -> Result<IndexSet<SignatureWithPublicKey>>;
+
+    async fn arculus_card_reset(&self) -> Result<()>;
 }
 
 #[async_trait::async_trait]
@@ -32,23 +40,20 @@ impl OsArculusCard for SargonOS {
         self.arculus_get_card_state().await
     }
 
-    async fn arculus_card_create_wallet_seed(
+    async fn arculus_configure_card(
         &self,
-        pin: String,
-        word_count: i64,
     ) -> Result<FactorSourceIDFromHash> {
-        self.arculus_card_create_wallet_seed(pin, word_count).await
+        self.arculus_configure_card().await
     }
 
-    async fn restore_wallet_seed(
+    async fn arculus_configure_card_with_mnemonic(
         &self,
-        mnemonic: Mnemonic,
-        pin: String,
-    ) -> Result<()> {
-        self.restore_wallet_seed(mnemonic, pin).await
+        mnemonic: Mnemonic
+    ) -> Result<FactorSourceIDFromHash> {
+        self.arculus_configure_card_with_mnemonic(mnemonic).await
     }
 
-    async fn derive_public_keys(
+    async fn arculus_card_derive_public_keys(
         &self,
         factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
@@ -59,10 +64,22 @@ impl OsArculusCard for SargonOS {
     async fn arculus_card_sign_hashes(
         &self,
         factor_source: ArculusCardFactorSource,
-        pin: String,
         hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
     ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>> {
-        self.arculus_card_sign_hashes(factor_source, pin, hashes)
+        self.arculus_card_sign_hashes(factor_source, hashes)
             .await
+    }
+
+    async fn arculus_card_sign_hash(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        hash: Hash,
+        paths: IndexSet<DerivationPath>,
+    ) -> Result<IndexSet<SignatureWithPublicKey>> {
+        self.arculus_card_sign_hash(factor_source, hash, paths).await
+    }
+
+    async fn arculus_card_reset(&self) -> Result<()> {
+        self.arculus_card_reset().await
     }
 }

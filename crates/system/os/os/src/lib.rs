@@ -26,6 +26,7 @@ pub mod prelude {
     pub use crate::sargon_os_personas::*;
     pub use crate::sargon_os_profile::*;
     pub use crate::testing_interactors::*;
+    pub use clients::prelude::ArculusCardState;
 
     pub(crate) use build_info::prelude::*;
     pub(crate) use clients::prelude::*;
