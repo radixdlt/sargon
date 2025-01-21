@@ -38,6 +38,6 @@ pub enum SelectedPrimaryThresholdFactorsStatusInvalidReason {
         factor_source_kind: FactorSourceKind,
     },
     Other {
-        underlying: SecurityShieldBuilderInvalidReason,
+        underlying: SecurityShieldBuilderRuleViolation,
     },
 }

@@ -52,7 +52,7 @@ impl SargonOS {
     pub async fn add_security_structure_of_factor_source_ids(
         &self,
         structure_ids: &SecurityStructureOfFactorSourceIDs,
-    ) -> Result<bool> {
+    ) -> Result<()> {
         self.wrapped
             .add_security_structure_of_factor_source_ids(
                 &structure_ids.into_internal(),

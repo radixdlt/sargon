@@ -457,19 +457,19 @@ impl SecurityShieldBuilder {
 
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
-        self.get(|builder| builder.validate().map(|x| x.into()))
-    }
-
     pub fn validate_role_in_isolation(
         &self,
         role: RoleKind,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         self.get(|builder| {
             builder
                 .validate_role_in_isolation(role.into_internal())
                 .map(|x| x.into())
         })
+    }
+
+    pub fn status(&self) -> SecurityShieldBuilderStatus {
+        self.get(|builder| builder.status().into())
     }
 
     pub fn selected_primary_threshold_factors_status(
@@ -497,7 +497,7 @@ impl SecurityShieldBuilder {
         &self,
     ) -> Result<
         SecurityStructureOfFactorSourceIDs,
-        SecurityShieldBuilderInvalidReason,
+        SecurityShieldBuilderRuleViolation,
     > {
         self.get(|builder| builder.build())
             .map(|shield| shield.into())
@@ -906,8 +906,16 @@ mod tests {
         assert_eq!(xs, sut.clone().get_confirmation_factors());
 
         assert_eq!(
-            sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason {
+                    is_primary_role_factor_list_empty: false,
+                    is_recovery_role_factor_list_empty: false,
+                    is_confirmation_role_factor_list_empty: false,
+                    is_auth_signing_factor_missing: true
+                }
+            }
+            .into()
         );
         sut = sut.set_authentication_signing_factor(Some(
             FactorSourceID::sample_device_other(),
@@ -917,9 +925,9 @@ mod tests {
             Some(FactorSourceID::sample_device_other())
         );
 
-        let v0 = sut.validate();
-        let v1 = sut.validate(); // can call validate many times!
-        assert_eq!(v0, v1);
+        let s0 = sut.status();
+        let s1 = sut.status(); // can call status many times!
+        assert_eq!(s0, s1);
 
         let shield0 = sut.clone().build().unwrap();
         let shield = sut.clone().build().unwrap(); // can call build many times!

@@ -489,7 +489,7 @@ impl SecurityShieldBuilder {
     ) -> RoleBuilderMutateResult {
         self.get(|builder| {
             builder.validation_for_addition_of_factor_source_of_kind_to_confirmation_override(
-                factor_source_kind
+                factor_source_kind,
             )
         })
     }
@@ -500,7 +500,7 @@ impl SecurityShieldBuilder {
     ) -> RoleBuilderMutateResult {
         self.get(|builder| {
             builder.validation_for_addition_of_factor_source_of_kind_to_recovery_override(
-                factor_source_kind
+                factor_source_kind,
             )
         })
     }
@@ -511,7 +511,7 @@ impl SecurityShieldBuilder {
     ) -> RoleBuilderMutateResult {
         self.get(|builder| {
             builder.validation_for_addition_of_factor_source_of_kind_to_primary_override(
-                factor_source_kind
+                factor_source_kind,
             )
         })
     }
@@ -690,14 +690,14 @@ impl SecurityShieldBuilder {
 
 impl SecurityShieldBuilder {
     /// `None` means valid!
-    pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
+    pub fn validate(&self) -> Option<SecurityShieldBuilderRuleViolation> {
         if DisplayName::new(self.get_name()).is_err() {
-            return Some(SecurityShieldBuilderInvalidReason::ShieldNameInvalid);
+            return Some(SecurityShieldBuilderRuleViolation::ShieldNameInvalid);
         }
 
         if self.get_authentication_signing_factor().is_none() {
             return Some(
-                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+                SecurityShieldBuilderRuleViolation::MissingAuthSigningFactor,
             );
         }
 
@@ -714,7 +714,7 @@ impl SecurityShieldBuilder {
     /// Validates **just** the primary role **in isolation**.
     pub fn validate_primary_role(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         self.validate_role_in_isolation(RoleKind::Primary)
     }
 
@@ -722,7 +722,7 @@ impl SecurityShieldBuilder {
     pub fn validate_role_in_isolation(
         &self,
         role: RoleKind,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         self.get(|builder| {
             let validation = match role {
                 RoleKind::Primary => {
@@ -739,6 +739,47 @@ impl SecurityShieldBuilder {
         })
     }
 
+    pub fn is_role_in_isolation_invalid(&self, role: RoleKind) -> bool {
+        self.validate_role_in_isolation(role).is_some_and(|reason| {
+            matches!(
+                reason,
+                SecurityShieldBuilderRuleViolation::MissingAuthSigningFactor |
+                SecurityShieldBuilderRuleViolation::PrimaryRoleMustHaveAtLeastOneFactor |
+                SecurityShieldBuilderRuleViolation::RecoveryRoleMustHaveAtLeastOneFactor |
+                SecurityShieldBuilderRuleViolation::ConfirmationRoleMustHaveAtLeastOneFactor
+            )
+        })
+    }
+
+    pub fn status(&self) -> SecurityShieldBuilderStatus {
+        let invalid_reason = SecurityShieldBuilderStatusInvalidReason::new(
+            IsPrimaryRoleFactorListEmpty(
+                self.is_role_in_isolation_invalid(RoleKind::Primary),
+            ),
+            IsRecoveryRoleFactorListEmpty(
+                self.is_role_in_isolation_invalid(RoleKind::Recovery),
+            ),
+            IsConfirmationRoleFactorListEmpty(
+                self.is_role_in_isolation_invalid(RoleKind::Confirmation),
+            ),
+            IsAuthSigningFactorMissing(
+                self.get_authentication_signing_factor().is_none(),
+            ),
+        );
+
+        if let Some(invalid_reason) = invalid_reason {
+            SecurityShieldBuilderStatus::Invalid {
+                reason: invalid_reason,
+            }
+        } else if let Some(rule_violation_reason) = self.validate() {
+            SecurityShieldBuilderStatus::Weak {
+                reason: rule_violation_reason,
+            }
+        } else {
+            SecurityShieldBuilderStatus::Strong
+        }
+    }
+
     pub fn selected_primary_threshold_factors_status(
         &self,
     ) -> SelectedPrimaryThresholdFactorsStatus {
@@ -750,10 +791,10 @@ impl SecurityShieldBuilder {
 
         if let Some(reason) = reason {
             return match reason {
-                SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor => {
+                SecurityShieldBuilderRuleViolation::PrimaryRoleMustHaveAtLeastOneFactor => {
                     SelectedPrimaryThresholdFactorsStatus::Insufficient
                 }
-                SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor => {
+                SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor => {
                     SelectedPrimaryThresholdFactorsStatus::Invalid {
                         reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::CannotBeUsedAlone {
                             factor_source_kind: FactorSourceKind::Password,
@@ -801,11 +842,11 @@ impl SecurityShieldBuilder {
         &self,
     ) -> Result<
         SecurityStructureOfFactorSourceIds,
-        SecurityShieldBuilderInvalidReason,
+        SecurityShieldBuilderRuleViolation,
     > {
         let authentication_signing_factor =
             self.get_authentication_signing_factor().ok_or(
-                SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor,
+                SecurityShieldBuilderRuleViolation::MissingAuthSigningFactor,
             )?;
         let matrix_result = self.get(|builder| builder.build());
 
@@ -821,7 +862,7 @@ impl SecurityShieldBuilder {
         let name = self.get_name();
         let display_name = DisplayName::new(name).map_err(|e| {
             error!("Invalid DisplayName {:?}", e);
-            SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+            SecurityShieldBuilderRuleViolation::ShieldNameInvalid
         })?;
 
         let metadata = SecurityStructureMetadata::with_details(
@@ -1309,7 +1350,7 @@ mod tests {
             sut.selected_primary_threshold_factors_status(),
             SelectedPrimaryThresholdFactorsStatus::Invalid {
                 reason: SelectedPrimaryThresholdFactorsStatusInvalidReason::Other {
-                    underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices
+                    underlying: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
                 }
             }
         );
@@ -1342,7 +1383,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             sut.validate(),
             Some(
-                SecurityShieldBuilderInvalidReason::FactorSourceAlreadyPresent
+                SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent
             )
         );
         pretty_assertions::assert_eq!(
@@ -1390,7 +1431,7 @@ mod test_invalid {
         let sut = SUT::strict();
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+            SecurityShieldBuilderRuleViolation::MissingAuthSigningFactor
         );
     }
 
@@ -1409,7 +1450,7 @@ mod test_invalid {
 
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+            SecurityShieldBuilderRuleViolation::MissingAuthSigningFactor
         );
     }
 
@@ -1418,11 +1459,11 @@ mod test_invalid {
         let sut = SUT::sample_strict_with_auth_signing();
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::PrimaryRoleMustHaveAtLeastOneFactor
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::PrimaryRoleMustHaveAtLeastOneFactor
         );
     }
 
@@ -1436,11 +1477,11 @@ mod test_invalid {
         sut.set_threshold(Threshold::zero());
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
+            SecurityShieldBuilderRuleViolation::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
+            SecurityShieldBuilderRuleViolation::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
         );
     }
 
@@ -1452,11 +1493,11 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::RecoveryRoleMustHaveAtLeastOneFactor
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Recovery).unwrap(),
-            SecurityShieldBuilderInvalidReason::RecoveryRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::RecoveryRoleMustHaveAtLeastOneFactor
         );
     }
 
@@ -1471,11 +1512,11 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::ConfirmationRoleMustHaveAtLeastOneFactor
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Confirmation).unwrap(),
-            SecurityShieldBuilderInvalidReason::ConfirmationRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::ConfirmationRoleMustHaveAtLeastOneFactor
         );
     }
 
@@ -1493,7 +1534,7 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+            SecurityShieldBuilderRuleViolation::MissingAuthSigningFactor
         );
         assert!(sut.validate_role_in_isolation(RoleKind::Primary).is_none());
         sut.set_authentication_signing_factor(Some(
@@ -1541,7 +1582,7 @@ mod test_invalid {
         sut.set_name("");
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+            SecurityShieldBuilderRuleViolation::ShieldNameInvalid
         );
     }
 
@@ -1564,7 +1605,7 @@ mod test_invalid {
         sut.set_time_period_until_auto_confirm(TimePeriod::with_days(0));
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero
+            SecurityShieldBuilderRuleViolation::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero
         );
     }
 
@@ -1582,7 +1623,7 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::RecoveryAndConfirmationFactorsOverlap
+            SecurityShieldBuilderRuleViolation::RecoveryAndConfirmationFactorsOverlap
         );
     }
 
@@ -1601,7 +1642,7 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole
+            SecurityShieldBuilderRuleViolation::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole
         );
     }
 
@@ -1620,7 +1661,7 @@ mod test_invalid {
         );
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole
+            SecurityShieldBuilderRuleViolation::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole
         );
     }
 
@@ -1646,11 +1687,11 @@ mod test_invalid {
 
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
+            SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
+            SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
         );
     }
 
@@ -1672,11 +1713,11 @@ mod test_invalid {
 
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+            SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+            SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
         );
     }
 
@@ -1701,7 +1742,7 @@ mod test_invalid {
 
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+            SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
         );
     }
 
@@ -1723,11 +1764,11 @@ mod test_invalid {
 
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::PrimaryRoleMustHaveAtLeastOneFactor
         );
         assert_eq!(
             sut.validate_role_in_isolation(RoleKind::Primary).unwrap(),
-            SecurityShieldBuilderInvalidReason::PrimaryRoleMustHaveAtLeastOneFactor
+            SecurityShieldBuilderRuleViolation::PrimaryRoleMustHaveAtLeastOneFactor
         );
     }
 
@@ -1738,7 +1779,7 @@ mod test_invalid {
         sut.set_name("");
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+            SecurityShieldBuilderRuleViolation::ShieldNameInvalid
         );
     }
 
@@ -1791,10 +1832,169 @@ mod test_invalid {
             status,
             SelectedPrimaryThresholdFactorsStatus::Invalid {
                 reason: Other {
-                    underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices
+                    underlying: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
                 }
             }
         );
+    }
+
+    #[test]
+    fn shield_status_strong() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
+            )
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        let status = sut.status();
+
+        pretty_assertions::assert_eq!(
+            status,
+            SecurityShieldBuilderStatus::Strong
+        );
+        assert!(sut.build().is_ok())
+    }
+
+    #[test]
+    fn shield_status_weak() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
+            )
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+            }
+        );
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .remove_factor_from_recovery(FactorSourceID::sample_ledger())
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::RecoveryAndConfirmationFactorsOverlap
+            }
+        );
+
+        let _ = sut
+            .remove_factor_from_recovery(FactorSourceID::sample_password())
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger_other(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_ledger_other(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::RecoveryAndConfirmationFactorsOverlap
+            }
+        );
+        assert!(sut.build().is_ok())
+    }
+
+    #[test]
+    fn shield_status_invalid() {
+        let sut = SUT::default();
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(true),
+                    IsRecoveryRoleFactorListEmpty(true),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(true),
+                )
+                .unwrap()
+            }
+        );
+
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(false),
+                    IsRecoveryRoleFactorListEmpty(true),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(true),
+                )
+                .unwrap()
+            }
+        );
+
+        let _ = sut.set_authentication_signing_factor(Some(
+            FactorSourceID::sample_device(),
+        ));
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(false),
+                    IsRecoveryRoleFactorListEmpty(true),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(false),
+                )
+                .unwrap()
+            }
+        );
+
+        let _ = sut.add_factor_source_to_recovery_override(
+            FactorSourceID::sample_ledger(),
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason::new(
+                    IsPrimaryRoleFactorListEmpty(false),
+                    IsRecoveryRoleFactorListEmpty(false),
+                    IsConfirmationRoleFactorListEmpty(true),
+                    IsAuthSigningFactorMissing(false),
+                )
+                .unwrap()
+            }
+        );
+        assert!(sut.build().is_err())
     }
 }
 
@@ -1903,5 +2103,153 @@ mod lenient {
 
         test(FactorListKind::Threshold);
         test(FactorListKind::Override);
+    }
+
+    #[test]
+    fn basic_validation() {
+        let sut = SUT::lenient();
+
+        let _ = sut
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            ); // did not get added, duplicates are not allowed
+
+        assert_eq!(
+            sut.get_primary_threshold_factors(),
+            vec![FactorSourceID::sample_device()]
+        );
+
+        assert_eq!(
+            // Takes into consideration all the rules because it disregards the mode
+            // the builder was initialized with and always uses SecurityShieldBuilderMode::Strict
+            sut._validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
+                FactorSourceKind::Device,
+            ),
+            Err(
+                RoleBuilderValidation::ForeverInvalid(
+                    ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
+                )
+            )
+        );
+
+        let _ = sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device_other(),
+        ); // actually this is added because of the lenient mode
+
+        assert_eq!(
+            sut.get_primary_threshold_factors(),
+            vec![
+                FactorSourceID::sample_device(),
+                FactorSourceID::sample_device_other()
+            ]
+        );
+
+        let _ = sut
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
+            }
+        );
+        assert!(sut.build().is_ok());
+    }
+
+    #[test]
+    fn primary_password_never_alone() {
+        let sut = SUT::lenient();
+
+        let _ = sut
+            .set_authentication_signing_factor(FactorSourceID::sample_device())
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_password(),
+            ); // not allowed
+
+        assert!(sut.get_primary_override_factors().is_empty(),);
+
+        let _ = sut
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_arculus(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus_other(),
+            )
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_password(),
+            );
+
+        assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+            }
+        );
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_ledger(),
+            )
+            .set_threshold(Threshold::Specific(1));
+
+        assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
+            }
+        );
+
+        let _ = sut.set_threshold(Threshold::Specific(2));
+
+        assert_eq!(sut.status(), SecurityShieldBuilderStatus::Strong);
+
+        let shield = sut.build().unwrap();
+        assert!(shield
+            .matrix_of_factors
+            .primary_role
+            .get_override_factors()
+            .is_empty());
+        assert_eq!(
+            shield.matrix_of_factors.primary_role.get_threshold(),
+            Threshold::Specific(2)
+        );
+        assert_eq!(
+            shield
+                .matrix_of_factors
+                .primary_role
+                .get_threshold_factors()
+                .clone(),
+            vec![
+                FactorSourceID::sample_password(),
+                FactorSourceID::sample_ledger()
+            ]
+        );
+    }
+
+    #[test]
+    fn validation_for_addition() {
+        let sut = SUT::lenient();
+
+        assert_eq!(
+            sut._validation_for_addition_of_factor_source_of_kind_to_primary_override(
+                FactorSourceKind::Password,
+            ),
+            Err(
+                RoleBuilderValidation::ForeverInvalid(
+                    ForeverInvalidReason::PrimaryCannotHavePasswordInOverrideList
+                )
+            )
+        );
     }
 }

@@ -27,7 +27,11 @@ impl Threshold {
     /// Returns the selectable values for a threshold.
     pub fn values(max_threshold: u8) -> Vec<Threshold> {
         std::iter::once(Threshold::All)
-            .chain((1..=max_threshold - 1).rev().map(Threshold::Specific))
+            .chain(
+                (1..=max_threshold.saturating_sub(1))
+                    .rev()
+                    .map(Threshold::Specific),
+            )
             .collect()
     }
 }
@@ -78,5 +82,8 @@ mod tests {
     fn values() {
         let res = SUT::values(3);
         assert_eq!(res, vec![SUT::All, SUT::Specific(2), SUT::Specific(1)]);
+
+        let res = SUT::values(0);
+        assert_eq!(res, vec![SUT::All]);
     }
 }

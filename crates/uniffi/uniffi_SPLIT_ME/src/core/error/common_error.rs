@@ -102,6 +102,12 @@ pub enum CommonError {
         bad_value: String,
     },
     SigningFailedTooManyFactorSourcesNeglected,
+    GatewaySubmitDuplicateTX {
+        intent_hash: String,
+    },
+    UnableToLoadMnemonicFromSecureStorage {
+        bad_value: String,
+    },
 }
 
 #[uniffi::export]
@@ -306,6 +312,16 @@ impl CommonError {
             }
             SigningFailedTooManyFactorSourcesNeglected => {
                 InternalCommonError::SigningFailedTooManyFactorSourcesNeglected
+            }
+            GatewaySubmitDuplicateTX { intent_hash } => {
+                InternalCommonError::GatewaySubmitDuplicateTX {
+                    intent_hash: intent_hash.clone(),
+                }
+            }
+            UnableToLoadMnemonicFromSecureStorage { bad_value } => {
+                InternalCommonError::UnableToLoadMnemonicFromSecureStorage {
+                    bad_value: bad_value.clone(),
+                }
             }
             _ => InternalCommonError::Unknown,
         }

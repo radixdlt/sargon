@@ -375,6 +375,18 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         })
     }
 
+    pub(crate) fn build_with_minimum_validation(
+        &self,
+    ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
+        self.validate_minimum_factor_count().map(|_| {
+            RoleWithFactorSourceIds::with_factors_and_threshold(
+                self.get_threshold(),
+                self.get_threshold_factors().clone(),
+                self.get_override_factors().clone(),
+            )
+        })
+    }
+
     pub(crate) fn set_specific_threshold(
         &mut self,
         threshold: u8,
@@ -488,6 +500,12 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             self.validation_for_addition_of_password_to_primary(Threshold)?;
         }
 
+        self.validate_minimum_factor_count()?;
+
+        Ok(())
+    }
+
+    fn validate_minimum_factor_count(&self) -> RoleBuilderMutateResult {
         if self.all_factors().is_empty() {
             return RoleBuilderMutateResult::not_yet_valid(
                 RoleMustHaveAtLeastOneFactor,
