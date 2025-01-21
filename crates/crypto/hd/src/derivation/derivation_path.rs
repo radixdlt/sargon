@@ -343,15 +343,15 @@ mod tests {
             value: AccountPath::new(
                 NetworkID::Mainnet,
                 CAP26KeyKind::TransactionSigning,
-                Hardened::from_local_key_space(U31::ZERO, IsSecurified(true))
+                Hardened::from_local_key_space(U31::new(3), IsSecurified(true))
                     .unwrap(),
             ),
         };
 
-        assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/0S");
+        assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/3S");
         assert_eq!(
             sut.to_canonical_bip32_string(),
-            "m/44H/1022H/1H/525H/1460H/2147483648H"
+            "m/44H/1022H/1H/525H/1460H/2147483651H"
         )
     }
 
