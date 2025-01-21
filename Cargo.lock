@@ -3805,6 +3805,7 @@ dependencies = [
  "radix-transactions",
  "sargon-os",
  "sargon-os-accounts",
+ "sargon-os-derive-public-keys",
  "sargon-os-factors",
  "sargon-os-security-center",
  "sargon-os-signing",
@@ -3870,6 +3871,25 @@ dependencies = [
  "sargon-os",
  "serde",
  "transaction-models",
+]
+
+[[package]]
+name = "sargon-os-derive-public-keys"
+version = "1.1.106"
+dependencies = [
+ "actix-rt",
+ "async-trait",
+ "clients",
+ "derive_more",
+ "drivers",
+ "error",
+ "interactors",
+ "key-derivation-traits",
+ "keys-collector",
+ "log",
+ "prelude",
+ "profile",
+ "sargon-os",
 ]
 
 [[package]]
