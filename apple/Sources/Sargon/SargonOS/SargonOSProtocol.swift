@@ -7,6 +7,7 @@ public protocol SargonOSProtocol {
 	var os: SargonOS { get }
 
 	func createAccountWithBDFS(
+		networkId: NetworkID?,
 		name: DisplayName
 	) async throws -> Account
 }
@@ -14,9 +15,10 @@ public protocol SargonOSProtocol {
 // MARK: Forward calls to `os`
 extension SargonOSProtocol {
 	public func createAccountWithBDFS(
+		networkId: NetworkID?,
 		name: DisplayName
 	) async throws -> Account {
-		try await os.createAccountWithBDFS(name: name)
+		try await os.createAccountWithBDFS(networkId: networkId, name: name)
 	}
 }
 
