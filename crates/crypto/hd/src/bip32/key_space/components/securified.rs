@@ -133,13 +133,40 @@ impl TryFrom<HDPathComponent> for SecurifiedU30 {
     }
 }
 impl IsPathComponentStringConvertible for SecurifiedU30 {
-    const CANONICAL_SUFFIX: &'static str = "S";
-    const NON_CANONICAL_SUFFIX: &'static str = "^";
+    const VERBOSE_SYNTAX_SUFFIX: &'static str = "S";
+    const SHORTHAND_SYNTAX_SUFFIX: &'static str = "^";
+}
+
+impl SecurifiedU30 {
+    /// Accepts `1073741824H` which will be interpreted as `0S`
+    /// and `1073741825H` which will be interpreted as `1S` etc.
+    fn from_canonical_bip32_str(s: &str) -> Result<Self> {
+        let offsetted = Self::value_in_local_keyspace_from_bip32_string_with_acceptable_suffixes(s,
+            vec![
+                Self::VERBOSE_SYNTAX_SUFFIX,
+                Self::SHORTHAND_SYNTAX_SUFFIX,
+                // We allow the unsecurified syntax as well - since that
+                // is what we get from the canonical BIP32 strings
+                UnsecurifiedHardened::VERBOSE_SYNTAX_SUFFIX,
+                UnsecurifiedHardened::SHORTHAND_SYNTAX_SUFFIX,
+            ])?;
+        let unoffsetted = offsetted
+            .checked_sub(RELATIVELY_LOCAL_OFFSET_SECURIFIED)
+            .ok_or(CommonError::IndexOverflow)?;
+        Self::from_local_key_space(unoffsetted)
+    }
+
+    /// Tries to parse a strict Radix HDPath string (using securified notation)
+    /// and if that fails, tries to parse a canonical BIP32 string.
+    pub(crate) fn from_lenient_bip32_string(s: &str) -> Result<Self> {
+        Self::from_bip32_string(s)
+            .or_else(|_| Self::from_canonical_bip32_str(s))
+    }
 }
 impl FromStr for SecurifiedU30 {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_lenient_bip32_string(s)
     }
 }
 
@@ -166,6 +193,14 @@ mod tests {
     #[test]
     fn ord() {
         assert!(SUT::sample() < SUT::sample_other());
+    }
+
+    #[test]
+    fn from_canonical_bip32() {
+        assert_eq!(
+            SUT::from_canonical_bip32_str("1073741825H").unwrap(),
+            SUT::from_local_key_space(U31::ONE).unwrap()
+        );
     }
 
     #[test]
@@ -196,7 +231,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_canonical_0() {
+    fn from_str_valid_verbose_syntax_0() {
         assert_eq!(
             "0S".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U31::ZERO).unwrap()
@@ -204,7 +239,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_canonical_1() {
+    fn from_str_valid_verbose_syntax_1() {
         assert_eq!(
             "1S".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U31::ONE).unwrap()
@@ -212,7 +247,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_canonical_max() {
+    fn from_str_valid_verbose_syntax_max() {
         assert_eq!(
             "1073741823S".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U30_MAX).unwrap()
@@ -220,7 +255,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_uncanonical_0() {
+    fn from_str_valid_shorthand_syntax_0() {
         assert_eq!(
             "0^".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U31::ZERO).unwrap()
@@ -228,7 +263,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_uncanonical_1() {
+    fn from_str_valid_shorthand_syntax_1() {
         assert_eq!(
             "1^".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U31::ONE).unwrap()
@@ -236,7 +271,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_uncanonical_max() {
+    fn from_str_valid_shorthand_syntax_max() {
         assert_eq!(
             "1073741823^".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U30_MAX).unwrap()
@@ -377,7 +412,6 @@ mod tests {
         assert_json_value_fails::<SUT>(json!("^"));
         assert_json_value_fails::<SUT>(json!("S"));
         assert_json_value_fails::<SUT>(json!("2"));
-        assert_json_value_fails::<SUT>(json!("2'"));
         assert_json_value_fails::<SUT>(json!("2X"));
         assert_json_value_fails::<SUT>(json!("   "));
     }

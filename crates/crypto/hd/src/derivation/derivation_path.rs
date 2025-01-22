@@ -81,9 +81,10 @@ macro_rules! path_union {
             impl FromBIP32Str for $union_name {
                 fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
                     let s = s.as_ref();
-                    Result::<Self>::Err(CommonError::InvalidBIP32Path { bad_value: s.to_owned() })
+                    // Result::<Self>::Err(CommonError::InvalidBIP32Path { bad_value: s.to_owned() })
+                    Result::<Self>::Err(CommonError::InvalidDisplayNameEmpty)
                     $(
-                        .or($variant_type::from_bip32_string(s).map(Self::[< $variant_name:snake >]))
+                        .or_else(|_| $variant_type::from_bip32_string(s).map(Self::[< $variant_name:snake >]))
                     )+
 
                 }
@@ -361,6 +362,14 @@ mod tests {
     }
 
     #[test]
+    fn from_canonical_bip32_str() {
+        let canonical = "m/44H/1022H/1H/525H/1460H/1073741824H";
+        let sut = SUT::from_str(canonical).unwrap();
+        assert_eq!(sut.to_canonical_bip32_string(), canonical);
+        assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/0S");
+    }
+
+    #[test]
     fn string_representation_of_canonical_and_non_canonical_for_securified_derivation_path_zero(
     ) {
         let sut = SUT::Account {
@@ -384,7 +393,7 @@ mod tests {
     }
 
     #[test]
-    fn string_representation_of_canonical_and_non_canonical_for_securified_derivation_path_2(
+    fn string_representation_of_canonical_and_shorthand_syntax_for_securified_derivation_path_2(
     ) {
         let sut = SUT::Account {
             value: AccountPath::new(
@@ -403,7 +412,7 @@ mod tests {
     }
 
     #[test]
-    fn string_representation_of_canonical_and_non_canonical_for_unsecurified_derivation_path(
+    fn string_representation_of_canonical_and_shorthand_syntax_for_unsecurified_derivation_path(
     ) {
         let sut = SUT::Account {
             value: AccountPath::new(

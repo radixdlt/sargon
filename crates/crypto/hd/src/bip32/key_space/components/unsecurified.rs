@@ -303,7 +303,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_0_hardened_canonical() {
+    fn from_str_valid_0_hardened_verbose_syntax() {
         assert_eq!(
             "0H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED).unwrap()
@@ -311,7 +311,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_1_hardened_canonical() {
+    fn from_str_valid_1_hardened_verbose_syntax() {
         assert_eq!(
             "1H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -319,7 +319,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_2_hardened_non_canonical() {
+    fn from_str_valid_2_hardened_shorthand_syntax() {
         assert_eq!(
             "2'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -327,7 +327,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_3_hardened_non_canonical() {
+    fn from_str_valid_3_hardened_shorthand_syntax() {
         assert_eq!(
             "3'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED).unwrap()

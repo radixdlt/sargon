@@ -243,7 +243,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_hardened_non_canonical() {
+    fn from_str_hardened_shorthand_syntax() {
         let sut = SUT::from_str("m/44'/1022'/0'/0/8'").unwrap();
         assert_eq!(
             sut.index,
@@ -265,7 +265,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_unhardened_non_canonical() {
+    fn from_str_unhardened_shorthand_syntax() {
         let sut = SUT::from_str("m/44'/1022'/0'/0/6").unwrap();
         assert_eq!(
             sut.index,

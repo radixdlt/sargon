@@ -120,8 +120,8 @@ impl TryFrom<u32> for Unhardened {
 }
 
 impl IsPathComponentStringConvertible for Unhardened {
-    const CANONICAL_SUFFIX: &'static str = "";
-    const NON_CANONICAL_SUFFIX: &'static str = "";
+    const VERBOSE_SYNTAX_SUFFIX: &'static str = "";
+    const SHORTHAND_SYNTAX_SUFFIX: &'static str = "";
 }
 
 impl FromStr for Unhardened {

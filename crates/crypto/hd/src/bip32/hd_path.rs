@@ -235,4 +235,16 @@ mod tests {
         assert_json_value_fails::<HDPath>(json!("m/44X"));
         assert_json_value_fails::<HDPath>(json!("super invalid path"));
     }
+
+    #[test]
+    fn from_canonical_bip32_str() {
+        let canonical = "m/44H/1022H/1H/525H/1460H/1073741824H";
+        let sut = SUT::from_str(canonical).unwrap();
+        assert_eq!(
+            DerivationPath::from(AccountPath::try_from(sut.clone()).unwrap())
+                .to_canonical_bip32_string(),
+            canonical
+        );
+        assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/0S");
+    }
 }

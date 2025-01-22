@@ -13,12 +13,12 @@ use crate::prelude::*;
     derive_more::Display,
 )]
 pub enum KeySpace {
-    #[debug("{}", if *is_hardened { UnsecurifiedHardened::NON_CANONICAL_SUFFIX } else { "" })]
-    #[display("{}", if *is_hardened { UnsecurifiedHardened::CANONICAL_SUFFIX } else { "" })]
+    #[debug("{}", if *is_hardened { UnsecurifiedHardened::SHORTHAND_SYNTAX_SUFFIX } else { "" })]
+    #[display("{}", if *is_hardened { UnsecurifiedHardened::VERBOSE_SYNTAX_SUFFIX } else { "" })]
     Unsecurified { is_hardened: bool },
 
-    #[debug("{}", SecurifiedU30::NON_CANONICAL_SUFFIX)]
-    #[display("{}", SecurifiedU30::CANONICAL_SUFFIX)]
+    #[debug("{}", SecurifiedU30::SHORTHAND_SYNTAX_SUFFIX)]
+    #[display("{}", SecurifiedU30::VERBOSE_SYNTAX_SUFFIX)]
     Securified,
 }
 

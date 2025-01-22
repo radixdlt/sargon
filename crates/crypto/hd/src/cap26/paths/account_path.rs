@@ -437,4 +437,15 @@ mod tests {
         let b: AccountPath = "m/44H/1022H/1H/525H/1678H/0H".parse().unwrap();
         assert_ne!(a, b);
     }
+
+    #[test]
+    fn from_canonical_bip32_str() {
+        let canonical = "m/44H/1022H/1H/525H/1460H/1073741824H";
+        let sut = SUT::from_str(canonical).unwrap();
+        assert_eq!(
+            DerivationPath::from(sut.clone()).to_canonical_bip32_string(),
+            canonical
+        );
+        assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/0S");
+    }
 }

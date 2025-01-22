@@ -283,7 +283,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_1_securified_canonical() {
+    fn from_str_valid_1_securified_verbose_syntax() {
         assert_eq!(
             "1S".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
@@ -291,7 +291,7 @@ mod tests {
         );
     }
     #[test]
-    fn from_str_valid_1_securified_non_canonical() {
+    fn from_str_valid_1_securified_shorthand_syntax() {
         assert_eq!(
             "1^".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
@@ -300,7 +300,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_1_hardened_canonical() {
+    fn from_str_valid_1_hardened_verbose_syntax() {
         assert_eq!(
             "1H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -308,7 +308,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_2_hardened_non_canonical() {
+    fn from_str_valid_2_hardened_shorthand_syntax() {
         assert_eq!(
             "2'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -316,7 +316,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_3_hardened_non_canonical() {
+    fn from_str_valid_3_hardened_shorthand_syntax() {
         assert_eq!(
             "3'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED).unwrap()
