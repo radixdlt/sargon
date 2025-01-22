@@ -22,6 +22,8 @@ impl TryFrom<HDPathComponent> for NetworkID {
     }
 }
 
+pub const CAP26_PATH_ENTITY_INDEX_POS: usize = 5;
+
 impl TryFrom<HDPath> for UnvalidatedCAP26Path {
     type Error = CommonError;
 
@@ -51,7 +53,8 @@ impl TryFrom<HDPath> for UnvalidatedCAP26Path {
         let entity_kind = CAP26EntityKind::try_from(components[3])?;
         let key_kind = CAP26KeyKind::try_from(components[4])?;
 
-        let hardened = Hardened::try_from(components[5])?;
+        let hardened =
+            Hardened::try_from(components[CAP26_PATH_ENTITY_INDEX_POS])?;
 
         Ok(UnvalidatedCAP26Path {
             network_id,

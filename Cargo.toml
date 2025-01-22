@@ -309,7 +309,9 @@ sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
 
 
 # ==== EXTERNAL DEPENDENCIES ====
-actix-rt = { version = "2.10.0", default-features = false, features = ["macros"] }
+actix-rt = { version = "2.10.0", default-features = false, features = [
+    "macros",
+] }
 aes-gcm = { version = "=0.10.3", default-features = false, features = [
     "aes",
     "alloc",
@@ -331,7 +333,7 @@ bip39 = { version = "=2.0.0", default-features = true, features = [
 
 camino = { version = "1.0.8", default-features = false }
 cargo_toml = { version = "0.15.3", default-features = false }
-clap = { version =  "4.5.1", default-features = false, features = [
+clap = { version = "4.5.1", default-features = false, features = [
     "std",
     "derive",
 ] }
@@ -370,7 +372,9 @@ log = { version = "0.4.20", default-features = false }
 once_cell = { version = "1.19.0", default-features = false }
 paste = { version = "1.0.14", default-features = false }
 preinterpret = { version = "0.2.0", default-features = false }
-pretty_assertions = { version = "1.4.0", default-features = false, features = ["std"] }
+pretty_assertions = { version = "1.4.0", default-features = false, features = [
+    "std",
+] }
 pretty_env_logger = { version = "0.5.0", default-features = false }
 rand = { version = "0.8.5", default-features = false, features = ["getrandom"] }
 regex = { version = "1.9.3", default-features = false }
@@ -378,14 +382,16 @@ reqwest = { version = "0.12.3", default-features = false, features = [
     "native-tls-vendored",
 ] }
 serde_with = { version = "3.4.0", default-features = false }
-serde = { version = "1.0.193", default-features = false, features = ["derive", "rc", "std"] }
+serde = { version = "1.0.193", default-features = false, features = [
+    "derive",
+    "rc",
+    "std",
+] }
 serde_json = { version = "1.0.108", default-features = false, features = [
     "preserve_order",
 ] }
 serde_repr = { version = "0.1.17", default-features = false }
-strum = { version = "0.26.1", default-features = false, features = [
-    "derive",
-] }
+strum = { version = "0.26.1", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.50", default-features = false }
 url = { version = "2.5.0", default-features = false, features = ["serde"] }
 uniffi = { git = "https://github.com/mozilla/uniffi-rs/", rev = "9127d4d9cfb8ff8372e70f2e4e0eb36bc06f146d", features = [

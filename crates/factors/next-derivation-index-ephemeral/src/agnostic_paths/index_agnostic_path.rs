@@ -73,7 +73,7 @@ impl IndexAgnosticPath {
     }
 
     fn _to_str(&self) -> String {
-        let base = self._to_hd_path().to_bip32_string_with(false);
+        let base = self._to_hd_path().to_bip32_string_with(false, false);
         format!("{}/{}{}", base, self.key_space, Self::COMPONENT_SUFFIX)
     }
 }
