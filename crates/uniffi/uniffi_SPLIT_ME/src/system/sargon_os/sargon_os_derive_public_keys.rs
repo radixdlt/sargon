@@ -21,7 +21,7 @@ impl SargonOS {
 
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Enum)]
 pub enum DerivePublicKeysSource {
-    MnemonicWithPassphrase(MnemonicWithPassphrase),
+    Mnemonic(MnemonicWithPassphrase),
 
     FactorSource(FactorSourceIDFromHash),
 }

@@ -11,7 +11,7 @@ pub trait OsDerivePublicKeys {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum DerivePublicKeysSource {
-    MnemonicWithPassphrase(MnemonicWithPassphrase),
+    Mnemonic(MnemonicWithPassphrase),
 
     FactorSource(FactorSourceIDFromHash),
 }
@@ -24,9 +24,7 @@ impl OsDerivePublicKeys for SargonOS {
         source: DerivePublicKeysSource,
     ) -> Result<Vec<HierarchicalDeterministicPublicKey>> {
         match source {
-            DerivePublicKeysSource::MnemonicWithPassphrase(
-                mnemonic_with_passphrase,
-            ) => {
+            DerivePublicKeysSource::Mnemonic(mnemonic_with_passphrase) => {
                 let public_keys = mnemonic_with_passphrase
                     .derive_public_keys_vec(derivation_paths);
                 Ok(public_keys)
