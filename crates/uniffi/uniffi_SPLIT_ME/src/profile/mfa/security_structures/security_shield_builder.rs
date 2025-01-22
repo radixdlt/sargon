@@ -595,9 +595,6 @@ impl FactorSource {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use profile_security_structures::prelude::{
-        FactorSourceInRoleBuilderValidationStatus, ForeverInvalidReason,
-    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
