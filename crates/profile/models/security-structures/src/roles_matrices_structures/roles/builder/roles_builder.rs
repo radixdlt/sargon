@@ -643,42 +643,21 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             FactorSourceAlreadyPresent,
         );
 
-        match mode {
-            SecurityShieldBuilderMode::Strict => {
-                if self.contains_factor_source(factor_source_id) {
+        match factor_list_kind {
+            Override => {
+                if self.override_contains_factor_source(factor_source_id) {
                     return duplicates_err;
                 }
             }
-            SecurityShieldBuilderMode::Lenient => {
-                match factor_list_kind {
-                    Override => {
-                        if self
-                            .override_contains_factor_source(factor_source_id)
-                        {
-                            return duplicates_err;
-                        }
-                        // but if threshold contains it, we're good (since mode is lenient)
-                    }
-                    Threshold => {
-                        if self
-                            .threshold_contains_factor_source(factor_source_id)
-                        {
-                            return duplicates_err;
-                        }
-                    } // but if override contains it, we're good (since mode is lenient)
+            Threshold => {
+                if self.threshold_contains_factor_source(factor_source_id) {
+                    return duplicates_err;
                 }
             }
         }
+
         let factor_source_kind = factor_source_id.get_factor_source_kind();
         self._validation_add(factor_source_kind, factor_list_kind, mode)
-    }
-
-    fn contains_factor_source(
-        &self,
-        factor_source_id: &FactorSourceID,
-    ) -> bool {
-        self.override_contains_factor_source(factor_source_id)
-            || self.threshold_contains_factor_source(factor_source_id)
     }
 
     fn contains_factor_source_of_kind(

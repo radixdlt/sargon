@@ -537,58 +537,6 @@ mod validation_for_addition_of_factor_source_for_each {
         }
 
         #[test]
-        fn device_2x_threshold_override_first_ok_second_not() {
-            let mut sut = make();
-            let xs = sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
-                &IndexSet::from_iter([
-                    FactorSourceID::sample_device(),
-                    FactorSourceID::sample_device_other(),
-                ]),
-            );
-            assert_eq!(
-                xs.into_iter().collect::<Vec<_>>(),
-                vec![
-                    FactorSourceInRoleBuilderValidationStatus::ok(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device()
-                    ),
-                    FactorSourceInRoleBuilderValidationStatus::ok(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device_other(),
-                    )
-                ]
-            );
-
-            sut.add_factor_source_to_primary_threshold(
-                FactorSourceID::sample_device(),
-            )
-            .unwrap();
-
-            let xs = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
-                &IndexSet::from_iter([
-                    FactorSourceID::sample_device(),
-                    FactorSourceID::sample_device_other(),
-                ]),
-            );
-
-            pretty_assertions::assert_eq!(
-                xs.into_iter().collect::<Vec<_>>(),
-                vec![
-                    FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device(),
-                        ForeverInvalidReason::FactorSourceAlreadyPresent
-                    ),
-                    FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device_other(),
-                        ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
-                    ),
-                ]
-            );
-        }
-
-        #[test]
         fn device_threshold_override_2x_first_ok_second_not() {
             let mut sut = make();
             let xs = sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
@@ -617,58 +565,6 @@ mod validation_for_addition_of_factor_source_for_each {
             .unwrap();
 
             let xs = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
-                &IndexSet::from_iter([
-                    FactorSourceID::sample_device(),
-                    FactorSourceID::sample_device_other(),
-                ]),
-            );
-
-            pretty_assertions::assert_eq!(
-                xs.into_iter().collect::<Vec<_>>(),
-                vec![
-                    FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device(),
-                        ForeverInvalidReason::FactorSourceAlreadyPresent
-                    ),
-                    FactorSourceInRoleBuilderValidationStatus::forever_invalid(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device_other(),
-                        ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
-                    ),
-                ]
-            );
-        }
-
-        #[test]
-        fn device_2x_override_threshold_first_ok_second_not() {
-            let mut sut = make();
-            let xs = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
-                &IndexSet::from_iter([
-                    FactorSourceID::sample_device(),
-                    FactorSourceID::sample_device_other(),
-                ]),
-            );
-            assert_eq!(
-                xs.into_iter().collect::<Vec<_>>(),
-                vec![
-                    FactorSourceInRoleBuilderValidationStatus::ok(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device()
-                    ),
-                    FactorSourceInRoleBuilderValidationStatus::ok(
-                        RoleKind::Primary,
-                        FactorSourceID::sample_device_other(),
-                    )
-                ]
-            );
-
-            sut.add_factor_source_to_primary_override(
-                FactorSourceID::sample_device(),
-            )
-            .unwrap();
-
-            let xs = sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
                 &IndexSet::from_iter([
                     FactorSourceID::sample_device(),
                     FactorSourceID::sample_device_other(),

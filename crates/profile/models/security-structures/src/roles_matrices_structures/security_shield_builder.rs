@@ -1383,7 +1383,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             sut.validate(),
             Some(
-                SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent
+                SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
             )
         );
         pretty_assertions::assert_eq!(
@@ -1996,6 +1996,41 @@ mod test_invalid {
         );
         assert!(sut.build().is_err())
     }
+
+    #[test]
+    fn shield_status_weak_when_multiple_devices_in_primary() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device_other(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
+            }
+        );
+        assert!(sut.build().is_ok())
+    }
 }
 
 #[cfg(test)]
@@ -2019,7 +2054,7 @@ mod lenient {
         let strict = SUT::strict();
         let lenient = SUT::lenient();
 
-        test(&strict, 0);
+        test(&strict, 1);
         test(&lenient, 1);
     }
 
@@ -2120,14 +2155,13 @@ mod lenient {
                 FactorSourceID::sample_device(),
             ); // did not get added, duplicates are not allowed
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             sut.get_primary_threshold_factors(),
             vec![FactorSourceID::sample_device()]
         );
 
-        assert_eq!(
-            // Takes into consideration all the rules because it disregards the mode
-            // the builder was initialized with and always uses SecurityShieldBuilderMode::Strict
+        pretty_assertions::assert_eq!(
+            // The mode used for validation is always Strict
             sut._validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
             ),
@@ -2138,16 +2172,25 @@ mod lenient {
             )
         );
 
-        let _ = sut.add_factor_source_to_primary_threshold(
-            FactorSourceID::sample_device_other(),
-        ); // actually this is added because of the lenient mode
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device_other(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device_other(),
+            ); // actually this is added because of the lenient mode
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             sut.get_primary_threshold_factors(),
             vec![
                 FactorSourceID::sample_device(),
                 FactorSourceID::sample_device_other()
             ]
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.get_primary_override_factors(),
+            vec![FactorSourceID::sample_device_other()]
         );
 
         let _ = sut
@@ -2158,7 +2201,7 @@ mod lenient {
                 FactorSourceID::sample_arculus(),
             );
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             sut.status(),
             SecurityShieldBuilderStatus::Weak {
                 reason: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
