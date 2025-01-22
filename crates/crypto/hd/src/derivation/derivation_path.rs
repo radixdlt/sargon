@@ -349,9 +349,9 @@ mod tests {
         };
 
         assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/3S");
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             sut.to_canonical_bip32_string(),
-            "m/44H/1022H/1H/525H/1460H/2147483651H"
+            format!("m/44H/1022H/1H/525H/1460H/{}H", U30::MAX + 3)
         )
     }
 
