@@ -60,9 +60,6 @@ pub enum ForeverInvalidReason {
     #[error("Factor source already present")]
     FactorSourceAlreadyPresent,
 
-    #[error("Primary role cannot have multiple devices")]
-    PrimaryCannotHaveMultipleDevices,
-
     #[error("Primary role cannot have password in override list")]
     PrimaryCannotHavePasswordInOverrideList,
 
@@ -426,15 +423,6 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         self.get_threshold_factors().contains(factor_source_id)
     }
 
-    fn override_contains_factor_source_of_kind(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.get_override_factors()
-            .iter()
-            .any(|f| f.get_factor_source_kind() == factor_source_kind)
-    }
-
     fn threshold_contains_factor_source_of_kind(
         &self,
         factor_source_kind: FactorSourceKind,
@@ -571,6 +559,18 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         self.validate_addition_of_password_and_minimum_factor_count()
     }
 
+    pub(crate) fn has_same_factor_in_both_threshold_and_override(
+        &self,
+    ) -> bool {
+        let threshold_set =
+            HashSet::<_>::from_iter(self.get_threshold_factors());
+        let override_set = HashSet::<_>::from_iter(self.get_override_factors());
+        let intersection = threshold_set
+            .intersection(&override_set)
+            .collect::<HashSet<_>>();
+        !intersection.is_empty()
+    }
+
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(
         &self,
         factor_source_kind: FactorSourceKind,
@@ -660,14 +660,6 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         self._validation_add(factor_source_kind, factor_list_kind, mode)
     }
 
-    fn contains_factor_source_of_kind(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.override_contains_factor_source_of_kind(factor_source_kind)
-            || self.threshold_contains_factor_source_of_kind(factor_source_kind)
-    }
-
     /// Removes a factor source from the list of `factor_list_kind`.
     ///
     /// Lowers the threshold if the deleted factor source is in the `factor_list_kind` list
@@ -749,19 +741,8 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                     PrimaryCannotContainTrustedContact,
                 );
             }
-            FactorSourceKind::Device => match mode {
-                SecurityShieldBuilderMode::Strict => {
-                    if self.contains_factor_source_of_kind(
-                        FactorSourceKind::Device,
-                    ) {
-                        return RoleBuilderMutateResult::forever_invalid(
-                            PrimaryCannotHaveMultipleDevices,
-                        );
-                    }
-                }
-                SecurityShieldBuilderMode::Lenient => {}
-            },
-            FactorSourceKind::LedgerHQHardwareWallet
+            FactorSourceKind::Device
+            | FactorSourceKind::LedgerHQHardwareWallet
             | FactorSourceKind::ArculusCard
             | FactorSourceKind::OffDeviceMnemonic => {}
         }

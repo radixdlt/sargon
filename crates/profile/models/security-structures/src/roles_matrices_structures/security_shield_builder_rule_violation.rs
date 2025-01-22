@@ -68,6 +68,12 @@ impl AsShieldBuilderViolation for MatrixRolesInCombinationForeverInvalid {
             RecoveryAndConfirmationFactorsOverlap => {
                 Some(SecurityShieldBuilderRuleViolation::RecoveryAndConfirmationFactorsOverlap)
             }
+            PrimaryCannotHaveMultipleDevices => {
+                Some(SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices)
+            }
+            ThresholdAndOverrideFactorsOverlap => {
+                Some(SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent)
+            }
         }
     }
 }
@@ -108,9 +114,8 @@ impl AsShieldBuilderViolation for ForeverInvalidReason {
     ) -> Option<SecurityShieldBuilderRuleViolation> {
         use ForeverInvalidReason::*;
         let reason = match self {
-            FactorSourceAlreadyPresent => SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent,
-            PrimaryCannotHaveMultipleDevices => {
-                SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
+            FactorSourceAlreadyPresent => {
+                SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent
             }
             PrimaryCannotHavePasswordInOverrideList => {
                 SecurityShieldBuilderRuleViolation::PrimaryCannotHavePasswordInOverrideList

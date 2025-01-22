@@ -594,8 +594,10 @@ impl FactorSource {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
+    use profile_security_structures::prelude::{
+        FactorSourceInRoleBuilderValidationStatus, ForeverInvalidReason,
+    };
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
@@ -849,14 +851,14 @@ mod tests {
             ])
         );
 
-        assert_ne!(
+        assert_eq!(
             sim_kind_prim,
             sut.clone().addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
                 FactorSourceKind::Device,
             )
         );
 
-        assert_ne!(
+        assert_eq!(
             sim_kind_prim_threshold,
             sut.clone().addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
                 FactorSourceKind::Device,
@@ -1030,5 +1032,25 @@ mod tests {
                 ]
             }
         );
+    }
+
+    #[test]
+    fn primary_override_validation_status_trusted_contact() {
+        let sut = SUT::new();
+        let res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
+            vec![FactorSourceID::sample_trusted_contact()],
+        );
+        pretty_assertions::assert_eq!(
+            res,
+            vec![
+                FactorSourceValidationStatus {
+                    role: RoleKind::Primary,
+                    factor_source_id: FactorSourceID::sample_trusted_contact(),
+                    reason_if_invalid: Some(FactorSourceValidationStatusReasonIfInvalid::NonBasic(
+                        SecurityShieldBuilderRuleViolation::PrimaryCannotContainTrustedContact
+                    ))
+                }
+            ]
+        )
     }
 }

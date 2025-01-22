@@ -221,14 +221,13 @@ mod tests {
         // ACT
         let structure_factor_id_level =
             SecurityStructureOfFactorSourceIDs::sample();
-        let _ = os
-            .with_timeout(|x| {
-                x.add_security_structure_of_factor_source_ids(
-                    &structure_factor_id_level,
-                )
-            })
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_factor_id_level,
+            )
+        })
+        .await
+        .unwrap();
 
         // ASSERT
         assert!(os
@@ -322,12 +321,11 @@ mod tests {
         // ACT
         let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
         let id = structure_ids.metadata.id;
-        let _ = os
-            .with_timeout(|x| {
-                x.add_security_structure_of_factor_source_ids(&structure_ids)
-            })
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure_ids)
+        })
+        .await
+        .unwrap();
 
         // ASSERT
         assert!(event_bus_driver.recorded().iter().any(|e| e.event
@@ -350,14 +348,13 @@ mod tests {
             SecurityStructureOfFactorSourceIDs::sample();
         let structure_source_ids_sample_other =
             SecurityStructureOfFactorSourceIDs::sample_other();
-        let _ = os
-            .with_timeout(|x| {
-                x.add_security_structure_of_factor_source_ids(
-                    &structure_source_ids_sample,
-                )
-            })
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_source_ids_sample,
+            )
+        })
+        .await
+        .unwrap();
 
         let result = os
             .with_timeout(|x| {
@@ -373,14 +370,13 @@ mod tests {
             })
         );
 
-        let _ = os
-            .with_timeout(|x| {
-                x.add_security_structure_of_factor_source_ids(
-                    &structure_source_ids_sample_other,
-                )
-            })
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_source_ids_sample_other,
+            )
+        })
+        .await
+        .unwrap();
 
         let structure_id_sample = SecurityStructureOfFactorSourceIDs::from(
             structure_source_ids_sample.clone(),

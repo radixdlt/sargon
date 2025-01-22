@@ -527,10 +527,9 @@ mod validation_for_addition_of_factor_source_for_each {
                         FactorSourceID::sample_device(),
                         ForeverInvalidReason::FactorSourceAlreadyPresent
                     ),
-                    FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                    FactorSourceInRoleBuilderValidationStatus::ok(
                         RoleKind::Primary,
                         FactorSourceID::sample_device_other(),
-                        ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
                     ),
                 ]
             );
@@ -579,10 +578,9 @@ mod validation_for_addition_of_factor_source_for_each {
                         FactorSourceID::sample_device(),
                         ForeverInvalidReason::FactorSourceAlreadyPresent
                     ),
-                    FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                    FactorSourceInRoleBuilderValidationStatus::ok(
                         RoleKind::Primary,
                         FactorSourceID::sample_device_other(),
-                        ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
                     ),
                 ]
             );
@@ -1119,7 +1117,7 @@ mod validation_of_addition_of_kind {
         }
 
         #[test]
-        fn device_is_err_for_second_3x_threshold() {
+        fn device_is_ok_for_second_3x_threshold() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
@@ -1132,11 +1130,11 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
 
         #[test]
-        fn device_is_err_for_second_2x_threshold_override() {
+        fn device_is_ok_for_second_2x_threshold_override() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
@@ -1149,11 +1147,11 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
 
         #[test]
-        fn device_is_err_for_second_threshold_override_threshold() {
+        fn device_is_ok_for_second_threshold_override_threshold() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
@@ -1166,11 +1164,11 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
 
         #[test]
-        fn device_is_err_for_second_threshold_override_2x() {
+        fn device_is_ok_for_second_threshold_override_2x() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
@@ -1183,11 +1181,11 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
 
         #[test]
-        fn device_is_err_for_second_3x_override() {
+        fn device_is_ok_for_second_3x_override() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
@@ -1200,11 +1198,11 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
 
         #[test]
-        fn device_is_err_for_second_2x_override_threshold() {
+        fn device_is_ok_for_second_2x_override_threshold() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
@@ -1217,11 +1215,11 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
 
         #[test]
-        fn device_is_err_for_second_override_threshold_2x() {
+        fn device_is_ok_for_second_override_threshold_2x() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
@@ -1234,11 +1232,11 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
 
         #[test]
-        fn device_is_err_for_second_override_threshold_override() {
+        fn device_is_ok_for_second_override_threshold_override() {
             let mut sut = make();
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
@@ -1251,7 +1249,7 @@ mod validation_of_addition_of_kind {
             let res = sut.validation_for_addition_of_factor_source_of_kind_to_primary_override(
                 FactorSourceKind::Device,
             );
-            assert!(res.is_err());
+            assert!(res.is_ok());
         }
     }
 }
