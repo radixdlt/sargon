@@ -108,6 +108,15 @@ pub enum CommonError {
     UnableToLoadMnemonicFromSecureStorage {
         bad_value: String,
     },
+    ExecutionSummaryFail {
+        underlying: String,
+    },
+    FailedToGenerateManifestSummary {
+        underlying: String,
+    },
+    InvalidInstructionsString {
+        underlying: String,
+    },
 }
 
 #[uniffi::export]
@@ -323,6 +332,21 @@ impl CommonError {
                     bad_value: bad_value.clone(),
                 }
             }
+            ExecutionSummaryFail { underlying } => {
+                InternalCommonError::ExecutionSummaryFail {
+                    underlying: underlying.clone(),
+                }
+            }
+            FailedToGenerateManifestSummary { underlying } => {
+                InternalCommonError::FailedToGenerateManifestSummary {
+                    underlying: underlying.clone(),
+                }
+            }
+            InvalidInstructionsString { underlying } => {
+                InternalCommonError::InvalidInstructionsString {
+                    underlying: underlying.clone(),
+                }
+            }
             _ => InternalCommonError::Unknown,
         }
     }
@@ -448,6 +472,31 @@ impl From<InternalCommonError> for CommonError {
             } => InvalidSecp256k1PublicKeyFromBytes { bad_value },
             InternalCommonError::SigningFailedTooManyFactorSourcesNeglected => {
                 SigningFailedTooManyFactorSourcesNeglected
+            }
+            InternalCommonError::GatewaySubmitDuplicateTX { intent_hash } => {
+                GatewaySubmitDuplicateTX {
+                    intent_hash: intent_hash.clone(),
+                }
+            }
+            InternalCommonError::UnableToLoadMnemonicFromSecureStorage {
+                bad_value,
+            } => UnableToLoadMnemonicFromSecureStorage {
+                bad_value: bad_value.clone(),
+            },
+            InternalCommonError::ExecutionSummaryFail { underlying } => {
+                ExecutionSummaryFail {
+                    underlying: underlying.clone(),
+                }
+            }
+            InternalCommonError::FailedToGenerateManifestSummary {
+                underlying,
+            } => FailedToGenerateManifestSummary {
+                underlying: underlying.clone(),
+            },
+            InternalCommonError::InvalidInstructionsString { underlying } => {
+                InvalidInstructionsString {
+                    underlying: underlying.clone(),
+                }
             }
             _ => Self::erased(value),
         }
