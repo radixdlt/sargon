@@ -78,7 +78,8 @@ impl HDPath {
             {
                 let securified = c.as_securified().unwrap();
                 let global = u32::from(securified.index_in_local_key_space());
-                let without_securified = global + U30_MAX;
+                let without_securified =
+                    global + RELATIVELY_LOCAL_OFFSET_SECURIFIED;
                 format!("{}H", without_securified)
             } else {
                 format!("{}", c)

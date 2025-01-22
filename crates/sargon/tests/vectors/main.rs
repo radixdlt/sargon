@@ -123,36 +123,70 @@ mod cap26_tests {
         mnemonic: Mnemonic,
         passphrase: impl AsRef<str>,
         network_id: NetworkID,
-        index: u32,
-        path: impl AsRef<str>,
+        index_unhardened: u32,
+        path_canonical_notation: impl AsRef<str>,
+        path_securified_notation: Option<&'static str>,
         private_key_hex: impl AsRef<str>,
         public_key_hex: impl AsRef<str>,
         factor_source_id_str: impl AsRef<str>,
         address: impl AsRef<str>,
     ) {
-        let path = path.as_ref();
+        let index_hardened = index_unhardened | 0x8000_0000;
+        let path_canonical_notation = path_canonical_notation.as_ref();
         let account_path = AccountPath::new(
             network_id,
             CAP26KeyKind::TransactionSigning,
-            Hardened::from_global_key_space(index).unwrap(),
+            Hardened::from_global_key_space(index_hardened).unwrap(),
         );
-        assert_eq!(account_path.to_string(), path); // test Display
-        assert_eq!(path.parse::<AccountPath>().unwrap(), account_path); // test FromStr
-        let private_key = mnemonic.to_seed("").derive_private_key(&account_path);
+
+        // Test display
+        let derivation_path = DerivationPath::from(account_path.clone());
+        pretty_assertions::assert_eq!(
+            derivation_path.to_canonical_bip32_string(),
+            path_canonical_notation
+        );
+        if let Some(path_securified_notation) = path_securified_notation {
+            pretty_assertions::assert_eq!(
+                derivation_path.to_bip32_string(),
+                path_securified_notation
+            );
+            pretty_assertions::assert_eq!(
+                path_securified_notation.parse::<AccountPath>().unwrap(),
+                account_path
+            ); // test FromStr
+        } else {
+            pretty_assertions::assert_eq!(
+                path_canonical_notation.parse::<AccountPath>().unwrap(),
+                account_path
+            ); // test FromStr
+        }
+
+        let private_key = mnemonic
+            .to_seed(passphrase.as_ref())
+            .derive_private_key(&account_path);
         let public_key = private_key.public_key();
-        // let account = Account::derive(&mnemoas_ref(), &account_path);
-        assert_eq!(private_key.to_hex(), private_key.as_ref());
-        assert_eq!(public_key.to_hex(), public_key.as_ref());
-        let account = AccountAddress::new(public_key, network_id);
-        let factor_source_id = FactorSourceIDFromHash::new_for_device(&MnemonicWithPassphrase::new(mnemonic))
-        assert_eq!(
-            factor_source_id.to_string(),
-            factor_source_id_str.as_ref()
+        pretty_assertions::assert_eq!(
+            private_key.to_hex(),
+            private_key_hex.as_ref()
         );
-        assert_eq!(account.address, address.as_ref());
-        assert_eq!(account.network_id, network_id);
-        assert_eq!(account.path, account_path);
-        assert_eq!(account.index, index);
+        pretty_assertions::assert_eq!(
+            public_key.to_hex(),
+            public_key_hex.as_ref()
+        );
+        let account_address =
+            AccountAddress::new(public_key.public_key, network_id);
+        let factor_source_id = FactorSourceIDFromHash::new_for_device(
+            &MnemonicWithPassphrase::new(mnemonic),
+        );
+        pretty_assertions::assert_eq!(
+            factor_source_id.to_string(),
+            format!("device:{}", factor_source_id_str.as_ref())
+        );
+        pretty_assertions::assert_eq!(
+            account_address.to_string(),
+            address.as_ref()
+        );
+        pretty_assertions::assert_eq!(account_address.network_id(), network_id);
     }
 
     #[test]
@@ -163,6 +197,7 @@ mod cap26_tests {
             NetworkID::Mainnet,
             0,
             "m/44H/1022H/1H/525H/1460H/0H",
+            None,
             "5b82120ec4763f8bacff71c8e529894fea1e735a5698ff400364a913f7b20c00",
             "f3d0210f6c2cecbdc977b7aae19d468a6c363e73a055bc877248f8318f0122e8",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -178,6 +213,7 @@ mod cap26_tests {
             NetworkID::Mainnet,
             1,
             "m/44H/1022H/1H/525H/1460H/1H",
+            None,
             "da5e924c716a05b616940dd7828e3020de4dc09c371ab03966e00e95c68cb439",
             "df49129a10aa88c76837611a4ecda794ac5f650e4401037e1ff275e52bc784c5",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -194,6 +230,7 @@ mod cap26_tests {
             NetworkID::Mainnet,
             (2i32.pow(30) - 3) as u32,
             "m/44H/1022H/1H/525H/1460H/1073741821H",
+            None,
             "d9e0394b67affb91b5acdc3ecf6786a6628892ffd605291c853568cbed498afa",
             "a484112bcd119488f13191a6ec57ff27606ea041537662730e60580cdb679616",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -210,6 +247,7 @@ mod cap26_tests {
             NetworkID::Mainnet,
             (2i32.pow(30) - 2) as u32,
             "m/44H/1022H/1H/525H/1460H/1073741822H",
+            None,
             "5218159039d5c639ae4e0b6b351b821e3687aa44768230c4f06a13ae0c78715c",
             "2155707a3cebd7788dc83113174d30e2c29abae34f399c27a6caa8c6f5ae543e",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -226,6 +264,7 @@ mod cap26_tests {
             NetworkID::Mainnet,
             (2i32.pow(30) - 1) as u32,
             "m/44H/1022H/1H/525H/1460H/1073741823H",
+            None,
             "5c5adfebe650684e3cc20e4dba49e1447d7ac12f63ae1bd8723554d0a95aaf38",
             "f4f43daaedc3603b3dc6b92a2014630a96ca2a20cc14d2dcaa71f49c30789689",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -241,7 +280,8 @@ mod cap26_tests {
             "",
             NetworkID::Mainnet,
             2u32.pow(30),
-            "m/44H/1022H/1H/525H/1460H/1073741824H", // Sargon securified notation: "/0S"
+            "m/44H/1022H/1H/525H/1460H/1073741824H",
+            Some("m/44H/1022H/1H/525H/1460H/0S"),
             "b0b9180f7c96778cffba7af2ef1ddf4705fca21b965e8a722ccf2ec403c35950",
             "e0293d4979bc303ea4fe361a62baf9c060c7d90267972b05c61eead9ef3eed3e",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -257,7 +297,8 @@ mod cap26_tests {
             "",
             NetworkID::Mainnet,
             2u32.pow(30) + 1,
-            "m/44H/1022H/1H/525H/1460H/1073741825H", // Sargon securified notation: "/1S"
+            "m/44H/1022H/1H/525H/1460H/1073741825H",
+            Some("m/44H/1022H/1H/525H/1460H/1S"), 
             "c1880587c727f2f01dfdf61d19b44283d311b31c12e8898b774b73e8067d25b1",
             "c6aaee6fa60d73a17989ce2a2a5db5a88cd696aef61d2f298262fae189dff04e",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -273,7 +314,8 @@ mod cap26_tests {
             "",
             NetworkID::Mainnet,
             2u32.pow(30) + 2,
-            "m/44H/1022H/1H/525H/1460H/1073741826H", // Sargon securified notation: "/2S"
+            "m/44H/1022H/1H/525H/1460H/1073741826H", 
+            Some("m/44H/1022H/1H/525H/1460H/2S"),
             "837bc77bb29e4702be39c69fbade7d350bc23f6daddf68a64474984e899a97a3",
             "6a92b3338dc74a50e8b3fff896a7e0f43c42742544af52de20353675d8bc7907",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -284,13 +326,13 @@ mod cap26_tests {
     #[test]
     fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_5()
     {
-        let idx = 2u32.pow(31u32) - 5;
         test(
             Mnemonic::sample_device_other(),
             "",
             NetworkID::Mainnet,
-            idx,
+            2u32.pow(31u32) - 5,
             "m/44H/1022H/1H/525H/1460H/2147483643H",
+            Some("m/44H/1022H/1H/525H/1460H/1073741819S"),
             "8371cdce66f0733cf1f8a07235825267e8e650f9bf194dfe82992c8ae77faa84",
             "9bce7e1a1d724b2013add0697e4133e2affc93b806793ee6709dfdc242738e19",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -301,13 +343,13 @@ mod cap26_tests {
     #[test]
     fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_4()
     {
-        let idx = 2u32.pow(31u32) - 4;
         test(
             Mnemonic::sample_device_other(),
             "",
             NetworkID::Mainnet,
-            idx,
-            "m/44H/1022H/1H/525H/1460H/2147483644H", // Sargon securified notation: "/1073741820S"
+            2u32.pow(31u32) - 4,
+            "m/44H/1022H/1H/525H/1460H/2147483644H",
+            Some("m/44H/1022H/1H/525H/1460H/1073741820S"), 
             "361126bd7947254c49b83c23bbb557219cfa2ac5e5a4551501f18236ffa4eb17",
             "481b737f5baaf52520612e70858ffa72a3624d5a050da5748844ac14036c8b17",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -318,13 +360,13 @@ mod cap26_tests {
     #[test]
     fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_3()
     {
-        let idx = 2u32.pow(31u32) - 3;
         test(
             Mnemonic::sample_device_other(),
             "",
             NetworkID::Mainnet,
-            idx,
-            "m/44H/1022H/1H/525H/1460H/2147483645H", // Sargon securified notation: "/1073741821S"
+            2u32.pow(31u32) - 3,
+            "m/44H/1022H/1H/525H/1460H/2147483645H", 
+            Some("m/44H/1022H/1H/525H/1460H/1073741821S"), 
             "f63fe429c5723448dfb8d1f3eda88a659473b4c38960a09bb20efe546fac95ee",
             "b2819057da648f36eadb59f60b732d4ae7fb22a207acf214e0271d3c587afd54",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -335,13 +377,13 @@ mod cap26_tests {
     #[test]
     fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_2()
     {
-        let idx = 2u32.pow(31u32) - 2;
         test(
             Mnemonic::sample_device_other(),
             "",
             NetworkID::Mainnet,
-            idx,
-            "m/44H/1022H/1H/525H/1460H/2147483646H", // Sargon securified notation: "/1073741822S"
+            2u32.pow(31u32) - 2,
+            "m/44H/1022H/1H/525H/1460H/2147483646H", 
+            Some("m/44H/1022H/1H/525H/1460H/1073741822S"), 
             "5a8b6327942ca8fc5b30fb5b0c1fa53e97362d514ff4f2c281060b9d51f7fc88",
             "932123e6c46af8ebde7a96bee4563e09bbf41b28eae9d6ba1c667a2f490a1fcf",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
@@ -352,13 +394,13 @@ mod cap26_tests {
     #[test]
     fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_1()
     {
-        let idx = 2u32.pow(31u32) - 1;
         test(
             Mnemonic::sample_device_other(),
             "",
             NetworkID::Mainnet,
-            idx,
-            "m/44H/1022H/1H/525H/1460H/2147483647H", // Sargon securified notation: "/1073741823S"
+            2u32.pow(31u32) - 1,
+            "m/44H/1022H/1H/525H/1460H/2147483647H", 
+            Some("m/44H/1022H/1H/525H/1460H/1073741823S"),
             "7eae6f235206329561b09fc2235d35e017c3f28b54fd3b4f6525e601257c4ce7",
             "87a2f84f826da0c62052fbe7b385ab78883c02d1fa5472c55a06aa529a0701e9",
             "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",

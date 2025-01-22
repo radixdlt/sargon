@@ -184,9 +184,6 @@ default-members = [
     # or cargo test --workspace to test it.
 ]
 
-[profile.dev]
-opt-level = 0
-
 [profile.release]
 incremental = false
 panic = 'unwind'

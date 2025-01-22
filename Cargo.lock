@@ -1814,7 +1814,6 @@ dependencies = [
  "numeric",
  "paste",
  "prelude",
- "pretty_assertions",
  "radix-common",
  "serde",
  "serde_json",

@@ -26,7 +26,6 @@ enum-as-inner = { workspace = true }
 enum-iterator = { workspace = true }
 iota-crypto = { workspace = true }
 itertools = { workspace = true }
-pretty_assertions = { workspace = true }
 paste = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
