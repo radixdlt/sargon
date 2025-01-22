@@ -337,7 +337,54 @@ mod tests {
     }
 
     #[test]
-    fn string_representation_of_canonical_and_non_canonical_for_securified_derivation_path(
+    fn string_representation_of_canonical_and_non_canonical_for_unsecurified_derivation_path_last(
+    ) {
+        let sut = SUT::Account {
+            value: AccountPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                Hardened::from_global_key_space(
+                    2u32.pow(30) - 1 + GLOBAL_OFFSET_HARDENED,
+                )
+                .unwrap(),
+            ),
+        };
+
+        assert_eq!(
+            sut.to_bip32_string(),
+            "m/44H/1022H/1H/525H/1460H/1073741823H"
+        );
+        assert_eq!(
+            sut.to_canonical_bip32_string(),
+            "m/44H/1022H/1H/525H/1460H/1073741823H"
+        );
+    }
+
+    #[test]
+    fn string_representation_of_canonical_and_non_canonical_for_securified_derivation_path_zero(
+    ) {
+        let sut = SUT::Account {
+            value: AccountPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                Hardened::from_local_key_space(U31::ZERO, IsSecurified(true))
+                    .unwrap(),
+            ),
+        };
+
+        assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/0S");
+        assert_eq!(
+            sut.to_canonical_bip32_string(),
+            "m/44H/1022H/1H/525H/1460H/1073741824H"
+        );
+        assert_eq!(
+            sut.to_canonical_bip32_string(),
+            format!("m/44H/1022H/1H/525H/1460H/{}H", 2u32.pow(30))
+        );
+    }
+
+    #[test]
+    fn string_representation_of_canonical_and_non_canonical_for_securified_derivation_path_2(
     ) {
         let sut = SUT::Account {
             value: AccountPath::new(
