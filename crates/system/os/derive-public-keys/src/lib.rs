@@ -1,7 +1,9 @@
 mod sargon_os_derive_public_keys;
+mod support;
 
 pub mod prelude {
     pub use crate::sargon_os_derive_public_keys::*;
+    pub use crate::support::*;
 
     pub(crate) use profile::prelude::*;
     pub(crate) use sargon_os::prelude::*;
@@ -16,7 +18,6 @@ pub mod prelude {
     mod testing {
         pub(crate) use clients::prelude::*;
         pub(crate) use interactors::prelude::*;
-        pub(crate) use key_derivation_traits::prelude::*;
     }
 }
 

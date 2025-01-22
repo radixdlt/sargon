@@ -696,6 +696,34 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_create_and_save_new_persona_sets_persona_data() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let persona = os
+            .with_timeout(|x| {
+                x.create_and_save_new_persona_with_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                    Some(PersonaData::sample()),
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            os.profile().unwrap().networks[0].personas,
+            Personas::just(persona)
+        );
+        assert_eq!(
+            os.profile().unwrap().networks[0].personas[0].persona_data,
+            PersonaData::sample()
+        );
+    }
+
+    #[actix_rt::test]
     async fn test_first_create_and_add_persona_has_index_0() {
         // ARRANGE
         let os = SUT::fast_boot().await;

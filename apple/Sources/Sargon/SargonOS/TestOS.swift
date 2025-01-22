@@ -48,7 +48,7 @@ extension TestOS {
 // MARK: Public
 extension TestOS {
 	@discardableResult
-	public func createAccountWithBDFS(
+	public func createAccount(
 		named name: String? = nil
 	) async throws -> Self {
 		let accountName = try name.map {

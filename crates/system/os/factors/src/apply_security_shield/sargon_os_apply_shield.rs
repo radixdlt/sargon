@@ -437,6 +437,7 @@ mod tests {
                 .create_and_save_new_persona_with_bdfs(
                     network,
                     DisplayName::sample_other(),
+                    None,
                 )
                 .await
                 .unwrap();
@@ -494,6 +495,7 @@ mod tests {
                 .create_and_save_new_persona_with_bdfs(
                     network,
                     DisplayName::sample_other(),
+                    None,
                 )
                 .await
                 .unwrap();
@@ -722,6 +724,7 @@ mod tests {
                 .create_and_save_new_persona_with_bdfs(
                     network,
                     DisplayName::sample(),
+                    None,
                 )
                 .await
                 .unwrap();
@@ -758,6 +761,7 @@ mod tests {
                 .create_and_save_new_persona_with_bdfs(
                     network,
                     DisplayName::sample(),
+                    None,
                 )
                 .await
                 .unwrap();
