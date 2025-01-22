@@ -397,31 +397,30 @@ mod tests {
         );
     }
 
-     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
-     #[test]
-     fn derive_a_curve25519_key_with_cap26_in_securified_space() {
-         let mwp = SUT::with_passphrase(
+    /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/cap26_curve25519.json#L8
+    #[test]
+    fn derive_a_curve25519_key_with_cap26_in_securified_space() {
+        let mwp = SUT::with_passphrase(
              Mnemonic::from_phrase(
                  "equip will roof matter pink blind book anxiety banner elbow sun young",
              )
              .unwrap(),
              BIP39Passphrase::default(),
          );
-         let seed = mwp.to_seed();
-         let private_key = seed.derive_private_key(
-             &AccountPath::from_str("m/44H/1022H/12H/525H/1460H/3S").unwrap(),
-         );
- 
-         assert_eq!(
-             "13e971fb16cb2c816d6b9f12176e9b8ab9af1831d006114d344d119ab2715506",
-             private_key.to_hex()
-         );
-         assert_eq!(
-             "451152a1cef7be603205086d4ebac0a0b78fda2ff4684b9dea5ca9ef003d4e7d",
-             private_key.public_key().to_hex()
-         );
-     }
- 
+        let seed = mwp.to_seed();
+        let private_key = seed.derive_private_key(
+            &AccountPath::from_str("m/44H/1022H/12H/525H/1460H/3S").unwrap(),
+        );
+
+        assert_eq!(
+            "13e971fb16cb2c816d6b9f12176e9b8ab9af1831d006114d344d119ab2715506",
+            private_key.to_hex()
+        );
+        assert_eq!(
+            "451152a1cef7be603205086d4ebac0a0b78fda2ff4684b9dea5ca9ef003d4e7d",
+            private_key.public_key().to_hex()
+        );
+    }
 
     /// Test vector: https://github.com/radixdlt/babylon-wallet-ios/blob/99161cbbb11a78f36db6991e5d5c5f092678d5fa/RadixWalletTests/CryptographyTests/SLIP10Tests/TestVectors/bip44_secp256k1.json#L288
     #[test]
