@@ -77,10 +77,8 @@ impl HDPath {
                 && c.is_securified()
             {
                 let securified = c.as_securified().unwrap();
-                let global = u32::from(securified.index_in_local_key_space());
-                let without_securified =
-                    global + RELATIVELY_LOCAL_OFFSET_SECURIFIED;
-                format!("{}H", without_securified)
+                let local = u32::from(securified.index_in_local_key_space());
+                format!("{}H", local + RELATIVELY_LOCAL_OFFSET_SECURIFIED)
             } else {
                 format!("{}", c)
             }
@@ -93,8 +91,14 @@ impl HDPath {
 
     /// This method returns the canonical bip32 representation of the path.
     /// In sargon, paths in the securified space are printed with the `S` notation after the index,
-    /// for readability purposes. Such paths need to be canonicalized in bip32 notation meaning that
-    /// an index of `i S` => `i + 2^31 + 2^30 H` for communication with other external APIs.
+    /// for readability purposes.
+    ///
+    /// The notation `{i}S` means `{i + 2^30}H`, and since `H` means `+ 2^31` we can
+    /// verbosely express `{i}S` as `{i + 2^30 + 2^31} (without the H)
+    ///
+    /// Such paths need to be canonicalized in bip32 notation meaning that
+    /// an index of `"{i}S"` => `"{i + 2^30}H"` when communication with other external APIs,
+    /// e.g. using Ledger hardware wallet or Arculus.
     pub fn to_canonical_bip32_string(&self) -> String {
         self.to_bip32_string_with(true, true)
     }
