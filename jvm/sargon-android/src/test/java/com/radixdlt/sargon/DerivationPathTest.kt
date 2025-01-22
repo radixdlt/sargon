@@ -71,7 +71,7 @@ class DerivationPathTest: SampleTestable<DerivationPath> {
             accountPathInSecurifiedSpace.displayString
         )
         assertEquals(
-            "m/44H/1022H/1H/525H/1460H/2147483648H",
+            "m/44H/1022H/1H/525H/1460H/1073741824H",
             accountPathInSecurifiedSpace.bip32CanonicalString
         )
 
