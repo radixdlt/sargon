@@ -915,7 +915,6 @@ mod tests {
                     is_auth_signing_factor_missing: true
                 }
             }
-            .into()
         );
         sut = sut.set_authentication_signing_factor(Some(
             FactorSourceID::sample_device_other(),
