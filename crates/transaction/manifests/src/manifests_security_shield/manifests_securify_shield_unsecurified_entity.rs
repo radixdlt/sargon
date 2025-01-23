@@ -8,7 +8,6 @@ use radix_engine_interface::blueprints::{
     },
     account::AccountSecurifyManifestInput as ScryptoAccountSecurifyManifestInput,
 };
-use radix_transactions::prelude::ManifestBuilder;
 
 use crate::prelude::*;
 
@@ -29,37 +28,16 @@ impl TransactionManifestApplySecurityShieldUnsecurifiedInput {
     }
 }
 
-pub trait TransactionManifestSecurifyEntity: Sized {
+pub trait TransactionManifestSecurifyUnsecurifiedEntity:
+    Sized + TransactionManifestSetRolaKey
+{
     fn apply_security_shield_for_unsecurified_entity(
         unsecurified_entity: AnyUnsecurifiedEntity,
         input: TransactionManifestApplySecurityShieldUnsecurifiedInput,
     ) -> Result<Self>;
-
-    fn set_rola_key(
-        builder: ManifestBuilder,
-        authentication_signing_factor_instance: &HierarchicalDeterministicFactorInstance,
-        entity_address: &AddressOfAccountOrPersona,
-    ) -> ManifestBuilder;
 }
 
-impl TransactionManifestSecurifyEntity for TransactionManifest {
-    fn set_rola_key(
-        builder: ManifestBuilder,
-        authentication_signing_factor_instance:
-        &HierarchicalDeterministicFactorInstance,
-        entity_address: &AddressOfAccountOrPersona,
-    ) -> ManifestBuilder {
-        let rola_key_hash = PublicKeyHash::hash(
-            authentication_signing_factor_instance.public_key(),
-        );
-        let owner_key_hashes = vec![rola_key_hash];
-        Self::set_owner_keys_hashes_on_builder(
-            entity_address,
-            owner_key_hashes,
-            builder,
-        )
-    }
-
+impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
     /// We do NOT top of XRD vault of AccessController - yet!
     /// Host will need to call the function:
     /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account`

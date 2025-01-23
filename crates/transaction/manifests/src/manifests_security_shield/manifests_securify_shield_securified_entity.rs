@@ -1,8 +1,11 @@
+#![allow(dead_code)]
 use profile_supporting_types::AnySecurifiedEntity;
 
 use crate::prelude::*;
 
-pub trait TransactionManifestSecurifySecurifiedEntity: Sized {
+pub trait TransactionManifestSecurifySecurifiedEntity:
+    Sized + TransactionManifestSetRolaKey
+{
     fn apply_security_shield_for_securified_entity(
         securified_entity: AnySecurifiedEntity,
         input: TransactionManifestApplySecurityShieldSecurifiedInput,
@@ -30,7 +33,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         //     //  builder.call_method(access_controller_address, , arguments)
         //     todo!();
         // }
-        todo!("Implement in coming PR")
+        todo!("implement me")
     }
 }
 
