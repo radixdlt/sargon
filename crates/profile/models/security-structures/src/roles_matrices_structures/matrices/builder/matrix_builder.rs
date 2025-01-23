@@ -218,7 +218,10 @@ impl MatrixBuilder {
     ) -> MatrixBuilderMutateResult {
         self.primary_role
             .validate_threshold_factors()
-            .into_matrix_err(RoleKind::Primary)
+            .into_matrix_err(RoleKind::Primary)?;
+        Self::validate_primary_list_cannot_have_multiple_devices(
+            self.primary_role.get_threshold_factors().iter().cloned(),
+        )
     }
 
     pub fn validate_recovery_role_in_isolation(
@@ -543,6 +546,52 @@ impl MatrixBuilder {
         Ok(())
     }
 
+    fn validate_primary_cannot_have_multiple_devices(
+        &self,
+    ) -> MatrixBuilderMutateResult {
+        Self::validate_primary_list_cannot_have_multiple_devices(
+            self.primary_role.all_factors().into_iter().cloned(),
+        )
+    }
+
+    fn validate_no_factor_may_be_used_in_both_primary_threshold_and_override(
+        &self,
+    ) -> MatrixBuilderMutateResult {
+        if self
+            .primary_role
+            .has_same_factor_in_both_threshold_and_override()
+        {
+            Err(MatrixBuilderValidation::CombinationViolation(
+                    MatrixRolesInCombinationViolation::ForeverInvalid(
+                        MatrixRolesInCombinationForeverInvalid::ThresholdAndOverrideFactorsOverlap,
+                    ),
+                ))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn validate_primary_list_cannot_have_multiple_devices(
+        factors: impl IntoIterator<Item = FactorSourceID>,
+    ) -> MatrixBuilderMutateResult {
+        let device_count = factors
+            .into_iter()
+            .filter(|fsid| {
+                fsid.get_factor_source_kind() == FactorSourceKind::Device
+            })
+            .count();
+
+        if device_count > 1 {
+            Err(MatrixBuilderValidation::CombinationViolation(
+                MatrixRolesInCombinationViolation::ForeverInvalid(
+                    MatrixRolesInCombinationForeverInvalid::PrimaryCannotHaveMultipleDevices,
+                ),
+            ))
+        } else {
+            Ok(())
+        }
+    }
+
     /// Security Shield Rules
     /// In addition to the factor/role rules above, the wallet must enforce certain rules for combinations of
     /// factors across the three roles. The construction method described in the next section will automatically
@@ -557,13 +606,10 @@ impl MatrixBuilder {
     /// 4. Number of days until auto confirm is greater than zero
     fn validate_combination(&self) -> MatrixBuilderMutateResult {
         self.validate_if_primary_has_single_it_must_not_be_used_by_any_other_role()?;
+        self.validate_primary_cannot_have_multiple_devices()?;
+        self.validate_no_factor_may_be_used_in_both_primary_threshold_and_override()?;
         self.validate_no_factor_may_be_used_in_both_recovery_and_confirmation(
         )?;
-
-        // N.B. the third 3:
-        // "3. No factor may be used in both the `Primary` threshold and `Primary` override"
-        // is already enforced by the RoleBuilder
-
         self.validate_number_of_days_until_auto_confirm()?;
         Ok(())
     }
