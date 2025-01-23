@@ -6,10 +6,6 @@ extension DerivationPath {
 		derivationPathToHdPath(path: self)
 	}
 
-	public var canonicalBIP32: String {
-		derivationPathToCanonicalBip32String(path: self)
-	}
-
 	public func toString() -> String {
 		derivationPathToString(path: self)
 	}
