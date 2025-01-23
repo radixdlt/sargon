@@ -148,6 +148,9 @@ impl FromGlobalKeySpace for Hardened {
     }
 }
 
+pub const HARDENED_SUFFIX_BIP32: &str = "H";
+pub const HARDENED_SUFFIX_BIP44: &str = "'";
+
 impl FromBIP32Str for Hardened {
     fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
         let s = s.as_ref();

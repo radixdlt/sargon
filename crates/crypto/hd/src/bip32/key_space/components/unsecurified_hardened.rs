@@ -104,8 +104,8 @@ impl TryFrom<u32> for UnsecurifiedHardened {
 }
 
 impl IsPathComponentStringConvertible for UnsecurifiedHardened {
-    const VERBOSE_SYNTAX_SUFFIX: &'static str = "H";
-    const SHORTHAND_SYNTAX_SUFFIX: &'static str = "'";
+    const VERBOSE_SYNTAX_SUFFIX: &'static str = HARDENED_SUFFIX_BIP32;
+    const SHORTHAND_SYNTAX_SUFFIX: &'static str = HARDENED_SUFFIX_BIP44;
 }
 
 impl HasIndexInLocalKeySpace for UnsecurifiedHardened {

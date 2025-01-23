@@ -81,8 +81,7 @@ macro_rules! path_union {
             impl FromBIP32Str for $union_name {
                 fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
                     let s = s.as_ref();
-                    // Result::<Self>::Err(CommonError::InvalidBIP32Path { bad_value: s.to_owned() })
-                    Result::<Self>::Err(CommonError::InvalidDisplayNameEmpty)
+                    Result::<Self>::Err(CommonError::InvalidBIP32Path { bad_value: s.to_owned() })
                     $(
                         .or_else(|_| $variant_type::from_bip32_string(s).map(Self::[< $variant_name:snake >]))
                     )+

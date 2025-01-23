@@ -147,8 +147,8 @@ impl SecurifiedU30 {
                 Self::SHORTHAND_SYNTAX_SUFFIX,
                 // We allow the unsecurified syntax as well - since that
                 // is what we get from the canonical BIP32 strings
-                UnsecurifiedHardened::VERBOSE_SYNTAX_SUFFIX,
-                UnsecurifiedHardened::SHORTHAND_SYNTAX_SUFFIX,
+                HARDENED_SUFFIX_BIP32,
+                HARDENED_SUFFIX_BIP44,
             ])?;
         let unoffsetted = offsetted
             .checked_sub(RELATIVELY_LOCAL_OFFSET_SECURIFIED)
