@@ -48,5 +48,5 @@ pub fn derivation_path_to_string(path: &DerivationPath) -> String {
 /// e.g. using Ledger hardware wallet or Arculus.
 #[uniffi::export]
 pub fn derivation_path_to_bip32_string(path: &DerivationPath) -> String {
-    path.into_internal().to_cap43_string()
+    path.into_internal().to_bip32_string()
 }
