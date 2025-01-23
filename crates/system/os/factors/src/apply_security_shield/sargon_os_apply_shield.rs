@@ -6,7 +6,7 @@ pub trait OsShieldApplying {
         &self,
         security_shield_id: SecurityStructureID,
         addresses: IndexSet<AddressOfAccountOrPersona>,
-    ) -> Result<()>;
+    ) -> Result<EntitiesOnNetwork>;
 
     async fn _apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
         &self,
@@ -21,14 +21,7 @@ pub trait OsShieldApplying {
         &self,
         shield: &SecurityStructureOfFactorSources,
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
-    ) -> Result<()> {
-        self._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
-            shield,
-            entity_addresses,
-        )
-        .await
-        .map(|_| ())
-    }
+    ) -> Result<EntitiesOnNetwork>;
 
     async fn _provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
         &self,
@@ -58,7 +51,7 @@ impl OsShieldApplying for SargonOS {
         &self,
         security_shield_id: SecurityStructureID,
         addresses: IndexSet<AddressOfAccountOrPersona>,
-    ) -> Result<()> {
+    ) -> Result<EntitiesOnNetwork> {
         let shield = self
             .security_structure_of_factor_sources_from_security_structure_id(
                 security_shield_id,
@@ -67,6 +60,20 @@ impl OsShieldApplying for SargonOS {
             &shield, addresses,
         )
         .await
+    }
+
+    async fn apply_security_structure_of_factor_sources_to_entities(
+        &self,
+        shield: &SecurityStructureOfFactorSources,
+        entity_addresses: IndexSet<AddressOfAccountOrPersona>,
+    ) -> Result<EntitiesOnNetwork> {
+        let network = self.current_network_id()?;
+        self._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
+            shield,
+            entity_addresses,
+        )
+        .await
+        .and_then(|(entities, _)| EntitiesOnNetwork::new(network, entities))
     }
 
     async fn _apply_security_structure_of_factor_sources_to_entities_with_diagnostics(

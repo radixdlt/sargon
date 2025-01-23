@@ -9,6 +9,12 @@ impl SecurifiedAccount {
     }
 }
 
+impl From<SecurifiedAccount> for AnySecurifiedEntity {
+    fn from(value: SecurifiedAccount) -> Self {
+        value.erase_to_any()
+    }
+}
+
 impl HasEntityKind for SecurifiedAccount {
     fn entity_kind() -> CAP26EntityKind {
         CAP26EntityKind::Account
@@ -20,6 +26,21 @@ impl TryFrom<AccountOrPersona> for SecurifiedAccount {
 
     fn try_from(value: AccountOrPersona) -> Result<Self> {
         Account::try_from(value).and_then(Self::new)
+    }
+}
+
+impl TryFrom<AnySecurifiedEntity> for SecurifiedAccount {
+    type Error = CommonError;
+
+    fn try_from(value: AnySecurifiedEntity) -> Result<Self> {
+        match value.entity {
+            AccountOrPersona::AccountEntity(account) => Self::new(account),
+            AccountOrPersona::PersonaEntity(_) => {
+                Err(CommonError::ExpectedAccountButGotPersona {
+                    address: value.entity.address().to_string(),
+                })
+            }
+        }
     }
 }
 

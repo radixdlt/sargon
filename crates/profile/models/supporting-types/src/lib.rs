@@ -1,6 +1,7 @@
 mod abstract_securified_entity;
 mod any_securified_entity;
 mod assert_derivation_path;
+mod entities_on_network;
 mod is_securified_entity;
 mod profile_state;
 mod securified_account;
@@ -12,6 +13,7 @@ pub mod prelude {
     pub use crate::abstract_securified_entity::*;
     pub use crate::any_securified_entity::*;
     pub use crate::assert_derivation_path::*;
+    pub use crate::entities_on_network::*;
     pub use crate::is_securified_entity::*;
     pub use crate::profile_state::*;
     pub use crate::securified_account::*;

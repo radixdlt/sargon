@@ -12,6 +12,9 @@ pub enum DappToWalletInteractionItems {
     #[serde(rename = "transaction")]
     Transaction(DappToWalletInteractionTransactionItems),
 
+    #[serde(rename = "batchOfTransactions")]
+    BatchOfTransactions(DappToWalletInteractionBatchOfTransactions),
+
     #[serde(rename = "preAuthorizationRequest")]
     PreAuthorization(DappToWalletInteractionPreAuthorizationItems),
 }

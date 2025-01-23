@@ -19,14 +19,4 @@ fun AccountPath.Companion.init(
     index = index
 )
 
-@Throws(SargonException::class)
-fun AccountPath.Companion.init(path: String): AccountPath =
-    when (val derivationPath = DerivationPath.init(path)) {
-        is DerivationPath.Account -> derivationPath.value
-        is DerivationPath.Bip44Like, is DerivationPath.Identity -> throw CommonException.WrongEntityKind(
-            expected = Cap26EntityKind.ACCOUNT.discriminant(),
-            found = Cap26EntityKind.IDENTITY.discriminant()
-        )
-    }
-
 fun AccountPath.asGeneral(): DerivationPath = DerivationPath.Account(value = this)

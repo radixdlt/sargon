@@ -3,7 +3,6 @@ package com.radixdlt.sargon
 import com.radixdlt.sargon.extensions.addressIndex
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.init
-import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,7 +16,7 @@ class BIP44LikePathTest: SampleTestable<Bip44LikePath> {
     fun testRoundtrip() {
         assertEquals(
             Bip44LikePath.sample(),
-            Bip44LikePath.init(Bip44LikePath.sample().string)
+            Bip44LikePath.init(Bip44LikePath.sample().addressIndex)
         )
 
         assertEquals(

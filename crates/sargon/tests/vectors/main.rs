@@ -110,6 +110,303 @@ mod cap26_tests {
         secp256k1.test::<Secp256k1PrivateKey, Secp256k1PublicKey>();
         curve25519.test::<Ed25519PrivateKey, Ed25519PublicKey>();
     }
+
+    // ========= SECURIFIED KEY SPACE =========
+    // Higher part of the 2^31-1 key space
+    // These values have been cross references
+    // using this Python script:
+    // https://gist.github.com/Sajjon/060c5747c6ffead12f78645b623a8164
+    // Which is based on the SLIP10 reference implementation:
+    // https://github.com/satoshilabs/slips/blob/master/slip-0010/testvectors.py
+    // ========================================
+    fn test(
+        mnemonic: Mnemonic,
+        passphrase: impl AsRef<str>,
+        network_id: NetworkID,
+        index_unhardened: u32,
+        path_canonical_notation: impl AsRef<str>,
+        path_securified_notation: Option<&'static str>,
+        private_key_hex: impl AsRef<str>,
+        public_key_hex: impl AsRef<str>,
+        factor_source_id_str: impl AsRef<str>,
+        address: impl AsRef<str>,
+    ) {
+        let index_hardened = index_unhardened | 0x8000_0000;
+        let path_canonical_notation = path_canonical_notation.as_ref();
+        let account_path = AccountPath::new(
+            network_id,
+            CAP26KeyKind::TransactionSigning,
+            Hardened::from_global_key_space(index_hardened).unwrap(),
+        );
+
+        // Test display
+        let derivation_path = DerivationPath::from(account_path.clone());
+        pretty_assertions::assert_eq!(
+            derivation_path.to_canonical_bip32_string(),
+            path_canonical_notation
+        );
+        if let Some(path_securified_notation) = path_securified_notation {
+            pretty_assertions::assert_eq!(
+                derivation_path.to_bip32_string(),
+                path_securified_notation
+            );
+            pretty_assertions::assert_eq!(
+                path_securified_notation.parse::<AccountPath>().unwrap(),
+                account_path
+            ); // test FromStr
+        } else {
+            pretty_assertions::assert_eq!(
+                path_canonical_notation.parse::<AccountPath>().unwrap(),
+                account_path
+            ); // test FromStr
+        }
+
+        let private_key = mnemonic
+            .to_seed(passphrase.as_ref())
+            .derive_private_key(&account_path);
+        let public_key = private_key.public_key();
+        pretty_assertions::assert_eq!(
+            private_key.to_hex(),
+            private_key_hex.as_ref()
+        );
+        pretty_assertions::assert_eq!(
+            public_key.to_hex(),
+            public_key_hex.as_ref()
+        );
+        let account_address =
+            AccountAddress::new(public_key.public_key, network_id);
+        let factor_source_id = FactorSourceIDFromHash::new_for_device(
+            &MnemonicWithPassphrase::new(mnemonic),
+        );
+        pretty_assertions::assert_eq!(
+            factor_source_id.to_string(),
+            format!("device:{}", factor_source_id_str.as_ref())
+        );
+        pretty_assertions::assert_eq!(
+            account_address.to_string(),
+            address.as_ref()
+        );
+        pretty_assertions::assert_eq!(account_address.network_id(), network_id);
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_0() {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            0,
+            "m/44H/1022H/1H/525H/1460H/0H",
+            None,
+            "5b82120ec4763f8bacff71c8e529894fea1e735a5698ff400364a913f7b20c00",
+            "f3d0210f6c2cecbdc977b7aae19d468a6c363e73a055bc877248f8318f0122e8",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12xek3geay25lktmk5zyplc7z7mg5xe8ldh48ta4mkcd9q0v0q6l8y6",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_1() {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            1,
+            "m/44H/1022H/1H/525H/1460H/1H",
+            None,
+            "da5e924c716a05b616940dd7828e3020de4dc09c371ab03966e00e95c68cb439",
+            "df49129a10aa88c76837611a4ecda794ac5f650e4401037e1ff275e52bc784c5",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx128mh2ae9dsrwa0t8l37ayjrxxf0p84e6qm227ytxtcu447f5uw5m8w",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow30_minus_3_hardened(
+    ) {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            (2i32.pow(30) - 3) as u32,
+            "m/44H/1022H/1H/525H/1460H/1073741821H",
+            None,
+            "d9e0394b67affb91b5acdc3ecf6786a6628892ffd605291c853568cbed498afa",
+            "a484112bcd119488f13191a6ec57ff27606ea041537662730e60580cdb679616",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12yxslky3ye2rdtcv439s7l8hw2pm7sp6g3e537dsuk6558z66yteu5",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow30_minus_2_hardened(
+    ) {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            (2i32.pow(30) - 2) as u32,
+            "m/44H/1022H/1H/525H/1460H/1073741822H",
+            None,
+            "5218159039d5c639ae4e0b6b351b821e3687aa44768230c4f06a13ae0c78715c",
+            "2155707a3cebd7788dc83113174d30e2c29abae34f399c27a6caa8c6f5ae543e",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx1299mrqwvhy6cka9vsvjddqhttm9qckk08w32kp6nrnzrwaclqelp4x",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow30_minus_1_hardened(
+    ) {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            (2i32.pow(30) - 1) as u32,
+            "m/44H/1022H/1H/525H/1460H/1073741823H",
+            None,
+            "5c5adfebe650684e3cc20e4dba49e1447d7ac12f63ae1bd8723554d0a95aaf38",
+            "f4f43daaedc3603b3dc6b92a2014630a96ca2a20cc14d2dcaa71f49c30789689",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx129zmjv05ljhm3tc3f5nayvfgym69fu6zlajt6xp2jj900c5qt76m6v",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow30_hardened()
+    {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(30),
+            "m/44H/1022H/1H/525H/1460H/1073741824H",
+            Some("m/44H/1022H/1H/525H/1460H/0S"),
+            "b0b9180f7c96778cffba7af2ef1ddf4705fca21b965e8a722ccf2ec403c35950",
+            "e0293d4979bc303ea4fe361a62baf9c060c7d90267972b05c61eead9ef3eed3e",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx128znphf3gxek50qyxjcuels6xtulum3g46vhr43ryavj7zr53xxded",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow30_plus_1_hardened(
+    ) {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(30) + 1,
+            "m/44H/1022H/1H/525H/1460H/1073741825H",
+            Some("m/44H/1022H/1H/525H/1460H/1S"), 
+            "c1880587c727f2f01dfdf61d19b44283d311b31c12e8898b774b73e8067d25b1",
+            "c6aaee6fa60d73a17989ce2a2a5db5a88cd696aef61d2f298262fae189dff04e",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12y8gd9dyz9mhg3jv5p9md5gvuzc34m0p90te0hx7aqgsvuy5g2p09s",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow30_plus_2_hardened(
+    ) {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(30) + 2,
+            "m/44H/1022H/1H/525H/1460H/1073741826H", 
+            Some("m/44H/1022H/1H/525H/1460H/2S"),
+            "837bc77bb29e4702be39c69fbade7d350bc23f6daddf68a64474984e899a97a3",
+            "6a92b3338dc74a50e8b3fff896a7e0f43c42742544af52de20353675d8bc7907",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12xluhgaw3vcyskpsmswu279jlysmrdjuk23erjcx8s83kcgx3r4zvn",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_5()
+    {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(31u32) - 5,
+            "m/44H/1022H/1H/525H/1460H/2147483643H",
+            Some("m/44H/1022H/1H/525H/1460H/1073741819S"),
+            "8371cdce66f0733cf1f8a07235825267e8e650f9bf194dfe82992c8ae77faa84",
+            "9bce7e1a1d724b2013add0697e4133e2affc93b806793ee6709dfdc242738e19",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12x0z0sm5qpp9gmuah7nnpkkkk2zn2r8tvpd9w64097949mcs7jm960",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_4()
+    {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(31u32) - 4,
+            "m/44H/1022H/1H/525H/1460H/2147483644H",
+            Some("m/44H/1022H/1H/525H/1460H/1073741820S"), 
+            "361126bd7947254c49b83c23bbb557219cfa2ac5e5a4551501f18236ffa4eb17",
+            "481b737f5baaf52520612e70858ffa72a3624d5a050da5748844ac14036c8b17",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12y27yrwuqmec5saaykp82098nykpeqentzt3syt4dfdyuq0ckkc07u",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_3()
+    {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(31u32) - 3,
+            "m/44H/1022H/1H/525H/1460H/2147483645H", 
+            Some("m/44H/1022H/1H/525H/1460H/1073741821S"), 
+            "f63fe429c5723448dfb8d1f3eda88a659473b4c38960a09bb20efe546fac95ee",
+            "b2819057da648f36eadb59f60b732d4ae7fb22a207acf214e0271d3c587afd54",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12x9mszdtxacj5trw78g2ndvc54wtxg9mxx982w2p8vnv7jes7nvc40",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_2()
+    {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(31u32) - 2,
+            "m/44H/1022H/1H/525H/1460H/2147483646H", 
+            Some("m/44H/1022H/1H/525H/1460H/1073741822S"), 
+            "5a8b6327942ca8fc5b30fb5b0c1fa53e97362d514ff4f2c281060b9d51f7fc88",
+            "932123e6c46af8ebde7a96bee4563e09bbf41b28eae9d6ba1c667a2f490a1fcf",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx12ysf5nesz5h3wk8aypyn83e9752mal8q545epwykq6nr8k8aavyu7d",
+        );
+    }
+
+    #[test]
+    fn derive_account_mnemonic_2_with_passphrase_mainnet_index_2pow31_minus_1()
+    {
+        test(
+            Mnemonic::sample_device_other(),
+            "",
+            NetworkID::Mainnet,
+            2u32.pow(31u32) - 1,
+            "m/44H/1022H/1H/525H/1460H/2147483647H", 
+            Some("m/44H/1022H/1H/525H/1460H/1073741823S"),
+            "7eae6f235206329561b09fc2235d35e017c3f28b54fd3b4f6525e601257c4ce7",
+            "87a2f84f826da0c62052fbe7b385ab78883c02d1fa5472c55a06aa529a0701e9",
+            "5255999c65076ce9ced5a1881f1a621bba1ce3f1f68a61df462d96822a5190cd",
+            "account_rdx128258pxhges8rmva0a2egr0tzqd8x8clsl5d90a8qv3zqggc4jr2ss",
+        );
+    }
 }
 
 #[cfg(test)]

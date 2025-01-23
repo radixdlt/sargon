@@ -7,6 +7,12 @@ TAKE_FROM_WORKTOP
     Decimal("1")
     Bucket("bucket1")
 ;
+ALLOCATE_GLOBAL_ADDRESS
+    Address("package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr")
+    "AccessController"
+    AddressReservation("reservation1")
+    NamedAddress("address1")
+;
 CREATE_ACCESS_CONTROLLER
     Bucket("bucket1")
     Tuple(
@@ -83,7 +89,9 @@ CREATE_ACCESS_CONTROLLER
     Enum<1u8>(
         20160u32
     )
-    Enum<0u8>()
+    Enum<1u8>(
+        AddressReservation("reservation1")
+    )
 ;
 SET_METADATA
     Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
