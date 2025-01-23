@@ -17,6 +17,7 @@ transaction-models = { workspace = true }
 gateway-models = { workspace = true }
 profile = { workspace = true }
 profile-account-or-persona = { workspace = true }
+profile-supporting-types = { workspace = true }
 profile-base-entity = { workspace = true }
 account-for-display = { workspace = true }
 
