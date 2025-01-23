@@ -153,19 +153,19 @@ impl TryFrom<HDPathComponent> for Unsecurified {
     }
 }
 
-impl FromBIP32Str for Unsecurified {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+impl FromCAP43String for Unsecurified {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
         let s = s.as_ref();
-        UnsecurifiedHardened::from_bip32_string(s)
+        UnsecurifiedHardened::from_cap43_string(s)
             .map(Self::Hardened)
-            .or(Unhardened::from_bip32_string(s).map(Self::Unhardened))
+            .or(Unhardened::from_cap43_string(s).map(Self::Unhardened))
     }
 }
 
 impl FromStr for Unsecurified {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 

@@ -57,8 +57,8 @@ use crate::prelude::*;
     derive_more::Debug,
 )]
 #[deref(forward)]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct SecurifiedU30(pub U30);
 
 impl SecurifiedU30 {
@@ -140,13 +140,9 @@ impl IsPathComponentStringConvertible for SecurifiedU30 {
 impl SecurifiedU30 {
     /// Accepts `1073741824H` which will be interpreted as `0S`
     /// and `1073741825H` which will be interpreted as `1S` etc.
-    fn from_canonical_bip32_str(s: &str) -> Result<Self> {
-        let offsetted = Self::value_in_local_keyspace_from_bip32_string_with_acceptable_suffixes(s,
+    fn from_bip32_str(s: &str) -> Result<Self> {
+        let offsetted = Self::value_in_local_keyspace_from_cap43_string_with_acceptable_suffixes(s,
             vec![
-                Self::VERBOSE_SYNTAX_SUFFIX,
-                Self::SHORTHAND_SYNTAX_SUFFIX,
-                // We allow the unsecurified syntax as well - since that
-                // is what we get from the canonical BIP32 strings
                 HARDENED_SUFFIX_BIP32,
                 HARDENED_SUFFIX_BIP44,
             ])?;
@@ -156,17 +152,15 @@ impl SecurifiedU30 {
         Self::from_local_key_space(unoffsetted)
     }
 
-    /// Tries to parse a strict Radix HDPath string (using securified notation)
-    /// and if that fails, tries to parse a canonical BIP32 string.
-    pub(crate) fn from_lenient_bip32_string(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
-            .or_else(|_| Self::from_canonical_bip32_str(s))
+    /// Tries to parse a CAP43 string and falls back to BIP32
+    pub(crate) fn from_string_lenient(s: &str) -> Result<Self> {
+        Self::from_cap43_string(s).or_else(|_| Self::from_bip32_str(s))
     }
 }
 impl FromStr for SecurifiedU30 {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_lenient_bip32_string(s)
+        Self::from_string_lenient(s)
     }
 }
 
@@ -198,7 +192,7 @@ mod tests {
     #[test]
     fn from_canonical_bip32() {
         assert_eq!(
-            SUT::from_canonical_bip32_str("1073741825H").unwrap(),
+            SUT::from_bip32_str("1073741825H").unwrap(),
             SUT::from_local_key_space(U31::ONE).unwrap()
         );
     }

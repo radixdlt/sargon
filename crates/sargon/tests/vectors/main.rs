@@ -142,12 +142,12 @@ mod cap26_tests {
         // Test display
         let derivation_path = DerivationPath::from(account_path.clone());
         pretty_assertions::assert_eq!(
-            derivation_path.to_canonical_bip32_string(),
+            derivation_path.to_bip32_string(),
             path_canonical_notation
         );
         if let Some(path_securified_notation) = path_securified_notation {
             pretty_assertions::assert_eq!(
-                derivation_path.to_bip32_string(),
+                derivation_path.to_cap43_string(),
                 path_securified_notation
             );
             pretty_assertions::assert_eq!(

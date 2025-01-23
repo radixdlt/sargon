@@ -62,8 +62,8 @@ use crate::prelude::*;
     DeserializeFromStr,
     derive_more::Display,
 )]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct AccountPath {
     pub network_id: NetworkID,
     pub key_kind: CAP26KeyKind,
@@ -144,25 +144,25 @@ impl HasEntityKind for AccountPath {
     }
 }
 
-impl ToBIP32Str for AccountPath {
-    fn to_bip32_string(&self) -> String {
-        self.to_hd_path().to_bip32_string()
+impl ToCAP43String for AccountPath {
+    fn to_cap43_string(&self) -> String {
+        self.to_hd_path().to_cap43_string()
     }
-    fn to_bip32_string_debug(&self) -> String {
-        self.to_hd_path().to_bip32_string_debug()
+    fn to_cap43_string_debug(&self) -> String {
+        self.to_hd_path().to_cap43_string_debug()
     }
 }
 
-impl FromBIP32Str for AccountPath {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
-        HDPath::from_bip32_string(s).and_then(Self::try_from)
+impl FromCAP43String for AccountPath {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
+        HDPath::from_cap43_string(s).and_then(Self::try_from)
     }
 }
 impl FromStr for AccountPath {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 
@@ -439,13 +439,13 @@ mod tests {
     }
 
     #[test]
-    fn from_canonical_bip32_str() {
+    fn from_bip32_str() {
         let canonical = "m/44H/1022H/1H/525H/1460H/1073741824H";
         let sut = SUT::from_str(canonical).unwrap();
         assert_eq!(
-            DerivationPath::from(sut.clone()).to_canonical_bip32_string(),
+            DerivationPath::from(sut.clone()).to_bip32_string(),
             canonical
         );
-        assert_eq!(sut.to_bip32_string(), "m/44H/1022H/1H/525H/1460H/0S");
+        assert_eq!(sut.to_cap43_string(), "m/44H/1022H/1H/525H/1460H/0S");
     }
 }

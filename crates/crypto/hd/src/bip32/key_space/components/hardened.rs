@@ -151,12 +151,12 @@ impl FromGlobalKeySpace for Hardened {
 pub const HARDENED_SUFFIX_BIP32: &str = "H";
 pub const HARDENED_SUFFIX_BIP44: &str = "'";
 
-impl FromBIP32Str for Hardened {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+impl FromCAP43String for Hardened {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
         let s = s.as_ref();
-        SecurifiedU30::from_bip32_string(s)
+        SecurifiedU30::from_cap43_string(s)
             .map(Self::Securified)
-            .or(UnsecurifiedHardened::from_bip32_string(s)
+            .or(UnsecurifiedHardened::from_cap43_string(s)
                 .map(Self::Unsecurified))
     }
 }
@@ -198,7 +198,7 @@ impl TryFrom<HDPathComponent> for Hardened {
 impl FromStr for Hardened {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 

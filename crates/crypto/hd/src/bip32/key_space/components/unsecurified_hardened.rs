@@ -45,8 +45,8 @@ use crate::prelude::*;
     derive_more::Debug,
 )]
 #[deref(forward)]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct UnsecurifiedHardened(pub U30);
 
 impl UnsecurifiedHardened {
@@ -141,7 +141,7 @@ impl TryFrom<Unsecurified> for UnsecurifiedHardened {
 impl FromStr for UnsecurifiedHardened {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 

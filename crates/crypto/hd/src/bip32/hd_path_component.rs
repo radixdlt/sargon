@@ -71,12 +71,12 @@ impl Ord for HDPathComponent {
     }
 }
 
-impl ToBIP32Str for HDPathComponent {
-    fn to_bip32_string(&self) -> String {
+impl ToCAP43String for HDPathComponent {
+    fn to_cap43_string(&self) -> String {
         format!("{}", self)
     }
 
-    fn to_bip32_string_debug(&self) -> String {
+    fn to_cap43_string_debug(&self) -> String {
         format!("{:?}", self)
     }
 }
@@ -168,13 +168,13 @@ impl HDPathComponent {
     }
 }
 
-impl FromBIP32Str for HDPathComponent {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+impl FromCAP43String for HDPathComponent {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
         let s = s.as_ref();
-        SecurifiedU30::from_lenient_bip32_string(s)
+        SecurifiedU30::from_string_lenient(s)
             .map(Self::securified)
             .or_else(|_| {
-                Unsecurified::from_bip32_string(s).map(Self::Unsecurified)
+                Unsecurified::from_cap43_string(s).map(Self::Unsecurified)
             })
     }
 }
@@ -182,7 +182,7 @@ impl FromBIP32Str for HDPathComponent {
 impl FromStr for HDPathComponent {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 
@@ -517,7 +517,7 @@ mod tests {
         assert_eq!(
             SUT::from_global_key_space(0)
                 .unwrap()
-                .to_bip32_string_debug(),
+                .to_cap43_string_debug(),
             "0"
         );
     }
@@ -531,7 +531,7 @@ mod tests {
         assert_eq!(
             SUT::from_global_key_space(U30_MAX)
                 .unwrap()
-                .to_bip32_string(),
+                .to_cap43_string(),
             "1073741823"
         );
     }

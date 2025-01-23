@@ -38,8 +38,8 @@ use crate::prelude::*;
     derive_more::Debug,
     derive_more::Display,
 )]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct BIP44LikePath {
     pub account: HDPathComponent,
     pub change: HDPathComponent,
@@ -150,24 +150,24 @@ impl TryFrom<HDPath> for BIP44LikePath {
     }
 }
 
-impl ToBIP32Str for BIP44LikePath {
-    fn to_bip32_string(&self) -> String {
-        self.to_hd_path().to_bip32_string()
+impl ToCAP43String for BIP44LikePath {
+    fn to_cap43_string(&self) -> String {
+        self.to_hd_path().to_cap43_string()
     }
-    fn to_bip32_string_debug(&self) -> String {
-        self.to_hd_path().to_bip32_string_debug()
+    fn to_cap43_string_debug(&self) -> String {
+        self.to_hd_path().to_cap43_string_debug()
     }
 }
-impl FromBIP32Str for BIP44LikePath {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
-        HDPath::from_bip32_string(s).and_then(Self::try_from)
+impl FromCAP43String for BIP44LikePath {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
+        HDPath::from_cap43_string(s).and_then(Self::try_from)
     }
 }
 impl FromStr for BIP44LikePath {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 

@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
 pub trait ValueInLocalKeyspaceFromBIP32Str: Sized {
-    fn value_in_local_keyspace_from_bip32_string(
+    fn value_in_local_keyspace_from_cap43_string(
         s: impl AsRef<str>,
     ) -> Result<u32>;
 
-    fn value_in_local_keyspace_from_bip32_string_with_acceptable_suffixes(
+    fn value_in_local_keyspace_from_cap43_string_with_acceptable_suffixes(
         s: impl AsRef<str>,
         acceptable_suffixes: Vec<&str>,
     ) -> Result<u32> {
@@ -36,11 +36,14 @@ pub trait ValueInLocalKeyspaceFromBIP32Str: Sized {
     }
 }
 
-pub trait FromBIP32Str: Sized {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self>;
+/// CAP43 string [described here][doc]
+///
+/// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3880058888/CAP-43+Sargon+HD+Path+string+notation
+pub trait FromCAP43String: Sized {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self>;
 }
 
-impl<T: ValueInLocalKeyspaceFromBIP32Str + FromLocalKeySpace> FromBIP32Str
+impl<T: ValueInLocalKeyspaceFromBIP32Str + FromLocalKeySpace> FromCAP43String
     for T
 {
     /// Parse a BIP32 path string into a `Self`.
@@ -50,10 +53,10 @@ impl<T: ValueInLocalKeyspaceFromBIP32Str + FromLocalKeySpace> FromBIP32Str
     /// extern crate sargon;
     /// use sargon::prelude::*;
     ///
-    /// assert!(AccountPath::from_bip32_string("m/44'/1022'/1'/525'/1460'/1'").is_ok());
+    /// assert!(AccountPath::from_cap43_string("m/44'/1022'/1'/525'/1460'/1'").is_ok());
     /// ```
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
-        let value = Self::value_in_local_keyspace_from_bip32_string(s)?;
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
+        let value = Self::value_in_local_keyspace_from_cap43_string(s)?;
         Self::from_local_key_space(value)
     }
 }
@@ -68,12 +71,12 @@ impl<T: IsPathComponentStringConvertible> ValueInLocalKeyspaceFromBIP32Str
     /// extern crate sargon;
     /// use sargon::prelude::*;
     ///
-    /// assert!(AccountPath::from_bip32_string("m/44'/1022'/1'/525'/1460'/1'").is_ok());
+    /// assert!(AccountPath::from_cap43_string("m/44'/1022'/1'/525'/1460'/1'").is_ok());
     /// ```
-    fn value_in_local_keyspace_from_bip32_string(
+    fn value_in_local_keyspace_from_cap43_string(
         s: impl AsRef<str>,
     ) -> Result<u32> {
-        Self::value_in_local_keyspace_from_bip32_string_with_acceptable_suffixes(
+        Self::value_in_local_keyspace_from_cap43_string_with_acceptable_suffixes(
             s,
             T::ACCEPTABLE_SUFFIXES.to_vec(),
         )
