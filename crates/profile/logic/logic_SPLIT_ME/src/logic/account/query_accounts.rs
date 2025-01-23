@@ -20,13 +20,13 @@ pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
         entity_kind: CAP26EntityKind,
         network_id: NetworkID,
         key_space: KeySpace,
-    ) -> IndexSet<AccountOrPersona>;
+    ) -> IdentifiedVecOf<AccountOrPersona>;
 
     fn get_unsecurified_entities_of_kind_on_network(
         &self,
         entity_kind: CAP26EntityKind,
         network_id: NetworkID,
-    ) -> IndexSet<UnsecurifiedEntity> {
+    ) -> IdentifiedVecOf<AnyUnsecurifiedEntity> {
         self.get_entities_of_kind_on_network_in_key_space(
             entity_kind,
             network_id,
@@ -35,40 +35,33 @@ pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
             KeySpace::Unsecurified { is_hardened: true },
         )
         .into_iter()
-        .map(|e: AccountOrPersona| {
-            let factor_instance = match e.security_state() {
-                EntitySecurityState::Unsecured { value: uec } => {
-                    uec.transaction_signing.clone()
-                }
-                _ => unreachable!(
-                    "Should already have filtered out securified entities"
-                ),
-            };
-            UnsecurifiedEntity::new(
-                e.address(),
-                factor_instance,
-                e.get_provisional(),
-            )
-        })
+        .filter_map(|e: AccountOrPersona| AnyUnsecurifiedEntity::new(e).ok())
         .collect()
     }
 
     fn unsecurified_accounts_on_network(
         &self,
         network_id: NetworkID,
-    ) -> IndexSet<UnsecurifiedEntity> {
+    ) -> IdentifiedVecOf<UnsecurifiedAccount> {
         self.get_unsecurified_entities_of_kind_on_network(
             CAP26EntityKind::Account,
             network_id,
         )
+        .into_iter()
+        .map(|x| UnsecurifiedAccount::try_from(x).unwrap())
+        .collect()
     }
 
     fn get_securified_entities_of_kind_on_network<
-        E: IsSecurifiedEntity + HasEntityKind + TryFrom<AccountOrPersona>,
+        E: IsSecurifiedEntity
+            + HasEntityKind
+            + TryFrom<AccountOrPersona>
+            + Identifiable
+            + std::fmt::Debug,
     >(
         &self,
         network_id: NetworkID,
-    ) -> IndexSet<E> {
+    ) -> IdentifiedVecOf<E> {
         self.get_entities_of_kind_on_network_in_key_space(
             E::entity_kind(),
             network_id,
@@ -82,24 +75,27 @@ pub trait ProfileEntitiesOfKindOnNetworkInKeySpace {
     fn securified_accounts_on_network(
         &self,
         network_id: NetworkID,
-    ) -> IndexSet<SecurifiedAccount> {
+    ) -> IdentifiedVecOf<SecurifiedAccount> {
         self.get_securified_entities_of_kind_on_network(network_id)
     }
 
     fn unsecurified_personas_on_network(
         &self,
         network_id: NetworkID,
-    ) -> IndexSet<UnsecurifiedEntity> {
+    ) -> IdentifiedVecOf<UnsecurifiedPersona> {
         self.get_unsecurified_entities_of_kind_on_network(
             CAP26EntityKind::Identity,
             network_id,
         )
+        .into_iter()
+        .map(|x| UnsecurifiedPersona::try_from(x).unwrap())
+        .collect()
     }
 
     fn securified_personas_on_network(
         &self,
         network_id: NetworkID,
-    ) -> IndexSet<SecurifiedPersona> {
+    ) -> IdentifiedVecOf<SecurifiedPersona> {
         self.get_securified_entities_of_kind_on_network(network_id)
     }
 
@@ -141,7 +137,7 @@ impl ProfileEntitiesOfKindOnNetworkInKeySpace for Profile {
         entity_kind: CAP26EntityKind,
         network_id: NetworkID,
         key_space: KeySpace,
-    ) -> IndexSet<AccountOrPersona> {
+    ) -> IdentifiedVecOf<AccountOrPersona> {
         self.networks
             .get_id(network_id)
             .map(|n| {

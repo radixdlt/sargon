@@ -12,6 +12,15 @@ pub struct AbstractSecurifiedEntity<
     pub securified_entity_control: SecuredEntityControl,
 }
 
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
+    for AbstractSecurifiedEntity<E>
+{
+    type ID = AddressOfAccountOrPersona;
+    fn id(&self) -> Self::ID {
+        self.entity.address().into()
+    }
+}
+
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsNetworkAware
     for AbstractSecurifiedEntity<E>
 {
@@ -32,14 +41,21 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsSecurifiedEntity
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     AbstractSecurifiedEntity<E>
 {
+    pub fn with_securified_entity_control(
+        entity: E,
+        securified_entity_control: SecuredEntityControl,
+    ) -> Self {
+        Self {
+            __hidden: HiddenConstructor,
+            entity,
+            securified_entity_control,
+        }
+    }
+
     pub fn new(entity: E) -> Result<Self> {
         entity
             .try_get_secured_control()
-            .map(|securified_entity_control| Self {
-                __hidden: HiddenConstructor,
-                entity,
-                securified_entity_control,
-            })
+            .map(|sec| Self::with_securified_entity_control(entity, sec))
     }
 
     pub fn address(&self) -> AddressOfAccountOrPersona {

@@ -340,9 +340,9 @@ mod test {
         let signable =
             TransactionIntent::sample_entity_addresses_requiring_auth(
                 [
-                    account_device.address.clone(),
-                    account_ledger1.address.clone(),
-                    account_ledger2.address.clone(),
+                    account_device.address,
+                    account_ledger1.address,
+                    account_ledger2.address,
                 ],
                 [],
             );

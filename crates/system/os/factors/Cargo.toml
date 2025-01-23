@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os-factors"
-version = "1.1.115"
+version = "1.1.116"
 edition = "2021"
 
 [dependencies]
@@ -15,6 +15,9 @@ clients = { workspace = true }
 profile-logic = { workspace = true }
 factor-instances-provider = { workspace = true }
 key-derivation-traits = { workspace = true }
+radix-connect = { workspace = true }
+transaction-models = { workspace = true }
+manifests = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
@@ -23,7 +26,9 @@ key-derivation-traits = { workspace = true }
 actix-rt = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
 log = { workspace = true }
+preinterpret = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

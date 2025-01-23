@@ -18,6 +18,7 @@ impl SargonOS {
                 addresses.into_internal(),
             )
             .await
+            .map(|_| ())
             .into_result()
     }
 }
