@@ -4,40 +4,96 @@ use profile_supporting_types::AnySecurifiedEntity;
 use crate::prelude::*;
 
 pub trait TransactionManifestSecurifySecurifiedEntity:
-    Sized + TransactionManifestSetRolaKey
+    TransactionManifestSetRolaKey
 {
     fn apply_security_shield_for_securified_entity(
         securified_entity: AnySecurifiedEntity,
         input: TransactionManifestApplySecurityShieldSecurifiedInput,
-    ) -> Result<Self>;
+    ) -> Result<TransactionManifest>;
+
+    fn _update_shield_exercising_recovery_and_explicit_confirmation(
+        builder: ScryptoTransactionManifestBuilder,
+        securified_entity: &AnySecurifiedEntity,
+        input: &TransactionManifestApplySecurityShieldSecurifiedInput,
+    ) -> Result<ScryptoTransactionManifestBuilder> {
+        todo!()
+    }
 }
 
 impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
     fn apply_security_shield_for_securified_entity(
-        _securified_entity: AnySecurifiedEntity,
-        _input: TransactionManifestApplySecurityShieldSecurifiedInput,
+        securified_entity: AnySecurifiedEntity,
+        input: TransactionManifestApplySecurityShieldSecurifiedInput,
     ) -> Result<Self> {
-        // let TransactionManifestApplySecurityShieldSecurifiedInput {
-        //     security_structure_of_factor_instances,
-        //     apply_shield_manifest_kind,
-        // } = input.clone();
+        let TransactionManifestApplySecurityShieldSecurifiedInput {
+            security_structure_of_factor_instances,
+            apply_shield_manifest_kind: kind,
+        } = input.clone();
 
-        // let builder = ManifestBuilder::new();
-        // let access_controller_address = securified_entity
-        //     .securified_entity_control
-        //     .access_controller_address;
+        let entity_address = securified_entity.entity.address();
 
-        // let should_start_recovery =
-        //     apply_shield_manifest_kind.should_confirm_recovery();
-        // if should_start_recovery {
-        //     //  builder.call_method(access_controller_address, , arguments)
-        //     todo!();
-        // }
-        todo!("implement me")
+        let mut builder = ScryptoTransactionManifestBuilder::new();
+
+        use TransactionManifestApplySecurityShieldKindSelector::*;
+        builder = match kind {
+            PrimaryAndRecoveryWithExplicitConfirmation => Self::_update_shield_exercising_recovery_and_explicit_confirmation(builder, &securified_entity, &input)?,
+            PrimaryAndRecoveryWithTimedAutoConfirm => todo!(),
+            PrimaryAndExplicitConfirmation => todo!(),
+            PrimaryWithTimedAutoConfirm => todo!(),
+            RecoveryAndExplicitConfirmation => todo!(),
+            RecoveryWithTimedAutoConfirm => todo!(),
+        };
+
+        // Set Rola Key
+        let should_set_rola_key = security_structure_of_factor_instances
+            .authentication_signing_factor_instance
+            != securified_entity
+                .current_authentication_signing_factor_instance();
+        if should_set_rola_key {
+            if kind.can_set_rola_key() {
+                builder = TransactionManifest::set_rola_key(
+                    builder,
+                    &security_structure_of_factor_instances
+                        .authentication_signing_factor_instance,
+                    &entity_address,
+                );
+            } else {
+                return Err(CommonError::Unknown); // TODO: new error variant
+            }
+        }
+
+        let manifest = TransactionManifest::sargon_built(
+            builder,
+            securified_entity.network_id(),
+        );
+
+        // N.B.
+        // We do NOT top of XRD vault of AccessController - yet!
+        // Host will need to call the function:
+        // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account`
+        // after user has selected account to pay in wallet GUI.
+        // (and as usual also call `modify_manifest_lock_fee`)
+
+        Ok(manifest)
     }
 }
 
 impl TransactionManifestApplySecurityShieldKindSelector {
+    fn can_exercise_primary_role(&self) -> bool {
+        match self {
+            Self::PrimaryAndRecoveryWithExplicitConfirmation => true,
+            Self::PrimaryAndRecoveryWithTimedAutoConfirm => true,
+            Self::PrimaryAndExplicitConfirmation => true,
+            Self::PrimaryWithTimedAutoConfirm => true,
+            Self::RecoveryAndExplicitConfirmation => false,
+            Self::RecoveryWithTimedAutoConfirm => false,
+        }
+    }
+
+    fn can_set_rola_key(&self) -> bool {
+        self.can_exercise_primary_role()
+    }
+
     fn should_confirm_recovery_with_explicit(&self) -> bool {
         match self {
             Self::PrimaryAndRecoveryWithExplicitConfirmation => true,
@@ -48,6 +104,7 @@ impl TransactionManifestApplySecurityShieldKindSelector {
             Self::RecoveryWithTimedAutoConfirm => false,
         }
     }
+
     fn should_confirm_recovery_with_time(&self) -> bool {
         match self {
             Self::PrimaryAndRecoveryWithExplicitConfirmation => false,
@@ -58,6 +115,7 @@ impl TransactionManifestApplySecurityShieldKindSelector {
             Self::RecoveryWithTimedAutoConfirm => true,
         }
     }
+
     fn should_confirm_recovery(&self) -> bool {
         self.should_confirm_recovery_with_explicit()
             || self.should_confirm_recovery_with_time()

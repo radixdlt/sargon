@@ -62,6 +62,10 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
         Into::<AddressOfAccountOrPersona>::into(self.entity.address())
     }
 
+    pub fn current_authentication_signing_factor_instance(&self) -> HierarchicalDeterministicFactorInstance {
+self.securified_entity_control().authentication_signing_factor_instance()
+    }
+
     pub fn veci(&self) -> Option<VirtualEntityCreatingInstance> {
         self.securified_entity_control()
             .veci()
