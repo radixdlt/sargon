@@ -751,7 +751,8 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(!bdfs.common.is_main_bdfs());
+        assert!(!bdfs.is_main_bdfs());
+        assert!(!bdfs.common.is_main());
         assert!(bdfs.common.supports_babylon());
     }
 
@@ -772,7 +773,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(!dfs.common.is_main_bdfs());
+        assert!(!dfs.common.is_main());
         assert!(!dfs.common.supports_babylon());
         assert!(dfs.common.supports_olympia());
         assert_eq!(

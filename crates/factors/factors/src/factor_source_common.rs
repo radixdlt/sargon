@@ -100,11 +100,6 @@ impl FactorSourceCommon {
         self.crypto_parameters.supports_olympia()
     }
 
-    /// Checks if it is Main Babylon Device Factor Source (BDFS).
-    pub fn is_main_bdfs(&self) -> bool {
-        self.supports_babylon() && self.is_main()
-    }
-
     /// Checks if it is a main factor source.
     pub fn is_main(&self) -> bool {
         self.flags.contains_by_id(&FactorSourceFlag::Main)
@@ -180,11 +175,6 @@ mod tests {
             FactorSourceCryptoParameters::babylon()
         );
         assert!(FactorSourceCommon::default().supports_babylon());
-    }
-
-    #[test]
-    fn new_main_bdfs() {
-        assert!(FactorSourceCommon::new_main_bdfs().is_main_bdfs());
     }
 
     #[test]
