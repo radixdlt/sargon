@@ -69,7 +69,7 @@ extension TestOS {
 		count: UInt16,
 		namePrefix: DisplayName
 	) async throws -> Self {
-		let _ = try await os.batchCreateManyAccountsThenSaveOnce(count: count, networkId: currentNetworkID, namePrefix: namePrefix.value)
+		let _ = try await os.batchCreateManyAccountsWithMainBdfsThenSaveOnce(count: count, networkId: currentNetworkID, namePrefix: namePrefix.value)
 		return self
 	}
 }

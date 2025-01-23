@@ -167,7 +167,7 @@ impl Profile {
     /// The Profile is initialized with a Mainnet ProfileNetwork, and some [Accounts] in it.
     ///
     /// # Panics
-    /// Panics if the `device_factor_source` is not a BDFS and not marked "main".
+    /// Panics if the `device_factor_source` is not the main BDFS.
     pub fn from_device_factor_source(
         device_factor_source: DeviceFactorSource,
         host_id: HostId,

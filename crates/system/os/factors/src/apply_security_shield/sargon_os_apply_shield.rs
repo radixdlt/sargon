@@ -407,7 +407,7 @@ mod tests {
     async fn add_unsafe_shield_with_matrix(
         os: &SargonOS,
     ) -> Result<SecurityStructureOfFactorSourceIDs> {
-        let bdsf = os.bdfs()?;
+        let bdsf = os.main_bdfs()?;
         let shield_of_ids = unsafe_shield_with_bdfs(&bdsf.into());
         os.add_security_structure_of_factor_source_ids(&shield_of_ids)
             .await?;
@@ -427,14 +427,14 @@ mod tests {
             let shield_id = add_unsafe_shield(&os).await.unwrap();
             let network = NetworkID::Mainnet;
             let account = os
-                .create_and_save_new_account_with_bdfs(
+                .create_and_save_new_account_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                 )
                 .await
                 .unwrap();
             let persona = os
-                .create_and_save_new_persona_with_bdfs(
+                .create_and_save_new_persona_with_main_bdfs(
                     network,
                     DisplayName::sample_other(),
                     None,
@@ -485,14 +485,14 @@ mod tests {
             let shield_id = shield.id();
             let network = NetworkID::Mainnet;
             let account = os
-                .create_and_save_new_account_with_bdfs(
+                .create_and_save_new_account_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                 )
                 .await
                 .unwrap();
             let persona = os
-                .create_and_save_new_persona_with_bdfs(
+                .create_and_save_new_persona_with_main_bdfs(
                     network,
                     DisplayName::sample_other(),
                     None,
@@ -643,7 +643,7 @@ mod tests {
             let shield_id = add_unsafe_shield(&os).await.unwrap();
             let network = NetworkID::Mainnet;
             let mut account = os
-                .create_and_save_new_account_with_bdfs(
+                .create_and_save_new_account_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                 )
@@ -679,7 +679,7 @@ mod tests {
             let shield_id = add_unsafe_shield(&os).await.unwrap();
             let network = NetworkID::Mainnet;
             let mut account = os
-                .create_and_save_new_account_with_bdfs(
+                .create_and_save_new_account_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                 )
@@ -721,7 +721,7 @@ mod tests {
             let shield_id = add_unsafe_shield(&os).await.unwrap();
             let network = NetworkID::Mainnet;
             let mut persona = os
-                .create_and_save_new_persona_with_bdfs(
+                .create_and_save_new_persona_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                     None,
@@ -758,7 +758,7 @@ mod tests {
             let shield_id = add_unsafe_shield(&os).await.unwrap();
             let network = NetworkID::Mainnet;
             let mut persona = os
-                .create_and_save_new_persona_with_bdfs(
+                .create_and_save_new_persona_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                     None,
@@ -803,7 +803,7 @@ mod tests {
             let shield_id = add_unsafe_shield(&os).await.unwrap();
             let network = NetworkID::Mainnet;
             let mut account = os
-                .create_and_save_new_account_with_bdfs(
+                .create_and_save_new_account_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                 )
@@ -855,7 +855,7 @@ mod tests {
 
             let network = NetworkID::Mainnet;
             let mut account = os
-                .create_and_save_new_account_with_bdfs(
+                .create_and_save_new_account_with_main_bdfs(
                     network,
                     DisplayName::sample(),
                 )

@@ -103,7 +103,7 @@ mod tests {
     fn next_success() {
         let network_id = NetworkID::Mainnet;
         let profile = Arc::new(Profile::sample());
-        let bdfs = profile.bdfs();
+        let bdfs = profile.main_bdfs();
         let cache = FactorInstancesCache::default();
         let sut = SUT::new(network_id, profile, cache);
 

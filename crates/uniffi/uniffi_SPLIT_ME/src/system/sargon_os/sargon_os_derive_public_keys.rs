@@ -19,9 +19,12 @@ impl SargonOS {
     }
 }
 
+/// The source of the public keys to derive.
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Enum)]
 pub enum DerivePublicKeysSource {
+    /// Derive the public keys from a known mnemonic.
     Mnemonic(MnemonicWithPassphrase),
 
+    /// Derive the public keys from a factor source added to Profile.
     FactorSource(FactorSourceIDFromHash),
 }
