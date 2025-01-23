@@ -45,8 +45,8 @@ use crate::prelude::*;
     derive_more::Debug,
 )]
 #[deref(forward)]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct Unhardened(pub U31);
 
 impl Unhardened {
@@ -120,14 +120,14 @@ impl TryFrom<u32> for Unhardened {
 }
 
 impl IsPathComponentStringConvertible for Unhardened {
-    const CANONICAL_SUFFIX: &'static str = "";
-    const NON_CANONICAL_SUFFIX: &'static str = "";
+    const VERBOSE_SYNTAX_SUFFIX: &'static str = "";
+    const SHORTHAND_SYNTAX_SUFFIX: &'static str = "";
 }
 
 impl FromStr for Unhardened {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 

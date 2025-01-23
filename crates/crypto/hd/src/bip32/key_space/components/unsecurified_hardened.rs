@@ -45,8 +45,8 @@ use crate::prelude::*;
     derive_more::Debug,
 )]
 #[deref(forward)]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct UnsecurifiedHardened(pub U30);
 
 impl UnsecurifiedHardened {
@@ -103,13 +103,9 @@ impl TryFrom<u32> for UnsecurifiedHardened {
     }
 }
 
-pub const UNSECURIFIED_HARDENED_CANONICAL_SUFFIX: &str = "H";
-pub const UNSECURIFIED_HARDENED_NON_CANONICAL_SUFFIX: &str = "'";
 impl IsPathComponentStringConvertible for UnsecurifiedHardened {
-    const CANONICAL_SUFFIX: &'static str =
-        UNSECURIFIED_HARDENED_CANONICAL_SUFFIX;
-    const NON_CANONICAL_SUFFIX: &'static str =
-        UNSECURIFIED_HARDENED_NON_CANONICAL_SUFFIX;
+    const VERBOSE_SYNTAX_SUFFIX: &'static str = HARDENED_SUFFIX_BIP32;
+    const SHORTHAND_SYNTAX_SUFFIX: &'static str = HARDENED_SUFFIX_BIP44;
 }
 
 impl HasIndexInLocalKeySpace for UnsecurifiedHardened {
@@ -145,7 +141,7 @@ impl TryFrom<Unsecurified> for UnsecurifiedHardened {
 impl FromStr for UnsecurifiedHardened {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 
@@ -189,7 +185,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_canonical_0() {
+    fn from_str_valid_verbose_syntax_0() {
         assert_eq!(
             "0H".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U31::ZERO).unwrap()
@@ -197,7 +193,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_canonical_1() {
+    fn from_str_valid_verbose_syntax_1() {
         assert_eq!(
             "1H".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U31::ONE).unwrap()
@@ -205,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_canonical_max() {
+    fn from_str_valid_verbose_syntax_max() {
         assert_eq!(
             "1073741823H".parse::<SUT>().unwrap(),
             SUT::from_local_key_space(U30_MAX).unwrap()

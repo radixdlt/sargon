@@ -153,19 +153,19 @@ impl TryFrom<HDPathComponent> for Unsecurified {
     }
 }
 
-impl FromBIP32Str for Unsecurified {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+impl FromCAP43String for Unsecurified {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
         let s = s.as_ref();
-        UnsecurifiedHardened::from_bip32_string(s)
+        UnsecurifiedHardened::from_cap43_string(s)
             .map(Self::Hardened)
-            .or(Unhardened::from_bip32_string(s).map(Self::Unhardened))
+            .or(Unhardened::from_cap43_string(s).map(Self::Unhardened))
     }
 }
 
 impl FromStr for Unsecurified {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 
@@ -303,7 +303,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_0_hardened_canonical() {
+    fn from_str_valid_0_hardened_verbose_syntax() {
         assert_eq!(
             "0H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED).unwrap()
@@ -311,7 +311,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_1_hardened_canonical() {
+    fn from_str_valid_1_hardened_verbose_syntax() {
         assert_eq!(
             "1H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -319,7 +319,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_2_hardened_non_canonical() {
+    fn from_str_valid_2_hardened_shorthand_syntax() {
         assert_eq!(
             "2'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -327,7 +327,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_3_hardened_non_canonical() {
+    fn from_str_valid_3_hardened_shorthand_syntax() {
         assert_eq!(
             "3'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED).unwrap()

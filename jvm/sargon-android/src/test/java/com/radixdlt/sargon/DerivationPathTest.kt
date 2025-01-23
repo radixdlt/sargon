@@ -1,7 +1,7 @@
 package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.asGeneral
-import com.radixdlt.sargon.extensions.bip32CanonicalString
+import com.radixdlt.sargon.extensions.bip32String
 import com.radixdlt.sargon.extensions.curve
 import com.radixdlt.sargon.extensions.displayString
 import com.radixdlt.sargon.extensions.init
@@ -72,7 +72,7 @@ class DerivationPathTest: SampleTestable<DerivationPath> {
         )
         assertEquals(
             "m/44H/1022H/1H/525H/1460H/1073741824H",
-            accountPathInSecurifiedSpace.bip32CanonicalString
+            accountPathInSecurifiedSpace.bip32String
         )
 
         val accountPathInUnsecurifiedSpace = AccountPath.init(
@@ -87,7 +87,7 @@ class DerivationPathTest: SampleTestable<DerivationPath> {
         )
         assertEquals(
             "m/44H/1022H/1H/525H/1460H/0H",
-            accountPathInUnsecurifiedSpace.bip32CanonicalString
+            accountPathInUnsecurifiedSpace.bip32String
         )
     }
 

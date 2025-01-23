@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 #[derive(Clone, Default, derive_more::Debug, derive_more::Display)]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct GetIDPath;
 
 impl GetIDPath {
@@ -21,12 +21,12 @@ impl GetIDPath {
     }
 }
 
-impl ToBIP32Str for GetIDPath {
-    fn to_bip32_string(&self) -> String {
-        self.to_hd_path().to_bip32_string()
+impl ToCAP43String for GetIDPath {
+    fn to_cap43_string(&self) -> String {
+        self.to_hd_path().to_cap43_string()
     }
-    fn to_bip32_string_debug(&self) -> String {
-        self.to_hd_path().to_bip32_string_debug()
+    fn to_cap43_string_debug(&self) -> String {
+        self.to_hd_path().to_cap43_string_debug()
     }
 }
 

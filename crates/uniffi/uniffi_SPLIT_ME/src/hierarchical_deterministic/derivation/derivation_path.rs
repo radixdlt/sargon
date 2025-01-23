@@ -36,9 +36,17 @@ pub fn derivation_path_to_string(path: &DerivationPath) -> String {
     path.into_internal().to_string()
 }
 
+/// String representation of the path using BIP32 notation.
+/// In sargon, paths in the securified space are printed with the `S` notation after the index,
+/// for readability purposes.
+///
+/// The notation `{i}S` means `{i + 2^30}H`, and since `H` means `+ 2^31` we can
+/// verbosely express `{i}S` as `{i + 2^30 + 2^31} (without the H)
+///
+/// Such paths need to be on BIP32 notation meaning that
+/// an index of `"{i}S"` => `"{i + 2^30}H"` when communication with other external APIs,
+/// e.g. using Ledger hardware wallet or Arculus.
 #[uniffi::export]
-pub fn derivation_path_to_canonical_bip32_string(
-    path: &DerivationPath,
-) -> String {
-    path.into_internal().to_canonical_bip32_string()
+pub fn derivation_path_to_bip32_string(path: &DerivationPath) -> String {
+    path.into_internal().to_bip32_string()
 }

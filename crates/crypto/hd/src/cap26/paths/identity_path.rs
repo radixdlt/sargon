@@ -62,8 +62,8 @@ use crate::prelude::*;
     DeserializeFromStr,
     derive_more::Display,
 )]
-#[display("{}", self.to_bip32_string())]
-#[debug("{}", self.to_bip32_string_debug())]
+#[display("{}", self.to_cap43_string())]
+#[debug("{}", self.to_cap43_string_debug())]
 pub struct IdentityPath {
     pub network_id: NetworkID,
     pub key_kind: CAP26KeyKind,
@@ -145,25 +145,25 @@ impl HasEntityKind for IdentityPath {
     }
 }
 
-impl ToBIP32Str for IdentityPath {
-    fn to_bip32_string(&self) -> String {
-        self.to_hd_path().to_bip32_string()
+impl ToCAP43String for IdentityPath {
+    fn to_cap43_string(&self) -> String {
+        self.to_hd_path().to_cap43_string()
     }
-    fn to_bip32_string_debug(&self) -> String {
-        self.to_hd_path().to_bip32_string_debug()
+    fn to_cap43_string_debug(&self) -> String {
+        self.to_hd_path().to_cap43_string_debug()
     }
 }
 
-impl FromBIP32Str for IdentityPath {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
-        HDPath::from_bip32_string(s).and_then(Self::try_from)
+impl FromCAP43String for IdentityPath {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
+        HDPath::from_cap43_string(s).and_then(Self::try_from)
     }
 }
 impl FromStr for IdentityPath {
     type Err = CommonError;
 
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 
