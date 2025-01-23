@@ -38,22 +38,22 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_account(
+    pub async fn create_unsaved_unnamed_mainnet_account_with_main_bdfs(
         &self,
     ) -> Result<Account> {
         self.wrapped
-            .create_unsaved_unnamed_mainnet_account_with_bdfs()
+            .create_unsaved_unnamed_mainnet_account_with_main_bdfs()
             .await
             .into_result()
     }
 
-    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet`.
-    pub async fn create_unsaved_mainnet_account(
+    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using main BDFS.
+    pub async fn create_unsaved_mainnet_account_with_main_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_unsaved_mainnet_account_with_bdfs(name.into_internal())
+            .create_unsaved_mainnet_account_with_main_bdfs(name.into_internal())
             .await
             .into_result()
     }
@@ -70,13 +70,13 @@ impl SargonOS {
     /// of the factor source has been updated.
     ///
     /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    pub async fn create_unsaved_account(
+    pub async fn create_unsaved_account_with_main_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_unsaved_account_with_bdfs(
+            .create_unsaved_account_with_main_bdfs(
                 network_id.into_internal(),
                 name.into_internal(),
             )
@@ -84,29 +84,31 @@ impl SargonOS {
             .into_result()
     }
 
-    /// Create a new mainnet Account named "Unnamed" and adds it to the active Profile.
+    /// Create a new mainnet Account named "Unnamed" using main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_unnamed_mainnet_account(
+    pub async fn create_and_save_new_unnamed_mainnet_account_with_main_bdfs(
         &self,
     ) -> Result<Account> {
         self.wrapped
-            .create_and_save_new_unnamed_mainnet_account_with_bdfs()
+            .create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             .await
             .into_result()
     }
 
-    /// Create a new mainnet Account and adds it to the active Profile.
+    /// Create a new mainnet Account using the main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_mainnet_account(
+    pub async fn create_and_save_new_mainnet_account_with_main_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_and_save_new_mainnet_account_with_bdfs(name.into_internal())
+            .create_and_save_new_mainnet_account_with_main_bdfs(
+                name.into_internal(),
+            )
             .await
             .into_result()
     }
@@ -115,13 +117,15 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_account(
+    pub async fn create_and_save_new_account_with_factor_source(
         &self,
+        factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
         self.wrapped
-            .create_and_save_new_account_with_bdfs(
+            .create_and_save_new_account_with_factor_source(
+                factor_source.into_internal(),
                 network_id.into_internal(),
                 name.into_internal(),
             )
@@ -129,6 +133,25 @@ impl SargonOS {
             .into_result()
     }
 
+    /// Create a new Account using main BDFS and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_account_with_main_bdfs(
+        &self,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.wrapped
+            .create_and_save_new_account_with_main_bdfs(
+                network_id.into_internal(),
+                name.into_internal(),
+            )
+            .await
+            .into_result()
+    }
+
+    /// Creates account using main BDFS.
     /// The account names will be `<name_prefix> <index>`
     ///
     /// # Emits Event
@@ -136,14 +159,14 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn batch_create_many_accounts_then_save_once(
+    pub async fn batch_create_many_accounts_with_main_bdfs_then_save_once(
         &self,
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<()> {
         self.wrapped
-            .batch_create_many_accounts_with_bdfs_then_save_once(
+            .batch_create_many_accounts_with_main_bdfs_then_save_once(
                 count,
                 network_id.into_internal(),
                 name_prefix,
@@ -168,7 +191,7 @@ impl SargonOS {
         name_prefix: String,
     ) -> Result<Vec<Account>> {
         self.wrapped
-            .batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+            .batch_create_unsaved_accounts_with_main_bdfs_consuming_factor_instances(
                 network_id.into_internal(),
                 count,
                 name_prefix,

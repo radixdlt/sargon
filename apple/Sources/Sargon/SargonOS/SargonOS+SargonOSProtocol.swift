@@ -9,8 +9,33 @@ extension SargonOS: SargonOSProtocol {
 extension SargonOS {
 	@discardableResult
 	public func createAccount(
-		named accountName: DisplayName
+		factorSource: FactorSource,
+		networkId: NetworkID?,
+		name: DisplayName
 	) async throws -> Account {
-		try await createAndSaveNewAccount(networkId: currentNetworkID, name: accountName)
+		try await createAndSaveNewAccountWithFactorSource(factorSource: factorSource, networkId: networkId ?? currentNetworkID, name: name)
+	}
+
+	@discardableResult
+	public func createAccountWithBDFS(
+		networkId: NetworkID?,
+		name: DisplayName
+	) async throws -> Account {
+		try await createAndSaveNewAccountWithMainBdfs(networkId: networkId ?? currentNetworkID, name: name)
+	}
+
+	public func createPersona(
+		factorSource: FactorSource,
+		name: DisplayName,
+		personaData: PersonaData?
+	) async throws -> Persona {
+		try await createAndSaveNewPersonaWithFactorSource(factorSource: factorSource, networkId: currentNetworkID, name: name, personaData: personaData)
+	}
+
+	public func createPersonaWithBDFS(
+		name: DisplayName,
+		personaData: PersonaData?
+	) async throws -> Persona {
+		try await createAndSaveNewPersonaWithMainBdfs(networkId: currentNetworkID, name: name, personaData: personaData)
 	}
 }

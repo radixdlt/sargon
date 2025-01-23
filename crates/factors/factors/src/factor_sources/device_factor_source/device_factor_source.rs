@@ -117,7 +117,7 @@ impl DeviceFactorSource {
 
     /// Checks if its Main Babylon Device Factor Source (BDFS).
     pub fn is_main_bdfs(&self) -> bool {
-        self.common.is_main_bdfs()
+        self.common.supports_babylon() && self.common.is_main()
     }
 }
 
@@ -200,11 +200,24 @@ mod tests {
     }
 
     #[test]
-    fn main_babylon() {
+    fn is_main_bdfs() {
         assert!(SUT::babylon(
             true,
             &MnemonicWithPassphrase::sample(),
             &HostInfo::sample()
+        )
+        .is_main_bdfs());
+
+        assert!(!SUT::babylon(
+            false,
+            &MnemonicWithPassphrase::sample(),
+            &HostInfo::sample()
+        )
+        .is_main_bdfs());
+
+        assert!(!SUT::olympia(
+            &MnemonicWithPassphrase::sample_device_12_words(),
+            &HostInfo::sample_other()
         )
         .is_main_bdfs());
     }

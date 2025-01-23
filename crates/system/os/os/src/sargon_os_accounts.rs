@@ -35,14 +35,14 @@ impl SargonOS {
     }
 
     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
-    /// index of the next account for the BDFS.
+    /// index of the next account for the main BDFS.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_account_with_bdfs(
+    pub async fn create_unsaved_unnamed_mainnet_account_with_main_bdfs(
         &self,
     ) -> Result<Account> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_unsaved_unnamed_mainnet_account_with_factor_source(
             bdfs.into(),
         )
@@ -66,13 +66,12 @@ impl SargonOS {
         .await
     }
 
-    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using
-    /// the specified `factor_source`.
-    pub async fn create_unsaved_mainnet_account_with_bdfs(
+    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using main BDFS.
+    pub async fn create_unsaved_mainnet_account_with_main_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_unsaved_mainnet_account_with_factor_source(
             bdfs.into(),
             name,
@@ -107,12 +106,12 @@ impl SargonOS {
     /// of the factor source has been updated.
     ///
     /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    pub async fn create_unsaved_account_with_bdfs(
+    pub async fn create_unsaved_account_with_main_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_unsaved_account_with_factor_source(
             bdfs.into(),
             network_id,
@@ -188,14 +187,14 @@ impl SargonOS {
         Ok((account, instances_in_cache_consumer, derivation_outcome))
     }
 
-    /// Create a new mainnet Account named "Unnamed" using BDFS and adds it to the active Profile.
+    /// Create a new mainnet Account named "Unnamed" using main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_unnamed_mainnet_account_with_bdfs(
+    pub async fn create_and_save_new_unnamed_mainnet_account_with_main_bdfs(
         &self,
     ) -> Result<Account> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_and_save_new_unnamed_mainnet_account_with_factor_source(
             bdfs.into(),
         )
@@ -217,22 +216,22 @@ impl SargonOS {
         .await
     }
 
-    /// Create a new mainnet Account using the BDFS and adds it to the active Profile.
+    /// Create a new mainnet Account using the main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_mainnet_account_with_bdfs(
+    pub async fn create_and_save_new_mainnet_account_with_main_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
+        self.create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
     }
 
-    pub async fn create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(
+    pub async fn create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(
         &self,
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(
             bdfs.into(),
             name,
@@ -265,16 +264,16 @@ impl SargonOS {
         .await
     }
 
-    /// Create a new Account and adds it to the active Profile.
+    /// Create a new Account using main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_account_with_bdfs(
+    pub async fn create_and_save_new_account_with_main_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_and_save_new_account_with_factor_source(
             bdfs.into(),
             network_id,
@@ -324,7 +323,7 @@ impl SargonOS {
         Ok((account, derivation_outcome))
     }
 
-    /// Creates account using BDFS
+    /// Creates account using main BDFS.
     /// The account names will be `<name_prefix> <index>`
     ///
     /// # Emits Event
@@ -332,22 +331,22 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn batch_create_many_accounts_with_bdfs_then_save_once(
+    pub async fn batch_create_many_accounts_with_main_bdfs_then_save_once(
         &self,
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<Accounts> {
-        self.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) |x)
+        self.batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) |x)
     }
 
-    pub async fn batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(
+    pub async fn batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(
         &self,
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(
             bdfs.into(),
             count,
@@ -403,14 +402,14 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
     /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+    pub async fn batch_create_unsaved_accounts_with_main_bdfs_consuming_factor_instances(
         &self,
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
         let (accounts, instances_in_cache_consumer) = self
-            .batch_create_unsaved_accounts_with_bdfs(
+            .batch_create_unsaved_accounts_with_main_bdfs(
                 network_id,
                 count,
                 name_prefix,
@@ -428,13 +427,13 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
     /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_accounts_with_bdfs(
+    pub async fn batch_create_unsaved_accounts_with_main_bdfs(
         &self,
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
     ) -> Result<(Accounts, InstancesInCacheConsumer)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.batch_create_unsaved_accounts_with_factor_source(
             bdfs.into(),
             network_id,
@@ -915,7 +914,7 @@ mod tests {
         // ACT
         let unsaved_account = os
             .with_timeout(|x| {
-                x.create_unsaved_mainnet_account_with_bdfs(
+                x.create_unsaved_mainnet_account_with_main_bdfs(
                     DisplayName::new("Alice").unwrap(),
                 )
             })
@@ -935,14 +934,14 @@ mod tests {
         // ACT
         let first = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_account_with_bdfs()
+                x.create_unsaved_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
 
         let second = os
             .with_timeout(|x| {
-                x.create_unsaved_account_with_bdfs(
+                x.create_unsaved_account_with_main_bdfs(
                     NetworkID::Mainnet,
                     DisplayName::new("Unnamed").unwrap(),
                 )
@@ -962,7 +961,7 @@ mod tests {
         // ACT
         let account = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -982,7 +981,7 @@ mod tests {
         // ACT
         let account = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1009,14 +1008,14 @@ mod tests {
         // ACT
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
 
         let second = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1044,7 +1043,7 @@ mod tests {
         // ACT
         let n: u32 = 3;
         os.with_timeout(|x| {
-            x.batch_create_many_accounts_with_bdfs_then_save_once(
+            x.batch_create_many_accounts_with_main_bdfs_then_save_once(
                 n as u16,
                 NetworkID::Mainnet,
                 "test".to_owned(),
@@ -1072,7 +1071,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+    async fn test_batch_create_unsaved_accounts_with_main_bdfs_consuming_factor_instances(
     ) {
         // ARRANGE
         let os = SUT::fast_boot_bdfs(MnemonicWithPassphrase::sample()).await;
@@ -1082,7 +1081,7 @@ mod tests {
         let n = 50;
         let accounts = os
             .with_timeout(|x| {
-                x.batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
+                x.batch_create_unsaved_accounts_with_main_bdfs_consuming_factor_instances(
                     network,
                     n as u16,
                     "acco".to_owned()
@@ -1145,7 +1144,7 @@ mod tests {
         // ACT
         let n: u32 = 3;
         os.with_timeout(|x| {
-            x.batch_create_many_accounts_with_bdfs_then_save_once(
+            x.batch_create_many_accounts_with_main_bdfs_then_save_once(
                 n as u16,
                 NetworkID::Mainnet,
                 "test".to_owned(),
@@ -1179,7 +1178,7 @@ mod tests {
         // ACT
         let n = AppearanceID::all().len() as u32 * 2;
         os.with_timeout(|x| {
-            x.batch_create_many_accounts_with_bdfs_then_save_once(
+            x.batch_create_many_accounts_with_main_bdfs_then_save_once(
                 n as u16,
                 NetworkID::Mainnet,
                 "test".to_owned(),
@@ -1208,7 +1207,7 @@ mod tests {
 
         // ACT
         os.with_timeout(|x| {
-            x.batch_create_unsaved_accounts_with_bdfs(
+            x.batch_create_unsaved_accounts_with_main_bdfs(
                 NetworkID::Mainnet,
                 3,
                 "test".to_owned(),
@@ -1241,7 +1240,7 @@ mod tests {
 
         // ACT
         os.with_timeout(|x| {
-            x.create_unsaved_unnamed_mainnet_account_with_bdfs()
+            x.create_unsaved_unnamed_mainnet_account_with_main_bdfs()
         })
         .await
         .unwrap();
@@ -1272,7 +1271,7 @@ mod tests {
         // ACT
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
         os.with_timeout(|x| {
-            x.create_and_save_new_account_with_bdfs(
+            x.create_and_save_new_account_with_main_bdfs(
                 NetworkID::Mainnet,
                 DisplayName::sample(),
             )
@@ -1570,7 +1569,7 @@ mod tests {
         // ACT
         let account = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1589,7 +1588,7 @@ mod tests {
 
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1612,7 +1611,7 @@ mod tests {
         // ACT
         let account = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1632,7 +1631,7 @@ mod tests {
         // ACT
         let account = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1650,7 +1649,7 @@ mod tests {
         // so that we have at least one network (with one account)
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
             })
             .await
             .unwrap();

@@ -30,4 +30,7 @@ pub enum DerivationPurpose {
     /// When adding a new factor source, initiates keys collection
     /// for collecting various factor instances.
     PreDerivingKeys,
+
+    /// When deriving accounts for recovery
+    AccountRecovery,
 }

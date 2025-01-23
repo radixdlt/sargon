@@ -1,6 +1,6 @@
 [package]
 name = "radix-connect"
-version = "1.1.117"
+version = "1.1.118"
 edition = "2021"
 
 

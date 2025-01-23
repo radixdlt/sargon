@@ -17,6 +17,13 @@ extension AddressOfAccountOrPersona {
 	public func formatted(_ format: AddressFormat) -> String {
 		addressOfAccountOrPersonaFormatted(address: self, format: format)
 	}
+
+	public var accountAddress: AccountAddress? {
+		switch self {
+		case let .account(address): address
+		case .identity: nil
+		}
+	}
 }
 
 #if DEBUG

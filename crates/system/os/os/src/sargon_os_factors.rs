@@ -13,8 +13,9 @@ pub enum DeviceFactorSourceType {
 impl SargonOS {
     /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
     /// a `DeviceFactorSource`.
-    pub fn bdfs(&self) -> Result<DeviceFactorSource> {
-        self.profile_state_holder.access_profile_with(|p| p.bdfs())
+    pub fn main_bdfs(&self) -> Result<DeviceFactorSource> {
+        self.profile_state_holder
+            .access_profile_with(|p| p.main_bdfs())
     }
 
     /// Returns all the factor sources
@@ -270,7 +271,7 @@ impl SargonOS {
 
         let is_any_of_new_factors_main_bdfs =
             new_factors_only.iter().any(|x| x.is_main_bdfs());
-        let id_of_old_bdfs = self.bdfs()?.factor_source_id();
+        let id_of_old_bdfs = self.main_bdfs()?.factor_source_id();
 
         for factor_source in new_factors_only.iter() {
             if !factor_source.factor_source_id().is_hash() {
@@ -296,7 +297,7 @@ impl SargonOS {
             self.update_factor_source_remove_flag_main(id_of_old_bdfs)
                 .await?;
             assert!(ids_of_factors_to_add
-                .contains(&self.bdfs()?.factor_source_id()))
+                .contains(&self.main_bdfs()?.factor_source_id()))
         }
 
         Ok(ids_of_new_factor_sources.into_iter().collect_vec())
@@ -554,7 +555,7 @@ mod tests {
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
         // ACT
-        let loaded = os.bdfs().unwrap();
+        let loaded = os.main_bdfs().unwrap();
 
         // ASSERT
         assert_eq!(
@@ -651,7 +652,7 @@ mod tests {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
-        let old_bdfs_id = os.bdfs().unwrap().factor_source_id();
+        let old_bdfs_id = os.main_bdfs().unwrap().factor_source_id();
         let new_bdfs = DeviceFactorSource::babylon(
             true,
             &MnemonicWithPassphrase::sample(),
@@ -669,7 +670,7 @@ mod tests {
 
         // ASSERT
         assert!(inserted);
-        assert_eq!(os.bdfs().unwrap(), new_bdfs);
+        assert_eq!(os.main_bdfs().unwrap(), new_bdfs);
         let old_bdfs = os
             .profile()
             .unwrap()
@@ -688,7 +689,7 @@ mod tests {
         let mwp = MnemonicWithPassphrase::sample();
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
-        let bdfs = os.bdfs().unwrap();
+        let bdfs = os.main_bdfs().unwrap();
 
         // ACT
         let inserted = os
@@ -750,7 +751,8 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(!bdfs.common.is_main_bdfs());
+        assert!(!bdfs.is_main_bdfs());
+        assert!(!bdfs.common.is_main());
         assert!(bdfs.common.supports_babylon());
     }
 
@@ -771,7 +773,7 @@ mod tests {
             .unwrap();
 
         // ASSERT
-        assert!(!dfs.common.is_main_bdfs());
+        assert!(!dfs.common.is_main());
         assert!(!dfs.common.supports_babylon());
         assert!(dfs.common.supports_olympia());
         assert_eq!(

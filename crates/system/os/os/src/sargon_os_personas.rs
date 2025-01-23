@@ -19,14 +19,14 @@ impl SargonOS {
         self.profile_state_holder.persona_by_address(address)
     }
 
-    /// Creates a new unsaved mainnet persona named "Unnamed".
+    /// Creates a new unsaved mainnet persona named "Unnamed" using main bdfs.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_persona_with_bdfs(
+    pub async fn create_unsaved_unnamed_mainnet_persona_with_main_bdfs(
         &self,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_unsaved_unnamed_mainnet_persona_with_factor_source(
             bdfs.into(),
         )
@@ -50,13 +50,12 @@ impl SargonOS {
         .await
     }
 
-    /// Uses `create_unsaved_persona` specifying `NetworkID::Mainnet` using
-    /// the specified `factor_source`.
-    pub async fn create_unsaved_mainnet_persona_with_bdfs(
+    /// Uses `create_unsaved_persona` specifying `NetworkID::Mainnet` using main BDFS.
+    pub async fn create_unsaved_mainnet_persona_with_main_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_unsaved_mainnet_persona_with_factor_source(
             bdfs.into(),
             name,
@@ -91,12 +90,12 @@ impl SargonOS {
     /// of the factor source has been updated.
     ///
     /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    pub async fn create_unsaved_persona_with_bdfs(
+    pub async fn create_unsaved_persona_with_main_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_unsaved_persona_with_factor_source(
             bdfs.into(),
             network_id,
@@ -169,14 +168,14 @@ impl SargonOS {
         Ok((persona, instances_in_cache_consumer, derivation_outcome))
     }
 
-    /// Create a new mainnet Persona named "Unnamed" using BDFS and adds it to the active Profile.
+    /// Create a new mainnet Persona named "Unnamed" using main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_unnamed_mainnet_persona_with_bdfs(
+    pub async fn create_and_save_new_unnamed_mainnet_persona_with_main_bdfs(
         &self,
     ) -> Result<Persona> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_and_save_new_unnamed_mainnet_persona_with_factor_source(
             bdfs.into(),
         )
@@ -198,22 +197,22 @@ impl SargonOS {
         .await
     }
 
-    /// Create a new mainnet Persona using the BDFS and adds it to the active Profile.
+    /// Create a new mainnet Persona using the mian BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_mainnet_persona_with_bdfs(
+    pub async fn create_and_save_new_mainnet_persona_with_main_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Persona> {
-        self.create_and_save_new_mainnet_persona_with_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
+        self.create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
     }
 
-    pub async fn create_and_save_new_mainnet_persona_with_bdfs_with_derivation_outcome(
+    pub async fn create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(
         &self,
         name: DisplayName,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_and_save_new_mainnet_persona_with_factor_source_with_derivation_outcome(
             bdfs.into(),
             name,
@@ -242,24 +241,27 @@ impl SargonOS {
             factor_source,
             NetworkID::Mainnet,
             name,
+            None,
         )
         .await
     }
 
-    /// Create a new Persona and adds it to the active Profile.
+    /// Create a new Persona with main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_persona_with_bdfs(
+    pub async fn create_and_save_new_persona_with_main_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
+        persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.create_and_save_new_persona_with_factor_source(
             bdfs.into(),
             network_id,
             name,
+            persona_data,
         )
         .await
     }
@@ -273,8 +275,9 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
+        persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
-        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, name).await.map(|(x, _)| x)
+        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, name, persona_data).await.map(|(x, _)| x)
     }
 
     pub async fn create_and_save_new_persona_with_factor_source_with_derivation_outcome(
@@ -282,9 +285,10 @@ impl SargonOS {
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
+        persona_data: Option<PersonaData>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
         debug!("Creating persona.");
-        let (persona, instances_in_cache_consumer, derivation_outcome) = self
+        let (mut persona, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
@@ -292,6 +296,11 @@ impl SargonOS {
             )
             .await?;
         debug!("Created persona, now saving it to profile.");
+
+        // If PersonaData is set, assign it before saving it into Profile
+        if let Some(persona_data) = persona_data {
+            persona.persona_data = persona_data;
+        }
 
         // First try save Persona into Profile...
         self.add_persona(persona.clone()).await?;
@@ -328,7 +337,7 @@ impl SargonOS {
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(
             bdfs.into(),
             count,
@@ -390,7 +399,7 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<(Personas, InstancesInCacheConsumer)> {
-        let bdfs = self.bdfs()?;
+        let bdfs = self.main_bdfs()?;
         self.batch_create_unsaved_personas_with_factor_source(
             bdfs.into(),
             network_id,
@@ -589,7 +598,7 @@ mod tests {
         // ACT
         let (mut unsaved_persona, _) = os
             .with_timeout(|x| {
-                x.create_unsaved_mainnet_persona_with_bdfs(
+                x.create_unsaved_mainnet_persona_with_main_bdfs(
                     DisplayName::new("Satoshi").unwrap(),
                 )
             })
@@ -625,7 +634,7 @@ mod tests {
 
         let (second, _) = os
             .with_timeout(|x| {
-                x.create_unsaved_persona_with_bdfs(
+                x.create_unsaved_persona_with_main_bdfs(
                     NetworkID::Mainnet,
                     DisplayName::new("Unnamed").unwrap(),
                 )
@@ -646,7 +655,7 @@ mod tests {
         // ACT
         let (first, instances_in_cache_consumer) = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
+                x.create_unsaved_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -656,7 +665,7 @@ mod tests {
 
         let (second, _) = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
+                x.create_unsaved_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -673,7 +682,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -686,6 +695,34 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn test_create_and_save_new_persona_sets_persona_data() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let persona = os
+            .with_timeout(|x| {
+                x.create_and_save_new_persona_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                    Some(PersonaData::sample()),
+                )
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(
+            os.profile().unwrap().networks[0].personas,
+            Personas::just(persona)
+        );
+        assert_eq!(
+            os.profile().unwrap().networks[0].personas[0].persona_data,
+            PersonaData::sample()
+        );
+    }
+
+    #[actix_rt::test]
     async fn test_first_create_and_add_persona_has_index_0() {
         // ARRANGE
         let os = SUT::fast_boot().await;
@@ -693,7 +730,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -720,14 +757,14 @@ mod tests {
         // ACT
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
 
         let second = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -881,7 +918,7 @@ mod tests {
 
         // ACT
         os.with_timeout(|x| {
-            x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
+            x.create_unsaved_unnamed_mainnet_persona_with_main_bdfs()
         })
         .await
         .unwrap();
@@ -913,9 +950,10 @@ mod tests {
         // ACT
         os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
         os.with_timeout(|x| {
-            x.create_and_save_new_persona_with_bdfs(
+            x.create_and_save_new_persona_with_main_bdfs(
                 NetworkID::Mainnet,
                 DisplayName::sample(),
+                None,
             )
         })
         .await
@@ -1156,7 +1194,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1175,7 +1213,7 @@ mod tests {
 
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1198,7 +1236,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();
@@ -1216,7 +1254,7 @@ mod tests {
         // so that we have at least one network (with one persona)
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
             })
             .await
             .unwrap();

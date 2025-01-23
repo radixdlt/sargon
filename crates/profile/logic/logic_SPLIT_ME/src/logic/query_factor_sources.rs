@@ -22,7 +22,7 @@ pub trait ProfileFactorSourceQuerying {
         kind: FactorSourceKind,
     ) -> Option<FactorSourceID>;
 
-    fn bdfs(&self) -> DeviceFactorSource {
+    fn main_bdfs(&self) -> DeviceFactorSource {
         let device_factor_sources = self.device_factor_sources();
         let explicit_main = device_factor_sources
             .clone()
@@ -239,13 +239,13 @@ mod tests {
     fn bdfs_success_without_explicit_main_flag() {
         let profile =
             Profile::sample_no_factor_source_explicitly_marked_as_main();
-        assert_eq!(profile.bdfs().id, DeviceFactorSource::sample().id);
+        assert_eq!(profile.main_bdfs().id, DeviceFactorSource::sample().id);
     }
 
     #[test]
     fn bdfs_success_with_explicit_main_flag() {
         let profile = Profile::sample();
-        assert_eq!(profile.bdfs().id, DeviceFactorSource::sample().id);
+        assert_eq!(profile.main_bdfs().id, DeviceFactorSource::sample().id);
     }
 
     #[test]
@@ -254,7 +254,7 @@ mod tests {
     )]
     fn bdfs_fail_for_invalid_profile_without_device_factor_source() {
         let profile = Profile::sample_no_device_factor_source();
-        profile.bdfs();
+        profile.main_bdfs();
     }
 
     #[test]
@@ -263,7 +263,7 @@ mod tests {
     )]
     fn bdfs_fail_for_invalid_profile_without_babylon_device_factor_source() {
         let profile = Profile::sample_no_babylon_device_factor_source();
-        profile.bdfs();
+        profile.main_bdfs();
     }
 
     #[test]

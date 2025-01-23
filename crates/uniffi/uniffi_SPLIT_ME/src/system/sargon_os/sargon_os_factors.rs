@@ -45,8 +45,8 @@ impl From<InternalHierarchicalDeterministicFactorInstance>
 impl SargonOS {
     /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
     /// a `DeviceFactorSource`.
-    pub fn bdfs(&self) -> Result<DeviceFactorSource> {
-        self.wrapped.bdfs().into_result()
+    pub fn main_bdfs(&self) -> Result<DeviceFactorSource> {
+        self.wrapped.main_bdfs().into_result()
     }
 
     /// Returns all the factor sources
