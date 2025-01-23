@@ -57,7 +57,7 @@ where
                 unsecured_entity_control,
             )),
             EntitySecurityState::Securified { .. } => {
-                Err(CommonError::AESDecryptionFailed)
+                Err(CommonError::SecurityStateSecurifiedButExpectedUnsecurified)
             }
         }
     }
