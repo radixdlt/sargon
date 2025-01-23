@@ -251,7 +251,7 @@ mod tests {
     type SUT = DerivationPath;
 
     #[test]
-    fn test_to_bip32_string_is_display_account() {
+    fn test_to_cap43_string_is_display_account() {
         let sut = SUT::Account {
             value: AccountPath::sample(),
         };
@@ -259,7 +259,7 @@ mod tests {
     }
 
     #[test]
-    fn test_to_bip32_string_is_debug_account() {
+    fn test_to_cap43_string_debug_is_debug_account() {
         let sut = SUT::Account {
             value: AccountPath::sample(),
         };
@@ -267,7 +267,7 @@ mod tests {
     }
 
     #[test]
-    fn test_to_bip32_string_is_display_identity() {
+    fn test_to_cap43_string_is_display_identity() {
         let sut = SUT::Identity {
             value: IdentityPath::sample(),
         };
@@ -275,7 +275,7 @@ mod tests {
     }
 
     #[test]
-    fn test_to_bip32_string_is_debug_identity() {
+    fn test_to_cap43_string_debug_is_debug_identity() {
         let sut = SUT::Identity {
             value: IdentityPath::sample(),
         };
