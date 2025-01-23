@@ -1613,6 +1613,72 @@ mod test_invalid {
     }
 
     #[test]
+    fn factor_source_already_present() {
+        let sut = SUT::sample_strict_with_auth_signing();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_recovery_override(FactorSourceID::sample_ledger())
+        .add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_ledger_other(),
+        );
+
+        let res = sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
+            vec![FactorSourceID::sample_device(),]
+        );
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        ); // did not get added
+
+        assert_eq!(
+            res,
+            vec![FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                RoleKind::Primary,
+                FactorSourceID::sample_device(),
+                ForeverInvalidReason::FactorSourceAlreadyPresent
+            )]
+        );
+
+        assert!(sut.validate().is_none(),);
+        assert_eq!(sut.status(), SecurityShieldBuilderStatus::Strong);
+    }
+
+    #[test]
+    fn primary_cannot_have_password_in_override_list() {
+        let sut = SUT::sample_strict_with_auth_signing();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_recovery_override(FactorSourceID::sample_ledger())
+        .add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_ledger_other(),
+        );
+
+        let is_valid_or_can_be = sut.addition_of_factor_source_of_kind_to_primary_override_is_valid_or_can_be(FactorSourceKind::Password);
+        let validation_res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
+            vec![FactorSourceID::sample_password(),]
+        );
+
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_password(),
+        ); // did not get added
+
+        assert!(!is_valid_or_can_be);
+        assert_eq!(
+            validation_res,
+            vec![FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                RoleKind::Primary,
+                FactorSourceID::sample_password(),
+                ForeverInvalidReason::PrimaryCannotHavePasswordInOverrideList
+            )]
+        );
+
+        assert!(sut.validate().is_none(),);
+        assert_eq!(sut.status(), SecurityShieldBuilderStatus::Strong);
+    }
+
+    #[test]
     fn single_factor_used_in_primary_must_not_be_used_in_any_other_role_in_recovery(
     ) {
         let sut = SUT::sample_strict_with_auth_signing();
