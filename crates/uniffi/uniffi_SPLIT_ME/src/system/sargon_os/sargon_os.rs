@@ -22,9 +22,12 @@ impl SargonOS {
     ) -> Arc<Self> {
         let internal_sargon_os = InternalSargonOS::boot(
             Arc::new(bios.as_ref().clone().into()),
-            Interactors::new(Arc::new(UseFactorSourcesInteractorAdapter::new(
-                interactor,
-            ))),
+            Interactors::new(
+                Arc::new(UseFactorSourcesInteractorAdapter::new(
+                    interactor.clone(),
+                )),
+                Arc::new(AuthorizationInteractorAdapter::new(interactor)),
+            ),
         )
         .await;
 

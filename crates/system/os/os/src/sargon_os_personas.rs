@@ -295,11 +295,25 @@ impl SargonOS {
                 name,
             )
             .await?;
-        debug!("Created persona, now saving it to profile.");
-
         // If PersonaData is set, assign it before saving it into Profile
         if let Some(persona_data) = persona_data {
             persona.persona_data = persona_data;
+        }
+        debug!("Created persona, requesting authorization...");
+
+        let authorization = self
+            .authorization_interactor()
+            .request_authorization(AuthorizationPurpose::CreatingPersona)
+            .await;
+
+        match authorization {
+            AuthorizationResponse::Rejected => {
+                debug!("User rejected authorization, aborting.");
+                return Err(CommonError::SigningRejected);
+            }
+            AuthorizationResponse::Authorized => {
+                debug!("User authorized, saving to profile...");
+            }
         }
 
         // First try save Persona into Profile...
@@ -371,17 +385,29 @@ impl SargonOS {
                 name_prefix,
             )
             .await?;
-        debug!("Created #{} personas, now saving them to profile.", count);
+        debug!("Created #{} personas, requesting authorization...", count);
+
+        let authorization = self
+            .authorization_interactor()
+            .request_authorization(AuthorizationPurpose::CreatingPersonas)
+            .await;
+
+        match authorization {
+            AuthorizationResponse::Rejected => {
+                debug!("User rejected authorization, aborting.");
+                return Err(CommonError::SigningRejected);
+            }
+            AuthorizationResponse::Authorized => {
+                debug!("User authorized, saving to profile...");
+            }
+        }
 
         // First save personas into Profile...
         self.add_personas(personas.clone()).await?;
         // ... if successful, consume FactorInstances from cache!
         instances_in_cache_consumer.consume().await?;
 
-        info!(
-            "Created persona and saved #{} new personas into profile",
-            count
-        );
+        info!("Created and saved #{} new personas into profile", count);
         Ok((personas, derivation_outcome))
     }
 
@@ -1263,6 +1289,92 @@ mod tests {
         assert_eq!(
             os.persona_by_address(IdentityAddress::sample_mainnet()),
             Err(CommonError::UnknownPersona)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_persona_aborts_when_user_rejects_authorization(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_authorization_interactor(
+                &clients,
+                Arc::new(TestAuthorizationInteractor::new_rejecting_only(
+                    AuthorizationPurpose::CreatingPersona,
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let initial_profile = Profile::sample();
+        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+            .await
+            .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.create_and_save_new_persona_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                    None,
+                )
+            })
+            .await;
+
+        assert_eq!(Err(CommonError::SigningRejected), result);
+
+        assert_eq!(
+            initial_profile.personas_on_current_network().unwrap().len(),
+            os.personas_on_current_network().unwrap().len()
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_batch_create_and_save_new_personas_aborts_when_user_rejects_authorization(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_authorization_interactor(
+                &clients,
+                Arc::new(TestAuthorizationInteractor::new_rejecting_only(
+                    AuthorizationPurpose::CreatingPersonas,
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let initial_profile = Profile::sample();
+        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+            .await
+            .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.batch_create_many_personas_with_bdfs_then_save_once(
+                    10,
+                    NetworkID::Mainnet,
+                    "test".to_owned(),
+                )
+            })
+            .await;
+
+        assert_eq!(Err(CommonError::SigningRejected), result);
+
+        assert_eq!(
+            initial_profile.personas_on_current_network().unwrap().len(),
+            os.personas_on_current_network().unwrap().len()
         );
     }
 }

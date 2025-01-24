@@ -461,7 +461,10 @@ mod test {
                     get_simulated_user::<AuthIntent>(&maybe_signing_failure),
                 )),
             ));
-        let interactors = Interactors::new(use_factor_sources_interactors);
+        let interactors = Interactors::new(
+            use_factor_sources_interactors,
+            Arc::new(TestAuthorizationInteractor::new_authorizing()),
+        );
         SUT::boot_with_clients_and_interactor(clients, interactors).await
     }
 
