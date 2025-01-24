@@ -13,7 +13,7 @@ use radix_engine_interface::blueprints::access_controller::{
     ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT,
 };
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, enum_iterator::Sequence)]
 pub enum TransactionManifestApplySecurityShieldKind {
     /// (Primary Recovery Confirmation)
     PrimaryAndRecoveryWithExplicitConfirmation,
@@ -42,6 +42,10 @@ pub trait CallMethodInput: ManifestEncode + ManifestSborTuple {}
 impl<T: ManifestEncode + ManifestSborTuple> CallMethodInput for T {}
 
 impl TransactionManifestApplySecurityShieldKind {
+    pub fn all() -> IndexSet<Self> {
+        enum_iterator::all::<Self>().collect()
+    }
+
     fn can_exercise_primary_role(&self) -> bool {
         match self {
             Self::PrimaryAndRecoveryWithExplicitConfirmation => true,

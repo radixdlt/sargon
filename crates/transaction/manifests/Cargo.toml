@@ -33,6 +33,7 @@ sbor = { workspace = true }
 # === EXTERNAL DEPENDENCIES ===
 derive_more = { workspace = true }
 enum-as-inner = { workspace = true }
+enum-iterator = { workspace = true }
 itertools = { workspace = true }
 paste = { workspace = true }
 pretty_assertions = { workspace = true }

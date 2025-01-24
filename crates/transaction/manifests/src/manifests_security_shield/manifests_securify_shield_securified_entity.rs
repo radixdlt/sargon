@@ -16,6 +16,16 @@ pub trait TransactionManifestSecurifySecurifiedEntity:
 }
 
 impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
+    /// Updates the security shield of a securified entity to `security_structure_of_factor_instances`.
+    ///
+    /// Also conditionally updates the Rola key of the entity - if it is new.
+    ///
+    /// Later once we have got a preview from Gateway - we will need to call:
+    /// * `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`
+    ///
+    /// And when we know the fee we can calculate how much to top up the XRD vault of the AccessController
+    /// and call
+    /// * `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account`
     fn apply_security_shield_for_securified_entity(
         securified_entity: AnySecurifiedEntity,
         security_structure_of_factor_instances:
@@ -84,6 +94,11 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         );
 
         // N.B.
+        // We will not lock fee against the XRD vault yet - we will do that
+        // later when we have made a preview/dry-run of the `manifest` to get
+        // the estimated fee to lock, by calling `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`
+        //
+        // Furthermore:
         // We do NOT top of XRD vault of AccessController - yet!
         // Host will need to call the function:
         // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account`

@@ -41,8 +41,12 @@ impl OsApplySecurityShieldInteraction for SargonOS {
              .iter()
              .map(|e| {
                 let provisional = e.entity.get_provisional().expect("Entity should have a provisional config set since we applied shield above");
-                let _derived = provisional.as_factor_instances_derived().expect("Should have derived factors");
-                todo!("Implement TransactionManifest::apply_security_shield_for_securified_entity")
+                let derived = provisional.as_factor_instances_derived().expect("Should have derived factors");
+                TransactionManifest::apply_security_shield_for_securified_entity(
+                    e,
+                    derived.clone(),
+                    TransactionManifestApplySecurityShieldKind::PrimaryAndRecoveryWithExplicitConfirmation
+                )
          }).collect::<Result<Vec<TransactionManifest>>>()?;
 
         Ok(DappToWalletInteractionBatchOfTransactions::new(

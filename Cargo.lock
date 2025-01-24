@@ -2451,6 +2451,7 @@ dependencies = [
  "core-utils",
  "derive_more",
  "enum-as-inner",
+ "enum-iterator",
  "factors",
  "gateway-models",
  "hierarchical-deterministic",
