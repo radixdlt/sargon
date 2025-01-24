@@ -26,6 +26,9 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
     /// And when we know the fee we can calculate how much to top up the XRD vault of the AccessController
     /// and call
     /// * `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account`
+    ///
+    /// For timed confirmation - much later (`timed_recovery_delay_in_minutes` later ) the
+    /// host app will need to call `confirm_timed_recovery`
     fn apply_security_shield_for_securified_entity(
         securified_entity: AnySecurifiedEntity,
         security_structure_of_factor_instances:
@@ -58,16 +61,16 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
             (init_input.deref(),),
         );
 
-        // CONFIRM RECOVERY
-        // TODO: for timed, should we really call it here, now? Should
-        // we not call it AFTER the time has elapsed???
-        let (confirm_method, confirm_input) =
-            kind.input_for_confirm(factors_and_time_input);
-        builder = builder.call_method(
-            access_controller_address.scrypto(),
-            confirm_method,
-            (confirm_input.deref(),),
-        );
+        // QUICK CONFIRM RECOVERY - Only if we can exercise the confirmation role explicitly.
+        if let Some((confirm_method, confirm_input)) =
+            kind.input_for_quick_confirm(factors_and_time_input)
+        {
+            builder = builder.call_method(
+                access_controller_address.scrypto(),
+                confirm_method,
+                (confirm_input.deref(),),
+            );
+        }
 
         // Set Rola Key
         let should_set_rola_key = security_structure_of_factor_instances

@@ -5,12 +5,10 @@ use radix_engine_interface::blueprints::access_controller::{
     AccessControllerInitiateRecoveryAsRecoveryInput as ScryptoAccessControllerInitiateRecoveryAsRecoveryInput,
     AccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput as ScryptoAccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput,
     AccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput as ScryptoAccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput,
-    AccessControllerTimedConfirmRecoveryInput as ScryptoAccessControllerTimedConfirmRecoveryInput,
     ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
     ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
     ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT,
     ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
-    ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT,
 };
 
 /// A "selector" of which combination of Roles we can exercise with used
@@ -130,26 +128,22 @@ impl TransactionManifestApplySecurityShieldKind {
     /// on an AccessController - depending on which roles we can exercise.
     ///
     /// **MUST** use the analogous method which was used to initiate recovery.
-    pub fn input_for_confirm(
+    pub fn input_for_quick_confirm(
         &self,
         factors_and_time: &AccessControllerFactorsAndTimeInput,
-    ) -> (&'static str, Box<dyn CallMethodInput>) {
+    ) -> Option<(&'static str, Box<dyn CallMethodInput>)> {
         if self.can_exercise_confirmation_role_explicitly() {
-            if self.can_exercise_recovery_role() {
+            Some(if self.can_exercise_recovery_role() {
                 (SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT, Box::new(ScryptoAccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput::from(factors_and_time)))
             } else {
                 (SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT, Box::new(ScryptoAccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput::from(factors_and_time)))
-            }
+            })
         } else {
-            // Time based
-            (
-                SCRYPTO_ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT,
-                Box::new(
-                    ScryptoAccessControllerTimedConfirmRecoveryInput::from(
-                        factors_and_time,
-                    ),
-                ),
-            )
+            // Time based cannot happen yet - host (user) need to wait the specified
+            // amount of time (factors_and_time.time) before calling this method.
+            // So host will need to schedule a notification for user so that host
+            // can call this method after the time has elapsed.
+            None
         }
     }
 }
