@@ -1,12 +1,9 @@
 use profile_supporting_types::AnyUnsecurifiedEntity;
 use radix_common::prelude::ACCESS_CONTROLLER_PACKAGE as SCRYPTO_ACCESS_CONTROLLER_PACKAGE;
-use radix_engine_interface::blueprints::{
-    access_controller::{
-        AccessControllerCreateManifestInput as ScryptoAccessControllerCreateManifestInput,
-        ACCESS_CONTROLLER_BLUEPRINT as SCRYPTO_ACCESS_CONTROLLER_BLUEPRINT,
-        ACCESS_CONTROLLER_CREATE_IDENT as SCRYPTO_ACCESS_CONTROLLER_CREATE_IDENT,
-    },
-    account::AccountSecurifyManifestInput as ScryptoAccountSecurifyManifestInput,
+use radix_engine_interface::blueprints::access_controller::{
+    AccessControllerCreateManifestInput as ScryptoAccessControllerCreateManifestInput,
+    ACCESS_CONTROLLER_BLUEPRINT as SCRYPTO_ACCESS_CONTROLLER_BLUEPRINT,
+    ACCESS_CONTROLLER_CREATE_IDENT as SCRYPTO_ACCESS_CONTROLLER_CREATE_IDENT,
 };
 
 use crate::prelude::*;
@@ -55,34 +52,11 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
         security_structure_of_factor_instances
             .assert_has_entity_kind(entity_address.get_entity_kind())?;
 
-        let (security_entity_identifier, owner_badge) =
-            if entity_address.is_identity() {
-                (
-                    SCRYPTO_IDENTITY_SECURIFY_IDENT,
-                    SCRYPTO_IDENTITY_OWNER_BADGE,
-                )
-            } else {
-                (SCRYPTO_ACCOUNT_SECURIFY_IDENT, SCRYPTO_ACCOUNT_OWNER_BADGE)
-            };
-
-        let mut builder = ScryptoTransactionManifestBuilder::new();
-
         // Securify the entity which will return an entity owner badge onto the worktop.
-        let owner_badge_bucket_name = "owner_badge_bucket";
-        {
-            builder = builder.call_method(
-                &entity_address,
-                security_entity_identifier,
-                ScryptoAccountSecurifyManifestInput {},
-            );
-
-            // Create a bucket out of the entity owner badge.
-            builder = builder.take_from_worktop(
-                owner_badge,
-                1,
-                owner_badge_bucket_name,
-            );
-        };
+        let (mut builder, owner_badge_bucket) = Self::put_owner_badge_in_bucket(
+            ScryptoTransactionManifestBuilder::new(),
+            &unsecurified_entity.entity,
+        );
 
         // Create an access controller for the entity.
         builder = {
@@ -108,8 +82,6 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
                     .matrix_of_factors
                     .clone(),
             );
-
-            let owner_badge_bucket = builder.bucket(owner_badge_bucket_name);
 
             builder.call_function(
                 SCRYPTO_ACCESS_CONTROLLER_PACKAGE,
