@@ -7,6 +7,7 @@ use crate::prelude::*;
 impl TransactionManifestOwnerBadgeProducing for TransactionManifest {}
 
 pub trait TransactionManifestOwnerBadgeProducing {
+    /// Produces and puts the owner badge in a Bucket and returns the bucket.
     fn put_owner_badge_in_bucket(
         builder: ScryptoTransactionManifestBuilder,
         owner: impl Borrow<AccountOrPersona>,
@@ -29,6 +30,8 @@ pub trait TransactionManifestOwnerBadgeProducing {
         (builder, owner_badge_bucket)
     }
 
+    /// Produce the owner badge
+    /// TODO: Ask Omar if this is correct for Securified entityes.
     fn produce_owner_badge(
         builder: ScryptoTransactionManifestBuilder,
         owner: impl Borrow<AccountOrPersona>,

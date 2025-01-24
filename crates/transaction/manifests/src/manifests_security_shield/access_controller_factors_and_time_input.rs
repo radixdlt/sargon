@@ -7,9 +7,15 @@ use radix_engine_interface::blueprints::access_controller::{
     AccessControllerTimedConfirmRecoveryInput as ScryptoAccessControllerTimedConfirmRecoveryInput,
 };
 
+/// An ephemeral DTO that is used to create the input for the access controller
+/// methods that require factors and time - which we create from a
+/// `SecurityStructureOfFactorInstances`
 #[derive(Debug, Clone)]
 pub struct AccessControllerFactorsAndTimeInput {
+    /// RuleSet is Scrypto representation of the security structure's
+    /// MatrixOfFactors
     rule_set: ScryptoRuleSet,
+    /// The timed recovery delay in minutes we get from `SecurityStructureOfFactorInstances`.
     timed_recovery_delay_in_minutes: u32,
 }
 

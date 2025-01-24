@@ -13,6 +13,12 @@ use radix_engine_interface::blueprints::access_controller::{
     ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT,
 };
 
+/// A "selector" of which combination of Roles we can exercise with used
+/// to build different flavours of TransactionManifest for the Security Shield
+/// update.
+///
+/// Each combination of roles allows us to skip signing with certain factors
+/// and still be able to recover + confirm the AccessController update.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, enum_iterator::Sequence)]
 pub enum TransactionManifestApplySecurityShieldKind {
     /// (Primary Recovery Confirmation)
@@ -46,6 +52,7 @@ impl TransactionManifestApplySecurityShieldKind {
         enum_iterator::all::<Self>().collect()
     }
 
+    /// If this combination of roles references the `Primary` role or not.
     fn can_exercise_primary_role(&self) -> bool {
         match self {
             Self::PrimaryAndRecoveryWithExplicitConfirmation => true,
@@ -57,6 +64,7 @@ impl TransactionManifestApplySecurityShieldKind {
         }
     }
 
+    /// If this combination of roles references the `Recovery` role or not.
     fn can_exercise_recovery_role(&self) -> bool {
         match self {
             Self::PrimaryAndRecoveryWithExplicitConfirmation => true,
@@ -68,6 +76,8 @@ impl TransactionManifestApplySecurityShieldKind {
         }
     }
 
+    /// If this combination of roles references the `Confirmation` role or not.
+    ///
     /// Explicitly means "not using time, but use quick confirmation"
     fn can_exercise_confirmation_role_explicitly(&self) -> bool {
         match self {
@@ -80,10 +90,13 @@ impl TransactionManifestApplySecurityShieldKind {
         }
     }
 
+    /// If we can set the ROLA key for this combination of roles.
     pub fn can_set_rola_key(&self) -> bool {
         self.can_exercise_primary_role()
     }
 
+    /// Returns method identifier and input for **initiating** recovery
+    /// on an AccessController - depending on which roles we can exercise.
     pub fn input_for_initialization(
         &self,
         factors_and_time: &AccessControllerFactorsAndTimeInput,
@@ -113,6 +126,10 @@ impl TransactionManifestApplySecurityShieldKind {
         }
     }
 
+    /// Returns method identifier and input for **confirm** recovery
+    /// on an AccessController - depending on which roles we can exercise.
+    ///
+    /// **MUST** use the analogous method which was used to initiate recovery.
     pub fn input_for_confirm(
         &self,
         factors_and_time: &AccessControllerFactorsAndTimeInput,
