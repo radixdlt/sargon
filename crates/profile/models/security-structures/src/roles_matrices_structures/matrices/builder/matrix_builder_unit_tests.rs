@@ -86,11 +86,11 @@ fn set_number_of_days_cannot_be_zero() {
     )
     .unwrap();
 
-    sut.number_of_days_until_auto_confirm = 0; // bypass validation
+    sut.number_of_days_until_timed_confirmation_is_callable = 0; // bypass validation
 
     // Build
     let validation = MatrixBuilderValidation::CombinationViolation(
-            MatrixRolesInCombinationViolation::Basic(MatrixRolesInCombinationBasicViolation::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero)
+            MatrixRolesInCombinationViolation::Basic(MatrixRolesInCombinationBasicViolation::NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero)
         );
     assert_eq!(sut.validate(), Err(validation));
     let res = sut.build();
@@ -117,7 +117,8 @@ fn set_number_of_days_42() {
     )
     .unwrap();
 
-    sut.set_number_of_days_until_auto_confirm(42).unwrap();
+    sut.set_number_of_days_until_timed_confirmation_is_callable(42)
+        .unwrap();
 
     // Build
     assert!(sut.validate().is_ok());
@@ -142,8 +143,11 @@ fn set_number_of_days_42() {
 }
 
 #[test]
-fn auto_confirm_default() {
-    assert_eq!(SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM, 14);
+fn timed_confirm_default() {
+    assert_eq!(
+        SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE,
+        14
+    );
 }
 
 #[test]
@@ -183,7 +187,7 @@ fn set_number_of_days_if_not_set_uses_default() {
             ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_password()
             ],),
-            SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
+            SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE,
         )
     );
 }

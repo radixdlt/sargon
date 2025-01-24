@@ -39,13 +39,14 @@ pub struct AbstractMatrixBuilderOrBuilt<
     pub(crate) confirmation_role:
         AbstractRoleBuilderOrBuilt<{ ROLE_CONFIRMATION }, MODE_OF_ROLE, FACTOR>,
 
-    pub number_of_days_until_auto_confirm: u16,
+    pub number_of_days_until_timed_confirmation_is_callable: u16,
 }
 
 impl<const MODE_OF_MATRIX: u8, const MODE_OF_ROLE: u8, FACTOR>
     AbstractMatrixBuilderOrBuilt<MODE_OF_MATRIX, MODE_OF_ROLE, FACTOR>
 {
-    pub const DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM: u16 = 14;
+    pub const DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE: u16 =
+        14;
 
     /// # Safety
     /// Rust memory safe, but marked "unsafe" since it might allow for unsafe
@@ -109,13 +110,13 @@ impl<const MODE_OF_MATRIX: u8, const MODE_OF_ROLE: u8, FACTOR>
             MODE_OF_ROLE,
             FACTOR,
         >,
-        number_of_days_until_auto_confirm: u16,
+        number_of_days_until_timed_confirmation_is_callable: u16,
     ) -> Self {
         Self {
             primary_role,
             recovery_role,
             confirmation_role,
-            number_of_days_until_auto_confirm,
+            number_of_days_until_timed_confirmation_is_callable,
         }
     }
 }

@@ -117,7 +117,7 @@ mod tests {
                     }
                   ]
                 },
-                "numberOfDaysUntilAutoConfirm": 14
+                "numberOfDaysUntilTimedConfirmationIsCallable": 14
               }
             }
             "#,
@@ -184,7 +184,7 @@ mod tests {
                     }
                   ]
                 },
-                "numberOfDaysUntilAutoConfirm": 14
+                "numberOfDaysUntilTimedConfirmationIsCallable": 14
               }
             }
           "#,

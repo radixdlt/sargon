@@ -5,7 +5,7 @@ pub type MatrixOfFactorInstances = AbstractMatrixBuilt<FactorInstance>;
 impl MatrixOfFactorInstances {
     pub fn timed_recovery_delay_in_minutes(&self) -> u32 {
         let timed_recovery_in_days =
-            self.number_of_days_until_auto_confirm as u32;
+            self.number_of_days_until_timed_confirmation_is_callable as u32;
         MINUTES_PER_DAY * timed_recovery_in_days
     }
 }
@@ -290,7 +290,8 @@ impl MatrixOfFactorInstances {
                 primary_role,
                 recovery_role,
                 confirmation_role,
-                matrix_of_factor_sources.number_of_days_until_auto_confirm,
+                matrix_of_factor_sources
+                    .number_of_days_until_timed_confirmation_is_callable,
             )
         };
 
@@ -339,7 +340,10 @@ mod tests {
         let sut = SUT::sample();
         assert_eq!(
             sut.timed_recovery_delay_in_minutes(),
-            SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM as u32 * 24 * 60
+            SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE
+                as u32
+                * 24
+                * 60
         );
     }
 
@@ -557,7 +561,7 @@ mod tests {
                   }
                 ]
               },
-              "numberOfDaysUntilAutoConfirm": 14
+              "numberOfDaysUntilTimedConfirmationIsCallable": 14
             }
             "#,
         );

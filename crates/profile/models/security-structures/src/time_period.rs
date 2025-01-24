@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// Time period expressed by a number of `TimePeriodUnit`.
 ///
-/// Used to represent in the hosts UI the time period until the recovery role is auto confirmed
+/// Used to represent in the hosts UI the time period until recovery can be confirmed with timed based confirmation
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct TimePeriod {
     pub value: u16,

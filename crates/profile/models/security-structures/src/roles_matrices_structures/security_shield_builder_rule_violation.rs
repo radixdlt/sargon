@@ -53,8 +53,8 @@ impl AsShieldBuilderViolation for MatrixRolesInCombinationBasicViolation {
         match self {
             FactorSourceNotFoundInAnyRole =>
                 unreachable!("Cannot happen since this error is not returned by 'validate'/'build'."),
-            NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero => {
-                Some(SecurityShieldBuilderRuleViolation::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero)
+            NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero => {
+                Some(SecurityShieldBuilderRuleViolation::NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero)
             }
         }
     }
@@ -188,8 +188,8 @@ pub enum SecurityShieldBuilderRuleViolation {
     #[error("Shield name is invalid")]
     ShieldNameInvalid,
 
-    #[error("The number of days until auto confirm must be greater than zero")]
-    NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero,
+    #[error("The number of days until timed confirm is callable must be greater than zero")]
+    NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero,
 
     #[error("Recovery and confirmation factors overlap. No factor may be used in both the recovery and confirmation roles")]
     RecoveryAndConfirmationFactorsOverlap,

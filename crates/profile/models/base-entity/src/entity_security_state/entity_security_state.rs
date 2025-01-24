@@ -382,7 +382,7 @@ mod tests {
                         }
                       ]
                     },
-                    "numberOfDaysUntilAutoConfirm": 14
+                    "numberOfDaysUntilTimedConfirmationIsCallable": 14
                   },
                   "authenticationSigningFactorInstance": {
                     "factorSourceID": {
@@ -508,7 +508,7 @@ mod tests {
                           }
                         ]
                       },
-                      "numberOfDaysUntilAutoConfirm": 14
+                      "numberOfDaysUntilTimedConfirmationIsCallable": 14
                     },
                     "authenticationSigningFactorInstance": {
                       "factorSourceID": {
