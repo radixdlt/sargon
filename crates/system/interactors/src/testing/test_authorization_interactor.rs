@@ -41,29 +41,6 @@ impl TestAuthorizationInteractor {
         }
     }
 
-    pub fn new_rejecting() -> Self {
-        Self {
-            response_per_purpose: IndexMap::from_iter([
-                (
-                    AuthorizationPurpose::CreatingAccount,
-                    AuthorizationResponse::Rejected,
-                ),
-                (
-                    AuthorizationPurpose::CreatingAccounts,
-                    AuthorizationResponse::Rejected,
-                ),
-                (
-                    AuthorizationPurpose::CreatingPersona,
-                    AuthorizationResponse::Rejected,
-                ),
-                (
-                    AuthorizationPurpose::CreatingPersonas,
-                    AuthorizationResponse::Rejected,
-                ),
-            ]),
-        }
-    }
-
     pub fn new_rejecting_only(purpose: AuthorizationPurpose) -> Self {
         let mut interactor = TestAuthorizationInteractor::new_authorizing();
         interactor
