@@ -85,7 +85,9 @@ impl<S: Signable> SignInteractor<S> for TestSignInteractor<S> {
                 Ok(SignResponse::user_skipped_factors(ids))
             }
 
-            SigningUserInput::Reject => Err(CommonError::SigningRejected),
+            SigningUserInput::Reject => {
+                Err(CommonError::HostInteractionAborted)
+            }
         }
     }
 }

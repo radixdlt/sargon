@@ -309,7 +309,7 @@ impl SargonOS {
         match authorization {
             AuthorizationResponse::Rejected => {
                 debug!("User rejected authorization, aborting.");
-                return Err(CommonError::SigningRejected);
+                return Err(CommonError::HostInteractionAborted);
             }
             AuthorizationResponse::Authorized => {
                 debug!("User authorized, saving to profile...");
@@ -395,7 +395,7 @@ impl SargonOS {
         match authorization {
             AuthorizationResponse::Rejected => {
                 debug!("User rejected authorization, aborting.");
-                return Err(CommonError::SigningRejected);
+                return Err(CommonError::HostInteractionAborted);
             }
             AuthorizationResponse::Authorized => {
                 debug!("User authorized, saving to profile...");
@@ -1327,7 +1327,7 @@ mod tests {
             })
             .await;
 
-        assert_eq!(Err(CommonError::SigningRejected), result);
+        assert_eq!(Err(CommonError::HostInteractionAborted), result);
 
         assert_eq!(
             initial_profile.personas_on_current_network().unwrap().len(),
@@ -1370,7 +1370,7 @@ mod tests {
             })
             .await;
 
-        assert_eq!(Err(CommonError::SigningRejected), result);
+        assert_eq!(Err(CommonError::HostInteractionAborted), result);
 
         assert_eq!(
             initial_profile.personas_on_current_network().unwrap().len(),

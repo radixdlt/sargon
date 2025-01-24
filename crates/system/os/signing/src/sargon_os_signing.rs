@@ -172,7 +172,7 @@ mod test {
 
         let result = sut.sign_auth(auth_intent).await;
 
-        assert_eq!(result, Err(CommonError::SigningRejected))
+        assert_eq!(result, Err(CommonError::HostInteractionAborted))
     }
 
     #[actix_rt::test]
@@ -423,7 +423,7 @@ mod test {
             .sign_subintent(signable.clone(), RoleKind::Primary)
             .await;
 
-        assert_eq!(outcome, Err(CommonError::SigningRejected));
+        assert_eq!(outcome, Err(CommonError::HostInteractionAborted));
     }
 
     async fn boot(
