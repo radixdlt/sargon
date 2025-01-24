@@ -93,7 +93,7 @@ impl TestAuthorizationInteractor {
                 response_per_purpose
                     .insert(purpose, AuthorizationResponse::Rejected);
             }
-            AuthorisingUser::Docile { .. } => panic!("Not possible"),
+            _ => unreachable!(),
         }
 
         Self::new(user)

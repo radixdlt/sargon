@@ -1379,7 +1379,7 @@ mod tests {
             Interactors::new_from_clients_and_authorization_interactor(
                 &clients,
                 Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
-                    AuthorizationPurpose::CreatingAccount,
+                    AuthorizationPurpose::CreatingAccounts,
                 )),
             );
         let os = timeout(
@@ -1396,9 +1396,10 @@ mod tests {
 
         let result = os
             .with_timeout(|x| {
-                x.create_and_save_new_account_with_main_bdfs(
+                x.batch_create_many_accounts_with_main_bdfs_then_save_once(
+                    10u16,
                     NetworkID::Mainnet,
-                    DisplayName::new("Authorising Account").unwrap(),
+                    "Authorising Account".to_string(),
                 )
             })
             .await;
