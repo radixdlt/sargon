@@ -11,7 +11,7 @@ pub trait TransactionManifestSecurifySecurifiedEntity:
         securified_entity: AnySecurifiedEntity,
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
-        apply_shield_manifest_kind: TransactionManifestApplySecurityShieldKind,
+        apply_shield_manifest_kind: RolesExercisableInTransactionManifestCombination,
     ) -> Result<TransactionManifest>;
 }
 
@@ -33,16 +33,13 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         securified_entity: AnySecurifiedEntity,
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
-        apply_shield_manifest_kind: TransactionManifestApplySecurityShieldKind,
+        apply_shield_manifest_kind: RolesExercisableInTransactionManifestCombination,
     ) -> Result<Self> {
         let kind = apply_shield_manifest_kind;
         let entity_address = securified_entity.entity.address();
 
         // ACCESS_CONTROLLER_CREATE_PROOF_IDENT
-        let mut builder = TransactionManifest::produce_owner_badge(
-            ScryptoTransactionManifestBuilder::new(),
-            &securified_entity.entity,
-        );
+        let mut builder = ScryptoTransactionManifestBuilder::new();
 
         let access_controller_address = securified_entity
             .securified_entity_control

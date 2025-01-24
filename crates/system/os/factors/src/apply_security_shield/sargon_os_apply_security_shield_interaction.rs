@@ -45,7 +45,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                 TransactionManifest::apply_security_shield_for_securified_entity(
                     e,
                     derived.clone(),
-                    TransactionManifestApplySecurityShieldKind::PrimaryAndRecoveryWithExplicitConfirmation
+                    RolesExercisableInTransactionManifestCombination::default()
                 )
          }).collect::<Result<Vec<TransactionManifest>>>()?;
 

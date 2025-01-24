@@ -37,7 +37,7 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
         // Securify the entity which will return an entity owner badge onto the worktop.
         let (mut builder, owner_badge_bucket) = Self::put_owner_badge_in_bucket(
             ScryptoTransactionManifestBuilder::new(),
-            &unsecurified_entity.entity,
+            &unsecurified_entity,
         );
 
         // Create an access controller for the entity.

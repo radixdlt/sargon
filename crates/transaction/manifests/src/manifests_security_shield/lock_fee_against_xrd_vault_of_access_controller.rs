@@ -18,7 +18,7 @@ pub trait TransactionManifestLockFeeAgainstXrdVaultOfAccessController {
     ///
     /// In fact we will be locking fee for 6 flavours of transaction manifest
     /// which updates the security shield of an entity, as returned by
-    /// `TransactionManifestApplySecurityShieldKind::all()`, and we could try to
+    /// `RolesExercisableInTransactionManifestCombination::all()`, and we could try to
     /// be smart and run preview of each six to get a minimal fee per manifest,
     /// but we will avoid that complexity.
     ///
@@ -30,11 +30,14 @@ pub trait TransactionManifestLockFeeAgainstXrdVaultOfAccessController {
         // TODO: remove `entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
         entity_applying_shield: AnySecurifiedEntity,
     ) -> TransactionManifest {
-        let mut builder = ManifestBuilder::with_manifest(manifest);
+        let mut builder = ManifestBuilder::new();
+
         let access_controller_address = entity_applying_shield
             .securified_entity_control
             .access_controller_address;
+
         // Lock fee against XRD vault of the access controller
+        // put this instruction at index 0
         builder = builder.call_method(
             access_controller_address.scrypto(),
             SCRYPTO_ACCESS_CONTROLLER_LOCK_RECOVERY_FEE_IDENT,
@@ -42,6 +45,9 @@ pub trait TransactionManifestLockFeeAgainstXrdVaultOfAccessController {
                 amount: ScryptoDecimal192::from(fee),
             },
         );
+
+        // ... then append all instructions from the original manifest
+        builder = builder.extend_builder_with_manifest(manifest);
 
         TransactionManifest::sargon_built(
             builder,
