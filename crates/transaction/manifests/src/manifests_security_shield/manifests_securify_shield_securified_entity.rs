@@ -9,20 +9,20 @@ pub trait TransactionManifestSecurifySecurifiedEntity:
 {
     fn apply_security_shield_for_securified_entity(
         securified_entity: AnySecurifiedEntity,
-        input: TransactionManifestApplySecurityShieldSecurifiedInput,
+        security_structure_of_factor_instances:
+        SecurityStructureOfFactorInstances,
+        apply_shield_manifest_kind: TransactionManifestApplySecurityShieldKind,
     ) -> Result<TransactionManifest>;
 }
 
 impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
     fn apply_security_shield_for_securified_entity(
         securified_entity: AnySecurifiedEntity,
-        input: TransactionManifestApplySecurityShieldSecurifiedInput,
+        security_structure_of_factor_instances:
+        SecurityStructureOfFactorInstances,
+        apply_shield_manifest_kind: TransactionManifestApplySecurityShieldKind,
     ) -> Result<Self> {
-        let TransactionManifestApplySecurityShieldSecurifiedInput {
-            security_structure_of_factor_instances,
-            apply_shield_manifest_kind: kind,
-        } = input.clone();
-
+        let kind = apply_shield_manifest_kind;
         let entity_address = securified_entity.entity.address();
 
         // ACCESS_CONTROLLER_CREATE_PROOF_IDENT

@@ -30,10 +30,9 @@ impl OsApplySecurityShieldInteraction for SargonOS {
             .map(|e| {
                 let provisional = e.entity.get_provisional().expect("Entity should have a provisional config set since we applied shield above");
                 let derived = provisional.as_factor_instances_derived().expect("Should have derived factors");
-                let input = TransactionManifestApplySecurityShieldUnsecurifiedInput::new(derived.clone());
                 TransactionManifest::apply_security_shield_for_unsecurified_entity(
                     e,
-                    input,
+                    derived.clone()
                 )
         }).collect::<Result<Vec<TransactionManifest>>>()?;
 

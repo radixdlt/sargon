@@ -8,29 +8,13 @@ use radix_engine_interface::blueprints::access_controller::{
 
 use crate::prelude::*;
 
-#[derive(Debug, Clone)]
-pub struct TransactionManifestApplySecurityShieldUnsecurifiedInput {
-    pub security_structure_of_factor_instances:
-        SecurityStructureOfFactorInstances,
-}
-
-impl TransactionManifestApplySecurityShieldUnsecurifiedInput {
-    pub fn new(
-        security_structure_of_factor_instances:
-        SecurityStructureOfFactorInstances,
-    ) -> Self {
-        Self {
-            security_structure_of_factor_instances,
-        }
-    }
-}
-
 pub trait TransactionManifestSecurifyUnsecurifiedEntity:
     Sized + TransactionManifestSetRolaKey
 {
     fn apply_security_shield_for_unsecurified_entity(
         unsecurified_entity: AnyUnsecurifiedEntity,
-        input: TransactionManifestApplySecurityShieldUnsecurifiedInput,
+        security_structure_of_factor_instances:
+        SecurityStructureOfFactorInstances,
     ) -> Result<Self>;
 }
 
@@ -42,12 +26,10 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
     /// (and as usual also call `modify_manifest_lock_fee`)
     fn apply_security_shield_for_unsecurified_entity(
         unsecurified_entity: AnyUnsecurifiedEntity,
-        input: TransactionManifestApplySecurityShieldUnsecurifiedInput,
+        security_structure_of_factor_instances:
+        SecurityStructureOfFactorInstances,
     ) -> Result<Self> {
         let entity_address = unsecurified_entity.address();
-        let TransactionManifestApplySecurityShieldUnsecurifiedInput {
-            security_structure_of_factor_instances,
-        } = input.clone();
 
         security_structure_of_factor_instances
             .assert_has_entity_kind(entity_address.get_entity_kind())?;
@@ -142,9 +124,7 @@ mod tests {
         let manifest =
             TransactionManifest::apply_security_shield_for_unsecurified_entity(
                 AnyUnsecurifiedEntity::new(entity.clone().into()).unwrap(),
-                TransactionManifestApplySecurityShieldUnsecurifiedInput::new(
-                    security_structure_of_factor_instances.clone(),
-                ),
+                security_structure_of_factor_instances.clone(),
             )
             .unwrap();
         manifest_eq(manifest.clone(), expected_manifest_str);
@@ -223,9 +203,7 @@ mod tests {
         let manifest =
             TransactionManifest::apply_security_shield_for_unsecurified_entity(
                 AnyUnsecurifiedEntity::new(entity.clone().into()).unwrap(),
-                TransactionManifestApplySecurityShieldUnsecurifiedInput::new(
-                    security_structure_of_factor_instances.clone(),
-                ),
+                security_structure_of_factor_instances.clone(),
             )
             .unwrap();
         manifest_eq(manifest, expected_manifest_str);
@@ -255,9 +233,7 @@ mod tests {
             TransactionManifest::apply_security_shield_for_unsecurified_entity(
                 AnyUnsecurifiedEntity::new(Account::sample_other().into())
                     .unwrap(),
-                TransactionManifestApplySecurityShieldUnsecurifiedInput::new(
-                    SecurityStructureOfFactorInstances::sample_other(),
-                ),
+                SecurityStructureOfFactorInstances::sample_other(),
             );
         assert_eq!(manifest, Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity: CAP26EntityKind::Account.to_string(), entity_kind_of_factor_instances: CAP26EntityKind::Identity.to_string() }));
     }
@@ -268,9 +244,7 @@ mod tests {
             TransactionManifest::apply_security_shield_for_unsecurified_entity(
                 AnyUnsecurifiedEntity::new(Persona::sample_other().into())
                     .unwrap(),
-                TransactionManifestApplySecurityShieldUnsecurifiedInput::new(
-                    SecurityStructureOfFactorInstances::sample(),
-                ),
+                SecurityStructureOfFactorInstances::sample(),
             );
         assert_eq!(manifest, Err(CommonError::SecurityStructureOfFactorInstancesEntityDiscrepancyInEntityKind { entity_kind_of_entity: CAP26EntityKind::Identity.to_string(), entity_kind_of_factor_instances: CAP26EntityKind::Account.to_string() }));
     }
