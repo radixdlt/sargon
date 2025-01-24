@@ -71,12 +71,12 @@ impl Ord for HDPathComponent {
     }
 }
 
-impl ToBIP32Str for HDPathComponent {
-    fn to_bip32_string(&self) -> String {
+impl ToCAP43String for HDPathComponent {
+    fn to_cap43_string(&self) -> String {
         format!("{}", self)
     }
 
-    fn to_bip32_string_debug(&self) -> String {
+    fn to_cap43_string_debug(&self) -> String {
         format!("{:?}", self)
     }
 }
@@ -168,19 +168,21 @@ impl HDPathComponent {
     }
 }
 
-impl FromBIP32Str for HDPathComponent {
-    fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+impl FromCAP43String for HDPathComponent {
+    fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
         let s = s.as_ref();
-        SecurifiedU30::from_bip32_string(s)
+        SecurifiedU30::from_string_lenient(s)
             .map(Self::securified)
-            .or(Unsecurified::from_bip32_string(s).map(Self::Unsecurified))
+            .or_else(|_| {
+                Unsecurified::from_cap43_string(s).map(Self::Unsecurified)
+            })
     }
 }
 
 impl FromStr for HDPathComponent {
     type Err = CommonError;
     fn from_str(s: &str) -> Result<Self> {
-        Self::from_bip32_string(s)
+        Self::from_cap43_string(s)
     }
 }
 
@@ -462,7 +464,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_0_hardened_canonical() {
+    fn from_str_valid_0_hardened_verbose_syntax() {
         assert_eq!(
             "0H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(GLOBAL_OFFSET_HARDENED).unwrap()
@@ -470,7 +472,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_1_hardened_canonical() {
+    fn from_str_valid_1_hardened_verbose_syntax() {
         assert_eq!(
             "1H".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -478,7 +480,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_2_hardened_non_canonical() {
+    fn from_str_valid_2_hardened_non_verbose_syntax() {
         assert_eq!(
             "2'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -486,7 +488,7 @@ mod tests {
     }
 
     #[test]
-    fn from_str_valid_3_hardened_non_canonical() {
+    fn from_str_valid_3_hardened_non_verbose_syntax() {
         assert_eq!(
             "3'".parse::<SUT>().unwrap(),
             SUT::from_global_key_space(3 + GLOBAL_OFFSET_HARDENED).unwrap()
@@ -515,7 +517,7 @@ mod tests {
         assert_eq!(
             SUT::from_global_key_space(0)
                 .unwrap()
-                .to_bip32_string_debug(),
+                .to_cap43_string_debug(),
             "0"
         );
     }
@@ -529,7 +531,7 @@ mod tests {
         assert_eq!(
             SUT::from_global_key_space(U30_MAX)
                 .unwrap()
-                .to_bip32_string(),
+                .to_cap43_string(),
             "1073741823"
         );
     }

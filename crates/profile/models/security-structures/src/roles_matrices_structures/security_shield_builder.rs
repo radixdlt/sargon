@@ -1118,7 +1118,7 @@ mod tests {
             assert!(!is_fully_valid(sut, FactorSourceKind::Password)); // never alone
             assert!(can_be(sut, FactorSourceKind::Password)); // lenient
 
-            // now lets adding a Device => subsequent calls to `is_fully_valid` will return false
+            // now lets adding a Device => subsequent calls to `is_fully_valid` will return true
             add(sut, FactorSourceID::sample_device());
             add(sut, FactorSourceID::sample_ledger());
 
@@ -1126,22 +1126,15 @@ mod tests {
             assert!(is_fully_valid(sut, FactorSourceKind::Password)); // not alone any more!
             assert!(can_be(sut, FactorSourceKind::Password));
         } else {
-            // now lets adding a Device => subsequent calls to `is_fully_valid` will return false
+            // now lets adding a Device => subsequent calls to `is_fully_valid` will return true
             add(sut, FactorSourceID::sample_device());
         }
 
-        assert!(!is_fully_valid(sut, FactorSourceKind::Device));
-
-        // TODO: Unsure about this, we do not count current state and query "can I add (another) Device?" as something
-        // which can become valid. It would require deletion of current Device factor. Maybe we should change this?
-        // Not sure... lets keep it as is for now! And lets see how UI integration "feels".
-        assert!(!can_be(sut, FactorSourceKind::Device));
-
-        // make it valid again
-        sut.remove_factor_from_all_roles(FactorSourceID::sample_device());
-
         assert!(is_fully_valid(sut, FactorSourceKind::Device));
+
+        // Another device can be added
         assert!(can_be(sut, FactorSourceKind::Device));
+        assert!(is_fully_valid(sut, FactorSourceKind::Device));
     }
 
     #[test]
@@ -1222,10 +1215,9 @@ mod tests {
                     FactorSourceID::sample_device(),
                     ForeverInvalidReason::FactorSourceAlreadyPresent
                 ),
-                FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                FactorSourceInRoleBuilderValidationStatus::ok(
                     RoleKind::Primary,
                     FactorSourceID::sample_device_other(),
-                    ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
                 ),
             ]
         );
@@ -1379,13 +1371,6 @@ mod tests {
         )
         .add_factor_source_to_primary_override(FactorSourceID::sample_device());
 
-        // making the primary role invalid DOESN'T affect the primary threshold factors status
-        pretty_assertions::assert_eq!(
-            sut.validate(),
-            Some(
-                SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent
-            )
-        );
         pretty_assertions::assert_eq!(
             sut.selected_primary_threshold_factors_status(),
             SelectedPrimaryThresholdFactorsStatus::Optimal
@@ -1625,6 +1610,72 @@ mod test_invalid {
             sut.validate().unwrap(),
             SecurityShieldBuilderRuleViolation::RecoveryAndConfirmationFactorsOverlap
         );
+    }
+
+    #[test]
+    fn factor_source_already_present() {
+        let sut = SUT::sample_strict_with_auth_signing();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_recovery_override(FactorSourceID::sample_ledger())
+        .add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_ledger_other(),
+        );
+
+        let res = sut.validation_for_addition_of_factor_source_to_primary_threshold_for_each(
+            vec![FactorSourceID::sample_device(),]
+        );
+
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        ); // did not get added
+
+        assert_eq!(
+            res,
+            vec![FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                RoleKind::Primary,
+                FactorSourceID::sample_device(),
+                ForeverInvalidReason::FactorSourceAlreadyPresent
+            )]
+        );
+
+        assert!(sut.validate().is_none(),);
+        assert_eq!(sut.status(), SecurityShieldBuilderStatus::Strong);
+    }
+
+    #[test]
+    fn primary_cannot_have_password_in_override_list() {
+        let sut = SUT::sample_strict_with_auth_signing();
+        sut.add_factor_source_to_primary_threshold(
+            FactorSourceID::sample_device(),
+        )
+        .add_factor_source_to_recovery_override(FactorSourceID::sample_ledger())
+        .add_factor_source_to_confirmation_override(
+            FactorSourceID::sample_ledger_other(),
+        );
+
+        let is_valid_or_can_be = sut.addition_of_factor_source_of_kind_to_primary_override_is_valid_or_can_be(FactorSourceKind::Password);
+        let validation_res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
+            vec![FactorSourceID::sample_password(),]
+        );
+
+        sut.add_factor_source_to_primary_override(
+            FactorSourceID::sample_password(),
+        ); // did not get added
+
+        assert!(!is_valid_or_can_be);
+        assert_eq!(
+            validation_res,
+            vec![FactorSourceInRoleBuilderValidationStatus::forever_invalid(
+                RoleKind::Primary,
+                FactorSourceID::sample_password(),
+                ForeverInvalidReason::PrimaryCannotHavePasswordInOverrideList
+            )]
+        );
+
+        assert!(sut.validate().is_none(),);
+        assert_eq!(sut.status(), SecurityShieldBuilderStatus::Strong);
     }
 
     #[test]
@@ -1996,6 +2047,98 @@ mod test_invalid {
         );
         assert!(sut.build().is_err())
     }
+
+    #[test]
+    fn shield_status_weak_when_multiple_devices_in_primary() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        assert!(
+            sut.addition_of_factor_source_of_kind_to_primary_threshold_is_valid_or_can_be(
+                FactorSourceKind::Device
+            )
+        );
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device_other(),
+            ) // did not get added
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.validate(),
+            Some(SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices)
+        );
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices
+            }
+        );
+        assert!(sut.build().is_ok())
+    }
+
+    #[test]
+    fn shield_status_weak_when_same_factor_in_primary() {
+        let sut = SUT::default();
+
+        let _ = sut
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_ledger(),
+            )
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus(),
+            );
+
+        assert!(
+            sut.addition_of_factor_source_of_kind_to_primary_threshold_is_valid_or_can_be(
+                FactorSourceKind::LedgerHQHardwareWallet
+            )
+        );
+
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_ledger(),
+            ) // did not get added
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_ledger(),
+            );
+
+        pretty_assertions::assert_eq!(
+            sut.validate(),
+            Some(
+                SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent
+            )
+        );
+        pretty_assertions::assert_eq!(
+            sut.status(),
+            SecurityShieldBuilderStatus::Weak {
+                reason: SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent
+            }
+        );
+        assert!(sut.build().is_ok())
+    }
 }
 
 #[cfg(test)]
@@ -2019,7 +2162,7 @@ mod lenient {
         let strict = SUT::strict();
         let lenient = SUT::lenient();
 
-        test(&strict, 0);
+        test(&strict, 1);
         test(&lenient, 1);
     }
 
@@ -2041,7 +2184,7 @@ mod lenient {
         let strict = SUT::strict();
         let lenient = SUT::lenient();
 
-        test(&strict, 1);
+        test(&strict, 2);
         test(&lenient, 2);
     }
 
@@ -2120,34 +2263,37 @@ mod lenient {
                 FactorSourceID::sample_device(),
             ); // did not get added, duplicates are not allowed
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             sut.get_primary_threshold_factors(),
             vec![FactorSourceID::sample_device()]
         );
 
-        assert_eq!(
-            // Takes into consideration all the rules because it disregards the mode
-            // the builder was initialized with and always uses SecurityShieldBuilderMode::Strict
+        pretty_assertions::assert_eq!(
             sut._validation_for_addition_of_factor_source_of_kind_to_primary_threshold(
                 FactorSourceKind::Device,
             ),
-            Err(
-                RoleBuilderValidation::ForeverInvalid(
-                    ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
-                )
-            )
+            Ok(())
         );
 
-        let _ = sut.add_factor_source_to_primary_threshold(
-            FactorSourceID::sample_device_other(),
-        ); // actually this is added because of the lenient mode
+        let _ = sut
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device_other(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_device_other(),
+            ); // actually this is added because of the lenient mode
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             sut.get_primary_threshold_factors(),
             vec![
                 FactorSourceID::sample_device(),
                 FactorSourceID::sample_device_other()
             ]
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.get_primary_override_factors(),
+            vec![FactorSourceID::sample_device_other()]
         );
 
         let _ = sut
@@ -2158,7 +2304,7 @@ mod lenient {
                 FactorSourceID::sample_arculus(),
             );
 
-        assert_eq!(
+        pretty_assertions::assert_eq!(
             sut.status(),
             SecurityShieldBuilderStatus::Weak {
                 reason: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices

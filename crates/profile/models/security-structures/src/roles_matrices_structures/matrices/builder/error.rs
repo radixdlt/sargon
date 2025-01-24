@@ -25,6 +25,10 @@ pub enum MatrixRolesInCombinationBasicViolation {
 pub enum MatrixRolesInCombinationForeverInvalid {
     #[error("Recovery and confirmation factors overlap. No factor may be used in both the recovery and confirmation roles")]
     RecoveryAndConfirmationFactorsOverlap,
+    #[error("Primary role cannot have multiple devices")]
+    PrimaryCannotHaveMultipleDevices,
+    #[error("Threshold and override factors overlap. No factor may be used in both the threshold and override list kinds")]
+    ThresholdAndOverrideFactorsOverlap,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]

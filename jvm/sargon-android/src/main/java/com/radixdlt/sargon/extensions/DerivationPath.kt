@@ -10,7 +10,7 @@ import com.radixdlt.sargon.HdPathComponent
 import com.radixdlt.sargon.IdentityPath
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Slip10Curve
-import com.radixdlt.sargon.derivationPathToCanonicalBip32String
+import com.radixdlt.sargon.derivationPathToBip32String
 import com.radixdlt.sargon.derivationPathToHdPath
 import com.radixdlt.sargon.derivationPathToString
 import com.radixdlt.sargon.newDerivationPathFromString
@@ -37,8 +37,8 @@ fun DerivationPath.Companion.initForEntity(
 val DerivationPath.displayString
     get() = derivationPathToString(path = this)
 
-val DerivationPath.bip32CanonicalString: String
-    get() = derivationPathToCanonicalBip32String(path = this)
+val DerivationPath.bip32String: String
+    get() = derivationPathToBip32String(path = this)
 
 val DerivationPath.path: HdPath
     get() = derivationPathToHdPath(path = this)

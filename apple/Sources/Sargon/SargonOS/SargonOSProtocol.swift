@@ -6,17 +6,19 @@ import SargonUniFFI
 public protocol SargonOSProtocol {
 	var os: SargonOS { get }
 
-	func createAccount(
-		named accountName: DisplayName
+	func createAccountWithBDFS(
+		networkId: NetworkID?,
+		name: DisplayName
 	) async throws -> Account
 }
 
 // MARK: Forward calls to `os`
 extension SargonOSProtocol {
-	public func createAccount(
-		named accountName: DisplayName
+	public func createAccountWithBDFS(
+		networkId: NetworkID?,
+		name: DisplayName
 	) async throws -> Account {
-		try await os.createAccount(named: accountName)
+		try await os.createAccountWithBDFS(networkId: networkId, name: name)
 	}
 }
 

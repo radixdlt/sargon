@@ -970,7 +970,7 @@ mod device_factor_source {
         }
 
         #[test]
-        fn two_different_is_err() {
+        fn two_different_is_ok() {
             // Arrange
             let mut sut = make();
 
@@ -980,12 +980,7 @@ mod device_factor_source {
             let res = sut.add_factor_source_to_threshold(sample_other());
 
             // Assert
-            assert!(matches!(
-                res,
-                MutRes::Err(Validation::ForeverInvalid(
-                    ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
-                ))
-            ));
+            assert!(matches!(res, Ok(())));
         }
     }
 

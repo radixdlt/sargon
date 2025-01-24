@@ -4,7 +4,7 @@ use sargon::{
     IsKeySpaceAware,
 };
 
-use sargon::{FromGlobalKeySpace, IsMappableToGlobalKeySpace, ToBIP32Str};
+use sargon::{FromGlobalKeySpace, IsMappableToGlobalKeySpace, ToCAP43String};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum HDPathComponent {
@@ -81,14 +81,14 @@ pub fn hd_path_component_to_hardened(
 
 #[uniffi::export]
 pub fn hd_path_component_to_bip32_string(component: HDPathComponent) -> String {
-    component.into_internal().to_bip32_string()
+    component.into_internal().to_cap43_string()
 }
 
 #[uniffi::export]
 pub fn hd_path_component_to_bip32_string_debug(
     component: HDPathComponent,
 ) -> String {
-    component.into_internal().to_bip32_string_debug()
+    component.into_internal().to_cap43_string_debug()
 }
 
 #[uniffi::export]

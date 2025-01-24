@@ -76,6 +76,7 @@ members = [
     "crates/system/profile-state-holder",
     "crates/system/interactors",
     "crates/system/os/accounts",
+    "crates/system/os/derive-public-keys",
     "crates/system/os/factors",
     "crates/system/os/os",
     "crates/system/os/security-center",
@@ -167,6 +168,7 @@ default-members = [
     "crates/system/profile-state-holder",
     "crates/system/interactors",
     "crates/system/os/accounts",
+    "crates/system/os/derive-public-keys",
     "crates/system/os/factors",
     "crates/system/os/os",
     "crates/system/os/security-center",
@@ -275,6 +277,7 @@ sub-systems = { path = "crates/system/sub-systems" }
 profile-state-holder = { path = "crates/system/profile-state-holder" }
 interactors = { path = "crates/system/interactors" }
 sargon-os-accounts = { path = "crates/system/os/accounts" }
+sargon-os-derive-public-keys = { path = "crates/system/os/derive-public-keys" }
 sargon-os-factors = { path = "crates/system/os/factors" }
 sargon-os = { path = "crates/system/os/os" }
 sargon-os-security-center = { path = "crates/system/os/security-center" }
