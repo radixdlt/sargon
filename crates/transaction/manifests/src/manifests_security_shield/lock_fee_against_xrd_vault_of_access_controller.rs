@@ -19,7 +19,7 @@ pub trait TransactionManifestLockFeeAgainstXrdVaultOfAccessController {
     /// In fact we will be locking fee for 6 flavours of transaction manifest
     /// which updates the security shield of an entity, as returned by
     /// `TransactionManifestApplySecurityShieldKind::all()`, and we could try to
-    /// be smart and run preview of each six to get a minimial fee per manifest,
+    /// be smart and run preview of each six to get a minimal fee per manifest,
     /// but we will avoid that complexity.
     ///
     /// Only relevant for securified entities - since it is only securified entities
