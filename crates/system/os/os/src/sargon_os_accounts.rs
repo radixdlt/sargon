@@ -1379,7 +1379,7 @@ mod tests {
             Interactors::new_from_clients_and_authorization_interactor(
                 &clients,
                 Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
-                    AuthorizationPurpose::CreatingAccounts,
+                    AuthorizationPurpose::CreatingAccount,
                 )),
             );
         let os = timeout(
