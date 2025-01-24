@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os-derive-public-keys"
-version = "1.1.119"
+version = "1.1.120"
 edition = "2021"
 
 [dependencies]
