@@ -13,7 +13,7 @@ pub trait AuthorizationInteractor: Send + Sync {
 }
 
 /// The purpose of the authorization request
-#[derive(Clone, std::hash::Hash, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub enum AuthorizationPurpose {
     /// When a new account is about to be created.
     CreatingAccount,
@@ -28,7 +28,7 @@ pub enum AuthorizationPurpose {
     CreatingPersonas,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub enum AuthorizationResponse {
     /// The user authorized the request
     Authorized,

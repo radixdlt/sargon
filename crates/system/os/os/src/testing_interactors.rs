@@ -53,7 +53,7 @@ impl InteractorsCtors for Interactors {
 
         Self::new(
             Arc::new(use_factor_sources_interactors),
-            Arc::new(TestAuthorizationInteractor::new_authorizing()),
+            Arc::new(TestAuthorizationInteractor::stubborn_authorizing()),
         )
     }
 

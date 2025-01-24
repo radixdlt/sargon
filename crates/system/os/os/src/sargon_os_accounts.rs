@@ -1336,7 +1336,7 @@ mod tests {
         let interactors =
             Interactors::new_from_clients_and_authorization_interactor(
                 &clients,
-                Arc::new(TestAuthorizationInteractor::new_rejecting_only(
+                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
                     AuthorizationPurpose::CreatingAccount,
                 )),
             );
@@ -1378,7 +1378,7 @@ mod tests {
         let interactors =
             Interactors::new_from_clients_and_authorization_interactor(
                 &clients,
-                Arc::new(TestAuthorizationInteractor::new_rejecting_only(
+                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
                     AuthorizationPurpose::CreatingAccounts,
                 )),
             );
@@ -1396,10 +1396,9 @@ mod tests {
 
         let result = os
             .with_timeout(|x| {
-                x.batch_create_many_accounts_with_main_bdfs_then_save_once(
-                    10,
+                x.create_and_save_new_account_with_main_bdfs(
                     NetworkID::Mainnet,
-                    "test".to_owned(),
+                    DisplayName::new("Authorising Account").unwrap(),
                 )
             })
             .await;
@@ -1409,6 +1408,97 @@ mod tests {
         assert_eq!(
             initial_profile.accounts_on_current_network().unwrap().len(),
             os.accounts_on_current_network().unwrap().len()
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_uses_correct_index_after_one_rejection(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_authorization_interactor(
+                &clients,
+                Arc::new(TestAuthorizationInteractor::docile_with([
+                    (
+                        AuthorizationPurpose::CreatingAccount,
+                        AuthorizationResponse::Authorized,
+                    ),
+                    (
+                        AuthorizationPurpose::CreatingAccount,
+                        AuthorizationResponse::Rejected,
+                    ),
+                    (
+                        AuthorizationPurpose::CreatingAccount,
+                        AuthorizationResponse::Authorized,
+                    ),
+                ])),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let initial_profile = Profile::sample();
+        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+            .await
+            .unwrap();
+
+        let accepted_first = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Accepted 1st").unwrap(),
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            accepted_first
+                .security_state
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index()
+                .index_in_local_key_space()
+                .0,
+            0u32
+        );
+
+        let result = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Rejected").unwrap(),
+                )
+            })
+            .await;
+        assert_eq!(Err(CommonError::HostInteractionAborted), result);
+
+        let accepted_second = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Accepted 2nd").unwrap(),
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            accepted_second
+                .security_state
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index()
+                .index_in_local_key_space()
+                .0,
+            1u32
         );
     }
 

@@ -454,7 +454,7 @@ impl SargonOS {
 
         let authorization_interactor =
             authorization_interactor.into().unwrap_or_else(|| {
-                Arc::new(TestAuthorizationInteractor::new_authorizing())
+                Arc::new(TestAuthorizationInteractor::stubborn_authorizing())
             });
 
         let os = Self::boot_with_clients_and_interactor(
@@ -492,7 +492,7 @@ impl SargonOS {
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
         let authorization_interactor: Arc<dyn AuthorizationInteractor> =
-            Arc::new(TestAuthorizationInteractor::new_authorizing());
+            Arc::new(TestAuthorizationInteractor::stubborn_authorizing());
 
         let req = Self::boot_test_with_bdfs_mnemonic_and_interactors(
             bdfs_mnemonic,
