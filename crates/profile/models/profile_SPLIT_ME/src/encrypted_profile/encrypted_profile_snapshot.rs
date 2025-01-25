@@ -2,7 +2,7 @@ use encryption::{
     EncryptionKey, EncryptionScheme, PasswordBasedKeyDerivationScheme,
     VersionedEncryption, VersionedPasswordBasedKeyDerivation,
 };
-use prelude::fixture_vector;
+use prelude::fixture_profiles;
 
 use crate::prelude::*;
 
@@ -92,13 +92,13 @@ impl HasSampleValues for EncryptedProfileSnapshot {
     /// Password is: `"babylon"` - encryption of SAME profile as `Self::sample_other()`
     fn sample() -> Self {
         let json_str =
-            fixture_vector!("profile_encrypted_by_password_of_babylon");
+            fixture_profiles!("profile_encrypted_by_password_of_babylon");
         serde_json::from_str::<EncryptedProfileSnapshot>(json_str).unwrap()
     }
 
     /// Password is: `""` (empty) - encryption of SAME profile as `Self::sample()`
     fn sample_other() -> Self {
-        let json_str = fixture_vector!("profile_encrypted_by_password_empty");
+        let json_str = fixture_profiles!("profile_encrypted_by_password_empty");
         serde_json::from_str::<EncryptedProfileSnapshot>(json_str).unwrap()
     }
 }

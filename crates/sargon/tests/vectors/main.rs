@@ -1,12 +1,11 @@
-use sargon::prelude::*;
-
 use core::fmt::Debug;
+use sargon::prelude::*;
 use serde::Deserialize;
 use std::str::FromStr;
 
 #[cfg(test)]
 mod profile_snapshot_tests {
-    use prelude::fixture_vector;
+    use prelude::fixture_profiles;
 
     use super::*;
 
@@ -17,7 +16,7 @@ mod profile_snapshot_tests {
     /// [doc]: https://radixdlt.atlassian.net/wiki/spaces/AT/pages/3251863610/CAP-36+WebRTC+Clients+Protocol
     #[test]
     fn v100_100() {
-        fixture_and_json::<Profile>(fixture_vector!(
+        fixture_and_json::<Profile>(fixture_profiles!(
             "only_plaintext_profile_snapshot_version_100"
         ))
         .expect("V100 Profile to deserialize");
@@ -592,7 +591,7 @@ mod slip10_tests {
 mod encrypted_profile_tests {
     use std::collections::HashSet;
 
-    use prelude::fixture_vector;
+    use prelude::fixture_profiles;
     use serde::Serialize;
 
     use super::*;
@@ -744,7 +743,7 @@ mod encrypted_profile_tests {
 
     #[test]
     fn test_vectors() {
-        let fixture = fixture::<Fixture>(fixture_vector!(
+        let fixture = fixture::<Fixture>(fixture_profiles!(
             "multi_profile_snapshots_test_version_100_patch_after_app_version_120"
         ))
         .expect("Encrypted Profile tests");
@@ -756,13 +755,13 @@ mod encrypted_profile_tests {
 #[cfg(test)]
 mod dapp_to_wallet_interaction_tests {
     use super::*;
-    use prelude::fixture_vector;
+    use prelude::fixture_interaction;
     use serde_json::Value;
 
     #[test]
     fn test_vector() {
         let decoded_wallet_interactions =
-            fixture::<Vec<DappToWalletInteraction>>(fixture_vector!(
+            fixture::<Vec<DappToWalletInteraction>>(fixture_interaction!(
                 "wallet_interactions_dapp_to_wallet"
             ))
             .expect("wallet_interactions_dapp_to_wallet fixture");
@@ -992,9 +991,9 @@ mod dapp_to_wallet_interaction_tests {
             pretty_assertions::assert_eq!(fixture, expected);
         }
 
-        let raw_wallet_interactions = fixture::<Vec<Value>>(fixture_vector!(
-            "wallet_interactions_dapp_to_wallet"
-        ))
+        let raw_wallet_interactions = fixture::<Vec<Value>>(
+            fixture_interaction!("wallet_interactions_dapp_to_wallet"),
+        )
         .expect("wallet_interactions_dapp_to_wallet fixture");
 
         let encoded_interactions =
@@ -1014,7 +1013,7 @@ mod dapp_to_wallet_interaction_tests {
 mod wallet_to_dapp_interaction_tests {
     use super::*;
 
-    use prelude::fixture_vector;
+    use prelude::fixture_interaction;
     use serde_json::Value;
 
     #[test]
@@ -1280,7 +1279,7 @@ mod wallet_to_dapp_interaction_tests {
 
         let encoded = serde_json::to_string(&responses).unwrap();
         let serde_value: Vec<Value> = serde_json::from_str(&encoded).unwrap();
-        let fixture = fixture::<Vec<Value>>(fixture_vector!(
+        let fixture = fixture::<Vec<Value>>(fixture_interaction!(
             "wallet_interactions_wallet_to_dapp"
         ))
         .expect("wallet_interactions_wallet_to_dapp fixture");

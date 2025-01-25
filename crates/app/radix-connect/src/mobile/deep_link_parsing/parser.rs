@@ -171,7 +171,7 @@ impl SampleRequestParams {
     }
 
     pub fn new_from_text_vector() -> Self {
-        fixture::<SampleRequestParams>(prelude::fixture_vector!(
+        fixture::<SampleRequestParams>(prelude::fixture_interaction!(
             "deep_link_request_params"
         ))
         .unwrap()
