@@ -1,3 +1,4 @@
+use profile_supporting_types::{AnySecurifiedEntity, AnyUnsecurifiedEntity};
 use radix_common::prelude::ManifestGlobalAddress;
 use radix_engine_interface::blueprints::access_controller::{
     AccessControllerContributeRecoveryFeeManifestInput,
@@ -20,14 +21,10 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
     /// at the end of `manifest` for topping the XRD vault of the access controller
     /// with `top_up_amount` many XRD.
     ///
-    /// N.B. We will call this method for both when `entity_applying_shield` is
-    /// securified or unsecurified. In the case of unsecurified entity we will use
-    /// the address reservation of `apply_security_shield_for_unsecurified_entity`
+    /// We will use the address reservation of `apply_security_shield_for_unsecurified_entity`
     /// (`ACCESS_CONTROLLER_ADDRESS_RESERVATION_NAME`) which we cannot access by id
     /// since Radix Engine discard those ids and uses internal ones, instead we need
     /// to use `ManifestGlobalAddress::Named(ScryptoManifestNamedAddress(0))`.
-    /// If `entity_applying_shield` is securified we will use the address of the
-    /// already existing access controller.
     ///
     /// If `payer` is securified we will also add a `create_proof` instruction for
     /// authenticating the withdrawal of XRD from the payer.
@@ -36,14 +33,69 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
     /// We allow to pass amount so that we can top of with more or less based on
     /// token balance of `payer` and current balance of the access controller (when
     /// we use this method for securified entities.)
-    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
-        payer: Account,
-        // TODO: remove `entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
-        entity_applying_shield: Account,
+    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(
+        payer: impl Into<Account>,
+        // TODO: remove `unsecurified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
+        unsecurified_entity_applying_shield: AnyUnsecurifiedEntity,
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
     ) -> TransactionManifest {
+        assert!(!manifest.explicitly_references_primary_role(), "Unexpectedly classified manifest as updating of shield of securified entity, but it is not.");
+        Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
+            payer,
+            unsecurified_entity_applying_shield.entity,
+            manifest,
+            top_up_amount,
+        ).expect("Should never fail")
+    }
+
+    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account(
+        payer: impl Into<Account>,
+        // TODO: remove `securified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
+        securified_entity_applying_shield: impl Into<AnySecurifiedEntity>,
+        manifest: TransactionManifest,
+        top_up_amount: impl Into<Option<Decimal192>>,
+    ) -> Result<TransactionManifest> {
+        Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
+            payer,
+            securified_entity_applying_shield.into().entity,
+            manifest,
+            top_up_amount,
+        )
+    }
+
+    fn _modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
+        payer: impl Into<Account>,
+        // TODO: remove `entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
+        entity_applying_shield: AccountOrPersona,
+        manifest: TransactionManifest,
+        top_up_amount: impl Into<Option<Decimal192>>,
+    ) -> Result<TransactionManifest> {
+        let payer = payer.into();
         let address_of_paying_account = payer.address();
+
+        {
+            // Try to eagerly identify invalid manifest.
+            // We dont _need_ this and might remove it.
+            // but I think this will work.
+
+            let payer_is_entity_applying_shield =
+                entity_applying_shield.address() == payer.address().into();
+            if payer_is_entity_applying_shield {
+                let cannot_exercise_primary_role =
+                    !manifest.explicitly_references_primary_role();
+                let is_unable_to_top_up_xrd_vault =
+                    payer_is_entity_applying_shield
+                        && cannot_exercise_primary_role;
+                if is_unable_to_top_up_xrd_vault {
+                    // The payer is the entity applying the shield, but the manifest is not classified as
+                    // to be able to exercise the primary role. Thus we will not be able to
+                    // top up the XRD vault of the access controller.
+                    return Err(CommonError::Unknown); // TODO: Add error
+                }
+            }
+        }
+
         let mut builder = ManifestBuilder::with_manifest(manifest);
 
         let address_of_access_controller_to_top_up =
@@ -120,10 +172,12 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             },
         );
 
-        TransactionManifest::sargon_built(
+        let manifest = TransactionManifest::sargon_built(
             builder,
             address_of_paying_account.network_id(),
-        )
+        );
+
+        Ok(manifest)
     }
 }
 

@@ -38,7 +38,4 @@ pub mod prelude {
 
     #[cfg(test)]
     pub(crate) use serde_json::json;
-
-    #[cfg(test)]
-    pub(crate) use std::collections::HashSet;
 }

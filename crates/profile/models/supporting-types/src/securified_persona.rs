@@ -15,6 +15,12 @@ impl From<SecurifiedPersona> for AnySecurifiedEntity {
     }
 }
 
+impl From<SecurifiedPersona> for Persona {
+    fn from(value: SecurifiedPersona) -> Self {
+        value.entity
+    }
+}
+
 impl HasEntityKind for SecurifiedPersona {
     fn entity_kind() -> CAP26EntityKind {
         CAP26EntityKind::Identity
@@ -41,5 +47,34 @@ impl TryFrom<AnySecurifiedEntity> for SecurifiedPersona {
                 })
             }
         }
+    }
+}
+
+impl HasSampleValues for SecurifiedPersona {
+    fn sample() -> Self {
+        Self::new(Persona::sample_at(2)).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(Persona::sample_at(3)).unwrap()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SecurifiedPersona;
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
     }
 }

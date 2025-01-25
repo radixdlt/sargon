@@ -15,3 +15,7 @@ test_mac:
 
 test_mac_build:
 	./scripts/ios/test.sh --build
+
+clean:
+	cargo clean
+	rm cobertura.xml 2> /dev/null || true

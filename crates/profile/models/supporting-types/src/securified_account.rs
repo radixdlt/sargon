@@ -15,6 +15,12 @@ impl From<SecurifiedAccount> for AnySecurifiedEntity {
     }
 }
 
+impl From<SecurifiedAccount> for Account {
+    fn from(value: SecurifiedAccount) -> Self {
+        value.entity
+    }
+}
+
 impl HasEntityKind for SecurifiedAccount {
     fn entity_kind() -> CAP26EntityKind {
         CAP26EntityKind::Account

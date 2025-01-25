@@ -48,6 +48,7 @@ macro_rules! fixture_gw_model {
 }
 
 pub mod prelude {
+    pub use std::collections::HashSet;
     pub use std::str::FromStr;
     pub use std::sync::{Arc, RwLock};
 }

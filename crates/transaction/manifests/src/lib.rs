@@ -30,6 +30,7 @@ pub mod prelude {
     pub use gateway_models::prelude::*;
     pub use hierarchical_deterministic::prelude::*;
     pub use metadata::prelude::*;
+    pub use prelude::prelude::*;
     pub use profile::prelude::*;
 
     pub use std::str::FromStr;
@@ -158,9 +159,6 @@ pub mod prelude {
     pub(crate) use serde::{Deserialize, Serialize};
 
     pub(crate) use std::collections::BTreeMap;
-
-    #[cfg(test)]
-    pub(crate) use std::collections::HashSet;
 }
 
 pub use prelude::*;

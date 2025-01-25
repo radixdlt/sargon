@@ -21,7 +21,7 @@ use radix_engine_interface::blueprints::access_controller::{
 ///
 /// Each combination of roles allows us to skip signing with certain factors
 /// and still be able to recover + confirm the AccessController update.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, enum_iterator::Sequence)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, enum_iterator::Sequence)]
 pub enum RolesExercisableInTransactionManifestCombination {
     /// Initiates recovery using `Primary` role and quick confirms using
     /// `Recovery` role explicitly.
@@ -97,7 +97,7 @@ impl RolesExercisableInTransactionManifestCombination {
     }
 
     /// If this combination of roles references the `Primary` role or not.
-    fn can_exercise_primary_role(&self) -> bool {
+    pub fn can_exercise_primary_role(&self) -> bool {
         matches!(
             self,
             Self::InitiateWithPrimaryCompleteWithRecovery
@@ -106,30 +106,37 @@ impl RolesExercisableInTransactionManifestCombination {
         )
     }
 
-    /// If this combination of roles references the `Recovery` role or not.
-    fn can_exercise_recovery_role(&self) -> bool {
+    /// If we can set the ROLA key for this combination of roles.
+    pub fn can_set_rola_key(&self) -> bool {
+        self.can_exercise_primary_role()
+    }
+
+    fn initiate_recovery_with_primary(&self) -> bool {
         matches!(
             self,
             Self::InitiateWithPrimaryCompleteWithRecovery
-                | Self::InitiateWithRecoveryCompleteWithConfirmation
+                | Self::InitiateWithPrimaryCompleteWithConfirmation
+                | Self::InitiateWithPrimaryDelayedCompletion
+        )
+    }
+    fn initiate_recovery_with_recovery(&self) -> bool {
+        matches!(
+            self,
+            Self::InitiateWithRecoveryCompleteWithConfirmation
                 | Self::InitiateWithRecoveryDelayedCompletion
         )
     }
 
-    /// If this combination of roles references the `Confirmation` role or not.
-    ///
-    /// Explicitly means "not using time, but use quick confirmation"
-    fn can_exercise_confirmation_role_explicitly(&self) -> bool {
+    fn quick_confirm_with_recovery(&self) -> bool {
+        matches!(self, Self::InitiateWithPrimaryCompleteWithRecovery)
+    }
+
+    fn quick_confirm_with_confirmation(&self) -> bool {
         matches!(
             self,
             Self::InitiateWithPrimaryCompleteWithConfirmation
                 | Self::InitiateWithRecoveryCompleteWithConfirmation
         )
-    }
-
-    /// If we can set the ROLA key for this combination of roles.
-    pub fn can_set_rola_key(&self) -> bool {
-        self.can_exercise_primary_role()
     }
 
     /// Returns method identifier and input for **initiating** recovery
@@ -138,16 +145,7 @@ impl RolesExercisableInTransactionManifestCombination {
         &self,
         factors_and_time: &AccessControllerFactorsAndTimeInput,
     ) -> (&'static str, Box<dyn CallMethodInput>) {
-        if self.can_exercise_recovery_role() {
-            (
-                SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
-                Box::new(
-                    ScryptoAccessControllerInitiateRecoveryAsRecoveryInput::from(
-                        factors_and_time,
-                    ),
-                ),
-            )
-        } else if self.can_exercise_primary_role() {
+        if self.initiate_recovery_with_primary() {
             (
                 SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
                 Box::new(
@@ -156,9 +154,18 @@ impl RolesExercisableInTransactionManifestCombination {
                     ),
                 ),
             )
+        } else if self.initiate_recovery_with_recovery() {
+            (
+                SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
+                Box::new(
+                    ScryptoAccessControllerInitiateRecoveryAsRecoveryInput::from(
+                        factors_and_time,
+                    ),
+                ),
+            )
         } else {
             unreachable!(
-                "No combination exists which disallows for both primary and recovery"
+                "unable to calculate input_for_initialization - this is a programmer error"
             )
         }
     }
@@ -171,12 +178,24 @@ impl RolesExercisableInTransactionManifestCombination {
         &self,
         factors_and_time: &AccessControllerFactorsAndTimeInput,
     ) -> Option<(&'static str, Box<dyn CallMethodInput>)> {
-        if self.can_exercise_confirmation_role_explicitly() {
-            Some(if self.can_exercise_recovery_role() {
-                (SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT, Box::new(ScryptoAccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput::from(factors_and_time)))
+        if self.quick_confirm_with_confirmation()
+            || self.quick_confirm_with_recovery()
+        {
+            if self.initiate_recovery_with_primary() {
+                Some((
+                    SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT,
+                    Box::new(ScryptoAccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput::from(factors_and_time))
+                ))
+            } else if self.initiate_recovery_with_recovery() {
+                Some((
+                    SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+                    Box::new(ScryptoAccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput::from(factors_and_time))
+                ))
             } else {
-                (SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT, Box::new(ScryptoAccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput::from(factors_and_time)))
-            })
+                unreachable!(
+                    "unable to calculate input_for_quick_confirm - this is a programmer error"
+                )
+            }
         } else {
             // Time based cannot happen yet - host (user) need to wait the specified
             // amount of time (factors_and_time.time) before calling this method.
@@ -184,5 +203,22 @@ impl RolesExercisableInTransactionManifestCombination {
             // can call this method after the time has elapsed.
             None
         }
+    }
+}
+
+pub trait TransactionManifestExplicitlyReferencesPrimaryRole {
+    fn explicitly_references_primary_role(&self) -> bool;
+}
+impl TransactionManifestExplicitlyReferencesPrimaryRole
+    for TransactionManifest
+{
+    fn explicitly_references_primary_role(&self) -> bool {
+        let has = |identifier: &str| -> bool {
+            self.instructions()
+                .iter()
+                .any(|instruction| matches!(instruction, ScryptoInstruction::CallMethod(method) if method.method_name == identifier))
+        };
+
+        has(SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT)
     }
 }

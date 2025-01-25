@@ -49,7 +49,7 @@ pub mod prelude {
     mod testing {
         pub(crate) use drivers::prelude::MockNetworkingDriver;
         pub(crate) use serde_json::json;
-        pub(crate) use std::collections::{BTreeSet, HashSet};
+        pub(crate) use std::collections::BTreeSet;
     }
 }
 

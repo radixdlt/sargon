@@ -31,7 +31,7 @@ pub mod prelude {
     pub(crate) use transaction_models::prelude::*;
 
     pub(crate) use log::*;
-    pub(crate) use std::collections::{HashMap, HashSet};
+    pub(crate) use std::collections::HashMap;
 
     #[cfg(test)]
     pub(crate) use testing::*;

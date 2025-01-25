@@ -38,14 +38,6 @@ pub mod prelude {
     pub(crate) use indexmap::{IndexMap, IndexSet};
 
     pub(crate) use std::fmt::Debug;
-
-    #[cfg(test)]
-    pub(crate) use testing::*;
-
-    #[cfg(test)]
-    mod testing {
-        pub(crate) use std::collections::HashSet;
-    }
 }
 
 pub use prelude::*;
