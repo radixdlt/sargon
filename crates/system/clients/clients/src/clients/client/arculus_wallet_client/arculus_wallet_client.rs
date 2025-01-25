@@ -1,4 +1,4 @@
-use std::future::{self, Future};
+use std::{fmt::format, future::{self, Future}};
 
 pub use crate::prelude::*;
 
@@ -20,7 +20,7 @@ impl ArculusWalletClient {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ArculusCardState {
     NotConfigured,
     Configured(FactorSourceIDFromHash),
@@ -38,14 +38,27 @@ impl HasSampleValues for ArculusCardState {
 
 impl ArculusWalletClient {
     pub async fn get_arculus_card_state(&self) -> Result<ArculusCardState> {
-        self.execute_card_operation(|wallet| {
+        self.execute_card_operation(NFCTagDriverPurpose::Arculus(NFCTagArculusInteractonPurpose::IdentifyingCard), |wallet| {
             self._get_arculus_card_state(wallet)
         })
         .await
     }
 
+    pub async fn sign<S: Signable>(
+        &self, 
+        factor_source_id: FactorSourceIDFromHash, 
+        purpose: NFCTagArculusInteractonPurpose,
+        pin: String, 
+        per_transaction: IndexSet<TransactionSignRequestInput<S>>
+    ) -> Result<IndexSet<HDSignature<S::ID>>> {
+        self.execute_card_operation(NFCTagDriverPurpose::Arculus(purpose), |wallet| {
+            self._sign(wallet, factor_source_id, pin, per_transaction)
+        })
+        .await
+    }
+
     pub async fn reset_wallet(&self) -> Result<()> {
-        self.execute_card_operation(|wallet| self.reset_wallet_io(wallet))
+        self.execute_card_operation(NFCTagDriverPurpose::Arculus(NFCTagArculusInteractonPurpose::IdentifyingCard),|wallet| self.reset_wallet_io(wallet))
             .await
     }
 
@@ -54,7 +67,7 @@ impl ArculusWalletClient {
         mnemonic: Mnemonic,
         pin: String,   
     ) -> Result<FactorSourceIDFromHash> {
-        self.execute_card_operation(|wallet| {
+        self.execute_card_operation(NFCTagDriverPurpose::Arculus(NFCTagArculusInteractonPurpose::ConfiguringCardMnemonic), |wallet| {
             self._restore_wallet_seed(wallet, mnemonic, pin)
         })
         .await
@@ -65,33 +78,8 @@ impl ArculusWalletClient {
         pin: String,
         word_count: i64,
     ) -> Result<FactorSourceIDFromHash> {
-        self.execute_card_operation(|wallet| {
+        self.execute_card_operation(NFCTagDriverPurpose::Arculus(NFCTagArculusInteractonPurpose::ConfiguringCardMnemonic), |wallet| {
             self._create_wallet_seed(wallet, pin, word_count)
-        })
-        .await
-    }
-
-    pub async fn sign_hashes(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        pin: String,
-        hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
-    ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>> {
-        self.execute_card_operation(|wallet| {
-            self._sign_hashes(wallet, factor_source, pin, hashes)
-        })
-        .await
-    }
-
-    pub async fn sign_hash(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        pin: String,
-        hash: Hash, 
-        paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<SignatureWithPublicKey>> {
-        self.execute_card_operation(|wallet| {
-            self._sign_hash(wallet, factor_source, pin, hash, paths)
         })
         .await
     }
@@ -100,9 +88,9 @@ impl ArculusWalletClient {
         &self,
         factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
-        self.execute_card_operation(|wallet| {
-            self._derive_public_keys(wallet, factor_source, paths)
+    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
+        self.execute_card_operation(NFCTagDriverPurpose::Arculus(NFCTagArculusInteractonPurpose::DerivingPublicKeys(factor_source.clone())), |wallet| {
+            self._derive_public_keys(wallet, factor_source.id, paths)
         })
         .await
     }
@@ -114,26 +102,60 @@ impl ArculusWalletClient {
 
     async fn execute_card_operation<Response, Op, Fut>(
         &self,
+        purpose: NFCTagDriverPurpose,
         op: Op,
     ) -> Result<Response>
     where
         Op: FnOnce(ArculusWalletPointer) -> Fut,
         Fut: Future<Output = Result<Response>>,
     {
-        self.nfc_tag_driver.start_session().await?;
-        let wallet = self.start_arculus_wallet_session().await?;
+        self.nfc_tag_driver.start_session(purpose).await?;
+        let wallet = self.start_arculus_wallet_session().await;
 
-        let result = op(wallet.clone()).await;
+        let result = {
+            let wallet = wallet?;
+            let result = op(wallet.clone()).await;
+            self.csdk_driver.wallet_free(wallet);
+            result
+        };
 
-        self.nfc_tag_driver.end_session().await;
-        self.csdk_driver.wallet_free(wallet);
-
+        self.nfc_tag_driver.end_session(result.as_ref().err().cloned()).await;
+        
         result
     }
 }
 
 /// Wallet seed setup
 impl ArculusWalletClient {
+    pub async fn _sign<S: Signable>(
+        &self,
+        wallet: ArculusWalletPointer,
+        factor_source_id: FactorSourceIDFromHash, 
+        pin: String, 
+        per_transaction: IndexSet<TransactionSignRequestInput<S>>
+    ) -> Result<IndexSet<HDSignature<S::ID>>> {
+        self.validate_factor_source(wallet, factor_source_id).await?;
+        self.verify_pin_io(wallet, pin.clone()).await?;
+
+        let mut signatures = IndexSet::new();
+
+        let signature_inputs: Vec<HDSignatureInput<S::ID>> = per_transaction.iter().flat_map(|transaction| transaction.signature_inputs()).collect();
+
+        for signature_input in signature_inputs {
+                let signature = self
+                    .sign_hash_path(
+                        wallet.clone(), 
+                        signature_input.payload_id.clone().into(), 
+                        signature_input.owned_factor_instance.factor_instance().derivation_path()
+                    )
+                    .await?;
+                let signature = HDSignature::new(signature_input, signature)?;
+                signatures.insert(signature);
+        }
+
+        Ok(signatures)
+    }
+
     async fn _get_arculus_card_state(
         &self,
         wallet: ArculusWalletPointer,
@@ -220,13 +242,14 @@ impl ArculusWalletClient {
     async fn _derive_public_keys(
         &self,
         wallet: ArculusWalletPointer,
-        factor_source: ArculusCardFactorSource,
+        factor_source_id: FactorSourceIDFromHash,
         paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
-        self.validate_factor_source(wallet, factor_source).await?;
+    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
+        self.validate_factor_source(wallet, factor_source_id.clone()).await?;
 
         let mut keys = IndexSet::new();
-
+        let number_of_total_paths = paths.len();
+        self.nfc_tag_driver.set_message("Deriving public keys, pregress 0%".to_string()).await;
         for path in paths {
             let public_key =
                 self.derive_public_key(wallet, path.clone()).await?;
@@ -234,7 +257,10 @@ impl ArculusWalletClient {
                 public_key.into(),
                 path,
             );
-            keys.insert(key);
+            keys.insert(HierarchicalDeterministicFactorInstance::new(factor_source_id, key));
+
+            let progress = (keys.len() as f32 / number_of_total_paths as f32) * 100 as f32;
+            self.nfc_tag_driver.set_message( format!("Deriving public keys, progress {:?}%", progress.floor())).await;
         }
 
         Ok(keys)
@@ -257,52 +283,6 @@ impl ArculusWalletClient {
 }
 
 impl ArculusWalletClient {
-    async fn _sign_hashes(
-        &self,
-        wallet: ArculusWalletPointer,
-        factor_source: ArculusCardFactorSource,
-        pin: String,
-        hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
-    ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>> {
-        self.validate_factor_source(wallet, factor_source).await?;
-        self.verify_pin_io(wallet, pin.clone()).await?;
-
-        let mut per_hash_signatures = IndexMap::new();
-
-        for (hash, paths) in hashes {
-            for path in paths {
-                let signature = self
-                    .sign_hash_path(wallet.clone(), hash.clone(), path)
-                    .await?;
-                per_hash_signatures
-                    .append_or_insert_element_to(hash, signature);
-            }
-        }
-
-        Ok(per_hash_signatures)
-    }
-
-    async fn _sign_hash(
-        &self,
-        wallet: ArculusWalletPointer,
-        factor_source: ArculusCardFactorSource,
-        pin: String,
-        hash: Hash, 
-        paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<SignatureWithPublicKey>> {
-        self.validate_factor_source(wallet.clone(), factor_source).await?;
-        self.verify_pin_io(wallet, pin).await?;
-
-        let mut signatures = IndexSet::new();
-        for path in paths {
-            let signature = self
-                .sign_hash_path(wallet.clone(), hash.clone(), path)
-                .await?;
-            signatures.insert(signature);
-        }
-        Ok(signatures)
-    }
-
     async fn sign_hash_path(
         &self,
         wallet: ArculusWalletPointer,
@@ -358,16 +338,23 @@ impl ArculusWalletClient {
     async fn validate_factor_source(
         &self,
         wallet: ArculusWalletPointer,
-        factor_source: ArculusCardFactorSource,
+        factor_source_id: FactorSourceIDFromHash,
     ) -> Result<()> {
-        let on_card_factor_source_id =
-            self._get_factor_source_id(wallet).await?;
+        let card_state =
+            self._get_arculus_card_state(wallet).await;
 
-        if on_card_factor_source_id != factor_source.id {
-            return Err(CommonError::AESDecryptionFailed);
+        match card_state {
+            Ok(ArculusCardState::NotConfigured) => {
+                return Err(CommonError::ArculusCardNotConfigured);
+            },
+            Ok(ArculusCardState::Configured(on_card_factor_source_id)) => {
+                if on_card_factor_source_id != factor_source_id {
+                    return Err(CommonError::ArculusCardFactorSourceIdMissmatch);
+                }
+                Ok(())
+            },
+            Err(e) => Err(e)
         }
-
-        Ok(())
     }
 
     async fn _get_factor_source_id(

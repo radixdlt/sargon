@@ -11,6 +11,7 @@ error = { workspace = true }
 factors = { workspace = true }
 ecc = { workspace = true }
 hierarchical-deterministic = { workspace = true }
+signing-traits = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

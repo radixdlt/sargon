@@ -3,6 +3,7 @@ mod sargon_os_arculus_card;
 pub mod prelude {
     pub use crate::sargon_os_arculus_card::*;
 
+    pub(crate) use signing_traits::prelude::*;
     pub(crate) use hash::prelude::*;
     pub(crate) use indexmap::IndexMap;
     pub(crate) use indexmap::IndexSet;

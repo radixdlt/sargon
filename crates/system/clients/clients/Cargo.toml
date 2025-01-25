@@ -15,6 +15,7 @@ drivers = { workspace = true, features = ["mock"] }
 http-client = { workspace = true }
 gateway-client-and-api = { workspace = true }
 hierarchical-deterministic = { workspace = true }
+signing-traits = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

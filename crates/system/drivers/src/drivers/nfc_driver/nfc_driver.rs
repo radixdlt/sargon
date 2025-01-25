@@ -1,5 +1,20 @@
 use crate::prelude::*;
 
+#[derive(Debug, Clone, PartialEq)]
+pub enum NFCTagArculusInteractonPurpose {
+    IdentifyingCard,
+    ConfiguringCardMnemonic,
+    SignTransaction(ArculusCardFactorSource),
+    SignPreAuth(ArculusCardFactorSource),
+    ProveOwnership(ArculusCardFactorSource),
+    DerivingPublicKeys(ArculusCardFactorSource),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum NFCTagDriverPurpose {
+    Arculus(NFCTagArculusInteractonPurpose)
+}
+
 #[cfg(any(test, feature = "mock"))]
 use mockall::automock;
 
@@ -8,10 +23,10 @@ use mockall::automock;
 #[async_trait::async_trait]
 pub trait NFCTagDriver: Send + Sync + std::fmt::Debug {
     /// Starts a session with the NFC tag. The host will start the session and keep it in the active state until the session is ended.
-    async fn start_session(&self) -> Result<()>;
+    async fn start_session(&self, purpose: NFCTagDriverPurpose) -> Result<()>;
 
     /// Ends the session with the NFC tag. The host will end the session and the NFC tag will no longer be in the active state.
-    async fn end_session(&self);
+    async fn end_session(&self, with_failure: Option<CommonError>);
 
     /// Sends a command to the NFC tag and receives a response.
     async fn send_receive(&self, command: BagOfBytes) -> Result<BagOfBytes>;
@@ -21,4 +36,6 @@ pub trait NFCTagDriver: Send + Sync + std::fmt::Debug {
         &self,
         commands: Vec<BagOfBytes>,
     ) -> Result<BagOfBytes>;
+
+    async fn set_message(&self, message: String);
 }

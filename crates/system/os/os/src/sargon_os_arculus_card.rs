@@ -44,35 +44,20 @@ impl SargonOS {
         &self,
         factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
+    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         self.clients
             .arculus_wallet_client
             .derive_public_keys(factor_source, paths)
             .await
     }
 
-    pub async fn arculus_card_sign_hashes(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
-    ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>> {
-        let pin = self.clients.secure_storage.load_pin_for_factor_source_id(factor_source.id).await?.ok_or(CommonError::Unknown)?;
-
-        self.clients
-            .arculus_wallet_client
-            .sign_hashes(factor_source, pin, hashes)
-            .await
-    }
-
-    pub async fn arculus_card_sign_hash(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        hash: Hash,
-        paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<SignatureWithPublicKey>> {
-        let pin = self.clients.secure_storage.load_pin_for_factor_source_id(factor_source.id).await?.ok_or(CommonError::Unknown)?;
-
-        self.clients.arculus_wallet_client.sign_hash(factor_source, pin, hash, paths).await
+    pub async fn arculus_card_sign<S: Signable>(&self,
+        factor_source_id: FactorSourceIDFromHash,
+        purpose: NFCTagArculusInteractonPurpose,
+        per_transaction: IndexSet<TransactionSignRequestInput<S>>,
+    ) -> Result<IndexSet<HDSignature<S::ID>>> {
+        let pin = self.clients.secure_storage.load_pin_for_factor_source_id(factor_source_id).await?.ok_or(CommonError::Unknown)?;
+        self.clients.arculus_wallet_client.sign(factor_source_id, purpose, pin, per_transaction).await
     }
 
     pub async fn arculus_card_reset(&self) -> Result<()> {

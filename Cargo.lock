@@ -826,6 +826,7 @@ dependencies = [
  "serde",
  "serde_json 1.0.108",
  "serde_with 3.4.0",
+ "signing-traits",
 ]
 
 [[package]]
@@ -4102,6 +4103,7 @@ dependencies = [
  "hierarchical-deterministic",
  "indexmap 2.7.0",
  "sargon-os",
+ "signing-traits",
 ]
 
 [[package]]

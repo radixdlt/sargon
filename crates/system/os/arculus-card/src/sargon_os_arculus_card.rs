@@ -16,20 +16,13 @@ pub trait OsArculusCard {
         &self,
         factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>>;
+    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>>;
 
-    async fn arculus_card_sign_hashes(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
-    ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>>;
-
-    async fn arculus_card_sign_hash(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        hash: Hash,
-        paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<SignatureWithPublicKey>>;
+    async fn arculus_card_sign<S: Signable>(&self,
+        factor_source_id: FactorSourceIDFromHash,
+        purpose: NFCTagArculusInteractonPurpose,
+        per_transaction: IndexSet<TransactionSignRequestInput<S>>,
+    ) -> Result<IndexSet<HDSignature<S::ID>>>;
 
     async fn arculus_card_reset(&self) -> Result<()>;
 }
@@ -57,26 +50,16 @@ impl OsArculusCard for SargonOS {
         &self,
         factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<HierarchicalDeterministicPublicKey>> {
+    ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         self.arculus_card_derive_public_keys(factor_source, paths).await
     }
 
-    async fn arculus_card_sign_hashes(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        hashes: IndexMap<Hash, IndexSet<DerivationPath>>,
-    ) -> Result<IndexMap<Hash, IndexSet<SignatureWithPublicKey>>> {
-        self.arculus_card_sign_hashes(factor_source, hashes)
-            .await
-    }
-
-    async fn arculus_card_sign_hash(
-        &self,
-        factor_source: ArculusCardFactorSource,
-        hash: Hash,
-        paths: IndexSet<DerivationPath>,
-    ) -> Result<IndexSet<SignatureWithPublicKey>> {
-        self.arculus_card_sign_hash(factor_source, hash, paths).await
+    async fn arculus_card_sign<S: Signable>(&self,
+        factor_source_id: FactorSourceIDFromHash,
+        purpose: NFCTagArculusInteractonPurpose,
+        per_transaction: IndexSet<TransactionSignRequestInput<S>>,
+    ) -> Result<IndexSet<HDSignature<S::ID>>> {
+        self.arculus_card_sign(factor_source_id, purpose, per_transaction).await
     }
 
     async fn arculus_card_reset(&self) -> Result<()> {

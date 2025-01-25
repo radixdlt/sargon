@@ -21,6 +21,8 @@ pub struct ArculusCardFactorSource {
     pub hint: ArculusCardHint,
 }
 
+delegate_debug_into!(ArculusCardFactorSource, InternalArculusCardFactorSource);
+
 #[uniffi::export]
 pub fn new_arculus_card_factor_source_sample() -> ArculusCardFactorSource {
     InternalArculusCardFactorSource::sample().into()
