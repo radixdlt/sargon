@@ -12,7 +12,7 @@ pub trait TransactionManifestSecurifySecurifiedEntity:
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
         roles_combination: RolesExercisableInTransactionManifestCombination,
-    ) -> Result<TransactionManifest>;
+    ) -> Option<TransactionManifest>;
 }
 
 impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
@@ -34,10 +34,13 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
         roles_combination: RolesExercisableInTransactionManifestCombination,
-    ) -> Result<Self> {
+    ) -> Option<Self> {
         let securified_entity = securified_entity.into();
         let kind = roles_combination;
         let entity_address = securified_entity.entity.address();
+
+        security_structure_of_factor_instances
+            .assert_has_entity_kind(entity_address.get_entity_kind()).expect("Shouldn't have used wrong FactorInstance for entity - apply_security_shield_with_id_to_entities has some bug.");
 
         // ACCESS_CONTROLLER_CREATE_PROOF_IDENT
         let mut builder = ScryptoTransactionManifestBuilder::new();
@@ -85,7 +88,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
                     &entity_address,
                 );
             } else {
-                return Err(CommonError::Unknown); // TODO: new error variant
+                return None; // Nothing has "failed" really, but we cannot proceed with this combination.
             }
         }
 
@@ -106,7 +109,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         // after user has selected account to pay in wallet GUI. And also call
         // `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`
 
-        Ok(manifest)
+        Some(manifest)
     }
 }
 
@@ -265,6 +268,6 @@ mod tests {
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion,
         );
 
-        assert_eq!(res, Err(CommonError::Unknown));
+        assert_eq!(res, None);
     }
 }

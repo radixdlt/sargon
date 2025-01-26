@@ -367,56 +367,72 @@ impl OsShieldApplying for SargonOS {
 }
 
 #[cfg(test)]
+pub(crate) fn unsafe_shield_with_bdfs(
+    bdfs: &FactorSource,
+) -> SecurityStructureOfFactorSourceIDs {
+    let id = bdfs.factor_source_id();
+
+    // This is an invalid shield, but it's just for testing
+    let matrix = unsafe {
+        MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
+            PrimaryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                Threshold::zero(),
+                [],
+                [id],
+            ),
+            RecoveryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                Threshold::zero(),
+                [],
+                [id],
+            ),
+            ConfirmationRoleWithFactorSourceIDs::unbuilt_with_factors(
+                Threshold::zero(),
+                [],
+                [id],
+            ),
+            14,
+        )
+    };
+    SecurityStructureOfFactorSourceIds::new(
+        DisplayName::new("Invalid Shield").unwrap(),
+        matrix,
+        id,
+    )
+}
+
+#[cfg(test)]
+pub(crate) async fn add_unsafe_shield_with_matrix_with_fixed_metadata(
+    os: &SargonOS,
+    fixed_metadata: impl Into<Option<SecurityStructureMetadata>>,
+) -> Result<SecurityStructureOfFactorSourceIDs> {
+    let bdsf = os.main_bdfs()?;
+    let mut shield_of_ids = unsafe_shield_with_bdfs(&bdsf.into());
+    if let Some(fixed_metadata) = fixed_metadata.into() {
+        shield_of_ids.metadata = fixed_metadata;
+    }
+    os.add_security_structure_of_factor_source_ids(&shield_of_ids)
+        .await?;
+    Ok(shield_of_ids)
+}
+
+#[cfg(test)]
+pub(crate) async fn add_unsafe_shield_with_matrix(
+    os: &SargonOS,
+) -> Result<SecurityStructureOfFactorSourceIDs> {
+    add_unsafe_shield_with_matrix_with_fixed_metadata(os, None).await
+}
+
+#[cfg(test)]
+pub(crate) async fn add_unsafe_shield(
+    os: &SargonOS,
+) -> Result<SecurityStructureID> {
+    add_unsafe_shield_with_matrix(os).await.map(|s| s.id())
+}
+
+#[cfg(test)]
 mod tests {
 
     use super::*;
-
-    fn unsafe_shield_with_bdfs(
-        bdfs: &FactorSource,
-    ) -> SecurityStructureOfFactorSourceIDs {
-        let id = bdfs.factor_source_id();
-
-        // This is an invalid shield, but it's just for testing
-        let matrix = unsafe {
-            MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
-                PrimaryRoleWithFactorSourceIDs::unbuilt_with_factors(
-                    Threshold::zero(),
-                    [],
-                    [id],
-                ),
-                RecoveryRoleWithFactorSourceIDs::unbuilt_with_factors(
-                    Threshold::zero(),
-                    [],
-                    [id],
-                ),
-                ConfirmationRoleWithFactorSourceIDs::unbuilt_with_factors(
-                    Threshold::zero(),
-                    [],
-                    [id],
-                ),
-                14,
-            )
-        };
-        SecurityStructureOfFactorSourceIds::new(
-            DisplayName::new("Invalid Shield").unwrap(),
-            matrix,
-            id,
-        )
-    }
-
-    async fn add_unsafe_shield_with_matrix(
-        os: &SargonOS,
-    ) -> Result<SecurityStructureOfFactorSourceIDs> {
-        let bdsf = os.main_bdfs()?;
-        let shield_of_ids = unsafe_shield_with_bdfs(&bdsf.into());
-        os.add_security_structure_of_factor_source_ids(&shield_of_ids)
-            .await?;
-        Ok(shield_of_ids)
-    }
-
-    async fn add_unsafe_shield(os: &SargonOS) -> Result<SecurityStructureID> {
-        add_unsafe_shield_with_matrix(os).await.map(|s| s.id())
-    }
 
     #[actix_rt::test]
     async fn test_apply_security_shield_with_id_to_unsecurified_entities_only()
