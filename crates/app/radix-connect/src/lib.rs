@@ -29,8 +29,9 @@ pub mod prelude {
     pub(crate) use identified_vec_of::prelude::*;
     pub(crate) use prelude::prelude::*;
     pub(crate) use profile_persona_data::prelude::*;
+    pub(crate) use profile_security_structures::prelude::*;
     pub(crate) use radix_connect_models::prelude::*;
-    pub(crate) use short_string::prelude::*;
+
     pub(crate) use transaction_models::prelude::*;
 
     // EXTERNAL DEPENDENCIES

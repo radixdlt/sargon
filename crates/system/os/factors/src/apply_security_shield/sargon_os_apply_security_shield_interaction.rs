@@ -1,5 +1,8 @@
 use crate::prelude::*;
-use radix_connect::DappToWalletInteractionBatchOfTransactions;
+use radix_connect::{
+    BatchOfTransactionsApplyingSecurityShield,
+    DappToWalletInteractionBatchOfTransactions,
+};
 
 #[async_trait::async_trait]
 pub trait OsApplySecurityShieldInteraction {
@@ -31,10 +34,12 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                 let provisional = e.entity.get_provisional().expect("Entity should have a provisional config set since we applied shield above");
                 let derived = provisional.as_factor_instances_derived().expect("Should have derived factors");
                 TransactionManifest::apply_security_shield_for_unsecurified_entity(
-                    e,
+                    e.clone(),
                     derived.clone()
-                )
-        }).collect::<Result<Vec<TransactionManifest>>>()?;
+                ).map(|manifest| {
+                    BatchOfTransactionsApplyingSecurityShield::new(derived.security_structure_id, e.address(), [UnvalidatedTransactionManifest::from(manifest)])
+                })
+        }).collect::<Result<Vec<BatchOfTransactionsApplyingSecurityShield>>>()?;
 
         let manifests_for_securified = entities_with_provisional
         .securified_erased()
@@ -42,19 +47,26 @@ impl OsApplySecurityShieldInteraction for SargonOS {
              .map(|e| {
                 let provisional = e.entity.get_provisional().expect("Entity should have a provisional config set since we applied shield above");
                 let derived = provisional.as_factor_instances_derived().expect("Should have derived factors");
-                TransactionManifest::apply_security_shield_for_securified_entity(
-                    e,
-                    derived.clone(),
-                    RolesExercisableInTransactionManifestCombination::default()
-                )
-         }).collect::<Result<Vec<TransactionManifest>>>()?;
+
+                let res = RolesExercisableInTransactionManifestCombination::all()
+                .into_iter()
+                .map(|combination| {
+                    TransactionManifest::apply_security_shield_for_securified_entity(
+                        e.clone(),
+                        derived.clone(),
+                        combination
+                    ).map(UnvalidatedTransactionManifest::from)
+                })
+                .collect::<Result<Vec<_>>>();
+
+            res.map(|manifests| BatchOfTransactionsApplyingSecurityShield::new(derived.security_structure_id, e.address(), manifests))
+         }).collect::<Result<Vec<BatchOfTransactionsApplyingSecurityShield>>>()?;
 
         Ok(DappToWalletInteractionBatchOfTransactions::new(
             manifests_for_unsecurified
                 .iter()
                 .chain(manifests_for_securified.iter())
-                .cloned()
-                .map(UnvalidatedTransactionManifest::from),
+                .cloned(),
         ))
     }
 }

@@ -2,12 +2,14 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct DappToWalletInteractionBatchOfTransactions {
-    pub transactions: Vec<UnvalidatedTransactionManifest>,
+    pub transactions: Vec<BatchOfTransactionsApplyingSecurityShield>,
 }
 
 impl DappToWalletInteractionBatchOfTransactions {
     pub fn new(
-        transactions: impl IntoIterator<Item = UnvalidatedTransactionManifest>,
+        transactions: impl IntoIterator<
+            Item = BatchOfTransactionsApplyingSecurityShield,
+        >,
     ) -> Self {
         Self {
             transactions: transactions.into_iter().collect(),
@@ -18,13 +20,13 @@ impl DappToWalletInteractionBatchOfTransactions {
 impl HasSampleValues for DappToWalletInteractionBatchOfTransactions {
     fn sample() -> Self {
         Self::new([
-            UnvalidatedTransactionManifest::sample(),
-            UnvalidatedTransactionManifest::sample_other(),
+            BatchOfTransactionsApplyingSecurityShield::sample(),
+            BatchOfTransactionsApplyingSecurityShield::sample_other(),
         ])
     }
 
     fn sample_other() -> Self {
-        Self::new([UnvalidatedTransactionManifest::sample_other()])
+        Self::new([BatchOfTransactionsApplyingSecurityShield::sample_other()])
     }
 }
 

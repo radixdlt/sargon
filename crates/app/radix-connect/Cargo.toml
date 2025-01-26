@@ -25,6 +25,7 @@ entity-foundation = { workspace = true }
 short-string = { workspace = true }
 has-sample-values = { workspace = true }
 radix-connect-models = { workspace = true }
+profile-security-structures = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

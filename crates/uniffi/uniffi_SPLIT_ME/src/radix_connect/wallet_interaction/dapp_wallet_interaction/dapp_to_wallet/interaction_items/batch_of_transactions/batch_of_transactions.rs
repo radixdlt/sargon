@@ -3,5 +3,5 @@ use sargon::DappToWalletInteractionBatchOfTransactions as InternalDappToWalletIn
 
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct DappToWalletInteractionBatchOfTransactions {
-    pub transactions: Vec<UnvalidatedTransactionManifest>,
+    pub transactions: Vec<BatchOfTransactionsApplyingSecurityShield>,
 }

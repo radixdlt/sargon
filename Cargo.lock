@@ -3305,6 +3305,7 @@ dependencies = [
  "prelude",
  "pretty_assertions",
  "profile-persona-data",
+ "profile-security-structures",
  "radix-connect-models",
  "serde",
  "serde_json",
