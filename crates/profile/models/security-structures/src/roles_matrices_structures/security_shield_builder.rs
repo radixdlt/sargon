@@ -279,10 +279,7 @@ impl SecurityShieldBuilder {
         &self,
     ) -> TimePeriod {
         self.get(|builder| {
-            TimePeriod::with_days(
-                builder
-                    .get_number_of_days_until_timed_confirmation_is_callable(),
-            )
+            builder.get_time_until_delayed_confirmation_is_callable()
         })
     }
 
@@ -441,7 +438,7 @@ impl SecurityShieldBuilder {
         time_period: TimePeriod,
     ) -> &Self {
         self.set(|builder| {
-            builder.set_number_of_days_until_timed_confirmation_is_callable(
+            builder.set_time_until_delayed_confirmation_is_callable(
                 time_period.days(),
             )
         })
@@ -1594,7 +1591,7 @@ mod test_invalid {
     }
 
     #[test]
-    fn number_of_days_until_timed_confirmation_is_callable_invalid() {
+    fn time_until_delayed_confirmation_is_callable_invalid() {
         let sut = valid();
         sut.set_time_period_until_timed_confirmation_is_callable(
             TimePeriod::with_days(0),

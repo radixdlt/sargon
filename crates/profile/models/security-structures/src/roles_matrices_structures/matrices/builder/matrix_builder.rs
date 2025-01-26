@@ -12,7 +12,7 @@ pub type MatrixBuilderBuildResult =
 /// * RecoveryRoleBuilder
 /// * ConfirmationRoleBuilder
 ///
-/// And `number_of_days_until_timed_confirmation_is_callable`.
+/// And `time_until_delayed_confirmation_is_callable`.
 pub type MatrixBuilder = AbstractMatrixBuilderOrBuilt<
     IS_MATRIX_BUILDER,
     IS_ROLE_BUILDER,
@@ -28,8 +28,8 @@ impl MatrixBuilder {
             primary_role: PrimaryRoleBuilder::new(),
             recovery_role: RecoveryRoleBuilder::new(),
             confirmation_role: ConfirmationRoleBuilder::new(),
-            number_of_days_until_timed_confirmation_is_callable:
-                Self::DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE,
+            time_until_delayed_confirmation_is_callable:
+                Self::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
         }
     }
 
@@ -37,7 +37,7 @@ impl MatrixBuilder {
     ///
     /// If valid it returns a "built" `MatrixOfFactorSourceIds`.
     pub fn build(&self) -> MatrixBuilderBuildResult {
-        self.validate_number_of_days_until_timed_confirmation_is_callable()?;
+        self.validate_time_until_delayed_confirmation_is_callable()?;
 
         let primary = self
             .primary_role
@@ -61,7 +61,7 @@ impl MatrixBuilder {
                 primary,
                 recovery,
                 confirmation,
-                self.number_of_days_until_timed_confirmation_is_callable,
+                self.time_until_delayed_confirmation_is_callable,
             )
         };
         Ok(built)
@@ -379,20 +379,20 @@ impl MatrixBuilder {
         self.primary_role.get_threshold()
     }
 
-    pub fn set_number_of_days_until_timed_confirmation_is_callable(
+    pub fn set_time_until_delayed_confirmation_is_callable(
         &mut self,
         number_of_days: u16,
     ) -> MatrixBuilderMutateResult {
-        self.number_of_days_until_timed_confirmation_is_callable =
-            number_of_days;
+        self.time_until_delayed_confirmation_is_callable =
+            TimePeriod::with_days(number_of_days);
 
-        self.validate_number_of_days_until_timed_confirmation_is_callable()
+        self.validate_time_until_delayed_confirmation_is_callable()
     }
 
-    pub fn get_number_of_days_until_timed_confirmation_is_callable(
+    pub fn get_time_until_delayed_confirmation_is_callable(
         &self,
-    ) -> u16 {
-        self.number_of_days_until_timed_confirmation_is_callable
+    ) -> TimePeriod {
+        self.time_until_delayed_confirmation_is_callable
     }
 
     fn remove_factor_from_role<const ROLE: u8>(
@@ -536,10 +536,10 @@ impl MatrixBuilder {
         }
     }
 
-    fn validate_number_of_days_until_timed_confirmation_is_callable(
+    fn validate_time_until_delayed_confirmation_is_callable(
         &self,
     ) -> MatrixBuilderMutateResult {
-        if self.number_of_days_until_timed_confirmation_is_callable == 0 {
+        if self.time_until_delayed_confirmation_is_callable.is_zero() {
             return Err(MatrixBuilderValidation::CombinationViolation(
                 MatrixRolesInCombinationViolation::Basic(
                     MatrixRolesInCombinationBasicViolation::NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero,
@@ -613,7 +613,7 @@ impl MatrixBuilder {
         self.validate_no_factor_may_be_used_in_both_primary_threshold_and_override()?;
         self.validate_no_factor_may_be_used_in_both_recovery_and_confirmation(
         )?;
-        self.validate_number_of_days_until_timed_confirmation_is_callable()?;
+        self.validate_time_until_delayed_confirmation_is_callable()?;
         Ok(())
     }
 }

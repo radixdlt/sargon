@@ -390,7 +390,7 @@ pub(crate) fn unsafe_shield_with_bdfs(
                 [],
                 [id],
             ),
-            14,
+            TimePeriod::with_days(14),
         )
     };
     SecurityStructureOfFactorSourceIds::new(

@@ -247,7 +247,10 @@ mod tests {
                                     }
                                 ]
                             },
-                            "numberOfDaysUntilTimedConfirmationIsCallable": 14
+                            "timeUntilDelayedConfirmationIsCallable": {
+	                            "value": 2,
+	                            "unit": "weeks"
+                            }
                         }
                     },
                     {
@@ -304,7 +307,10 @@ mod tests {
                                     }
                                 ]
                             },
-                            "numberOfDaysUntilTimedConfirmationIsCallable": 14
+                            "timeUntilDelayedConfirmationIsCallable": {
+	                            "value": 2,
+                            	"unit": "weeks"
+                            }
                         }
                     }
                 ]

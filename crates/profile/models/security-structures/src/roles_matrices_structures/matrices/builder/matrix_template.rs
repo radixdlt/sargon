@@ -82,8 +82,8 @@ impl MatrixTemplate {
         self,
         factor_source_ids: impl IntoIterator<Item = FactorSourceID>,
     ) -> Result<MatrixOfFactorSourceIds, CommonError> {
-        let number_of_days_until_timed_confirmation_is_callable =
-            self.number_of_days_until_timed_confirmation_is_callable;
+        let time_until_delayed_confirmation_is_callable =
+            self.time_until_delayed_confirmation_is_callable;
 
         let mut assigner = FactorSourceIdAssigner::new(factor_source_ids);
 
@@ -98,7 +98,7 @@ impl MatrixTemplate {
                 primary_role,
                 recovery_role,
                 confirmation_role,
-                number_of_days_until_timed_confirmation_is_callable,
+                time_until_delayed_confirmation_is_callable,
             )
         };
 
@@ -113,7 +113,7 @@ impl MatrixTemplate {
         confirmation_role: ConfirmationRoleTemplate,
     ) -> Self {
         unsafe {
-            Self::unbuilt_with_roles_and_days(primary_role, recovery_role, confirmation_role, MatrixOfFactorSourceIds::DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE)
+            Self::unbuilt_with_roles_and_days(primary_role, recovery_role, confirmation_role, MatrixOfFactorSourceIds::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE)
         }
     }
 

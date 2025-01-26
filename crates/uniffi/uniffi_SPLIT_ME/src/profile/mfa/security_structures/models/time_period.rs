@@ -4,7 +4,9 @@ use sargon::TimePeriod as InternalTimePeriod;
 /// Time period unit expressed in days, weeks, or years.
 ///
 /// Used to represent in the hosts UI the time period.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(
+    Clone, Debug, Copy, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+)]
 pub struct TimePeriod {
     /// The value of the time period.
     pub value: u16,

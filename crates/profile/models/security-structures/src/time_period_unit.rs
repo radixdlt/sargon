@@ -3,9 +3,13 @@ use crate::prelude::*;
 /// Time period unit expressed in days, weeks, or years.
 ///
 /// Used to represent in the hosts UI the time period.
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(
+    PartialEq, Eq, Clone, Copy, Debug, StdHash, Serialize, Deserialize,
+)]
 pub enum TimePeriodUnit {
+    #[serde(rename = "days")]
     Days,
+    #[serde(rename = "weeks")]
     Weeks,
 }
 
@@ -35,5 +39,11 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
+    #[test]
+    fn json_roundtrip() {
+        assert_json_value_eq_after_roundtrip(&SUT::Days, json!("days"));
+        assert_json_value_eq_after_roundtrip(&SUT::Weeks, json!("weeks"));
     }
 }

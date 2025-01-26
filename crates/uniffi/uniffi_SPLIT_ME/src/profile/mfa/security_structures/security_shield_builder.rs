@@ -216,7 +216,7 @@ impl SecurityShieldBuilder {
     ) -> Arc<Self> {
         self.set(|builder| {
             builder.set_time_period_until_timed_confirmation_is_callable(
-                time_period.clone().into(),
+                time_period.into(),
             )
         })
     }
@@ -971,11 +971,14 @@ mod tests {
             FactorSource::sample_ledger_other(),
         ];
         let name = "Auto Built";
-        let days_until_timed_confirmation = 237;
+        let days_until_timed_confirmation = TimePeriod {
+            value: 237,
+            unit: TimePeriodUnit::Days,
+        };
         sut = sut
             .set_name(name.to_owned())
             .set_time_period_until_timed_confirmation_is_callable(
-                new_time_period_with_days(days_until_timed_confirmation),
+                new_time_period_with_days(237),
             )
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
@@ -993,7 +996,7 @@ mod tests {
         assert_eq!(shield.metadata.display_name.value, name.to_owned());
         let matrix = shield.matrix_of_factors;
         assert_eq!(
-            matrix.number_of_days_until_timed_confirmation_is_callable,
+            matrix.time_until_delayed_confirmation_is_callable,
             days_until_timed_confirmation
         );
 

@@ -349,7 +349,10 @@ mod tests {
                      }
                    ]
                  },
-                 "numberOfDaysUntilTimedConfirmationIsCallable": 14
+                 "timeUntilDelayedConfirmationIsCallable": {
+                	"value": 2,
+                	"unit": "weeks"
+                 }
                },
                "authenticationSigningFactorInstance": {
                  "factorSourceID": {
@@ -475,7 +478,10 @@ mod tests {
                        }
                      ]
                    },
-                   "numberOfDaysUntilTimedConfirmationIsCallable": 14
+                   "timeUntilDelayedConfirmationIsCallable": {
+                      "value": 2,
+                      "unit": "weeks"
+                    }
                  },
                  "authenticationSigningFactorInstance": {
                    "factorSourceID": {

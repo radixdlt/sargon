@@ -86,7 +86,7 @@ fn set_number_of_days_cannot_be_zero() {
     )
     .unwrap();
 
-    sut.number_of_days_until_timed_confirmation_is_callable = 0; // bypass validation
+    sut.time_until_delayed_confirmation_is_callable = TimePeriod::with_days(0); // bypass validation
 
     // Build
     let validation = MatrixBuilderValidation::CombinationViolation(
@@ -117,7 +117,7 @@ fn set_number_of_days_42() {
     )
     .unwrap();
 
-    sut.set_number_of_days_until_timed_confirmation_is_callable(42)
+    sut.set_time_until_delayed_confirmation_is_callable(42)
         .unwrap();
 
     // Build
@@ -137,7 +137,7 @@ fn set_number_of_days_42() {
             ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_password()
             ],),
-            42,
+            TimePeriod::with_days(42),
         )
     );
 }
@@ -145,8 +145,8 @@ fn set_number_of_days_42() {
 #[test]
 fn timed_confirm_default() {
     assert_eq!(
-        SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE,
-        14
+        SUT::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
+        TimePeriod::with_days(14)
     );
 }
 
@@ -187,7 +187,7 @@ fn set_number_of_days_if_not_set_uses_default() {
             ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_password()
             ],),
-            SUT::DEFAULT_NUMBER_OF_DAYS_UNTIL_TIMED_CONFIRMATION_IS_CALLABLE,
+            SUT::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
         )
     );
 }
