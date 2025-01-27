@@ -172,7 +172,7 @@ mod test {
 
         let result = sut.sign_auth(auth_intent).await;
 
-        assert_eq!(result, Err(CommonError::SigningRejected))
+        assert_eq!(result, Err(CommonError::HostInteractionAborted))
     }
 
     #[actix_rt::test]
@@ -423,7 +423,7 @@ mod test {
             .sign_subintent(signable.clone(), RoleKind::Primary)
             .await;
 
-        assert_eq!(outcome, Err(CommonError::SigningRejected));
+        assert_eq!(outcome, Err(CommonError::HostInteractionAborted));
     }
 
     async fn boot(
@@ -461,7 +461,10 @@ mod test {
                     get_simulated_user::<AuthIntent>(&maybe_signing_failure),
                 )),
             ));
-        let interactors = Interactors::new(use_factor_sources_interactors);
+        let interactors = Interactors::new(
+            use_factor_sources_interactors,
+            Arc::new(TestAuthorizationInteractor::stubborn_authorizing()),
+        );
         SUT::boot_with_clients_and_interactor(clients, interactors).await
     }
 

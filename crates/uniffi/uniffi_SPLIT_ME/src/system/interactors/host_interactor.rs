@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use sargon::AuthIntent as InternalAuthIntent;
 use sargon::AuthIntentHash as InternalAuthIntentHash;
+use sargon::AuthorizationInteractor as InternalAuthorizationInteractor;
+use sargon::AuthorizationPurpose as InternalAuthorizationPurpose;
+use sargon::AuthorizationResponse as InternalAuthorizationResponse;
 use sargon::KeyDerivationInteractor as InternalKeyDerivationInteractor;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
@@ -46,6 +49,35 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
         &self,
         request: SignRequestOfAuthIntent,
     ) -> Result<SignResponseOfAuthIntentHash>;
+
+    async fn request_authorization(
+        &self,
+        purpose: AuthorizationPurpose,
+    ) -> AuthorizationResponse;
+}
+
+#[derive(Debug)]
+pub struct AuthorizationInteractorAdapter {
+    pub wrapped: Arc<dyn HostInteractor>,
+}
+
+impl AuthorizationInteractorAdapter {
+    pub fn new(wrapped: Arc<dyn HostInteractor>) -> Self {
+        Self { wrapped }
+    }
+}
+
+#[async_trait::async_trait]
+impl InternalAuthorizationInteractor for AuthorizationInteractorAdapter {
+    async fn request_authorization(
+        &self,
+        purpose: InternalAuthorizationPurpose,
+    ) -> InternalAuthorizationResponse {
+        self.wrapped
+            .request_authorization(purpose.into())
+            .await
+            .into_internal()
+    }
 }
 
 #[derive(Debug)]

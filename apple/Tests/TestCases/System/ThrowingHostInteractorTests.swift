@@ -12,7 +12,7 @@ final class ThrowingHostInteractorTests: TestCase {
 				request: SargonUniFFI.KeyDerivationRequest(derivationPurpose: .creatingNewAccount, perFactorSource: [])
 			)
 		} catch {
-			XCTAssertEqual(error as? CommonError, CommonError.SigningRejected)
+			XCTAssertEqual(error as? CommonError, CommonError.HostInteractionAborted)
 		}
 	}
 
@@ -22,7 +22,7 @@ final class ThrowingHostInteractorTests: TestCase {
 				request: SargonUniFFI.SignRequestOfAuthIntent(factorSourceKind: .device, perFactorSource: [])
 			)
 		} catch {
-			XCTAssertEqual(error as? CommonError, CommonError.SigningRejected)
+			XCTAssertEqual(error as? CommonError, CommonError.HostInteractionAborted)
 		}
 	}
 
@@ -32,7 +32,7 @@ final class ThrowingHostInteractorTests: TestCase {
 				request: SargonUniFFI.SignRequestOfTransactionIntent(factorSourceKind: .device, perFactorSource: [])
 			)
 		} catch {
-			XCTAssertEqual(error as? CommonError, CommonError.SigningRejected)
+			XCTAssertEqual(error as? CommonError, CommonError.HostInteractionAborted)
 		}
 	}
 
@@ -42,7 +42,12 @@ final class ThrowingHostInteractorTests: TestCase {
 				request: SargonUniFFI.SignRequestOfSubintent(factorSourceKind: .device, perFactorSource: [])
 			)
 		} catch {
-			XCTAssertEqual(error as? CommonError, CommonError.SigningRejected)
+			XCTAssertEqual(error as? CommonError, CommonError.HostInteractionAborted)
 		}
+	}
+
+	func testAuthoriseGetsRejected() async {
+		let outcome = await SUT.shared.requestAuthorization(purpose: .creatingAccount)
+		XCTAssertEqual(outcome, .rejected)
 	}
 }

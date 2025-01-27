@@ -309,7 +309,22 @@ impl SargonOS {
                 name,
             )
             .await?;
-        debug!("Created account, now saving it to profile.");
+        debug!("Created account, requesting authorization...");
+
+        let authorization = self
+            .authorization_interactor()
+            .request_authorization(AuthorizationPurpose::CreatingAccount)
+            .await;
+
+        match authorization {
+            AuthorizationResponse::Rejected => {
+                debug!("User rejected authorization, aborting.");
+                return Err(CommonError::HostInteractionAborted);
+            }
+            AuthorizationResponse::Authorized => {
+                debug!("User authorized, saving to profile...");
+            }
+        }
 
         // Add account to Profile...
         self.add_account(account.clone()).await?;
@@ -380,17 +395,29 @@ impl SargonOS {
                 name_prefix,
             )
             .await?;
-        debug!("Created #{} accounts, now saving them to profile.", count);
+        debug!("Created #{} accounts, requesting authorization...", count);
+
+        let authorization = self
+            .authorization_interactor()
+            .request_authorization(AuthorizationPurpose::CreatingAccounts)
+            .await;
+
+        match authorization {
+            AuthorizationResponse::Rejected => {
+                debug!("User rejected authorization, aborting.");
+                return Err(CommonError::HostInteractionAborted);
+            }
+            AuthorizationResponse::Authorized => {
+                debug!("User authorized, saving to profile...");
+            }
+        }
 
         // First try to save accounts into Profile...
         self.add_accounts(accounts.clone()).await?;
         // ... if successful consume the FactorInstances from the Cache!
         instances_in_cache_consumer.consume().await?;
 
-        info!(
-            "Created account and saved #{} new accounts into profile",
-            count
-        );
+        info!("Created and saved #{} new accounts into profile", count);
         Ok((accounts, derivation_outcome))
     }
 
@@ -1297,6 +1324,182 @@ mod tests {
                 ProfileSaved,
                 AccountAdded
             ]
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_aborts_when_user_rejects_authorization(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_authorization_interactor(
+                &clients,
+                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
+                    AuthorizationPurpose::CreatingAccount,
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let initial_profile = Profile::sample();
+        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+            .await
+            .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                )
+            })
+            .await;
+
+        assert_eq!(Err(CommonError::HostInteractionAborted), result);
+
+        assert_eq!(
+            initial_profile.accounts_on_current_network().unwrap().len(),
+            os.accounts_on_current_network().unwrap().len()
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_batch_create_and_save_new_accounts_aborts_when_user_rejects_authorization(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_authorization_interactor(
+                &clients,
+                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
+                    AuthorizationPurpose::CreatingAccounts,
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let initial_profile = Profile::sample();
+        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+            .await
+            .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.batch_create_many_accounts_with_main_bdfs_then_save_once(
+                    10u16,
+                    NetworkID::Mainnet,
+                    "Authorising Account".to_string(),
+                )
+            })
+            .await;
+
+        assert_eq!(Err(CommonError::HostInteractionAborted), result);
+
+        assert_eq!(
+            initial_profile.accounts_on_current_network().unwrap().len(),
+            os.accounts_on_current_network().unwrap().len()
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_uses_correct_index_after_one_rejection(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_authorization_interactor(
+                &clients,
+                Arc::new(TestAuthorizationInteractor::docile_with([
+                    (
+                        AuthorizationPurpose::CreatingAccount,
+                        AuthorizationResponse::Authorized,
+                    ),
+                    (
+                        AuthorizationPurpose::CreatingAccount,
+                        AuthorizationResponse::Rejected,
+                    ),
+                    (
+                        AuthorizationPurpose::CreatingAccount,
+                        AuthorizationResponse::Authorized,
+                    ),
+                ])),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let initial_profile = Profile::sample();
+        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+            .await
+            .unwrap();
+
+        let accepted_first = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Accepted 1st").unwrap(),
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            accepted_first
+                .security_state
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index()
+                .index_in_local_key_space()
+                .0,
+            0u32
+        );
+
+        let result = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Rejected").unwrap(),
+                )
+            })
+            .await;
+        assert_eq!(Err(CommonError::HostInteractionAborted), result);
+
+        let accepted_second = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::new("Accepted 2nd").unwrap(),
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            accepted_second
+                .security_state
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .derivation_entity_index()
+                .index_in_local_key_space()
+                .0,
+            1u32
         );
     }
 

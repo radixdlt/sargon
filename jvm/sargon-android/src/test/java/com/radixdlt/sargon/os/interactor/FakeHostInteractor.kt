@@ -1,5 +1,7 @@
 package com.radixdlt.sargon.os.interactor
 
+import com.radixdlt.sargon.AuthorizationPurpose
+import com.radixdlt.sargon.AuthorizationResponse
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.HostInteractor
 import com.radixdlt.sargon.KeyDerivationRequest
@@ -15,19 +17,23 @@ class FakeHostInteractor: HostInteractor {
     override suspend fun signTransactions(
         request: SignRequestOfTransactionIntent
     ): SignResponseOfTransactionIntentHash {
-        throw CommonException.SigningRejected()
+        throw CommonException.HostInteractionAborted()
     }
 
     override suspend fun signSubintents(request: SignRequestOfSubintent): SignResponseOfSubintentHash {
-        throw CommonException.SigningRejected()
+        throw CommonException.HostInteractionAborted()
     }
 
     override suspend fun deriveKeys(request: KeyDerivationRequest): KeyDerivationResponse {
-        throw CommonException.SigningRejected()
+        throw CommonException.HostInteractionAborted()
     }
 
     override suspend fun signAuth(request: SignRequestOfAuthIntent): SignResponseOfAuthIntentHash {
-        throw CommonException.SigningRejected()
+        throw CommonException.HostInteractionAborted()
+    }
+
+    override suspend fun requestAuthorization(purpose: AuthorizationPurpose): AuthorizationResponse {
+        return AuthorizationResponse.REJECTED
     }
 
 }
