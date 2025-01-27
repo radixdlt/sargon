@@ -55,8 +55,7 @@ let package = Package(
 		.package(url: "https://github.com/SwiftyJSON/SwiftyJSON", from: "5.0.2"),
 
 		// Multicast / Share of notifications in EventBus
-		.package(url: "https://github.com/sideeffect-io/AsyncExtensions", exact: "0.5.3"),
-        .package(path: "../arculus-csdk-ios")
+		.package(url: "https://github.com/sideeffect-io/AsyncExtensions", exact: "0.5.3")
 	],
 	targets: [
 		binaryTarget,
@@ -72,7 +71,6 @@ let package = Package(
 				"SwiftyJSON",
 				.product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
 				"AsyncExtensions",
-                .product(name: "ArculusCSDK", package: "arculus-csdk-ios")
 			],
 			path: "apple/Sources/Sargon",
 			swiftSettings: swiftSettings
