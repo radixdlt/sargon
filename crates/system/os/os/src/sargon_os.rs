@@ -316,6 +316,10 @@ impl SargonOS {
             as Arc<dyn KeyDerivationInteractor>
     }
 
+    pub fn authorization_interactor(&self) -> Arc<dyn AuthorizationInteractor> {
+        self.interactors.authorization_interactor.clone()
+    }
+
     pub fn host_id(&self) -> HostId {
         self.host_id
     }
@@ -426,9 +430,12 @@ impl SargonOS {
             .unwrap()
     }
 
-    pub async fn boot_test_with_bdfs_mnemonic_and_interactor(
+    pub async fn boot_test_with_bdfs_mnemonic_and_interactors(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
         derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
+        authorization_interactor: impl Into<
+            Option<Arc<dyn AuthorizationInteractor>>,
+        >,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Result<Arc<Self>> {
         let test_drivers =
@@ -445,10 +452,16 @@ impl SargonOS {
                 ))
             });
 
+        let authorization_interactor =
+            authorization_interactor.into().unwrap_or_else(|| {
+                Arc::new(TestAuthorizationInteractor::stubborn_authorizing())
+            });
+
         let os = Self::boot_with_clients_and_interactor(
             clients,
-            Interactors::new_with_derivation_interactor(
+            Interactors::new_with_derivation_and_authorization_interactor(
                 keys_derivation_interactor,
+                authorization_interactor,
             ),
         )
         .await;
@@ -478,9 +491,13 @@ impl SargonOS {
         derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
-        let req = Self::boot_test_with_bdfs_mnemonic_and_interactor(
+        let authorization_interactor: Arc<dyn AuthorizationInteractor> =
+            Arc::new(TestAuthorizationInteractor::stubborn_authorizing());
+
+        let req = Self::boot_test_with_bdfs_mnemonic_and_interactors(
             bdfs_mnemonic,
             derivation_interactor,
+            authorization_interactor,
             pre_derive_factor_instance_for_bdfs,
         );
 
@@ -497,8 +514,10 @@ impl SargonOS {
     }
 
     pub async fn boot_test() -> Result<Arc<Self>> {
-        Self::boot_test_with_bdfs_mnemonic_and_interactor(None, None, true)
-            .await
+        Self::boot_test_with_bdfs_mnemonic_and_interactors(
+            None, None, None, true,
+        )
+        .await
     }
 
     /// Boot the SargonOS with a mocked networking driver.
