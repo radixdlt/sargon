@@ -145,7 +145,7 @@ fn set_number_of_days_42() {
 #[test]
 fn timed_confirm_default() {
     assert_eq!(
-        SUT::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
+        SUT::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
         TimePeriod::with_days(14)
     );
 }
@@ -187,7 +187,7 @@ fn set_number_of_days_if_not_set_uses_default() {
             ConfirmationRoleWithFactorSourceIds::override_only([
                 FactorSourceID::sample_password()
             ],),
-            SUT::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
+            SUT::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
         )
     );
 }

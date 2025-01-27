@@ -113,7 +113,7 @@ impl MatrixTemplate {
         confirmation_role: ConfirmationRoleTemplate,
     ) -> Self {
         unsafe {
-            Self::unbuilt_with_roles_and_days(primary_role, recovery_role, confirmation_role, MatrixOfFactorSourceIds::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE)
+            Self::unbuilt_with_roles_and_days(primary_role, recovery_role, confirmation_role, MatrixOfFactorSourceIds::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE)
         }
     }
 

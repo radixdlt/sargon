@@ -45,7 +45,7 @@ pub struct AbstractMatrixBuilderOrBuilt<
 impl<const MODE_OF_MATRIX: u8, const MODE_OF_ROLE: u8, FACTOR>
     AbstractMatrixBuilderOrBuilt<MODE_OF_MATRIX, MODE_OF_ROLE, FACTOR>
 {
-    pub const DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE: TimePeriod =
+    pub const DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE: TimePeriod =
         TimePeriod::with_days(14);
 
     /// # Safety

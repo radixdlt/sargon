@@ -43,7 +43,6 @@ extension EntityBaseProtocol {
 		flags.contains(.hiddenByUser)
 	}
 
-	// TODO: MOVE TO SARGON
 	public var virtualHierarchicalDeterministicFactorInstances:
 		Set<HierarchicalDeterministicFactorInstance>
 	{
@@ -55,15 +54,13 @@ extension EntityBaseProtocol {
 		}
 	}
 
-	// TODO: MOVE TO SARGON
 	public var hasAuthenticationSigningKey: Bool {
 		switch securityState {
-		case let .unsecured(unsecuredEntityControl):
+		case .unsecured:
 			false
 		}
 	}
 
-	// TODO: MOVE TO SARGON
 	public var deviceFactorSourceID: FactorSourceIDFromHash? {
 		switch self.securityState {
 		case let .unsecured(control):

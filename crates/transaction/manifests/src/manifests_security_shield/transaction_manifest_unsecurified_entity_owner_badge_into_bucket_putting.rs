@@ -34,7 +34,7 @@ pub trait TransactionManifestUnsecurifiedEntityOwnerBadgeIntoBucketPutting {
         (builder, owner_badge_bucket)
     }
 
-    /// Calls "secufiry" for an unsecurified entity which places the owner badge
+    /// Calls "securify" for an unsecurified entity which places the owner badge
     /// on the worktop.
     fn call_securify_for_unsecurified_entity(
         builder: ScryptoTransactionManifestBuilder,

@@ -29,7 +29,7 @@ impl MatrixBuilder {
             recovery_role: RecoveryRoleBuilder::new(),
             confirmation_role: ConfirmationRoleBuilder::new(),
             time_until_delayed_confirmation_is_callable:
-                Self::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
+                Self::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
         }
     }
 

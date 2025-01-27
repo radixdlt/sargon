@@ -49,24 +49,22 @@ pub enum RolesExercisableInTransactionManifestCombination {
     /// Host will also need to schedule a notification for user so that host
     /// can call the `confirm_timed_recovery` method after the time has elapsed.
     InitiateWithRecoveryDelayedCompletion,
+    // Initiate recovery with `Primary` role and use timed confirmation.
+    //
+    // Since this roles combination does not explicitly use the Confirmation
+    // Role we will not include any confirm Instruction in the manifest
+    // we build for this kind. Instead, if this is the TransactionManifest which
+    // we will be submitting to the network, the host (user) will need to wait
+    // until the transaction is confirmed and then update Profile to keep
+    // track of the fact that the entity is in between states of recovery.
+    // TODO: TBD probably a new variant of the `ProvisionalSecurifiedConfig`
+    // `WaitingForTimedRecovery(SecurityStructureOfFactorInstances)` or similar.
+    //
+    // Host will also need to schedule a notification for user so that host
+    // can call the `confirm_timed_recovery` method after the time has elapsed.
+    //
+    // InitiateWithPrimaryDelayedCompletion, TODO: when Dugong is available => comment in this
 
-    /// ‼️ REQUIRES "Dugong" ‼️
-    /// Initiate recovery with `Primary` role and use timed confirmation.
-    ///
-    /// Since this roles combination does not explicitly use the Confirmation
-    /// Role we will not include any confirm Instruction in the manifest
-    /// we build for this kind. Instead, if this is the TransactionManifest which
-    /// we will be submitting to the network, the host (user) will need to wait
-    /// until the transaction is confirmed and then update Profile to keep
-    /// track of the fact that the entity is in between states of recovery.
-    /// TODO: TBD probably a new variant of the `ProvisionalSecurifiedConfig`
-    /// `WaitingForTimedRecovery(SecurityStructureOfFactorInstances)` or similar.
-    ///
-    /// Host will also need to schedule a notification for user so that host
-    /// can call the `confirm_timed_recovery` method after the time has elapsed.
-    ///
-    /// ‼️ REQUIRES "Dugong" ‼️
-    InitiateWithPrimaryDelayedCompletion,
     // TODO:
     // FUTURE IMPROVEMENTS,
     // User can't initiate themselves and needs to send a request to an external source (e.g. a friend or custodian)
@@ -101,8 +99,7 @@ impl RolesExercisableInTransactionManifestCombination {
         matches!(
             self,
             Self::InitiateWithPrimaryCompleteWithRecovery
-                | Self::InitiateWithPrimaryCompleteWithConfirmation
-                | Self::InitiateWithPrimaryDelayedCompletion
+                | Self::InitiateWithPrimaryCompleteWithConfirmation // | Self::InitiateWithPrimaryDelayedCompletion
         )
     }
 
@@ -115,8 +112,7 @@ impl RolesExercisableInTransactionManifestCombination {
         matches!(
             self,
             Self::InitiateWithPrimaryCompleteWithRecovery
-                | Self::InitiateWithPrimaryCompleteWithConfirmation
-                | Self::InitiateWithPrimaryDelayedCompletion
+                | Self::InitiateWithPrimaryCompleteWithConfirmation // | Self::InitiateWithPrimaryDelayedCompletion
         )
     }
     fn initiate_recovery_with_recovery(&self) -> bool {
@@ -146,6 +142,8 @@ impl RolesExercisableInTransactionManifestCombination {
         factors_and_time: &AccessControllerFactorsAndTimeInput,
     ) -> (&'static str, Box<dyn CallMethodInput>) {
         if self.initiate_recovery_with_primary() {
+            // Recovery was initiated with `Primary` and needs to be confirmed with `Recovery` or with `Confirmation`
+            // as per specified by this RolesExercisableInTransactionManifestCombination
             (
                 SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
                 Box::new(
@@ -155,6 +153,8 @@ impl RolesExercisableInTransactionManifestCombination {
                 ),
             )
         } else if self.initiate_recovery_with_recovery() {
+            // Recovery was initiated with `Recovery` and needs to be confirmed with
+            // `Confirmation` role
             (
                 SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
                 Box::new(

@@ -13,7 +13,7 @@ impl MatrixOfFactorSourceIds {
                 primary,
                 recovery,
                 confirmation,
-                Self::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
+                Self::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
             )
         }
     }
@@ -46,7 +46,7 @@ impl MatrixOfFactorSourceIds {
             primary,
             recovery,
             confirmation,
-            Self::DEFAULT_TIME_UNTIL_DELAYE_CONFIRMATION_IS_CALLABLE,
+            Self::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
         )
     }
 }

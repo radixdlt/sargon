@@ -150,7 +150,7 @@ mod tests {
             };
         test(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation, true);
         test(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithRecovery, true);
-        test(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion, true);
+        // test(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion, true);
 
         test(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation, false);
         test(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion, false);
@@ -231,13 +231,13 @@ mod tests {
         )
     }
 
-    #[test]
-    fn update_shield_of_securified_persona_init_with_P_confirm_with_T() {
-        test_update_shield_of_securified_persona(
-            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion,
-            || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_T")
-        )
-    }
+    // #[test] // requires Dugong
+    // fn update_shield_of_securified_persona_init_with_P_confirm_with_T() {
+    //     test_update_shield_of_securified_persona(
+    //         RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion,
+    //         || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_T")
+    //     )
+    // }
 
     #[test]
     fn update_shield_of_securified_persona_init_with_R_confirm_with_C() {

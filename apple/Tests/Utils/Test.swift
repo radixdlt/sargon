@@ -40,9 +40,10 @@ class TestCase: XCTestCase {
 	func jsonFixture<T: Decodable>(
 		as: T.Type = T.self,
 		file fileName: String,
+		in subPath: String? = nil,
 		decode: (Data) throws -> T = { try JSONDecoder().decode(T.self, from: $0) }
 	) throws -> (model: T, json: Data) {
-		let json = try openFile(subPath: "vector", fileName, extension: "json")
+		let json = try jsonData(file: fileName, in: subPath)
 		let model: T = try decode(json)
 		return (model, json)
 	}
@@ -50,23 +51,32 @@ class TestCase: XCTestCase {
 	func jsonFixture<T>(
 		as: T.Type = T.self,
 		file fileName: String,
+		in subPath: String? = nil,
 		decode: (Data) throws -> T
 	) throws -> (model: T, json: Data) {
-		let json = try openFile(subPath: "vector", fileName, extension: "json")
+		let json = try jsonData(file: fileName, in: subPath)
 		let model: T = try decode(json)
 		return (model, json)
+	}
+
+	func jsonData(
+		file fileName: String,
+		in subPath: String? = nil
+	) throws -> Data {
+		try openFile(
+			subPath: subPath ?? "models/profile",
+			fileName,
+			extension: "json"
+		)
 	}
 
 	func jsonString<T>(
 		as: T.Type = T.self,
 		file fileName: String,
+		in subPath: String? = nil,
 		decode: (String) throws -> T
 	) throws -> (model: T, jsonString: String) {
-		let jsonData = try openFile(
-			subPath: "vector",
-			fileName,
-			extension: "json"
-		)
+		let jsonData = try jsonData(file: fileName, in: subPath)
 		let jsonString = try XCTUnwrap(String(data: jsonData, encoding: .utf8))
 		let model: T = try decode(jsonString)
 		return (model, jsonString)
