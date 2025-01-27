@@ -3874,6 +3874,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sargon-os-arculus-card"
+version = "1.1.99"
+dependencies = [
+ "async-trait",
+ "ecc",
+ "error",
+ "factors",
+ "hash",
+ "hierarchical-deterministic",
+ "indexmap 2.7.0",
+ "sargon-os",
+ "signing-traits",
+]
+
+[[package]]
 name = "sargon-os-derive-public-keys"
 version = "1.1.119"
 dependencies = [
