@@ -4,11 +4,15 @@ mod factor_list_kind;
 mod role_kind;
 mod roles_matrices_structures;
 mod threshold;
+mod time_period;
+mod time_period_unit;
 
 pub mod prelude {
     pub use crate::factor_list_kind::*;
     pub use crate::role_kind::*;
     pub use crate::roles_matrices_structures::*;
+    pub use crate::time_period::*;
+    pub use crate::time_period_unit::*;
 
     pub use addresses::prelude::*;
     pub use cap26_models::prelude::*;

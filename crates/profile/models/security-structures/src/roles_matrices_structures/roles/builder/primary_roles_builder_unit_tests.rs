@@ -414,6 +414,22 @@ mod threshold_suite {
     }
 
     #[test]
+    fn set_threshold_from_one_to_all() {
+        // Arrange
+        let mut sut = make();
+
+        // Act
+        sut.add_factor_source_to_threshold(sample()).unwrap();
+        sut.add_factor_source_to_threshold(sample_other()).unwrap();
+        assert_eq!(sut.set_specific_threshold(2), Ok(()));
+        sut.remove_factor_source(&sample(), FactorListKind::Threshold)
+            .unwrap();
+
+        // Assert
+        assert_eq!(sut.set_threshold(Threshold::All), Ok(()));
+    }
+
+    #[test]
     fn validation_for_addition_of_factor_source_for_each_before_after_adding_a_factor(
     ) {
         let mut sut = make();
@@ -954,7 +970,7 @@ mod device_factor_source {
         }
 
         #[test]
-        fn two_different_is_err() {
+        fn two_different_is_ok() {
             // Arrange
             let mut sut = make();
 
@@ -964,12 +980,7 @@ mod device_factor_source {
             let res = sut.add_factor_source_to_threshold(sample_other());
 
             // Assert
-            assert!(matches!(
-                res,
-                MutRes::Err(Validation::ForeverInvalid(
-                    ForeverInvalidReason::PrimaryCannotHaveMultipleDevices
-                ))
-            ));
+            assert!(matches!(res, Ok(())));
         }
     }
 

@@ -36,7 +36,7 @@ pub enum SelectedPrimaryThresholdFactorsStatusInvalidReason {
         factor_source_kind: FactorSourceKind,
     },
     Other {
-        underlying: SecurityShieldBuilderInvalidReason,
+        underlying: SecurityShieldBuilderRuleViolation,
     },
 }
 
@@ -49,7 +49,7 @@ impl HasSampleValues for SelectedPrimaryThresholdFactorsStatusInvalidReason {
 
     fn sample_other() -> Self {
         SelectedPrimaryThresholdFactorsStatusInvalidReason::Other {
-            underlying: SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices,
+            underlying: SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices,
         }
     }
 }

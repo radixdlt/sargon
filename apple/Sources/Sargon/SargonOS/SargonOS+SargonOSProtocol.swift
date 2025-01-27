@@ -21,7 +21,7 @@ extension SargonOS {
 		networkId: NetworkID?,
 		name: DisplayName
 	) async throws -> Account {
-		try await createAndSaveNewAccountWithBdfs(networkId: networkId ?? currentNetworkID, name: name)
+		try await createAndSaveNewAccountWithMainBdfs(networkId: networkId ?? currentNetworkID, name: name)
 	}
 
 	public func createPersona(
@@ -36,6 +36,6 @@ extension SargonOS {
 		name: DisplayName,
 		personaData: PersonaData?
 	) async throws -> Persona {
-		try await createAndSaveNewPersonaWithBdfs(networkId: currentNetworkID, name: name, personaData: personaData)
+		try await createAndSaveNewPersonaWithMainBdfs(networkId: currentNetworkID, name: name, personaData: personaData)
 	}
 }

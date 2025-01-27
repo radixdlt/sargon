@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.109"
+version = "1.1.119"
 edition = "2021"
 
 resolver = "2" # features enabled in integration test
@@ -47,7 +47,7 @@ signing-traits = { workspace = true }
 sargon-os = { path = "../system/os/os" }
 sargon-os-transaction = { path = "../system/os/transaction" }
 sargon-os-accounts = { workspace = true }
-sargon-os-arculus-card = { workspace = true }
+sargon-os-derive-public-keys = { workspace = true }
 sargon-os-factors = { workspace = true }
 sargon-os-security-center = { workspace = true }
 sargon-os-signing = { workspace = true }
@@ -83,6 +83,3 @@ security-framework-sys = "=2.10.0"
 
 [dev-dependencies]
 actix-rt = { workspace = true }
-
-[build-dependencies]
-cargo_toml = { workspace = true }

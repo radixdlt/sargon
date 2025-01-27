@@ -60,9 +60,6 @@ pub enum ForeverInvalidReason {
     #[error("Factor source already present")]
     FactorSourceAlreadyPresent,
 
-    #[error("Primary role cannot have multiple devices")]
-    PrimaryCannotHaveMultipleDevices,
-
     #[error("Primary role cannot have password in override list")]
     PrimaryCannotHavePasswordInOverrideList,
 
@@ -375,6 +372,18 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         })
     }
 
+    pub(crate) fn build_with_minimum_validation(
+        &self,
+    ) -> Result<RoleWithFactorSourceIds<ROLE>, RoleBuilderValidation> {
+        self.validate_minimum_factor_count().map(|_| {
+            RoleWithFactorSourceIds::with_factors_and_threshold(
+                self.get_threshold(),
+                self.get_threshold_factors().clone(),
+                self.get_override_factors().clone(),
+            )
+        })
+    }
+
     pub(crate) fn set_specific_threshold(
         &mut self,
         threshold: u8,
@@ -412,15 +421,6 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         factor_source_id: &FactorSourceID,
     ) -> bool {
         self.get_threshold_factors().contains(factor_source_id)
-    }
-
-    fn override_contains_factor_source_of_kind(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.get_override_factors()
-            .iter()
-            .any(|f| f.get_factor_source_kind() == factor_source_kind)
     }
 
     fn threshold_contains_factor_source_of_kind(
@@ -488,6 +488,12 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             self.validation_for_addition_of_password_to_primary(Threshold)?;
         }
 
+        self.validate_minimum_factor_count()?;
+
+        Ok(())
+    }
+
+    fn validate_minimum_factor_count(&self) -> RoleBuilderMutateResult {
         if self.all_factors().is_empty() {
             return RoleBuilderMutateResult::not_yet_valid(
                 RoleMustHaveAtLeastOneFactor,
@@ -551,6 +557,18 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
         self.validate_threshold_factors_only(&mut simulation)?;
 
         self.validate_addition_of_password_and_minimum_factor_count()
+    }
+
+    pub(crate) fn has_same_factor_in_both_threshold_and_override(
+        &self,
+    ) -> bool {
+        let threshold_set =
+            HashSet::<_>::from_iter(self.get_threshold_factors());
+        let override_set = HashSet::<_>::from_iter(self.get_override_factors());
+        let intersection = threshold_set
+            .intersection(&override_set)
+            .collect::<HashSet<_>>();
+        !intersection.is_empty()
     }
 
     fn validation_for_addition_of_factor_source_of_kind_to_override_for_non_primary_role(
@@ -625,50 +643,21 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
             FactorSourceAlreadyPresent,
         );
 
-        match mode {
-            SecurityShieldBuilderMode::Strict => {
-                if self.contains_factor_source(factor_source_id) {
+        match factor_list_kind {
+            Override => {
+                if self.override_contains_factor_source(factor_source_id) {
                     return duplicates_err;
                 }
             }
-            SecurityShieldBuilderMode::Lenient => {
-                match factor_list_kind {
-                    Override => {
-                        if self
-                            .override_contains_factor_source(factor_source_id)
-                        {
-                            return duplicates_err;
-                        }
-                        // but if threshold contains it, we're good (since mode is lenient)
-                    }
-                    Threshold => {
-                        if self
-                            .threshold_contains_factor_source(factor_source_id)
-                        {
-                            return duplicates_err;
-                        }
-                    } // but if override contains it, we're good (since mode is lenient)
+            Threshold => {
+                if self.threshold_contains_factor_source(factor_source_id) {
+                    return duplicates_err;
                 }
             }
         }
+
         let factor_source_kind = factor_source_id.get_factor_source_kind();
         self._validation_add(factor_source_kind, factor_list_kind, mode)
-    }
-
-    fn contains_factor_source(
-        &self,
-        factor_source_id: &FactorSourceID,
-    ) -> bool {
-        self.override_contains_factor_source(factor_source_id)
-            || self.threshold_contains_factor_source(factor_source_id)
-    }
-
-    fn contains_factor_source_of_kind(
-        &self,
-        factor_source_kind: FactorSourceKind,
-    ) -> bool {
-        self.override_contains_factor_source_of_kind(factor_source_kind)
-            || self.threshold_contains_factor_source_of_kind(factor_source_kind)
     }
 
     /// Removes a factor source from the list of `factor_list_kind`.
@@ -752,19 +741,8 @@ impl<const ROLE: u8> RoleBuilder<ROLE> {
                     PrimaryCannotContainTrustedContact,
                 );
             }
-            FactorSourceKind::Device => match mode {
-                SecurityShieldBuilderMode::Strict => {
-                    if self.contains_factor_source_of_kind(
-                        FactorSourceKind::Device,
-                    ) {
-                        return RoleBuilderMutateResult::forever_invalid(
-                            PrimaryCannotHaveMultipleDevices,
-                        );
-                    }
-                }
-                SecurityShieldBuilderMode::Lenient => {}
-            },
-            FactorSourceKind::LedgerHQHardwareWallet
+            FactorSourceKind::Device
+            | FactorSourceKind::LedgerHQHardwareWallet
             | FactorSourceKind::ArculusCard
             | FactorSourceKind::OffDeviceMnemonic => {}
         }

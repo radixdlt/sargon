@@ -40,7 +40,7 @@ impl FromStr for IndexAgnosticPath {
         let key_space = KeySpace::from_str(&key_space_component)?;
         let parts = parts[..3].to_vec();
         let s = parts.join(HDPath::SEPARATOR);
-        let hd_path = HDPath::from_bip32_string(s)?;
+        let hd_path = HDPath::from_cap43_string(s)?;
         let components = hd_path.components();
 
         let network_id = NetworkID::try_from(components[0])?;
@@ -73,7 +73,7 @@ impl IndexAgnosticPath {
     }
 
     fn _to_str(&self) -> String {
-        let base = self._to_hd_path().to_bip32_string_with(false);
+        let base = self._to_hd_path().to_cap43_string_with(false, false);
         format!("{}/{}{}", base, self.key_space, Self::COMPONENT_SUFFIX)
     }
 }

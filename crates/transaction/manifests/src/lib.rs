@@ -4,9 +4,10 @@ mod delete_account;
 mod high_level;
 mod manifest_account_locker;
 mod manifest_assets_transfers;
+mod manifest_builder_from_manifest;
 mod manifests;
-mod manifests_access_controller;
 mod manifests_create_tokens;
+mod manifests_security_shield;
 mod modify_manifest;
 mod third_party_deposit_update;
 
@@ -18,9 +19,10 @@ pub mod prelude {
     pub use crate::high_level::*;
     pub use crate::manifest_account_locker::*;
     pub use crate::manifest_assets_transfers::*;
+    pub use crate::manifest_builder_from_manifest::*;
     pub use crate::manifests::*;
-    pub use crate::manifests_access_controller::*;
     pub use crate::manifests_create_tokens::*;
+    pub use crate::manifests_security_shield::*;
     pub use crate::modify_manifest::*;
     pub use crate::third_party_deposit_update::*;
 

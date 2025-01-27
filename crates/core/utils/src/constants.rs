@@ -31,6 +31,9 @@ pub const POLLING_DELAY_INCREMENT_IN_SECONDS: u64 = 1;
 /// Number of minutes per day.
 pub const MINUTES_PER_DAY: u32 = 24 * 60;
 
+/// Number of days per week.
+pub const DAYS_PER_WEEK: u16 = 7;
+
 #[cfg(test)]
 mod tests {
     use super::*;

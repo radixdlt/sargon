@@ -36,6 +36,7 @@ class CargoDesktopPlugin : Plugin<Project> {
                             val commands = listOf(
                                 "cargo",
                                 "build",
+                                "--locked",
                                 "-p",
                                 "sargon-uniffi",
                                 if (buildType.isRelease()) "--release" else null,

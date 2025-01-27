@@ -78,4 +78,24 @@ final class DerivationPathTests: HDPathProtocolTest<DerivationPath> {
 			"m/44H/1022H/2H/618H/1460H/42H"
 		)
 	}
+
+	func test_to_bip32() throws {
+		// Build from CAP43 syntax
+		var sut = try SUT(string: "m/44H/1022H/1H/525H/1460H/0S")
+		XCTAssertEqual(sut.toBip32String(), "m/44H/1022H/1H/525H/1460H/1073741824H")
+
+		// Build from BIP32 syntax
+		sut = try SUT(string: "m/44H/1022H/1H/525H/1460H/2H")
+		XCTAssertEqual(sut.toBip32String(), "m/44H/1022H/1H/525H/1460H/2H")
+	}
+
+	func test_to_string() throws {
+		// Build from CAP43 syntax
+		var sut = try SUT(string: "m/44H/1022H/1H/525H/1460H/0S")
+		XCTAssertEqual(sut.toString(), "m/44H/1022H/1H/525H/1460H/0S")
+
+		// Build from BIP32 syntax
+		sut = try SUT(string: "m/44H/1022H/1H/525H/1460H/2H")
+		XCTAssertEqual(sut.toString(), "m/44H/1022H/1H/525H/1460H/2H")
+	}
 }

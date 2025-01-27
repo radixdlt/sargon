@@ -16,6 +16,7 @@ pub mod prelude {
     pub use sargon_os::prelude::*;
     pub use sargon_os_accounts::prelude::*;
     pub use sargon_os_arculus_card::prelude::*;
+    pub use sargon_os_derive_public_keys::prelude::*;
     pub use sargon_os_factors::prelude::*;
     pub use sargon_os_security_center::prelude::*;
     pub use sargon_os_signing::prelude::*;

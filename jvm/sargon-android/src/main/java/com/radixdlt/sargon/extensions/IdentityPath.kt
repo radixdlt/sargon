@@ -22,14 +22,4 @@ fun IdentityPath.Companion.init(
 
 public fun Cap26EntityKind.discriminant(): String = cap26EntityKindToString(kind = this)
 
-@Throws(SargonException::class)
-fun IdentityPath.Companion.init(path: String): IdentityPath =
-    when (val derivationPath = DerivationPath.init(path)) {
-        is DerivationPath.Identity -> derivationPath.value
-        is DerivationPath.Bip44Like, is DerivationPath.Account -> throw CommonException.WrongEntityKind(
-            expected = Cap26EntityKind.IDENTITY.discriminant(),
-            found = Cap26EntityKind.ACCOUNT.discriminant()
-        )
-    }
-
 fun IdentityPath.asGeneral(): DerivationPath = DerivationPath.Identity(value = this)

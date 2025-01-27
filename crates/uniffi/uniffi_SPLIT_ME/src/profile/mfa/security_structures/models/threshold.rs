@@ -12,3 +12,13 @@ pub enum Threshold {
     /// A specific number of factors in the threshold factors list must be used to perform some function with
     Specific(u8),
 }
+
+#[uniffi::export]
+pub fn new_threshold_sample() -> Threshold {
+    InternalThreshold::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_threshold_sample_other() -> Threshold {
+    InternalThreshold::sample_other().into()
+}

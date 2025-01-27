@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use crate::prelude::*;
 use sargon::CommonError as InternalCommonError;
+use CommonError::*;
 
 use thiserror::Error as ThisError;
 
@@ -88,12 +89,39 @@ pub enum CommonError {
         error_message: String,
     },
     FailedToExtractTransactionReceiptBytes,
-    MaxTransfersPerTransactionReached { amount: u64 },
     ArculusCardFactorSourceIdMissmatch,
     NFCSessionCancelled,
     NFCSessionLostTagConnection,
     NFCSessionUnknownTag,
     ArculusCardNotConfigured,
+    MaxTransfersPerTransactionReached {
+        amount: u64,
+    },
+    UnknownNetworkWithName {
+        bad_value: String,
+    },
+    InvalidEd25519PublicKeyFromBytes {
+        bad_value: String,
+    },
+    InvalidSecp256k1PublicKeyFromBytes {
+        bad_value: String,
+    },
+    SigningFailedTooManyFactorSourcesNeglected,
+    GatewaySubmitDuplicateTX {
+        intent_hash: String,
+    },
+    UnableToLoadMnemonicFromSecureStorage {
+        bad_value: String,
+    },
+    ExecutionSummaryFail {
+        underlying: String,
+    },
+    FailedToGenerateManifestSummary {
+        underlying: String,
+    },
+    InvalidInstructionsString {
+        underlying: String,
+    },
 }
 
 #[uniffi::export]
@@ -114,7 +142,7 @@ pub fn is_safe_to_show_error_message_from_error(error: &CommonError) -> bool {
 impl Display for CommonError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            CommonError::ErasedError { error_message, .. } => {
+            ErasedError { error_message, .. } => {
                 write!(f, "{}", error_message)
             }
             _ => Display::fmt(&self.into_internal(), f),
@@ -125,7 +153,7 @@ impl Display for CommonError {
 impl CommonError {
     pub fn error_code(&self) -> u32 {
         match self {
-            CommonError::ErasedError {
+            ErasedError {
                 internal_error_code,
                 ..
             } => *internal_error_code,
@@ -134,7 +162,7 @@ impl CommonError {
     }
 
     pub fn is_safe_to_show_error_message(&self) -> bool {
-        matches!(self, CommonError::FailedToDeserializeJSONToValue { .. })
+        matches!(self, FailedToDeserializeJSONToValue { .. })
     }
 }
 
@@ -150,7 +178,7 @@ impl CommonError {
 impl CommonError {
     pub fn into_internal(&self) -> InternalCommonError {
         match self {
-            CommonError::SecureStorageAccessError {
+            SecureStorageAccessError {
                 key,
                 error_kind,
                 error_message,
@@ -159,36 +187,32 @@ impl CommonError {
                 error_kind: error_kind.into_internal(),
                 error_message: error_message.clone(),
             },
-            CommonError::InvalidISO8601String { bad_value } => {
+            InvalidISO8601String { bad_value } => {
                 InternalCommonError::InvalidISO8601String {
                     bad_value: bad_value.clone(),
                 }
             }
-            CommonError::SigningRejected => {
-                InternalCommonError::SigningRejected
-            }
-            CommonError::WrongEntityKind { expected, found } => {
+            SigningRejected => InternalCommonError::SigningRejected,
+            WrongEntityKind { expected, found } => {
                 InternalCommonError::WrongEntityKind {
                     expected: expected.clone(),
                     found: found.clone(),
                 }
             }
-            CommonError::NetworkRequestGenericFailure { underlying } => {
+            NetworkRequestGenericFailure { underlying } => {
                 InternalCommonError::NetworkRequestGenericFailure {
                     underlying: underlying.clone(),
                 }
             }
-            CommonError::InvalidURL { bad_value } => {
-                InternalCommonError::InvalidURL {
-                    bad_value: bad_value.clone(),
-                }
-            }
-            CommonError::UnknownNetworkForID { bad_value } => {
+            InvalidURL { bad_value } => InternalCommonError::InvalidURL {
+                bad_value: bad_value.clone(),
+            },
+            UnknownNetworkForID { bad_value } => {
                 InternalCommonError::UnknownNetworkForID {
                     bad_value: *bad_value,
                 }
             }
-            CommonError::FailedToDeserializeJSONToValue {
+            FailedToDeserializeJSONToValue {
                 json_byte_count,
                 type_name,
                 serde_message,
@@ -197,93 +221,136 @@ impl CommonError {
                 type_name: type_name.clone(),
                 serde_message: serde_message.clone(),
             },
-            CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve => {
+            InvalidSecp256k1PublicKeyPointNotOnCurve => {
                 InternalCommonError::InvalidSecp256k1PublicKeyPointNotOnCurve
             }
-            CommonError::InvalidBIP39WordCount { bad_value } => {
+            InvalidBIP39WordCount { bad_value } => {
                 InternalCommonError::InvalidBIP39WordCount {
                     bad_value: *bad_value,
                 }
             }
-            CommonError::Unknown => InternalCommonError::Unknown,
-            CommonError::FileAlreadyExists { path } => {
+            Unknown => InternalCommonError::Unknown,
+            FileAlreadyExists { path } => {
                 InternalCommonError::FileAlreadyExists { path: path.clone() }
             }
-            CommonError::SecureStorageReadError => {
+            SecureStorageReadError => {
                 InternalCommonError::SecureStorageReadError
             }
-            CommonError::SecureStorageWriteError => {
+            SecureStorageWriteError => {
                 InternalCommonError::SecureStorageWriteError
             }
-            CommonError::UnsafeStorageReadError => {
+            UnsafeStorageReadError => {
                 InternalCommonError::UnsafeStorageReadError
             }
-            CommonError::UnsafeStorageWriteError => {
+            UnsafeStorageWriteError => {
                 InternalCommonError::UnsafeStorageWriteError
             }
-            CommonError::FailedToDecodeAddressFromBech32 { bad_value } => {
+            FailedToDecodeAddressFromBech32 { bad_value } => {
                 InternalCommonError::FailedToDecodeAddressFromBech32 {
                     bad_value: bad_value.clone(),
                 }
             }
-            CommonError::InvalidAppearanceID { bad_value } => {
+            InvalidAppearanceID { bad_value } => {
                 InternalCommonError::InvalidAppearanceID {
                     bad_value: *bad_value,
                 }
             }
-            CommonError::DecimalError => InternalCommonError::DecimalError,
-            CommonError::InvalidByteCount { expected, found } => {
+            DecimalError => InternalCommonError::DecimalError,
+            InvalidByteCount { expected, found } => {
                 InternalCommonError::InvalidByteCount {
                     expected: *expected,
                     found: *found,
                 }
             }
-            CommonError::IndexNotHardened { bad_value } => {
+            IndexNotHardened { bad_value } => {
                 InternalCommonError::IndexNotHardened {
                     bad_value: *bad_value,
                 }
             }
-            CommonError::UnknownNetworkID { bad_value } => {
+            UnknownNetworkID { bad_value } => {
                 InternalCommonError::UnknownNetworkID {
                     bad_value: *bad_value,
                 }
             }
-            CommonError::TooManyBytes { max, found } => {
-                InternalCommonError::TooManyBytes {
-                    max: *max,
-                    found: *found,
-                }
-            }
-            CommonError::BytesEmpty => InternalCommonError::BytesEmpty,
-            CommonError::FactorOutcomeSignedFactorSourceIDMismatch => {
+            TooManyBytes { max, found } => InternalCommonError::TooManyBytes {
+                max: *max,
+                found: *found,
+            },
+            BytesEmpty => InternalCommonError::BytesEmpty,
+            FactorOutcomeSignedFactorSourceIDMismatch => {
                 InternalCommonError::FactorOutcomeSignedFactorSourceIDMismatch
             }
-            CommonError::UnknownAccount => InternalCommonError::UnknownAccount,
-            CommonError::NotPermissionToAccessFile { path } => {
+            UnknownAccount => InternalCommonError::UnknownAccount,
+            NotPermissionToAccessFile { path } => {
                 InternalCommonError::NotPermissionToAccessFile {
                     path: path.clone(),
                 }
             }
-            CommonError::ReservedInstructionsNotAllowedInManifest {
+            ReservedInstructionsNotAllowedInManifest {
                 reserved_instructions,
             } => {
                 InternalCommonError::ReservedInstructionsNotAllowedInManifest {
                     reserved_instructions: reserved_instructions.clone(),
                 }
             }
-            CommonError::OneOfReceivingAccountsDoesNotAllowDeposits => {
+            OneOfReceivingAccountsDoesNotAllowDeposits => {
                 InternalCommonError::OneOfReceivingAccountsDoesNotAllowDeposits
             }
-            CommonError::FailedTransactionPreview { error_message } => {
+            FailedTransactionPreview { error_message } => {
                 InternalCommonError::FailedTransactionPreview {
                     error_message: error_message.clone(),
                 }
             }
-            CommonError::FailedToExtractTransactionReceiptBytes => {
+            FailedToExtractTransactionReceiptBytes => {
                 InternalCommonError::FailedToExtractTransactionReceiptBytes
             }
-            CommonError::MaxTransfersPerTransactionReached { amount } => {
-                InternalCommonError::MaxTransfersPerTransactionReached { amount: *amount }
+            MaxTransfersPerTransactionReached { amount } => {
+                InternalCommonError::MaxTransfersPerTransactionReached {
+                    amount: *amount,
+                }
+            }
+            UnknownNetworkWithName { bad_value } => {
+                InternalCommonError::UnknownNetworkWithName {
+                    bad_value: bad_value.clone(),
+                }
+            }
+            InvalidEd25519PublicKeyFromBytes { bad_value } => {
+                InternalCommonError::InvalidEd25519PublicKeyFromBytes {
+                    bad_value: bad_value.clone(),
+                }
+            }
+            InvalidSecp256k1PublicKeyFromBytes { bad_value } => {
+                InternalCommonError::InvalidSecp256k1PublicKeyFromBytes {
+                    bad_value: bad_value.clone(),
+                }
+            }
+            SigningFailedTooManyFactorSourcesNeglected => {
+                InternalCommonError::SigningFailedTooManyFactorSourcesNeglected
+            }
+            GatewaySubmitDuplicateTX { intent_hash } => {
+                InternalCommonError::GatewaySubmitDuplicateTX {
+                    intent_hash: intent_hash.clone(),
+                }
+            }
+            UnableToLoadMnemonicFromSecureStorage { bad_value } => {
+                InternalCommonError::UnableToLoadMnemonicFromSecureStorage {
+                    bad_value: bad_value.clone(),
+                }
+            }
+            ExecutionSummaryFail { underlying } => {
+                InternalCommonError::ExecutionSummaryFail {
+                    underlying: underlying.clone(),
+                }
+            }
+            FailedToGenerateManifestSummary { underlying } => {
+                InternalCommonError::FailedToGenerateManifestSummary {
+                    underlying: underlying.clone(),
+                }
+            }
+            InvalidInstructionsString { underlying } => {
+                InternalCommonError::InvalidInstructionsString {
+                    underlying: underlying.clone(),
+                }
             }
             CommonError::ArculusCardFactorSourceIdMissmatch => {
                 InternalCommonError::ArculusCardFactorSourceIdMissmatch
@@ -318,103 +385,138 @@ impl From<InternalCommonError> for CommonError {
                 key,
                 error_kind,
                 error_message,
-            } => CommonError::SecureStorageAccessError {
+            } => SecureStorageAccessError {
                 key,
                 error_kind: error_kind.into(),
                 error_message,
             },
             InternalCommonError::InvalidISO8601String { bad_value } => {
-                CommonError::InvalidISO8601String { bad_value }
+                InvalidISO8601String { bad_value }
             }
-            InternalCommonError::SigningRejected => {
-                CommonError::SigningRejected
-            }
+            InternalCommonError::SigningRejected => SigningRejected,
             InternalCommonError::WrongEntityKind { expected, found } => {
-                CommonError::WrongEntityKind { expected, found }
+                WrongEntityKind { expected, found }
             }
             InternalCommonError::NetworkRequestGenericFailure {
                 underlying,
-            } => CommonError::NetworkRequestGenericFailure { underlying },
+            } => NetworkRequestGenericFailure { underlying },
             InternalCommonError::InvalidURL { bad_value } => {
-                CommonError::InvalidURL { bad_value }
+                InvalidURL { bad_value }
             }
             InternalCommonError::UnknownNetworkForID { bad_value } => {
-                CommonError::UnknownNetworkForID { bad_value }
+                UnknownNetworkForID { bad_value }
             }
             InternalCommonError::FailedToDeserializeJSONToValue {
                 json_byte_count,
                 type_name,
                 serde_message,
-            } => CommonError::FailedToDeserializeJSONToValue {
+            } => FailedToDeserializeJSONToValue {
                 json_byte_count,
                 type_name,
                 serde_message,
             },
             InternalCommonError::InvalidSecp256k1PublicKeyPointNotOnCurve => {
-                CommonError::InvalidSecp256k1PublicKeyPointNotOnCurve
+                InvalidSecp256k1PublicKeyPointNotOnCurve
             }
             InternalCommonError::InvalidBIP39WordCount { bad_value } => {
-                CommonError::InvalidBIP39WordCount { bad_value }
+                InvalidBIP39WordCount { bad_value }
             }
-            InternalCommonError::Unknown => CommonError::Unknown,
+            InternalCommonError::Unknown => Unknown,
             InternalCommonError::FileAlreadyExists { path } => {
-                CommonError::FileAlreadyExists { path }
+                FileAlreadyExists { path }
             }
             InternalCommonError::SecureStorageReadError => {
-                CommonError::SecureStorageReadError
+                SecureStorageReadError
             }
             InternalCommonError::SecureStorageWriteError => {
-                CommonError::SecureStorageWriteError
+                SecureStorageWriteError
             }
             InternalCommonError::UnsafeStorageReadError => {
-                CommonError::UnsafeStorageReadError
+                UnsafeStorageReadError
             }
             InternalCommonError::UnsafeStorageWriteError => {
-                CommonError::UnsafeStorageWriteError
+                UnsafeStorageWriteError
             }
             InternalCommonError::FailedToDecodeAddressFromBech32 {
                 bad_value,
-            } => CommonError::FailedToDecodeAddressFromBech32 { bad_value },
+            } => FailedToDecodeAddressFromBech32 { bad_value },
             InternalCommonError::InvalidAppearanceID { bad_value } => {
-                CommonError::InvalidAppearanceID { bad_value }
+                InvalidAppearanceID { bad_value }
             }
-            InternalCommonError::DecimalError => CommonError::DecimalError,
+            InternalCommonError::DecimalError => DecimalError,
             InternalCommonError::InvalidByteCount { expected, found } => {
-                CommonError::InvalidByteCount { expected, found }
+                InvalidByteCount { expected, found }
             }
             InternalCommonError::IndexNotHardened { bad_value } => {
-                CommonError::IndexNotHardened { bad_value }
+                IndexNotHardened { bad_value }
             }
             InternalCommonError::UnknownNetworkID { bad_value } => {
-                CommonError::UnknownNetworkID { bad_value }
+                UnknownNetworkID { bad_value }
             }
             InternalCommonError::TooManyBytes { max, found } => {
-                CommonError::TooManyBytes { max, found }
+                TooManyBytes { max, found }
             }
-            InternalCommonError::BytesEmpty => CommonError::BytesEmpty,
+            InternalCommonError::BytesEmpty => BytesEmpty,
             InternalCommonError::FactorOutcomeSignedFactorSourceIDMismatch => {
-                CommonError::FactorOutcomeSignedFactorSourceIDMismatch
+                FactorOutcomeSignedFactorSourceIDMismatch
             }
-            InternalCommonError::UnknownAccount => CommonError::UnknownAccount,
+            InternalCommonError::UnknownAccount => UnknownAccount,
             InternalCommonError::NotPermissionToAccessFile { path } => {
-                CommonError::NotPermissionToAccessFile { path }
+                NotPermissionToAccessFile { path }
             }
             InternalCommonError::ReservedInstructionsNotAllowedInManifest {
                 reserved_instructions,
-            } => CommonError::ReservedInstructionsNotAllowedInManifest {
+            } => ReservedInstructionsNotAllowedInManifest {
                 reserved_instructions,
             },
             InternalCommonError::OneOfReceivingAccountsDoesNotAllowDeposits => {
-                CommonError::OneOfReceivingAccountsDoesNotAllowDeposits
+                OneOfReceivingAccountsDoesNotAllowDeposits
             }
             InternalCommonError::FailedTransactionPreview { error_message } => {
-                CommonError::FailedTransactionPreview { error_message }
+                FailedTransactionPreview { error_message }
             }
             InternalCommonError::FailedToExtractTransactionReceiptBytes => {
-                CommonError::FailedToExtractTransactionReceiptBytes
+                FailedToExtractTransactionReceiptBytes
             }
-            InternalCommonError::MaxTransfersPerTransactionReached { amount } => {
-                CommonError::MaxTransfersPerTransactionReached { amount }
+            InternalCommonError::MaxTransfersPerTransactionReached {
+                amount,
+            } => MaxTransfersPerTransactionReached { amount },
+            InternalCommonError::UnknownNetworkWithName { bad_value } => {
+                UnknownNetworkWithName { bad_value }
+            }
+            InternalCommonError::InvalidEd25519PublicKeyFromBytes {
+                bad_value,
+            } => InvalidEd25519PublicKeyFromBytes { bad_value },
+            InternalCommonError::InvalidSecp256k1PublicKeyFromBytes {
+                bad_value,
+            } => InvalidSecp256k1PublicKeyFromBytes { bad_value },
+            InternalCommonError::SigningFailedTooManyFactorSourcesNeglected => {
+                SigningFailedTooManyFactorSourcesNeglected
+            }
+            InternalCommonError::GatewaySubmitDuplicateTX { intent_hash } => {
+                GatewaySubmitDuplicateTX {
+                    intent_hash: intent_hash.clone(),
+                }
+            }
+            InternalCommonError::UnableToLoadMnemonicFromSecureStorage {
+                bad_value,
+            } => UnableToLoadMnemonicFromSecureStorage {
+                bad_value: bad_value.clone(),
+            },
+            InternalCommonError::ExecutionSummaryFail { underlying } => {
+                ExecutionSummaryFail {
+                    underlying: underlying.clone(),
+                }
+            }
+            InternalCommonError::FailedToGenerateManifestSummary {
+                underlying,
+            } => FailedToGenerateManifestSummary {
+                underlying: underlying.clone(),
+            },
+            InternalCommonError::InvalidInstructionsString { underlying } => {
+                InvalidInstructionsString {
+                    underlying: underlying.clone(),
+                }
             }
             InternalCommonError::ArculusCardFactorSourceIdMissmatch => {
                 CommonError::ArculusCardFactorSourceIdMissmatch
@@ -431,7 +533,7 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::ArculusCardNotConfigured => {
                 CommonError::ArculusCardNotConfigured
             }
-            _ => CommonError::erased(value),
+            _ => Self::erased(value),
         }
     }
 }

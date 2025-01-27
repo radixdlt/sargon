@@ -18,17 +18,17 @@ struct ShieldTests {
 	@Test("threshold")
 	func threshold() {
 		var builder = SecurityShieldBuilder()
-		#expect(builder.threshold == 0)
+		#expect(builder.threshold == Threshold.all)
 		builder = builder.setThreshold(threshold: Threshold.specific(42))
-		#expect(builder.threshold == 42)
+		#expect(builder.threshold == Threshold.specific(42))
 	}
 
 	@Test("days")
 	func days() {
 		var builder = SecurityShieldBuilder()
-		#expect(builder.numberOfDaysUntilAutoConfirm == 14)
-		builder = builder.setNumberOfDaysUntilAutoConfirm(numberOfDays: 237)
-		#expect(builder.numberOfDaysUntilAutoConfirm == 237)
+		#expect(builder.timePeriodUntilAutoConfirm == TimePeriod(days: 14))
+		builder = builder.setTimePeriodUntilAutoConfirm(timePeriod: TimePeriod(days: 237))
+		#expect(builder.timePeriodUntilAutoConfirm == TimePeriod(days: 237))
 	}
 
 	@Test("empty primary threshold")
@@ -58,7 +58,7 @@ struct ShieldTests {
 	@Test("primary override validation status trustedContact")
 	func primValidationStatusTrustedContact() {
 		let builder = SecurityShieldBuilder()
-		#expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).compactMap(\.reasonIfInvalid) == [FactorSourceValidationStatusReasonIfInvalid.nonBasic(SecurityShieldBuilderInvalidReason.PrimaryCannotContainTrustedContact)])
+		#expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).compactMap(\.reasonIfInvalid) == [FactorSourceValidationStatusReasonIfInvalid.nonBasic(SecurityShieldBuilderRuleViolation.PrimaryCannotContainTrustedContact)])
 	}
 
 	@Test("Auto lowering of threshold upon deletion")
@@ -74,55 +74,23 @@ struct ShieldTests {
 			.addFactorSourceToRecoveryOverride(factorSourceId: y)
 		#expect(builder.recoveryRoleFactors == [y])
 
-		#expect(builder.threshold == 3)
+		#expect(builder.threshold == Threshold.specific(3))
 
 		builder = builder.removeFactorFromPrimary(factorSourceId: x, factorListKind: FactorListKind.threshold)
-		#expect(builder.threshold == 2)
+		#expect(builder.threshold == Threshold.specific(2))
 
 		builder = builder.removeFactorFromAllRoles(factorSourceId: y)
 		#expect(builder.recoveryRoleFactors == []) // assert `y` is removed from Recovery and Primary
-		#expect(builder.threshold == 1)
+		#expect(builder.threshold == Threshold.specific(1))
 
 		builder = builder.removeFactorFromPrimary(factorSourceId: z, factorListKind: FactorListKind.threshold)
-		#expect(builder.threshold == 0)
+		#expect(builder.threshold == Threshold.all)
 		#expect(builder.primaryRoleThresholdFactors == [])
-	}
-
-	@Test("basic validation")
-	func basicValidation() throws {
-		var builder = SecurityShieldBuilder()
-		#expect(builder.validate() == .PrimaryRoleMustHaveAtLeastOneFactor)
-		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
-			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice) // did not get added, duplicates are not allowed
-		#expect(builder.primaryRoleThresholdFactors == [.sampleDevice])
-
-		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDeviceOther) // actually this is added
-		#expect(builder.validate() == .PrimaryCannotHaveMultipleDevices)
-		builder = builder.removeFactorFromPrimary(factorSourceId: .sampleDeviceOther, factorListKind: FactorListKind.threshold)
-
-		#expect(builder.validate() == .RecoveryRoleMustHaveAtLeastOneFactor)
-		builder = builder.removeFactorFromPrimary(factorSourceId: .sampleDeviceOther, factorListKind: FactorListKind.threshold)
-			.addFactorSourceToRecoveryOverride(factorSourceId: .sampleLedger)
-
-		#expect(builder.validate() == .ConfirmationRoleMustHaveAtLeastOneFactor)
-		builder = builder.addFactorSourceToConfirmationOverride(factorSourceId: .sampleArculus)
-			.setAuthenticationSigningFactor(new: .sampleDevice)
-
-		#expect(builder.validate() == nil)
-		#expect((try? builder.build()) != nil)
-	}
-
-	@Test("primary role with threshold factors cannot have a threshold value of zero")
-	func primaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero() throws {
-		var builder = SecurityShieldBuilder()
-			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleLedger)
-			.setThreshold(threshold: Threshold.specific(0))
-		#expect(builder.validate() == .PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero)
 	}
 
 	@Test("cannot add forbidden FactorSourceKinds")
 	func preventAddOfForbiddenFactorSourceKinds() throws {
-		var builder = SecurityShieldBuilder()
+		let builder = SecurityShieldBuilder()
 			// Primary
 			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleTrustedContact) // Verboten
 			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleSecurityQuestions) // Verboten
@@ -153,52 +121,22 @@ struct ShieldTests {
 		#expect(builder.primaryRoleThresholdFactors == [other])
 		#expect(builder.primaryRoleOverrideFactors == [other, factor])
 
-		// But when validated/built is err
-		#expect(builder.validate() != nil)
+		// But when statusd/built is err
+		#expect(builder.status() != nil)
 		#expect((try? builder.build()) == nil)
-	}
-
-	@Test("Primary password never alone")
-	func primaryPasswordNeverAlone() {
-		var builder = SecurityShieldBuilder()
-			.addFactorSourceToPrimaryOverride(factorSourceId: .samplePassword) // not allowed
-		#expect(builder.primaryRoleOverrideFactors.isEmpty)
-
-		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .samplePassword)
-		#expect(builder.validate() == .PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor)
-		builder = builder.setThreshold(threshold: Threshold.specific(0))
-
-		#expect(builder.validate() == .PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero)
-		builder = builder.setThreshold(threshold: Threshold.specific(1))
-		#expect(builder.validate() == .PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor)
-		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleLedger)
-		#expect(builder.validate() == .PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne)
-		builder = builder.setThreshold(threshold: Threshold.specific(2))
-
-		builder = builder.addFactorSourceToRecoveryOverride(factorSourceId: .sampleArculus)
-			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleArculusOther)
-
-		builder.setAuthenticationSigningFactor(new: .sampleDevice)
-
-		let shield = try! builder.build()
-
-		#expect(shield.matrixOfFactors.primaryRole.overrideFactors.isEmpty)
-		#expect(shield.matrixOfFactors.primaryRole.threshold == Threshold.specific(2))
-		#expect(shield.matrixOfFactors.primaryRole.thresholdFactors == [.samplePassword, .sampleLedger])
 	}
 
 	@Test("Build")
 	func build() throws {
 		var builder = SecurityShieldBuilder()
 			.setName(name: "S.H.I.E.L.D.")
-			.setNumberOfDaysUntilAutoConfirm(numberOfDays: 42)
-
-		#expect(builder.validate() == .PrimaryRoleMustHaveAtLeastOneFactor)
+			.setTimePeriodUntilAutoConfirm(timePeriod: TimePeriod(days: 42))
+			.setAuthenticationSigningFactor(new: .sampleDevice)
 
 		// Primary
-		#expect(builder.threshold == 0)
-		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice) // bumps threshold
-		#expect(builder.threshold == 1)
+		#expect(builder.threshold == Threshold.all)
+		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
+		#expect(builder.threshold == Threshold.all)
 		builder = builder.addFactorSourceToPrimaryOverride(factorSourceId: .sampleArculus)
 			.addFactorSourceToPrimaryOverride(factorSourceId: .sampleArculusOther)
 			// Recovery
@@ -210,10 +148,10 @@ struct ShieldTests {
 			.removeFactorFromPrimary(factorSourceId: .sampleArculusOther, factorListKind: FactorListKind.override)
 			.removeFactorFromRecovery(factorSourceId: .sampleLedgerOther)
 
-		builder.setAuthenticationSigningFactor(new: .sampleDevice)
+		builder = builder.setAuthenticationSigningFactor(new: .sampleDevice)
 
-		// Validate
-		#expect(builder.validate() == nil)
+		// status
+		#expect(builder.status() == SecurityShieldBuilderStatus.strong)
 
 		// Build
 		let shield0 = try builder.build()
@@ -234,7 +172,7 @@ struct ShieldTests {
 
 	@Test("selected primary threshold factors status")
 	func selectedPrimaryThresholdFactorsStatusInvalid() {
-		var builder = SecurityShieldBuilder()
+		let builder = SecurityShieldBuilder()
 			.addFactorSourceToPrimaryThreshold(factorSourceId: .samplePassword)
 
 		#expect(builder.selectedPrimaryThresholdFactorsStatus() == .invalid(reason: SelectedPrimaryThresholdFactorsStatusInvalidReason.cannotBeUsedAlone(factorSourceKind: FactorSourceKind.password)))
@@ -246,11 +184,11 @@ struct ShieldTests {
 
 		#expect(builder.selectedPrimaryThresholdFactorsStatus() == .insufficient)
 
-		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
+		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleDevice)
 
 		#expect(builder.selectedPrimaryThresholdFactorsStatus() == .suboptimal)
 
-		builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleLedger)
+		builder = builder.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleLedger)
 
 		#expect(builder.selectedPrimaryThresholdFactorsStatus() == .optimal)
 	}

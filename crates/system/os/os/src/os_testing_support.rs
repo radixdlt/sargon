@@ -6,7 +6,7 @@ use crate::prelude::*;
 impl SargonOS {
     pub async fn with_bdfs() -> (Arc<Self>, FactorSource) {
         let os = Self::fast_boot().await;
-        let bdfs = os.bdfs().unwrap();
+        let bdfs = os.main_bdfs().unwrap();
         (os, bdfs.into())
     }
 
@@ -15,7 +15,7 @@ impl SargonOS {
         name: impl AsRef<str>,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
         let display_name = DisplayName::new(name)?;
-        self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
+        self.create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(display_name).await
     }
 
     pub async fn create_and_save_new_mainnet_persona(
@@ -61,6 +61,6 @@ impl SargonOS {
         name: impl AsRef<str>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
         let display_name = DisplayName::new(name)?;
-        self.create_and_save_new_mainnet_persona_with_bdfs_with_derivation_outcome(display_name).await
+        self.create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(display_name).await
     }
 }

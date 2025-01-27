@@ -3,20 +3,9 @@ use crate::prelude::*;
 /// An analyzer of a `Profile` for some `network_id` (i.e. analyzer of `ProfileNetwork`),
 /// reading out the max derivation entity index for Unsecurified/Securified Accounts/Personas
 /// for some factor source id.
+#[derive(derive_more::Deref)]
 pub struct NextDerivationEntityIndexProfileAnalyzingAssigner {
-    network_id: NetworkID,
-
-    /// might be empty
-    unsecurified_accounts_on_network: IndexSet<UnsecurifiedEntity>,
-
-    /// might be empty
-    securified_accounts_on_network: IndexSet<SecurifiedAccount>,
-
-    /// might be empty
-    unsecurified_personas_on_network: IndexSet<UnsecurifiedEntity>,
-
-    /// might be empty
-    securified_personas_on_network: IndexSet<SecurifiedPersona>,
+    entities_on_network: EntitiesOnNetwork,
 }
 
 impl NextDerivationEntityIndexProfileAnalyzingAssigner {
@@ -48,19 +37,24 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
             .map(|p| p.securified_personas_on_network(network_id))
             .unwrap_or_default();
 
-        Self {
+        let entities_on_network = EntitiesOnNetwork::with_split(
             network_id,
             unsecurified_accounts_on_network,
             securified_accounts_on_network,
             unsecurified_personas_on_network,
             securified_personas_on_network,
+        )
+        .expect("Should have only queried entities on the correct network");
+
+        Self {
+            entities_on_network,
         }
     }
 
     fn max_entity_veci(
         &self,
         factor_source_id: FactorSourceIDFromHash,
-        entities: impl IntoIterator<Item = UnsecurifiedEntity>,
+        entities: impl IntoIterator<Item = AnyUnsecurifiedEntity>,
         securified_entities: impl IntoIterator<Item = AnySecurifiedEntity>,
         entity_kind: CAP26EntityKind,
         key_space: KeySpace,
@@ -108,7 +102,11 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     ) -> Option<HDPathComponent> {
         self.max_entity_veci(
             factor_source_id,
-            self.unsecurified_accounts_on_network.clone(),
+            self.unsecurified_accounts_on_network
+                .clone()
+                .iter()
+                .map(Into::<AnyUnsecurifiedEntity>::into)
+                .collect::<IdentifiedVecOf<_>>(),
             self.securified_accounts_on_network
                 .clone()
                 .into_iter()
@@ -127,7 +125,11 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     ) -> Option<HDPathComponent> {
         self.max_entity_veci(
             factor_source_id,
-            self.unsecurified_personas_on_network.clone(),
+            self.unsecurified_personas_on_network
+                .clone()
+                .iter()
+                .map(Into::<AnyUnsecurifiedEntity>::into)
+                .collect::<IdentifiedVecOf<_>>(),
             self.securified_personas_on_network
                 .clone()
                 .into_iter()
@@ -142,11 +144,18 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     /// factor source id found.
     /// By "controlled by" we mean having a MatrixOfFactorInstances which has that
     /// factor in **any role** in its MatrixOfFactorInstances.
-    fn max_entity_mfa<E: IsBaseEntity + std::hash::Hash + Eq + Clone>(
+    fn max_entity_mfa<
+        E: IsBaseEntity
+            + std::hash::Hash
+            + Eq
+            + Clone
+            + std::fmt::Debug
+            + Identifiable,
+    >(
         &self,
         factor_source_id: FactorSourceIDFromHash,
-        unsecurified_entities: &IndexSet<UnsecurifiedEntity>,
-        securified_entities: &IndexSet<AbstractSecurifiedEntity<E>>,
+        unsecurified_entities: &IdentifiedVecOf<AbstractUnsecurifiedEntity<E>>,
+        securified_entities: &IdentifiedVecOf<AbstractSecurifiedEntity<E>>,
         entity_kind: CAP26EntityKind,
     ) -> Option<HDPathComponent> {
         let predicate = AssertMatches {
@@ -164,7 +173,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
 
         let max_provisional_unsecurified = unsecurified_entities
             .iter()
-            .filter_map(|e| e.provisional_securified_config.as_ref())
+            .filter_map(|e| e.provisional_securified_config.clone())
             .flat_map(|x| {
                 x.highest_derivation_path_index(factor_source_id, predicate)
             })
@@ -207,11 +216,18 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
         )
     }
 
-    fn max_entity_rola<E: IsBaseEntity + std::hash::Hash + Eq + Clone>(
+    fn max_entity_rola<
+        E: IsBaseEntity
+            + std::hash::Hash
+            + Eq
+            + Clone
+            + std::fmt::Debug
+            + Identifiable,
+    >(
         &self,
         factor_source_id: FactorSourceIDFromHash,
-        unsecurified_entities: &IndexSet<UnsecurifiedEntity>,
-        securified_entities: &IndexSet<AbstractSecurifiedEntity<E>>,
+        unsecurified_entities: &IdentifiedVecOf<AbstractUnsecurifiedEntity<E>>,
+        securified_entities: &IdentifiedVecOf<AbstractSecurifiedEntity<E>>,
         entity_kind: CAP26EntityKind,
     ) -> Option<HDPathComponent> {
         let predicate = AssertMatches {

@@ -61,7 +61,7 @@ final class TestOSTests: OSTest {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
-		let account = try await sut.createAccount(named: displayName)
+		let account = try await sut.createAccountWithBDFS(networkId: nil, name: displayName)
 		XCTAssertEqual(account.displayName, displayName)
 		XCTAssertEqual(try sut.accountsForDisplayOnCurrentNetwork, [AccountForDisplay(account)])
 	}
@@ -70,7 +70,7 @@ final class TestOSTests: OSTest {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)
 		let displayName: DisplayName = "New"
-		let account = try await sut.createAccount(named: displayName)
+		let account = try await sut.createAccountWithBDFS(networkId: nil, name: displayName)
 		let lookedUp = try sut.accountByAddress(account.address)
 		XCTAssertEqual(lookedUp, account)
 	}

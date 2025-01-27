@@ -23,6 +23,17 @@ impl Threshold {
             Threshold::Specific(value) => *value,
         }
     }
+
+    /// Returns the selectable values for a threshold.
+    pub fn values(max_threshold: u8) -> Vec<Threshold> {
+        std::iter::once(Threshold::All)
+            .chain(
+                (1..=max_threshold.saturating_sub(1))
+                    .rev()
+                    .map(Threshold::Specific),
+            )
+            .collect()
+    }
 }
 
 impl HasSampleValues for Threshold {
@@ -65,5 +76,14 @@ mod tests {
         let model = SUT::Specific(2);
         assert_json_value_eq_after_roundtrip(&model, json!({"specific": 2}));
         assert_json_roundtrip(&model);
+    }
+
+    #[test]
+    fn values() {
+        let res = SUT::values(3);
+        assert_eq!(res, vec![SUT::All, SUT::Specific(2), SUT::Specific(1)]);
+
+        let res = SUT::values(0);
+        assert_eq!(res, vec![SUT::All]);
     }
 }

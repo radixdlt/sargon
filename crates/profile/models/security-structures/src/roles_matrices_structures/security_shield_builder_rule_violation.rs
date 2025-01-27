@@ -3,7 +3,7 @@ use crate::prelude::*;
 pub trait AsShieldBuilderViolation {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason>;
+    ) -> Option<SecurityShieldBuilderRuleViolation>;
 }
 
 impl<T: std::fmt::Debug> AsShieldBuilderViolation
@@ -11,7 +11,7 @@ impl<T: std::fmt::Debug> AsShieldBuilderViolation
 {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         match self {
             Result::Err(err) => err.as_shield_validation(),
             Result::Ok(_) => None,
@@ -21,7 +21,7 @@ impl<T: std::fmt::Debug> AsShieldBuilderViolation
 impl AsShieldBuilderViolation for MatrixBuilderValidation {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         match self {
             MatrixBuilderValidation::RoleInIsolation { role, violation } => {
                 (*role, *violation).as_shield_validation()
@@ -36,7 +36,7 @@ impl AsShieldBuilderViolation for MatrixBuilderValidation {
 impl AsShieldBuilderViolation for MatrixRolesInCombinationViolation {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         match self {
             Self::Basic(val) => val.as_shield_validation(),
             Self::ForeverInvalid(val) => val.as_shield_validation(),
@@ -48,13 +48,13 @@ impl AsShieldBuilderViolation for MatrixRolesInCombinationViolation {
 impl AsShieldBuilderViolation for MatrixRolesInCombinationBasicViolation {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         use MatrixRolesInCombinationBasicViolation::*;
         match self {
             FactorSourceNotFoundInAnyRole =>
                 unreachable!("Cannot happen since this error is not returned by 'validate'/'build'."),
             NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero => {
-                Some(SecurityShieldBuilderInvalidReason::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero)
+                Some(SecurityShieldBuilderRuleViolation::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero)
             }
         }
     }
@@ -62,11 +62,17 @@ impl AsShieldBuilderViolation for MatrixRolesInCombinationBasicViolation {
 impl AsShieldBuilderViolation for MatrixRolesInCombinationForeverInvalid {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         use MatrixRolesInCombinationForeverInvalid::*;
         match self {
             RecoveryAndConfirmationFactorsOverlap => {
-                Some(SecurityShieldBuilderInvalidReason::RecoveryAndConfirmationFactorsOverlap)
+                Some(SecurityShieldBuilderRuleViolation::RecoveryAndConfirmationFactorsOverlap)
+            }
+            PrimaryCannotHaveMultipleDevices => {
+                Some(SecurityShieldBuilderRuleViolation::PrimaryCannotHaveMultipleDevices)
+            }
+            ThresholdAndOverrideFactorsOverlap => {
+                Some(SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent)
             }
         }
     }
@@ -74,12 +80,12 @@ impl AsShieldBuilderViolation for MatrixRolesInCombinationForeverInvalid {
 impl AsShieldBuilderViolation for MatrixRolesInCombinationNotYetValid {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         use MatrixRolesInCombinationNotYetValid::*;
 
         match self {
             SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole => {
-                Some(SecurityShieldBuilderInvalidReason::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole)
+                Some(SecurityShieldBuilderRuleViolation::SingleFactorUsedInPrimaryMustNotBeUsedInAnyOtherRole)
             }
         }
     }
@@ -88,7 +94,7 @@ impl AsShieldBuilderViolation for MatrixRolesInCombinationNotYetValid {
 impl AsShieldBuilderViolation for (RoleKind, RoleBuilderValidation) {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         let (role_kind, violation) = self;
         match violation {
             RoleBuilderValidation::BasicViolation(basic) => unreachable!("Programmer error. Should have prevented this from happening: '{:?}'", basic),
@@ -105,37 +111,36 @@ impl AsShieldBuilderViolation for (RoleKind, RoleBuilderValidation) {
 impl AsShieldBuilderViolation for ForeverInvalidReason {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         use ForeverInvalidReason::*;
         let reason = match self {
-            FactorSourceAlreadyPresent => SecurityShieldBuilderInvalidReason::FactorSourceAlreadyPresent,
-            PrimaryCannotHaveMultipleDevices => {
-                SecurityShieldBuilderInvalidReason::PrimaryCannotHaveMultipleDevices
+            FactorSourceAlreadyPresent => {
+                SecurityShieldBuilderRuleViolation::FactorSourceAlreadyPresent
             }
             PrimaryCannotHavePasswordInOverrideList => {
-                SecurityShieldBuilderInvalidReason::PrimaryCannotHavePasswordInOverrideList
+                SecurityShieldBuilderRuleViolation::PrimaryCannotHavePasswordInOverrideList
             }
             PrimaryCannotContainSecurityQuestions => {
-                SecurityShieldBuilderInvalidReason::PrimaryCannotContainSecurityQuestions
+                SecurityShieldBuilderRuleViolation::PrimaryCannotContainSecurityQuestions
             }
             PrimaryCannotContainTrustedContact => {
-                SecurityShieldBuilderInvalidReason::PrimaryCannotContainTrustedContact
+                SecurityShieldBuilderRuleViolation::PrimaryCannotContainTrustedContact
             }
             RecoveryRoleSecurityQuestionsNotSupported => {
-                SecurityShieldBuilderInvalidReason::RecoveryRoleSecurityQuestionsNotSupported
+                SecurityShieldBuilderRuleViolation::RecoveryRoleSecurityQuestionsNotSupported
             }
             RecoveryRolePasswordNotSupported => {
-                SecurityShieldBuilderInvalidReason::RecoveryRolePasswordNotSupported
+                SecurityShieldBuilderRuleViolation::RecoveryRolePasswordNotSupported
             }
             ConfirmationRoleTrustedContactNotSupported => {
-                SecurityShieldBuilderInvalidReason::ConfirmationRoleTrustedContactNotSupported
+                SecurityShieldBuilderRuleViolation::ConfirmationRoleTrustedContactNotSupported
             }
         };
         Some(reason)
     }
 }
 
-impl SecurityShieldBuilderInvalidReason {
+impl SecurityShieldBuilderRuleViolation {
     pub(crate) fn role_must_have_at_least_one_factor(
         role_kind: &RoleKind,
     ) -> Self {
@@ -152,33 +157,31 @@ impl SecurityShieldBuilderInvalidReason {
 impl AsShieldBuilderViolation for (RoleKind, NotYetValidReason) {
     fn as_shield_validation(
         &self,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         let (role_kind, violation) = self;
         use NotYetValidReason::*;
         let reason = match violation {
-            RoleMustHaveAtLeastOneFactor => SecurityShieldBuilderInvalidReason::role_must_have_at_least_one_factor(role_kind),
+            RoleMustHaveAtLeastOneFactor => SecurityShieldBuilderRuleViolation::role_must_have_at_least_one_factor(role_kind),
             PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor => {
-                SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
+                SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustHaveAnotherFactor
             }
             PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero => {
-                SecurityShieldBuilderInvalidReason::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
+                SecurityShieldBuilderRuleViolation::PrimaryRoleWithThresholdFactorsCannotHaveAThresholdValueOfZero
             }
             PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne => {
-                SecurityShieldBuilderInvalidReason::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
+                SecurityShieldBuilderRuleViolation::PrimaryRoleWithPasswordInThresholdListMustThresholdGreaterThanOne
             }
             ThresholdHigherThanThresholdFactorsLen => {
-                SecurityShieldBuilderInvalidReason::ThresholdHigherThanThresholdFactorsLen
+                SecurityShieldBuilderRuleViolation::ThresholdHigherThanThresholdFactorsLen
             }
         };
         Some(reason)
     }
 }
 
-// #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
-
 #[repr(u32)]
 #[derive(Clone, Debug, thiserror::Error, PartialEq)]
-pub enum SecurityShieldBuilderInvalidReason {
+pub enum SecurityShieldBuilderRuleViolation {
     #[error("Auth Signing Factor Missing")]
     MissingAuthSigningFactor,
 
@@ -250,13 +253,13 @@ pub enum SecurityShieldBuilderInvalidReason {
     ConfirmationRoleTrustedContactNotSupported,
 }
 
-impl HasSampleValues for SecurityShieldBuilderInvalidReason {
+impl HasSampleValues for SecurityShieldBuilderRuleViolation {
     fn sample() -> Self {
-        SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+        SecurityShieldBuilderRuleViolation::MissingAuthSigningFactor
     }
 
     fn sample_other() -> Self {
-        SecurityShieldBuilderInvalidReason::ShieldNameInvalid
+        SecurityShieldBuilderRuleViolation::ShieldNameInvalid
     }
 }
 
@@ -265,7 +268,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = SecurityShieldBuilderInvalidReason;
+    type SUT = SecurityShieldBuilderRuleViolation;
 
     #[test]
     fn equality() {

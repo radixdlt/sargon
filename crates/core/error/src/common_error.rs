@@ -943,6 +943,14 @@ pub enum CommonError {
 
     #[error("Arculus Card not configured")]
     ArculusCardNotConfigured = 10275,
+
+    #[error("Signing failed due to too many factor sources were neglected.")]
+    SigningFailedTooManyFactorSourcesNeglected = 10276,
+
+    #[error(
+        "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
+    )]
+    StructureAlreadyExists { bad_value: String } = 10277,
 }
 
 impl CommonError {

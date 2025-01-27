@@ -47,13 +47,13 @@ pub trait ProfileNetworkEntitiesQuerying {
     fn get_entities_erased(
         &self,
         entity_kind: CAP26EntityKind,
-    ) -> IndexSet<AccountOrPersona>;
+    ) -> IdentifiedVecOf<AccountOrPersona>;
 
     fn get_entities_of_kind_in_key_space(
         &self,
         entity_kind: CAP26EntityKind,
         key_space: KeySpace,
-    ) -> IndexSet<AccountOrPersona> {
+    ) -> IdentifiedVecOf<AccountOrPersona> {
         self.get_entities_erased(entity_kind)
             .into_iter()
             .filter(|e| e.matches_key_space(key_space))
@@ -101,20 +101,20 @@ impl ProfileNetworkEntitiesQuerying for ProfileNetwork {
     fn get_entities_erased(
         &self,
         entity_kind: CAP26EntityKind,
-    ) -> IndexSet<AccountOrPersona> {
+    ) -> IdentifiedVecOf<AccountOrPersona> {
         match entity_kind {
             CAP26EntityKind::Account => self
                 .accounts
                 .items()
                 .into_iter()
                 .map(AccountOrPersona::from)
-                .collect::<IndexSet<_>>(),
+                .collect::<IdentifiedVecOf<_>>(),
             CAP26EntityKind::Identity => self
                 .personas
                 .items()
                 .into_iter()
                 .map(AccountOrPersona::from)
-                .collect::<IndexSet<_>>(),
+                .collect::<IdentifiedVecOf<_>>(),
         }
     }
 }

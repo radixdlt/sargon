@@ -1,6 +1,6 @@
 [package]
 name = "profile-security-structures"
-version = "1.1.109"
+version = "1.1.119"
 edition = "2021"
 
 [dependencies]
@@ -18,7 +18,7 @@ core-collections = { workspace = true }
 time-utils = { workspace = true }
 short-string = { workspace = true }
 core-utils = { workspace = true }
-
+core-misc = { workspace = true }          # decl_bool_type
 
 # === RADIX DEPENDENCIES ===
 radix-engine-interface = { workspace = true }

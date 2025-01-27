@@ -45,7 +45,7 @@ macro_rules! path_union {
             impl FromStr for $union_name {
                 type Err = CommonError;
                 fn from_str(s: &str) -> Result<Self> {
-                    Self::from_bip32_string(s)
+                    Self::from_cap43_string(s)
                 }
             }
 
@@ -58,6 +58,10 @@ macro_rules! path_union {
                         )+
                     }
                 }
+
+                pub fn to_bip32_string(&self) -> String {
+                    self.to_hd_path().to_bip32_string()
+                }
             }
             impl From<$union_name> for HDPath {
                 fn from(value: $union_name) -> Self {
@@ -65,21 +69,21 @@ macro_rules! path_union {
                 }
             }
 
-            impl ToBIP32Str for $union_name {
-                fn to_bip32_string(&self) -> String {
-                    self.to_hd_path().to_bip32_string()
+            impl ToCAP43String for $union_name {
+                fn to_cap43_string(&self) -> String {
+                    self.to_hd_path().to_cap43_string()
                 }
-                fn to_bip32_string_debug(&self) -> String {
-                    self.to_hd_path().to_bip32_string_debug()
+                fn to_cap43_string_debug(&self) -> String {
+                    self.to_hd_path().to_cap43_string_debug()
                 }
             }
 
-            impl FromBIP32Str for $union_name {
-                fn from_bip32_string(s: impl AsRef<str>) -> Result<Self> {
+            impl FromCAP43String for $union_name {
+                fn from_cap43_string(s: impl AsRef<str>) -> Result<Self> {
                     let s = s.as_ref();
                     Result::<Self>::Err(CommonError::InvalidBIP32Path { bad_value: s.to_owned() })
                     $(
-                        .or($variant_type::from_bip32_string(s).map(Self::[< $variant_name:snake >]))
+                        .or_else(|_| $variant_type::from_cap43_string(s).map(Self::[< $variant_name:snake >]))
                     )+
 
                 }
@@ -247,42 +251,42 @@ mod tests {
     type SUT = DerivationPath;
 
     #[test]
-    fn test_to_bip32_string_is_display_account() {
+    fn test_to_cap43_string_is_display_account() {
         let sut = SUT::Account {
             value: AccountPath::sample(),
         };
-        assert_eq!(sut.to_bip32_string(), format!("{}", sut));
+        assert_eq!(sut.to_cap43_string(), format!("{}", sut));
     }
 
     #[test]
-    fn test_to_bip32_string_is_debug_account() {
+    fn test_to_cap43_string_debug_is_debug_account() {
         let sut = SUT::Account {
             value: AccountPath::sample(),
         };
-        assert_eq!(sut.to_bip32_string_debug(), format!("{:?}", sut));
+        assert_eq!(sut.to_cap43_string_debug(), format!("{:?}", sut));
     }
 
     #[test]
-    fn test_to_bip32_string_is_display_identity() {
+    fn test_to_cap43_string_is_display_identity() {
         let sut = SUT::Identity {
             value: IdentityPath::sample(),
         };
-        assert_eq!(sut.to_bip32_string(), format!("{}", sut));
+        assert_eq!(sut.to_cap43_string(), format!("{}", sut));
     }
 
     #[test]
-    fn test_to_bip32_string_is_debug_identity() {
+    fn test_to_cap43_string_debug_is_debug_identity() {
         let sut = SUT::Identity {
             value: IdentityPath::sample(),
         };
-        assert_eq!(sut.to_bip32_string_debug(), format!("{:?}", sut));
+        assert_eq!(sut.to_cap43_string_debug(), format!("{:?}", sut));
     }
 
     #[test]
     fn string_roundtrip_account_from_account() {
         let value = AccountPath::sample();
-        let s = value.to_bip32_string();
-        let path2 = SUT::from_bip32_string(&s).unwrap();
+        let s = value.to_cap43_string();
+        let path2 = SUT::from_cap43_string(&s).unwrap();
         assert_eq!(SUT::Account { value }, path2);
     }
 
@@ -291,16 +295,16 @@ mod tests {
         let sut = SUT::Account {
             value: AccountPath::sample(),
         };
-        let s = sut.to_bip32_string();
-        let value = AccountPath::from_bip32_string(&s).unwrap();
+        let s = sut.to_cap43_string();
+        let value = AccountPath::from_cap43_string(&s).unwrap();
         assert_eq!(SUT::Account { value }, sut)
     }
 
     #[test]
     fn string_roundtrip_identity_from_identity() {
         let value = IdentityPath::sample();
-        let s = value.to_bip32_string();
-        let path2 = SUT::from_bip32_string(&s).unwrap();
+        let s = value.to_cap43_string();
+        let path2 = SUT::from_cap43_string(&s).unwrap();
         assert_eq!(SUT::Identity { value }, path2);
     }
 
@@ -309,16 +313,16 @@ mod tests {
         let sut = SUT::Identity {
             value: IdentityPath::sample(),
         };
-        let s = sut.to_bip32_string();
-        let value = IdentityPath::from_bip32_string(&s).unwrap();
+        let s = sut.to_cap43_string();
+        let value = IdentityPath::from_cap43_string(&s).unwrap();
         assert_eq!(SUT::Identity { value }, sut)
     }
 
     #[test]
     fn string_roundtrip_bip44_from_bip44() {
         let value = BIP44LikePath::sample();
-        let s = value.to_bip32_string();
-        let path2 = SUT::from_bip32_string(&s).unwrap();
+        let s = value.to_cap43_string();
+        let path2 = SUT::from_cap43_string(&s).unwrap();
         assert_eq!(SUT::Bip44Like { value }, path2);
     }
 
@@ -327,9 +331,98 @@ mod tests {
         let sut = SUT::Bip44Like {
             value: BIP44LikePath::sample(),
         };
-        let s = sut.to_bip32_string();
-        let value = BIP44LikePath::from_bip32_string(&s).unwrap();
+        let s = sut.to_cap43_string();
+        let value = BIP44LikePath::from_cap43_string(&s).unwrap();
         assert_eq!(SUT::Bip44Like { value }, sut)
+    }
+
+    #[test]
+    fn string_representation_of_canonical_and_non_canonical_for_unsecurified_derivation_path_last(
+    ) {
+        let sut = SUT::Account {
+            value: AccountPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                Hardened::from_global_key_space(
+                    2u32.pow(30) - 1 + GLOBAL_OFFSET_HARDENED,
+                )
+                .unwrap(),
+            ),
+        };
+
+        assert_eq!(
+            sut.to_cap43_string(),
+            "m/44H/1022H/1H/525H/1460H/1073741823H"
+        );
+        assert_eq!(
+            sut.to_bip32_string(),
+            "m/44H/1022H/1H/525H/1460H/1073741823H"
+        );
+    }
+
+    #[test]
+    fn from_bip32_str() {
+        let canonical = "m/44H/1022H/1H/525H/1460H/1073741824H";
+        let sut = SUT::from_str(canonical).unwrap();
+        assert_eq!(sut.to_bip32_string(), canonical);
+        assert_eq!(sut.to_cap43_string(), "m/44H/1022H/1H/525H/1460H/0S");
+    }
+
+    #[test]
+    fn string_representation_of_canonical_and_non_canonical_for_securified_derivation_path_zero(
+    ) {
+        let sut = SUT::Account {
+            value: AccountPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                Hardened::from_local_key_space(U31::ZERO, IsSecurified(true))
+                    .unwrap(),
+            ),
+        };
+
+        assert_eq!(sut.to_cap43_string(), "m/44H/1022H/1H/525H/1460H/0S");
+        assert_eq!(
+            sut.to_bip32_string(),
+            "m/44H/1022H/1H/525H/1460H/1073741824H"
+        );
+        assert_eq!(
+            sut.to_bip32_string(),
+            format!("m/44H/1022H/1H/525H/1460H/{}H", 2u32.pow(30))
+        );
+    }
+
+    #[test]
+    fn string_representation_of_canonical_and_shorthand_syntax_for_securified_derivation_path_2(
+    ) {
+        let sut = SUT::Account {
+            value: AccountPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                Hardened::from_local_key_space(U31::new(2), IsSecurified(true))
+                    .unwrap(),
+            ),
+        };
+
+        assert_eq!(sut.to_cap43_string(), "m/44H/1022H/1H/525H/1460H/2S");
+        assert_eq!(
+            sut.to_bip32_string(),
+            "m/44H/1022H/1H/525H/1460H/1073741826H"
+        )
+    }
+
+    #[test]
+    fn string_representation_of_canonical_and_shorthand_syntax_for_unsecurified_derivation_path(
+    ) {
+        let sut = SUT::Account {
+            value: AccountPath::new(
+                NetworkID::Mainnet,
+                CAP26KeyKind::TransactionSigning,
+                Hardened::from_local_key_space(U31::ZERO, IsSecurified(false))
+                    .unwrap(),
+            ),
+        };
+
+        assert_eq!(sut.to_cap43_string(), sut.to_bip32_string());
     }
 
     #[test]

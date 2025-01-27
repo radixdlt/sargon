@@ -2,11 +2,10 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+use crate::prelude::*;
 #[cfg(test)]
 use sargon::FactorSourceWithExtraSampleValues;
 use std::{borrow::Borrow, sync::Arc};
-
-use crate::prelude::*;
 
 /// A builder of `SecurityStructureOfFactorSourceIds` a.k.a. `SecurityShield`,
 /// which contains a MatrixOfFactorSourceIds - with primary, recovery, and
@@ -92,12 +91,20 @@ impl SecurityShieldBuilder {
 // ====================
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn get_primary_threshold(&self) -> u8 {
-        self.get(|builder| builder.get_threshold())
+    pub fn get_primary_threshold(&self) -> Threshold {
+        self.get(|builder| builder.get_threshold()).into()
     }
 
-    pub fn get_number_of_days_until_auto_confirm(&self) -> u16 {
-        self.get(|builder| builder.get_number_of_days_until_auto_confirm())
+    pub fn get_primary_threshold_values(&self) -> Vec<Threshold> {
+        self.get(|builder| builder.get_threshold_values())
+            .into_iter()
+            .map(|threshold| threshold.into())
+            .collect()
+    }
+
+    pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
+        self.get(|builder| builder.get_time_period_until_auto_confirm())
+            .into()
     }
 
     pub fn get_name(&self) -> String {
@@ -169,6 +176,12 @@ impl SecurityShieldBuilder {
         })
     }
 
+    pub fn remove_all_factors_from_primary_override(
+        self: Arc<Self>,
+    ) -> Arc<Self> {
+        self.set(|builder| builder.remove_all_factors_from_primary_override())
+    }
+
     pub fn remove_factor_from_recovery(
         self: Arc<Self>,
         factor_source_id: FactorSourceID,
@@ -193,12 +206,13 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold.into()))
     }
 
-    pub fn set_number_of_days_until_auto_confirm(
+    pub fn set_time_period_until_auto_confirm(
         self: Arc<Self>,
-        number_of_days: u16,
+        time_period: TimePeriod,
     ) -> Arc<Self> {
         self.set(|builder| {
-            builder.set_number_of_days_until_auto_confirm(number_of_days)
+            builder
+                .set_time_period_until_auto_confirm(time_period.clone().into())
         })
     }
 
@@ -443,19 +457,19 @@ impl SecurityShieldBuilder {
 
 #[uniffi::export]
 impl SecurityShieldBuilder {
-    pub fn validate(&self) -> Option<SecurityShieldBuilderInvalidReason> {
-        self.get(|builder| builder.validate().map(|x| x.into()))
-    }
-
     pub fn validate_role_in_isolation(
         &self,
         role: RoleKind,
-    ) -> Option<SecurityShieldBuilderInvalidReason> {
+    ) -> Option<SecurityShieldBuilderRuleViolation> {
         self.get(|builder| {
             builder
                 .validate_role_in_isolation(role.into_internal())
                 .map(|x| x.into())
         })
+    }
+
+    pub fn status(&self) -> SecurityShieldBuilderStatus {
+        self.get(|builder| builder.status().into())
     }
 
     pub fn selected_primary_threshold_factors_status(
@@ -483,7 +497,7 @@ impl SecurityShieldBuilder {
         &self,
     ) -> Result<
         SecurityStructureOfFactorSourceIDs,
-        SecurityShieldBuilderInvalidReason,
+        SecurityShieldBuilderRuleViolation,
     > {
         self.get(|builder| builder.build())
             .map(|shield| shield.into())
@@ -580,7 +594,6 @@ impl FactorSource {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -622,10 +635,19 @@ mod tests {
         assert_eq!(sut.clone().get_name(), "My Shield");
         sut = sut.set_name("S.H.I.E.L.D.".to_owned());
 
-        assert_eq!(sut.clone().get_number_of_days_until_auto_confirm(), 14);
-        sut = sut.set_number_of_days_until_auto_confirm(u16::MAX);
         assert_eq!(
-            sut.clone().get_number_of_days_until_auto_confirm(),
+            time_period_to_days(
+                &sut.clone().get_time_period_until_auto_confirm()
+            ),
+            14
+        );
+        sut = sut.set_time_period_until_auto_confirm(
+            new_time_period_with_days(u16::MAX),
+        );
+        assert_eq!(
+            time_period_to_days(
+                &sut.clone().get_time_period_until_auto_confirm()
+            ),
             u16::MAX
         );
         // Primary
@@ -654,16 +676,18 @@ mod tests {
 
         // Threshold increases when adding a factor, because it's being set to All by default
         sut = sut.add_factor_source_to_primary_threshold(
-            // should bump threshold to 1
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::All);
 
         sut = sut.add_factor_source_to_primary_threshold(
-            // should bump threshold to 2
             FactorSourceID::sample_password_other(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 2);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::All);
+        assert_eq!(
+            sut.clone().get_primary_threshold_values(),
+            vec![Threshold::All, Threshold::Specific(1)]
+        );
 
         sut = sut
             .remove_factor_from_primary(
@@ -679,16 +703,15 @@ mod tests {
         sut = sut.set_threshold(Threshold::Specific(1));
 
         sut = sut.add_factor_source_to_primary_threshold(
-            // should also bump threshold to 1
             FactorSourceID::sample_device(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::Specific(1));
 
         sut = sut.add_factor_source_to_primary_threshold(
             // should NOT bump threshold
             FactorSourceID::sample_password_other(),
         );
-        assert_eq!(sut.clone().get_primary_threshold(), 1);
+        assert_eq!(sut.clone().get_primary_threshold(), Threshold::Specific(1));
         sut = sut.remove_factor_from_primary(
             FactorSourceID::sample_password_other(),
             FactorListKind::Threshold,
@@ -713,6 +736,17 @@ mod tests {
                 FactorSourceID::sample_arculus_other()
             ]
         );
+
+        sut = sut.remove_all_factors_from_primary_override();
+        assert!(sut.clone().get_primary_override_factors().is_empty());
+
+        sut = sut
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus_other(),
+            );
 
         // Recovery
         let sim_rec =
@@ -814,14 +848,14 @@ mod tests {
             ])
         );
 
-        assert_ne!(
+        assert_eq!(
             sim_kind_prim,
             sut.clone().addition_of_factor_source_of_kind_to_primary_override_is_fully_valid(
                 FactorSourceKind::Device,
             )
         );
 
-        assert_ne!(
+        assert_eq!(
             sim_kind_prim_threshold,
             sut.clone().addition_of_factor_source_of_kind_to_primary_threshold_is_fully_valid(
                 FactorSourceKind::Device,
@@ -871,8 +905,15 @@ mod tests {
         assert_eq!(xs, sut.clone().get_confirmation_factors());
 
         assert_eq!(
-            sut.validate().unwrap(),
-            SecurityShieldBuilderInvalidReason::MissingAuthSigningFactor
+            sut.status(),
+            SecurityShieldBuilderStatus::Invalid {
+                reason: SecurityShieldBuilderStatusInvalidReason {
+                    is_primary_role_factor_list_empty: false,
+                    is_recovery_role_factor_list_empty: false,
+                    is_confirmation_role_factor_list_empty: false,
+                    is_auth_signing_factor_missing: true
+                }
+            }
         );
         sut = sut.set_authentication_signing_factor(Some(
             FactorSourceID::sample_device_other(),
@@ -882,9 +923,9 @@ mod tests {
             Some(FactorSourceID::sample_device_other())
         );
 
-        let v0 = sut.validate();
-        let v1 = sut.validate(); // can call validate many times!
-        assert_eq!(v0, v1);
+        let s0 = sut.status();
+        let s1 = sut.status(); // can call status many times!
+        assert_eq!(s0, s1);
 
         let shield0 = sut.clone().build().unwrap();
         let shield = sut.clone().build().unwrap(); // can call build many times!
@@ -926,7 +967,9 @@ mod tests {
         let days_to_auto_confirm = 237;
         sut = sut
             .set_name(name.to_owned())
-            .set_number_of_days_until_auto_confirm(days_to_auto_confirm)
+            .set_time_period_until_auto_confirm(new_time_period_with_days(
+                days_to_auto_confirm,
+            ))
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )
@@ -986,5 +1029,25 @@ mod tests {
                 ]
             }
         );
+    }
+
+    #[test]
+    fn primary_override_validation_status_trusted_contact() {
+        let sut = SUT::new();
+        let res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
+            vec![FactorSourceID::sample_trusted_contact()],
+        );
+        pretty_assertions::assert_eq!(
+            res,
+            vec![
+                FactorSourceValidationStatus {
+                    role: RoleKind::Primary,
+                    factor_source_id: FactorSourceID::sample_trusted_contact(),
+                    reason_if_invalid: Some(FactorSourceValidationStatusReasonIfInvalid::NonBasic(
+                        SecurityShieldBuilderRuleViolation::PrimaryCannotContainTrustedContact
+                    ))
+                }
+            ]
+        )
     }
 }
