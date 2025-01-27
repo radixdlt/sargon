@@ -804,8 +804,8 @@ pub enum CommonError {
     #[error("Could not validate signature for the given rola challenge.")]
     InvalidSignatureForRolaChallenge = 10231,
 
-    #[error("Signing was rejected by the user")]
-    SigningRejected = 10232,
+    #[error("User aborted the interaction with sargon on host.")]
+    HostInteractionAborted = 10232,
 
     #[error("Failed to automatically build shield, reason: '{underlying}'")]
     AutomaticShieldBuildingFailure { underlying: String } = 10233,

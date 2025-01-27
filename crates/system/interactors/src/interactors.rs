@@ -5,14 +5,19 @@ use crate::prelude::*;
 pub struct Interactors {
     /// Interactors related to factor sources.
     pub use_factor_sources_interactor: Arc<dyn UseFactorSourcesInteractor>,
+
+    /// Interactor that asks the user to authorize
+    pub authorization_interactor: Arc<dyn AuthorizationInteractor>,
 }
 
 impl Interactors {
     pub fn new(
         use_factor_sources_interactor: Arc<dyn UseFactorSourcesInteractor>,
+        authorization_interactor: Arc<dyn AuthorizationInteractor>,
     ) -> Self {
         Self {
             use_factor_sources_interactor,
+            authorization_interactor,
         }
     }
 }

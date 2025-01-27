@@ -23,7 +23,7 @@ pub enum CommonError {
     InvalidISO8601String {
         bad_value: String,
     },
-    SigningRejected,
+    HostInteractionAborted,
     WrongEntityKind {
         expected: String,
         found: String,
@@ -192,7 +192,9 @@ impl CommonError {
                     bad_value: bad_value.clone(),
                 }
             }
-            SigningRejected => InternalCommonError::SigningRejected,
+            HostInteractionAborted => {
+                InternalCommonError::HostInteractionAborted
+            }
             WrongEntityKind { expected, found } => {
                 InternalCommonError::WrongEntityKind {
                     expected: expected.clone(),
@@ -393,7 +395,9 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::InvalidISO8601String { bad_value } => {
                 InvalidISO8601String { bad_value }
             }
-            InternalCommonError::SigningRejected => SigningRejected,
+            InternalCommonError::HostInteractionAborted => {
+                HostInteractionAborted
+            }
             InternalCommonError::WrongEntityKind { expected, found } => {
                 WrongEntityKind { expected, found }
             }

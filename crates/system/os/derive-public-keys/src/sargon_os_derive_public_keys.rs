@@ -111,9 +111,8 @@ mod test {
 
         let factor_source_not_in_profile =
             FactorSourceIDFromHash::sample_password();
-        let source = DerivePublicKeysSource::FactorSource(
-            factor_source_not_in_profile.clone(),
-        );
+        let source =
+            DerivePublicKeysSource::FactorSource(factor_source_not_in_profile);
         let result = sut
             .derive_public_keys(sample_derivation_paths(), source)
             .await
