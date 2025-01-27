@@ -1,15 +1,15 @@
+use prelude::fixture_rtm;
+
 use crate::prelude::*;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct DappToWalletInteractionBatchOfTransactions {
-    pub transactions: Vec<BatchOfTransactionsApplyingSecurityShield>,
+    pub transactions: Vec<UnvalidatedTransactionManifest>,
 }
 
 impl DappToWalletInteractionBatchOfTransactions {
     pub fn new(
-        transactions: impl IntoIterator<
-            Item = BatchOfTransactionsApplyingSecurityShield,
-        >,
+        transactions: impl IntoIterator<Item = UnvalidatedTransactionManifest>,
     ) -> Self {
         Self {
             transactions: transactions.into_iter().collect(),
@@ -19,14 +19,33 @@ impl DappToWalletInteractionBatchOfTransactions {
 
 impl HasSampleValues for DappToWalletInteractionBatchOfTransactions {
     fn sample() -> Self {
-        Self::new([
-            BatchOfTransactionsApplyingSecurityShield::sample(),
-            BatchOfTransactionsApplyingSecurityShield::sample_other(),
-        ])
+        let init_p_conf_r = TransactionManifest::new(
+            fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_R"),
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+        let unsecurified = TransactionManifest::new(
+            fixture_rtm!("create_access_controller_for_account"),
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+        Self::new(
+            [init_p_conf_r, unsecurified]
+                .map(UnvalidatedTransactionManifest::from),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::new([BatchOfTransactionsApplyingSecurityShield::sample_other()])
+        let init_p_conf_c = TransactionManifest::new(
+            fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_R"),
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+
+        Self::new([init_p_conf_c].map(UnvalidatedTransactionManifest::from))
     }
 }
 
