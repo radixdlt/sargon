@@ -3,6 +3,35 @@ use radix_connect::DappToWalletInteractionBatchOfTransactions;
 
 #[async_trait::async_trait]
 pub trait OsApplySecurityShieldInteraction {
+    /// For every entity in the given set of addresses, we use FactorInstancesProvider
+    /// to create `SecurityStructureOfFactorInstances` based on the security shield
+    /// loaded by the given `security_shield_id`. We update Profile to set
+    /// a provisional security config with the derived factors.
+    ///
+    /// We then create one TransactionManifest for each entity, if the entity
+    /// is unsecurified it will be a Manifest which calls "securify" on the
+    /// component and creates an AccessController for it. If the entity is already
+    /// securified, we will create a Manifest which uses default `RolesExercisableInTransactionManifestCombination`
+    /// to update the security config.
+    ///
+    /// These manifests are not fully valid yet - we need to set a payer of XRD
+    /// vault top up and TX fee - which uses different logic depending on if
+    /// the entity applying the shield is securified or not. If it is securified
+    /// we will need to lock fee against the XRD vault of the AccessController -
+    /// if the entity is unsecurified we will need to lock fee against the account
+    /// address if it is an account - if it is a Persona another account - securified
+    /// or not - will need to be used to pay TX fee.
+    ///
+    /// Host should present these manifests to the user for approval, and then
+    /// display necessary input UI components for payer and fee locking - and then
+    /// host need to tell Sargon to create many more manifest for each securified
+    /// entity, `RolesExercisableInTransactionManifestCombination::all() - 1` more
+    /// manifests need to be created and set payer and fee locking for each of them.
+    ///
+    /// When user slides to sign - Sargon will try to batch sign each kind of manifest
+    /// based on `RolesExercisableInTransactionManifestCombination` for the securified
+    /// entities - and for the unsecurified entities the Primary role will always
+    /// be used.
     async fn make_interaction_for_applying_security_shield(
         &self,
         security_shield_id: SecurityStructureID,
