@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.120"
+version = "1.1.121"
 edition = "2021"
 
 resolver = "2" # features enabled in integration test
@@ -37,7 +37,7 @@ home-cards = { workspace = true }
 security-center = { workspace = true }
 radix-connect = { workspace = true }
 radix-connect-models = { workspace = true }
-signing = { workspace = true }
+signatures-collector = { workspace = true }
 network = { workspace = true }
 next-derivation-index-ephemeral = { workspace = true }
 sub-systems = { workspace = true }
