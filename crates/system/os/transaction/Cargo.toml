@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os-transaction"
-version = "1.1.120"
+version = "1.1.121"
 edition = "2021"
 
 [dependencies]
@@ -11,7 +11,7 @@ transaction-models = { workspace = true }
 manifests = { workspace = true }
 signing-traits = { workspace = true }
 radix-connect-models = { workspace = true }
-signing = { workspace = true }
+signatures-collector = { workspace = true }
 entity-by-address = { workspace = true }
 profile = { workspace = true }
 # profile-state-holder = { workspace = true }

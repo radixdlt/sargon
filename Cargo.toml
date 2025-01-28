@@ -6,7 +6,6 @@ members = [
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
-    "crates/app/signing",
     "crates/app/signing-traits",
     "crates/app/key-derivation-traits",
 
@@ -43,6 +42,7 @@ members = [
     "crates/factors/factors",
     "crates/factors/instances-provider",
     "crates/factors/keys-collector",
+    "crates/factors/signatures-collector",
     "crates/factors/next-derivation-index-ephemeral",
     "crates/factors/supporting-types",
 
@@ -99,7 +99,6 @@ default-members = [
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
-    "crates/app/signing",
     "crates/app/signing-traits",
     "crates/app/key-derivation-traits",
 
@@ -136,6 +135,7 @@ default-members = [
     "crates/factors/factors",
     "crates/factors/instances-provider",
     "crates/factors/keys-collector",
+    "crates/factors/signatures-collector",
     "crates/factors/next-derivation-index-ephemeral",
     "crates/factors/supporting-types",
 
@@ -207,8 +207,7 @@ home-cards = { path = "crates/app/home-cards" }
 radix-connect = { path = "crates/app/radix-connect" }
 radix-connect-models = { path = "crates/app/radix-connect-models" }
 security-center = { path = "crates/app/security-center" }
-signing = { path = "crates/app/signing" }
-signing-traits = { path = "crates/app/signing-traits" }
+signing-traits= { path = "crates/app/signing-traits" }
 key-derivation-traits = { path = "crates/app/key-derivation-traits" }
 
 # === COMMON ===
@@ -244,6 +243,7 @@ hierarchical-deterministic = { path = "crates/crypto/hd" }
 factors = { path = "crates/factors/factors" }
 factor-instances-provider = { path = "crates/factors/instances-provider" }
 keys-collector = { path = "crates/factors/keys-collector" }
+signatures-collector = { path = "crates/factors/signatures-collector" }
 next-derivation-index-ephemeral = { path = "crates/factors/next-derivation-index-ephemeral" }
 factors-supporting-types = { path = "crates/factors/supporting-types" }
 

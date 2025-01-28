@@ -21,7 +21,7 @@ pub mod prelude {
     pub use sargon_os_signing::prelude::*;
     pub use sargon_os_transaction::prelude::*;
     pub use security_center::prelude::*;
-    pub use signing::prelude::*;
+    pub use signatures_collector::prelude::*;
     pub use signing_traits::prelude::*;
     pub use sub_systems::prelude::*;
 }
