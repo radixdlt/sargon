@@ -1,6 +1,6 @@
 CALL_METHOD
     Address("accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm")
-    "initiate_recovery_as_primary"
+    "initiate_recovery_as_recovery"
     Tuple(
         Tuple(
             Enum<2u8>(
@@ -74,7 +74,7 @@ CALL_METHOD
 ;
 CALL_METHOD
     Address("accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm")
-    "quick_confirm_primary_role_recovery_proposal"
+    "quick_confirm_recovery_role_recovery_proposal"
     Tuple(
         Tuple(
             Enum<2u8>(

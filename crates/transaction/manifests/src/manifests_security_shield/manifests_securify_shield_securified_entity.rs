@@ -197,10 +197,10 @@ mod tests {
     }
 
     #[test]
-    fn update_shield_of_securified_persona_init_with_P_confirm_with_R() {
+    fn update_shield_of_securified_persona_init_with_R_confirm_with_P() {
         let instruction_discriminants = test_update_shield_of_securified_persona(
-            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithRecovery,
-            || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_R")
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary,
+            || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_P")
         );
         assert_eq!(
             instruction_discriminants,
@@ -221,10 +221,11 @@ mod tests {
         assert_eq!(
             instruction_discriminants,
             vec![
+                CallMetadataMethod::ID, // set ROLA key
                 CallMethod::ID,         // init
                 CallMethod::ID,         // quick confirm
-                CallMetadataMethod::ID, // set ROLA key
-            ]
+            ],
+             "Expected to FIRST set ROLA key and THEN init - since we can set it using existing factors."
         );
     }
 
@@ -237,10 +238,8 @@ mod tests {
         assert_eq!(
             instruction_discriminants,
             vec![
-                CallMetadataMethod::ID, // set ROLA key
                 CallMethod::ID // init 
             ],
-            "Expected to FIRST set ROLA key and THEN init - since we can set it using existing factors."
         );
     }
 

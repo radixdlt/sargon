@@ -3,6 +3,17 @@ CALL_METHOD
     "lock_recovery_fee"
     Decimal("9")
 ;
+SET_METADATA
+    Address("account_rdx12xq83qxwf09eqquqfdj8rv004attq5tgxejkn59rwu588jprdy0xcg")
+    "owner_keys"
+    Enum<143u8>(
+        Array<Enum>(
+            Enum<1u8>(
+                Bytes("cb3f6086cd08a1d0ab10139a9c6d191783edb534059f7b4716dc5d239e")
+            )
+        )
+    )
+;
 CALL_METHOD
     Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
     "initiate_recovery_as_primary"
@@ -160,17 +171,6 @@ CALL_METHOD
         ),
         Enum<1u8>(
             20160u32
-        )
-    )
-;
-SET_METADATA
-    Address("account_rdx12xq83qxwf09eqquqfdj8rv004attq5tgxejkn59rwu588jprdy0xcg")
-    "owner_keys"
-    Enum<143u8>(
-        Array<Enum>(
-            Enum<1u8>(
-                Bytes("cb3f6086cd08a1d0ab10139a9c6d191783edb534059f7b4716dc5d239e")
-            )
         )
     )
 ;

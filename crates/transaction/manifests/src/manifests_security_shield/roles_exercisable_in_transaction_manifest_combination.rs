@@ -25,13 +25,9 @@ use radix_engine_interface::blueprints::access_controller::{
 /// and still be able to recover + confirm the AccessController update.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, enum_iterator::Sequence)]
 pub enum RolesExercisableInTransactionManifestCombination {
-    /// Initiates recovery using `Primary` role and quick confirms using
-    /// `Recovery` role explicitly.
-    InitiateWithPrimaryCompleteWithRecovery,
-
-    /// Initiates recovery using `Primary` role and quick confirms using
-    /// `Confirmation` role explicitly.
-    InitiateWithPrimaryCompleteWithConfirmation,
+    /// Initiates recovery using `Recovery` role and quick confirms using
+    /// `Primary` role explicitly.
+    InitiateWithRecoveryCompleteWithPrimary,
 
     /// Initiates recovery using `Recovery` role and quick confirms using
     /// `Confirmation` role explicitly.
@@ -52,7 +48,11 @@ pub enum RolesExercisableInTransactionManifestCombination {
     /// can call the `confirm_timed_recovery` method after the time has elapsed.
     InitiateWithRecoveryDelayedCompletion,
 
-    /// ‼️ Requires fuuture network upgrade "Dugong"
+    /// Initiates recovery using `Primary` role and quick confirms using
+    /// `Confirmation` role explicitly.
+    InitiateWithPrimaryCompleteWithConfirmation,
+
+    /// ‼️ Requires future network upgrade "Dugong"
     ///
     /// Initiate recovery with `Primary` role and use timed confirmation.
     ///
@@ -68,7 +68,7 @@ pub enum RolesExercisableInTransactionManifestCombination {
     /// Host will also need to schedule a notification for user so that host
     /// can call the `confirm_timed_recovery` method after the time has elapsed.
     ///
-    /// ‼️ Requires fuuture network upgrade "Dugong"
+    /// ‼️ Requires future network upgrade "Dugong"
     InitiateWithPrimaryDelayedCompletion,
     // TODO:
     // FUTURE IMPROVEMENTS,
@@ -137,36 +137,38 @@ impl RolesExercisableInTransactionManifestCombination {
             return OrderOfInstructionSettingRolaKey::NotNeeded;
         }
 
-        if self.can_quick_confirm() {
-            // we can quick confirm so we can always set the ROLA key using
-            // the NEW factors - disregarding of which role initiated recovery.
-            OrderOfInstructionSettingRolaKey::AfterQuickConfirm
-        } else {
-            match self.role_initiating_recovery() {
-                RoleInitiatingRecovery::Primary => {
-                    // We cannot quick confirm and set ROLA key using new factors in
-                    // the same TX, but fortunately we can set the ROLA key and auth with
-                    // th old factors if we place the SET_METADATA instruction
-                    // **before** initiating recovery instruction.
-                    OrderOfInstructionSettingRolaKey::BeforeInitRecovery
-                }
-                RoleInitiatingRecovery::Recovery => {
-                    // We cannot set ROLA key in this TX, because we are not using the
-                    // quick confirm - so we must do it in a future TX.
-                    OrderOfInstructionSettingRolaKey::MustSetInFutureTxForConfirmRecovery
-                }
+        if !self.can_quick_confirm() {
+            // N.B.
+            // In case of role initiating the recovery being `Primary` we CAN in fact
+            // set the ROLA key in the same transaction as we initiate recovery, however,
+            // if we CANCEL the recovery proposal (instead of CONFIRM) in the future
+            // transaction we would be in a bad state (not using the old nor the new shield).
+            return OrderOfInstructionSettingRolaKey::MustSetInFutureTxForConfirmRecovery;
+        }
+
+        match self.role_initiating_recovery() {
+            RoleInitiatingRecovery::Primary => {
+                // We can exercise the Primary Role => no need
+                // to set the ROLA key after recovery and use new factors, instead
+                // we can use existing factors
+                OrderOfInstructionSettingRolaKey::BeforeInitRecovery
+            }
+            RoleInitiatingRecovery::Recovery => {
+                // we can quick confirm so we can always set the ROLA key using
+                // the NEW factors - disregarding of which role initiated recovery.
+                OrderOfInstructionSettingRolaKey::AfterQuickConfirm
             }
         }
     }
 
     fn role_initiating_recovery(&self) -> RoleInitiatingRecovery {
         match self {
-            Self::InitiateWithPrimaryCompleteWithRecovery
-            | Self::InitiateWithPrimaryCompleteWithConfirmation
+            Self::InitiateWithPrimaryCompleteWithConfirmation
             | Self::InitiateWithPrimaryDelayedCompletion => {
                 RoleInitiatingRecovery::Primary
             }
-            Self::InitiateWithRecoveryCompleteWithConfirmation
+            Self::InitiateWithRecoveryCompleteWithPrimary
+            | Self::InitiateWithRecoveryCompleteWithConfirmation
             | Self::InitiateWithRecoveryDelayedCompletion => {
                 RoleInitiatingRecovery::Recovery
             }
@@ -177,7 +179,7 @@ impl RolesExercisableInTransactionManifestCombination {
         match self {
             Self::InitiateWithPrimaryCompleteWithConfirmation
             | Self::InitiateWithRecoveryCompleteWithConfirmation
-            | Self::InitiateWithPrimaryCompleteWithRecovery => true,
+            | Self::InitiateWithRecoveryCompleteWithPrimary => true,
             Self::InitiateWithRecoveryDelayedCompletion
             | Self::InitiateWithPrimaryDelayedCompletion => false,
         }

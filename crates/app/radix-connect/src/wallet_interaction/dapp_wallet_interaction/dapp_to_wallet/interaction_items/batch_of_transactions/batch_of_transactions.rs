@@ -20,7 +20,7 @@ impl DappToWalletInteractionBatchOfTransactions {
 impl HasSampleValues for DappToWalletInteractionBatchOfTransactions {
     fn sample() -> Self {
         let init_p_conf_r = TransactionManifest::new(
-            fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_R"),
+            fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_P"),
             NetworkID::Mainnet,
             Blobs::default(),
         )
@@ -39,7 +39,7 @@ impl HasSampleValues for DappToWalletInteractionBatchOfTransactions {
 
     fn sample_other() -> Self {
         let init_p_conf_c = TransactionManifest::new(
-            fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_R"),
+            fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_P"),
             NetworkID::Mainnet,
             Blobs::default(),
         )
