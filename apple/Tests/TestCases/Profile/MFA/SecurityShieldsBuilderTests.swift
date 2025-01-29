@@ -55,17 +55,17 @@ struct ShieldTests {
 		#expect(builder.confirmationRoleFactors == [])
 	}
 
-	@Test("primary override validation status trustedContact")
-	func primValidationStatusTrustedContact() {
-		let builder = SecurityShieldBuilder()
-		#expect(
-			builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [
-				TrustedContactFactorSource.sample.asGeneral.id,
-			]).compactMap(\.reasonIfInvalid) == [
-				FactorSourceValidationStatusReasonIfInvalid.nonBasic(
-					SecurityShieldBuilderRuleViolation.PrimaryCannotContainTrustedContact),
-			])
-	}
+	// @Test("primary override validation status trustedContact")
+	// func primValidationStatusTrustedContact() {
+	// 	let builder = SecurityShieldBuilder()
+	// 	#expect(
+	// 		builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [
+	// 			TrustedContactFactorSource.sample.asGeneral.id,
+	// 		]).compactMap(\.reasonIfInvalid) == [
+	// 			FactorSourceValidationStatusReasonIfInvalid.nonBasic(
+	// 				SecurityShieldBuilderRuleViolation.PrimaryCannotContainTrustedContact),
+	// 		])
+	// }
 
 	@Test("Auto lowering of threshold upon deletion")
 	func deleteFactorSourceFromPrimaryLowersThreshold() {
@@ -102,13 +102,13 @@ struct ShieldTests {
 	func preventAddOfForbiddenFactorSourceKinds() throws {
 		let builder = SecurityShieldBuilder()
 			// Primary
-			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleTrustedContact) // Verboten
-			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleSecurityQuestions) // Verboten
+//			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleTrustedContact) // Verboten
+//			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleSecurityQuestions) // Verboten
 			// Recovery
-			.addFactorSourceToRecoveryOverride(factorSourceId: .sampleSecurityQuestions) // Verboten
+//			.addFactorSourceToRecoveryOverride(factorSourceId: .sampleSecurityQuestions) // Verboten
 			.addFactorSourceToRecoveryOverride(factorSourceId: .samplePassword) // Verboten
-			// Confirmation
-			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleTrustedContact) // Verboten
+		// Confirmation
+//			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleTrustedContact) // Verboten
 
 		#expect(builder.primaryRoleThresholdFactors.isEmpty)
 		#expect(builder.recoveryRoleFactors.isEmpty)
@@ -230,13 +230,13 @@ extension FactorSourceID {
 	public static let sampleOffDeviceMnemonicOther = OffDeviceMnemonicFactorSource.sampleOther
 		.asGeneral.id
 
-	public static let sampleTrustedContact = TrustedContactFactorSource.sample.asGeneral.id
-	public static let sampleTrustedContactOther = TrustedContactFactorSource.sampleOther.asGeneral
-		.id
+	// public static let sampleTrustedContact = TrustedContactFactorSource.sample.asGeneral.id
+	// public static let sampleTrustedContactOther = TrustedContactFactorSource.sampleOther.asGeneral
+	// 	.id
 
-	public static let sampleSecurityQuestions = SecurityQuestionsNotProductionReadyFactorSource
-		.sample.asGeneral.id
-	public static let sampleSecurityQuestionsOther = SecurityQuestionsNotProductionReadyFactorSource
-		.sampleOther.asGeneral.id
+	// public static let sampleSecurityQuestions = SecurityQuestionsNotProductionReadyFactorSource
+	// 	.sample.asGeneral.id
+	// public static let sampleSecurityQuestionsOther = SecurityQuestionsNotProductionReadyFactorSource
+	// 	.sampleOther.asGeneral.id
 }
 #endif

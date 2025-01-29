@@ -1,0 +1,29 @@
+package com.radixdlt.sargon
+
+import com.radixdlt.sargon.extensions.init
+import com.radixdlt.sargon.extensions.publicKey
+import com.radixdlt.sargon.extensions.signature
+import com.radixdlt.sargon.samples.sample
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+
+class WalletToDappInteractionAuthProofTest {
+
+    @Test
+    fun testNewFromIntentSignatures_Ed25519() {
+        val signatureWithPublicKey = SignatureWithPublicKey.sample() // Ed25519
+        val sut = WalletToDappInteractionAuthProof.init(signatureWithPublicKey = signatureWithPublicKey)
+        assertEquals(sut.curve, Slip10Curve.CURVE25519)
+        assertEquals(sut.publicKey, signatureWithPublicKey.publicKey)
+        assertEquals(sut.signature, signatureWithPublicKey.signature)
+    }
+
+    @Test
+    fun testNewFromIntentSignatures_Secp256k1() {
+        val signatureWithPublicKey = SignatureWithPublicKey.sample.other() // Secp256k1
+        val sut = WalletToDappInteractionAuthProof.init(signatureWithPublicKey = signatureWithPublicKey)
+        assertEquals(sut.curve, Slip10Curve.SECP256K1)
+        assertEquals(sut.publicKey, signatureWithPublicKey.publicKey)
+        assertEquals(sut.signature, signatureWithPublicKey.signature)
+    }
+}
