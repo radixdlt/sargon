@@ -1,3 +1,14 @@
+SET_METADATA
+    Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
+    "owner_keys"
+    Enum<143u8>(
+        Array<Enum>(
+            Enum<1u8>(
+                Bytes("cb3f6086cd08a1d0ab10139a9c6d191783edb534059f7b4716dc5d239e")
+            )
+        )
+    )
+;
 CALL_METHOD
     Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
     "securify"
@@ -91,17 +102,6 @@ CREATE_ACCESS_CONTROLLER
     )
     Enum<1u8>(
         AddressReservation("reservation1")
-    )
-;
-SET_METADATA
-    Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
-    "owner_keys"
-    Enum<143u8>(
-        Array<Enum>(
-            Enum<1u8>(
-                Bytes("cb3f6086cd08a1d0ab10139a9c6d191783edb534059f7b4716dc5d239e")
-            )
-        )
     )
 ;
 CALL_METHOD

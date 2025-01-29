@@ -34,6 +34,14 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
         security_structure_of_factor_instances
             .assert_has_entity_kind(entity_address.get_entity_kind())?;
 
+        // Set Rola Key
+        builder = TransactionManifest::set_rola_key(
+            builder,
+            &security_structure_of_factor_instances
+                .authentication_signing_factor_instance,
+            &entity_address,
+        );
+
         // Securify the entity which will return an entity owner badge onto the worktop.
         let (mut builder, owner_badge_bucket) = Self::put_owner_badge_in_bucket(
             ScryptoTransactionManifestBuilder::new(),
@@ -81,14 +89,6 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
                 },
             )
         };
-
-        // Set Rola Key
-        builder = TransactionManifest::set_rola_key(
-            builder,
-            &security_structure_of_factor_instances
-                .authentication_signing_factor_instance,
-            &entity_address,
-        );
 
         let manifest = TransactionManifest::sargon_built(
             builder,

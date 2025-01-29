@@ -84,18 +84,23 @@ impl OsShieldApplying for SargonOS {
         IdentifiedVecOf<AccountOrPersona>,
         FactorInstancesProviderOutcome,
     )> {
-        if !entity_addresses
-            .iter()
-            .map(|a| self.entity_by_address(*a))
-            .all(|r| match r {
-                Ok(e) => e.get_provisional().is_none(),
-                Err(_) => false,
-            })
-        {
-            return Err(
-                CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig,
-            );
-        }
+        // TODO change when queue is introduced
+        // `CannotSecurifyEntityHasProvisionalSecurityConfig` should be returned when
+        // 1. entity's shield is in provisional state
+        // 2. interaction is in the queue.
+
+        // if !entity_addresses
+        //     .iter()
+        //     .map(|a| self.entity_by_address(*a))
+        //     .all(|r| match r {
+        //         Ok(e) => e.get_provisional().is_none(),
+        //         Err(_) => false,
+        //     })
+        // {
+        //     return Err(
+        //         CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig,
+        //     );
+        // }
 
         let outcome = self._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
             shield.clone(),
@@ -181,11 +186,11 @@ impl OsShieldApplying for SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcome,
     )> {
-        if !entities.iter().all(|a| a.get_provisional().is_none()) {
-            return Err(
-                CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig,
-            );
-        }
+        // if !entities.iter().all(|a| a.get_provisional().is_none()) {
+        //     return Err(
+        //         CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig,
+        //     );
+        // }
         let addresses_of_entities = entities
             .iter()
             .map(|e| e.address())
@@ -651,6 +656,7 @@ mod tests {
         );
     }
 
+    #[ignore = "Should be tested when queue is integrated"]
     #[actix_rt::test]
     async fn test_one_unsecurified_account_has_provisional_fails() {
         // ARRANGE
@@ -687,6 +693,7 @@ mod tests {
         );
     }
 
+    #[ignore = "Should be tested when queue is integrated"]
     #[actix_rt::test]
     async fn test_one_securified_account_has_provisional_fails() {
         // ARRANGE
@@ -729,6 +736,7 @@ mod tests {
         );
     }
 
+    #[ignore = "Should be tested when queue is integrated"]
     #[actix_rt::test]
     async fn test_one_unsecurified_persona_has_provisional_fails() {
         // ARRANGE
@@ -766,6 +774,7 @@ mod tests {
         );
     }
 
+    #[ignore = "Should be tested when queue is integrated"]
     #[actix_rt::test]
     async fn test_one_securified_persona_has_provisional_fails() {
         // ARRANGE
@@ -810,6 +819,7 @@ mod tests {
         );
     }
 
+    #[ignore = "Should be tested when queue is integrated"]
     #[actix_rt::test]
     async fn test_one_unsecurified_account_of_many_entities_has_provisional_fails_the_rest_unchanged(
     ) {
@@ -862,6 +872,7 @@ mod tests {
         assert_eq!(os.personas_on_current_network().unwrap(), personas); // assert unchanged
     }
 
+    #[ignore = "Should be tested when queue is integrated"]
     #[actix_rt::test]
     async fn test_low_level_one_account_has_provisional_fails() {
         // ARRANGE
