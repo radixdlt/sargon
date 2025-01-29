@@ -26,6 +26,34 @@ impl From<WalletToDappInteractionPersonaProof>
     }
 }
 
+impl From<(AddressOfAccountOrPersona, SignatureWithPublicKey)>
+    for WalletToDappInteractionProofOfOwnership
+{
+    fn from(
+        value: (AddressOfAccountOrPersona, SignatureWithPublicKey),
+    ) -> Self {
+        let (owner, signature_with_public_key) = value;
+        match owner {
+            AddressOfAccountOrPersona::Account(account_address) => {
+                WalletToDappInteractionProofOfOwnership::Account(
+                    WalletToDappInteractionAccountProof::new(
+                        account_address,
+                        signature_with_public_key.into(),
+                    ),
+                )
+            }
+            AddressOfAccountOrPersona::Identity(identity_address) => {
+                WalletToDappInteractionProofOfOwnership::Persona(
+                    WalletToDappInteractionPersonaProof::new(
+                        identity_address,
+                        signature_with_public_key.into(),
+                    ),
+                )
+            }
+        }
+    }
+}
+
 impl HasSampleValues for WalletToDappInteractionProofOfOwnership {
     fn sample() -> Self {
         Self::Account(WalletToDappInteractionAccountProof::sample())
