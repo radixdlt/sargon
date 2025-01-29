@@ -41,6 +41,9 @@ pub enum EventProfileModified {
 
     /// Profile updated with a new Security Structure.
     SecurityStructureAdded { id: SecurityStructureID },
+
+    /// Security structures have been updated
+    SecurityStructuresUpdated { ids: Vec<SecurityStructureID> },
 }
 
 impl HasEventKind for EventProfileModified {
@@ -70,6 +73,9 @@ impl HasEventKind for EventProfileModified {
             }
             Self::SecurityStructureAdded { id: _ } => {
                 EventKind::SecurityStructureAdded
+            }
+            Self::SecurityStructuresUpdated { ids: _ } => {
+                EventKind::SecurityStructuresUpdated
             }
         }
     }
@@ -245,6 +251,13 @@ mod tests {
                 ids: vec![FactorSourceID::sample()],
             },
             EventKind::FactorSourcesUpdated,
+        );
+
+        test(
+            SUT::SecurityStructuresUpdated {
+                ids: vec![SecurityStructureID::sample()],
+            },
+            EventKind::SecurityStructuresUpdated,
         );
     }
 }
