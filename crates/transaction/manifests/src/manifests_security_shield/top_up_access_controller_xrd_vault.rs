@@ -40,7 +40,6 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
     ) -> TransactionManifest {
-        assert!(!manifest.explicitly_references_primary_role(), "Unexpectedly classified manifest as updating of shield of securified entity, but it is not.");
         Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
             payer,
             unsecurified_entity_applying_shield.entity,

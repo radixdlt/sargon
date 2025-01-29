@@ -39,6 +39,70 @@ pub trait OsApplySecurityShieldInteraction {
     ) -> Result<DappToWalletInteractionBatchOfTransactions>;
 }
 
+static HACKY_TMP_ENTITIES_APPLYING_SHIELD: RwLock<
+    IndexMap<EntityApplyingShieldAddress, TransactionManifest>,
+> = RwLock::new(IndexMap::new());
+
+/// Called by `make_interaction_for_applying_security_shield` to set the entities
+fn hacky_tmp_set_entities_applying_shield(
+    entities: IndexMap<EntityApplyingShieldAddress, TransactionManifest>,
+) {
+    *HACKY_TMP_ENTITIES_APPLYING_SHIELD.write().unwrap() = entities;
+}
+
+pub fn hacky_tmp_get_entities_applying_shield(
+) -> IndexMap<EntityApplyingShieldAddress, TransactionManifest> {
+    HACKY_TMP_ENTITIES_APPLYING_SHIELD.read().unwrap()
+}
+
+address_union!(
+    enum EntityApplyingShieldAddress: accessController, account, identity
+);
+impl EntityApplyingShieldAddress {
+    fn from_unsecurified_entity(entity: &AnyUnsecurifiedEntity) -> Self {
+        match entity.entity {
+            AccountOrPersona::AccountEntity(account) => {
+                Self::AccountAddress(account.address())
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                Self::IdentityAddress(persona.address())
+            }
+        }
+    }
+}
+
+// TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+// is merge remove this and use static analisys using RET to get this.
+fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shield(
+    manifest: TransactionManifest,
+) -> Result<EntityApplyingShieldAddress> {
+    let lookup = hacky_tmp_get_entities_applying_shield();
+    let address = lookup.iter().find_map(|(address, m)| {
+        if m == &manifest {
+            Some(address.clone())
+        } else {
+            None
+        }
+    });
+    address.ok_or(CommonError::Unknown)
+}
+
+// TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+// impl this
+fn _extract_address_of_entity_updating_shield(
+    manifest: TransactionManifest,
+) -> Result<EntityApplyingShieldAddress> {
+    todo!("cannot be implemented yet, awaiting #132 RET PR")
+}
+
+// TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+// is merge remove this and use static analisys using RET to get this.
+pub fn extract_address_of_entity_updating_shield(
+    manifest: TransactionManifest,
+) -> Result<EntityApplyingShieldAddress> {
+    __hacky_tmp_using_local_global_state_extract_address_of_entity(manifest)
+}
+
 #[async_trait::async_trait]
 impl OsApplySecurityShieldInteraction for SargonOS {
     async fn make_interaction_for_applying_security_shield(
@@ -53,6 +117,9 @@ impl OsApplySecurityShieldInteraction for SargonOS {
             )
             .await?;
 
+        let mut manifests_for_entity =
+            IndexMap::<EntityApplyingShieldAddress, TransacionManifest>::new();
+
         let manifests_for_unsecurified = entities_with_provisional
        .unsecurified_erased()
             .iter()
@@ -62,7 +129,9 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                 TransactionManifest::apply_security_shield_for_unsecurified_entity(
                     e.clone(),
                     derived.clone()
-                ).map(UnvalidatedTransactionManifest::from)
+                ).inspect(|m| {
+                    manifests_for_entity.insert(EntityApplyingShieldAddress::from_unsecurified_entity(&e), m)
+                }).map(UnvalidatedTransactionManifest::from)
         }).collect::<Result<Vec<UnvalidatedTransactionManifest>>>()?;
 
         let manifests_for_securified = entities_with_provisional
@@ -75,9 +144,15 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                     e.clone(),
                     derived.clone(),
                     RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()
-                )
+                ).inspect(|m| {
+                    manifests_for_entity.insert(e.securified_entity_control.access_controller_address, m)
+                })
                 .map(UnvalidatedTransactionManifest::from).unwrap()
          }).collect_vec();
+
+        // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+        // is merge remove this and use static analisys using RET to get this.
+        hacky_tmp_set_entities_applying_shield(manifests_for_entity);
 
         Ok(DappToWalletInteractionBatchOfTransactions::new(
             manifests_for_unsecurified
