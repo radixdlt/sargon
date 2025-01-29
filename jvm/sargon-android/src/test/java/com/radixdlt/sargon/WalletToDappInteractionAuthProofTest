@@ -11,7 +11,7 @@ class WalletToDappInteractionAuthProofTest {
 
     @Test
     fun testNewFromIntentSignatures_Ed25519() {
-        val signatureWithPublicKey = SignatureWithPublicKey.sample.invoke() // Ed25519
+        val signatureWithPublicKey = SignatureWithPublicKey.sample() // Ed25519
         val sut = WalletToDappInteractionAuthProof.init(signatureWithPublicKey = signatureWithPublicKey)
         assertEquals(sut.curve, Slip10Curve.CURVE25519)
         assertEquals(sut.publicKey, signatureWithPublicKey.publicKey)

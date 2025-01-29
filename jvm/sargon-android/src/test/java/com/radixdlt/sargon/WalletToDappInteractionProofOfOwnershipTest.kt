@@ -14,7 +14,7 @@ class WalletToDappInteractionProofOfOwnershipTest {
     @Test
     fun testNewFromIntentSignatures_Ed25519_Account() {
         val owner = AddressOfAccountOrPersona.Account(AccountAddress.sampleStokenet.invoke())
-        val intentSignature = IntentSignature.sample.invoke() // Ed25519
+        val intentSignature = IntentSignature.sample() // Ed25519
         val intentSignatureOfOwner = IntentSignatureOfOwner(owner = owner, intentSignature = intentSignature)
         val sut = WalletToDappInteractionProofOfOwnership.init(intentSignatureOfOwner = intentSignatureOfOwner)
         when (sut) {
@@ -30,7 +30,7 @@ class WalletToDappInteractionProofOfOwnershipTest {
     @Test
     fun testNewFromIntentSignatures_Ed25519_Persona() {
         val owner = AddressOfAccountOrPersona.Identity(IdentityAddress.sampleStokenet.invoke())
-        val intentSignature = IntentSignature.sample.invoke() // Ed25519
+        val intentSignature = IntentSignature.sample() // Ed25519
         val intentSignatureOfOwner = IntentSignatureOfOwner(owner = owner, intentSignature = intentSignature)
         val sut = WalletToDappInteractionProofOfOwnership.init(intentSignatureOfOwner = intentSignatureOfOwner)
         when (sut) {
