@@ -1,4 +1,6 @@
 use crate::prelude::*;
+use sargon::SecurityStructureFlag as InternalSecurityStructureFlag;
+use sargon::SecurityStructureFlags as InternalSecurityStructureFlags;
 use sargon::SecurityStructureMetadata as InternalSecurityStructureMetadata;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
@@ -7,6 +9,7 @@ pub struct SecurityStructureMetadata {
     pub display_name: DisplayName,
     pub created_on: Timestamp,
     pub last_updated_on: Timestamp,
+    pub flags: Vec<SecurityStructureFlag>,
 }
 
 delegate_debug_into!(
@@ -29,5 +32,11 @@ pub fn new_security_structure_metadata_sample_other(
 pub fn new_security_structure_metadata_named(
     name: &DisplayName,
 ) -> SecurityStructureMetadata {
-    InternalSecurityStructureMetadata::new(name.into_internal()).into()
+    InternalSecurityStructureMetadata::new(
+        name.into_internal(),
+        InternalSecurityStructureFlags::just(
+            InternalSecurityStructureFlag::Default,
+        ),
+    )
+    .into()
 }
