@@ -24,7 +24,7 @@ final class WalletToDappInteractionAuthProofTests: TestCase {
 	}
 
 	func testNewFromIntentSignatureOfOwner_Ed25519() throws {
-		let intentSignature = IntentSignature.sampleOther // Secp256k1
+		let intentSignature = IntentSignature.sample // Ed25519
 		let sut = SUT(intentSignatureOfOwner: .init(owner: .sample, intentSignature: intentSignature))
 		XCTAssertEqual(sut.curve, .curve25519)
 		XCTAssertEqual(sut.publicKey, intentSignature.signatureWithPublicKey.publicKey)
