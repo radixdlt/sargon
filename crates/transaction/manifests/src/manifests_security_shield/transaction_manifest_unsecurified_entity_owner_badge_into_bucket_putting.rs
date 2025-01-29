@@ -14,12 +14,10 @@ pub trait TransactionManifestUnsecurifiedEntityOwnerBadgeIntoBucketPutting {
         builder: ScryptoTransactionManifestBuilder,
         unsecurified_entity: &AnyUnsecurifiedEntity,
     ) -> (ScryptoTransactionManifestBuilder, ScryptoManifestBucket) {
-        let is_account = unsecurified_entity.entity.is_account_entity();
         let owner_badge_bucket_name = "owner_badge_bucket";
-        let owner_badge = if is_account {
-            SCRYPTO_ACCOUNT_OWNER_BADGE
-        } else {
-            SCRYPTO_IDENTITY_OWNER_BADGE
+        let owner_badge = match unsecurified_entity.entity.get_entity_kind() {
+            CAP26EntityKind::Account => SCRYPTO_ACCOUNT_OWNER_BADGE,
+            CAP26EntityKind::Identity => SCRYPTO_IDENTITY_OWNER_BADGE,
         };
         let mut builder = Self::call_securify_for_unsecurified_entity(
             builder,

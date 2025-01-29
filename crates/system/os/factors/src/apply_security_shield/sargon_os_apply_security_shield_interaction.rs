@@ -74,7 +74,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                 TransactionManifest::apply_security_shield_for_securified_entity(
                     e.clone(),
                     derived.clone(),
-                    RolesExercisableInTransactionManifestCombination::default()
+                    RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()
                 )
                 .map(UnvalidatedTransactionManifest::from).unwrap()
          }).collect_vec();
@@ -249,7 +249,6 @@ mod tests {
             .await
             .unwrap()
         };
-
         let fixture_json =
             fixture_interaction!("wallet_interaction_batch_of_transactions");
         assert_eq_after_json_roundtrip(&interaction, fixture_json);

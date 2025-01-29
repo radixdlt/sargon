@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use enum_as_inner::EnumAsInner;
+use profile_supporting_types::AnySecurifiedEntity;
 use radix_common::prelude::{
     ManifestEncode as ScryptoManifestEncode,
     ManifestSborTuple as ScryptoManifestSborTuple,
@@ -49,35 +51,30 @@ pub enum RolesExercisableInTransactionManifestCombination {
     /// Host will also need to schedule a notification for user so that host
     /// can call the `confirm_timed_recovery` method after the time has elapsed.
     InitiateWithRecoveryDelayedCompletion,
-    // Initiate recovery with `Primary` role and use timed confirmation.
-    //
-    // Since this roles combination does not explicitly use the Confirmation
-    // Role we will not include any confirm Instruction in the manifest
-    // we build for this kind. Instead, if this is the TransactionManifest which
-    // we will be submitting to the network, the host (user) will need to wait
-    // until the transaction is confirmed and then update Profile to keep
-    // track of the fact that the entity is in between states of recovery.
-    // TODO: TBD probably a new variant of the `ProvisionalSecurifiedConfig`
-    // `WaitingForTimedRecovery(SecurityStructureOfFactorInstances)` or similar.
-    //
-    // Host will also need to schedule a notification for user so that host
-    // can call the `confirm_timed_recovery` method after the time has elapsed.
-    //
-    // InitiateWithPrimaryDelayedCompletion, TODO: when Dugong is available => comment in this
 
+    /// ‼️ Requires fuuture network upgrade "Dugong"
+    ///
+    /// Initiate recovery with `Primary` role and use timed confirmation.
+    ///
+    /// Since this roles combination does not explicitly use the Confirmation
+    /// Role we will not include any confirm Instruction in the manifest
+    /// we build for this kind. Instead, if this is the TransactionManifest which
+    /// we will be submitting to the network, the host (user) will need to wait
+    /// until the transaction is confirmed and then update Profile to keep
+    /// track of the fact that the entity is in between states of recovery.
+    /// TODO: TBD probably a new variant of the `ProvisionalSecurifiedConfig`
+    /// `WaitingForTimedRecovery(SecurityStructureOfFactorInstances)` or similar.
+    ///
+    /// Host will also need to schedule a notification for user so that host
+    /// can call the `confirm_timed_recovery` method after the time has elapsed.
+    ///
+    /// ‼️ Requires fuuture network upgrade "Dugong"
+    InitiateWithPrimaryDelayedCompletion,
     // TODO:
     // FUTURE IMPROVEMENTS,
     // User can't initiate themselves and needs to send a request to an external source (e.g. a friend or custodian)
     // ExternalInitiateWithPrimary
     // ExternalInitiateWithRecovery
-}
-
-impl Default for RolesExercisableInTransactionManifestCombination {
-    fn default() -> Self {
-        // we default to a combination containing Primary since it allows
-        // use to top up XRD vault of AccessController
-        Self::InitiateWithPrimaryCompleteWithRecovery
-    }
 }
 
 pub trait CallMethodInput:
@@ -89,50 +86,101 @@ impl<T: ScryptoManifestEncode + ScryptoManifestSborTuple> CallMethodInput
 {
 }
 
+/// Depending on the role used to initiate recovery, and if we are quick confirming
+/// the recovery proposal we need to either place SET_METADATA instruction which
+/// updates the ROLA key with the new factors before the recovery proposal - requiring
+/// the OLD PrimaryRole factors to auth the transaction - or we can quick confirm
+/// we will place the SET_METADATA instruction after we have (quick) confirmed the
+/// recovery proposal.
+#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
+pub enum OrderOfInstructionSettingRolaKey {
+    /// Place SET_METADATA instruction before initiating recovery - so that
+    /// we can auth with the OLD factors of Primary role.
+    BeforeInitRecovery,
+    /// Place SET_METADATA instruction after quick confirming the recovery proposal
+    /// => requiring us to auth with the NEW factors of Primary role.
+    AfterQuickConfirm,
+
+    /// No need to set ROLA key
+    NotNeeded,
+
+    /// Cannot set ROLA key in this TX - must do it in a future TX when we confirm recovery
+    MustSetInFutureTxForConfirmRecovery,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum RoleInitiatingRecovery {
+    Primary,
+    Recovery,
+}
+
 impl RolesExercisableInTransactionManifestCombination {
+    pub fn manifest_end_user_gets_to_preview() -> Self {
+        Self::InitiateWithRecoveryCompleteWithConfirmation
+    }
+
     pub fn all() -> IndexSet<Self> {
         enum_iterator::all::<Self>().collect()
     }
 
-    /// If this combination of roles references the `Primary` role or not.
-    pub fn can_exercise_primary_role(&self) -> bool {
-        matches!(
-            self,
-            Self::InitiateWithPrimaryCompleteWithRecovery
-                | Self::InitiateWithPrimaryCompleteWithConfirmation // | Self::InitiateWithPrimaryDelayedCompletion
-        )
+    pub fn order_of_instruction_setting_rola(
+        &self,
+        security_structure_of_factor_instances: &SecurityStructureOfFactorInstances,
+        entity: &AnySecurifiedEntity,
+    ) -> OrderOfInstructionSettingRolaKey {
+        if security_structure_of_factor_instances
+            .authentication_signing_factor_instance
+            == entity.current_authentication_signing_factor_instance()
+        {
+            // The factor of ROLA key is the same as the current factor of the entity
+            // => we can skip setting the ROLA key.
+            return OrderOfInstructionSettingRolaKey::NotNeeded;
+        }
+
+        if self.can_quick_confirm() {
+            // we can quick confirm so we can always set the ROLA key using
+            // the NEW factors - disregarding of which role initiated recovery.
+            OrderOfInstructionSettingRolaKey::AfterQuickConfirm
+        } else {
+            match self.role_initiating_recovery() {
+                RoleInitiatingRecovery::Primary => {
+                    // We cannot quick confirm and set ROLA key using new factors in
+                    // the same TX, but fortunately we can set the ROLA key and auth with
+                    // th old factors if we place the SET_METADATA instruction
+                    // **before** initiating recovery instruction.
+                    OrderOfInstructionSettingRolaKey::BeforeInitRecovery
+                }
+                RoleInitiatingRecovery::Recovery => {
+                    // We cannot set ROLA key in this TX, because we are not using the
+                    // quick confirm - so we must do it in a future TX.
+                    OrderOfInstructionSettingRolaKey::MustSetInFutureTxForConfirmRecovery
+                }
+            }
+        }
     }
 
-    /// If we can set the ROLA key for this combination of roles.
-    pub fn can_set_rola_key(&self) -> bool {
-        self.can_exercise_primary_role()
-    }
-
-    fn initiate_recovery_with_primary(&self) -> bool {
-        matches!(
-            self,
+    fn role_initiating_recovery(&self) -> RoleInitiatingRecovery {
+        match self {
             Self::InitiateWithPrimaryCompleteWithRecovery
-                | Self::InitiateWithPrimaryCompleteWithConfirmation // | Self::InitiateWithPrimaryDelayedCompletion
-        )
-    }
-    fn initiate_recovery_with_recovery(&self) -> bool {
-        matches!(
-            self,
+            | Self::InitiateWithPrimaryCompleteWithConfirmation
+            | Self::InitiateWithPrimaryDelayedCompletion => {
+                RoleInitiatingRecovery::Primary
+            }
             Self::InitiateWithRecoveryCompleteWithConfirmation
-                | Self::InitiateWithRecoveryDelayedCompletion
-        )
+            | Self::InitiateWithRecoveryDelayedCompletion => {
+                RoleInitiatingRecovery::Recovery
+            }
+        }
     }
 
-    fn quick_confirm_with_recovery(&self) -> bool {
-        matches!(self, Self::InitiateWithPrimaryCompleteWithRecovery)
-    }
-
-    fn quick_confirm_with_confirmation(&self) -> bool {
-        matches!(
-            self,
+    fn can_quick_confirm(&self) -> bool {
+        match self {
             Self::InitiateWithPrimaryCompleteWithConfirmation
-                | Self::InitiateWithRecoveryCompleteWithConfirmation
-        )
+            | Self::InitiateWithRecoveryCompleteWithConfirmation
+            | Self::InitiateWithPrimaryCompleteWithRecovery => true,
+            Self::InitiateWithRecoveryDelayedCompletion
+            | Self::InitiateWithPrimaryDelayedCompletion => false,
+        }
     }
 
     /// Returns method identifier and input for **initiating** recovery
@@ -141,32 +189,27 @@ impl RolesExercisableInTransactionManifestCombination {
         &self,
         factors_and_time: &AccessControllerFactorsAndTimeInput,
     ) -> (&'static str, Box<dyn CallMethodInput>) {
-        if self.initiate_recovery_with_primary() {
-            // Recovery was initiated with `Primary` and needs to be confirmed with `Recovery` or with `Confirmation`
-            // as per specified by this RolesExercisableInTransactionManifestCombination
-            (
-                SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
-                Box::new(
-                    ScryptoAccessControllerInitiateRecoveryAsPrimaryInput::from(
-                        factors_and_time,
+        match self.role_initiating_recovery() {
+            RoleInitiatingRecovery::Primary => {
+                (
+                    SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
+                    Box::new(
+                        ScryptoAccessControllerInitiateRecoveryAsPrimaryInput::from(
+                            factors_and_time,
+                        ),
                     ),
-                ),
-            )
-        } else if self.initiate_recovery_with_recovery() {
-            // Recovery was initiated with `Recovery` and needs to be confirmed with
-            // `Confirmation` role
-            (
-                SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
-                Box::new(
-                    ScryptoAccessControllerInitiateRecoveryAsRecoveryInput::from(
-                        factors_and_time,
+                )
+            }
+            RoleInitiatingRecovery::Recovery => {
+                (
+                    SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
+                    Box::new(
+                        ScryptoAccessControllerInitiateRecoveryAsRecoveryInput::from(
+                            factors_and_time,
+                        ),
                     ),
-                ),
-            )
-        } else {
-            unreachable!(
-                "unable to calculate input_for_initialization - this is a programmer error"
-            )
+                )
+            }
         }
     }
 
@@ -178,23 +221,16 @@ impl RolesExercisableInTransactionManifestCombination {
         &self,
         factors_and_time: &AccessControllerFactorsAndTimeInput,
     ) -> Option<(&'static str, Box<dyn CallMethodInput>)> {
-        if self.quick_confirm_with_confirmation()
-            || self.quick_confirm_with_recovery()
-        {
-            if self.initiate_recovery_with_primary() {
-                Some((
+        if self.can_quick_confirm() {
+            match self.role_initiating_recovery() {
+                RoleInitiatingRecovery::Primary => Some((
                     SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT,
                     Box::new(ScryptoAccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput::from(factors_and_time))
-                ))
-            } else if self.initiate_recovery_with_recovery() {
-                Some((
+                )),
+                RoleInitiatingRecovery::Recovery => Some((
                     SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
                     Box::new(ScryptoAccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput::from(factors_and_time))
                 ))
-            } else {
-                unreachable!(
-                    "unable to calculate input_for_quick_confirm - this is a programmer error"
-                )
             }
         } else {
             // Time based cannot happen yet - host (user) need to wait the specified

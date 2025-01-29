@@ -42,8 +42,22 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         security_structure_of_factor_instances
             .assert_has_entity_kind(entity_address.get_entity_kind()).expect("Shouldn't have used wrong FactorInstance for entity - apply_security_shield_with_id_to_entities has some bug.");
 
-        // ACCESS_CONTROLLER_CREATE_PROOF_IDENT
         let mut builder = ScryptoTransactionManifestBuilder::new();
+
+        let set_rola = |builder: ScryptoTransactionManifestBuilder| -> ScryptoTransactionManifestBuilder {
+            TransactionManifest::set_rola_key(
+                builder,
+                &security_structure_of_factor_instances
+                    .authentication_signing_factor_instance,
+                &entity_address,
+            )
+        };
+
+        let order_of_instruction_setting_rola = kind
+            .order_of_instruction_setting_rola(
+                &security_structure_of_factor_instances,
+                &securified_entity,
+            );
 
         let access_controller_address = securified_entity
             .securified_entity_control
@@ -52,6 +66,15 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         let factors_and_time_input = &AccessControllerFactorsAndTimeInput::new(
             &security_structure_of_factor_instances,
         );
+
+        match order_of_instruction_setting_rola {
+            OrderOfInstructionSettingRolaKey::BeforeInitRecovery => {
+                builder = set_rola(builder);
+            }
+            OrderOfInstructionSettingRolaKey::AfterQuickConfirm | OrderOfInstructionSettingRolaKey::NotNeeded | OrderOfInstructionSettingRolaKey::MustSetInFutureTxForConfirmRecovery => {
+                // Do nothing for now
+            }
+        }
 
         // INITIATE RECOVERY
         let (init_method, init_input) =
@@ -73,22 +96,14 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
             );
         }
 
-        // Set Rola Key
-        let should_set_rola_key = security_structure_of_factor_instances
-            .authentication_signing_factor_instance
-            != securified_entity
-                .current_authentication_signing_factor_instance();
-
-        if should_set_rola_key {
-            if kind.can_set_rola_key() {
-                builder = TransactionManifest::set_rola_key(
-                    builder,
-                    &security_structure_of_factor_instances
-                        .authentication_signing_factor_instance,
-                    &entity_address,
-                );
-            } else {
-                return None; // Nothing has "failed" really, but we cannot proceed with this combination.
+        match order_of_instruction_setting_rola {
+            OrderOfInstructionSettingRolaKey::AfterQuickConfirm => {
+                builder = set_rola(builder);
+            }
+            OrderOfInstructionSettingRolaKey::BeforeInitRecovery | OrderOfInstructionSettingRolaKey::NotNeeded => {
+                // nothing to do
+            } OrderOfInstructionSettingRolaKey::MustSetInFutureTxForConfirmRecovery => {
+                info!("Do not forget to set Rola key in future transaction for Confirm Recovery");
             }
         }
 
@@ -119,42 +134,15 @@ mod tests {
 
     use prelude::fixture_rtm;
     use profile_supporting_types::{SecurifiedAccount, SecurifiedPersona};
+    use radix_transactions::manifest::{
+        CallMetadataMethod, CallMethod, ManifestInstruction,
+    };
+    use sbor::SborEnum;
 
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
-
-    #[test]
-    fn classify() {
-        let test =
-            |combination: RolesExercisableInTransactionManifestCombination,
-             expected: bool| {
-                let entity_applying_shield = AnySecurifiedEntity::sample();
-                let mut instances =
-                    SecurityStructureOfFactorInstances::sample();
-
-                // skip set rola
-                instances.authentication_signing_factor_instance =
-                    entity_applying_shield
-                        .current_authentication_signing_factor_instance();
-                let manifest =
-                    SUT::apply_security_shield_for_securified_entity(
-                        entity_applying_shield.clone(),
-                        instances,
-                        combination,
-                    )
-                    .unwrap();
-                let classified = manifest.explicitly_references_primary_role();
-                assert_eq!(classified, expected);
-            };
-        test(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation, true);
-        test(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithRecovery, true);
-        // test(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion, true);
-
-        test(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation, false);
-        test(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion, false);
-    }
 
     #[test]
     fn update_shield_of_securified_account_with_top_up_where_payer_is_entity_applying_shield(
@@ -186,18 +174,13 @@ mod tests {
         manifest_eq(manifest, expected_manifest_str);
     }
 
-    fn test_update_shield_of_securified_persona_cond_set_rola<'a>(
+    fn test_update_shield_of_securified_persona<'a>(
         roles: RolesExercisableInTransactionManifestCombination,
-        set_rola: bool,
         rtm: impl Fn() -> &'a str,
-    ) {
+    ) -> Vec<u8> {
         let entity_applying_shield = SecurifiedPersona::sample();
-        let mut instances = SecurityStructureOfFactorInstances::sample_other();
-        if !set_rola {
-            instances.authentication_signing_factor_instance =
-                entity_applying_shield
-                    .current_authentication_signing_factor_instance();
-        }
+        let instances = SecurityStructureOfFactorInstances::sample_other();
+
         let manifest = SUT::apply_security_shield_for_securified_entity(
             entity_applying_shield.clone(),
             instances,
@@ -206,68 +189,87 @@ mod tests {
         .unwrap();
         let expected_manifest_str = rtm();
         manifest_eq(manifest.clone(), expected_manifest_str);
-    }
-
-    fn test_update_shield_of_securified_persona<'a>(
-        roles: RolesExercisableInTransactionManifestCombination,
-        rtm: impl Fn() -> &'a str,
-    ) {
-        test_update_shield_of_securified_persona_cond_set_rola(roles, true, rtm)
+        manifest
+            .instructions()
+            .iter()
+            .map(|i| i.get_discriminator())
+            .collect_vec()
     }
 
     #[test]
     fn update_shield_of_securified_persona_init_with_P_confirm_with_R() {
-        test_update_shield_of_securified_persona(
+        let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithRecovery,
             || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_R")
-        )
+        );
+        assert_eq!(
+            instruction_discriminants,
+            vec![
+                CallMethod::ID,         // init
+                CallMethod::ID,         // quick confirm
+                CallMetadataMethod::ID, // set ROLA key
+            ]
+        );
     }
 
     #[test]
     fn update_shield_of_securified_persona_init_with_P_confirm_with_C() {
-        test_update_shield_of_securified_persona(
+        let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation,
             || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_C")
-        )
+        );
+        assert_eq!(
+            instruction_discriminants,
+            vec![
+                CallMethod::ID,         // init
+                CallMethod::ID,         // quick confirm
+                CallMetadataMethod::ID, // set ROLA key
+            ]
+        );
     }
 
-    // #[test] // requires Dugong
-    // fn update_shield_of_securified_persona_init_with_P_confirm_with_T() {
-    //     test_update_shield_of_securified_persona(
-    //         RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion,
-    //         || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_T")
-    //     )
-    // }
+    #[test]
+    fn update_shield_of_securified_persona_init_with_P_confirm_with_T() {
+        let instruction_discriminants = test_update_shield_of_securified_persona(
+            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion,
+            || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_T")
+        );
+        assert_eq!(
+            instruction_discriminants,
+            vec![
+                CallMetadataMethod::ID, // set ROLA key
+                CallMethod::ID // init 
+            ],
+            "Expected to FIRST set ROLA key and THEN init - since we can set it using existing factors."
+        );
+    }
 
     #[test]
     fn update_shield_of_securified_persona_init_with_R_confirm_with_C() {
-        test_update_shield_of_securified_persona_cond_set_rola(
+        let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation,
-            false,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_C")
-        )
+        );
+        assert_eq!(
+            instruction_discriminants,
+            vec![
+                CallMethod::ID,         // init
+                CallMethod::ID,         // quick confirm
+                CallMetadataMethod::ID, // set ROLA key
+            ]
+        );
     }
 
     #[test]
     fn update_shield_of_securified_persona_init_with_R_confirm_with_T() {
-        test_update_shield_of_securified_persona_cond_set_rola(
+        let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion,
-            false,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_T")
-        )
-    }
-
-    #[test]
-    fn update_shield_of_securified_persona_fails_when_setting_rola_and_without_primary(
-    ) {
-        let entity_applying_shield = SecurifiedPersona::sample();
-
-        let res = SUT::apply_security_shield_for_securified_entity(
-            entity_applying_shield.clone(),
-            SecurityStructureOfFactorInstances::sample_other(),
-            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion,
         );
-
-        assert_eq!(res, None);
+        assert_eq!(
+            instruction_discriminants,
+            vec![CallMethod::ID],
+            "init with R complete with T should not set rola key - since we cannot"
+        );
     }
 }
