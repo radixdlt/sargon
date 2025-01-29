@@ -18,8 +18,6 @@ pub mod prelude {
     pub use profile_logic::prelude::*;
     pub use sargon_os::prelude::*;
 
-    pub(crate) use std::collections::HashSet;
-
     #[cfg(test)]
     pub(crate) use interactors::prelude::*;
 }

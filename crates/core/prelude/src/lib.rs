@@ -47,7 +47,38 @@ macro_rules! fixture_gw_model {
     };
 }
 
+#[macro_export]
+macro_rules! fixture_profiles {
+    ($file: expr) => {
+        $crate::fixture_in!(
+            env!("FIXTURES_MODELS_PROFILES"),
+            concat!($file, ".json")
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! fixture_profile_model {
+    ($file: expr) => {
+        $crate::fixture_in!(
+            env!("FIXTURES_MODELS_PROFILE"),
+            concat!($file, ".json")
+        )
+    };
+}
+
+#[macro_export]
+macro_rules! fixture_interaction {
+    ($file: expr) => {
+        $crate::fixture_in!(
+            env!("FIXTURES_MODELS_INTERACTION"),
+            concat!($file, ".json")
+        )
+    };
+}
+
 pub mod prelude {
+    pub use std::collections::HashSet;
     pub use std::str::FromStr;
     pub use std::sync::{Arc, RwLock};
 }

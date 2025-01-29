@@ -38,8 +38,6 @@ pub mod prelude {
     pub(crate) use signing_traits::prelude::*;
     pub(crate) use sub_systems::prelude::*;
 
-    pub(crate) use std::collections::HashSet;
-
     #[cfg(test)]
     pub(crate) use testing::*;
 

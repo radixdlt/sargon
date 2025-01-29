@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use prelude::fixture_vector;
+    use prelude::fixture_interaction;
     use serde::{de, Deserializer};
 
     use crate::prelude::*;
@@ -52,7 +52,7 @@ mod tests {
 
     #[test]
     fn test_from_vectors() {
-        let json = fixture_vector!("rola_challenge_payload_hash_vectors");
+        let json = fixture_interaction!("rola_challenge_payload_hash_vectors");
         let vector =
             serde_json::from_str::<Vec<AuthIntentHashVectorItem>>(json)
                 .unwrap();

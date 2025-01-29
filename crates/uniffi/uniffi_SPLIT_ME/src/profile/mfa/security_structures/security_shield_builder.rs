@@ -102,9 +102,11 @@ impl SecurityShieldBuilder {
             .collect()
     }
 
-    pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
-        self.get(|builder| builder.get_time_period_until_auto_confirm())
-            .into()
+    pub fn get_time_until_timed_confirmation_is_callable(&self) -> TimePeriod {
+        self.get(|builder| {
+            builder.get_time_until_timed_confirmation_is_callable()
+        })
+        .into()
     }
 
     pub fn get_name(&self) -> String {
@@ -206,13 +208,14 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold.into()))
     }
 
-    pub fn set_time_period_until_auto_confirm(
+    pub fn set_time_until_delayed_confirmation_is_callable(
         self: Arc<Self>,
         time_period: TimePeriod,
     ) -> Arc<Self> {
         self.set(|builder| {
-            builder
-                .set_time_period_until_auto_confirm(time_period.clone().into())
+            builder.set_time_until_delayed_confirmation_is_callable(
+                time_period.into(),
+            )
         })
     }
 
@@ -637,16 +640,16 @@ mod tests {
 
         assert_eq!(
             time_period_to_days(
-                &sut.clone().get_time_period_until_auto_confirm()
+                &sut.clone().get_time_until_timed_confirmation_is_callable()
             ),
             14
         );
-        sut = sut.set_time_period_until_auto_confirm(
+        sut = sut.set_time_until_delayed_confirmation_is_callable(
             new_time_period_with_days(u16::MAX),
         );
         assert_eq!(
             time_period_to_days(
-                &sut.clone().get_time_period_until_auto_confirm()
+                &sut.clone().get_time_until_timed_confirmation_is_callable()
             ),
             u16::MAX
         );
@@ -964,12 +967,15 @@ mod tests {
             FactorSource::sample_ledger_other(),
         ];
         let name = "Auto Built";
-        let days_to_auto_confirm = 237;
+        let days_until_timed_confirmation = TimePeriod {
+            value: 237,
+            unit: TimePeriodUnit::Days,
+        };
         sut = sut
             .set_name(name.to_owned())
-            .set_time_period_until_auto_confirm(new_time_period_with_days(
-                days_to_auto_confirm,
-            ))
+            .set_time_until_delayed_confirmation_is_callable(
+                new_time_period_with_days(237),
+            )
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )
@@ -986,8 +992,8 @@ mod tests {
         assert_eq!(shield.metadata.display_name.value, name.to_owned());
         let matrix = shield.matrix_of_factors;
         assert_eq!(
-            matrix.number_of_days_until_auto_confirm,
-            days_to_auto_confirm
+            matrix.time_until_delayed_confirmation_is_callable,
+            days_until_timed_confirmation
         );
 
         pretty_assertions::assert_eq!(

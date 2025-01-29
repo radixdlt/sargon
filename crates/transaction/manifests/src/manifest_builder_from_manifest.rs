@@ -2,7 +2,35 @@ use radix_transactions::prelude::ManifestBuilder;
 
 use crate::prelude::*;
 
-pub trait BuilderFromManifest {
+pub trait BuilderExtendWithInstructions: Sized {
+    fn extend_builder_with_instructions(
+        self,
+        instructions: impl IntoIterator<Item = ScryptoInstruction>,
+    ) -> ManifestBuilder;
+
+    fn extend_builder_with_manifest(
+        self,
+        manifest: TransactionManifest,
+    ) -> ManifestBuilder {
+        Self::extend_builder_with_instructions(
+            self,
+            manifest.instructions().clone(),
+        )
+    }
+}
+
+impl BuilderExtendWithInstructions for ManifestBuilder {
+    fn extend_builder_with_instructions(
+        self,
+        instructions: impl IntoIterator<Item = ScryptoInstruction>,
+    ) -> ManifestBuilder {
+        instructions.into_iter().fold(self, |builder, instruction| {
+            builder.add_instruction_advanced(instruction).0
+        })
+    }
+}
+
+pub trait BuilderFromManifest: BuilderExtendWithInstructions {
     fn with_instructions(
         instructions: impl IntoIterator<Item = ScryptoInstruction>,
     ) -> ManifestBuilder;
@@ -16,11 +44,9 @@ impl BuilderFromManifest for ManifestBuilder {
     fn with_instructions(
         instructions: impl IntoIterator<Item = ScryptoInstruction>,
     ) -> ManifestBuilder {
-        instructions.into_iter().fold(
+        Self::extend_builder_with_instructions(
             ManifestBuilder::new(),
-            |builder, instruction| {
-                builder.add_instruction_advanced(instruction).0
-            },
+            instructions,
         )
     }
 }

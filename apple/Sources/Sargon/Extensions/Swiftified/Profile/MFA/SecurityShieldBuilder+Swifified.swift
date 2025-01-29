@@ -4,8 +4,8 @@ extension SecurityShieldBuilder {
 	public typealias Factor = FactorSourceID
 
 	/// Confirmation Role
-	public var timePeriodUntilAutoConfirm: TimePeriod {
-		getTimePeriodUntilAutoConfirm()
+	public var timeUntilTimedConfirmationIsCallable: TimePeriod {
+		getTimeUntilTimedConfirmationIsCallable()
 	}
 
 	public var threshold: Threshold {

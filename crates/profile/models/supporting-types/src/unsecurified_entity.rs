@@ -48,12 +48,12 @@ where
 
     /// # Throws
     /// Throws if the entity is securified
-    pub fn new(entity: E) -> Result<Self> {
+    pub fn new<T: HasSecurityState + Into<E>>(entity: T) -> Result<Self> {
         match entity.security_state() {
             EntitySecurityState::Unsecured {
                 value: unsecured_entity_control,
             } => Ok(Self::with_unsecured_entity_control(
-                entity,
+                entity.into(),
                 unsecured_entity_control,
             )),
             EntitySecurityState::Securified { .. } => {
@@ -129,11 +129,11 @@ impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedPersona {
 
 impl HasSampleValues for AnyUnsecurifiedEntity {
     fn sample() -> Self {
-        Self::new(Account::sample().into()).unwrap()
+        Self::new(Account::sample()).unwrap()
     }
 
     fn sample_other() -> Self {
-        Self::new(Account::sample_other().into()).unwrap()
+        Self::new(Account::sample_other()).unwrap()
     }
 }
 

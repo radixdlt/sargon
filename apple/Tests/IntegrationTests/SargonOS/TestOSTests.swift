@@ -113,6 +113,7 @@ final class TestOSTests: OSTest {
 		XCTAssertEqual(try sut.os.profile().header.creatingDevice, newCreatingDevice) // assert change worked
 	}
 
+	@available(*, deprecated)
 	func batch_create_many_accounts() async throws {
 		let sut = await TestOS()
 		try await sut.os.newWallet(shouldPreDeriveInstances: false)

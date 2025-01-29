@@ -126,7 +126,7 @@ class ProfileTest : SampleTestable<Profile> {
 
     @Test
     fun testCheckIfProfileJsonContainsLegacyP2PLinksWhenP2PLinksArePresent() {
-        val json = File("../../" + "fixtures/vector/only_plaintext_profile_snapshot_version_100.json").readText()
+        val json = File("../../" + "fixtures/models/profile/only_plaintext_profile_snapshot_version_100.json").readText()
         assertEquals(
             true,
             Profile.checkIfProfileJsonContainsLegacyP2PLinks(json)
@@ -143,7 +143,7 @@ class ProfileTest : SampleTestable<Profile> {
 
     @Test
     fun testCheckIfEncryptedProfileJsonContainsLegacyP2PLinksWhenP2PLinksArePresent() {
-        val json = File("../../" + "fixtures/vector/profile_encrypted_by_password_of_babylon.json").readText()
+        val json = File("../../" + "fixtures/models/profile/profile_encrypted_by_password_of_babylon.json").readText()
         assertEquals(
             true,
             Profile.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(json, "babylon")
