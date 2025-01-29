@@ -1,0 +1,8 @@
+package com.radixdlt.sargon.extensions
+
+import com.radixdlt.sargon.WalletToDappInteractionAuthProof
+import com.radixdlt.sargon.newWalletToDappInteractionAuthProofFromIntentSignatureOfOwner
+import com.radixdlt.sargon.IntentSignatureOfOwner
+
+fun WalletToDappInteractionAuthProof.Companion.init(intentSignatureOfOwner: IntentSignatureOfOwner) =
+    newWalletToDappInteractionAuthProofFromIntentSignatureOfOwner(intentSignatureOfOwner = intentSignatureOfOwner)

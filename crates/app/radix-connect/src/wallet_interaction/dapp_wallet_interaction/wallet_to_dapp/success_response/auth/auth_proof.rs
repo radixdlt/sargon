@@ -28,6 +28,15 @@ impl WalletToDappInteractionAuthProof {
     }
 }
 
+impl From<SignatureWithPublicKey> for WalletToDappInteractionAuthProof {
+    fn from(signature_with_public_key: SignatureWithPublicKey) -> Self {
+        Self::new(
+            signature_with_public_key.public_key(),
+            signature_with_public_key.signature(),
+        )
+    }
+}
+
 impl HasSampleValues for WalletToDappInteractionAuthProof {
     fn sample() -> Self {
         Self::new(PublicKey::sample(), Signature::sample())
@@ -60,5 +69,20 @@ mod tests {
     #[should_panic]
     fn panics_if_curve_discrepancy() {
         let _ = SUT::new(PublicKey::sample(), Signature::sample_other());
+    }
+
+    #[test]
+    fn from_signature_with_public_key() {
+        // Ed25519
+        let signature_with_public_key = SignatureWithPublicKey::sample();
+        let sut = SUT::from(signature_with_public_key);
+        assert_eq!(sut.public_key, signature_with_public_key.public_key());
+        assert_eq!(sut.signature, signature_with_public_key.signature());
+
+        // Secp256k1
+        let signature_with_public_key = SignatureWithPublicKey::sample_other();
+        let sut = SUT::from(signature_with_public_key);
+        assert_eq!(sut.public_key, signature_with_public_key.public_key());
+        assert_eq!(sut.signature, signature_with_public_key.signature());
     }
 }
