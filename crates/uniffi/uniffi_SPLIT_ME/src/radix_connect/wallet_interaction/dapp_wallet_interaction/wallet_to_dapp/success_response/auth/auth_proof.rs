@@ -9,14 +9,11 @@ pub struct WalletToDappInteractionAuthProof {
 }
 
 #[uniffi::export]
-pub fn new_wallet_to_dapp_interaction_auth_proof_from_intent_signature_of_owner(
-    intent_signature_of_owner: IntentSignatureOfOwner,
+pub fn new_wallet_to_dapp_interaction_auth_proof_from_signature_with_public_key(
+    signature_with_public_key: SignatureWithPublicKey,
 ) -> WalletToDappInteractionAuthProof {
     InternalWalletToDappInteractionAuthProof::from(
-        intent_signature_of_owner
-            .intent_signature
-            .value
-            .into_internal(),
+        signature_with_public_key.into_internal(),
     )
     .into()
 }

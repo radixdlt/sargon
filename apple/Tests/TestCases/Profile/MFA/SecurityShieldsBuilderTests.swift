@@ -67,7 +67,6 @@ struct ShieldTests {
 	// 		])
 	// }
 
-
 	@Test("Auto lowering of threshold upon deletion")
 	func deleteFactorSourceFromPrimaryLowersThreshold() {
 		let x: FactorSourceID = .sampleDevice
