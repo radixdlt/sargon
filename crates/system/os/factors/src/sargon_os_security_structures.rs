@@ -35,6 +35,11 @@ pub trait OsSecurityStructuresQuerying {
         &self,
         structure_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<()>;
+
+    async fn set_default_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<()>;
 }
 
 #[async_trait::async_trait]
@@ -150,6 +155,65 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 EventProfileModified::SecurityStructureAdded { id },
             ))
             .await;
+        Ok(())
+    }
+
+    /// Sets the Security Shield with the given `shield_id` as the default shield.
+    /// If a default Security Shield already exists, it is removed and replaced with the new one.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::SecurityStructuresUpdated { id } }`
+    async fn set_default_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<()> {
+        let profile = self.profile()?;
+
+        let current_default_shield = profile
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .iter()
+            .find(|s| s.metadata.is_default());
+
+        let updated_ids = match current_default_shield {
+            Some(ref current_default_shield) => {
+                vec![current_default_shield.metadata.id, shield_id]
+            }
+            None => vec![shield_id],
+        };
+
+        self.update_profile_with(|p| {
+            if let Some(current_default_shield) = &current_default_shield {
+                p.app_preferences
+                    .security
+                    .security_structures_of_factor_source_ids
+                    .update_with(current_default_shield.metadata.id, |s| {
+                        s.metadata.remove_flag(SecurityStructureFlag::Default)
+                    });
+            }
+
+            Ok(p.app_preferences
+                .security
+                .security_structures_of_factor_source_ids
+                .update_with(shield_id, |s| {
+                    s.metadata.set_flag(SecurityStructureFlag::Default)
+                }))
+        })
+        .await?;
+
+        // Emit event
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::SecurityStructuresUpdated {
+                    ids: updated_ids,
+                },
+            ))
+            .await;
+
         Ok(())
     }
 }
@@ -331,6 +395,111 @@ mod tests {
         assert!(event_bus_driver.recorded().iter().any(|e| e.event
             == Event::ProfileModified {
                 change: EventProfileModified::SecurityStructureAdded { id }
+            }));
+    }
+
+    #[actix_rt::test]
+    async fn set_default_flag() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        let structure_ids_sample = SecurityStructureOfFactorSourceIDs::sample();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure_ids_sample)
+        })
+        .await
+        .unwrap();
+
+        let structure_ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample_other();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_ids_sample_other,
+            )
+        })
+        .await
+        .unwrap();
+
+        // ACT
+        assert!(structure_ids_sample.metadata.is_default());
+        os.with_timeout(|x| {
+            x.set_default_security_structure(
+                structure_ids_sample_other.metadata.id(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let updated_security_structures = os
+            .profile()
+            .unwrap()
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids;
+
+        let updated_structure_ids_sample = updated_security_structures.first();
+        let updated_structure_ids_sample_other =
+            updated_security_structures.get_at_index(1);
+
+        assert!(!updated_structure_ids_sample.unwrap().metadata.is_default());
+        assert!(updated_structure_ids_sample_other
+            .unwrap()
+            .metadata
+            .is_default())
+    }
+
+    #[actix_rt::test]
+    async fn set_default_flag_emits_event() {
+        // ARRANGE
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        let structure_ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample_other();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_ids_sample_other,
+            )
+        })
+        .await
+        .unwrap();
+
+        // ACT
+        os.with_timeout(|x| {
+            x.set_default_security_structure(
+                structure_ids_sample_other.metadata.id(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        assert!(event_bus_driver.recorded().iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::SecurityStructuresUpdated {
+                    ids: vec![structure_ids_sample_other.metadata.id()]
+                }
             }));
     }
 

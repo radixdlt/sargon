@@ -61,6 +61,24 @@ impl SargonOS {
             .into_result()
     }
 
+    /// Sets the Security Shield with the given `shield_id` as the default shield.
+    /// If a default Security Shield already exists, it is removed and replaced with the new one.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::SecurityStructuresUpdated { id } }`
+    pub async fn set_default_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<()> {
+        self.wrapped
+            .set_default_security_structure(shield_id.into_internal())
+            .await
+            .into_result()
+    }
+
     /// Returns the status of the prerequisites for building a Security Shield.
     ///
     /// According to [definition][doc], a Security Shield can be built if the user has, asides from
