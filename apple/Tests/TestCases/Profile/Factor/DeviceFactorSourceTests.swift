@@ -64,9 +64,9 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 		}
 	}
 
-	func test_other_wrong() {
-		XCTAssertNil(SUT.extract(from: TrustedContactFactorSource.sample))
-	}
+//	func test_other_wrong() {
+//		XCTAssertNil(SUT.extract(from: TrustedContactFactorSource.sample))
+//	}
 
 	func test_extract_wrong_throws() throws {
 		try eachSample { sut in

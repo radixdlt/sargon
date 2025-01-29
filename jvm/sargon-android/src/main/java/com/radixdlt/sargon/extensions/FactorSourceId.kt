@@ -15,9 +15,9 @@ import com.radixdlt.sargon.newFactorSourceIdFromHashFromMnemonicWithPassphrase
 
 fun FactorSourceIdFromHash.asGeneral() = FactorSourceId.Hash(value = this)
 
-fun FactorSourceIdFromAddress.asGeneral() = FactorSourceId.Address(
-    value = this
-)
+//fun FactorSourceIdFromAddress.asGeneral() = FactorSourceId.Address(
+//    value = this
+//)
 
 fun FactorSourceId.Hash.Companion.init(
     kind: FactorSourceKind,
@@ -27,15 +27,15 @@ fun FactorSourceId.Hash.Companion.init(
     mnemonicWithPassphrase = mnemonicWithPassphrase
 ).asGeneral()
 
-@Throws(SargonException::class)
-fun FactorSourceId.Address.Companion.fromJson(
-    jsonString: String
-): FactorSourceId.Address = newFactorSourceIDFromAddressFromJsonBytes(
-    jsonBytes = bagOfBytes(fromString = jsonString)
-).asGeneral()
+//@Throws(SargonException::class)
+//fun FactorSourceId.Address.Companion.fromJson(
+//    jsonString: String
+//): FactorSourceId.Address = newFactorSourceIDFromAddressFromJsonBytes(
+//    jsonBytes = bagOfBytes(fromString = jsonString)
+//).asGeneral()
 
-fun FactorSourceId.Address.toJson(): String =
-    factorSourceIDFromAddressToJsonBytes(factorSourceIDFromAddress = value).string
+//fun FactorSourceId.Address.toJson(): String =
+//    factorSourceIDFromAddressToJsonBytes(factorSourceIDFromAddress = value).string
 
 @Throws(SargonException::class)
 fun FactorSourceId.Hash.Companion.fromJson(
