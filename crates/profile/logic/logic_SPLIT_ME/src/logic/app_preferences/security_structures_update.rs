@@ -66,6 +66,8 @@ pub trait SecurityStructuresUpdating {
 }
 
 impl SecurityStructuresUpdating for Security {
+    /// # Throws
+    /// Throws `CommonError:InvalidSecurityStructureID` if the structure identified by `shield_id` does not exist.
     fn update_security_structure_remove_flag_default(
         &mut self,
         shield_id: &SecurityStructureID,
@@ -79,6 +81,8 @@ impl SecurityStructuresUpdating for Security {
             })
     }
 
+    /// # Throws
+    /// Throws `CommonError:InvalidSecurityStructureID` if the structure identified by `shield_id` does not exist.
     fn update_security_structure_add_flag_default(
         &mut self,
         shield_id: &SecurityStructureID,
