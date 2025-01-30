@@ -12,6 +12,10 @@ use crate::prelude::*;
 const XRD_TO_AC_VAULT_FIRST_TOP_UP: ScryptoDecimal192 =
     ScryptoDecimal192::ONE_HUNDRED;
 
+pub fn xrd_amount_for_initial_xrd_vault_of_access_controller() -> Decimal192 {
+    XRD_TO_AC_VAULT_FIRST_TOP_UP.into()
+}
+
 pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
     /// A method modifying manifests which applies security shield. We
     /// The `manifest` which applies the security shield could not include
