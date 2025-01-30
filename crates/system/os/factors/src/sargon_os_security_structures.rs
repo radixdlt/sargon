@@ -170,32 +170,11 @@ impl OsSecurityStructuresQuerying for SargonOS {
         &self,
         shield_id: SecurityStructureID,
     ) -> Result<()> {
-        let profile = self.profile()?;
-
-        let current_default_shield = profile
-            .app_preferences
-            .security
-            .security_structures_of_factor_source_ids
-            .iter()
-            .find(|s| s.metadata.is_default());
-
-        let updated_ids = match current_default_shield {
-            Some(ref current_default_shield) => {
-                vec![current_default_shield.metadata.id, shield_id]
-            }
-            None => vec![shield_id],
-        };
-
-        self.update_profile_with(|p| {
-            if let Some(current_default_shield) = &current_default_shield {
-                p.update_security_structure_remove_flag_default(
-                    &current_default_shield.metadata.id,
-                )
-                .unwrap();
-            }
-            p.update_security_structure_add_flag_default(&shield_id)
-        })
-        .await?;
+        let updated_ids = self
+            .update_profile_with(|p| {
+                p.set_default_security_structure(&shield_id)
+            })
+            .await?;
 
         // Emit event
         self.event_bus
@@ -391,9 +370,44 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn set_default_flag() {
+    async fn when_setting_main_security_structure_with_invalid_id_error_is_thrown(
+    ) {
         // ARRANGE
         let os = SUT::fast_boot().await;
+
+        // ACT
+        let structure_ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample_other();
+        let result = os
+            .set_default_security_structure(structure_ids_sample_other.id())
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidSecurityStructureID {
+                bad_value: structure_ids_sample_other.id().to_string()
+            })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn set_default_flag() {
+        // ARRANGE
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
@@ -415,6 +429,8 @@ mod tests {
         })
         .await
         .unwrap();
+
+        event_bus_driver.clear_recorded();
 
         // ACT
         assert!(structure_ids_sample.metadata.is_default());
@@ -442,7 +458,26 @@ mod tests {
         assert!(updated_structure_ids_sample_other
             .unwrap()
             .metadata
-            .is_default())
+            .is_default());
+
+        let events = event_bus_driver.recorded();
+        let security_structures_updated_event = events
+            .iter()
+            .find(|e| matches!(
+                e.event,
+                Event::ProfileModified {
+                    change: EventProfileModified::SecurityStructuresUpdated { .. }
+                }));
+        let ids = if let Event::ProfileModified {
+            change: EventProfileModified::SecurityStructuresUpdated { ref ids },
+        } = &security_structures_updated_event.unwrap().event
+        {
+            ids
+        } else {
+            panic!("Expected a SecurityStructuresUpdated event");
+        };
+
+        assert_eq!(ids.len(), 2);
     }
 
     #[actix_rt::test]
@@ -477,6 +512,8 @@ mod tests {
         .await
         .unwrap();
 
+        event_bus_driver.clear_recorded();
+
         // ACT
         os.with_timeout(|x| {
             x.set_default_security_structure(
@@ -487,7 +524,9 @@ mod tests {
         .unwrap();
 
         // ASSERT
-        assert!(event_bus_driver.recorded().iter().any(|e| e.event
+        let events = event_bus_driver.recorded();
+        assert!(events.iter().any(|e| e.event == Event::ProfileSaved),);
+        assert!(events.iter().any(|e| e.event
             == Event::ProfileModified {
                 change: EventProfileModified::SecurityStructuresUpdated {
                     ids: vec![structure_ids_sample_other.metadata.id()]

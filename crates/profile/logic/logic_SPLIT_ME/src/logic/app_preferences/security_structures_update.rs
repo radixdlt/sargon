@@ -18,9 +18,9 @@ impl DefaultSecurityStructureUpdating for Security {
 
         let updated_ids = match current_default_shield {
             Some(ref current_default_shield) => {
-                vec![current_default_shield.metadata.id, shield_id.clone()]
+                vec![current_default_shield.metadata.id, *shield_id]
             }
-            None => vec![shield_id.clone()],
+            None => vec![*shield_id],
         };
 
         if let Some(current_default_shield) = &current_default_shield {
@@ -28,7 +28,7 @@ impl DefaultSecurityStructureUpdating for Security {
                 &current_default_shield.metadata.id,
             )?;
         }
-        self.update_security_structure_add_flag_default(&shield_id)?;
+        self.update_security_structure_add_flag_default(shield_id)?;
 
         Ok(updated_ids)
     }
