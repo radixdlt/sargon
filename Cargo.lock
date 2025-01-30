@@ -3899,6 +3899,7 @@ name = "sargon-os-factors"
 version = "1.1.124"
 dependencies = [
  "actix-rt",
+ "addresses",
  "async-trait",
  "clients",
  "derive_more",
@@ -3910,6 +3911,7 @@ dependencies = [
  "key-derivation-traits",
  "log",
  "manifests",
+ "paste",
  "preinterpret",
  "prelude",
  "pretty_assertions",
@@ -3919,6 +3921,7 @@ dependencies = [
  "sargon-os",
  "serde",
  "serde_json",
+ "serde_with",
  "transaction-models",
 ]
 

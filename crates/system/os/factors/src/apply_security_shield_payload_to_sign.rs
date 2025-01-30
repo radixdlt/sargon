@@ -1,10 +1,8 @@
 use enum_as_inner::EnumAsInner;
-use factor_instances_provider::address_union;
-use serde_json::value::Index;
 
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PayerOfTransaction {
     /// `None` is invalid if `entity_applying_shield` is a Persona.
     /// Some(Account) if `entity_applying_shield` is an Account means "use this other account instead"
@@ -61,17 +59,22 @@ pub trait BatchApplySecurityShieldSigning {
     ) -> Result<IndexSet<TransactionIntentHash>>;
 }
 
-
 #[async_trait::async_trait]
 impl BatchApplySecurityShieldSigning for SargonOS {
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
         &self,
         manifest_and_payer_tuples: IndexSet<PayerOfTransaction>,
     ) -> Result<IndexSet<TransactionIntentHash>> {
-       let manifest_and_payer_tuples = manifest_and_payer_tuples.into_iter().map(|t| {
-            let address_of_ac_or_entity_applying_shield = extract_address_of_entity_updating_shield(&t.manifest)?;
-            
-       }).collect::<Result<IndexSet<SecurityShieldApplication>>>()?;
+        let manifest_and_payer_tuples = manifest_and_payer_tuples
+            .into_iter()
+            .map(|t| {
+                let address_of_ac_or_entity_applying_shield =
+                    extract_address_of_entity_updating_shield(&t.manifest)?;
+                todo!()
+            })
+            .collect::<Result<Vec<SecurityShieldApplication>>>()?;
+
+        todo!()
     }
 }
 
@@ -142,7 +145,7 @@ pub enum SecurityShieldApplicationForSecurifiedEntity {
 ///
 /// Essentially holds a manifest for exercising the primary role,
 /// to create an AccessController with factors specified in the shield.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 pub struct SecurityShieldApplicationForUnsecurifiedAccount {
     #[allow(dead_code)]
     #[doc(hidden)]
@@ -183,12 +186,13 @@ impl SecurityShieldApplicationForUnsecurifiedAccount {
         paying_account: impl Into<Option<Account>>,
         modified_manifest: TransactionManifest,
     ) -> Self {
+        let paying_account = paying_account.into();
         if let Some(payer) = paying_account.as_ref() {
-            assert_ne!(payer.address(), address_of_account_applying_shield.address(), "Specify None as payer if it is the same as address_of_account_applying_shield");
+            assert_ne!(payer.address(), account_applying_shield.entity.address(), "Specify None as payer if it is the same as address_of_account_applying_shield");
         }
 
         Self {
-            hidden: HiddenConstructor::new(),
+            hidden: HiddenConstructor,
             account_applying_shield,
             paying_account,
             modified_manifest,

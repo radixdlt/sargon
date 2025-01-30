@@ -1,4 +1,7 @@
+use std::sync::{Mutex, OnceLock};
+
 use crate::prelude::*;
+use addresses::address_union;
 use radix_connect::DappToWalletInteractionBatchOfTransactions;
 
 #[async_trait::async_trait]
@@ -39,33 +42,39 @@ pub trait OsApplySecurityShieldInteraction {
     ) -> Result<DappToWalletInteractionBatchOfTransactions>;
 }
 
-static HACKY_TMP_ENTITIES_APPLYING_SHIELD: RwLock<
-    IndexMap<EntityApplyingShieldAddress, TransactionManifest>,
-> = RwLock::new(IndexMap::new());
+address_union!(
+    enum EntityApplyingShieldAddress: accessController, account, identity
+);
+
+fn hacky_tmp_entities_applying_shield(
+) -> &'static Mutex<IndexMap<EntityApplyingShieldAddress, TransactionManifest>>
+{
+    static ARRAY: OnceLock<
+        Mutex<IndexMap<EntityApplyingShieldAddress, TransactionManifest>>,
+    > = OnceLock::new();
+    ARRAY.get_or_init(|| Mutex::new(IndexMap::new()))
+}
 
 /// Called by `make_interaction_for_applying_security_shield` to set the entities
 fn hacky_tmp_set_entities_applying_shield(
     entities: IndexMap<EntityApplyingShieldAddress, TransactionManifest>,
 ) {
-    *HACKY_TMP_ENTITIES_APPLYING_SHIELD.write().unwrap() = entities;
+    *hacky_tmp_entities_applying_shield().lock().unwrap() = entities;
 }
 
 pub fn hacky_tmp_get_entities_applying_shield(
 ) -> IndexMap<EntityApplyingShieldAddress, TransactionManifest> {
-    HACKY_TMP_ENTITIES_APPLYING_SHIELD.read().unwrap()
+    hacky_tmp_entities_applying_shield().lock().unwrap().clone()
 }
 
-address_union!(
-    enum EntityApplyingShieldAddress: accessController, account, identity
-);
 impl EntityApplyingShieldAddress {
     fn from_unsecurified_entity(entity: &AnyUnsecurifiedEntity) -> Self {
-        match entity.entity {
-            AccountOrPersona::AccountEntity(account) => {
-                Self::AccountAddress(account.address())
+        match &entity.entity {
+            AccountOrPersona::AccountEntity(ref account) => {
+                Self::Account(account.address())
             }
-            AccountOrPersona::PersonaEntity(persona) => {
-                Self::IdentityAddress(persona.address())
+            AccountOrPersona::PersonaEntity(ref persona) => {
+                Self::Identity(persona.address())
             }
         }
     }
@@ -74,11 +83,11 @@ impl EntityApplyingShieldAddress {
 // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
 // is merge remove this and use static analisys using RET to get this.
 fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shield(
-    manifest: TransactionManifest,
+    manifest: &TransactionManifest,
 ) -> Result<EntityApplyingShieldAddress> {
     let lookup = hacky_tmp_get_entities_applying_shield();
     let address = lookup.iter().find_map(|(address, m)| {
-        if m == &manifest {
+        if m == manifest {
             Some(address.clone())
         } else {
             None
@@ -90,7 +99,7 @@ fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shiel
 // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
 // impl this
 fn _extract_address_of_entity_updating_shield(
-    manifest: TransactionManifest,
+    manifest: &TransactionManifest,
 ) -> Result<EntityApplyingShieldAddress> {
     todo!("cannot be implemented yet, awaiting #132 RET PR")
 }
@@ -98,9 +107,9 @@ fn _extract_address_of_entity_updating_shield(
 // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
 // is merge remove this and use static analisys using RET to get this.
 pub fn extract_address_of_entity_updating_shield(
-    manifest: TransactionManifest,
+    manifest: &TransactionManifest,
 ) -> Result<EntityApplyingShieldAddress> {
-    __hacky_tmp_using_local_global_state_extract_address_of_entity(manifest)
+    __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shield(manifest)
 }
 
 #[async_trait::async_trait]
@@ -118,7 +127,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
             .await?;
 
         let mut manifests_for_entity =
-            IndexMap::<EntityApplyingShieldAddress, TransacionManifest>::new();
+            IndexMap::<EntityApplyingShieldAddress, TransactionManifest>::new();
 
         let manifests_for_unsecurified = entities_with_provisional
        .unsecurified_erased()
@@ -130,7 +139,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                     e.clone(),
                     derived.clone()
                 ).inspect(|m| {
-                    manifests_for_entity.insert(EntityApplyingShieldAddress::from_unsecurified_entity(&e), m)
+                    manifests_for_entity.insert(EntityApplyingShieldAddress::from_unsecurified_entity(&e), m.clone());
                 }).map(UnvalidatedTransactionManifest::from)
         }).collect::<Result<Vec<UnvalidatedTransactionManifest>>>()?;
 
@@ -145,7 +154,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                     derived.clone(),
                     RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()
                 ).inspect(|m| {
-                    manifests_for_entity.insert(e.securified_entity_control.access_controller_address, m)
+                    manifests_for_entity.insert(EntityApplyingShieldAddress::AccessController(e.securified_entity_control.access_controller_address), m.clone());
                 })
                 .map(UnvalidatedTransactionManifest::from).unwrap()
          }).collect_vec();

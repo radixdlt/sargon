@@ -29,6 +29,7 @@ pub use account_address::*;
 pub use address::*;
 pub use address_format::*;
 pub use address_of_account_or_persona::*;
+pub use address_union::*;
 pub use component_address::*;
 pub use entity_address::*;
 pub use identity_address::*;
