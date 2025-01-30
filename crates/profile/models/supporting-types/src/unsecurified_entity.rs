@@ -9,7 +9,7 @@ pub struct AbstractUnsecurifiedEntity<
     E::Address: Into<AddressOfAccountOrPersona>,
 {
     pub entity: E,
-    unsecured_entity_control: UnsecuredEntityControl,
+    pub unsecured_entity_control: UnsecuredEntityControl,
     veci: VirtualEntityCreatingInstance,
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }

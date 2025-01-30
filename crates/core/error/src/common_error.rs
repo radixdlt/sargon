@@ -864,6 +864,9 @@ pub enum CommonError {
         "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
     )]
     StructureAlreadyExists { bad_value: String } = 10248,
+
+    #[error("No entity found with AccessController address {bad_value}")]
+    NoEntityFoundWithAccessControllerAddress { bad_value: String } = 10249,
 }
 
 impl CommonError {
