@@ -188,20 +188,12 @@ impl OsSecurityStructuresQuerying for SargonOS {
 
         self.update_profile_with(|p| {
             if let Some(current_default_shield) = &current_default_shield {
-                p.app_preferences
-                    .security
-                    .security_structures_of_factor_source_ids
-                    .update_with(current_default_shield.metadata.id, |s| {
-                        s.metadata.remove_flag(SecurityStructureFlag::Default)
-                    });
+                p.update_security_structure_remove_flag_default(
+                    &current_default_shield.metadata.id,
+                )
+                .unwrap();
             }
-
-            Ok(p.app_preferences
-                .security
-                .security_structures_of_factor_source_ids
-                .update_with(shield_id, |s| {
-                    s.metadata.set_flag(SecurityStructureFlag::Default)
-                }))
+            p.update_security_structure_add_flag_default(&shield_id)
         })
         .await?;
 

@@ -338,6 +338,46 @@ impl ProfileFactorSourceUpdating for Profile {
     }
 }
 
+pub trait ProfileSecurityStructuresUpdating {
+    fn update_security_structure_remove_flag_default(
+        &mut self,
+        shield_id: &SecurityStructureID,
+    ) -> Result<bool>;
+
+    fn update_security_structure_add_flag_default(
+        &mut self,
+        shield_id: &SecurityStructureID,
+    ) -> Result<bool>;
+}
+
+impl ProfileSecurityStructuresUpdating for Profile {
+    fn update_security_structure_remove_flag_default(
+        &mut self,
+        shield_id: &SecurityStructureID,
+    ) -> Result<bool> {
+        Ok(self
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .update_with(shield_id, |s| {
+                s.metadata.remove_flag(SecurityStructureFlag::Default)
+            }))
+    }
+
+    fn update_security_structure_add_flag_default(
+        &mut self,
+        shield_id: &SecurityStructureID,
+    ) -> Result<bool> {
+        Ok(self
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .update_with(shield_id, |s| {
+                s.metadata.set_flag(SecurityStructureFlag::Default)
+            }))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
