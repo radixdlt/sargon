@@ -21,6 +21,14 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
     }
 }
 
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
+    for AbstractSecurifiedEntity<E>
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity.address_erased()
+    }
+}
+
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsNetworkAware
     for AbstractSecurifiedEntity<E>
 {

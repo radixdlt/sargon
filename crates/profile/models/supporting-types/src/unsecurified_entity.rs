@@ -14,6 +14,16 @@ pub struct AbstractUnsecurifiedEntity<
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
 
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
+    for AbstractUnsecurifiedEntity<E>
+where
+    E::Address: Into<AddressOfAccountOrPersona>,
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity.address_erased()
+    }
+}
+
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
     for AbstractUnsecurifiedEntity<E>
 where

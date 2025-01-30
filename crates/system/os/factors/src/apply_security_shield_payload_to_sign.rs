@@ -2,9 +2,18 @@ use enum_as_inner::EnumAsInner;
 
 use crate::prelude::*;
 
+impl HasEntityAddress for EntityApplyingShield {
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        match self {
+            EntityApplyingShield::Securified(e) => e.address_erased(),
+            EntityApplyingShield::Unsecurified(e) => e.address_erased(),
+        }
+    }
+}
+
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 pub struct AbstractShieldApplicationInputWithOrWithoutBalance<
-    Entity,
+    Entity: HasEntityAddress + Clone,
     XrdBalance,
 > {
     #[allow(dead_code)]
@@ -30,15 +39,30 @@ pub struct AbstractShieldApplicationInputWithOrWithoutBalance<
     _balance_of_entity_applying_shield: XrdBalance,
 }
 
-struct XrdBalanceOfEntity<Entity> {
+impl<E: HasEntityAddress + Clone, X> HasEntityAddress
+    for AbstractShieldApplicationInputWithOrWithoutBalance<E, X>
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity_applying_shield.address_erased()
+    }
+}
+
+struct XrdBalanceOfEntity<Entity: HasEntityAddress + Clone> {
     pub entity: Entity,
     pub balance: Decimal,
+}
+impl<Entity: HasEntityAddress + Clone> HasEntityAddress
+    for XrdBalanceOfEntity<Entity>
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity.address_erased()
+    }
 }
 
 type AbstractShieldApplicationInput<Entity> =
     AbstractShieldApplicationInputWithOrWithoutBalance<Entity, Decimal>;
 
-impl<Entity> AbstractShieldApplicationInput<Entity> {
+impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
     pub fn get_payer_and_balance(&self) -> Option<XrdBalanceOfEntity<Account>> {
         self._payer.as_ref().map(|payer| XrdBalanceOfEntity {
             entity: payer.clone(),
@@ -47,7 +71,6 @@ impl<Entity> AbstractShieldApplicationInput<Entity> {
                 .expect("Must be Some if payer is Some"),
         })
     }
-
     pub fn get_entity_applying_shield_and_balance(
         &self,
     ) -> XrdBalanceOfEntity<Entity> {
@@ -116,7 +139,26 @@ pub type SecurifiedAccountShieldApplicationInput =
 pub type SecurifiedPersonaShieldApplicationInput =
     AbstractShieldApplicationInput<SecurifiedPersona>;
 
-impl<Entity> AbstractShieldApplicationInput<Entity> {
+impl ShieldApplicationInputWithoutXrdBalance {
+    fn new(
+        payer: impl Into<Option<Account>>,
+        entity_applying_shield: EntityApplyingShield,
+        manifest: TransactionManifest,
+    ) -> Self {
+        let payer = payer.into();
+        let balance_of_payer: Option<()> = payer.as_ref().map(|_| ());
+        Self {
+            hidden: HiddenConstructor,
+            _payer: payer,
+            entity_applying_shield,
+            manifest,
+            _balance_of_payer: balance_of_payer,
+            _balance_of_entity_applying_shield: (),
+        }
+    }
+}
+
+impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
     fn new(
         payer_with_balance: impl Into<Option<XrdBalanceOfEntity<Account>>>,
         entity_applying_shield_and_balance: XrdBalanceOfEntity<Entity>,
@@ -138,7 +180,7 @@ impl<Entity> AbstractShieldApplicationInput<Entity> {
                 entity_applying_shield_and_balance.balance,
         }
     }
-    fn with_entity_applying_shield<T>(
+    fn with_entity_applying_shield<T: HasEntityAddress + Clone>(
         some: AbstractShieldApplicationInput<T>,
         entity_applying_shield: impl Into<Entity>,
     ) -> Self
@@ -147,16 +189,17 @@ where {
 
         let uncasted_entity_with_balance =
             some.get_entity_applying_shield_and_balance();
-        // assert_eq!(
-        //     uncasted_entity_with_balance.entity.address(),
-        //     entity_applying_shield.address()
-        // );
+
+        assert_eq!(
+            uncasted_entity_with_balance.address_erased(),
+            entity_applying_shield.address_erased()
+        );
 
         let casted_entity_with_balance = XrdBalanceOfEntity {
             entity: entity_applying_shield,
             balance: uncasted_entity_with_balance.balance,
         };
-        
+
         Self::new(
             some.get_payer_and_balance(),
             casted_entity_with_balance,
@@ -292,12 +335,12 @@ pub trait BatchApplySecurityShieldSigning {
         let manifest = input.manifest;
         let modified_manifest = manifest;
         let account_applying_shield = input.entity_applying_shield;
-        let maybe_payer = input.payer;
-        Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
-            account_applying_shield,
-            maybe_payer,
-            modified_manifest,
-        ))
+        todo!("use xrd addresses");
+        // Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
+        //     account_applying_shield,
+        //     maybe_payer,
+        //     modified_manifest,
+        // ))
     }
 
     fn shield_application_for_unsecurified_persona(
@@ -405,7 +448,7 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         &self,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>> {
-        let manifests_with_entities = manifest_and_payer_tuples
+        let manifests_with_entities_without_xrd_balances = manifest_and_payer_tuples
             .into_iter()
             .map(|manifest_with_payer_by_address| {
                 let manifest = manifest_with_payer_by_address.manifest;
@@ -421,22 +464,28 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                     manifest_with_payer_by_address.payer
                 {
                     let payer = self.account_by_address(payer_address)?;
-                    Ok(ShieldApplicationInput::new(
+                    Ok(ShieldApplicationInputWithoutXrdBalance::new(
                         payer,
                         entity_applying_shield,
                         manifest,
                     ))
                 } else {
-                    Ok(ShieldApplicationInput::new(
+                    Ok(ShieldApplicationInputWithoutXrdBalance::new(
                         None,
                         entity_applying_shield,
                         manifest,
                     ))
                 }
             })
-            .collect::<Result<Vec<ShieldApplicationInput>>>()?;
+            .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()?;
 
-        manifests_with_entities
+        let manifests_with_entities_with_xrd_balance =
+            manifests_with_entities_without_xrd_balances
+                .into_iter()
+                .map(|with_balance| todo!())
+                .collect::<Result<Vec<ShieldApplicationInput>>>()?;
+
+        manifests_with_entities_with_xrd_balance
             .into_iter()
             .map(|manifest_with_payer| {
                 match &manifest_with_payer.entity_applying_shield {
