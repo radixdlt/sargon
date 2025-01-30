@@ -2,25 +2,77 @@ use enum_as_inner::EnumAsInner;
 
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct AbstractManifestWithEntityApplyingShieldAndPayer<Entity> {
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+pub struct AbstractShieldApplicationInputWithOrWithoutBalance<
+    Entity,
+    XrdBalance,
+> {
+    #[allow(dead_code)]
+    #[doc(hidden)]
+    #[debug(skip)]
+    hidden: HiddenConstructor,
     /// `None` is invalid if `entity_applying_shield` is a Persona.
     /// Some(Account) if `entity_applying_shield` is an Account means "use this other account instead"
     /// None if `entity_applying_shield` is an Account means "use the account applying the shield"
-    pub payer: Option<Account>,
+    ///
+    /// N.B.
+    /// MUST be `Some` if `balance_of_payer` is `Some`.
+    /// MUST be `None` if `balance_of_payer` is `None`.
+    _payer: Option<Account>,
     pub entity_applying_shield: Entity,
     pub manifest: TransactionManifest,
+
+    /// N.B.
+    /// MUST be `Some` if `payer` is `Some`.
+    /// MUST be `None` if `payer` is `None`.
+    _balance_of_payer: Option<XrdBalance>,
+
+    _balance_of_entity_applying_shield: XrdBalance,
 }
 
-impl
-    From<(
-        ManifestWithEntityApplyingShieldAndPayer,
-        AnyUnsecurifiedEntity,
-    )> for ManifestWithUnsecurifiedEntityApplyingShieldAndPayer
+struct XrdBalanceOfEntity<Entity> {
+    pub entity: Entity,
+    pub balance: Decimal,
+}
+
+type AbstractShieldApplicationInput<Entity> =
+    AbstractShieldApplicationInputWithOrWithoutBalance<Entity, Decimal>;
+
+impl<Entity> AbstractShieldApplicationInput<Entity> {
+    pub fn get_payer_and_balance(&self) -> Option<XrdBalanceOfEntity<Account>> {
+        self._payer.as_ref().map(|payer| XrdBalanceOfEntity {
+            entity: payer.clone(),
+            balance: self
+                ._balance_of_payer
+                .expect("Must be Some if payer is Some"),
+        })
+    }
+
+    pub fn get_entity_applying_shield_and_balance(
+        &self,
+    ) -> XrdBalanceOfEntity<Entity> {
+        XrdBalanceOfEntity {
+            entity: self.entity_applying_shield.clone(),
+            balance: self._balance_of_entity_applying_shield,
+        }
+    }
+}
+
+impl ShieldApplicationInputWithoutXrdBalance {
+    pub fn get_payer(&self) -> Option<Account> {
+        self._payer.clone()
+    }
+    pub fn get_entity_applying_shield(&self) -> EntityApplyingShield {
+        self.entity_applying_shield.clone()
+    }
+}
+
+impl From<(ShieldApplicationInput, AnyUnsecurifiedEntity)>
+    for AnyUnsecurifiedShieldApplicationInput
 {
     fn from(
         (some, entity_applying_shield): (
-            ManifestWithEntityApplyingShieldAndPayer,
+            ShieldApplicationInput,
             AnyUnsecurifiedEntity,
         ),
     ) -> Self {
@@ -28,15 +80,12 @@ impl
     }
 }
 
-impl
-    From<(
-        ManifestWithEntityApplyingShieldAndPayer,
-        AnySecurifiedEntity,
-    )> for ManifestWithSecurifiedEntityApplyingShieldAndPayer
+impl From<(ShieldApplicationInput, AnySecurifiedEntity)>
+    for AnySecurifiedShieldApplicationInput
 {
     fn from(
         (some, entity_applying_shield): (
-            ManifestWithEntityApplyingShieldAndPayer,
+            ShieldApplicationInput,
             AnySecurifiedEntity,
         ),
     ) -> Self {
@@ -44,60 +93,98 @@ impl
     }
 }
 
-pub type ManifestWithEntityApplyingShieldAndPayer =
-    AbstractManifestWithEntityApplyingShieldAndPayer<EntityApplyingShield>;
+pub type ShieldApplicationInput =
+    AbstractShieldApplicationInput<EntityApplyingShield>;
 
-pub type ManifestWithUnsecurifiedEntityApplyingShieldAndPayer =
-    AbstractManifestWithEntityApplyingShieldAndPayer<AnyUnsecurifiedEntity>;
-pub type ManifestWithUnsecurifiedAccountApplyingShieldAndPayer =
-    AbstractManifestWithEntityApplyingShieldAndPayer<UnsecurifiedAccount>;
-pub type ManifestWithUnsecurifiedPersonaApplyingShieldAndPayer =
-    AbstractManifestWithEntityApplyingShieldAndPayer<UnsecurifiedPersona>;
+pub type ShieldApplicationInputWithoutXrdBalance =
+    AbstractShieldApplicationInputWithOrWithoutBalance<
+        EntityApplyingShield,
+        (),
+    >;
 
-pub type ManifestWithSecurifiedEntityApplyingShieldAndPayer =
-    AbstractManifestWithEntityApplyingShieldAndPayer<AnySecurifiedEntity>;
-pub type ManifestWithSecurifiedAccountApplyingShieldAndPayer =
-    AbstractManifestWithEntityApplyingShieldAndPayer<SecurifiedAccount>;
-pub type ManifestWithSecurifiedPersonaApplyingShieldAndPayer =
-    AbstractManifestWithEntityApplyingShieldAndPayer<SecurifiedPersona>;
+pub type AnyUnsecurifiedShieldApplicationInput =
+    AbstractShieldApplicationInput<AnyUnsecurifiedEntity>;
+pub type UnsecurifiedAccountShieldApplicationInput =
+    AbstractShieldApplicationInput<UnsecurifiedAccount>;
+pub type UnsecurifiedPersonaShieldApplicationInput =
+    AbstractShieldApplicationInput<UnsecurifiedPersona>;
 
-impl<Entity> AbstractManifestWithEntityApplyingShieldAndPayer<Entity> {
+pub type AnySecurifiedShieldApplicationInput =
+    AbstractShieldApplicationInput<AnySecurifiedEntity>;
+pub type SecurifiedAccountShieldApplicationInput =
+    AbstractShieldApplicationInput<SecurifiedAccount>;
+pub type SecurifiedPersonaShieldApplicationInput =
+    AbstractShieldApplicationInput<SecurifiedPersona>;
+
+impl<Entity> AbstractShieldApplicationInput<Entity> {
     fn new(
-        payer: impl Into<Option<Account>>,
-        entity_applying_shield: Entity,
+        payer_with_balance: impl Into<Option<XrdBalanceOfEntity<Account>>>,
+        entity_applying_shield_and_balance: XrdBalanceOfEntity<Entity>,
         manifest: TransactionManifest,
     ) -> Self {
+        // Self {
+        //     payer: payer.into(),
+        //     entity_applying_shield,
+        //     manifest,
+        // }
+        let payer_with_balance = payer_with_balance.into();
         Self {
-            payer: payer.into(),
-            entity_applying_shield,
+            hidden: HiddenConstructor,
+            _payer: payer_with_balance.as_ref().map(|p| p.entity.clone()),
+            entity_applying_shield: entity_applying_shield_and_balance.entity,
             manifest,
+            _balance_of_payer: payer_with_balance.map(|p| p.balance),
+            _balance_of_entity_applying_shield:
+                entity_applying_shield_and_balance.balance,
         }
     }
-
     fn with_entity_applying_shield<T>(
-        some: AbstractManifestWithEntityApplyingShieldAndPayer<T>,
+        some: AbstractShieldApplicationInput<T>,
         entity_applying_shield: impl Into<Entity>,
     ) -> Self
 where {
-        let AbstractManifestWithEntityApplyingShieldAndPayer {
-            payer,
-            manifest,
-            ..
-        } = some;
+        let entity_applying_shield = entity_applying_shield.into();
 
-        Self::new(payer, entity_applying_shield.into(), manifest)
+        let uncasted_entity_with_balance =
+            some.get_entity_applying_shield_and_balance();
+        // assert_eq!(
+        //     uncasted_entity_with_balance.entity.address(),
+        //     entity_applying_shield.address()
+        // );
+
+        let casted_entity_with_balance = XrdBalanceOfEntity {
+            entity: entity_applying_shield,
+            balance: uncasted_entity_with_balance.balance,
+        };
+        
+        Self::new(
+            some.get_payer_and_balance(),
+            casted_entity_with_balance,
+            some.manifest,
+        )
     }
 }
 
-impl
-    From<(
-        ManifestWithUnsecurifiedEntityApplyingShieldAndPayer,
-        UnsecurifiedAccount,
-    )> for ManifestWithUnsecurifiedAccountApplyingShieldAndPayer
+// impl ShieldApplicationInputWithoutXrdBalance {
+//     fn new(
+//         payer: impl Into<Option<Account>>,
+//         entity_applying_shield: Entity,
+//         manifest: TransactionManifest,
+//     ) -> Self {
+//         Self {
+//             _payer: payer.into(),
+//             entity_applying_shield,
+//             manifest,
+//         }
+//     }
+// }
+
+impl From<(AnyUnsecurifiedShieldApplicationInput, UnsecurifiedAccount)>
+    for UnsecurifiedAccountShieldApplicationInput
 {
     fn from(
         (some, entity_applying_shield): (
-            ManifestWithUnsecurifiedEntityApplyingShieldAndPayer,
+            AnyUnsecurifiedShieldApplicationInput,
             UnsecurifiedAccount,
         ),
     ) -> Self {
@@ -105,15 +192,12 @@ impl
     }
 }
 
-impl
-    From<(
-        ManifestWithUnsecurifiedEntityApplyingShieldAndPayer,
-        UnsecurifiedPersona,
-    )> for ManifestWithUnsecurifiedPersonaApplyingShieldAndPayer
+impl From<(AnyUnsecurifiedShieldApplicationInput, UnsecurifiedPersona)>
+    for UnsecurifiedPersonaShieldApplicationInput
 {
     fn from(
         (some, entity_applying_shield): (
-            ManifestWithUnsecurifiedEntityApplyingShieldAndPayer,
+            AnyUnsecurifiedShieldApplicationInput,
             UnsecurifiedPersona,
         ),
     ) -> Self {
@@ -203,13 +287,12 @@ pub trait BatchApplySecurityShieldSigning {
 
     fn shield_application_for_unsecurified_account(
         &self,
-        manifest_entity_applying_shield_and_payer: ManifestWithUnsecurifiedAccountApplyingShieldAndPayer,
+        input: UnsecurifiedAccountShieldApplicationInput,
     ) -> Result<SecurityShieldApplicationForUnsecurifiedAccount> {
-        let manifest = manifest_entity_applying_shield_and_payer.manifest;
+        let manifest = input.manifest;
         let modified_manifest = manifest;
-        let account_applying_shield =
-            manifest_entity_applying_shield_and_payer.entity_applying_shield;
-        let maybe_payer = manifest_entity_applying_shield_and_payer.payer;
+        let account_applying_shield = input.entity_applying_shield;
+        let maybe_payer = input.payer;
         Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
             account_applying_shield,
             maybe_payer,
@@ -219,42 +302,37 @@ pub trait BatchApplySecurityShieldSigning {
 
     fn shield_application_for_unsecurified_persona(
         &self,
-        manifest_entity_applying_shield_and_payer: ManifestWithUnsecurifiedPersonaApplyingShieldAndPayer,
+        input: UnsecurifiedPersonaShieldApplicationInput,
     ) -> Result<SecurityShieldApplicationForUnsecurifiedPersona> {
         todo!()
     }
 
     fn shield_application_for_unsecurified_entity(
         &self,
-        manifest_entity_applying_shield_and_payer: ManifestWithUnsecurifiedEntityApplyingShieldAndPayer,
+        input: AnyUnsecurifiedShieldApplicationInput,
     ) -> Result<SecurityShieldApplicationForUnsecurifiedEntity> {
-        let entity =
-            &manifest_entity_applying_shield_and_payer.entity_applying_shield;
+        let entity = &input.entity_applying_shield;
         match &entity.entity {
             AccountOrPersona::AccountEntity(a) => self
                 .shield_application_for_unsecurified_account(
-                    ManifestWithUnsecurifiedAccountApplyingShieldAndPayer::from(
-                        (
-                            manifest_entity_applying_shield_and_payer.clone(),
-                            UnsecurifiedAccount::with_unsecured_entity_control(
-                                a.clone(),
-                                entity.unsecured_entity_control.clone(),
-                            ),
+                    UnsecurifiedAccountShieldApplicationInput::from((
+                        input.clone(),
+                        UnsecurifiedAccount::with_unsecured_entity_control(
+                            a.clone(),
+                            entity.unsecured_entity_control.clone(),
                         ),
-                    ),
+                    )),
                 )
                 .map(SecurityShieldApplicationForUnsecurifiedEntity::Account),
             AccountOrPersona::PersonaEntity(p) => self
                 .shield_application_for_unsecurified_persona(
-                    ManifestWithUnsecurifiedPersonaApplyingShieldAndPayer::from(
-                        (
-                            manifest_entity_applying_shield_and_payer.clone(),
-                            UnsecurifiedPersona::with_unsecured_entity_control(
-                                p.clone(),
-                                entity.unsecured_entity_control.clone(),
-                            ),
+                    UnsecurifiedPersonaShieldApplicationInput::from((
+                        input.clone(),
+                        UnsecurifiedPersona::with_unsecured_entity_control(
+                            p.clone(),
+                            entity.unsecured_entity_control.clone(),
                         ),
-                    ),
+                    )),
                 )
                 .map(SecurityShieldApplicationForUnsecurifiedEntity::Persona),
         }
@@ -262,7 +340,7 @@ pub trait BatchApplySecurityShieldSigning {
 
     fn shield_application_for_securified_entity(
         &self,
-        manifest_entity_applying_shield_and_payer: ManifestWithSecurifiedEntityApplyingShieldAndPayer,
+        input: AnySecurifiedShieldApplicationInput,
     ) -> Result<SecurityShieldApplicationForSecurifiedEntity> {
         todo!()
     }
@@ -272,22 +350,6 @@ pub trait BatchApplySecurityShieldSigning {
 pub enum EntityApplyingShield {
     Unsecurified(AnyUnsecurifiedEntity),
     Securified(AnySecurifiedEntity),
-}
-impl EntityApplyingShield {
-    fn has_address(
-        &self,
-        address: impl Into<AddressOfAccountOrPersona>,
-    ) -> bool {
-        let address = address.into();
-        match self {
-            EntityApplyingShield::Unsecurified(entity) => {
-                entity.entity.address() == address
-            }
-            EntityApplyingShield::Securified(entity) => {
-                entity.entity.address() == address
-            }
-        }
-    }
 }
 
 impl EntityApplyingShield {
@@ -303,27 +365,6 @@ impl EntityApplyingShield {
         Self::Unsecurified(AnyUnsecurifiedEntity::from(persona))
     }
 }
-
-// impl From<AnySecurifiedEntity> for SecurifiedEntityApplyingShield {
-//     fn from(entity: AnySecurifiedEntity) -> Self {
-//         SecurifiedAccount::try_from(entity.clone())
-//             .map(Self::Account)
-//             .or(SecurifiedPersona::try_from(entity).map(Self::Persona))
-//             .unwrap()
-//     }
-// }
-
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub enum UnsecurifiedEntityApplyingShield {
-//     Account(UnsecurifiedAccount),
-//     Persona(UnsecurifiedPersona),
-// }
-
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub enum SecurifiedEntityApplyingShield {
-//     Account(SecurifiedAccount),
-//     Persona(SecurifiedPersona),
-// }
 
 #[async_trait::async_trait]
 impl BatchApplySecurityShieldSigning for SargonOS {
@@ -380,21 +421,20 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                     manifest_with_payer_by_address.payer
                 {
                     let payer = self.account_by_address(payer_address)?;
-                    Ok(ManifestWithEntityApplyingShieldAndPayer::new(
+                    Ok(ShieldApplicationInput::new(
                         payer,
                         entity_applying_shield,
                         manifest,
                     ))
                 } else {
-                    Ok(ManifestWithEntityApplyingShieldAndPayer::new(
+                    Ok(ShieldApplicationInput::new(
                         None,
                         entity_applying_shield,
                         manifest,
                     ))
                 }
             })
-            .collect::<Result<Vec<ManifestWithEntityApplyingShieldAndPayer>>>(
-            )?;
+            .collect::<Result<Vec<ShieldApplicationInput>>>()?;
 
         manifests_with_entities
             .into_iter()
@@ -402,12 +442,18 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                 match &manifest_with_payer.entity_applying_shield {
                     EntityApplyingShield::Unsecurified(entity) => self
                         .shield_application_for_unsecurified_entity(
-                            ManifestWithUnsecurifiedEntityApplyingShieldAndPayer::from((manifest_with_payer.clone(), entity.clone()))
+                            AnyUnsecurifiedShieldApplicationInput::from((
+                                manifest_with_payer.clone(),
+                                entity.clone(),
+                            )),
                         )
                         .map(SecurityShieldApplication::unsecurified),
-                        EntityApplyingShield::Securified(entity) => self
+                    EntityApplyingShield::Securified(entity) => self
                         .shield_application_for_securified_entity(
-                            ManifestWithSecurifiedEntityApplyingShieldAndPayer::from((manifest_with_payer.clone(), entity.clone()))
+                            AnySecurifiedShieldApplicationInput::from((
+                                manifest_with_payer.clone(),
+                                entity.clone(),
+                            )),
                         )
                         .map(SecurityShieldApplication::securified),
                 }
