@@ -854,16 +854,103 @@ pub enum CommonError {
     #[error("Not all signatures are produced with the same factor source.")]
     FactorOutcomeSignedFactorSourceIDMismatch = 10245,
 
+    #[error("Unknown response status code: {status_code}")]
+    ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10246,
+
+    #[error("Unknown response status code: {status_code}")]
+    ArculusCSDKBadStatusCode { status_code: i32 } = 10247,
+
+    #[error("Arculus card created invalid mnemonic words")]
+    ArculusCardInvalidNonUtf8MnemonicPhrase = 10248,
+
+    #[error("Arculus card wrong PIN")]
+    ArculusCardWrongPIN = 10249,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateSelectWalletRequest = 10250,
+
+    #[error("Arculus card failed to create select wallet response")]
+    ArculusCSDKFailedToCreateSelectWalletResponse = 10251,
+
+    #[error("Arculus card failed to create get pub key by path request")]
+    ArculusCSDKFailedToCreateGetPublicKeyByPathRequest = 10252,
+
+    #[error("Arculus card failed to create get pub key by path response")]
+    ArculusCSDKFailedToCreateGetPublicKeyByPathResponse = 10253,
+
+    #[error("Arculus card failed to create get GGUID request")]
+    ArculusCSDKFailedToCreateGetGGUIDRequest = 10254,
+
+    #[error("Arculus card failed to create get GGUID response")]
+    ArculusCSDKFailedToCreateGetGGUIDResponse = 10255,
+
+    #[error("Arculus card failed to create get firmware version request")]
+    ArculusCSDKFailedToCreateGetFirmwareVersionRequest = 10256,
+
+    #[error("Arculus card failed to create get firmware version response")]
+    ArculusCSDKFailedToCreateGetFirmwareVersionResponse = 10257,
+
+    #[error("Arculus card failed to create store data PIN request")]
+    ArculusCSDKFailedToCreateStoreDataPINRequest = 10258,
+
+    #[error("Arculus card failed to create verify PIN request")]
+    ArculusCSDKFailedToCreateVerifyPINRequest = 10259,
+
+    #[error("Arculus card failed to create init encrypted session request")]
+    ArculusCSDKFailedToCreateaInitEncryptedSessionRequest = 10260,
+
+    #[error("Arculus card failed to create wallet seed request")]
+    ArculusCSDKFailedToCreateWalletSeedRequest = 10261,
+
+    #[error("Arculus card failed to create wallet seed response")]
+    ArculusCSDKFailedToCreateWalletSeedResponse = 10262,
+
+    #[error("Arculus card failed to create reset wallet request")]
+    ArculusCSDKFailedToCreateResetWalletRequest = 10263,
+
+    #[error("Arculus card failed to create inint recover wallet request")]
+    ArculusCSDKFailedToCreateInitRecoverWalletRequest = 10264,
+
+    #[error("Arculus card failed to create finish recover wallet request")]
+    ArculusCSDKFailedToCreateFinishRecoverWalletRequest = 10265,
+
+    #[error("Arculus card failed to create sign hash path request")]
+    ArculusCSDKFailedToCreateSignHashPathRequest = 10266,
+
+    #[error("Arculus card failed to create sign hash path response")]
+    ArculusCSDKFailedToCreateSignHashPathResponse = 10267,
+
+    #[error("Arculus card failed to create seed phrase from mnemonic")]
+    ArculusCSDKFailedToCreateSeedPhraseFromMnemonicSentence = 10268,
+
+    #[error("Arculus card failed to init wallet")]
+    ArculusCSDKFailedToInitWallet = 10269,
+
     #[error("Unknown SecurityStructureID {id}")]
-    UnknownSecurityStructureID { id: String } = 10246,
+    UnknownSecurityStructureID { id: String } = 10270,
+
+    #[error("Arculus Card FactorSourceID missmatch")]
+    ArculusCardFactorSourceIdMissmatch = 10271,
+
+    #[error("NFC Session was cancelled either by user or by system after being inactive")]
+    NFCSessionCancelled = 10272,
+
+    #[error("NFC Session lost the connection with the tag")]
+    NFCSessionLostTagConnection = 10273,
+
+    #[error("NFC Session detected an unknown tag")]
+    NFCSessionUnknownTag = 10274,
+
+    #[error("Arculus Card not configured")]
+    ArculusCardNotConfigured = 10275,
 
     #[error("Signing failed due to too many factor sources were neglected.")]
-    SigningFailedTooManyFactorSourcesNeglected = 10247,
+    SigningFailedTooManyFactorSourcesNeglected = 10276,
 
     #[error(
         "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
     )]
-    StructureAlreadyExists { bad_value: String } = 10248,
+    StructureAlreadyExists { bad_value: String } = 10277,
 }
 
 impl CommonError {

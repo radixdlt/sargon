@@ -89,6 +89,11 @@ pub enum CommonError {
         error_message: String,
     },
     FailedToExtractTransactionReceiptBytes,
+    ArculusCardFactorSourceIdMissmatch,
+    NFCSessionCancelled,
+    NFCSessionLostTagConnection,
+    NFCSessionUnknownTag,
+    ArculusCardNotConfigured,
     MaxTransfersPerTransactionReached {
         amount: u64,
     },
@@ -349,6 +354,21 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
+            CommonError::ArculusCardFactorSourceIdMissmatch => {
+                InternalCommonError::ArculusCardFactorSourceIdMissmatch
+            },
+            CommonError::NFCSessionCancelled => {
+                InternalCommonError::NFCSessionCancelled
+            },
+            CommonError::NFCSessionLostTagConnection => {
+                InternalCommonError::NFCSessionLostTagConnection
+            },
+            CommonError::NFCSessionUnknownTag => {
+                InternalCommonError::NFCSessionUnknownTag
+            },
+            CommonError::ArculusCardNotConfigured => {
+                InternalCommonError::ArculusCardNotConfigured
+            },
             _ => InternalCommonError::Unknown,
         }
     }
@@ -501,6 +521,21 @@ impl From<InternalCommonError> for CommonError {
                 InvalidInstructionsString {
                     underlying: underlying.clone(),
                 }
+            }
+            InternalCommonError::ArculusCardFactorSourceIdMissmatch => {
+                CommonError::ArculusCardFactorSourceIdMissmatch
+            }
+            InternalCommonError::NFCSessionCancelled => {
+                CommonError::NFCSessionCancelled
+            }
+            InternalCommonError::NFCSessionLostTagConnection => {
+                CommonError::NFCSessionLostTagConnection
+            }
+            InternalCommonError::NFCSessionUnknownTag => {
+                CommonError::NFCSessionUnknownTag
+            }
+            InternalCommonError::ArculusCardNotConfigured => {
+                CommonError::ArculusCardNotConfigured
             }
             _ => Self::erased(value),
         }
