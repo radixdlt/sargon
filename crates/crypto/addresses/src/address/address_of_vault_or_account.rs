@@ -1,4 +1,3 @@
-
 use crate::{address_union, prelude::*};
 
 address_union!(

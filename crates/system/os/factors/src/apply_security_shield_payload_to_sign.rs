@@ -62,7 +62,7 @@ impl<E: HasEntityAddress + Clone, X> HasEntityAddress
     }
 }
 
-struct XrdBalanceOfEntity<Entity: HasEntityAddress + Clone> {
+pub struct XrdBalanceOfEntity<Entity: HasEntityAddress + Clone> {
     pub entity: Entity,
     pub balance: Decimal,
 }
@@ -137,6 +137,34 @@ impl From<(ShieldApplicationInput, AnySecurifiedEntity)>
     }
 }
 
+impl From<(AnySecurifiedShieldApplicationInput, SecurifiedAccount)>
+    for SecurifiedAccountShieldApplicationInput
+{
+    fn from(
+        (some, entity_applying_shield): (
+            AnySecurifiedShieldApplicationInput,
+            SecurifiedAccount,
+        ),
+    ) -> Self {
+        assert!(some.address_erased().is_account(), "Must be Account");
+        Self::with_entity_applying_shield(some, entity_applying_shield)
+    }
+}
+
+impl From<(AnySecurifiedShieldApplicationInput, SecurifiedPersona)>
+    for SecurifiedPersonaShieldApplicationInput
+{
+    fn from(
+        (some, entity_applying_shield): (
+            AnySecurifiedShieldApplicationInput,
+            SecurifiedPersona,
+        ),
+    ) -> Self {
+        assert!(some.address_erased().is_identity(), "Must be Persona");
+        Self::with_entity_applying_shield(some, entity_applying_shield)
+    }
+}
+
 pub type ShieldApplicationInput =
     AbstractShieldApplicationInput<EntityApplyingShield>;
 
@@ -197,15 +225,19 @@ impl ShieldApplicationInputWithoutXrdBalance {
 
 pub type AnyUnsecurifiedShieldApplicationInput =
     AbstractShieldApplicationInput<AnyUnsecurifiedEntity>;
+
 pub type UnsecurifiedAccountShieldApplicationInput =
     AbstractShieldApplicationInput<UnsecurifiedAccount>;
+
 pub type UnsecurifiedPersonaShieldApplicationInput =
     AbstractShieldApplicationInput<UnsecurifiedPersona>;
 
 pub type AnySecurifiedShieldApplicationInput =
     AbstractShieldApplicationInput<AnySecurifiedEntity>;
+
 pub type SecurifiedAccountShieldApplicationInput =
     AbstractShieldApplicationInput<SecurifiedAccount>;
+
 pub type SecurifiedPersonaShieldApplicationInput =
     AbstractShieldApplicationInput<SecurifiedPersona>;
 
@@ -282,20 +314,6 @@ where {
         )
     }
 }
-
-// impl ShieldApplicationInputWithoutXrdBalance {
-//     fn new(
-//         payer: impl Into<Option<Account>>,
-//         entity_applying_shield: Entity,
-//         manifest: TransactionManifest,
-//     ) -> Self {
-//         Self {
-//             _payer: payer.into(),
-//             entity_applying_shield,
-//             manifest,
-//         }
-//     }
-// }
 
 impl From<(AnyUnsecurifiedShieldApplicationInput, UnsecurifiedAccount)>
     for UnsecurifiedAccountShieldApplicationInput
@@ -562,11 +580,49 @@ pub trait BatchApplySecurityShieldSigning {
         }
     }
 
+    fn shield_application_for_securified_account(
+        &self,
+        input: SecurifiedAccountShieldApplicationInput,
+    ) -> Result<SecurityShieldApplicationForSecurifiedAccount> {
+        todo!()
+    }
+
+    fn shield_application_for_securified_persona(
+        &self,
+        input: SecurifiedPersonaShieldApplicationInput,
+    ) -> Result<SecurityShieldApplicationForSecurifiedPersona> {
+        todo!()
+    }
+
     fn shield_application_for_securified_entity(
         &self,
         input: AnySecurifiedShieldApplicationInput,
     ) -> Result<SecurityShieldApplicationForSecurifiedEntity> {
-        todo!()
+        let entity = &input.entity_applying_shield;
+        match &entity.entity {
+            AccountOrPersona::AccountEntity(a) => self
+                .shield_application_for_securified_account(
+                    SecurifiedAccountShieldApplicationInput::from((
+                        input.clone(),
+                        SecurifiedAccount::with_securified_entity_control(
+                            a.clone(),
+                            entity.securified_entity_control(),
+                        ),
+                    )),
+                )
+                .map(SecurityShieldApplicationForSecurifiedEntity::Account),
+            AccountOrPersona::PersonaEntity(p) => self
+                .shield_application_for_securified_persona(
+                    SecurifiedPersonaShieldApplicationInput::from((
+                        input.clone(),
+                        SecurifiedPersona::with_securified_entity_control(
+                            p.clone(),
+                            entity.securified_entity_control(),
+                        ),
+                    )),
+                )
+                .map(SecurityShieldApplicationForSecurifiedEntity::Persona),
+        }
     }
 
     fn assert_that_payer_is_not_in_batch_of_entities_applying_shield(
