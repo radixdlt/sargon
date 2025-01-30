@@ -396,7 +396,7 @@ pub trait BatchApplySecurityShieldSigning {
         let manifest = input.manifest;
         let modified_manifest = manifest;
         let account_applying_shield = input.entity_applying_shield;
-        todo!("use xrd addresses");
+        todo!("use xrd balances");
         // Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
         //     account_applying_shield,
         //     maybe_payer,
@@ -582,18 +582,58 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                 network_id,
                 addresses_to_query,
             )
-            .await;
+            .await?;
 
-        let input_by_address_of_entity_applying_shield =
-            manifests_with_entities_without_xrd_balances
+        manifests_with_entities_without_xrd_balances
                 .into_iter()
-                .map(|i| (i.address_erased(), i))
-                .collect::<IndexMap<
-                    AddressOfAccountOrPersona,
-                    ShieldApplicationInputWithoutXrdBalance,
-                >>();
-
-        todo!("uh what to do with UNSECURIFIED PERSONAS!?!")
+                .map(|i| {
+                    let entity_applying_shield_and_balance_res: Result<XrdBalanceOfEntity<EntityApplyingShield>> = match i.get_entity_applying_shield() {
+                        EntityApplyingShield::Securified(e) => {
+                            let vault_address = e.xrd_vault_address();
+                            let balance = balances.get(&AddressOfVaultOrAccount::Vault(vault_address)).ok_or(CommonError::Unknown).cloned()?; // TODO better error
+                            Ok(XrdBalanceOfEntity {
+                                entity: EntityApplyingShield::securified(e),
+                                balance
+                            })
+                        },
+                        EntityApplyingShield::Unsecurified(e) => {
+                            match &e.entity {
+                                AccountOrPersona::AccountEntity(a) => {
+                                    let balance = balances.get(&AddressOfVaultOrAccount::Account(a.address())).ok_or(CommonError::Unknown).cloned()?; // TODO better error
+                            Ok(XrdBalanceOfEntity {
+                                entity: EntityApplyingShield::unsecurified_account(UnsecurifiedAccount::with_unsecured_entity_control(a.clone(), e.unsecured_entity_control.clone())),
+                                balance
+                            })
+                                }
+                                AccountOrPersona::PersonaEntity(p) => {
+                                    // Unsecurified Personas cannot have any XRD... 
+                                    // thus we use Decimal192::zero(), which is a safe default
+                                    // we can update the types involved in this function
+                                    // to make this exeuction path impossible, alas,
+                                    // they are already too complex, so seems no worth it.
+                                    Ok(XrdBalanceOfEntity {
+                                        entity: EntityApplyingShield::unsecurified_persona(UnsecurifiedPersona::with_unsecured_entity_control(p.clone(), e.unsecured_entity_control.clone())),
+                                        balance: Decimal192::zero()
+                                    })
+                                }
+                            }
+                        },
+                    };
+                    let entity_applying_shield_and_balance = entity_applying_shield_and_balance_res?;
+                    match i.get_payer() {
+                        Some(payer) => {
+                            let balance = balances.get(&AddressOfVaultOrAccount::Account(payeaddress())).ok_or(CommonError::Unknown).cloned()?; // TODO better error
+                            Ok(ShieldApplicationInput::new(XrdBalanceOfEntity::<Account> {
+                                entity: payer,
+                                balance
+                            }, entity_applying_shield_and_balance, i.manifest))
+                        }
+                        None => {
+                            Ok(ShieldApplicationInput::new(None, entity_applying_shield_and_balance, i.manifest))
+                        }
+                    }
+                })
+                .collect::<Result<Vec<ShieldApplicationInput>>>()
     }
 
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(

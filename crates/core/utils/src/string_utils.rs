@@ -22,10 +22,10 @@ pub trait TypeName {
     fn type_name() -> String;
 }
 
-impl<T> TypeName for T{
-fn type_name() -> String {
-    _type_name::<T>()
-}
+impl<T> TypeName for T {
+    fn type_name() -> String {
+        _type_name::<T>()
+    }
 }
 
 pub fn format_string(s: impl AsRef<str>, start: usize, end: usize) -> String {

@@ -12,7 +12,7 @@ impl<T: IsBaseEntity> HasEntityAddress for T {
 
 /// A trait bridging AccountOrPersona, Account and Persona.
 pub trait IsBaseEntity:
- HasEntityKindObjectSafe + IsNetworkAware + HasSecurityState
+    HasEntityKindObjectSafe + IsNetworkAware + HasSecurityState
 {
     type Address: IsBaseEntityAddress
         + PartialEq
@@ -23,7 +23,6 @@ pub trait IsBaseEntity:
         + std::fmt::Debug;
 
     fn address(&self) -> Self::Address;
-
 
     /// An order set of `EntityFlag`s used to describe certain Off-ledger
     /// user state about Accounts or Personas, such as if an entity is

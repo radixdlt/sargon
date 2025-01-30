@@ -82,4 +82,8 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
             .veci()
             .map(|fi| VirtualEntityCreatingInstance::new(fi, self.address()))
     }
+
+    pub fn xrd_vault_address(&self) -> VaultAddress {
+        self.securified_entity_control().xrd_vault_address()
+    }
 }
