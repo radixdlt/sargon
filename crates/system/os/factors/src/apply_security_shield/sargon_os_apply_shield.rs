@@ -86,7 +86,7 @@ impl OsShieldApplying for SargonOS {
     )> {
         // TODO change when queue is introduced
         // `CannotSecurifyEntityHasProvisionalSecurityConfig` should be returned when
-        // 1. entity's shield is in provisional state
+        // 1. entity's shield is in provisional state and
         // 2. interaction is in the queue.
 
         // if !entity_addresses
@@ -186,6 +186,11 @@ impl OsShieldApplying for SargonOS {
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcome,
     )> {
+        // TODO change when queue is introduced
+        // `CannotSecurifyEntityHasProvisionalSecurityConfig` should be returned when
+        // 1. entity's shield is in provisional state and
+        // 2. interaction is in the queue.
+
         // if !entities.iter().all(|a| a.get_provisional().is_none()) {
         //     return Err(
         //         CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig,
