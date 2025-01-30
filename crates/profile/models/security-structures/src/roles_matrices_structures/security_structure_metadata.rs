@@ -53,13 +53,12 @@ impl SecurityStructureMetadata {
         )
     }
 
-    pub fn set_flag(&mut self, flag: SecurityStructureFlag) {
+    pub fn insert_flag(&mut self, flag: SecurityStructureFlag) {
         self.flags.insert(flag);
     }
 
     pub fn remove_flag(&mut self, flag: SecurityStructureFlag) {
-        let result = self.flags.remove_id(&flag.id());
-        println!("flag removed: {:?}", result)
+        self.flags.remove_id(&flag.id());
     }
 
     pub fn is_default(&self) -> bool {

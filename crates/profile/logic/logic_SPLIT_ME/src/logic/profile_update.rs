@@ -342,39 +342,43 @@ pub trait ProfileSecurityStructuresUpdating {
     fn update_security_structure_remove_flag_default(
         &mut self,
         shield_id: &SecurityStructureID,
-    ) -> Result<bool>;
+    ) -> Result<()>;
 
     fn update_security_structure_add_flag_default(
         &mut self,
         shield_id: &SecurityStructureID,
-    ) -> Result<bool>;
+    ) -> Result<()>;
 }
 
 impl ProfileSecurityStructuresUpdating for Profile {
     fn update_security_structure_remove_flag_default(
         &mut self,
         shield_id: &SecurityStructureID,
-    ) -> Result<bool> {
-        Ok(self
-            .app_preferences
+    ) -> Result<()> {
+        self.app_preferences
             .security
             .security_structures_of_factor_source_ids
-            .update_with(shield_id, |s| {
+            .try_update_with(shield_id, |s| {
                 s.metadata.remove_flag(SecurityStructureFlag::Default)
-            }))
+            })
+            .map_err(|_| CommonError::InvalidSecurityStructureID {
+                bad_value: shield_id.to_string(),
+            })
     }
 
     fn update_security_structure_add_flag_default(
         &mut self,
         shield_id: &SecurityStructureID,
-    ) -> Result<bool> {
-        Ok(self
-            .app_preferences
+    ) -> Result<()> {
+        self.app_preferences
             .security
             .security_structures_of_factor_source_ids
-            .update_with(shield_id, |s| {
-                s.metadata.set_flag(SecurityStructureFlag::Default)
-            }))
+            .try_update_with(shield_id, |s| {
+                s.metadata.insert_flag(SecurityStructureFlag::Default)
+            })
+            .map_err(|_| CommonError::InvalidSecurityStructureID {
+                bad_value: shield_id.to_string(),
+            })
     }
 }
 
