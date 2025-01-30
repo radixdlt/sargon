@@ -34,18 +34,26 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
         security_structure_of_factor_instances
             .assert_has_entity_kind(entity_address.get_entity_kind())?;
 
+        // Securify the entity which will return an entity owner badge onto the worktop.
+        let (mut builder, owner_badge_bucket) = Self::put_owner_badge_in_bucket(
+            ScryptoTransactionManifestBuilder::new(),
+            &unsecurified_entity,
+        );
+
+        // Obtain the badge for rola key
+        let owner_badge_proof = "rola_key_proof";
+        builder = builder.create_proof_from_bucket_of_all(
+            owner_badge_bucket,
+            owner_badge_proof,
+        );
+        builder = builder.push_to_auth_zone(owner_badge_proof);
+
         // Set Rola Key
         builder = TransactionManifest::set_rola_key(
             builder,
             &security_structure_of_factor_instances
                 .authentication_signing_factor_instance,
             &entity_address,
-        );
-
-        // Securify the entity which will return an entity owner badge onto the worktop.
-        let (mut builder, owner_badge_bucket) = Self::put_owner_badge_in_bucket(
-            ScryptoTransactionManifestBuilder::new(),
-            &unsecurified_entity,
         );
 
         // Create an access controller for the entity.

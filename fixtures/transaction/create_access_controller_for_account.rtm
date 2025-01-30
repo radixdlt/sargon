@@ -1,3 +1,19 @@
+CALL_METHOD
+    Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
+    "securify"
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr")
+    Decimal("1")
+    Bucket("bucket1")
+;
+CREATE_PROOF_FROM_BUCKET_OF_ALL
+    Bucket("bucket1")
+    Proof("proof1")
+;
+PUSH_TO_AUTH_ZONE
+    Proof("proof1")
+;
 SET_METADATA
     Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
     "owner_keys"
@@ -8,15 +24,6 @@ SET_METADATA
             )
         )
     )
-;
-CALL_METHOD
-    Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
-    "securify"
-;
-TAKE_FROM_WORKTOP
-    Address("resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr")
-    Decimal("1")
-    Bucket("bucket1")
 ;
 ALLOCATE_GLOBAL_ADDRESS
     Address("package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr")

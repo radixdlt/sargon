@@ -1,3 +1,19 @@
+CALL_METHOD
+    Address("identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw")
+    "securify"
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1nfxxxxxxxxxxdntwnrxxxxxxxxx002876444928xxxxxxxxxdntwnr")
+    Decimal("1")
+    Bucket("bucket1")
+;
+CREATE_PROOF_FROM_BUCKET_OF_ALL
+    Bucket("bucket1")
+    Proof("proof1")
+;
+PUSH_TO_AUTH_ZONE
+    Proof("proof1")
+;
 SET_METADATA
     Address("identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw")
     "owner_keys"
@@ -8,15 +24,6 @@ SET_METADATA
             )
         )
     )
-;
-CALL_METHOD
-    Address("identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw")
-    "securify"
-;
-TAKE_FROM_WORKTOP
-    Address("resource_rdx1nfxxxxxxxxxxdntwnrxxxxxxxxx002876444928xxxxxxxxxdntwnr")
-    Decimal("1")
-    Bucket("bucket1")
 ;
 ALLOCATE_GLOBAL_ADDRESS
     Address("package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr")
