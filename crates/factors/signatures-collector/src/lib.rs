@@ -30,7 +30,7 @@ pub mod prelude {
     pub(crate) use signing_traits::prelude::*;
     pub(crate) use transaction_models::prelude::*;
 
-    pub(crate) use log::*;
+    
     pub(crate) use std::collections::HashMap;
 
     #[cfg(test)]

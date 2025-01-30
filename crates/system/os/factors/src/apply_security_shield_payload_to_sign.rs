@@ -1,4 +1,3 @@
-use addresses::address_union;
 use enum_as_inner::EnumAsInner;
 
 use crate::prelude::*;
@@ -458,17 +457,15 @@ pub trait BatchApplySecurityShieldSigning {
             } else {
                 Ok(other.entity.clone())
             }
+        } else if unsecurified_account_applying_shield_with_balance.balance
+            < input.needed_xrd_for_fee_and_topup()
+        {
+            Err(CommonError::Unknown) // CommonError::InsufficientXrdBalance
         } else {
-            if unsecurified_account_applying_shield_with_balance.balance
-                < input.needed_xrd_for_fee_and_topup()
-            {
-                Err(CommonError::Unknown) // CommonError::InsufficientXrdBalance
-            } else {
-                Ok(unsecurified_account_applying_shield_with_balance
-                    .entity
-                    .clone()
-                    .entity)
-            }
+            Ok(unsecurified_account_applying_shield_with_balance
+                .entity
+                .clone()
+                .entity)
         };
 
         let payer = payer_res?;
@@ -658,8 +655,7 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         if manifests_with_entities_without_xrd_balances
             .as_ref()
             .iter()
-            .find(|i| payer_addresses.contains(&i.address_erased()))
-            .is_some()
+            .any(|i| payer_addresses.contains(&i.address_erased()))
         {
             return Err(CommonError::Unknown); // CommonError::PayerCannotBeInBatchOfEntitiesApplyingShield
         }

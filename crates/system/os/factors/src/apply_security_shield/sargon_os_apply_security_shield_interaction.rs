@@ -88,7 +88,7 @@ fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shiel
     let lookup = hacky_tmp_get_entities_applying_shield();
     let address = lookup.iter().find_map(|(address, m)| {
         if m == manifest {
-            Some(address.clone())
+            Some(*address)
         } else {
             None
         }
