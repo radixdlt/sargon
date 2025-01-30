@@ -280,14 +280,14 @@ impl SecurityShieldBuilder {
     pub fn disallowed_factor_source_kinds_for_authentication_signing(
         &self,
     ) -> Vec<FactorSourceKind> {
-        sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().into_type()
+        sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().into_iter().filter(|f| f.is_supported()).into_type()
     }
 
     /// "Statically" queries which FactorSourceKinds are allowed for authentication signing.
     pub fn allowed_factor_source_kinds_for_authentication_signing(
         &self,
     ) -> Vec<FactorSourceKind> {
-        sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().into_type()
+        sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().into_iter().filter(|f| f.is_supported()).into_type()
     }
 
     /// "Statically" queries if `factor_source_kind`` is allowed for authentication signing.
@@ -532,9 +532,9 @@ impl FactorSourceID {
         Self::new(sargon::FactorSourceID::sample_ledger_other())
     }
 
-    pub fn sample_trusted_contact() -> Self {
-        Self::new(sargon::FactorSourceID::sample_trusted_contact())
-    }
+    // pub fn sample_trusted_contact() -> Self {
+    //     Self::new(sargon::FactorSourceID::sample_trusted_contact())
+    // }
 
     pub fn sample_arculus() -> Self {
         Self::new(sargon::FactorSourceID::sample_arculus())
@@ -572,9 +572,9 @@ impl FactorSource {
     pub fn sample_password() -> Self {
         Self::new(sargon::FactorSource::sample_password())
     }
-    pub fn sample_trusted_contact_frank() -> Self {
-        Self::new(sargon::FactorSource::sample_trusted_contact_frank())
-    }
+    // pub fn sample_trusted_contact_frank() -> Self {
+    //     Self::new(sargon::FactorSource::sample_trusted_contact_frank())
+    // }
     pub fn sample_device_babylon() -> Self {
         Self::new(sargon::FactorSource::sample_device_babylon())
     }
@@ -602,10 +602,12 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
 
+    // TODO: We should uncomment every reference in tests to TrustedContact and SecurityQuestions once they are supported
     #[test]
     fn rola() {
         let sut = SUT::new();
-        assert_eq!(sut.disallowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().len());
+        // UniFFI list doesn't include unsupported kinds (TrustedContact & SecurityQuestions)
+        assert_eq!(sut.disallowed_factor_source_kinds_for_authentication_signing().len() + 2, sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().len());
 
         assert_eq!(sut.allowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().len());
 
@@ -619,16 +621,17 @@ mod tests {
                 FactorSourceKind::Password
             )
         );
-        assert!(
-            !sut.is_allowed_factor_source_kind_for_authentication_signing(
-                FactorSourceKind::TrustedContact
-            )
-        );
-        assert!(
-            !sut.is_allowed_factor_source_kind_for_authentication_signing(
-                FactorSourceKind::SecurityQuestions
-            )
-        );
+
+        // assert!(
+        //     !sut.is_allowed_factor_source_kind_for_authentication_signing(
+        //         FactorSourceKind::TrustedContact
+        //     )
+        // );
+        // assert!(
+        //     !sut.is_allowed_factor_source_kind_for_authentication_signing(
+        //         FactorSourceKind::SecurityQuestions
+        //     )
+        // );
     }
 
     #[test]
@@ -958,7 +961,7 @@ mod tests {
         let mut sut = SUT::new();
         let all_factors_in_profile = vec![
             FactorSource::sample_password(),
-            FactorSource::sample_trusted_contact_frank(),
+            // FactorSource::sample_trusted_contact_frank(),
             FactorSource::sample_device_babylon(),
             FactorSource::sample_device_babylon_other(),
             FactorSource::sample_ledger(),
@@ -1014,9 +1017,9 @@ mod tests {
                 threshold: Threshold::All,
                 threshold_factors: Vec::new(),
                 override_factors: vec![
-                    FactorSourceID::sample_trusted_contact(),
+                    // FactorSourceID::sample_trusted_contact(),
                     FactorSourceID::sample_ledger(),
-                    FactorSourceID::sample_arculus_other(),
+                    FactorSourceID::sample_arculus(), // will be sample_arculus_other once we include sample_trusted_contact
                     FactorSourceID::sample_ledger_other(),
                 ]
             }
@@ -1029,7 +1032,7 @@ mod tests {
                 threshold_factors: Vec::new(),
                 override_factors: vec![
                     FactorSourceID::sample_password(),
-                    FactorSourceID::sample_arculus(),
+                    FactorSourceID::sample_arculus_other(), // will be sample_arculus once we include sample_trusted_contact
                     FactorSourceID::sample_device(),
                     FactorSourceID::sample_device_other(),
                 ]
@@ -1037,23 +1040,23 @@ mod tests {
         );
     }
 
-    #[test]
-    fn primary_override_validation_status_trusted_contact() {
-        let sut = SUT::new();
-        let res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
-            vec![FactorSourceID::sample_trusted_contact()],
-        );
-        pretty_assertions::assert_eq!(
-            res,
-            vec![
-                FactorSourceValidationStatus {
-                    role: RoleKind::Primary,
-                    factor_source_id: FactorSourceID::sample_trusted_contact(),
-                    reason_if_invalid: Some(FactorSourceValidationStatusReasonIfInvalid::NonBasic(
-                        SecurityShieldBuilderRuleViolation::PrimaryCannotContainTrustedContact
-                    ))
-                }
-            ]
-        )
-    }
+    // #[test]
+    // fn primary_override_validation_status_trusted_contact() {
+    //     let sut = SUT::new();
+    //     let res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
+    //         vec![FactorSourceID::sample_trusted_contact()],
+    //     );
+    //     pretty_assertions::assert_eq!(
+    //         res,
+    //         vec![
+    //             FactorSourceValidationStatus {
+    //                 role: RoleKind::Primary,
+    //                 factor_source_id: FactorSourceID::sample_trusted_contact(),
+    //                 reason_if_invalid: Some(FactorSourceValidationStatusReasonIfInvalid::NonBasic(
+    //                     SecurityShieldBuilderRuleViolation::PrimaryCannotContainTrustedContact
+    //                 ))
+    //             }
+    //         ]
+    //     )
+    // }
 }

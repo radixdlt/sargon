@@ -10,8 +10,6 @@ import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.OffDeviceMnemonicFactorSource
 import com.radixdlt.sargon.PasswordFactorSource
-import com.radixdlt.sargon.SecurityQuestionsNotProductionReadyFactorSource
-import com.radixdlt.sargon.TrustedContactFactorSource
 import com.radixdlt.sargon.deviceFactorSourceIsMainBdfs
 import com.radixdlt.sargon.factorSourceSupportsBabylon
 import com.radixdlt.sargon.factorSourceSupportsOlympia
@@ -25,8 +23,8 @@ val FactorSource.id: FactorSourceId
         is FactorSource.Ledger -> value.id.asGeneral()
         is FactorSource.ArculusCard -> value.id.asGeneral()
         is FactorSource.OffDeviceMnemonic -> value.id.asGeneral()
-        is FactorSource.SecurityQuestions -> value.id.asGeneral()
-        is FactorSource.TrustedContact -> value.id.asGeneral()
+//        is FactorSource.SecurityQuestions -> value.id.asGeneral()
+//        is FactorSource.TrustedContact -> value.id.asGeneral()
         is FactorSource.Password -> value.id.asGeneral()
     }
 
@@ -36,8 +34,8 @@ val FactorSource.kind: FactorSourceKind
         is FactorSource.Ledger -> value.kind
         is FactorSource.ArculusCard -> value.kind
         is FactorSource.OffDeviceMnemonic -> value.kind
-        is FactorSource.SecurityQuestions -> value.kind
-        is FactorSource.TrustedContact -> value.kind
+//        is FactorSource.SecurityQuestions -> value.kind
+//        is FactorSource.TrustedContact -> value.kind
         is FactorSource.Password -> value.kind
     }
 
@@ -45,9 +43,9 @@ fun DeviceFactorSource.asGeneral() = FactorSource.Device(value = this)
 fun LedgerHardwareWalletFactorSource.asGeneral() = FactorSource.Ledger(value = this)
 fun ArculusCardFactorSource.asGeneral() = FactorSource.ArculusCard(value = this)
 fun OffDeviceMnemonicFactorSource.asGeneral() = FactorSource.OffDeviceMnemonic(value = this)
-fun SecurityQuestionsNotProductionReadyFactorSource.asGeneral() =
-    FactorSource.SecurityQuestions(value = this)
-fun TrustedContactFactorSource.asGeneral() = FactorSource.TrustedContact(value = this)
+//fun SecurityQuestionsNotProductionReadyFactorSource.asGeneral() =
+//    FactorSource.SecurityQuestions(value = this)
+//fun TrustedContactFactorSource.asGeneral() = FactorSource.TrustedContact(value = this)
 fun PasswordFactorSource.asGeneral() = FactorSource.Password(value = this)
 
 fun FactorSource.Device.Companion.olympia(
@@ -92,11 +90,11 @@ val ArculusCardFactorSource.kind: FactorSourceKind
 val OffDeviceMnemonicFactorSource.kind: FactorSourceKind
     get() = FactorSourceKind.OFF_DEVICE_MNEMONIC
 
-val SecurityQuestionsNotProductionReadyFactorSource.kind: FactorSourceKind
-    get() = FactorSourceKind.SECURITY_QUESTIONS
+//val SecurityQuestionsNotProductionReadyFactorSource.kind: FactorSourceKind
+//    get() = FactorSourceKind.SECURITY_QUESTIONS
 
-val TrustedContactFactorSource.kind: FactorSourceKind
-    get() = FactorSourceKind.TRUSTED_CONTACT
+//val TrustedContactFactorSource.kind: FactorSourceKind
+//    get() = FactorSourceKind.TRUSTED_CONTACT
 
 val PasswordFactorSource.kind: FactorSourceKind
     get() = FactorSourceKind.PASSWORD

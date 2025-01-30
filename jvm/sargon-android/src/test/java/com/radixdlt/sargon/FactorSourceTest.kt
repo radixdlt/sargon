@@ -37,10 +37,10 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             FactorSource.sample.other().kind
         )
 
-        assertEquals(
-            FactorSourceKind.TRUSTED_CONTACT,
-            trustedContact.kind
-        )
+//        assertEquals(
+//            FactorSourceKind.TRUSTED_CONTACT,
+//            trustedContact.kind
+//        )
 
         assertEquals(
             FactorSourceKind.ARCULUS_CARD,
@@ -52,10 +52,10 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             offDeviceMnemonic.kind
         )
 
-        assertEquals(
-            FactorSourceKind.SECURITY_QUESTIONS,
-            sequrityQuestions.kind
-        )
+//        assertEquals(
+//            FactorSourceKind.SECURITY_QUESTIONS,
+//            sequrityQuestions.kind
+//        )
 
         assertEquals(
             FactorSourceKind.PASSWORD,
@@ -80,12 +80,12 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         }
 
 
-        with(trustedContact) {
-            assertEquals(
-                id,
-                value.id.asGeneral()
-            )
-        }
+//        with(trustedContact) {
+//            assertEquals(
+//                id,
+//                value.id.asGeneral()
+//            )
+//        }
 
         with(arculusCard) {
             assertEquals(
@@ -101,12 +101,12 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             )
         }
 
-        with(sequrityQuestions) {
-            assertEquals(
-                id,
-                value.id.asGeneral()
-            )
-        }
+//        with(sequrityQuestions) {
+//            assertEquals(
+//                id,
+//                value.id.asGeneral()
+//            )
+//        }
 
         with(password) {
             assertEquals(
@@ -128,10 +128,10 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             (FactorSource.sample.other() as FactorSource.Ledger).value.asGeneral()
         )
 
-        assertEquals(
-            trustedContact,
-            trustedContact.value.asGeneral()
-        )
+//        assertEquals(
+//            trustedContact,
+//            trustedContact.value.asGeneral()
+//        )
 
         assertEquals(
             arculusCard,
@@ -143,10 +143,10 @@ class FactorSourceTest : SampleTestable<FactorSource> {
             offDeviceMnemonic.value.asGeneral()
         )
 
-        assertEquals(
-            sequrityQuestions,
-            sequrityQuestions.value.asGeneral()
-        )
+//        assertEquals(
+//            sequrityQuestions,
+//            sequrityQuestions.value.asGeneral()
+//        )
 
         assertEquals(
             password,
@@ -205,13 +205,13 @@ class FactorSourceTest : SampleTestable<FactorSource> {
         assertFalse(factorSource.supportsBabylon)
     }
 
-    private val trustedContact = TrustedContactFactorSource.sample().asGeneral()
+//    private val trustedContact = TrustedContactFactorSource.sample().asGeneral()
 
     private val arculusCard = ArculusCardFactorSource.sample().asGeneral()
 
     private val offDeviceMnemonic = OffDeviceMnemonicFactorSource.sample().asGeneral()
 
-    private val sequrityQuestions = SecurityQuestionsNotProductionReadyFactorSource.sample().asGeneral()
+//    private val sequrityQuestions = SecurityQuestionsNotProductionReadyFactorSource.sample().asGeneral()
 
     private val password = PasswordFactorSource.sample().asGeneral()
 }

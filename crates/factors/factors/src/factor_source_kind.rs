@@ -124,6 +124,17 @@ impl FactorSourceKind {
             Self::TrustedContact => Contact,
         }
     }
+
+    pub fn is_supported(&self) -> bool {
+        match self {
+            Self::LedgerHQHardwareWallet
+            | Self::ArculusCard
+            | Self::Password
+            | Self::OffDeviceMnemonic
+            | Self::Device => true,
+            Self::SecurityQuestions | Self::TrustedContact => false,
+        }
+    }
 }
 
 impl FactorSourceKind {
@@ -267,6 +278,17 @@ mod tests {
             SUT::TrustedContact.category(),
             FactorSourceCategory::Contact
         );
+    }
+
+    #[test]
+    fn is_supported() {
+        assert!(SUT::Device.is_supported());
+        assert!(SUT::LedgerHQHardwareWallet.is_supported());
+        assert!(SUT::ArculusCard.is_supported());
+        assert!(SUT::OffDeviceMnemonic.is_supported());
+        assert!(SUT::Password.is_supported());
+        assert!(!SUT::TrustedContact.is_supported());
+        assert!(!SUT::SecurityQuestions.is_supported());
     }
 
     #[test]
