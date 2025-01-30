@@ -1,3 +1,4 @@
+use addresses::address_union;
 use enum_as_inner::EnumAsInner;
 
 use crate::prelude::*;
@@ -10,6 +11,8 @@ impl HasEntityAddress for EntityApplyingShield {
         }
     }
 }
+
+pub type AddressOfPayerOfShieldApplication = AddressOfVaultOrAccount;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 pub struct AbstractShieldApplicationInputWithOrWithoutBalance<
@@ -124,6 +127,55 @@ pub type ShieldApplicationInputWithoutXrdBalance =
         EntityApplyingShield,
         (),
     >;
+
+impl ShieldApplicationInputWithoutXrdBalance {
+    fn addresses_to_fetch_xrd_balance_for(
+        &self,
+    ) -> IndexSet<AddressOfPayerOfShieldApplication> {
+        let mut addresses = IndexSet::new();
+
+        if let Some(payer) = self._payer.as_ref() {
+            match payer.security_state() {
+                EntitySecurityState::Securified { value: sec } => {
+                    addresses.insert(AddressOfPayerOfShieldApplication::Vault(
+                        sec.xrd_vault_address(),
+                    ));
+                }
+                EntitySecurityState::Unsecured { .. } => {
+                    addresses.insert(
+                        AddressOfPayerOfShieldApplication::Account(
+                            payer.address(),
+                        ),
+                    );
+                }
+            }
+        }
+
+        match self.get_entity_applying_shield() {
+            EntityApplyingShield::Securified(e) => {
+                addresses.insert(AddressOfPayerOfShieldApplication::Vault(
+                    e.securified_entity_control.xrd_vault_address(),
+                ));
+            }
+            EntityApplyingShield::Unsecurified(e) => {
+                match e.entity {
+                    AccountOrPersona::PersonaEntity(_) => {
+                        // nothing to do
+                    }
+                    AccountOrPersona::AccountEntity(a) => {
+                        addresses.insert(
+                            AddressOfPayerOfShieldApplication::Account(
+                                a.address(),
+                            ),
+                        );
+                    }
+                }
+            }
+        }
+
+        addresses
+    }
+}
 
 pub type AnyUnsecurifiedShieldApplicationInput =
     AbstractShieldApplicationInput<AnyUnsecurifiedEntity>;
@@ -293,6 +345,7 @@ pub trait BatchApplySecurityShieldSigning {
     /// Can work with single transaction of course...
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
         &self,
+        network_id: NetworkID,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>>;
 
@@ -310,6 +363,14 @@ pub trait BatchApplySecurityShieldSigning {
         &self,
         address: IdentityAddress,
     ) -> Result<UnsecurifiedPersona>;
+
+    async fn get_xrd_balances(
+        &self,
+        network_id: NetworkID,
+        manifests_with_entities_without_xrd_balances: Vec<
+            ShieldApplicationInputWithoutXrdBalance,
+        >,
+    ) -> Result<Vec<ShieldApplicationInput>>;
 
     fn get_entity_applying_shield(
         &self,
@@ -387,6 +448,19 @@ pub trait BatchApplySecurityShieldSigning {
     ) -> Result<SecurityShieldApplicationForSecurifiedEntity> {
         todo!()
     }
+
+    fn assert_that_payer_is_not_in_batch_of_entities_applying_shield(
+        &self,
+        manifests_with_entities_without_xrd_balances: impl AsRef<
+            [ShieldApplicationInputWithoutXrdBalance],
+        >,
+    ) -> Result<()>;
+
+    async fn batch_fetch_xrd_balances_of_accounts_or_access_controllers(
+        &self,
+        network_id: NetworkID,
+        addresses: IndexSet<AddressOfPayerOfShieldApplication>,
+    ) -> Result<IndexMap<AddressOfPayerOfShieldApplication, Decimal>>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -444,8 +518,87 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         })
     }
 
+    fn assert_that_payer_is_not_in_batch_of_entities_applying_shield(
+        &self,
+        manifests_with_entities_without_xrd_balances: impl AsRef<
+            [ShieldApplicationInputWithoutXrdBalance],
+        >,
+    ) -> Result<()> {
+        let payer_addresses = manifests_with_entities_without_xrd_balances
+            .as_ref()
+            .iter()
+            .filter_map(|i| i.get_payer())
+            .map(|a| a.address())
+            .map(AddressOfAccountOrPersona::from)
+            .collect::<IndexSet<_>>();
+
+        if manifests_with_entities_without_xrd_balances
+            .as_ref()
+            .iter()
+            .find(|i| payer_addresses.contains(&i.address_erased()))
+            .is_some()
+        {
+            return Err(CommonError::Unknown); // CommonError::PayerCannotBeInBatchOfEntitiesApplyingShield
+        }
+
+        Ok(())
+    }
+
+    async fn batch_fetch_xrd_balances_of_accounts_or_access_controllers(
+        &self,
+        network_id: NetworkID,
+        addresses: IndexSet<AddressOfPayerOfShieldApplication>,
+    ) -> Result<IndexMap<AddressOfPayerOfShieldApplication, Decimal>> {
+        assert!(addresses.iter().all(|a| a.network_id() == network_id));
+        let gateway_client =
+            GatewayClient::new(self.http_client.driver.clone(), network_id);
+
+        let balances = gateway_client
+            .xrd_balances_of_vault_or_account(network_id, addresses)
+            .await?;
+
+        let balances = balances
+            .into_iter()
+            .map(|(k, v)| (k, v.unwrap_or(Decimal192::zero())))
+            .collect::<IndexMap<_, _>>();
+
+        Ok(balances)
+    }
+
+    async fn get_xrd_balances(
+        &self,
+        network_id: NetworkID,
+        manifests_with_entities_without_xrd_balances: Vec<
+            ShieldApplicationInputWithoutXrdBalance,
+        >,
+    ) -> Result<Vec<ShieldApplicationInput>> {
+        let addresses_to_query = manifests_with_entities_without_xrd_balances
+            .iter()
+            .flat_map(|i| i.addresses_to_fetch_xrd_balance_for())
+            .collect::<IndexSet<AddressOfPayerOfShieldApplication>>();
+
+        let balances = self
+            .batch_fetch_xrd_balances_of_accounts_or_access_controllers(
+                network_id,
+                addresses_to_query,
+            )
+            .await;
+
+        let input_by_address_of_entity_applying_shield =
+            manifests_with_entities_without_xrd_balances
+                .into_iter()
+                .map(|i| (i.address_erased(), i))
+                .collect::<IndexMap<
+                    AddressOfAccountOrPersona,
+                    ShieldApplicationInputWithoutXrdBalance,
+                >>();
+
+        todo!("uh what to do with UNSECURIFIED PERSONAS!?!")
+    }
+
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
         &self,
+        network_id: NetworkID,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>> {
         let manifests_with_entities_without_xrd_balances = manifest_and_payer_tuples
@@ -479,11 +632,21 @@ impl BatchApplySecurityShieldSigning for SargonOS {
             })
             .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()?;
 
-        let manifests_with_entities_with_xrd_balance =
-            manifests_with_entities_without_xrd_balances
-                .into_iter()
-                .map(|with_balance| todo!())
-                .collect::<Result<Vec<ShieldApplicationInput>>>()?;
+        // Assert that payer if specified is not part of the batch of entities applying shield
+        self.assert_that_payer_is_not_in_batch_of_entities_applying_shield(
+            &manifests_with_entities_without_xrd_balances,
+        )?;
+
+        let manifests_with_entities_with_xrd_balance = self
+            .get_xrd_balances(
+                network_id,
+                manifests_with_entities_without_xrd_balances,
+            )
+            .await?;
+        // manifests_with_entities_without_xrd_balances
+        //     .into_iter()
+        //     .map(|with_balance| todo!())
+        //     .collect::<Result<Vec<ShieldApplicationInput>>>()?;
 
         manifests_with_entities_with_xrd_balance
             .into_iter()

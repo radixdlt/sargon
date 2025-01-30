@@ -9,41 +9,89 @@ impl GatewayClient {
         &self,
         address: AccountAddress,
     ) -> Result<Option<Decimal192>> {
+        let map = self
+            .xrd_balances_of_accounts(address.network_id(), vec![address])
+            .await?;
+        Ok(map.get(&address).cloned().flatten())
+    }
+
+    /// Fetched the XRD balance of account of `address`, returns `None` if
+    /// it has no balance.
+    pub async fn xrd_balances_of_accounts(
+        &self,
+        network_id: NetworkID,
+        addresses: impl IntoIterator<Item = AccountAddress>,
+    ) -> Result<IndexMap<AccountAddress, Option<Decimal192>>> {
+        let map = self
+            .xrd_balances_of_vault_or_account(
+                network_id,
+                addresses.into_iter().map(AddressOfVaultOrAccount::from),
+            )
+            .await?;
+
+        let map = map
+            .into_iter()
+            .map(|(k, v)| {
+                (
+                    AccountAddress::try_from(k)
+                        .expect("should not have received other components"),
+                    v,
+                )
+            })
+            .collect();
+
+        Ok(map)
+    }
+
+    /// Fetched the XRD balance of the component - either AccountAddress or VaultAddress
+    pub async fn xrd_balances_of_vault_or_account(
+        &self,
+        network_id: NetworkID,
+        addresses: impl IntoIterator<Item = AddressOfVaultOrAccount>,
+    ) -> Result<IndexMap<AddressOfVaultOrAccount, Option<Decimal192>>> {
+        let addresses = addresses.into_iter().collect_vec();
+        assert!(addresses.iter().all(|a| a.network_id() == network_id));
         let response: StateEntityDetailsResponse = self
             .state_entity_details(StateEntityDetailsRequest::new(
-                vec![address.into()],
+                addresses.clone().into_iter().map(Address::from).collect(),
                 None,
                 None,
             ))
             .await?;
 
-        let Some(response_item) = response
+        let xrd_address = ResourceAddress::xrd_on_network(network_id);
+
+        let map = response
             .items
             .into_iter()
-            .find(|x| x.address == address.into())
-        else {
-            return Ok(None);
-        };
+            .map(|response_item| {
+                let owner =
+                    AddressOfVaultOrAccount::try_from(response_item.address)
+                        .expect("address is valid");
 
-        let fungible_resources = response_item
-            .fungible_resources
-            .expect("Never None for Account");
+                let fungible_resources =
+                    response_item.fungible_resources.expect("Never None");
 
-        let xrd_address = ResourceAddress::xrd_on_network(address.network_id());
+                if let Some(xrd_resource_collection_item) = fungible_resources
+                    .items
+                    .into_iter()
+                    .find(|x| x.resource_address() == xrd_address)
+                {
+                    let xrd_resource = xrd_resource_collection_item
+                        .as_global()
+                        .expect("Global is default");
+                    Ok((owner, Some(xrd_resource.amount)))
+                } else {
+                    Ok((owner, None))
+                }
+            })
+            .collect::<Result<IndexMap<_, _>>>()?;
 
-        let Some(xrd_resource_collection_item) = fungible_resources
-            .items
-            .into_iter()
-            .find(|x| x.resource_address() == xrd_address)
-        else {
-            return Ok(None);
-        };
+        if map.len() != addresses.len() {
+            return Err(CommonError::Unknown); // TODO better error
+        }
 
-        let xrd_resource = xrd_resource_collection_item
-            .as_global()
-            .expect("Global is default");
-
-        Ok(Some(xrd_resource.amount))
+        Ok(map)
     }
 
     /// Fetched the XRD balance of account of `address`, returns `0` if

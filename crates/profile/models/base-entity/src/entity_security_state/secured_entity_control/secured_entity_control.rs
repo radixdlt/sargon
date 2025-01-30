@@ -21,7 +21,7 @@ pub struct SecuredEntityControl {
     /// this entity. It will be the same as the ones in `security_structure`
     /// if we have not changed them locally, which we should not do unless
     /// we are sure the Ledger corresponds to the values in `security_structure`.
-    pub access_controller_address: AccessControllerAddress,
+    pub access_controller_address: AccessControllerAddress, // TODO hide and export method since we are gonna have a field of a new type `AddressessOfAccessController` which also will hold VaultAddress
 
     /// The believed-to-be-current security structure of FactorInstances which
     /// secures this entity.
@@ -31,6 +31,12 @@ pub struct SecuredEntityControl {
     /// is about to change to
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
+}
+
+impl SecuredEntityControl {
+    pub fn xrd_vault_address(&self) -> VaultAddress {
+        todo!()
+    }
 }
 
 impl HasProvisionalSecurifiedConfig for SecuredEntityControl {

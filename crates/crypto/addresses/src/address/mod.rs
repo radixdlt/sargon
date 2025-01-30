@@ -3,6 +3,7 @@ mod account_address;
 mod address;
 mod address_format;
 mod address_of_account_or_persona;
+mod address_of_vault_or_account;
 
 #[macro_use]
 mod address_union;
@@ -36,6 +37,7 @@ pub use identity_address::*;
 pub use legacy_olympia_account_address::*;
 pub use locker_address::*;
 pub use non_fungible_global_id::*;
+pub use address_of_vault_or_account::*;
 pub use non_fungible_local_id::*;
 pub use non_fungible_local_id_string::*;
 pub use non_fungible_resource_address::*;
