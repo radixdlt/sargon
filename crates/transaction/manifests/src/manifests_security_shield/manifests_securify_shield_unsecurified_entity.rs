@@ -56,6 +56,8 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
             &entity_address,
         );
 
+        builder = builder.drop_auth_zone_proofs();
+
         // Create an access controller for the entity.
         builder = {
             let access_controller_reservation_identifier =

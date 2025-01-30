@@ -25,6 +25,7 @@ SET_METADATA
         )
     )
 ;
+DROP_AUTH_ZONE_PROOFS;
 ALLOCATE_GLOBAL_ADDRESS
     Address("package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr")
     "AccessController"
