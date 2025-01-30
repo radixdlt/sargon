@@ -55,7 +55,7 @@ mod tests {
                 "displayName": "Spending Account",
                 "createdOn": "2023-09-11T16:05:56.000Z",
                 "lastUpdatedOn": "2023-09-11T16:05:56.000Z",
-                "flags": ["default"]
+                "flags": ["main"]
               },
               "authenticationSigningFactor": {
                 "discriminator": "fromHash",

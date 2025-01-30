@@ -35,7 +35,7 @@ pub fn new_security_structure_metadata_named(
     InternalSecurityStructureMetadata::new(
         name.into_internal(),
         InternalSecurityStructureFlags::just(
-            InternalSecurityStructureFlag::Default,
+            InternalSecurityStructureFlag::Main,
         ),
     )
     .into()

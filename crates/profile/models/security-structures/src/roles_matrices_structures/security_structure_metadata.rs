@@ -61,8 +61,8 @@ impl SecurityStructureMetadata {
         self.flags.remove_id(&flag.id());
     }
 
-    pub fn is_default(&self) -> bool {
-        self.flags.contains_id(SecurityStructureFlag::Default)
+    pub fn is_main(&self) -> bool {
+        self.flags.contains_id(SecurityStructureFlag::Main)
     }
 }
 
@@ -73,7 +73,7 @@ impl HasSampleValues for SecurityStructureMetadata {
             DisplayName::sample(),
             Timestamp::sample(),
             Timestamp::sample(),
-            SecurityStructureFlags::just(SecurityStructureFlag::Default),
+            SecurityStructureFlags::just(SecurityStructureFlag::Main),
         )
     }
     fn sample_other() -> Self {

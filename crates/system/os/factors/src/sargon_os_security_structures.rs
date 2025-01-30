@@ -36,7 +36,7 @@ pub trait OsSecurityStructuresQuerying {
         structure_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<()>;
 
-    async fn set_default_security_structure(
+    async fn set_main_security_structure(
         &self,
         shield_id: SecurityStructureID,
     ) -> Result<()>;
@@ -158,22 +158,20 @@ impl OsSecurityStructuresQuerying for SargonOS {
         Ok(())
     }
 
-    /// Sets the Security Shield with the given `shield_id` as the default shield.
-    /// If a default Security Shield already exists, it is removed and replaced with the new one.
+    /// Sets the Security Shield with the given `shield_id` as the main shield.
+    /// If a main Security Shield already exists, it is removed and replaced with the new one.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
     ///
     /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::SecurityStructuresUpdated { id } }`
-    async fn set_default_security_structure(
+    async fn set_main_security_structure(
         &self,
         shield_id: SecurityStructureID,
     ) -> Result<()> {
         let updated_ids = self
-            .update_profile_with(|p| {
-                p.set_default_security_structure(&shield_id)
-            })
+            .update_profile_with(|p| p.set_main_security_structure(&shield_id))
             .await?;
 
         // Emit event
@@ -379,7 +377,7 @@ mod tests {
         let structure_ids_sample_other =
             SecurityStructureOfFactorSourceIDs::sample_other();
         let result = os
-            .set_default_security_structure(structure_ids_sample_other.id())
+            .set_main_security_structure(structure_ids_sample_other.id())
             .await;
 
         // ASSERT
@@ -392,7 +390,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn set_default_flag() {
+    async fn set_main_flag() {
         // ARRANGE
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
@@ -433,9 +431,9 @@ mod tests {
         event_bus_driver.clear_recorded();
 
         // ACT
-        assert!(structure_ids_sample.metadata.is_default());
+        assert!(structure_ids_sample.metadata.is_main());
         os.with_timeout(|x| {
-            x.set_default_security_structure(
+            x.set_main_security_structure(
                 structure_ids_sample_other.metadata.id(),
             )
         })
@@ -454,11 +452,11 @@ mod tests {
         let updated_structure_ids_sample_other =
             updated_security_structures.get_at_index(1);
 
-        assert!(!updated_structure_ids_sample.unwrap().metadata.is_default());
+        assert!(!updated_structure_ids_sample.unwrap().metadata.is_main());
         assert!(updated_structure_ids_sample_other
             .unwrap()
             .metadata
-            .is_default());
+            .is_main());
 
         let events = event_bus_driver.recorded();
         let security_structures_updated_event = events
@@ -481,7 +479,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn set_default_flag_emits_event() {
+    async fn set_main_flag_emits_event() {
         // ARRANGE
         let event_bus_driver = RustEventBusDriver::new();
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
@@ -516,7 +514,7 @@ mod tests {
 
         // ACT
         os.with_timeout(|x| {
-            x.set_default_security_structure(
+            x.set_main_security_structure(
                 structure_ids_sample_other.metadata.id(),
             )
         })
