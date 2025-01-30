@@ -66,6 +66,26 @@ pub struct XrdBalanceOfEntity<Entity: HasEntityAddress + Clone> {
     pub entity: Entity,
     pub balance: Decimal,
 }
+
+impl<Entity: HasEntityAddress + Clone + Into<Account>>
+    XrdBalanceOfEntity<Entity>
+{
+    pub fn into_account(self) -> XrdBalanceOfEntity<Account> {
+        XrdBalanceOfEntity {
+            entity: self.entity.into(),
+            balance: self.balance,
+        }
+    }
+}
+impl<Entity: HasEntityAddress + Clone> XrdBalanceOfEntity<Entity> {
+    pub fn new(entity: impl Into<Entity>, balance: Decimal) -> Self {
+        Self {
+            entity: entity.into(),
+            balance,
+        }
+    }
+}
+
 impl<Entity: HasEntityAddress + Clone> HasEntityAddress
     for XrdBalanceOfEntity<Entity>
 {
@@ -83,7 +103,9 @@ impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
             + self.estimated_xrd_fee
     }
 
-    pub fn get_payer_and_balance(&self) -> Option<XrdBalanceOfEntity<Account>> {
+    pub fn maybe_other_payer_and_balance(
+        &self,
+    ) -> Option<XrdBalanceOfEntity<Account>> {
         self._payer.as_ref().map(|payer| XrdBalanceOfEntity {
             entity: payer.clone(),
             balance: self
@@ -99,6 +121,40 @@ impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
             entity: self.entity_applying_shield.clone(),
             balance: self._balance_of_entity_applying_shield,
         }
+    }
+}
+
+impl UnsecurifiedAccountShieldApplicationInput {
+    /// Payer might be same as entity applying the shield, or it might be another account.
+    pub fn payer_with_balance(&self) -> XrdBalanceOfEntity<Account> {
+        self.maybe_other_payer_and_balance().unwrap_or(
+            self.get_entity_applying_shield_and_balance().into_account(),
+        )
+    }
+}
+
+impl SecurifiedAccountShieldApplicationInput {
+    /// Payer might be same as entity applying the shield, or it might be another account.
+    pub fn payer_with_balance(&self) -> XrdBalanceOfEntity<Account> {
+        self.maybe_other_payer_and_balance().unwrap_or(
+            self.get_entity_applying_shield_and_balance().into_account(),
+        )
+    }
+}
+
+impl UnsecurifiedPersonaShieldApplicationInput {
+    /// Payer might be same as entity applying the shield, or it might be another account.
+    pub fn payer_with_balance(&self) -> Result<XrdBalanceOfEntity<Account>> {
+        self.maybe_other_payer_and_balance()
+            .ok_or(CommonError::Unknown)
+    }
+}
+
+impl SecurifiedPersonaShieldApplicationInput {
+    /// Payer might be same as entity applying the shield, or it might be another account.
+    pub fn payer_with_balance(&self) -> Result<XrdBalanceOfEntity<Account>> {
+        self.maybe_other_payer_and_balance()
+            .ok_or(CommonError::Unknown)
     }
 }
 
@@ -269,11 +325,6 @@ impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
         manifest: TransactionManifest,
         estimated_xrd_fee: Decimal,
     ) -> Self {
-        // Self {
-        //     payer: payer.into(),
-        //     entity_applying_shield,
-        //     manifest,
-        // }
         let payer_with_balance = payer_with_balance.into();
         Self {
             hidden: HiddenConstructor,
@@ -307,7 +358,7 @@ where {
         };
 
         Self::new(
-            some.get_payer_and_balance(),
+            some.maybe_other_payer_and_balance(),
             casted_entity_with_balance,
             some.manifest,
             some.estimated_xrd_fee,
@@ -441,6 +492,7 @@ pub trait BatchApplySecurityShieldSigning {
     where
         Entity: HasEntityAddress + Clone,
     {
+        //    if let Some(other_payer) = input.
         todo!()
     }
 
@@ -469,24 +521,13 @@ pub trait BatchApplySecurityShieldSigning {
         let unsecurified_account_applying_shield_with_balance =
             input.get_entity_applying_shield_and_balance();
 
-        let payer_res = if let Some(other) = input.get_payer_and_balance() {
-            if other.balance < input.needed_xrd_for_fee_and_topup() {
-                Err(CommonError::Unknown) // CommonError::InsufficientXrdBalance
-            } else {
-                Ok(other.entity.clone())
-            }
-        } else if unsecurified_account_applying_shield_with_balance.balance
-            < input.needed_xrd_for_fee_and_topup()
-        {
-            Err(CommonError::Unknown) // CommonError::InsufficientXrdBalance
-        } else {
-            Ok(unsecurified_account_applying_shield_with_balance
-                .entity
-                .clone()
-                .entity)
-        };
+        let payer_with_balance = input.payer_with_balance();
 
-        let payer = payer_res?;
+        if payer_with_balance.balance < input.needed_xrd_for_fee_and_topup() {
+            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+        }
+
+        let payer = payer_with_balance.entity;
         let unsecurified_account_applying_shield =
             unsecurified_account_applying_shield_with_balance.entity;
 
@@ -497,14 +538,19 @@ pub trait BatchApplySecurityShieldSigning {
             })
     }
 
+    fn modify_manifest_add_xrd_vault_contribution_for_securified_account_applying_shield(
+        input: SecurifiedAccountShieldApplicationInput,
+        manifest_variant: RolesExercisableInTransactionManifestCombination,
+    ) -> Result<SecurifiedAccountShieldApplicationInput> {
+        todo!()
+    }
+
     fn modify_manifest_add_xrd_vault_contribution_for_unsecurified_persona_applying_shield(
         input: UnsecurifiedPersonaShieldApplicationInput,
     ) -> Result<(UnsecurifiedPersonaShieldApplicationInput, Account)> {
-        let Some(payer_and_balance) = input.get_payer_and_balance() else {
-            return Err(CommonError::Unknown); // CommonError::PayerMustBeSpecifiedForPersona
-        };
+        let payer_with_balance = input.payer_with_balance()?;
 
-        if payer_and_balance.balance < input.needed_xrd_for_fee_and_topup() {
+        if payer_with_balance.balance < input.needed_xrd_for_fee_and_topup() {
             return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
         }
 
@@ -515,10 +561,10 @@ pub trait BatchApplySecurityShieldSigning {
             .into();
 
         input.modifying_manifest(|m| {
-                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(payer_and_balance.entity.clone(), unsecurified_persona_applying_shield, m, None);
+                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(payer_with_balance.entity.clone(), unsecurified_persona_applying_shield, m, None);
 
                 Ok(m)
-            }).map(|m| (m, payer_and_balance.entity))
+            }).map(|m| (m, payer_with_balance.entity))
     }
 
     fn shield_application_for_unsecurified_account(
@@ -530,7 +576,7 @@ pub trait BatchApplySecurityShieldSigning {
 
         Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
             input.entity_applying_shield.clone(),
-            input.get_payer_and_balance().map(|p| p.entity),
+            input.maybe_other_payer_and_balance().map(|p| p.entity),
             input.manifest,
         ))
     }
@@ -584,7 +630,40 @@ pub trait BatchApplySecurityShieldSigning {
         &self,
         input: SecurifiedAccountShieldApplicationInput,
     ) -> Result<SecurityShieldApplicationForSecurifiedAccount> {
-        todo!()
+        let manifest_for_variant =
+            |variant: RolesExercisableInTransactionManifestCombination| {
+                let manifest_with = input.clone();
+
+                let manifest_with = Self::modify_manifest_add_fee_securified(
+                    manifest_with,
+                    variant,
+                )?;
+
+                let manifest_with = Self::modify_manifest_add_xrd_vault_contribution_for_securified_account_applying_shield(manifest_with, variant)?;
+
+                Ok(manifest_with.manifest)
+            };
+
+        let initiate_with_recovery_complete_with_primary = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary)?;
+
+        let initiate_with_recovery_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation)?;
+
+        let initiate_with_recovery_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion)?;
+
+        let initiate_with_primary_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation)?;
+
+        let initiate_with_primary_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion)?;
+
+        let account_with_optional_paying_account = SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount::new(input.entity_applying_shield.clone(), input.maybe_other_payer_and_balance().map(|p| p.entity));
+
+        Ok(SecurityShieldApplicationForSecurifiedAccount::new(
+            account_with_optional_paying_account,
+            initiate_with_recovery_complete_with_primary,
+            initiate_with_recovery_complete_with_confirmation,
+            initiate_with_recovery_delayed_completion,
+            initiate_with_primary_complete_with_confirmation,
+            initiate_with_primary_delayed_completion,
+        ))
     }
 
     fn shield_application_for_securified_persona(
@@ -1097,16 +1176,32 @@ macro_rules! create_application_for_securified_entity {
                 )*
                 pub $entity_name: $entity_type,
 
-                /// Modified to include lock_fee against XRD vault of Access controller of entity.
-                ///
-                /// Also modified modified to perform topping up of XRD vault paid by
-                pub initating_with_primary_complete_with_recovery: TransactionManifest,
-                pub initating_with_primary_complete_with_confirmation: TransactionManifest,
+                pub initiate_with_recovery_complete_with_primary: TransactionManifest,
+                pub initiate_with_recovery_complete_with_confirmation: TransactionManifest,
+                pub initiate_with_recovery_delayed_completion: TransactionManifest,
+                pub initiate_with_primary_complete_with_confirmation: TransactionManifest,
+                pub initiate_with_primary_delayed_completion: TransactionManifest,
 
-                pub initating_with_recovery_complete_with_confirmation: TransactionManifest,
+            }
 
-                /// Use Time
-                pub initating_with_recovery_delayed_completion: TransactionManifest,
+            impl $name {
+                pub fn new(
+                    $entity_name: $entity_type,
+                    initiate_with_recovery_complete_with_primary: TransactionManifest,
+                    initiate_with_recovery_complete_with_confirmation: TransactionManifest,
+                    initiate_with_recovery_delayed_completion: TransactionManifest,
+                    initiate_with_primary_complete_with_confirmation: TransactionManifest,
+                    initiate_with_primary_delayed_completion: TransactionManifest,
+                ) -> Self {
+                    Self {
+                        $entity_name,
+                        initiate_with_recovery_complete_with_primary,
+                        initiate_with_recovery_complete_with_confirmation,
+                        initiate_with_recovery_delayed_completion,
+                        initiate_with_primary_complete_with_confirmation,
+                        initiate_with_primary_delayed_completion,
+                    }
+                }
             }
         }
     }
@@ -1135,6 +1230,20 @@ pub struct SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccoun
     /// An optional account topping up the XRD vault of `accounts`s AccessControllers
     /// XRD vault - if `Some(other)` then `other != account`.
     pub account_topping_up_xrd_vault_of_access_controller: Option<Account>,
+}
+impl SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount {
+    pub fn new(
+        account: SecurifiedAccount,
+        account_topping_up_xrd_vault_of_access_controller: impl Into<
+            Option<Account>,
+        >,
+    ) -> Self {
+        Self {
+            account,
+            account_topping_up_xrd_vault_of_access_controller:
+                account_topping_up_xrd_vault_of_access_controller.into(),
+        }
+    }
 }
 
 create_application_for_securified_entity! {

@@ -88,6 +88,13 @@ where
 pub type AnyUnsecurifiedEntity = AbstractUnsecurifiedEntity<AccountOrPersona>;
 
 pub type UnsecurifiedAccount = AbstractUnsecurifiedEntity<Account>;
+
+impl From<UnsecurifiedAccount> for Account {
+    fn from(value: UnsecurifiedAccount) -> Self {
+        value.entity
+    }
+}
+
 pub type UnsecurifiedPersona = AbstractUnsecurifiedEntity<Persona>;
 
 impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedAccount {
