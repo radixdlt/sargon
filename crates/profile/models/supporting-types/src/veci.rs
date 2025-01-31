@@ -27,7 +27,7 @@ impl VirtualEntityCreatingInstance {
             "Discrepancy! PublicKeys does not match, this is a programmer error!"
         );
 
-        Self::check_duplicate_factor_source_instances(
+        Self::check_for_derivation_path_discrepancies(
             &factor_instance,
             &address,
         );
@@ -84,7 +84,7 @@ impl VirtualEntityCreatingInstance {
     /// [identpr]: https://github.com/radixdlt/sargon/pull/254/files#r1860748013
     /// [badpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1042
     /// [goodpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1256
-    fn check_duplicate_factor_source_instances(
+    fn check_for_derivation_path_discrepancies(
         factor_instance: &HierarchicalDeterministicFactorInstance,
         address: &AddressOfAccountOrPersona,
     ) {
