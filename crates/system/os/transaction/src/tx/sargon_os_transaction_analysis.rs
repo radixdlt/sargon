@@ -146,6 +146,7 @@ pub trait OsExecutionSummary {
     ) -> Result<IndexSet<PublicKey>>;
 
     fn extract_execution_summary(
+        &self,
         manifest: &dyn DynamicallyAnalyzableManifest,
         receipts: PreviewResponseReceipts,
         network_id: NetworkID,
@@ -187,6 +188,7 @@ impl OsExecutionSummary for SargonOS {
             .await?;
 
         Self::extract_execution_summary(
+            self,
             &manifest,
             receipts,
             network_id,
@@ -215,6 +217,7 @@ impl OsExecutionSummary for SargonOS {
     }
 
     fn extract_execution_summary(
+        &self,
         manifest: &dyn DynamicallyAnalyzableManifest,
         receipts: PreviewResponseReceipts,
         network_id: NetworkID,
@@ -232,7 +235,7 @@ impl OsExecutionSummary for SargonOS {
             .engine_toolkit_receipt
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
-        let execution_summary =
+        let mut execution_summary =
             manifest.execution_summary(engine_toolkit_receipt, network_id)?;
 
         let reserved_manifest_class = execution_summary
@@ -247,6 +250,17 @@ impl OsExecutionSummary for SargonOS {
                 class: reserved_manifest_class.kind().to_string(),
             });
         }
+
+        execution_summary.classify_securify_entity_if_present(
+            |entity_address| {
+                self.entity_by_address(entity_address)
+                    .ok()
+                    .and_then(|entity| entity.get_provisional())
+                    .and_then(|provisional| {
+                        provisional.into_factor_instances_derived().ok()
+                    })
+            },
+        );
 
         Ok(execution_summary)
     }
@@ -358,6 +372,7 @@ mod transaction_preview_analysis_tests {
         FeeSummary as RETFeeSummary, LockedFees as RETLockedFees,
         StateUpdatesSummary as RETStateUpdatesSummary,
     };
+    use sargon_os_factors::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -640,6 +655,7 @@ mod transaction_preview_analysis_tests {
         )
     }
 
+    use prelude::{fixture_rtm, fixture_tx};
     use radix_common::math::Decimal as ScryptoDecimal192;
 
     #[actix_rt::test]
@@ -888,6 +904,175 @@ mod transaction_preview_analysis_tests {
                 )
             })
         )
+    }
+
+    #[actix_rt::test]
+    async fn test_classify_manifest_as_securify_entity_for_account() {
+        let transaction_preview_response =
+            fixture_and_json::<TransactionPreviewResponse>(fixture_tx!(
+                "apply_security_shield_to_unsecurified_account_execution"
+            ))
+            .unwrap()
+            .0;
+
+        let responses = prepare_responses(
+            LedgerState {
+                network: "".to_string(),
+                state_version: 0,
+                proposer_round_timestamp: "".to_string(),
+                epoch: 0,
+                round: 0,
+            },
+            transaction_preview_response,
+        );
+
+        let os =
+            prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
+                .await;
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+        let structure_source_ids_sample =
+            SecurityStructureOfFactorSourceIDs::sample();
+        os.add_security_structure_of_factor_source_ids(
+            &structure_source_ids_sample,
+        )
+        .await
+        .unwrap();
+
+        let profile = os.profile().unwrap();
+        let accounts = profile.clone().accounts_on_current_network().unwrap();
+        let entity_address_to_securify = accounts
+            .first()
+            .map(|a| AddressOfAccountOrPersona::from(a.address))
+            .unwrap();
+        let apply_result = os
+            .apply_security_shield_with_id_to_entities(
+                structure_source_ids_sample.id(),
+                IndexSet::just(entity_address_to_securify.clone()),
+            )
+            .await
+            .unwrap();
+        let account_in_provisional_state = apply_result
+            .unsecurified_accounts_on_network
+            .get_id(entity_address_to_securify.clone())
+            .unwrap();
+
+        let provisional_state = account_in_provisional_state
+            .clone()
+            .provisional_securified_config
+            .unwrap()
+            .into_factor_instances_derived()
+            .unwrap();
+
+        let transaction_to_review = os
+            .analyse_transaction_preview(
+                fixture_rtm!("apply_security_shield_to_unsecurified_account")
+                    .to_owned(),
+                Blobs::default(),
+                true,
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            *transaction_to_review
+                .execution_summary
+                .detailed_classification
+                .first()
+                .unwrap(),
+            DetailedManifestClass::SecurifyEntity {
+                entity_address: entity_address_to_securify.clone(),
+                provisional_security_structure: provisional_state
+            }
+        );
+    }
+
+    #[ignore = "RET does not classify yet reserved instructions for securifying identity"]
+    #[actix_rt::test]
+    async fn test_classify_manifest_as_securify_entity_for_persona() {
+        let transaction_preview_response =
+            fixture_and_json::<TransactionPreviewResponse>(fixture_tx!(
+                "apply_security_shield_to_unsecurified_persona_execution"
+            ))
+            .unwrap()
+            .0;
+
+        let responses = prepare_responses(
+            LedgerState {
+                network: "".to_string(),
+                state_version: 0,
+                proposer_round_timestamp: "".to_string(),
+                epoch: 0,
+                round: 0,
+            },
+            transaction_preview_response,
+        );
+
+        let os =
+            prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
+                .await;
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+        let structure_source_ids_sample =
+            SecurityStructureOfFactorSourceIDs::sample();
+        os.add_security_structure_of_factor_source_ids(
+            &structure_source_ids_sample,
+        )
+        .await
+        .unwrap();
+
+        let profile = os.profile().unwrap();
+        let personas = profile.clone().personas_on_current_network().unwrap();
+        let entity_address_to_securify = personas
+            .first()
+            .map(|p| AddressOfAccountOrPersona::from(p.address))
+            .unwrap();
+        let apply_result = os
+            .apply_security_shield_with_id_to_entities(
+                structure_source_ids_sample.id(),
+                IndexSet::just(entity_address_to_securify.clone()),
+            )
+            .await
+            .unwrap();
+        let persona_in_provisional_state = apply_result
+            .unsecurified_personas_on_network
+            .get_id(entity_address_to_securify.clone())
+            .unwrap();
+
+        let provisional_state = persona_in_provisional_state
+            .clone()
+            .provisional_securified_config
+            .unwrap()
+            .into_factor_instances_derived()
+            .unwrap();
+
+        let transaction_to_review = os
+            .analyse_transaction_preview(
+                fixture_rtm!("apply_security_shield_to_unsecurified_persona")
+                    .to_owned(),
+                Blobs::default(),
+                true,
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            *transaction_to_review
+                .execution_summary
+                .detailed_classification
+                .first()
+                .unwrap(),
+            DetailedManifestClass::SecurifyEntity {
+                entity_address: entity_address_to_securify.clone(),
+                provisional_security_structure: provisional_state
+            }
+        );
     }
 
     async fn prepare_os(
