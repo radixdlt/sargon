@@ -139,7 +139,10 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                     e.clone(),
                     derived.clone()
                 ).inspect(|m| {
-                    manifests_for_entity.insert(EntityApplyingShieldAddress::from_unsecurified_entity(&e), m.clone());
+                    manifests_for_entity.insert(
+                        EntityApplyingShieldAddress::from_unsecurified_entity(&e),
+                        m.clone()
+                    );
                 }).map(UnvalidatedTransactionManifest::from)
         }).collect::<Result<Vec<UnvalidatedTransactionManifest>>>()?;
 
@@ -154,7 +157,12 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                     derived.clone(),
                     RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()
                 ).inspect(|m| {
-                    manifests_for_entity.insert(EntityApplyingShieldAddress::AccessController(e.securified_entity_control.access_controller_address), m.clone());
+                    manifests_for_entity.insert(
+                        EntityApplyingShieldAddress::AccessController(
+                            e.securified_entity_control.access_controller_address()
+                        ),
+                        m.clone()
+                    );
                 })
                 .map(UnvalidatedTransactionManifest::from).unwrap()
          }).collect_vec();

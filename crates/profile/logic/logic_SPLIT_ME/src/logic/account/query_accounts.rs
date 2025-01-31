@@ -16,14 +16,15 @@ impl GetEntityAddressByAccessControllerAddress for Profile {
         self.securified_personas_on_network(network_id)
             .iter()
             .find(|p| {
-                p.securified_entity_control.access_controller_address == address
+                p.securified_entity_control.access_controller_address()
+                    == address
             })
             .map(AnySecurifiedEntity::from)
             .or(self
                 .securified_accounts_on_network(network_id)
                 .iter()
                 .find(|a| {
-                    a.securified_entity_control.access_controller_address
+                    a.securified_entity_control.access_controller_address()
                         == address
                 })
                 .map(AnySecurifiedEntity::from))

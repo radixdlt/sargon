@@ -203,7 +203,7 @@ impl Account {
             DisplayName::new(name).unwrap(),
             SecuredEntityControl::new(
                 Some(veci.clone()),
-                AccessControllerAddress::sample_from_account_address(address),
+                AddressessOfAccessController::sample_from_account_address(address),
                 security_structure_of_factor_instances,
             )
             .unwrap(),

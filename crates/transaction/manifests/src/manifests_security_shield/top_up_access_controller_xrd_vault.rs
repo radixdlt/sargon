@@ -105,7 +105,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             match entity_applying_shield.security_state() {
                 EntitySecurityState::Securified { value: sec } => {
                     ManifestGlobalAddress::Static(
-                        sec.access_controller_address.scrypto(),
+                        sec.access_controller_address().scrypto(),
                     )
                 }
                 EntitySecurityState::Unsecured { .. } => {
@@ -121,7 +121,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             match payer.security_state() {
                 EntitySecurityState::Securified { value: sec } => {
                     Some(ManifestGlobalAddress::Static(
-                        sec.access_controller_address.scrypto(),
+                        sec.access_controller_address().scrypto(),
                     ))
                 }
                 EntitySecurityState::Unsecured { .. } => {

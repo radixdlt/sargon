@@ -287,6 +287,16 @@ impl ShieldApplicationInputWithoutXrdBalance {
     }
 }
 
+pub trait IsSecurifiedMarker {}
+impl IsSecurifiedMarker for SecurifiedAccount {}
+impl IsSecurifiedMarker for SecurifiedPersona {}
+impl IsSecurifiedMarker for AnySecurifiedEntity {}
+pub trait IsUnsecurifiedMarker {}
+impl IsUnsecurifiedMarker for AnyUnsecurifiedEntity {}
+impl IsUnsecurifiedMarker for UnsecurifiedAccount {}
+impl IsUnsecurifiedMarker for UnsecurifiedPersona {}
+
+
 pub type AnyUnsecurifiedShieldApplicationInput =
     AbstractShieldApplicationInput<AnyUnsecurifiedEntity>;
 
