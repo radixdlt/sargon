@@ -804,6 +804,12 @@ pub trait BatchApplySecurityShieldSigning {
             SecurityShieldApplication,
         >,
     ) -> Result<ApplySecurityShieldPayloadToSign>;
+
+    async fn build_payload_to_sign(
+        &self,
+        network_id: NetworkID,
+        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+    ) -> Result<ApplySecurityShieldPayloadToSign>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1131,11 +1137,11 @@ impl BatchApplySecurityShieldSigning for SargonOS {
             .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()
     }
 
-    async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
+    async fn build_payload_to_sign(
         &self,
         network_id: NetworkID,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<IndexSet<TransactionIntentHash>> {
+    ) -> Result<ApplySecurityShieldPayloadToSign> {
         // Map Address -> Entity by Profile lookup
         let manifests_with_entities_without_xrd_balances =
             self.lookup_entities_for_manifests(manifest_and_payer_tuples)?;
@@ -1172,6 +1178,17 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         )
         .await?;
 
+        Ok(payload_to_sign)
+    }
+
+    async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
+        &self,
+        network_id: NetworkID,
+        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+    ) -> Result<IndexSet<TransactionIntentHash>> {
+        let payload_to_sign = self
+            .build_payload_to_sign(network_id, manifest_and_payer_tuples)
+            .await?;
         // Try to sign all applications - we will "the best" of the 5 manifests for securified entities
         // This step **also notarized** the signed intents.
         let signed_transactions =
