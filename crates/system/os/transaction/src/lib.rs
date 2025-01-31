@@ -20,6 +20,7 @@ pub mod prelude {
     pub(crate) use signing_traits::prelude::*;
 
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
+    pub(crate) use shaku::{module, Provider, Interface, HasComponent};
 }
 
 pub use prelude::*;

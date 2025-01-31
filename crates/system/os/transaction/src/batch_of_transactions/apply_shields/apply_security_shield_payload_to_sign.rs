@@ -296,7 +296,6 @@ impl IsUnsecurifiedMarker for AnyUnsecurifiedEntity {}
 impl IsUnsecurifiedMarker for UnsecurifiedAccount {}
 impl IsUnsecurifiedMarker for UnsecurifiedPersona {}
 
-
 pub type AnyUnsecurifiedShieldApplicationInput =
     AbstractShieldApplicationInput<AnyUnsecurifiedEntity>;
 
@@ -421,45 +420,7 @@ pub struct ManifestWithPayerByAddress {
 }
 
 #[async_trait::async_trait]
-pub trait BatchApplySecurityShieldSigning {
-    /// Host has previously called the function
-    ///     `make_interaction_for_applying_security_shield`
-    /// and specified the `security_shield_id` and `addresses` of the entities
-    /// for which they want to apply the security shield. Which returns a Vec
-    /// of TransactionManifests, one for each entity. If the entity is securified
-    /// already the "variant" `RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithRecovery` is used.
-    ///
-    /// Host presents batch TX review UI, and user needs to select payer for each manifest,
-    /// MUST be done for Personas and in case of entity being an Account, the payer might
-    /// be the same account as the entity applying the shield. That information is passed
-    /// when user slides to sign back to Sargon via the tuples of `ManifestWithPayer`.
-    ///
-    /// We will map from `Vec<Manifest>` -> `Vec<Vec<Manifest>>` where for each entity
-    /// being unsecurified the inner Vec will be unchanged - one single manifest. But
-    /// for each securified entity - which has a manifest which was create with `InitiateWithPrimaryCompleteWithRecovery` variant, we will map to 4 manifests, where
-    /// the three new manifests are created by specifying:
-    /// - `InitiateWithPrimaryCompleteWithConfirmation`
-    /// - `InitiateWithRecoveryCompleteWithConfirmation`
-    /// - `InitiateWithRecoveryDelayedCompletion`
-    ///
-    /// Then we will inner map of the `Vec<Vec<Manifest>>` to
-    /// perform look up of all `payer` address and get the Account from
-    /// Profile - and depending on if that payer account is already securified or not
-    /// we will use `modify_add_lock_fee` for Unsecurified accounts and for securified
-    /// accounts we will use `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`.
-    ///
-    /// Then we will build TransactionIntent for all of these - with broad enough
-    /// an epoch window so that we can submit these with delay in between.
-    ///
-    /// We will compile them and we will start the process of signing them. Which will be the job of `SigningManager` - many instances of `SignaturesCollector` using one Role at a time.
-    ///
-    /// Can work with single transaction of course...
-    async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
-        &self,
-        network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<IndexSet<TransactionIntentHash>>;
-
+pub trait BatchApplySecurityShieldSigningHelpersToMigrate {
     async fn enqueue_signed_transactions(
         &self,
         signed_payload: ApplySecurityShieldSignedPayload,
@@ -843,7 +804,7 @@ impl EntityApplyingShield {
 }
 
 #[async_trait::async_trait]
-impl BatchApplySecurityShieldSigning for SargonOS {
+impl BatchApplySecurityShieldSigningHelpersToMigrate for SargonOS {
     fn get_securified_entity_by_access_controller(
         &self,
         address: AccessControllerAddress,
@@ -851,6 +812,14 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         self.profile().and_then(|p| {
             p.get_securified_entity_by_access_controller_address(address)
         })
+    }
+
+    async fn build_payload_to_sign(
+        &self,
+        network_id: NetworkID,
+        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+    ) -> Result<ApplySecurityShieldPayloadToSign> {
+        todo!("ALREADY MIGRATED TO STRUCT")
     }
 
     fn get_unsecurified_account_by_address(
@@ -1145,72 +1114,6 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                 }
             })
             .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()
-    }
-
-    async fn build_payload_to_sign(
-        &self,
-        network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<ApplySecurityShieldPayloadToSign> {
-        // Map Address -> Entity by Profile lookup
-        let manifests_with_entities_without_xrd_balances =
-            self.lookup_entities_for_manifests(manifest_and_payer_tuples)?;
-
-        // Assert that payer if specified is not part of the batch of entities applying shield
-        self.assert_that_payer_is_not_in_batch_of_entities_applying_shield(
-            &manifests_with_entities_without_xrd_balances,
-        )?;
-
-        // Get XRD balances of XRD Vaults of Access Controllers and Accounts
-        let manifests_with_entities_with_xrd_balance = self
-            .get_xrd_balances(
-                network_id,
-                manifests_with_entities_without_xrd_balances,
-            )
-            .await?;
-
-        // For Securified entities => create 4 other variants of the manifest
-        // (noop for Unsecurified entities)
-        let applications_without_intents = self
-            .create_many_manifest_variants_per_roles_combination(
-                manifests_with_entities_with_xrd_balance,
-            )?;
-
-        // Build TransactionIntents for all of these applications (5 intents for securified entities)
-        // all using the same Epoch window (one week).
-        let payload_to_sign = self
-            .build_transaction_intents(network_id, applications_without_intents)
-            .await?;
-
-        // Persist notary private keys to be able to cancel transactions
-        self.persist_notary_private_keys_to_be_able_to_cancel_transactions(
-            &payload_to_sign.notary_keys,
-        )
-        .await?;
-
-        Ok(payload_to_sign)
-    }
-
-    async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
-        &self,
-        network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<IndexSet<TransactionIntentHash>> {
-        let payload_to_sign = self
-            .build_payload_to_sign(network_id, manifest_and_payer_tuples)
-            .await?;
-        // Try to sign all applications - we will "the best" of the 5 manifests for securified entities
-        // This step **also notarized** the signed intents.
-        let signed_transactions =
-            self.sign_transaction_intents(payload_to_sign).await?;
-
-        // Enqueue all signed transactions
-        let transaction_ids = self
-            .enqueue_signed_transactions(signed_transactions)
-            .await?;
-
-        // Return the TransactionIntentHashes
-        Ok(transaction_ids)
     }
 
     async fn enqueue_signed_transactions(

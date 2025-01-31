@@ -207,7 +207,7 @@ home-cards = { path = "crates/app/home-cards" }
 radix-connect = { path = "crates/app/radix-connect" }
 radix-connect-models = { path = "crates/app/radix-connect-models" }
 security-center = { path = "crates/app/security-center" }
-signing-traits= { path = "crates/app/signing-traits" }
+signing-traits = { path = "crates/app/signing-traits" }
 key-derivation-traits = { path = "crates/app/key-derivation-traits" }
 
 # === COMMON ===
@@ -394,6 +394,10 @@ serde_json = { version = "1.0.108", default-features = false, features = [
     "preserve_order",
 ] }
 serde_repr = { version = "0.1.17", default-features = false }
+shaku = { version = "0.6.2", default-features = false, features = [
+    "derive",
+    "thread_safe",
+] }
 strum = { version = "0.26.1", default-features = false, features = ["derive"] }
 thiserror = { version = "1.0.50", default-features = false }
 url = { version = "2.5.0", default-features = false, features = ["serde"] }
