@@ -9,9 +9,19 @@ pub struct AbstractUnsecurifiedEntity<
     E::Address: Into<AddressOfAccountOrPersona>,
 {
     pub entity: E,
-    unsecured_entity_control: UnsecuredEntityControl,
+    pub unsecured_entity_control: UnsecuredEntityControl,
     veci: VirtualEntityCreatingInstance,
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
+}
+
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
+    for AbstractUnsecurifiedEntity<E>
+where
+    E::Address: Into<AddressOfAccountOrPersona>,
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity.address_erased()
+    }
 }
 
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
@@ -78,6 +88,13 @@ where
 pub type AnyUnsecurifiedEntity = AbstractUnsecurifiedEntity<AccountOrPersona>;
 
 pub type UnsecurifiedAccount = AbstractUnsecurifiedEntity<Account>;
+
+impl From<UnsecurifiedAccount> for Account {
+    fn from(value: UnsecurifiedAccount) -> Self {
+        value.entity
+    }
+}
+
 pub type UnsecurifiedPersona = AbstractUnsecurifiedEntity<Persona>;
 
 impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedAccount {

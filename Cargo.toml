@@ -207,7 +207,7 @@ home-cards = { path = "crates/app/home-cards" }
 radix-connect = { path = "crates/app/radix-connect" }
 radix-connect-models = { path = "crates/app/radix-connect-models" }
 security-center = { path = "crates/app/security-center" }
-signing-traits= { path = "crates/app/signing-traits" }
+signing-traits = { path = "crates/app/signing-traits" }
 key-derivation-traits = { path = "crates/app/key-derivation-traits" }
 
 # === COMMON ===

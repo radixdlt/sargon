@@ -20,7 +20,7 @@ macro_rules! address_union {
                 PartialEq,
                 Eq,
                 Hash,
-                EnumAsInner,
+                enum_as_inner::EnumAsInner,
                 derive_more::Display,
                 derive_more::Debug,
                 SerializeDisplay,
@@ -117,6 +117,21 @@ macro_rules! address_union {
                 impl From<$variant_type> for $union_name {
                     fn from(value: $variant_type) -> Self {
                         Self::$variant_name(value)
+                    }
+                }
+            )+
+
+            $(
+                impl TryFrom<$union_name> for $variant_type {
+                    type Error = CommonError;
+                    fn try_from(value: $union_name) -> Result<Self> {
+                        match value {
+                            $union_name::$variant_name(address) => Ok(address),
+                            _ => Err(CommonError::FailedToMapAddressToSpecficType {
+                                expected_specific_type: stringify!($variant_type).to_string(),
+                                got_value: value.to_string(),
+                            }),
+                        }
                     }
                 }
             )+

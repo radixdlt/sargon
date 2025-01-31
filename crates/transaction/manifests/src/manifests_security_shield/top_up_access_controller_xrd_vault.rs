@@ -12,6 +12,10 @@ use crate::prelude::*;
 const XRD_TO_AC_VAULT_FIRST_TOP_UP: ScryptoDecimal192 =
     ScryptoDecimal192::ONE_HUNDRED;
 
+pub fn xrd_amount_for_initial_xrd_vault_of_access_controller() -> Decimal192 {
+    XRD_TO_AC_VAULT_FIRST_TOP_UP.into()
+}
+
 pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
     /// A method modifying manifests which applies security shield. We
     /// The `manifest` which applies the security shield could not include
@@ -40,7 +44,6 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
     ) -> TransactionManifest {
-        assert!(!manifest.explicitly_references_primary_role(), "Unexpectedly classified manifest as updating of shield of securified entity, but it is not.");
         Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
             payer,
             unsecurified_entity_applying_shield.entity,
@@ -102,7 +105,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             match entity_applying_shield.security_state() {
                 EntitySecurityState::Securified { value: sec } => {
                     ManifestGlobalAddress::Static(
-                        sec.access_controller_address.scrypto(),
+                        sec.access_controller_address().scrypto(),
                     )
                 }
                 EntitySecurityState::Unsecured { .. } => {
@@ -118,7 +121,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             match payer.security_state() {
                 EntitySecurityState::Securified { value: sec } => {
                     Some(ManifestGlobalAddress::Static(
-                        sec.access_controller_address.scrypto(),
+                        sec.access_controller_address().scrypto(),
                     ))
                 }
                 EntitySecurityState::Unsecured { .. } => {

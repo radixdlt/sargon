@@ -15,7 +15,7 @@ pub mod prelude {
 
     pub(crate) use addresses::prelude::*;
     pub(crate) use bytes::prelude::*;
-    pub(crate) use core_utils::prelude::*;
+
     pub(crate) use drivers::prelude::*;
     pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use identified_vec_of::prelude::*;

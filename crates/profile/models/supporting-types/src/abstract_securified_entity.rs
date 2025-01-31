@@ -21,6 +21,14 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
     }
 }
 
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
+    for AbstractSecurifiedEntity<E>
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity.address_erased()
+    }
+}
+
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsNetworkAware
     for AbstractSecurifiedEntity<E>
 {
@@ -73,5 +81,9 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
         self.securified_entity_control()
             .veci()
             .map(|fi| VirtualEntityCreatingInstance::new(fi, self.address()))
+    }
+
+    pub fn xrd_vault_address(&self) -> VaultAddress {
+        self.securified_entity_control().xrd_vault_address()
     }
 }

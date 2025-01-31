@@ -6,6 +6,7 @@ pub mod prelude {
 
     pub(crate) use bytes::prelude::*;
     pub(crate) use cap26_models::prelude::*;
+    pub use core_utils::prelude::*;
     pub(crate) use ecc::prelude::*;
     pub(crate) use factors::prelude::*;
     pub(crate) use identified_vec_of::prelude::*;
@@ -87,7 +88,6 @@ pub mod prelude {
     };
 
     pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use log::*;
     pub(crate) use serde::{Deserialize, Serialize};
     pub(crate) use serde_with::{DeserializeFromStr, SerializeDisplay};
     pub(crate) use std::str::FromStr;

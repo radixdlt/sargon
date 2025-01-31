@@ -23,8 +23,8 @@ pub trait HasSecurityState: HasFactorInstances + IsSecurityStateAware {
                 },
                 EntitySecurityState::Securified { value: sec_new },
             ) => {
-                if sec_new.access_controller_address
-                    != sec_existing.access_controller_address
+                if sec_new.access_controller_address()
+                    != sec_existing.access_controller_address()
                 {
                     Err(CommonError::SecurityStateAccessControllerAddressMismatch)
                 } else {

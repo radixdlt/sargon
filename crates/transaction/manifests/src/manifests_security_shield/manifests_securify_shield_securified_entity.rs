@@ -61,7 +61,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
 
         let access_controller_address = securified_entity
             .securified_entity_control
-            .access_controller_address;
+            .access_controller_address();
 
         let factors_and_time_input = &AccessControllerFactorsAndTimeInput::new(
             &security_structure_of_factor_instances,
