@@ -40,6 +40,24 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
             &unsecurified_entity,
         );
 
+        // Obtain the badge for rola key
+        let owner_badge_proof = "rola_key_proof";
+        builder = builder.create_proof_from_bucket_of_all(
+            owner_badge_bucket,
+            owner_badge_proof,
+        );
+        builder = builder.push_to_auth_zone(owner_badge_proof);
+
+        // Set Rola Key
+        builder = TransactionManifest::set_rola_key(
+            builder,
+            &security_structure_of_factor_instances
+                .authentication_signing_factor_instance,
+            &entity_address,
+        );
+
+        builder = builder.drop_auth_zone_proofs();
+
         // Create an access controller for the entity.
         builder = {
             let access_controller_reservation_identifier =
@@ -81,14 +99,6 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
                 },
             )
         };
-
-        // Set Rola Key
-        builder = TransactionManifest::set_rola_key(
-            builder,
-            &security_structure_of_factor_instances
-                .authentication_signing_factor_instance,
-            &entity_address,
-        );
 
         let manifest = TransactionManifest::sargon_built(
             builder,
