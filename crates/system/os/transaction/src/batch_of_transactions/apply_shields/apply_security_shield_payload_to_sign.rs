@@ -1,23 +1,4 @@
-use enum_as_inner::EnumAsInner;
-use sargon_os_factors::{
-    extract_address_of_entity_updating_shield, AbstractSecurifiedEntity,
-    AbstractUnsecurifiedEntity, AnySecurifiedEntity, AnyUnsecurifiedEntity,
-    EntityApplyingShieldAddress, GetEntityAddressByAccessControllerAddress,
-    IsSecurifiedEntity, ProfileEntitiesOfKindOnNetworkInKeySpace,
-    SecurifiedAccount, SecurifiedPersona, UnsecurifiedAccount,
-    UnsecurifiedPersona,
-};
-
 use crate::prelude::*;
-
-impl HasEntityAddress for EntityApplyingShield {
-    fn address_erased(&self) -> AddressOfAccountOrPersona {
-        match self {
-            EntityApplyingShield::Securified(e) => e.address_erased(),
-            EntityApplyingShield::Unsecurified(e) => e.address_erased(),
-        }
-    }
-}
 
 pub type AddressOfPayerOfShieldApplication = AddressOfVaultOrAccount;
 
@@ -52,7 +33,7 @@ pub struct AbstractShieldApplicationInputWithOrWithoutBalance<
 }
 
 impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
-    fn modifying_manifest(
+    pub fn modifying_manifest(
         self,
         modify: impl FnOnce(TransactionManifest) -> Result<TransactionManifest>,
     ) -> Result<Self> {
@@ -70,39 +51,7 @@ impl<E: HasEntityAddress + Clone, X> HasEntityAddress
     }
 }
 
-pub struct XrdBalanceOfEntity<Entity: HasEntityAddress + Clone> {
-    pub entity: Entity,
-    pub balance: Decimal,
-}
-
-impl<Entity: HasEntityAddress + Clone + Into<Account>>
-    XrdBalanceOfEntity<Entity>
-{
-    pub fn into_account(self) -> XrdBalanceOfEntity<Account> {
-        XrdBalanceOfEntity {
-            entity: self.entity.into(),
-            balance: self.balance,
-        }
-    }
-}
-impl<Entity: HasEntityAddress + Clone> XrdBalanceOfEntity<Entity> {
-    pub fn new(entity: impl Into<Entity>, balance: Decimal) -> Self {
-        Self {
-            entity: entity.into(),
-            balance,
-        }
-    }
-}
-
-impl<Entity: HasEntityAddress + Clone> HasEntityAddress
-    for XrdBalanceOfEntity<Entity>
-{
-    fn address_erased(&self) -> AddressOfAccountOrPersona {
-        self.entity.address_erased()
-    }
-}
-
-type AbstractShieldApplicationInput<Entity> =
+pub type AbstractShieldApplicationInput<Entity> =
     AbstractShieldApplicationInputWithOrWithoutBalance<Entity, Decimal>;
 
 impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
@@ -239,7 +188,7 @@ pub type ShieldApplicationInputWithoutXrdBalance =
     >;
 
 impl ShieldApplicationInputWithoutXrdBalance {
-    fn addresses_to_fetch_xrd_balance_for(
+    pub fn addresses_to_fetch_xrd_balance_for(
         &self,
     ) -> IndexSet<AddressOfPayerOfShieldApplication> {
         let mut addresses = IndexSet::new();
@@ -315,7 +264,7 @@ pub type SecurifiedPersonaShieldApplicationInput =
     AbstractShieldApplicationInput<SecurifiedPersona>;
 
 impl ShieldApplicationInputWithoutXrdBalance {
-    fn new(
+    pub fn new(
         payer: impl Into<Option<Account>>,
         entity_applying_shield: EntityApplyingShield,
         manifest: TransactionManifest,
@@ -336,7 +285,7 @@ impl ShieldApplicationInputWithoutXrdBalance {
 }
 
 impl<Entity: HasEntityAddress + Clone> AbstractShieldApplicationInput<Entity> {
-    fn new(
+    pub fn new(
         payer_with_balance: impl Into<Option<XrdBalanceOfEntity<Account>>>,
         entity_applying_shield_and_balance: XrdBalanceOfEntity<Entity>,
         manifest: TransactionManifest,
@@ -409,765 +358,6 @@ impl From<(AnyUnsecurifiedShieldApplicationInput, UnsecurifiedPersona)>
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ManifestWithPayerByAddress {
-    /// `None` is invalid if `entity_applying_shield` is a Persona.
-    /// Some(Account) if `entity_applying_shield` is an Account means "use this other account instead"
-    /// None if `entity_applying_shield` is an Account means "use the account applying the shield"
-    pub payer: Option<AccountAddress>,
-    pub manifest: TransactionManifest,
-    pub estimated_xrd_fee: Decimal,
-}
-
-#[async_trait::async_trait]
-pub trait BatchApplySecurityShieldSigningHelpersToMigrate {
-    async fn enqueue_signed_transactions(
-        &self,
-        signed_payload: ApplySecurityShieldSignedPayload,
-    ) -> Result<IndexSet<TransactionIntentHash>>;
-
-    fn lookup_entities_for_manifests(
-        &self,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<Vec<ShieldApplicationInputWithoutXrdBalance>>;
-
-    async fn sign_transaction_intents(
-        &self,
-        payload_to_sign: ApplySecurityShieldPayloadToSign,
-    ) -> Result<ApplySecurityShieldSignedPayload>;
-
-    async fn persist_notary_private_keys_to_be_able_to_cancel_transactions(
-        &self,
-        transaction_id_to_notary_private_key: &IndexMap<
-            TransactionIntentHash,
-            Ed25519PrivateKey,
-        >,
-    ) -> Result<()>;
-
-    fn get_securified_entity_by_access_controller(
-        &self,
-        address: AccessControllerAddress,
-    ) -> Result<AnySecurifiedEntity>;
-
-    fn get_unsecurified_account_by_address(
-        &self,
-        address: AccountAddress,
-    ) -> Result<UnsecurifiedAccount>;
-
-    fn get_unsecurified_persona_by_address(
-        &self,
-        address: IdentityAddress,
-    ) -> Result<UnsecurifiedPersona>;
-
-    async fn get_xrd_balances(
-        &self,
-        network_id: NetworkID,
-        manifests_with_entities_without_xrd_balances: Vec<
-            ShieldApplicationInputWithoutXrdBalance,
-        >,
-    ) -> Result<Vec<ShieldApplicationInput>>;
-
-    fn create_many_manifest_variants_per_roles_combination(
-        &self,
-        manifests_with_entities_with_xrd_balance: Vec<ShieldApplicationInput>,
-    ) -> Result<Vec<SecurityShieldApplication>>;
-
-    fn get_entity_applying_shield(
-        &self,
-        address: EntityApplyingShieldAddress,
-    ) -> Result<EntityApplyingShield> {
-        match address {
-            EntityApplyingShieldAddress::AccessController(ac) => self
-                .get_securified_entity_by_access_controller(ac)
-                .map(EntityApplyingShield::securified),
-            EntityApplyingShieldAddress::Account(a) => self
-                .get_unsecurified_account_by_address(a)
-                .map(EntityApplyingShield::unsecurified_account),
-            EntityApplyingShieldAddress::Identity(i) => self
-                .get_unsecurified_persona_by_address(i)
-                .map(EntityApplyingShield::unsecurified_persona),
-        }
-    }
-
-    fn _modify_manifest_add_fee<Entity>(
-        input: AbstractShieldApplicationInput<Entity>,
-        // None if unsecurified
-        manifest_variant: Option<
-            RolesExercisableInTransactionManifestCombination,
-        >,
-    ) -> Result<AbstractShieldApplicationInput<Entity>>
-    where
-        Entity: HasEntityAddress + Clone,
-    {
-        //    if let Some(other_payer) = input.
-        todo!()
-    }
-
-    fn modify_manifest_add_fee_securified<T>(
-        input: AbstractShieldApplicationInput<AbstractSecurifiedEntity<T>>,
-        manifest_variant: RolesExercisableInTransactionManifestCombination,
-    ) -> Result<AbstractShieldApplicationInput<AbstractSecurifiedEntity<T>>>
-    where
-        T: IsBaseEntity + std::hash::Hash + Eq + Clone,
-    {
-        Self::_modify_manifest_add_fee(input, Some(manifest_variant))
-    }
-
-    fn modify_manifest_add_fee_for_unsecurified_entity_applying_shield<T>(
-        input: AbstractShieldApplicationInput<AbstractUnsecurifiedEntity<T>>,
-    ) -> Result<AbstractShieldApplicationInput<AbstractUnsecurifiedEntity<T>>>
-    where
-        T: IsBaseEntity + std::hash::Hash + Eq + Clone,
-    {
-        Self::_modify_manifest_add_fee(input, None)
-    }
-
-    fn modify_manifest_add_xrd_vault_contribution_for_unsecurified_account_applying_shield(
-        input: UnsecurifiedAccountShieldApplicationInput,
-    ) -> Result<UnsecurifiedAccountShieldApplicationInput> {
-        let unsecurified_account_applying_shield_with_balance =
-            input.get_entity_applying_shield_and_balance();
-
-        let payer_with_balance = input.payer_with_balance();
-
-        if payer_with_balance.balance < input.needed_xrd_for_fee_and_topup() {
-            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
-        }
-
-        let payer = payer_with_balance.entity;
-        let unsecurified_account_applying_shield =
-            unsecurified_account_applying_shield_with_balance.entity;
-
-        input.modifying_manifest(|m| {
-                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(payer, unsecurified_account_applying_shield.into(), m, None);
-
-                Ok(m)
-            })
-    }
-
-    fn modify_manifest_add_xrd_vault_contribution_for_unsecurified_persona_applying_shield(
-        input: UnsecurifiedPersonaShieldApplicationInput,
-    ) -> Result<(UnsecurifiedPersonaShieldApplicationInput, Account)> {
-        let payer_with_balance = input.payer_with_balance()?;
-
-        if payer_with_balance.balance < input.needed_xrd_for_fee_and_topup() {
-            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
-        }
-
-        let unsecurified_persona_applying_shield = input
-            .get_entity_applying_shield_and_balance()
-            .entity
-            .clone()
-            .into();
-
-        input.modifying_manifest(|m| {
-                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(payer_with_balance.entity.clone(), unsecurified_persona_applying_shield, m, None);
-
-                Ok(m)
-            }).map(|m| (m, payer_with_balance.entity))
-    }
-
-    fn shield_application_for_unsecurified_account(
-        &self,
-        input: UnsecurifiedAccountShieldApplicationInput,
-    ) -> Result<SecurityShieldApplicationForUnsecurifiedAccount> {
-        let input = Self::modify_manifest_add_fee_for_unsecurified_entity_applying_shield(input)?;
-        let input = Self::modify_manifest_add_xrd_vault_contribution_for_unsecurified_account_applying_shield(input)?;
-
-        Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
-            input.entity_applying_shield.clone(),
-            input.maybe_other_payer_and_balance().map(|p| p.entity),
-            input.manifest,
-        ))
-    }
-
-    fn modify_manifest_add_xrd_vault_contribution_for_securified_account_applying_shield(
-        input: SecurifiedAccountShieldApplicationInput,
-        manifest_variant: RolesExercisableInTransactionManifestCombination,
-    ) -> Result<SecurifiedAccountShieldApplicationInput> {
-        todo!()
-    }
-
-    fn modify_manifest_add_xrd_vault_contribution_for_securified_persona_applying_shield(
-        input: SecurifiedPersonaShieldApplicationInput,
-        manifest_variant: RolesExercisableInTransactionManifestCombination,
-    ) -> Result<SecurifiedPersonaShieldApplicationInput> {
-        todo!()
-    }
-
-    fn shield_application_for_unsecurified_persona(
-        &self,
-        input: UnsecurifiedPersonaShieldApplicationInput,
-    ) -> Result<SecurityShieldApplicationForUnsecurifiedPersona> {
-        let input = Self::modify_manifest_add_fee_for_unsecurified_entity_applying_shield(input)?;
-        let (input, paying_account) = Self::modify_manifest_add_xrd_vault_contribution_for_unsecurified_persona_applying_shield(input)?;
-
-        Ok(SecurityShieldApplicationForUnsecurifiedPersona::with_modified_manifest(
-            input.entity_applying_shield.clone(),
-            paying_account,
-            input.manifest,
-        ))
-    }
-
-    fn shield_application_for_unsecurified_entity(
-        &self,
-        input: AnyUnsecurifiedShieldApplicationInput,
-    ) -> Result<SecurityShieldApplicationForUnsecurifiedEntity> {
-        let entity = &input.entity_applying_shield;
-        match &entity.entity {
-            AccountOrPersona::AccountEntity(a) => self
-                .shield_application_for_unsecurified_account(
-                    UnsecurifiedAccountShieldApplicationInput::from((
-                        input.clone(),
-                        UnsecurifiedAccount::with_unsecured_entity_control(
-                            a.clone(),
-                            entity.unsecured_entity_control.clone(),
-                        ),
-                    )),
-                )
-                .map(SecurityShieldApplicationForUnsecurifiedEntity::Account),
-            AccountOrPersona::PersonaEntity(p) => self
-                .shield_application_for_unsecurified_persona(
-                    UnsecurifiedPersonaShieldApplicationInput::from((
-                        input.clone(),
-                        UnsecurifiedPersona::with_unsecured_entity_control(
-                            p.clone(),
-                            entity.unsecured_entity_control.clone(),
-                        ),
-                    )),
-                )
-                .map(SecurityShieldApplicationForUnsecurifiedEntity::Persona),
-        }
-    }
-
-    fn shield_application_for_securified_account(
-        &self,
-        input: SecurifiedAccountShieldApplicationInput,
-    ) -> Result<SecurityShieldApplicationForSecurifiedAccount> {
-        let manifest_for_variant =
-            |variant: RolesExercisableInTransactionManifestCombination| {
-                let manifest_with = input.clone();
-
-                let manifest_with = Self::modify_manifest_add_fee_securified(
-                    manifest_with,
-                    variant,
-                )?;
-
-                let manifest_with = Self::modify_manifest_add_xrd_vault_contribution_for_securified_account_applying_shield(manifest_with, variant)?;
-
-                Ok(manifest_with.manifest)
-            };
-
-        let initiate_with_recovery_complete_with_primary = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary)?;
-
-        let initiate_with_recovery_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation)?;
-
-        let initiate_with_recovery_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion)?;
-
-        let initiate_with_primary_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation)?;
-
-        let initiate_with_primary_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion)?;
-
-        let account_with_optional_paying_account = SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount::new(input.entity_applying_shield.clone(), input.maybe_other_payer_and_balance().map(|p| p.entity));
-
-        Ok(SecurityShieldApplicationForSecurifiedAccount::new(
-            account_with_optional_paying_account,
-            initiate_with_recovery_complete_with_primary,
-            initiate_with_recovery_complete_with_confirmation,
-            initiate_with_recovery_delayed_completion,
-            initiate_with_primary_complete_with_confirmation,
-            initiate_with_primary_delayed_completion,
-        ))
-    }
-
-    fn shield_application_for_securified_persona(
-        &self,
-        input: SecurifiedPersonaShieldApplicationInput,
-    ) -> Result<SecurityShieldApplicationForSecurifiedPersona> {
-        let manifest_for_variant =
-            |variant: RolesExercisableInTransactionManifestCombination| {
-                let manifest_with = input.clone();
-
-                let manifest_with = Self::modify_manifest_add_fee_securified(
-                    manifest_with,
-                    variant,
-                )?;
-
-                let manifest_with = Self::modify_manifest_add_xrd_vault_contribution_for_securified_persona_applying_shield(manifest_with, variant)?;
-
-                Ok(manifest_with.manifest)
-            };
-
-        let initiate_with_recovery_complete_with_primary = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary)?;
-
-        let initiate_with_recovery_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation)?;
-
-        let initiate_with_recovery_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion)?;
-
-        let initiate_with_primary_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation)?;
-
-        let initiate_with_primary_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion)?;
-
-        let payer =
-            SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount::new(
-                input.entity_applying_shield.clone(),
-                input.maybe_other_payer_and_balance().map(|p| p.entity), // TODO Should we fail here if the an account doing top up is not specified?
-            );
-
-        Ok(SecurityShieldApplicationForSecurifiedPersona::new(
-            payer,
-            initiate_with_recovery_complete_with_primary,
-            initiate_with_recovery_complete_with_confirmation,
-            initiate_with_recovery_delayed_completion,
-            initiate_with_primary_complete_with_confirmation,
-            initiate_with_primary_delayed_completion,
-        ))
-    }
-
-    fn shield_application_for_securified_entity(
-        &self,
-        input: AnySecurifiedShieldApplicationInput,
-    ) -> Result<SecurityShieldApplicationForSecurifiedEntity> {
-        let entity = &input.entity_applying_shield;
-        match &entity.entity {
-            AccountOrPersona::AccountEntity(a) => self
-                .shield_application_for_securified_account(
-                    SecurifiedAccountShieldApplicationInput::from((
-                        input.clone(),
-                        SecurifiedAccount::with_securified_entity_control(
-                            a.clone(),
-                            entity.securified_entity_control(),
-                        ),
-                    )),
-                )
-                .map(SecurityShieldApplicationForSecurifiedEntity::Account),
-            AccountOrPersona::PersonaEntity(p) => self
-                .shield_application_for_securified_persona(
-                    SecurifiedPersonaShieldApplicationInput::from((
-                        input.clone(),
-                        SecurifiedPersona::with_securified_entity_control(
-                            p.clone(),
-                            entity.securified_entity_control(),
-                        ),
-                    )),
-                )
-                .map(SecurityShieldApplicationForSecurifiedEntity::Persona),
-        }
-    }
-
-    fn assert_that_payer_is_not_in_batch_of_entities_applying_shield(
-        &self,
-        manifests_with_entities_without_xrd_balances: impl AsRef<
-            [ShieldApplicationInputWithoutXrdBalance],
-        >,
-    ) -> Result<()>;
-
-    async fn batch_fetch_xrd_balances_of_accounts_or_access_controllers(
-        &self,
-        network_id: NetworkID,
-        addresses: IndexSet<AddressOfPayerOfShieldApplication>,
-    ) -> Result<IndexMap<AddressOfPayerOfShieldApplication, Decimal>>;
-
-    async fn build_transaction_intents(
-        &self,
-        network_id: NetworkID,
-        manifests_with_entities_with_xrd_balance: Vec<
-            SecurityShieldApplication,
-        >,
-    ) -> Result<ApplySecurityShieldPayloadToSign>;
-
-    async fn build_payload_to_sign(
-        &self,
-        network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<ApplySecurityShieldPayloadToSign>;
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum EntityApplyingShield {
-    Unsecurified(AnyUnsecurifiedEntity),
-    Securified(AnySecurifiedEntity),
-}
-
-impl EntityApplyingShield {
-    fn securified(entity: AnySecurifiedEntity) -> Self {
-        Self::Securified(entity)
-    }
-
-    fn unsecurified_account(account: UnsecurifiedAccount) -> Self {
-        Self::Unsecurified(AnyUnsecurifiedEntity::from(account))
-    }
-
-    fn unsecurified_persona(persona: UnsecurifiedPersona) -> Self {
-        Self::Unsecurified(AnyUnsecurifiedEntity::from(persona))
-    }
-}
-
-#[async_trait::async_trait]
-impl BatchApplySecurityShieldSigningHelpersToMigrate for SargonOS {
-    fn get_securified_entity_by_access_controller(
-        &self,
-        address: AccessControllerAddress,
-    ) -> Result<AnySecurifiedEntity> {
-        self.profile().and_then(|p| {
-            p.get_securified_entity_by_access_controller_address(address)
-        })
-    }
-
-    async fn build_payload_to_sign(
-        &self,
-        network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<ApplySecurityShieldPayloadToSign> {
-        todo!("ALREADY MIGRATED TO STRUCT")
-    }
-
-    fn get_unsecurified_account_by_address(
-        &self,
-        address: AccountAddress,
-    ) -> Result<UnsecurifiedAccount> {
-        self.profile().and_then(|p| {
-            p.unsecurified_accounts_on_network(address.network_id())
-                .iter()
-                .find(|a| a.entity.address == address)
-                .ok_or(CommonError::UnknownAccount)
-        })
-    }
-
-    fn get_unsecurified_persona_by_address(
-        &self,
-        address: IdentityAddress,
-    ) -> Result<UnsecurifiedPersona> {
-        self.profile().and_then(|p| {
-            p.unsecurified_personas_on_network(address.network_id())
-                .iter()
-                .find(|a| a.entity.address == address)
-                .ok_or(CommonError::UnknownPersona)
-        })
-    }
-
-    fn assert_that_payer_is_not_in_batch_of_entities_applying_shield(
-        &self,
-        manifests_with_entities_without_xrd_balances: impl AsRef<
-            [ShieldApplicationInputWithoutXrdBalance],
-        >,
-    ) -> Result<()> {
-        let payer_addresses = manifests_with_entities_without_xrd_balances
-            .as_ref()
-            .iter()
-            .filter_map(|i| i.get_payer())
-            .map(|a| a.address())
-            .map(AddressOfAccountOrPersona::from)
-            .collect::<IndexSet<_>>();
-
-        if manifests_with_entities_without_xrd_balances
-            .as_ref()
-            .iter()
-            .any(|i| payer_addresses.contains(&i.address_erased()))
-        {
-            return Err(CommonError::Unknown); // CommonError::PayerCannotBeInBatchOfEntitiesApplyingShield
-        }
-
-        Ok(())
-    }
-
-    async fn batch_fetch_xrd_balances_of_accounts_or_access_controllers(
-        &self,
-        network_id: NetworkID,
-        addresses: IndexSet<AddressOfPayerOfShieldApplication>,
-    ) -> Result<IndexMap<AddressOfPayerOfShieldApplication, Decimal>> {
-        assert!(addresses.iter().all(|a| a.network_id() == network_id));
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
-
-        let balances = gateway_client
-            .xrd_balances_of_vault_or_account(network_id, addresses)
-            .await?;
-
-        let balances = balances
-            .into_iter()
-            .map(|(k, v)| (k, v.unwrap_or(Decimal192::zero())))
-            .collect::<IndexMap<_, _>>();
-
-        Ok(balances)
-    }
-
-    async fn get_xrd_balances(
-        &self,
-        network_id: NetworkID,
-        manifests_with_entities_without_xrd_balances: Vec<
-            ShieldApplicationInputWithoutXrdBalance,
-        >,
-    ) -> Result<Vec<ShieldApplicationInput>> {
-        let addresses_to_query = manifests_with_entities_without_xrd_balances
-            .iter()
-            .flat_map(|i| i.addresses_to_fetch_xrd_balance_for())
-            .collect::<IndexSet<AddressOfPayerOfShieldApplication>>();
-
-        let balances = self
-            .batch_fetch_xrd_balances_of_accounts_or_access_controllers(
-                network_id,
-                addresses_to_query,
-            )
-            .await?;
-
-        manifests_with_entities_without_xrd_balances
-                .into_iter()
-                .map(|i| {
-                    let entity_applying_shield_and_balance_res: Result<XrdBalanceOfEntity<EntityApplyingShield>> = match i.get_entity_applying_shield() {
-                        EntityApplyingShield::Securified(e) => {
-                            let vault_address = e.xrd_vault_address();
-                            let balance = balances.get(&AddressOfVaultOrAccount::Vault(vault_address)).ok_or(CommonError::Unknown).cloned()?; // TODO better error
-                            Ok(XrdBalanceOfEntity {
-                                entity: EntityApplyingShield::securified(e),
-                                balance
-                            })
-                        },
-                        EntityApplyingShield::Unsecurified(e) => {
-                            match &e.entity {
-                                AccountOrPersona::AccountEntity(a) => {
-                                    let balance = balances.get(&AddressOfVaultOrAccount::Account(a.address())).ok_or(CommonError::Unknown).cloned()?; // TODO better error
-                            Ok(XrdBalanceOfEntity {
-                                entity: EntityApplyingShield::unsecurified_account(UnsecurifiedAccount::with_unsecured_entity_control(a.clone(), e.unsecured_entity_control.clone())),
-                                balance
-                            })
-                                }
-                                AccountOrPersona::PersonaEntity(p) => {
-                                    // Unsecurified Personas cannot have any XRD... 
-                                    // thus we use Decimal192::zero(), which is a safe default
-                                    // we can update the types involved in this function
-                                    // to make this exeuction path impossible, alas,
-                                    // they are already too complex, so seems no worth it.
-                                    Ok(XrdBalanceOfEntity {
-                                        entity: EntityApplyingShield::unsecurified_persona(UnsecurifiedPersona::with_unsecured_entity_control(p.clone(), e.unsecured_entity_control.clone())),
-                                        balance: Decimal192::zero()
-                                    })
-                                }
-                            }
-                        },
-                    };
-                    let entity_applying_shield_and_balance = entity_applying_shield_and_balance_res?;
-                    match i.get_payer() {
-                        Some(payer) => {
-                            let balance = balances.get(&AddressOfVaultOrAccount::Account(payer.address())).ok_or(CommonError::Unknown).cloned()?; // TODO better error
-                            Ok(ShieldApplicationInput::new(XrdBalanceOfEntity::<Account> {
-                                entity: payer,
-                                balance
-                            }, entity_applying_shield_and_balance, i.manifest, i.estimated_xrd_fee))
-                        }
-                        None => {
-                            Ok(ShieldApplicationInput::new(None, entity_applying_shield_and_balance, i.manifest, i.estimated_xrd_fee))
-                        }
-                    }
-                })
-                .collect::<Result<Vec<ShieldApplicationInput>>>()
-    }
-
-    async fn build_transaction_intents(
-        &self,
-        network_id: NetworkID,
-        manifests_with_entities_with_xrd_balance: Vec<
-            SecurityShieldApplication,
-        >,
-    ) -> Result<ApplySecurityShieldPayloadToSign> {
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
-
-        let start_epoch_inclusive = gateway_client.current_epoch().await?;
-        let end_epoch_exclusive = Epoch::one_week_from(start_epoch_inclusive);
-
-        let mut transaction_id_to_notary_private_key: IndexMap<
-            TransactionIntentHash,
-            Ed25519PrivateKey,
-        > = IndexMap::new();
-
-        let mut build_intent = |manifest: &TransactionManifest,
-                                nonce: Nonce,
-                                notary_private_key_bytes: Exactly32Bytes|
-         -> Result<TransactionIntent> {
-            let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(
-                notary_private_key_bytes,
-            );
-            let notary_public_key = notary_private_key.public_key();
-            let header = TransactionHeader::new(
-                network_id,
-                start_epoch_inclusive,
-                end_epoch_exclusive,
-                nonce,
-                notary_public_key,
-                NotaryIsSignatory(true),
-                0,
-            );
-
-            let intent = TransactionIntent::new(
-                header,
-                manifest.clone(),
-                Message::None,
-            )?;
-
-            // So we can return the notary keys to callee so we can notarize later.
-            //
-            // For securified entities the same notary private key will be present under many TransactionIntentHash
-            // map keys (identifier).
-            transaction_id_to_notary_private_key
-                .insert(intent.transaction_intent_hash(), notary_private_key);
-
-            Ok(intent)
-        };
-
-        let with_intents = manifests_with_entities_with_xrd_balance.into_iter().map(|m| {
-            // We tactically use the same nonce for all variants of the TransactionIntents
-            // for securified entities - ensuring that we cannot accidentally submit
-            // two variants of the same application.
-            let nonce =  Nonce::random();
-            // We can use the same notary private key for all variants since they
-            // are in fact the same application
-            let notary_private_key_bytes = Exactly32Bytes::generate();
-            match m {
-                SecurityShieldApplication::ForUnsecurifiedEntity(unsec) => {
-                    let intent = build_intent(unsec.manifest(), nonce, notary_private_key_bytes)?;
-                    let with_intents = SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::with_intent(unsec, intent);
-
-                    Ok(SecurityShieldApplicationWithTransactionIntents::ForUnsecurifiedEntity(with_intents))
-                }
-                SecurityShieldApplication::ForSecurifiedEntity(sec) => {
-                    let with_intents: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents = {
-
-                        let initiate_with_recovery_complete_with_primary = build_intent(sec.initiate_with_recovery_complete_with_primary(), nonce, notary_private_key_bytes)?;
-
-                        let initiate_with_recovery_complete_with_confirmation = build_intent(sec.initiate_with_recovery_complete_with_confirmation(), nonce, notary_private_key_bytes)?;
-
-                        let initiate_with_recovery_delayed_completion = build_intent(sec.initiate_with_recovery_delayed_completion(), nonce, notary_private_key_bytes)?;
-
-                        let initiate_with_primary_complete_with_confirmation = build_intent(sec.initiate_with_primary_complete_with_confirmation(), nonce, notary_private_key_bytes)?;
-
-                        let initiate_with_primary_delayed_completion = build_intent(sec.initiate_with_primary_delayed_completion(), nonce, notary_private_key_bytes)?;
-
-                        Ok(SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents::with_intents(sec, initiate_with_recovery_complete_with_primary, initiate_with_recovery_complete_with_confirmation, initiate_with_recovery_delayed_completion, initiate_with_primary_complete_with_confirmation, initiate_with_primary_delayed_completion))
-                    }?;
-                    Ok(SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(with_intents))
-                }
-            }
-        }).collect::<Result<Vec<SecurityShieldApplicationWithTransactionIntents>>>()?;
-
-        let payload_to_sign = ApplySecurityShieldPayloadToSign {
-            applications_with_intents: with_intents,
-            notary_keys: transaction_id_to_notary_private_key,
-        };
-
-        Ok(payload_to_sign)
-    }
-
-    async fn persist_notary_private_keys_to_be_able_to_cancel_transactions(
-        &self,
-        _transaction_id_to_notary_private_key: &IndexMap<
-            TransactionIntentHash,
-            Ed25519PrivateKey,
-        >,
-    ) -> Result<()> {
-        // We do not support this yet, but might in the future.
-        info!("Skipped persisting notary private keys to be able to cancel transactions");
-        Ok(())
-    }
-
-    async fn sign_transaction_intents(
-        &self,
-        payload_to_sign: ApplySecurityShieldPayloadToSign,
-    ) -> Result<ApplySecurityShieldSignedPayload> {
-        todo!()
-    }
-
-    fn lookup_entities_for_manifests(
-        &self,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<Vec<ShieldApplicationInputWithoutXrdBalance>> {
-        manifest_and_payer_tuples
-            .into_iter()
-            .map(|manifest_with_payer_by_address| {
-                let manifest = manifest_with_payer_by_address.manifest;
-                let estimated_xrd_fee =
-                    manifest_with_payer_by_address.estimated_xrd_fee;
-                let address_of_ac_or_entity_applying_shield =
-                    extract_address_of_entity_updating_shield(&manifest)?;
-
-                let entity_applying_shield = self.get_entity_applying_shield(
-                    address_of_ac_or_entity_applying_shield,
-                )?;
-
-                if let Some(payer_address) =
-                    manifest_with_payer_by_address.payer
-                {
-                    let payer = self.account_by_address(payer_address)?;
-                    Ok(ShieldApplicationInputWithoutXrdBalance::new(
-                        payer,
-                        entity_applying_shield,
-                        manifest,
-                        estimated_xrd_fee,
-                    ))
-                } else {
-                    Ok(ShieldApplicationInputWithoutXrdBalance::new(
-                        None,
-                        entity_applying_shield,
-                        manifest,
-                        estimated_xrd_fee,
-                    ))
-                }
-            })
-            .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()
-    }
-
-    async fn enqueue_signed_transactions(
-        &self,
-        signed_payload: ApplySecurityShieldSignedPayload,
-    ) -> Result<IndexSet<TransactionIntentHash>> {
-        todo!()
-    }
-
-    fn create_many_manifest_variants_per_roles_combination(
-        &self,
-        manifests_with_entities_with_xrd_balance: Vec<ShieldApplicationInput>,
-    ) -> Result<Vec<SecurityShieldApplication>> {
-        manifests_with_entities_with_xrd_balance
-            .into_iter()
-            .map(|manifest_with_payer| {
-                match &manifest_with_payer.entity_applying_shield {
-                    EntityApplyingShield::Unsecurified(entity) => self
-                        .shield_application_for_unsecurified_entity(
-                            AnyUnsecurifiedShieldApplicationInput::from((
-                                manifest_with_payer.clone(),
-                                entity.clone(),
-                            )),
-                        )
-                        .map(SecurityShieldApplication::unsecurified),
-                    EntityApplyingShield::Securified(entity) => self
-                        .shield_application_for_securified_entity(
-                            AnySecurifiedShieldApplicationInput::from((
-                                manifest_with_payer.clone(),
-                                entity.clone(),
-                            )),
-                        )
-                        .map(SecurityShieldApplication::securified),
-                }
-            })
-            .collect::<Result<Vec<SecurityShieldApplication>>>()
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct ApplySecurityShieldPayloadToSign {
-    pub applications_with_intents:
-        Vec<SecurityShieldApplicationWithTransactionIntents>,
-    pub notary_keys: IndexMap<TransactionIntentHash, Ed25519PrivateKey>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct ApplySecurityShieldSignedPayload {
-    /// Only one transaction per application - for Securified Entities we will have had 5 manifests
-    /// and we select "the best" (quick confirm if possible) depending on the outcome of the
-    /// signing process
-    pub notarized_transactions: Vec<NotarizedTransaction>,
-}
-
 /// Securiy shield application is the application of a security shield
 /// to some entity. This entity can be either an account or a persona.
 /// Essentially holds four
@@ -1199,13 +389,13 @@ pub enum SecurityShieldApplicationWithTransactionIntents {
 }
 
 impl SecurityShieldApplication {
-    fn unsecurified(
+    pub fn unsecurified(
         application: SecurityShieldApplicationForUnsecurifiedEntity,
     ) -> Self {
         Self::ForUnsecurifiedEntity(application)
     }
 
-    fn securified(
+    pub fn securified(
         application: SecurityShieldApplicationForSecurifiedEntity,
     ) -> Self {
         Self::ForSecurifiedEntity(application)
@@ -1256,7 +446,7 @@ pub enum SecurityShieldApplicationForSecurifiedEntity {
     Persona(SecurityShieldApplicationForSecurifiedPersona),
 }
 impl SecurityShieldApplicationForSecurifiedEntity {
-    fn initiate_with_recovery_complete_with_confirmation(
+    pub fn initiate_with_recovery_complete_with_confirmation(
         &self,
     ) -> &TransactionManifest {
         match self {
@@ -1268,7 +458,7 @@ impl SecurityShieldApplicationForSecurifiedEntity {
             }
         }
     }
-    fn initiate_with_recovery_complete_with_primary(
+    pub fn initiate_with_recovery_complete_with_primary(
         &self,
     ) -> &TransactionManifest {
         match self {
@@ -1280,7 +470,7 @@ impl SecurityShieldApplicationForSecurifiedEntity {
             }
         }
     }
-    fn initiate_with_recovery_delayed_completion(
+    pub fn initiate_with_recovery_delayed_completion(
         &self,
     ) -> &TransactionManifest {
         match self {
@@ -1292,7 +482,7 @@ impl SecurityShieldApplicationForSecurifiedEntity {
             }
         }
     }
-    fn initiate_with_primary_complete_with_confirmation(
+    pub fn initiate_with_primary_complete_with_confirmation(
         &self,
     ) -> &TransactionManifest {
         match self {
@@ -1304,7 +494,9 @@ impl SecurityShieldApplicationForSecurifiedEntity {
             }
         }
     }
-    fn initiate_with_primary_delayed_completion(&self) -> &TransactionManifest {
+    pub fn initiate_with_primary_delayed_completion(
+        &self,
+    ) -> &TransactionManifest {
         match self {
             SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
                 &a.initiate_with_primary_delayed_completion
@@ -1393,7 +585,7 @@ pub struct SecurityShieldApplicationForUnsecurifiedAccount {
 impl SecurityShieldApplicationForUnsecurifiedAccount {
     /// # Panics
     /// Panics if `address_of_paying_account` is `Some` and `address_of_paying_account == address_of_account_applying_shield`
-    fn with_modified_manifest(
+    pub fn with_modified_manifest(
         account_applying_shield: UnsecurifiedAccount,
         paying_account: impl Into<Option<Account>>,
         modified_manifest: TransactionManifest,
@@ -1445,7 +637,7 @@ pub struct SecurityShieldApplicationForUnsecurifiedPersona {
 }
 
 impl SecurityShieldApplicationForUnsecurifiedPersona {
-    fn with_modified_manifest(
+    pub fn with_modified_manifest(
         persona_applying_shield: UnsecurifiedPersona,
         paying_account: Account,
         modified_manifest: TransactionManifest,

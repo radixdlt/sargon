@@ -3987,6 +3987,8 @@ dependencies = [
  "pretty_assertions",
  "profile",
  "profile-account-or-persona",
+ "profile-logic",
+ "profile-supporting-types",
  "radix-common",
  "radix-connect-models",
  "radix-engine-interface",

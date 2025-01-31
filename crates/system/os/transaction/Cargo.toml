@@ -14,9 +14,11 @@ radix-connect-models = { workspace = true }
 signatures-collector = { workspace = true }
 entity-by-address = { workspace = true }
 profile = { workspace = true }
+profile-logic = { workspace = true }
 sargon-os-factors = { workspace = true }
 profile-account-or-persona = { workspace = true }
 gateway-client-and-api = { workspace = true }
+profile-supporting-types = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-engine-interface = { workspace = true }
