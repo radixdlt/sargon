@@ -35,6 +35,11 @@ pub trait OsSecurityStructuresQuerying {
         &self,
         structure_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<()>;
+
+    async fn set_main_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<()>;
 }
 
 #[async_trait::async_trait]
@@ -150,6 +155,34 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 EventProfileModified::SecurityStructureAdded { id },
             ))
             .await;
+        Ok(())
+    }
+
+    /// Sets the Security Shield with the given `shield_id` as the main shield.
+    /// If a main Security Shield already exists, it is removed and replaced with the new one.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::SecurityStructuresUpdated { id } }`
+    async fn set_main_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<()> {
+        let updated_ids = self
+            .update_profile_with(|p| p.set_main_security_structure(&shield_id))
+            .await?;
+
+        // Emit event
+        self.event_bus
+            .emit(EventNotification::profile_modified(
+                EventProfileModified::SecurityStructuresUpdated {
+                    ids: updated_ids,
+                },
+            ))
+            .await;
+
         Ok(())
     }
 }
@@ -331,6 +364,207 @@ mod tests {
         assert!(event_bus_driver.recorded().iter().any(|e| e.event
             == Event::ProfileModified {
                 change: EventProfileModified::SecurityStructureAdded { id }
+            }));
+    }
+
+    #[actix_rt::test]
+    async fn when_setting_main_security_structure_with_invalid_id_error_is_thrown(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // ACT
+        let structure_ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample_other();
+        let result = os
+            .set_main_security_structure(structure_ids_sample_other.id())
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidSecurityStructureID {
+                bad_value: structure_ids_sample_other.id().to_string()
+            })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn given_existing_main_security_structure_when_updating_with_invalid_id_then_main_is_not_removed(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        let structure_factor_id_level =
+            SecurityStructureOfFactorSourceIDs::sample();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_factor_id_level,
+            )
+        })
+        .await
+        .unwrap();
+
+        // ACT
+        let invalid_shield_id =
+            SecurityStructureID::from(Uuid::from_bytes([0xab; 16]));
+        let _ = os.set_main_security_structure(invalid_shield_id).await;
+
+        // ASSERT
+        let profile = os.profile().unwrap();
+        let main_security_structure = profile
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .first()
+            .unwrap();
+
+        assert!(main_security_structure.metadata.is_main());
+    }
+
+    #[actix_rt::test]
+    async fn set_main_flag() {
+        // ARRANGE
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        let structure_ids_sample = SecurityStructureOfFactorSourceIDs::sample();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure_ids_sample)
+        })
+        .await
+        .unwrap();
+
+        let structure_ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample_other();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_ids_sample_other,
+            )
+        })
+        .await
+        .unwrap();
+
+        event_bus_driver.clear_recorded();
+
+        // ACT
+        assert!(structure_ids_sample.metadata.is_main());
+        os.with_timeout(|x| {
+            x.set_main_security_structure(
+                structure_ids_sample_other.metadata.id(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let updated_security_structures = os
+            .profile()
+            .unwrap()
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids;
+
+        let updated_structure_ids_sample = updated_security_structures.first();
+        let updated_structure_ids_sample_other =
+            updated_security_structures.get_at_index(1);
+
+        assert!(!updated_structure_ids_sample.unwrap().metadata.is_main());
+        assert!(updated_structure_ids_sample_other
+            .unwrap()
+            .metadata
+            .is_main());
+
+        let events = event_bus_driver.recorded();
+        let security_structures_updated_event = events
+            .iter()
+            .find(|e| matches!(
+                e.event,
+                Event::ProfileModified {
+                    change: EventProfileModified::SecurityStructuresUpdated { .. }
+                }));
+        let ids = if let Event::ProfileModified {
+            change: EventProfileModified::SecurityStructuresUpdated { ref ids },
+        } = &security_structures_updated_event.unwrap().event
+        {
+            ids
+        } else {
+            panic!("Expected a SecurityStructuresUpdated event");
+        };
+
+        assert_eq!(ids.len(), 2);
+    }
+
+    #[actix_rt::test]
+    async fn set_main_flag_emits_event() {
+        // ARRANGE
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        let structure_ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample_other();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_ids_sample_other,
+            )
+        })
+        .await
+        .unwrap();
+
+        event_bus_driver.clear_recorded();
+
+        // ACT
+        os.with_timeout(|x| {
+            x.set_main_security_structure(
+                structure_ids_sample_other.metadata.id(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let events = event_bus_driver.recorded();
+        assert!(events.iter().any(|e| e.event == Event::ProfileSaved),);
+        assert!(events.iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::SecurityStructuresUpdated {
+                    ids: vec![structure_ids_sample_other.metadata.id()]
+                }
             }));
     }
 

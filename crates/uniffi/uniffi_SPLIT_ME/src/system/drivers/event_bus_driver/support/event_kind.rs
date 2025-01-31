@@ -60,6 +60,9 @@ pub enum EventKind {
 
     /// Profile updated with a new Security Structure.
     SecurityStructureAdded,
+
+    /// Security structures have been updated
+    SecurityStructuresUpdated,
 }
 
 #[uniffi::export]
