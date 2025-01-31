@@ -84,24 +84,19 @@ impl VirtualEntityCreatingInstance {
     /// [identpr]: https://github.com/radixdlt/sargon/pull/254/files#r1860748013
     /// [badpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1042
     /// [goodpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1256
-    #[cfg(debug_assertions)]
     fn check_for_derivation_path_discrepancies(
         factor_instance: &HierarchicalDeterministicFactorInstance,
         address: &AddressOfAccountOrPersona,
     ) {
-        let has_discrepancy =
+        let discrepancy_found =
             factor_instance.derivation_path().get_entity_kind()
                 == address.get_entity_kind();
-
-        #[cfg(test)]
-        debug_assert!(
-            has_discrepancy,
-            "Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds."
-        );
-
-        if has_discrepancy {
-            error!("Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds.");
+        let error_msg = "Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds.";
+        if discrepancy_found {
+            error!("{}", error_msg);
         }
+        #[cfg(test)]
+        debug_assert!(discrepancy_found, "{}", error_msg);
     }
 }
 
