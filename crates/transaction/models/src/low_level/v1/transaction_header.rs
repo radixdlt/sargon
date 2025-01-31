@@ -1,3 +1,5 @@
+use core_misc::decl_bool_type;
+
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, derive_more::Display)]
@@ -8,9 +10,11 @@ pub struct TransactionHeader {
     pub end_epoch_exclusive: Epoch,
     pub nonce: Nonce,
     pub notary_public_key: PublicKey,
-    pub notary_is_signatory: bool,
+    pub notary_is_signatory: NotaryIsSignatory,
     pub tip_percentage: u16,
 }
+
+decl_bool_type!(NotaryIsSignatory, true);
 
 impl TransactionHeader {
     /// Creates a new `TransactionHeader`
@@ -23,7 +27,7 @@ impl TransactionHeader {
         end_epoch_exclusive: impl Into<Epoch>,
         nonce: impl Into<Nonce>,
         notary_public_key: impl Into<PublicKey>,
-        notary_is_signatory: bool,
+        notary_is_signatory: impl Into<NotaryIsSignatory>,
         tip_percentage: u16,
     ) -> Self {
         let start_epoch_inclusive = start_epoch_inclusive.into();
@@ -38,7 +42,7 @@ impl TransactionHeader {
             end_epoch_exclusive,
             nonce: nonce.into(),
             notary_public_key: notary_public_key.into(),
-            notary_is_signatory,
+            notary_is_signatory: notary_is_signatory.into(),
             tip_percentage,
         }
     }
@@ -52,7 +56,7 @@ impl From<TransactionHeader> for ScryptoTransactionHeader {
             end_epoch_exclusive: value.end_epoch_exclusive.into(),
             nonce: value.nonce.into(),
             notary_public_key: value.notary_public_key.into(),
-            notary_is_signatory: value.notary_is_signatory,
+            notary_is_signatory: value.notary_is_signatory.0,
             tip_percentage: value.tip_percentage,
         }
     }
@@ -71,7 +75,7 @@ impl TryFrom<ScryptoTransactionHeader> for TransactionHeader {
             end_epoch_exclusive: value.end_epoch_exclusive.into(),
             nonce: value.nonce.into(),
             notary_public_key,
-            notary_is_signatory: value.notary_is_signatory,
+            notary_is_signatory: NotaryIsSignatory(value.notary_is_signatory),
             tip_percentage: value.tip_percentage,
         })
     }

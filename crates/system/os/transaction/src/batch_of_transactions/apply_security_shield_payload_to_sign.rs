@@ -960,9 +960,79 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         let gateway_client =
             GatewayClient::new(self.http_client.driver.clone(), network_id);
 
-        let epoch = gateway_client.current_epoch().await?;
+        let start_epoch_inclusive = gateway_client.current_epoch().await?;
+        let end_epoch_exclusive = Epoch::one_week_from(start_epoch_inclusive);
 
-        todo!()
+        let mut transaction_id_to_notary_private_key: IndexMap<TransactionIntentHash, Ed25519PrivateKey> = IndexMap::new();
+
+
+        let mut build_intent = |manifest: &TransactionManifest,
+                            nonce: Nonce,
+                            notary_private_key_bytes: Exactly32Bytes|
+         -> Result<TransactionIntent> {
+            let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(notary_private_key_bytes);
+            let notary_public_key = notary_private_key.public_key();
+            let header = TransactionHeader::new(
+                network_id,
+                start_epoch_inclusive,
+                end_epoch_exclusive,
+                nonce,
+                notary_public_key,
+                NotaryIsSignatory(true),
+                0,
+            );
+
+            let intent = TransactionIntent::new(header, manifest.clone(), Message::None)?;
+
+            // Save notary key so that in future - we can cancel the transaction
+            // after it has been submitted.
+            // 
+            // For securified entities the same notary private key will be present under many TransactionIntentHash
+            // map keys (identifier).
+            transaction_id_to_notary_private_key.insert(intent.transaction_intent_hash(), notary_private_key);
+
+            Ok(intent)
+        };
+
+     
+        manifests_with_entities_with_xrd_balance.into_iter().map(|m| {
+            // We tactically use the same nonce for all variants of the TransactionIntents
+            // for securified entities - ensuring that we cannot accidentally submit
+            // two variants of the same application.
+            let nonce =  Nonce::random();
+            // We can use the same notary private key for all variants since they
+            // are in fact the same application
+            let notary_private_key_bytes = Exactly32Bytes::generate();
+            match m {
+                SecurityShieldApplication::ForUnsecurifiedEntity(unsec) => {
+                    let intent = build_intent(unsec.manifest(), nonce, notary_private_key_bytes)?;
+
+                  
+                    let with_intents = SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::with_intent(unsec, intent);
+
+                    Ok(SecurityShieldApplicationWithTransactionIntents::ForUnsecurifiedEntity(with_intents))
+                }
+                SecurityShieldApplication::ForSecurifiedEntity(sec) => {
+                    let with_intents: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents = {
+
+                        let initiate_with_recovery_complete_with_primary = build_intent(sec.initiate_with_recovery_complete_with_primary(), nonce, notary_private_key_bytes)?;
+
+                        let initiate_with_recovery_complete_with_confirmation = build_intent(sec.initiate_with_recovery_complete_with_confirmation(), nonce, notary_private_key_bytes)?;
+
+                        let initiate_with_recovery_delayed_completion = build_intent(sec.initiate_with_recovery_delayed_completion(), nonce, notary_private_key_bytes)?;
+
+                        let initiate_with_primary_complete_with_confirmation = build_intent(sec.initiate_with_primary_complete_with_confirmation(), nonce, notary_private_key_bytes)?;
+
+                        let initiate_with_primary_delayed_completion = build_intent(sec.initiate_with_primary_delayed_completion(), nonce, notary_private_key_bytes)?;
+
+                        Ok(SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents::with_intents(sec, initiate_with_recovery_complete_with_primary, initiate_with_recovery_complete_with_confirmation, initiate_with_recovery_delayed_completion, initiate_with_primary_complete_with_confirmation, initiate_with_primary_delayed_completion))
+                    }?;
+
+
+                    Ok(SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(with_intents))
+                }
+            }
+        }).collect::<Result<Vec<SecurityShieldApplicationWithTransactionIntents>>>()
     }
 
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
@@ -1123,6 +1193,18 @@ pub enum SecurityShieldApplicationForUnsecurifiedEntity {
     /// AccessControl XRD vault.
     Persona(SecurityShieldApplicationForUnsecurifiedPersona),
 }
+impl SecurityShieldApplicationForUnsecurifiedEntity {
+    pub fn manifest(&self) -> &TransactionManifest {
+        match self {
+            SecurityShieldApplicationForUnsecurifiedEntity::Account(a) => {
+                &a.modified_manifest
+            }
+            SecurityShieldApplicationForUnsecurifiedEntity::Persona(p) => {
+                &p.modified_manifest
+            }
+        }
+    }
+}
 
 /// An application of a security shield to a securified entity
 /// holds many tuples of manifests for each combination of role.
@@ -1139,13 +1221,83 @@ pub enum SecurityShieldApplicationForSecurifiedEntity {
     /// AccessControl XRD vault.
     Persona(SecurityShieldApplicationForSecurifiedPersona),
 }
+impl SecurityShieldApplicationForSecurifiedEntity {
+    fn initiate_with_recovery_complete_with_confirmation(
+        &self,
+    ) -> &TransactionManifest {
+        match self {
+            SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
+                &a.initiate_with_recovery_complete_with_confirmation
+            }
+            SecurityShieldApplicationForSecurifiedEntity::Persona(p) => {
+                &p.initiate_with_recovery_complete_with_confirmation
+            }
+        }
+    }
+    fn initiate_with_recovery_complete_with_primary(
+        &self,
+    ) -> &TransactionManifest {
+        match self {
+            SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
+                &a.initiate_with_recovery_complete_with_primary
+            }
+            SecurityShieldApplicationForSecurifiedEntity::Persona(p) => {
+                &p.initiate_with_recovery_complete_with_primary
+            }
+        }
+    }
+    fn initiate_with_recovery_delayed_completion(
+        &self,
+    ) -> &TransactionManifest {
+        match self {
+            SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
+                &a.initiate_with_recovery_delayed_completion
+            }
+            SecurityShieldApplicationForSecurifiedEntity::Persona(p) => {
+                &p.initiate_with_recovery_delayed_completion
+            }
+        }
+    }
+    fn initiate_with_primary_complete_with_confirmation(
+        &self,
+    ) -> &TransactionManifest {
+        match self {
+            SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
+                &a.initiate_with_primary_complete_with_confirmation
+            }
+            SecurityShieldApplicationForSecurifiedEntity::Persona(p) => {
+                &p.initiate_with_primary_complete_with_confirmation
+            }
+        }
+    }
+    fn initiate_with_primary_delayed_completion(&self) -> &TransactionManifest {
+        match self {
+            SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
+                &a.initiate_with_primary_delayed_completion
+            }
+            SecurityShieldApplicationForSecurifiedEntity::Persona(p) => {
+                &p.initiate_with_primary_delayed_completion
+            }
+        }
+    }
+}
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct SecurityShieldApplicationForUnsecurifiedAccountWithTransactionIntent
 {
     pub application: SecurityShieldApplicationForUnsecurifiedAccount,
     pub transaction_intent: TransactionIntent,
-    pub notary_private_key: Ed25519PrivateKey,
+}
+impl SecurityShieldApplicationForUnsecurifiedAccountWithTransactionIntent {
+    pub fn new(
+        application: SecurityShieldApplicationForUnsecurifiedAccount,
+        transaction_intent: TransactionIntent,
+    ) -> Self {
+        Self {
+            application,
+            transaction_intent,
+        }
+    }
 }
 
 #[derive(PartialEq, Eq, Debug)]
@@ -1153,7 +1305,17 @@ pub struct SecurityShieldApplicationForUnsecurifiedPersonaWithTransactionIntent
 {
     pub application: SecurityShieldApplicationForUnsecurifiedPersona,
     pub transaction_intent: TransactionIntent,
-    pub notary_private_key: Ed25519PrivateKey,
+}
+impl SecurityShieldApplicationForUnsecurifiedPersonaWithTransactionIntent {
+    pub fn new(
+        application: SecurityShieldApplicationForUnsecurifiedPersona,
+        transaction_intent: TransactionIntent,
+    ) -> Self {
+        Self {
+            application,
+            transaction_intent,
+        }
+    }
 }
 
 /// An application of a security shield to an unsecurified account
@@ -1444,8 +1606,44 @@ pub enum SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
     ),
 }
 
+impl SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
+    pub fn with_intent(
+        without: SecurityShieldApplicationForUnsecurifiedEntity,
+        intent: TransactionIntent,
+    ) -> Self {
+        match without {
+            SecurityShieldApplicationForUnsecurifiedEntity::Account(a) => {
+                Self::Account(SecurityShieldApplicationForUnsecurifiedAccountWithTransactionIntent::new(a, intent))
+            }
+            SecurityShieldApplicationForUnsecurifiedEntity::Persona(p) => {
+                Self::Persona(SecurityShieldApplicationForUnsecurifiedPersonaWithTransactionIntent::new(p, intent))
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, EnumAsInner)]
 pub enum SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
     Account(SecurityShieldApplicationTransactionIntentsForSecurifiedAccount),
     Persona(SecurityShieldApplicationTransactionIntentsForSecurifiedPersona),
+}
+
+impl SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
+    pub fn with_intents(
+        without: SecurityShieldApplicationForSecurifiedEntity,
+        initiate_with_recovery_complete_with_primary: TransactionIntent,
+        initiate_with_recovery_complete_with_confirmation: TransactionIntent,
+        initiate_with_recovery_delayed_completion: TransactionIntent,
+        initiate_with_primary_complete_with_confirmation: TransactionIntent,
+        initiate_with_primary_delayed_completion: TransactionIntent,
+    ) -> Self {
+        match without {
+            SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
+                Self::Account(SecurityShieldApplicationTransactionIntentsForSecurifiedAccount::new(a.account_with_optional_paying_account, initiate_with_recovery_complete_with_primary, initiate_with_recovery_complete_with_confirmation, initiate_with_recovery_delayed_completion, initiate_with_primary_complete_with_confirmation, initiate_with_primary_delayed_completion))
+            }
+            SecurityShieldApplicationForSecurifiedEntity::Persona(p) => {
+                Self::Persona(SecurityShieldApplicationTransactionIntentsForSecurifiedPersona::new(p.persona_with_paying_account, initiate_with_recovery_complete_with_primary, initiate_with_recovery_complete_with_confirmation, initiate_with_recovery_delayed_completion, initiate_with_primary_complete_with_confirmation, initiate_with_primary_delayed_completion))
+            }
+        }
+    }
 }

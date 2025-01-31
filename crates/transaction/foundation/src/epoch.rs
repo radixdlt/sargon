@@ -18,7 +18,11 @@ pub struct Epoch(pub u64);
 
 impl Epoch {
     /// Circa 1 hour, since one epoch is circa 6 minutes.
-    pub const DEFAULT_EPOCH_WINDOW_SIZE: u64 = 10;
+    pub const NUMBER_OF_EPOCHS_PER_HOUR: u64 = 10;
+    pub const NUMBER_OF_EPOCHS_PER_DAY: u64 = Self::NUMBER_OF_EPOCHS_PER_HOUR * 24;
+    pub const NUMBER_OF_EPOCHS_PER_WEEK: u64 = Self::NUMBER_OF_EPOCHS_PER_DAY * 7;
+
+     pub const DEFAULT_EPOCH_WINDOW_SIZE: u64 = Self::NUMBER_OF_EPOCHS_PER_HOUR;
 }
 
 impl Epoch {
@@ -32,6 +36,10 @@ impl Epoch {
 
     pub fn adding(&self, amount: u64) -> Self {
         Self::new(self.0 + amount)
+    }
+
+    pub fn one_week_from(start: Self) -> Self {
+        Self::new(start.0 + Self::NUMBER_OF_EPOCHS_PER_WEEK)
     }
 }
 
