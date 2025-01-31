@@ -450,6 +450,19 @@ pub trait BatchApplySecurityShieldSigning {
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>>;
 
+    async fn sign_transaction_intents(
+        &self,
+        payload_to_sign: ApplySecurityShieldPayloadToSign,
+    ) -> Result<ApplySecurityShieldSignedPayload>;
+
+    async fn persist_notary_private_keys_to_be_able_to_cancel_transactions(
+        &self,
+        transaction_id_to_notary_private_key: &IndexMap<
+            TransactionIntentHash,
+            Ed25519PrivateKey,
+        >,
+    ) -> Result<()>;
+
     fn get_securified_entity_by_access_controller(
         &self,
         address: AccessControllerAddress,
@@ -775,7 +788,7 @@ pub trait BatchApplySecurityShieldSigning {
         manifests_with_entities_with_xrd_balance: Vec<
             SecurityShieldApplication,
         >,
-    ) -> Result<Vec<SecurityShieldApplicationWithTransactionIntents>>;
+    ) -> Result<ApplySecurityShieldPayloadToSign>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -956,21 +969,25 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         manifests_with_entities_with_xrd_balance: Vec<
             SecurityShieldApplication,
         >,
-    ) -> Result<Vec<SecurityShieldApplicationWithTransactionIntents>> {
+    ) -> Result<ApplySecurityShieldPayloadToSign> {
         let gateway_client =
             GatewayClient::new(self.http_client.driver.clone(), network_id);
 
         let start_epoch_inclusive = gateway_client.current_epoch().await?;
         let end_epoch_exclusive = Epoch::one_week_from(start_epoch_inclusive);
 
-        let mut transaction_id_to_notary_private_key: IndexMap<TransactionIntentHash, Ed25519PrivateKey> = IndexMap::new();
-
+        let mut transaction_id_to_notary_private_key: IndexMap<
+            TransactionIntentHash,
+            Ed25519PrivateKey,
+        > = IndexMap::new();
 
         let mut build_intent = |manifest: &TransactionManifest,
-                            nonce: Nonce,
-                            notary_private_key_bytes: Exactly32Bytes|
+                                nonce: Nonce,
+                                notary_private_key_bytes: Exactly32Bytes|
          -> Result<TransactionIntent> {
-            let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(notary_private_key_bytes);
+            let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(
+                notary_private_key_bytes,
+            );
             let notary_public_key = notary_private_key.public_key();
             let header = TransactionHeader::new(
                 network_id,
@@ -982,20 +999,23 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                 0,
             );
 
-            let intent = TransactionIntent::new(header, manifest.clone(), Message::None)?;
+            let intent = TransactionIntent::new(
+                header,
+                manifest.clone(),
+                Message::None,
+            )?;
 
-            // Save notary key so that in future - we can cancel the transaction
-            // after it has been submitted.
-            // 
+            // So we can return the notary keys to callee so we can notarize later.
+            //
             // For securified entities the same notary private key will be present under many TransactionIntentHash
             // map keys (identifier).
-            transaction_id_to_notary_private_key.insert(intent.transaction_intent_hash(), notary_private_key);
+            transaction_id_to_notary_private_key
+                .insert(intent.transaction_intent_hash(), notary_private_key);
 
             Ok(intent)
         };
 
-     
-        manifests_with_entities_with_xrd_balance.into_iter().map(|m| {
+        let with_intents = manifests_with_entities_with_xrd_balance.into_iter().map(|m| {
             // We tactically use the same nonce for all variants of the TransactionIntents
             // for securified entities - ensuring that we cannot accidentally submit
             // two variants of the same application.
@@ -1006,8 +1026,6 @@ impl BatchApplySecurityShieldSigning for SargonOS {
             match m {
                 SecurityShieldApplication::ForUnsecurifiedEntity(unsec) => {
                     let intent = build_intent(unsec.manifest(), nonce, notary_private_key_bytes)?;
-
-                  
                     let with_intents = SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::with_intent(unsec, intent);
 
                     Ok(SecurityShieldApplicationWithTransactionIntents::ForUnsecurifiedEntity(with_intents))
@@ -1027,12 +1045,36 @@ impl BatchApplySecurityShieldSigning for SargonOS {
 
                         Ok(SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents::with_intents(sec, initiate_with_recovery_complete_with_primary, initiate_with_recovery_complete_with_confirmation, initiate_with_recovery_delayed_completion, initiate_with_primary_complete_with_confirmation, initiate_with_primary_delayed_completion))
                     }?;
-
-
                     Ok(SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(with_intents))
                 }
             }
-        }).collect::<Result<Vec<SecurityShieldApplicationWithTransactionIntents>>>()
+        }).collect::<Result<Vec<SecurityShieldApplicationWithTransactionIntents>>>()?;
+
+        let payload_to_sign = ApplySecurityShieldPayloadToSign {
+            applications_with_intents: with_intents,
+            notary_keys: transaction_id_to_notary_private_key,
+        };
+
+        Ok(payload_to_sign)
+    }
+
+    async fn persist_notary_private_keys_to_be_able_to_cancel_transactions(
+        &self,
+        _transaction_id_to_notary_private_key: &IndexMap<
+            TransactionIntentHash,
+            Ed25519PrivateKey,
+        >,
+    ) -> Result<()> {
+        // We do not support this yet, but might in the future.
+        info!("Skipped persisting notary private keys to be able to cancel transactions");
+        Ok(())
+    }
+
+    async fn sign_transaction_intents(
+        &self,
+        payload_to_sign: ApplySecurityShieldPayloadToSign,
+    ) -> Result<ApplySecurityShieldSignedPayload> {
+        todo!()
     }
 
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
@@ -1110,28 +1152,35 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                 })
                 .collect::<Result<Vec<SecurityShieldApplication>>>()?;
 
-        let transaction_intents = self
+        let payload_to_sign = self
             .build_transaction_intents(network_id, applications_without_intents)
             .await?;
+
+        self.persist_notary_private_keys_to_be_able_to_cancel_transactions(
+            &payload_to_sign.notary_keys,
+        )
+        .await?;
+
+        let signed_transactions =
+            self.sign_transaction_intents(payload_to_sign).await?;
 
         todo!()
     }
 }
 
-/// A ApplySecurityShieldPayloadToSign for applying a security shield to many accounts or personas
-/// (mixed), either securified or unsecurified (mixed). Which per `application` in
-/// `applications` will hold tuples of manifests (or a single for unsecurified),
-/// being combinations of roles to be exercised.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct ApplySecurityShieldPayloadToSign {
-    /// A collection of all applications for the shield, one per entity,
-    /// the element type `SecurityShieldApplication` essentially holds four
-    /// different kinds of value, application for:
-    /// - unsecurified account
-    /// - unsecurified persona
-    /// - securified account
-    /// - securified persona
-    pub applications: Vec<SecurityShieldApplication>,
+    pub applications_with_intents:
+        Vec<SecurityShieldApplicationWithTransactionIntents>,
+    pub notary_keys: IndexMap<TransactionIntentHash, Ed25519PrivateKey>,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub struct ApplySecurityShieldSignedPayload {
+    /// Only one transaction per application - for Securified Entities we will have had 5 manifests
+    /// and we select "the best" (quick confirm if possible) depending on the outcome of the
+    /// signing process
+    pub notarized_transactions: Vec<NotarizedTransaction>,
 }
 
 /// Securiy shield application is the application of a security shield
