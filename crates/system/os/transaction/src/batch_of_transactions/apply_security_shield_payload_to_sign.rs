@@ -450,6 +450,16 @@ pub trait BatchApplySecurityShieldSigning {
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>>;
 
+    async fn enqueue_signed_transactions(
+        &self,
+        signed_payload: ApplySecurityShieldSignedPayload,
+    ) -> Result<IndexSet<TransactionIntentHash>>;
+
+    fn lookup_entities_for_manifests(
+        &self,
+        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+    ) -> Result<Vec<ShieldApplicationInputWithoutXrdBalance>>;
+
     async fn sign_transaction_intents(
         &self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
@@ -485,6 +495,11 @@ pub trait BatchApplySecurityShieldSigning {
             ShieldApplicationInputWithoutXrdBalance,
         >,
     ) -> Result<Vec<ShieldApplicationInput>>;
+
+    fn create_many_manifest_variants_per_roles_combination(
+        &self,
+        manifests_with_entities_with_xrd_balance: Vec<ShieldApplicationInput>,
+    ) -> Result<Vec<SecurityShieldApplication>>;
 
     fn get_entity_applying_shield(
         &self,
@@ -1077,16 +1092,16 @@ impl BatchApplySecurityShieldSigning for SargonOS {
         todo!()
     }
 
-    async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
+    fn lookup_entities_for_manifests(
         &self,
-        network_id: NetworkID,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
-    ) -> Result<IndexSet<TransactionIntentHash>> {
-        let manifests_with_entities_without_xrd_balances = manifest_and_payer_tuples
+    ) -> Result<Vec<ShieldApplicationInputWithoutXrdBalance>> {
+        manifest_and_payer_tuples
             .into_iter()
             .map(|manifest_with_payer_by_address| {
                 let manifest = manifest_with_payer_by_address.manifest;
-                let estimated_xrd_fee = manifest_with_payer_by_address.estimated_xrd_fee;
+                let estimated_xrd_fee =
+                    manifest_with_payer_by_address.estimated_xrd_fee;
                 let address_of_ac_or_entity_applying_shield =
                     extract_address_of_entity_updating_shield(&manifest)?;
 
@@ -1102,24 +1117,35 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                         payer,
                         entity_applying_shield,
                         manifest,
-                        estimated_xrd_fee
+                        estimated_xrd_fee,
                     ))
                 } else {
                     Ok(ShieldApplicationInputWithoutXrdBalance::new(
                         None,
                         entity_applying_shield,
                         manifest,
-                        estimated_xrd_fee
+                        estimated_xrd_fee,
                     ))
                 }
             })
-            .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()?;
+            .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()
+    }
+
+    async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
+        &self,
+        network_id: NetworkID,
+        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+    ) -> Result<IndexSet<TransactionIntentHash>> {
+        // Map Address -> Entity by Profile lookup
+        let manifests_with_entities_without_xrd_balances =
+            self.lookup_entities_for_manifests(manifest_and_payer_tuples)?;
 
         // Assert that payer if specified is not part of the batch of entities applying shield
         self.assert_that_payer_is_not_in_batch_of_entities_applying_shield(
             &manifests_with_entities_without_xrd_balances,
         )?;
 
+        // Get XRD balances of XRD Vaults of Access Controllers and Accounts
         let manifests_with_entities_with_xrd_balance = self
             .get_xrd_balances(
                 network_id,
@@ -1127,44 +1153,73 @@ impl BatchApplySecurityShieldSigning for SargonOS {
             )
             .await?;
 
-        let applications_without_intents =
-            manifests_with_entities_with_xrd_balance
-                .into_iter()
-                .map(|manifest_with_payer| {
-                    match &manifest_with_payer.entity_applying_shield {
-                        EntityApplyingShield::Unsecurified(entity) => self
-                            .shield_application_for_unsecurified_entity(
-                                AnyUnsecurifiedShieldApplicationInput::from((
-                                    manifest_with_payer.clone(),
-                                    entity.clone(),
-                                )),
-                            )
-                            .map(SecurityShieldApplication::unsecurified),
-                        EntityApplyingShield::Securified(entity) => self
-                            .shield_application_for_securified_entity(
-                                AnySecurifiedShieldApplicationInput::from((
-                                    manifest_with_payer.clone(),
-                                    entity.clone(),
-                                )),
-                            )
-                            .map(SecurityShieldApplication::securified),
-                    }
-                })
-                .collect::<Result<Vec<SecurityShieldApplication>>>()?;
+        // For Securified entities => create 4 other variants of the manifest
+        // (noop for Unsecurified entities)
+        let applications_without_intents = self
+            .create_many_manifest_variants_per_roles_combination(
+                manifests_with_entities_with_xrd_balance,
+            )?;
 
+        // Build TransactionIntents for all of these applications (5 intents for securified entities)
+        // all using the same Epoch window (one week).
         let payload_to_sign = self
             .build_transaction_intents(network_id, applications_without_intents)
             .await?;
 
+        // Persist notary private keys to be able to cancel transactions
         self.persist_notary_private_keys_to_be_able_to_cancel_transactions(
             &payload_to_sign.notary_keys,
         )
         .await?;
 
+        // Try to sign all applications - we will "the best" of the 5 manifests for securified entities
+        // This step **also notarized** the signed intents.
         let signed_transactions =
             self.sign_transaction_intents(payload_to_sign).await?;
 
+        // Enqueue all signed transactions
+        let transaction_ids = self
+            .enqueue_signed_transactions(signed_transactions)
+            .await?;
+
+        // Return the TransactionIntentHashes
+        Ok(transaction_ids)
+    }
+
+    async fn enqueue_signed_transactions(
+        &self,
+        signed_payload: ApplySecurityShieldSignedPayload,
+    ) -> Result<IndexSet<TransactionIntentHash>> {
         todo!()
+    }
+
+    fn create_many_manifest_variants_per_roles_combination(
+        &self,
+        manifests_with_entities_with_xrd_balance: Vec<ShieldApplicationInput>,
+    ) -> Result<Vec<SecurityShieldApplication>> {
+        manifests_with_entities_with_xrd_balance
+            .into_iter()
+            .map(|manifest_with_payer| {
+                match &manifest_with_payer.entity_applying_shield {
+                    EntityApplyingShield::Unsecurified(entity) => self
+                        .shield_application_for_unsecurified_entity(
+                            AnyUnsecurifiedShieldApplicationInput::from((
+                                manifest_with_payer.clone(),
+                                entity.clone(),
+                            )),
+                        )
+                        .map(SecurityShieldApplication::unsecurified),
+                    EntityApplyingShield::Securified(entity) => self
+                        .shield_application_for_securified_entity(
+                            AnySecurifiedShieldApplicationInput::from((
+                                manifest_with_payer.clone(),
+                                entity.clone(),
+                            )),
+                        )
+                        .map(SecurityShieldApplication::securified),
+                }
+            })
+            .collect::<Result<Vec<SecurityShieldApplication>>>()
     }
 }
 
