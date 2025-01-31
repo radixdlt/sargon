@@ -1,23 +1,4 @@
-use shaku::{Component, HasProvider};
-
 use crate::prelude::*;
-
-trait ApplyShieldTransactionsCommiterModule:
-    HasProvider<dyn ApplyShieldTransactionsCommiter>
-{
-}
-
-module! {
-    ApplyShieldTransactionsCommiterModuleImpl: ApplyShieldTransactionsCommiterModule {
-        components = [#[lazy] OsFactoryImpl],
-        providers = [
-            ApplyShieldTransactionsCommiterImpl,
-            ApplyShieldTransactionsBuilderImpl,
-            ApplyShieldTransactionsSignerImpl,
-            ApplyShieldTransactionsEnqueuerImpl,
-        ]
-    }
-}
 
 #[async_trait::async_trait]
 pub trait ApplyShieldTransactionsCommiter: Send + Sync {
@@ -30,51 +11,19 @@ pub trait ApplyShieldTransactionsCommiter: Send + Sync {
 
 /// Builds, signs and enqueues the transaction intents of manifests
 /// which applies a shields to entities.
-#[derive(Provider)]
-#[shaku(interface = ApplyShieldTransactionsCommiter)]
 pub struct ApplyShieldTransactionsCommiterImpl {
-    #[shaku(provide)]
-    builder: Box<dyn ApplyShieldTransactionsBuilder>,
-
-    #[shaku(provide)]
-    signer: Box<dyn ApplyShieldTransactionsSigner>,
-
-    #[shaku(provide)]
-    enqueuer: Box<dyn ApplyShieldTransactionsEnqueuer>,
-}
-
-pub trait OsFactory: shaku::Interface {
-    fn os(&self) -> &'static SargonOS;
-}
-
-#[derive(Component)]
-#[shaku(interface = OsFactory)]
-pub struct OsFactoryImpl {
-    os: &'static SargonOS,
-}
-impl OsFactory for OsFactoryImpl {
-    fn os(&self) -> &'static SargonOS {
-        self.os
-    }
+    builder: Arc<dyn ApplyShieldTransactionsBuilder>,
+    signer: Arc<dyn ApplyShieldTransactionsSigner>,
+    enqueuer: Arc<dyn ApplyShieldTransactionsEnqueuer>,
 }
 
 impl ApplyShieldTransactionsCommiterImpl {
-    fn live(os: &'static SargonOS) -> Box<dyn ApplyShieldTransactionsCommiter> {
-        let module = Arc::new(
-            ApplyShieldTransactionsCommiterModuleImpl::builder()
-                .with_component_parameters::<OsFactoryImpl>(
-                    OsFactoryImplParameters { os },
-                )
-                .build(),
-        );
-
-        module.provide().unwrap()
-    }
-
-    pub fn new(
-        os: &'static SargonOS,
-    ) -> Box<dyn ApplyShieldTransactionsCommiter> {
-        Self::live(os)
+    pub fn new<'a>(os: &'a SargonOS) -> Self {
+        Self {
+            builder: Arc::new(ApplyShieldTransactionsBuilderImpl::new(os)),
+            signer: Arc::new(ApplyShieldTransactionsSignerImpl::new(os)),
+            enqueuer: Arc::new(ApplyShieldTransactionsEnqueuerImpl::new(os)),
+        }
     }
 }
 

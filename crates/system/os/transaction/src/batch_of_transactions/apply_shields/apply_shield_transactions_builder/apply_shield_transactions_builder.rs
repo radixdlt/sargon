@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[async_trait::async_trait]
-pub trait ApplyShieldTransactionsBuilder: shaku::Interface {
+pub trait ApplyShieldTransactionsBuilder: Send + Sync {
     async fn build_payload_to_sign(
         &self,
         network_id: NetworkID,
@@ -9,12 +9,10 @@ pub trait ApplyShieldTransactionsBuilder: shaku::Interface {
     ) -> Result<ApplySecurityShieldPayloadToSign>;
 }
 
-#[derive(Provider)]
-#[shaku(interface = ApplyShieldTransactionsBuilder)]
 pub struct ApplyShieldTransactionsBuilderImpl {}
 impl ApplyShieldTransactionsBuilderImpl {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new<'a>(os: &'a SargonOS) -> Self {
+        todo!()
     }
 }
 

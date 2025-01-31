@@ -1,8 +1,7 @@
 use crate::prelude::*;
-#[allow(async_fn_in_trait)]
 
-// #[async_trait::async_trait]
-pub trait ApplySecurityShieldCommitting {
+#[async_trait::async_trait]
+pub trait ApplySecurityShieldCommitting: Send + Sync {
     /// Host has previously called the function
     ///     `make_interaction_for_applying_security_shield`
     /// and specified the `security_shield_id` and `addresses` of the entities
@@ -36,15 +35,16 @@ pub trait ApplySecurityShieldCommitting {
     ///
     /// Can work with single transaction of course...
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
-        &'static self,
+        &self,
         network_id: NetworkID,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>>;
 }
 
+#[async_trait::async_trait]
 impl ApplySecurityShieldCommitting for SargonOS {
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
-        &'static self,
+        &self,
         network_id: NetworkID,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>> {
