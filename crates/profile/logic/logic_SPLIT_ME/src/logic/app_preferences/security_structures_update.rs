@@ -1,8 +1,9 @@
 use crate::prelude::*;
 
 pub trait MainSecurityStructureUpdating {
-    /// Returns the list of IDs of updated SecurityShields - either one or two elements,
-    /// depending on if shield identified by `shield_id` already was "main" shield or not.
+    /// Returns the list of IDs of updated Security Shields - either one or two elements.
+    /// It returns one id if there wasn't any existing main Security Shield.
+    /// It returns two ids if there was a previous main Security Shield whose flag was removed.
     fn set_main_security_structure(
         &mut self,
         shield_id: &SecurityStructureID,
@@ -10,6 +11,9 @@ pub trait MainSecurityStructureUpdating {
 }
 
 impl MainSecurityStructureUpdating for Security {
+    /// Returns the list of IDs of updated Security Shields - either one or two elements.
+    /// It returns one id if there wasn't any existing main Security Shield.
+    /// It returns two ids if there was a previous main Security Shield whose flag was removed.
     fn set_main_security_structure(
         &mut self,
         shield_id: &SecurityStructureID,
