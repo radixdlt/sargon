@@ -205,6 +205,7 @@ pub mod prelude {
 
     pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use log::*;
+    pub(crate) use profile_security_structures::prelude::SecurityStructureOfFactorInstances;
     pub(crate) use serde::{Deserialize, Serialize};
     pub(crate) use std::collections::HashMap;
 

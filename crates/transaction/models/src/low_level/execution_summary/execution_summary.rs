@@ -201,6 +201,52 @@ impl ExecutionSummary {
             );
         }
     }
+
+    /// Responsible for identifying if the summary can be classified as a securify summary.
+    pub fn classify_securify_entity_if_present<F>(
+        &mut self,
+        get_provisional_securified_config: F,
+    ) where
+        F: Fn(
+            AddressOfAccountOrPersona,
+        ) -> Option<SecurityStructureOfFactorInstances>,
+    {
+        // Only try to classify if RET analysis didn't yield any classification
+        if !self.detailed_classification.is_empty() {
+            return;
+        }
+
+        /////// TEMPORARY solution until RET classifies it properly
+        let entity_address_to_securify = if self
+            .reserved_instructions
+            .contains(&ReservedInstruction::AccountSecurify)
+        {
+            self.addresses_of_accounts_requiring_auth
+                .first()
+                .map(|address| AddressOfAccountOrPersona::from(*address))
+        } else if self
+            .reserved_instructions
+            .contains(&ReservedInstruction::IdentitySecurify)
+        {
+            self.addresses_of_identities_requiring_auth
+                .first()
+                .map(|address| AddressOfAccountOrPersona::from(*address))
+        } else {
+            None
+        };
+        ///// END of temporary code
+
+        if let Some(address) = entity_address_to_securify {
+            if let Some(config) = get_provisional_securified_config(address) {
+                self.detailed_classification.push(
+                    DetailedManifestClass::SecurifyEntity {
+                        entity_address: address,
+                        provisional_security_structure: config,
+                    },
+                );
+            }
+        }
+    }
 }
 
 fn addresses_of_accounts_from_ret(

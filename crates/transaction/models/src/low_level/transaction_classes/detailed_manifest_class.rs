@@ -97,6 +97,17 @@ pub enum DetailedManifestClass {
         /// The addresses of the accounts that are being deleted
         account_addresses: Vec<AccountAddress>,
     },
+
+    /// A manifest that is presented when a provisional security structure is applied
+    /// to an entity
+    SecurifyEntity {
+        /// The entity address that is about to be securified
+        entity_address: AddressOfAccountOrPersona,
+
+        /// The provisional security configuration that is about to be applied
+        /// into the entity address
+        provisional_security_structure: SecurityStructureOfFactorInstances,
+    },
 }
 
 impl DetailedManifestClass {
@@ -128,6 +139,9 @@ impl DetailedManifestClass {
             Self::DeleteAccounts { .. } => {
                 DetailedManifestClassKind::DeleteAccounts
             }
+            Self::SecurifyEntity { .. } => {
+                DetailedManifestClassKind::SecurifyEntity
+            }
         }
     }
 
@@ -146,6 +160,7 @@ impl DetailedManifestClass {
     /// Checks the manifest class is reserved for Wallet interactions only
     pub fn is_reserved(&self) -> bool {
         self.kind() == DetailedManifestClassKind::DeleteAccounts
+            || self.kind() == DetailedManifestClassKind::SecurifyEntity
     }
 }
 
@@ -446,6 +461,14 @@ mod tests {
                 account_addresses: Vec::<_>::sample(),
             },
             DetailedManifestClassKind::DeleteAccounts,
+        );
+        test(
+            SUT::SecurifyEntity {
+                entity_address: AddressOfAccountOrPersona::sample(),
+                provisional_security_structure:
+                    SecurityStructureOfFactorInstances::sample(),
+            },
+            DetailedManifestClassKind::SecurifyEntity,
         );
     }
 }

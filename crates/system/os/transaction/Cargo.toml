@@ -17,6 +17,7 @@ profile = { workspace = true }
 # profile-state-holder = { workspace = true }
 profile-account-or-persona = { workspace = true }
 gateway-client-and-api = { workspace = true }
+sargon-os-factors = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-engine-interface = { workspace = true }
