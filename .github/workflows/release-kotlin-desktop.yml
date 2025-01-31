@@ -59,7 +59,7 @@ jobs:
           build-root-directory: jvm
 
       - name: Upload Artifacts
-        uses: RDXWorks-actions/upload-artifact@main
+        uses: RDXWorks-actions/upload-artifact-v4
         with:
           name: ${{ matrix.build-target.toolchain }}
           path: "target/${{ matrix.build-target.toolchain }}/release/${{ matrix.build-target.binary }}"
