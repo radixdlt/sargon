@@ -1,0 +1,4369 @@
+{
+  "encoded_receipt": "",
+  "radix_engine_toolkit_receipt": {
+    "kind": "CommitSuccess",
+    "state_updates_summary": {
+      "new_entities": [
+        "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+        "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+        "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx"
+      ],
+      "metadata_updates": {
+        "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87": {
+          "owner_badge": {
+            "Set": {
+              "kind": "NonFungibleLocalId",
+              "value": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+            }
+          },
+          "owner_keys": {
+            "Set": {
+              "kind": "PublicKeyHashArray",
+              "value": [
+                {
+                  "kind": "Ed25519",
+                  "value": "fe07e4be4047d8091b27f256c64f17dd365181cbf7513150c6c38607ff"
+                }
+              ]
+            }
+          }
+        },
+        "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct": {
+          "recovery_badge": {
+            "Set": {
+              "kind": "GlobalAddress",
+              "value": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx"
+            }
+          }
+        },
+        "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx": {
+          "access_controller": {
+            "Set": {
+              "kind": "GlobalAddress",
+              "value": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct"
+            }
+          },
+          "name": {
+            "Set": {
+              "kind": "String",
+              "value": "Recovery Badge"
+            }
+          },
+          "icon_url": {
+            "Set": {
+              "kind": "Url",
+              "value": "https://assets.radixdlt.com/icons/icon-recovery_badge.png"
+            }
+          }
+        }
+      },
+      "non_fungible_data_updates": {
+        "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr:[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]": "5c21020c134163636f756e74204f776e65722042616467658051dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74"
+      },
+      "newly_minted_non_fungibles": [
+        "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr:[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+      ]
+    },
+    "worktop_changes": {
+      "0": [
+        {
+          "kind": "Put",
+          "value": {
+            "kind": "Ids",
+            "resource_address": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr",
+            "ids": [
+              "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+            ]
+          }
+        }
+      ],
+      "1": [
+        {
+          "kind": "Take",
+          "value": {
+            "kind": "Ids",
+            "resource_address": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr",
+            "ids": [
+              "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+            ]
+          }
+        }
+      ]
+    },
+    "fee_summary": {
+      "execution_fees_in_xrd": "0.2521221",
+      "finalization_fees_in_xrd": "0.2265303",
+      "storage_fees_in_xrd": "0.53930281665",
+      "royalty_fees_in_xrd": "0"
+    },
+    "locked_fees": {
+      "contingent": "0",
+      "non_contingent": "0"
+    }
+  },
+  "receipt": {
+    "status": "Succeeded",
+    "fee_summary": {
+      "execution_cost_units_consumed": 5042442,
+      "finalization_cost_units_consumed": 4530606,
+      "xrd_total_execution_cost": "0.2521221",
+      "xrd_total_finalization_cost": "0.2265303",
+      "xrd_total_royalty_cost": "0",
+      "xrd_total_storage_cost": "0.53930281665",
+      "xrd_total_tipping_cost": "0"
+    },
+    "costing_parameters": {
+      "execution_cost_unit_price": "0.00000005",
+      "execution_cost_unit_limit": 100000000,
+      "execution_cost_unit_loan": 4000000,
+      "finalization_cost_unit_price": "0.00000005",
+      "finalization_cost_unit_limit": 50000000,
+      "xrd_usd_price": "16.666666666666666666",
+      "xrd_storage_price": "0.00009536743",
+      "xrd_archive_storage_price": "0.00009536743",
+      "tip_percentage": 0,
+      "tip_proportion": "0"
+    },
+    "fee_source": {
+      "from_vaults": []
+    },
+    "fee_destination": {
+      "to_proposer": "0.2544888041625",
+      "to_validator_set": "0.2544888041625",
+      "to_burn": "0.508977608325",
+      "to_royalty_recipients": []
+    },
+    "state_updates": {
+      "deleted_partitions": [],
+      "created_substates": [
+        {
+          "substate_id": {
+            "entity_type": "GlobalTransactionTracker",
+            "entity_module": "Main",
+            "partition_kind": "KeyValue",
+            "substate_type": "TransactionTrackerCollectionEntry",
+            "entity_address": "transactiontracker_rdx1stxxxxxxxxxxtxtrakxxxxxxxxx006844685494xxxxxxxxxtxtrak",
+            "partition_number": 136,
+            "substate_key": {
+              "key_hex": "5c20072080b612197d9a857d02379522bda71dcb41b82b19a15ddd45a4408c85411523c6",
+              "key_type": "Map",
+              "db_sort_key_hex": "2dfcfa87205cccc2529056c55d348bb82cfd46525c20072080b612197d9a857d02379522bda71dcb41b82b19a15ddd45a4408c85411523c6"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "intent_hash": "80b612197d9a857d02379522bda71dcb41b82b19a15ddd45a4408c85411523c6",
+                "intent_hash_bech32m": "txid_rdx1szmpyxtan2zh6q3hj53tmfcaedqms2ce59wa63dygzxg2sg4y0rqmy83aa"
+              },
+              "value": {
+                "status": "CommittedSuccess"
+              },
+              "substate_type": "TransactionTrackerCollectionEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxtxtrakxxxxxxxxx000595975309xxxxxxxxxtxtrak",
+                "schema_hash": "bd71c021e525c608eaf7291c8c0eb2519993241a8e8d6d58c62e3ae056535592",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxtxtrakxxxxxxxxx000595975309xxxxxxxxxtxtrak",
+                "schema_hash": "bd71c021e525c608eaf7291c8c0eb2519993241a8e8d6d58c62e3ae056535592",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 1,
+                  "as_sbor": {
+                    "hex": "5c2201010a0100000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "1"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalVirtualEd25519Account",
+            "entity_module": "Metadata",
+            "partition_kind": "KeyValue",
+            "substate_type": "MetadataModuleEntry",
+            "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+            "partition_number": 2,
+            "substate_key": {
+              "key_hex": "5c0c0b6f776e65725f6261646765",
+              "key_type": "Map",
+              "db_sort_key_hex": "7dc9a37ba09e088d1718351679bf215b8988e8b85c0c0b6f776e65725f6261646765"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "name": "owner_badge"
+              },
+              "value": {
+                "data_struct": {
+                  "struct_data": {
+                    "hex": "5c220b01c0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "11",
+                      "fields": [
+                        {
+                          "kind": "NonFungibleLocalId",
+                          "value": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+                        }
+                      ]
+                    }
+                  },
+                  "owned_entities": [],
+                  "referenced_entities": []
+                }
+              },
+              "substate_type": "MetadataModuleEntry",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 12,
+                  "as_sbor": {
+                    "hex": "5c220001070c",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "12"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalVirtualEd25519Account",
+            "entity_module": "Metadata",
+            "partition_kind": "KeyValue",
+            "substate_type": "MetadataModuleEntry",
+            "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+            "partition_number": 2,
+            "substate_key": {
+              "key_hex": "5c0c0a6f776e65725f6b657973",
+              "key_type": "Map",
+              "db_sort_key_hex": "d7ce0cb39809d891545b74e1019672bc2de6a1a05c0c0a6f776e65725f6b657973"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "name": "owner_keys"
+              },
+              "value": {
+                "data_struct": {
+                  "struct_data": {
+                    "hex": "5c228f01202201010120071dfe07e4be4047d8091b27f256c64f17dd365181cbf7513150c6c38607ff",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "143",
+                      "fields": [
+                        {
+                          "kind": "Array",
+                          "element_kind": "Enum",
+                          "elements": [
+                            {
+                              "kind": "Enum",
+                              "variant_id": "1",
+                              "fields": [
+                                {
+                                  "kind": "Bytes",
+                                  "element_kind": "U8",
+                                  "hex": "fe07e4be4047d8091b27f256c64f17dd365181cbf7513150c6c38607ff"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "owned_entities": [],
+                  "referenced_entities": []
+                }
+              },
+              "substate_type": "MetadataModuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 12,
+                  "as_sbor": {
+                    "hex": "5c220001070c",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "12"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalVirtualEd25519Account",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "Field",
+            "substate_type": "RoleAssignmentModuleFieldOwnerRole",
+            "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+            "partition_number": 5,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "owner_role": {
+                  "updater": "Object",
+                  "rule": {
+                    "access_rule": {
+                      "proof_rule": {
+                        "requirement": {
+                          "non_fungible": {
+                            "resource_address": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr",
+                            "local_id": {
+                              "id_type": "Bytes",
+                              "simple_rep": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]",
+                              "sbor_hex": "5cc0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74"
+                            }
+                          },
+                          "type": "NonFungible"
+                        },
+                        "type": "Require"
+                      },
+                      "type": "ProofRule"
+                    },
+                    "type": "Protected"
+                  }
+                }
+              },
+              "substate_type": "RoleAssignmentModuleFieldOwnerRole",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalVirtualEd25519Account",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c087365637572696679",
+              "key_type": "Map",
+              "db_sort_key_hex": "daa6cc98f72dca9f6751a89a57083c0131e59c4a5c21022200000c087365637572696679"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "securify"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalVirtualEd25519Account",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "AccountFieldState",
+            "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "default_deposit_rule": "Accept"
+              },
+              "substate_type": "AccountFieldState",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxaccntxxxxxxxxxx000929625493xxxxxxxxxaccntx",
+                "schema_hash": "a54510264dbd13e03ea7d6e3112d5f3a88c9bddae66b9569d5de381ba9447a8a",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalVirtualEd25519Account",
+            "entity_module": "TypeInfo",
+            "partition_kind": "Field",
+            "substate_type": "TypeInfoModuleFieldTypeInfo",
+            "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87",
+            "partition_number": 0,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "details": {
+                  "module_versions": [
+                    {
+                      "module": "RoleAssignment",
+                      "version": "1.0.0"
+                    },
+                    {
+                      "module": "Metadata",
+                      "version": "1.0.0"
+                    }
+                  ],
+                  "blueprint_info": {
+                    "package_address": "package_rdx1pkgxxxxxxxxxaccntxxxxxxxxxx000929625493xxxxxxxxxaccntx",
+                    "blueprint_name": "Account",
+                    "blueprint_version": "1.0.0",
+                    "features": [],
+                    "generic_substitutions": []
+                  },
+                  "global": true,
+                  "type": "Object"
+                }
+              },
+              "substate_type": "TypeInfoModuleFieldTypeInfo",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "field_kind": "TypeInfo",
+            "type": "SystemField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Main",
+            "partition_kind": "KeyValue",
+            "substate_type": "NonFungibleResourceManagerDataEntry",
+            "entity_address": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr",
+            "partition_number": 65,
+            "substate_key": {
+              "key_hex": "5cc0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74",
+              "key_type": "Map",
+              "db_sort_key_hex": "02d1e9b8e303441c33ae652707c90b024ad7b3415cc0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "non_fungible_local_id": {
+                  "id_type": "Bytes",
+                  "simple_rep": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]",
+                  "sbor_hex": "5cc0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74"
+                }
+              },
+              "value": {
+                "data_struct": {
+                  "struct_data": {
+                    "hex": "5c21020c134163636f756e74204f776e65722042616467658051dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74",
+                    "programmatic_json": {
+                      "kind": "Tuple",
+                      "fields": [
+                        {
+                          "kind": "String",
+                          "value": "Account Owner Badge"
+                        },
+                        {
+                          "kind": "Reference",
+                          "value": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
+                        }
+                      ]
+                    }
+                  },
+                  "owned_entities": [],
+                  "referenced_entities": [
+                    {
+                      "entity_type": "GlobalVirtualEd25519Account",
+                      "is_global": true,
+                      "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
+                    }
+                  ]
+                }
+              },
+              "substate_type": "NonFungibleResourceManagerDataEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "13bcc1e1d055e469936948b51d3621e05f8130901231a0847b8ff16eee058759",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 194,
+                  "as_sbor": {
+                    "hex": "5c22000107c2",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "194"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "resolved_full_type_id": {
+                "entity_address": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr",
+                "schema_hash": "5dfa18c939aaf3734b6dbfad32a69267f55eb66be8bb1df1e48ca178a13dc92c",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "generic_index": 0,
+              "type": "ObjectInstance"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalAccessController",
+            "entity_module": "Metadata",
+            "partition_kind": "KeyValue",
+            "substate_type": "MetadataModuleEntry",
+            "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+            "partition_number": 2,
+            "substate_key": {
+              "key_hex": "5c0c0e7265636f766572795f6261646765",
+              "key_type": "Map",
+              "db_sort_key_hex": "2ccf863f29673ed97c2465fa5cdb81dd729995c45c0c0e7265636f766572795f6261646765"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "name": "recovery_badge"
+              },
+              "value": {
+                "data_struct": {
+                  "struct_data": {
+                    "hex": "5c220801809a60fff4a7baea913c32b374ac85fce7f7f939b712e09666e27a2ce0c5a3",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "8",
+                      "fields": [
+                        {
+                          "kind": "Reference",
+                          "value": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx"
+                        }
+                      ]
+                    }
+                  },
+                  "owned_entities": [],
+                  "referenced_entities": [
+                    {
+                      "entity_type": "GlobalNonFungibleResource",
+                      "is_global": true,
+                      "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx"
+                    }
+                  ]
+                }
+              },
+              "substate_type": "MetadataModuleEntry",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 12,
+                  "as_sbor": {
+                    "hex": "5c220001070c",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "12"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalAccessController",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "Field",
+            "substate_type": "RoleAssignmentModuleFieldOwnerRole",
+            "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+            "partition_number": 5,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "owner_role": {
+                  "updater": "None",
+                  "rule": {
+                    "type": "DenyAll"
+                  }
+                }
+              },
+              "substate_type": "RoleAssignmentModuleFieldOwnerRole",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalAccessController",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c0c636f6e6669726d6174696f6e",
+              "key_type": "Map",
+              "db_sort_key_hex": "3bfdba3aa092c27c85c1a863d7c150e1b31d1a785c21022200000c0c636f6e6669726d6174696f6e"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "confirmation"
+              },
+              "value": {
+                "access_rule": {
+                  "access_rule": {
+                    "access_rules": [
+                      {
+                        "proof_rule": {
+                          "count": 0,
+                          "list": [],
+                          "type": "CountOf"
+                        },
+                        "type": "ProofRule"
+                      },
+                      {
+                        "proof_rule": {
+                          "list": [
+                            {
+                              "non_fungible": {
+                                "resource_address": "resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg",
+                                "local_id": {
+                                  "id_type": "Bytes",
+                                  "simple_rep": "[1268b98a19c0e5c6eca19f2ca1c68bfa33e1c21d664be9e7d67ee0861d]",
+                                  "sbor_hex": "5cc0021d1268b98a19c0e5c6eca19f2ca1c68bfa33e1c21d664be9e7d67ee0861d"
+                                }
+                              },
+                              "type": "NonFungible"
+                            }
+                          ],
+                          "type": "AnyOf"
+                        },
+                        "type": "ProofRule"
+                      }
+                    ],
+                    "type": "AnyOf"
+                  },
+                  "type": "Protected"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalAccessController",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c087265636f76657279",
+              "key_type": "Map",
+              "db_sort_key_hex": "a5df4691cce1f20f3b1cd1417a9218737c9ff04f5c21022200000c087265636f76657279"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "recovery"
+              },
+              "value": {
+                "access_rule": {
+                  "access_rule": {
+                    "access_rules": [
+                      {
+                        "proof_rule": {
+                          "count": 0,
+                          "list": [],
+                          "type": "CountOf"
+                        },
+                        "type": "ProofRule"
+                      },
+                      {
+                        "proof_rule": {
+                          "list": [
+                            {
+                              "non_fungible": {
+                                "resource_address": "resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg",
+                                "local_id": {
+                                  "id_type": "Bytes",
+                                  "simple_rep": "[1268b98a19c0e5c6eca19f2ca1c68bfa33e1c21d664be9e7d67ee0861d]",
+                                  "sbor_hex": "5cc0021d1268b98a19c0e5c6eca19f2ca1c68bfa33e1c21d664be9e7d67ee0861d"
+                                }
+                              },
+                              "type": "NonFungible"
+                            }
+                          ],
+                          "type": "AnyOf"
+                        },
+                        "type": "ProofRule"
+                      }
+                    ],
+                    "type": "AnyOf"
+                  },
+                  "type": "Protected"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalAccessController",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c077072696d617279",
+              "key_type": "Map",
+              "db_sort_key_hex": "d3518bfba6cce1896b57ea0f28dc3e835c7944b15c21022200000c077072696d617279"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "primary"
+              },
+              "value": {
+                "access_rule": {
+                  "access_rule": {
+                    "access_rules": [
+                      {
+                        "proof_rule": {
+                          "count": 2,
+                          "list": [
+                            {
+                              "non_fungible": {
+                                "resource_address": "resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg",
+                                "local_id": {
+                                  "id_type": "Bytes",
+                                  "simple_rep": "[ff2c163dad224ec4b27a7dc30549a2fcee76372dadd7ac8ce5553658a1]",
+                                  "sbor_hex": "5cc0021dff2c163dad224ec4b27a7dc30549a2fcee76372dadd7ac8ce5553658a1"
+                                }
+                              },
+                              "type": "NonFungible"
+                            },
+                            {
+                              "non_fungible": {
+                                "resource_address": "resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg",
+                                "local_id": {
+                                  "id_type": "Bytes",
+                                  "simple_rep": "[1268b98a19c0e5c6eca19f2ca1c68bfa33e1c21d664be9e7d67ee0861d]",
+                                  "sbor_hex": "5cc0021d1268b98a19c0e5c6eca19f2ca1c68bfa33e1c21d664be9e7d67ee0861d"
+                                }
+                              },
+                              "type": "NonFungible"
+                            }
+                          ],
+                          "type": "CountOf"
+                        },
+                        "type": "ProofRule"
+                      },
+                      {
+                        "proof_rule": {
+                          "list": [],
+                          "type": "AnyOf"
+                        },
+                        "type": "ProofRule"
+                      }
+                    ],
+                    "type": "AnyOf"
+                  },
+                  "type": "Protected"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalAccessController",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "AccessControllerFieldState",
+            "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "controlled_vault": {
+                  "entity_type": "InternalNonFungibleVault",
+                  "is_global": false,
+                  "entity_address": "internal_vault_rdx1nqutf8slj3qyasr8jepflggtycdxjzvnkawm8zahmax5xs0eetyehf"
+                },
+                "timed_recovery_delay_minutes": 20160,
+                "recovery_badge_resource_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+                "is_primary_role_locked": false,
+                "has_primary_role_badge_withdraw_attempt": false,
+                "has_recovery_role_badge_withdraw_attempt": false
+              },
+              "substate_type": "AccessControllerFieldState",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr",
+                "schema_hash": "c111d20eb3b1e02dc9dfc649dca83dfb9ce2fc8cd11a05c0dcd98212f7a5bc4c",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalAccessController",
+            "entity_module": "TypeInfo",
+            "partition_kind": "Field",
+            "substate_type": "TypeInfoModuleFieldTypeInfo",
+            "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct",
+            "partition_number": 0,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "details": {
+                  "module_versions": [
+                    {
+                      "module": "RoleAssignment",
+                      "version": "1.0.0"
+                    },
+                    {
+                      "module": "Metadata",
+                      "version": "1.0.0"
+                    }
+                  ],
+                  "blueprint_info": {
+                    "package_address": "package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr",
+                    "blueprint_name": "AccessController",
+                    "blueprint_version": "1.0.0",
+                    "features": [],
+                    "generic_substitutions": []
+                  },
+                  "global": true,
+                  "type": "Object"
+                }
+              },
+              "substate_type": "TypeInfoModuleFieldTypeInfo",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "field_kind": "TypeInfo",
+            "type": "SystemField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Schema",
+            "partition_kind": "KeyValue",
+            "substate_type": "SchemaEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 1,
+            "substate_key": {
+              "key_hex": "5c2007205984bee33c529de9f322241679b505ab2e60e2189bdf8c2b7811023ffb5c12f9",
+              "key_type": "Map",
+              "db_sort_key_hex": "809193f8af4df4fff91b44f21bea19498dbbd0a25c2007205984bee33c529de9f322241679b505ab2e60e2189bdf8c2b7811023ffb5c12f9"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "schema_hash": "5984bee33c529de9f322241679b505ab2e60e2189bdf8c2b7811023ffb5c12f9"
+              },
+              "value": {
+                "schema": {
+                  "sbor_data": {
+                    "hex": "5c2103202200202100202200",
+                    "programmatic_json": {
+                      "kind": "Tuple",
+                      "fields": [
+                        {
+                          "kind": "Array",
+                          "element_kind": "Enum",
+                          "elements": []
+                        },
+                        {
+                          "kind": "Array",
+                          "element_kind": "Tuple",
+                          "elements": []
+                        },
+                        {
+                          "kind": "Array",
+                          "element_kind": "Enum",
+                          "elements": []
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "substate_type": "SchemaEntry",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "type": "SystemSchema"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Metadata",
+            "partition_kind": "KeyValue",
+            "substate_type": "MetadataModuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 2,
+            "substate_key": {
+              "key_hex": "5c0c116163636573735f636f6e74726f6c6c6572",
+              "key_type": "Map",
+              "db_sort_key_hex": "422ac245706e738d4a13b1f2e69096c289861b725c0c116163636573735f636f6e74726f6c6c6572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "name": "access_controller"
+              },
+              "value": {
+                "data_struct": {
+                  "struct_data": {
+                    "hex": "5c22080180c31e139e20483389d0be9e8bf58e686094655e799ba1e9d6acc453d7cc69",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "8",
+                      "fields": [
+                        {
+                          "kind": "Reference",
+                          "value": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct"
+                        }
+                      ]
+                    }
+                  },
+                  "owned_entities": [],
+                  "referenced_entities": [
+                    {
+                      "entity_type": "GlobalAccessController",
+                      "is_global": true,
+                      "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct"
+                    }
+                  ]
+                }
+              },
+              "substate_type": "MetadataModuleEntry",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 12,
+                  "as_sbor": {
+                    "hex": "5c220001070c",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "12"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Metadata",
+            "partition_kind": "KeyValue",
+            "substate_type": "MetadataModuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 2,
+            "substate_key": {
+              "key_hex": "5c0c046e616d65",
+              "key_type": "Map",
+              "db_sort_key_hex": "4beef26cd8850b9fd9ddb4b3d0619405761b6b605c0c046e616d65"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "name": "name"
+              },
+              "value": {
+                "data_struct": {
+                  "struct_data": {
+                    "hex": "5c2200010c0e5265636f76657279204261646765",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "String",
+                          "value": "Recovery Badge"
+                        }
+                      ]
+                    }
+                  },
+                  "owned_entities": [],
+                  "referenced_entities": []
+                }
+              },
+              "substate_type": "MetadataModuleEntry",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 12,
+                  "as_sbor": {
+                    "hex": "5c220001070c",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "12"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Metadata",
+            "partition_kind": "KeyValue",
+            "substate_type": "MetadataModuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 2,
+            "substate_key": {
+              "key_hex": "5c0c0869636f6e5f75726c",
+              "key_type": "Map",
+              "db_sort_key_hex": "e1bbec522c32c1e573b454d60e1317beb4c0fde75c0c0869636f6e5f75726c"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "name": "icon_url"
+              },
+              "value": {
+                "data_struct": {
+                  "struct_data": {
+                    "hex": "5c220d010c3968747470733a2f2f6173736574732e7261646978646c742e636f6d2f69636f6e732f69636f6e2d7265636f766572795f62616467652e706e67",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "13",
+                      "fields": [
+                        {
+                          "kind": "String",
+                          "value": "https://assets.radixdlt.com/icons/icon-recovery_badge.png"
+                        }
+                      ]
+                    }
+                  },
+                  "owned_entities": [],
+                  "referenced_entities": []
+                }
+              },
+              "substate_type": "MetadataModuleEntry",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 12,
+                  "as_sbor": {
+                    "hex": "5c220001070c",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "12"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+                "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "Field",
+            "substate_type": "RoleAssignmentModuleFieldOwnerRole",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 5,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "owner_role": {
+                  "updater": "None",
+                  "rule": {
+                    "access_rule": {
+                      "proof_rule": {
+                        "requirement": {
+                          "non_fungible": {
+                            "resource_address": "resource_rdx1nfxxxxxxxxxxglcllrxxxxxxxxx002350006550xxxxxxxxxglcllr",
+                            "local_id": {
+                              "id_type": "Bytes",
+                              "simple_rep": "[69a16011d055f2aa13017f5dbe08e77cff5997308a1c0c37052202d3f9e2ec37]",
+                              "sbor_hex": "5cc0022069a16011d055f2aa13017f5dbe08e77cff5997308a1c0c37052202d3f9e2ec37"
+                            }
+                          },
+                          "type": "NonFungible"
+                        },
+                        "type": "Require"
+                      },
+                      "type": "ProofRule"
+                    },
+                    "type": "Protected"
+                  }
+                }
+              },
+              "substate_type": "RoleAssignmentModuleFieldOwnerRole",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022201000c0f6d657461646174615f736574746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "0933ddb5ef7c52a53a777942e7f9b3666677fde25c21022201000c0f6d657461646174615f736574746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Metadata",
+                "role_key": "metadata_setter"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022201000c176d657461646174615f6c6f636b65725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "0a17e4e3b7129ec64b867302c1c8234ec4b28f8d5c21022201000c176d657461646174615f6c6f636b65725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Metadata",
+                "role_key": "metadata_locker_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c096465706f7369746f72",
+              "key_type": "Map",
+              "db_sort_key_hex": "216cec21a558414c91f2972517a4c74b9c1bd8ae5c21022200000c096465706f7369746f72"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "depositor"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "AllowAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c0e6275726e65725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "238a56f4734c135db6f3a2ea01022ecb4c913e005c21022200000c0e6275726e65725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "burner_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "AllowAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c07667265657a6572",
+              "key_type": "Map",
+              "db_sort_key_hex": "32eaa45016c109d59eac811412528fb4b591b20a5c21022200000c07667265657a6572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "freezer"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c0f667265657a65725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "3efcc1d4f3272258d3de81dc6fa624e623727b1c5c21022200000c0f667265657a65725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "freezer_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c066275726e6572",
+              "key_type": "Map",
+              "db_sort_key_hex": "41e6549a61666035ded2d0837f7bfe9ee2b6ffdf5c21022200000c066275726e6572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "burner"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "AllowAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c08726563616c6c6572",
+              "key_type": "Map",
+              "db_sort_key_hex": "5586bfa0113c0da42d8e7b751b44ff930ec9eee75c21022200000c08726563616c6c6572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "recaller"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c0a77697468647261776572",
+              "key_type": "Map",
+              "db_sort_key_hex": "61eb344e54ef738a4fd099f8b3519d1b0b9d58da5c21022200000c0a77697468647261776572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "withdrawer"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c216e6f6e5f66756e6769626c655f646174615f757064617465725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "8a0e37bca588b2bf0b653e15254c5b97a7690bc55c21022200000c216e6f6e5f66756e6769626c655f646174615f757064617465725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "non_fungible_data_updater_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c10726563616c6c65725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "8e264e6f3d0ad05aecb6e478e62807a73b3b6fbe5c21022200000c10726563616c6c65725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "recaller_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c196e6f6e5f66756e6769626c655f646174615f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "94c7c93cf88199df5764cf27d09a82b4e03db0d75c21022200000c196e6f6e5f66756e6769626c655f646174615f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "non_fungible_data_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022201000c0f6d657461646174615f6c6f636b6572",
+              "key_type": "Map",
+              "db_sort_key_hex": "c57a2115ab2051b7283977b48793603965547c695c21022201000c0f6d657461646174615f6c6f636b6572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Metadata",
+                "role_key": "metadata_locker"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c116465706f7369746f725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "d3a7d632a7d9474c84942c407eed4922dd77d5bd5c21022200000c116465706f7369746f725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "depositor_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022201000c176d657461646174615f7365747465725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "ea6f68051aa3886ade83c2fe056b6b19f5deac575c21022201000c176d657461646174615f7365747465725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Metadata",
+                "role_key": "metadata_setter_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c066d696e746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "fa1f8ebc9dd82b143bf5a215de1eeb9104820eab5c21022200000c066d696e746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "minter"
+              },
+              "value": {
+                "access_rule": {
+                  "access_rule": {
+                    "proof_rule": {
+                      "requirement": {
+                        "non_fungible": {
+                          "resource_address": "resource_rdx1nfxxxxxxxxxxglcllrxxxxxxxxx002350006550xxxxxxxxxglcllr",
+                          "local_id": {
+                            "id_type": "Bytes",
+                            "simple_rep": "[69a16011d055f2aa13017f5dbe08e77cff5997308a1c0c37052202d3f9e2ec37]",
+                            "sbor_hex": "5cc0022069a16011d055f2aa13017f5dbe08e77cff5997308a1c0c37052202d3f9e2ec37"
+                          }
+                        },
+                        "type": "NonFungible"
+                      },
+                      "type": "Require"
+                    },
+                    "type": "ProofRule"
+                  },
+                  "type": "Protected"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c12776974686472617765725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "faa3cbbd31ecc1787fd10cb1398e47dd55be87445c21022200000c12776974686472617765725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "withdrawer_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "RoleAssignment",
+            "partition_kind": "KeyValue",
+            "substate_type": "RoleAssignmentModuleRuleEntry",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 6,
+            "substate_key": {
+              "key_hex": "5c21022200000c0e6d696e7465725f75706461746572",
+              "key_type": "Map",
+              "db_sort_key_hex": "fb380657812cd6224c1729904c07ea797ef867c65c21022200000c0e6d696e7465725f75706461746572"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "object_module_id": "Main",
+                "role_key": "minter_updater"
+              },
+              "value": {
+                "access_rule": {
+                  "type": "DenyAll"
+                }
+              },
+              "substate_type": "RoleAssignmentModuleRuleEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 3,
+                  "as_sbor": {
+                    "hex": "5c2201010a0300000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "3"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+                "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 4,
+                  "as_sbor": {
+                    "hex": "5c2201010a0400000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "4"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectKeyValuePartitionEntry"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "NonFungibleResourceManagerFieldIdType",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "non_fungible_id_type": "Integer"
+              },
+              "substate_type": "NonFungibleResourceManagerFieldIdType",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "13bcc1e1d055e469936948b51d3621e05f8130901231a0847b8ff16eee058759",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "NonFungibleResourceManagerFieldMutableFields",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 1,
+              "key_type": "Field",
+              "db_sort_key_hex": "01"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "mutable_fields": []
+              },
+              "substate_type": "NonFungibleResourceManagerFieldMutableFields",
+              "is_locked": true
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "13bcc1e1d055e469936948b51d3621e05f8130901231a0847b8ff16eee058759",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 2,
+                  "as_sbor": {
+                    "hex": "5c2201010a0200000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "NonFungibleResourceManagerFieldTotalSupply",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 2,
+              "key_type": "Field",
+              "db_sort_key_hex": "02"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "total_supply": "0"
+              },
+              "substate_type": "NonFungibleResourceManagerFieldTotalSupply",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "13bcc1e1d055e469936948b51d3621e05f8130901231a0847b8ff16eee058759",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 5,
+                  "as_sbor": {
+                    "hex": "5c2201010a0500000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "5"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "GlobalNonFungibleResource",
+            "entity_module": "TypeInfo",
+            "partition_kind": "Field",
+            "substate_type": "TypeInfoModuleFieldTypeInfo",
+            "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx",
+            "partition_number": 0,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "details": {
+                  "module_versions": [
+                    {
+                      "module": "RoleAssignment",
+                      "version": "1.0.0"
+                    },
+                    {
+                      "module": "Metadata",
+                      "version": "1.0.0"
+                    }
+                  ],
+                  "blueprint_info": {
+                    "package_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                    "blueprint_name": "NonFungibleResourceManager",
+                    "blueprint_version": "1.0.0",
+                    "features": [
+                      "track_total_supply",
+                      "mint",
+                      "burn"
+                    ],
+                    "generic_substitutions": [
+                      {
+                        "scoped_type_id": {
+                          "schema_hash": "5984bee33c529de9f322241679b505ab2e60e2189bdf8c2b7811023ffb5c12f9",
+                          "local_type_id": {
+                            "kind": "WellKnown",
+                            "id": 66,
+                            "as_sbor": {
+                              "hex": "5c2200010742",
+                              "programmatic_json": {
+                                "kind": "Enum",
+                                "variant_id": "0",
+                                "fields": [
+                                  {
+                                    "kind": "U8",
+                                    "value": "66"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        },
+                        "type": "Local"
+                      }
+                    ]
+                  },
+                  "global": true,
+                  "type": "Object"
+                }
+              },
+              "substate_type": "TypeInfoModuleFieldTypeInfo",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "field_kind": "TypeInfo",
+            "type": "SystemField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "InternalNonFungibleVault",
+            "entity_module": "TypeInfo",
+            "partition_kind": "Field",
+            "substate_type": "TypeInfoModuleFieldTypeInfo",
+            "entity_address": "internal_vault_rdx1nqutf8slj3qyasr8jepflggtycdxjzvnkawm8zahmax5xs0eetyehf",
+            "partition_number": 0,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "details": {
+                  "module_versions": [],
+                  "blueprint_info": {
+                    "package_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                    "blueprint_name": "NonFungibleVault",
+                    "blueprint_version": "1.0.0",
+                    "outer_object": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr",
+                    "features": [],
+                    "generic_substitutions": []
+                  },
+                  "global": false,
+                  "type": "Object"
+                }
+              },
+              "substate_type": "TypeInfoModuleFieldTypeInfo",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "field_kind": "TypeInfo",
+            "type": "SystemField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "InternalNonFungibleVault",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "NonFungibleVaultFieldBalance",
+            "entity_address": "internal_vault_rdx1nqutf8slj3qyasr8jepflggtycdxjzvnkawm8zahmax5xs0eetyehf",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "value": {
+                "amount": "1"
+              },
+              "substate_type": "NonFungibleVaultFieldBalance",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "aa18e25a2222655fec8fdce11d9951f8258ce83b17e18cdfe52debea86b8419b",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "InternalNonFungibleVault",
+            "entity_module": "Main",
+            "partition_kind": "Index",
+            "substate_type": "NonFungibleVaultContentsIndexEntry",
+            "entity_address": "internal_vault_rdx1nqutf8slj3qyasr8jepflggtycdxjzvnkawm8zahmax5xs0eetyehf",
+            "partition_number": 65,
+            "substate_key": {
+              "key_hex": "5cc0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74",
+              "key_type": "Map",
+              "db_sort_key_hex": "02d1e9b8e303441c33ae652707c90b024ad7b3415cc0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74"
+            }
+          },
+          "value": {
+            "substate_data": {
+              "key": {
+                "non_fungible_local_id": {
+                  "id_type": "Bytes",
+                  "simple_rep": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]",
+                  "sbor_hex": "5cc0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74"
+                }
+              },
+              "value": {
+                "is_present": true
+              },
+              "substate_type": "NonFungibleVaultContentsIndexEntry",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "key_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "aa18e25a2222655fec8fdce11d9951f8258ce83b17e18cdfe52debea86b8419b",
+                "local_type_id": {
+                  "kind": "WellKnown",
+                  "id": 194,
+                  "as_sbor": {
+                    "hex": "5c22000107c2",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "0",
+                      "fields": [
+                        {
+                          "kind": "U8",
+                          "value": "194"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "aa18e25a2222655fec8fdce11d9951f8258ce83b17e18cdfe52debea86b8419b",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 7,
+                  "as_sbor": {
+                    "hex": "5c2201010a0700000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "7"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectIndexPartitionEntry"
+          }
+        }
+      ],
+      "updated_substates": [
+        {
+          "substate_id": {
+            "entity_type": "GlobalConsensusManager",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "ConsensusManagerFieldValidatorRewards",
+            "entity_address": "consensusmanager_rdx1scxxxxxxxxxxcnsmgrxxxxxxxxx000999665565xxxxxxxxxcnsmgr",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 2,
+              "key_type": "Field",
+              "db_sort_key_hex": "02"
+            }
+          },
+          "new_value": {
+            "substate_data": {
+              "value": {
+                "proposer_rewards": [
+                  {
+                    "validator_index": {
+                      "index": 66
+                    },
+                    "xrd_amount": "0.345534552615"
+                  },
+                  {
+                    "validator_index": {
+                      "index": 85
+                    },
+                    "xrd_amount": "0.22672908663"
+                  },
+                  {
+                    "validator_index": {
+                      "index": 8
+                    },
+                    "xrd_amount": "0.3821291755825"
+                  },
+                  {
+                    "validator_index": {
+                      "index": 0
+                    },
+                    "xrd_amount": "0.612848709055"
+                  }
+                ],
+                "rewards_vault": {
+                  "entity_type": "InternalFungibleVault",
+                  "is_global": false,
+                  "entity_address": "internal_vault_rdx1tpsesv77qvw782kknjks9g3x2msg8cc8ldshk28pkf6m6lkhzcw3fr"
+                }
+              },
+              "substate_type": "ConsensusManagerFieldValidatorRewards",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxcnsmgrxxxxxxxxx000746305335xxxxxxxxxcnsmgr",
+                "schema_hash": "d8510877df1d820f4752b3c033baf656f62e0e612731718865d048b9d16300b3",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 9,
+                  "as_sbor": {
+                    "hex": "5c2201010a0900000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "9"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        },
+        {
+          "substate_id": {
+            "entity_type": "InternalFungibleVault",
+            "entity_module": "Main",
+            "partition_kind": "Field",
+            "substate_type": "FungibleVaultFieldBalance",
+            "entity_address": "internal_vault_rdx1tpsesv77qvw782kknjks9g3x2msg8cc8ldshk28pkf6m6lkhzcw3fr",
+            "partition_number": 64,
+            "substate_key": {
+              "id": 0,
+              "key_type": "Field",
+              "db_sort_key_hex": "00"
+            }
+          },
+          "new_value": {
+            "substate_data": {
+              "value": {
+                "amount": "3.13065218839449871"
+              },
+              "substate_type": "FungibleVaultFieldBalance",
+              "is_locked": false
+            }
+          },
+          "system_structure": {
+            "value_schema": {
+              "full_type_id": {
+                "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+                "schema_hash": "462a3fea283117aab2b01c297812bdc0fa9060b29eb5e68b847f361bc1201933",
+                "local_type_id": {
+                  "kind": "SchemaLocal",
+                  "id": 0,
+                  "as_sbor": {
+                    "hex": "5c2201010a0000000000000000",
+                    "programmatic_json": {
+                      "kind": "Enum",
+                      "variant_id": "1",
+                      "fields": [
+                        {
+                          "kind": "U64",
+                          "value": "0"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "type": "Package"
+            },
+            "type": "ObjectField"
+          }
+        }
+      ],
+      "deleted_substates": [],
+      "new_global_entities": [
+        {
+          "entity_type": "GlobalVirtualEd25519Account",
+          "is_global": true,
+          "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
+        },
+        {
+          "entity_type": "GlobalAccessController",
+          "is_global": true,
+          "entity_address": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct"
+        },
+        {
+          "entity_type": "GlobalNonFungibleResource",
+          "is_global": true,
+          "entity_address": "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx"
+        }
+      ]
+    },
+    "events": [
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "RoleAssignment",
+            "entity": {
+              "entity_type": "GlobalVirtualEd25519Account",
+              "is_global": true,
+              "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+              "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 15,
+                "as_sbor": {
+                  "hex": "5c2201010a0f00000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "15"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "SetRoleEvent"
+        },
+        "data": {
+          "hex": "5c21020c087365637572696679220100",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "String",
+                "value": "securify"
+              },
+              {
+                "kind": "Enum",
+                "variant_id": "1",
+                "fields": []
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "Main",
+            "entity": {
+              "entity_type": "GlobalNonFungibleResource",
+              "is_global": true,
+              "entity_address": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+              "schema_hash": "13bcc1e1d055e469936948b51d3621e05f8130901231a0847b8ff16eee058759",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 117,
+                "as_sbor": {
+                  "hex": "5c2201010a7500000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "117"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "MintNonFungibleResourceEvent"
+        },
+        "data": {
+          "hex": "5c210120c001021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "Array",
+                "element_kind": "NonFungibleLocalId",
+                "elements": [
+                  {
+                    "kind": "NonFungibleLocalId",
+                    "value": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "RoleAssignment",
+            "entity": {
+              "entity_type": "GlobalVirtualEd25519Account",
+              "is_global": true,
+              "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxarulesxxxxxxxxx002304462983xxxxxxxxxarules",
+              "schema_hash": "a06c16caa26e2fbc01ba2b9fe564a3f02d8f426c4580fcafebdff5464fefbde8",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 14,
+                "as_sbor": {
+                  "hex": "5c2201010a0e00000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "14"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "SetOwnerRoleEvent"
+        },
+        "data": {
+          "hex": "5c21012202012200012200012200012102809a4c6318c6318c6ee30e98cc6318c6318cf7eb5aabd4a7e946318c6318c6c0021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "Enum",
+                "variant_id": "2",
+                "fields": [
+                  {
+                    "kind": "Enum",
+                    "variant_id": "0",
+                    "fields": [
+                      {
+                        "kind": "Enum",
+                        "variant_id": "0",
+                        "fields": [
+                          {
+                            "kind": "Enum",
+                            "variant_id": "0",
+                            "fields": [
+                              {
+                                "kind": "Tuple",
+                                "fields": [
+                                  {
+                                    "kind": "Reference",
+                                    "value": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr"
+                                  },
+                                  {
+                                    "kind": "NonFungibleLocalId",
+                                    "value": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "Metadata",
+            "entity": {
+              "entity_type": "GlobalVirtualEd25519Account",
+              "is_global": true,
+              "entity_address": "account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxmtdataxxxxxxxxx005246577269xxxxxxxxxmtdata",
+              "schema_hash": "07bfe5891cd05394fa30c6a67fab9208642f39665ca903f9405aff6b6fefb36a",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 26,
+                "as_sbor": {
+                  "hex": "5c2201010a1a00000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "26"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "SetMetadataEvent"
+        },
+        "data": {
+          "hex": "5c21020c0a6f776e65725f6b657973228f01202201010120071dfe07e4be4047d8091b27f256c64f17dd365181cbf7513150c6c38607ff",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "String",
+                "value": "owner_keys"
+              },
+              {
+                "kind": "Enum",
+                "variant_id": "143",
+                "fields": [
+                  {
+                    "kind": "Array",
+                    "element_kind": "Enum",
+                    "elements": [
+                      {
+                        "kind": "Enum",
+                        "variant_id": "1",
+                        "fields": [
+                          {
+                            "kind": "Bytes",
+                            "element_kind": "U8",
+                            "hex": "fe07e4be4047d8091b27f256c64f17dd365181cbf7513150c6c38607ff"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "Main",
+            "entity": {
+              "entity_type": "GlobalNonFungibleResource",
+              "is_global": true,
+              "entity_address": "resource_rdx1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxxaccwnr"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+              "schema_hash": "13bcc1e1d055e469936948b51d3621e05f8130901231a0847b8ff16eee058759",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 115,
+                "as_sbor": {
+                  "hex": "5c2201010a7300000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "115"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "VaultCreationEvent"
+        },
+        "data": {
+          "hex": "5c210120071e9838b49e1f94404ec06796429fa10b261a690993b75db38bb7df4d4341f9",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "Bytes",
+                "element_kind": "U8",
+                "hex": "9838b49e1f94404ec06796429fa10b261a690993b75db38bb7df4d4341f9"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "Main",
+            "entity": {
+              "entity_type": "InternalNonFungibleVault",
+              "is_global": false,
+              "entity_address": "internal_vault_rdx1nqutf8slj3qyasr8jepflggtycdxjzvnkawm8zahmax5xs0eetyehf"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+              "schema_hash": "aa18e25a2222655fec8fdce11d9951f8258ce83b17e18cdfe52debea86b8419b",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 29,
+                "as_sbor": {
+                  "hex": "5c2201010a1d00000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "29"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "DepositEvent"
+        },
+        "data": {
+          "hex": "5c210120c001021e51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "Array",
+                "element_kind": "NonFungibleLocalId",
+                "elements": [
+                  {
+                    "kind": "NonFungibleLocalId",
+                    "value": "[51dddb6b536f55a80fdcc2456cbcce2a65e2ec8cffc94dbf62edf5c5fd74]"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "Main",
+            "entity": {
+              "entity_type": "InternalFungibleVault",
+              "is_global": false,
+              "entity_address": "internal_vault_rdx1tpsesv77qvw782kknjks9g3x2msg8cc8ldshk28pkf6m6lkhzcw3fr"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+              "schema_hash": "462a3fea283117aab2b01c297812bdc0fa9060b29eb5e68b847f361bc1201933",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 25,
+                "as_sbor": {
+                  "hex": "5c2201010a1900000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "25"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "DepositEvent"
+        },
+        "data": {
+          "hex": "5c2101a040ebd6267040100700000000000000000000000000000000",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "Decimal",
+                "value": "0.508977608325"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": {
+          "emitter": {
+            "object_module_id": "Main",
+            "entity": {
+              "entity_type": "GlobalFungibleResource",
+              "is_global": true,
+              "entity_address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+            },
+            "type": "Method"
+          },
+          "type_reference": {
+            "full_type_id": {
+              "entity_address": "package_rdx1pkgxxxxxxxxxresrcexxxxxxxxx000538436477xxxxxxxxxresrce",
+              "schema_hash": "ba27cc155884d6e1aa7a41346fd8c11f18cc99775653caef1fd3455d625fd147",
+              "local_type_id": {
+                "kind": "SchemaLocal",
+                "id": 58,
+                "as_sbor": {
+                  "hex": "5c2201010a3a00000000000000",
+                  "programmatic_json": {
+                    "kind": "Enum",
+                    "variant_id": "1",
+                    "fields": [
+                      {
+                        "kind": "U64",
+                        "value": "58"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "name": "BurnFungibleResourceEvent"
+        },
+        "data": {
+          "hex": "5c2101a040ebd6267040100700000000000000000000000000000000",
+          "programmatic_json": {
+            "kind": "Tuple",
+            "fields": [
+              {
+                "kind": "Decimal",
+                "value": "0.508977608325"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "output": [
+      {
+        "hex": "5c90f8de3dd91703682d3b041842eb1e61e1466d3cf05cd44c09bb7d886b98fa",
+        "programmatic_json": {
+          "kind": "Own",
+          "value": "internal_component_rdx1lr0rmkghqd5z6wcyrppwk8npu9rx608stn2yczdm0kyxhx86mm6ct4"
+        }
+      },
+      {
+        "hex": "5c2100",
+        "programmatic_json": {
+          "kind": "Tuple",
+          "fields": []
+        }
+      },
+      {
+        "hex": "5c2100",
+        "programmatic_json": {
+          "kind": "Tuple",
+          "fields": []
+        }
+      },
+      {
+        "hex": "5c2100",
+        "programmatic_json": {
+          "kind": "Tuple",
+          "fields": []
+        }
+      },
+      {
+        "hex": "5c2100",
+        "programmatic_json": {
+          "kind": "Tuple",
+          "fields": []
+        }
+      },
+      {
+        "hex": "5c2100",
+        "programmatic_json": {
+          "kind": "Tuple",
+          "fields": []
+        }
+      },
+      {
+        "hex": "5c2100",
+        "programmatic_json": {
+          "kind": "Tuple",
+          "fields": []
+        }
+      },
+      {
+        "hex": "5c80c31e139e20483389d0be9e8bf58e686094655e799ba1e9d6acc453d7cc69",
+        "programmatic_json": {
+          "kind": "Reference",
+          "value": "accesscontroller_rdx1cv0p883qfqecn597n69ltrngvz2x2hnenws7n44vc3fa0nrf2ka3ct"
+        }
+      }
+    ]
+  },
+  "resource_changes": [],
+  "logs": []
+}
