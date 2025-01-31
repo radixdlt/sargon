@@ -1,9 +1,11 @@
 #![feature(let_chains)]
 
+mod batch_of_transactions;
 mod pre_auth;
 mod tx;
 
 pub mod prelude {
+    pub use crate::batch_of_transactions::*;
     pub use crate::pre_auth::*;
     pub use crate::tx::*;
 

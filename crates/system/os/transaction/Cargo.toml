@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 # === SARGON CRATES ===
 prelude = { workspace = true }
-sargon-os = { path = "../../../system/os/os" }
+sargon-os = { workspace = true }
 transaction-models = { workspace = true }
 manifests = { workspace = true }
 signing-traits = { workspace = true }
@@ -14,7 +14,7 @@ radix-connect-models = { workspace = true }
 signatures-collector = { workspace = true }
 entity-by-address = { workspace = true }
 profile = { workspace = true }
-# profile-state-holder = { workspace = true }
+sargon-os-factors = { workspace = true }
 profile-account-or-persona = { workspace = true }
 gateway-client-and-api = { workspace = true }
 
@@ -28,8 +28,12 @@ actix-rt = { workspace = true }
 async-std = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }
+paste = { workspace = true }
+preinterpret = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde_with = { workspace = true }

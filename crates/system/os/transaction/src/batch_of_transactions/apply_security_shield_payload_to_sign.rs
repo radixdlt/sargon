@@ -1,4 +1,12 @@
 use enum_as_inner::EnumAsInner;
+use sargon_os_factors::{
+    extract_address_of_entity_updating_shield, AbstractSecurifiedEntity,
+    AbstractUnsecurifiedEntity, AnySecurifiedEntity, AnyUnsecurifiedEntity,
+    EntityApplyingShieldAddress, GetEntityAddressByAccessControllerAddress,
+    IsSecurifiedEntity, ProfileEntitiesOfKindOnNetworkInKeySpace,
+    SecurifiedAccount, SecurifiedPersona, UnsecurifiedAccount,
+    UnsecurifiedPersona,
+};
 
 use crate::prelude::*;
 
@@ -538,13 +546,6 @@ pub trait BatchApplySecurityShieldSigning {
             })
     }
 
-    fn modify_manifest_add_xrd_vault_contribution_for_securified_account_applying_shield(
-        input: SecurifiedAccountShieldApplicationInput,
-        manifest_variant: RolesExercisableInTransactionManifestCombination,
-    ) -> Result<SecurifiedAccountShieldApplicationInput> {
-        todo!()
-    }
-
     fn modify_manifest_add_xrd_vault_contribution_for_unsecurified_persona_applying_shield(
         input: UnsecurifiedPersonaShieldApplicationInput,
     ) -> Result<(UnsecurifiedPersonaShieldApplicationInput, Account)> {
@@ -579,6 +580,20 @@ pub trait BatchApplySecurityShieldSigning {
             input.maybe_other_payer_and_balance().map(|p| p.entity),
             input.manifest,
         ))
+    }
+
+    fn modify_manifest_add_xrd_vault_contribution_for_securified_account_applying_shield(
+        input: SecurifiedAccountShieldApplicationInput,
+        manifest_variant: RolesExercisableInTransactionManifestCombination,
+    ) -> Result<SecurifiedAccountShieldApplicationInput> {
+        todo!()
+    }
+
+    fn modify_manifest_add_xrd_vault_contribution_for_securified_persona_applying_shield(
+        input: SecurifiedPersonaShieldApplicationInput,
+        manifest_variant: RolesExercisableInTransactionManifestCombination,
+    ) -> Result<SecurifiedPersonaShieldApplicationInput> {
+        todo!()
     }
 
     fn shield_application_for_unsecurified_persona(
@@ -670,7 +685,44 @@ pub trait BatchApplySecurityShieldSigning {
         &self,
         input: SecurifiedPersonaShieldApplicationInput,
     ) -> Result<SecurityShieldApplicationForSecurifiedPersona> {
-        todo!()
+        let manifest_for_variant =
+            |variant: RolesExercisableInTransactionManifestCombination| {
+                let manifest_with = input.clone();
+
+                let manifest_with = Self::modify_manifest_add_fee_securified(
+                    manifest_with,
+                    variant,
+                )?;
+
+                let manifest_with = Self::modify_manifest_add_xrd_vault_contribution_for_securified_persona_applying_shield(manifest_with, variant)?;
+
+                Ok(manifest_with.manifest)
+            };
+
+        let initiate_with_recovery_complete_with_primary = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary)?;
+
+        let initiate_with_recovery_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation)?;
+
+        let initiate_with_recovery_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion)?;
+
+        let initiate_with_primary_complete_with_confirmation = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation)?;
+
+        let initiate_with_primary_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion)?;
+
+        let payer =
+            SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount::new(
+                input.entity_applying_shield.clone(),
+                input.maybe_other_payer_and_balance().map(|p| p.entity), // TODO Should we fail here if the an account doing top up is not specified?
+            );
+
+        Ok(SecurityShieldApplicationForSecurifiedPersona::new(
+            payer,
+            initiate_with_recovery_complete_with_primary,
+            initiate_with_recovery_complete_with_confirmation,
+            initiate_with_recovery_delayed_completion,
+            initiate_with_primary_complete_with_confirmation,
+            initiate_with_primary_delayed_completion,
+        ))
     }
 
     fn shield_application_for_securified_entity(
@@ -716,6 +768,14 @@ pub trait BatchApplySecurityShieldSigning {
         network_id: NetworkID,
         addresses: IndexSet<AddressOfPayerOfShieldApplication>,
     ) -> Result<IndexMap<AddressOfPayerOfShieldApplication, Decimal>>;
+
+    async fn build_transaction_intents(
+        &self,
+        network_id: NetworkID,
+        manifests_with_entities_with_xrd_balance: Vec<
+            SecurityShieldApplication,
+        >,
+    ) -> Result<Vec<SecurityShieldApplicationWithTransactionIntents>>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -890,6 +950,21 @@ impl BatchApplySecurityShieldSigning for SargonOS {
                 .collect::<Result<Vec<ShieldApplicationInput>>>()
     }
 
+    async fn build_transaction_intents(
+        &self,
+        network_id: NetworkID,
+        manifests_with_entities_with_xrd_balance: Vec<
+            SecurityShieldApplication,
+        >,
+    ) -> Result<Vec<SecurityShieldApplicationWithTransactionIntents>> {
+        let gateway_client =
+            GatewayClient::new(self.http_client.driver.clone(), network_id);
+
+        let epoch = gateway_client.current_epoch().await?;
+
+        todo!()
+    }
+
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
         &self,
         network_id: NetworkID,
@@ -940,29 +1015,34 @@ impl BatchApplySecurityShieldSigning for SargonOS {
             )
             .await?;
 
-        manifests_with_entities_with_xrd_balance
-            .into_iter()
-            .map(|manifest_with_payer| {
-                match &manifest_with_payer.entity_applying_shield {
-                    EntityApplyingShield::Unsecurified(entity) => self
-                        .shield_application_for_unsecurified_entity(
-                            AnyUnsecurifiedShieldApplicationInput::from((
-                                manifest_with_payer.clone(),
-                                entity.clone(),
-                            )),
-                        )
-                        .map(SecurityShieldApplication::unsecurified),
-                    EntityApplyingShield::Securified(entity) => self
-                        .shield_application_for_securified_entity(
-                            AnySecurifiedShieldApplicationInput::from((
-                                manifest_with_payer.clone(),
-                                entity.clone(),
-                            )),
-                        )
-                        .map(SecurityShieldApplication::securified),
-                }
-            })
-            .collect::<Result<Vec<SecurityShieldApplication>>>()?;
+        let applications_without_intents =
+            manifests_with_entities_with_xrd_balance
+                .into_iter()
+                .map(|manifest_with_payer| {
+                    match &manifest_with_payer.entity_applying_shield {
+                        EntityApplyingShield::Unsecurified(entity) => self
+                            .shield_application_for_unsecurified_entity(
+                                AnyUnsecurifiedShieldApplicationInput::from((
+                                    manifest_with_payer.clone(),
+                                    entity.clone(),
+                                )),
+                            )
+                            .map(SecurityShieldApplication::unsecurified),
+                        EntityApplyingShield::Securified(entity) => self
+                            .shield_application_for_securified_entity(
+                                AnySecurifiedShieldApplicationInput::from((
+                                    manifest_with_payer.clone(),
+                                    entity.clone(),
+                                )),
+                            )
+                            .map(SecurityShieldApplication::securified),
+                    }
+                })
+                .collect::<Result<Vec<SecurityShieldApplication>>>()?;
+
+        let transaction_intents = self
+            .build_transaction_intents(network_id, applications_without_intents)
+            .await?;
 
         todo!()
     }
@@ -999,6 +1079,19 @@ pub enum SecurityShieldApplication {
 
     /// Application for a securified entity.
     ForSecurifiedEntity(SecurityShieldApplicationForSecurifiedEntity),
+}
+
+#[derive(Debug, PartialEq, Eq, EnumAsInner)]
+pub enum SecurityShieldApplicationWithTransactionIntents {
+    /// Application for an unsecurified entity.
+    ForUnsecurifiedEntity(
+        SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent,
+    ),
+
+    /// Application for a securified entity.
+    ForSecurifiedEntity(
+        SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
+    ),
 }
 
 impl SecurityShieldApplication {
@@ -1045,6 +1138,22 @@ pub enum SecurityShieldApplicationForSecurifiedEntity {
     /// specifies the account that will pay the TX fee and top up the
     /// AccessControl XRD vault.
     Persona(SecurityShieldApplicationForSecurifiedPersona),
+}
+
+#[derive(PartialEq, Eq, Debug)]
+pub struct SecurityShieldApplicationForUnsecurifiedAccountWithTransactionIntent
+{
+    pub application: SecurityShieldApplicationForUnsecurifiedAccount,
+    pub transaction_intent: TransactionIntent,
+    pub notary_private_key: Ed25519PrivateKey,
+}
+
+#[derive(PartialEq, Eq, Debug)]
+pub struct SecurityShieldApplicationForUnsecurifiedPersonaWithTransactionIntent
+{
+    pub application: SecurityShieldApplicationForUnsecurifiedPersona,
+    pub transaction_intent: TransactionIntent,
+    pub notary_private_key: Ed25519PrivateKey,
 }
 
 /// An application of a security shield to an unsecurified account
@@ -1153,9 +1262,10 @@ impl SecurityShieldApplicationForUnsecurifiedPersona {
     }
 }
 
-macro_rules! create_application_for_securified_entity {
+macro_rules! create_application_for_securified_entity_with_payloads {
     (
         $name:ident,
+        $payload_ty: ty,
         $(
             #[doc = $expr: expr]
         )*
@@ -1176,22 +1286,22 @@ macro_rules! create_application_for_securified_entity {
                 )*
                 pub $entity_name: $entity_type,
 
-                pub initiate_with_recovery_complete_with_primary: TransactionManifest,
-                pub initiate_with_recovery_complete_with_confirmation: TransactionManifest,
-                pub initiate_with_recovery_delayed_completion: TransactionManifest,
-                pub initiate_with_primary_complete_with_confirmation: TransactionManifest,
-                pub initiate_with_primary_delayed_completion: TransactionManifest,
+                pub initiate_with_recovery_complete_with_primary: $payload_ty,
+                pub initiate_with_recovery_complete_with_confirmation: $payload_ty,
+                pub initiate_with_recovery_delayed_completion: $payload_ty,
+                pub initiate_with_primary_complete_with_confirmation: $payload_ty,
+                pub initiate_with_primary_delayed_completion: $payload_ty,
 
             }
 
             impl $name {
                 pub fn new(
                     $entity_name: $entity_type,
-                    initiate_with_recovery_complete_with_primary: TransactionManifest,
-                    initiate_with_recovery_complete_with_confirmation: TransactionManifest,
-                    initiate_with_recovery_delayed_completion: TransactionManifest,
-                    initiate_with_primary_complete_with_confirmation: TransactionManifest,
-                    initiate_with_primary_delayed_completion: TransactionManifest,
+                    initiate_with_recovery_complete_with_primary: $payload_ty,
+                    initiate_with_recovery_complete_with_confirmation: $payload_ty,
+                    initiate_with_recovery_delayed_completion: $payload_ty,
+                    initiate_with_primary_complete_with_confirmation: $payload_ty,
+                    initiate_with_primary_delayed_completion: $payload_ty,
                 ) -> Self {
                     Self {
                         $entity_name,
@@ -1207,6 +1317,44 @@ macro_rules! create_application_for_securified_entity {
     }
 }
 
+macro_rules! create_application_for_securified_entity_with_intents {
+    (
+        $name:ident,
+        $(
+            #[doc = $expr: expr]
+        )*
+        $entity_name:ident: $entity_type:ty
+    ) => {
+        create_application_for_securified_entity_with_payloads!(
+            $name,
+            TransactionIntent,
+            $(
+                #[doc = $expr]
+            )*
+            $entity_name: $entity_type
+        );
+    }
+}
+
+macro_rules! create_application_for_securified_entity_with_manifests {
+    (
+        $name:ident,
+        $(
+            #[doc = $expr: expr]
+        )*
+        $entity_name:ident: $entity_type:ty
+    ) => {
+        create_application_for_securified_entity_with_payloads!(
+            $name,
+            TransactionManifest,
+            $(
+                #[doc = $expr]
+            )*
+            $entity_name: $entity_type
+        );
+    }
+}
+
 /// The specified Persona to apply the shield for and the account that will
 /// pay for the topping up up the AccessControllers XRD vault.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1217,6 +1365,20 @@ pub struct SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount {
     /// The account topping up the XRD vault of `persona`s AccessControllers
     /// XRD vault.
     pub account_topping_up_xrd_vault_of_access_controller: Option<Account>,
+}
+impl SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount {
+    pub fn new(
+        persona: SecurifiedPersona,
+        account_topping_up_xrd_vault_of_access_controller: impl Into<
+            Option<Account>,
+        >,
+    ) -> Self {
+        Self {
+            persona,
+            account_topping_up_xrd_vault_of_access_controller:
+                account_topping_up_xrd_vault_of_access_controller.into(),
+        }
+    }
 }
 
 /// The specified Account to apply the shield for and optionally another
@@ -1246,15 +1408,44 @@ impl SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount {
     }
 }
 
-create_application_for_securified_entity! {
+create_application_for_securified_entity_with_manifests! {
     SecurityShieldApplicationForSecurifiedAccount,
     /// The account we are applying the shield for and an optional other payer
     account_with_optional_paying_account: SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount
 }
 
-create_application_for_securified_entity! {
+create_application_for_securified_entity_with_manifests! {
     SecurityShieldApplicationForSecurifiedPersona,
     /// The persona we are applyying the shield for
     /// and the account that will pay the topping up of the AccessControllers XRD vault.
     persona_with_paying_account: SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount
+}
+
+create_application_for_securified_entity_with_intents! {
+    SecurityShieldApplicationTransactionIntentsForSecurifiedPersona,
+    /// The persona we are applyying the shield for
+    /// and the account that will pay the topping up of the AccessControllers XRD vault.
+    persona_with_paying_account: SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount
+}
+
+create_application_for_securified_entity_with_intents! {
+    SecurityShieldApplicationTransactionIntentsForSecurifiedAccount,
+    /// The account we are applying the shield for and an optional other payer
+    account_with_optional_paying_account: SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount
+}
+
+#[derive(Debug, PartialEq, Eq, EnumAsInner)]
+pub enum SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
+    Account(
+        SecurityShieldApplicationForUnsecurifiedAccountWithTransactionIntent,
+    ),
+    Persona(
+        SecurityShieldApplicationForUnsecurifiedPersonaWithTransactionIntent,
+    ),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumAsInner)]
+pub enum SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
+    Account(SecurityShieldApplicationTransactionIntentsForSecurifiedAccount),
+    Persona(SecurityShieldApplicationTransactionIntentsForSecurifiedPersona),
 }
