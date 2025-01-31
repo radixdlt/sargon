@@ -23,12 +23,13 @@ impl MainSecurityStructureUpdating for Security {
             None => vec![*shield_id],
         };
 
+        self.update_security_structure_add_flag_main(shield_id)?;
+
         if let Some(current_main_shield) = &current_main_shield {
             self.update_security_structure_remove_flag_main(
                 &current_main_shield.metadata.id,
             )?;
         }
-        self.update_security_structure_add_flag_main(shield_id)?;
 
         Ok(updated_ids)
     }

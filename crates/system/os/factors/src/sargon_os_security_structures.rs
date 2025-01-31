@@ -390,6 +390,42 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn given_existing_main_security_structure_when_updating_with_invalid_id_then_main_is_not_removed(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        let structure_factor_id_level =
+            SecurityStructureOfFactorSourceIDs::sample();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(
+                &structure_factor_id_level,
+            )
+        })
+        .await
+        .unwrap();
+
+        // ACT
+        let invalid_shield_id =
+            SecurityStructureID::from(Uuid::from_bytes([0xab; 16]));
+        let _ = os.set_main_security_structure(invalid_shield_id).await;
+
+        // ASSERT
+        let profile = os.profile().unwrap();
+        let main_security_structure = profile
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .first()
+            .unwrap();
+
+        assert!(main_security_structure.metadata.is_main());
+    }
+
+    #[actix_rt::test]
     async fn set_main_flag() {
         // ARRANGE
         let event_bus_driver = RustEventBusDriver::new();
