@@ -11,7 +11,7 @@ pub trait ApplyShieldTransactionsEnqueuer: Send + Sync {
 pub struct ApplyShieldTransactionsEnqueuerImpl {}
 
 impl ApplyShieldTransactionsEnqueuerImpl {
-    pub fn new<'a>(_os: &'a SargonOS) -> Self {
+    pub fn new(_os: &SargonOS) -> Self {
         warn!("ApplyShieldTransactionsEnqueuerImpl is not implemented yet. We might not need `os` here.");
         Self {}
     }

@@ -18,7 +18,7 @@ pub struct ApplyShieldTransactionsCommiterImpl {
 }
 
 impl ApplyShieldTransactionsCommiterImpl {
-    pub fn new<'a>(os: &'a SargonOS) -> Result<Self> {
+    pub fn new(os: &SargonOS) -> Result<Self> {
         let builder = ApplyShieldTransactionsBuilderImpl::new(os)?;
         Ok(Self {
             builder: Arc::new(builder),

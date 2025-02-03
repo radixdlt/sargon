@@ -18,7 +18,7 @@ pub struct ApplyShieldTransactionsBuilderImpl {
 }
 
 impl ApplyShieldTransactionsBuilderImpl {
-    pub fn new<'a>(os: &'a SargonOS) -> Result<Self> {
+    pub fn new(os: &SargonOS) -> Result<Self> {
         os.profile().map(|profile| {
             let networking_driver = os.http_client.driver.clone();
             Self {

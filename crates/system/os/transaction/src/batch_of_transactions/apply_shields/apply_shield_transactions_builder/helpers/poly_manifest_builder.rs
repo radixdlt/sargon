@@ -9,6 +9,12 @@ pub trait ApplyShieldTransactionsPolyManifestBuilder: Send + Sync {
 }
 
 pub struct ApplyShieldTransactionsPolyManifestBuilderImpl {}
+impl Default for ApplyShieldTransactionsPolyManifestBuilderImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ApplyShieldTransactionsPolyManifestBuilderImpl {
     pub fn new() -> Self {
         Self {}

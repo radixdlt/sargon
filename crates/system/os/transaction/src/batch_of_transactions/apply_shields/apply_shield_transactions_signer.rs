@@ -11,7 +11,7 @@ pub trait ApplyShieldTransactionsSigner: Send + Sync {
 pub struct ApplyShieldTransactionsSignerImpl {}
 
 impl ApplyShieldTransactionsSignerImpl {
-    pub fn new<'a>(_os: &'a SargonOS) -> Self {
+    pub fn new(_os: &SargonOS) -> Self {
         warn!(
             "ApplyShieldTransactionsSignerImpl is not implemented yet. Actually might only need the `sign_transactions_interactor` here"
         );

@@ -84,10 +84,10 @@ pub struct SecuredEntityControl {
 
 impl SecuredEntityControl {
     pub fn xrd_vault_address(&self) -> VaultAddress {
-        self.addresses.xrd_vault_address.clone()
+        self.addresses.xrd_vault_address
     }
     pub fn access_controller_address(&self) -> AccessControllerAddress {
-        self.addresses.access_controller_address.clone()
+        self.addresses.access_controller_address
     }
 }
 
