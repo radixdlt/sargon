@@ -111,6 +111,23 @@ impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedAccount {
         }
     }
 }
+
+impl TryFrom<Account> for UnsecurifiedAccount {
+    type Error = CommonError;
+
+    fn try_from(value: Account) -> Result<Self> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<Persona> for UnsecurifiedPersona {
+    type Error = CommonError;
+
+    fn try_from(value: Persona) -> Result<Self> {
+        Self::new(value)
+    }
+}
+
 impl From<UnsecurifiedAccount> for AnyUnsecurifiedEntity {
     fn from(value: UnsecurifiedAccount) -> Self {
         Self::with_unsecured_entity_control(

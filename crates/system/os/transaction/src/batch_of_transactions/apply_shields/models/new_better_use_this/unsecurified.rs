@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 // ========================
 // UNSECURIFIED
 // ========================
@@ -8,6 +7,21 @@ use crate::prelude::*;
 pub enum ApplicationInputForUnsecurifiedEntity {
     Account(ApplicationInputForUnsecurifiedAccount),
     Persona(ApplicationInputForUnsecurifiedPersona),
+}
+
+impl From<ApplicationInputForUnsecurifiedAccount>
+    for ApplicationInputForUnsecurifiedEntity
+{
+    fn from(value: ApplicationInputForUnsecurifiedAccount) -> Self {
+        Self::Account(value)
+    }
+}
+impl From<ApplicationInputForUnsecurifiedPersona>
+    for ApplicationInputForUnsecurifiedEntity
+{
+    fn from(value: ApplicationInputForUnsecurifiedPersona) -> Self {
+        Self::Persona(value)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -19,9 +33,8 @@ pub struct ApplicationInputForUnsecurifiedAccount {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ApplicationInputForUnsecurifiedPersona {
     pub entity_input: UnsecurifiedPersona,
-    pub maybe_paying_account: ApplicationInputPayingAccount,
+    pub paying_account: ApplicationInputPayingAccount,
 }
-
 
 // ========================
 // ENTITY INPUT
