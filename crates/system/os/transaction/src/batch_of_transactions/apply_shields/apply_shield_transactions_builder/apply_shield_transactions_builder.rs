@@ -16,9 +16,30 @@ pub struct ApplyShieldTransactionsBuilderImpl {
     transaction_intent_builder:
         Arc<dyn ApplyShieldTransactionsTransactionIntentBuilder>,
 }
+
 impl ApplyShieldTransactionsBuilderImpl {
-    pub fn new<'a>(os: &'a SargonOS) -> Self {
-        todo!()
+    pub fn new<'a>(os: &'a SargonOS) -> Result<Self> {
+        os.profile().map(|profile| {
+            let networking_driver = os.http_client.driver.clone();
+            Self {
+                profile_lens: Arc::new(
+                    ApplyShieldTransactionsProfileLensImpl::new(profile),
+                ),
+                xrd_balances_fetcher: Arc::new(
+                    ApplyShieldTransactionsXrdBalancesFetcherImpl::new(
+                        networking_driver.clone(),
+                    ),
+                ),
+                poly_manifest_builder: Arc::new(
+                    ApplyShieldTransactionsPolyManifestBuilderImpl::new(),
+                ),
+                transaction_intent_builder: Arc::new(
+                    ApplyShieldTransactionsTransactionIntentBuilderImpl::new(
+                        networking_driver,
+                    ),
+                ),
+            }
+        })
     }
 
     async fn persist_notary_private_keys_to_be_able_to_cancel_transactions(

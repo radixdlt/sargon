@@ -10,8 +10,8 @@ pub trait ApplyShieldTransactionsPolyManifestBuilder: Send + Sync {
 
 pub struct ApplyShieldTransactionsPolyManifestBuilderImpl {}
 impl ApplyShieldTransactionsPolyManifestBuilderImpl {
-    pub fn new<'a>(os: &'a SargonOS) -> Self {
-        todo!()
+    pub fn new() -> Self {
+        Self {}
     }
 
     fn _modify_manifest_add_fee<Entity>(
