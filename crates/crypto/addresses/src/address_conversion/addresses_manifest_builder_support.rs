@@ -6,7 +6,7 @@ macro_rules! from_scrypto_global_address {
             impl TryFrom<(ScryptoGlobalAddress, NetworkID)> for $address_type {
                 type Error = crate::CommonError;
                 fn try_from(value: (ScryptoGlobalAddress, NetworkID)) -> Result<Self> {
-                    <$address_type as AddressFromNodeId>::new_from_node_id(value.0.into_node_id(), value.1)
+                    $address_type::new_from_node_id(value.0.into_node_id(), value.1)
                 }
             }
         }
