@@ -890,6 +890,9 @@ pub enum CommonError {
 
     #[error("Named addresses are not supported")]
     NamedAddressesAreNotSupported = 10253,
+
+    #[error("Entity has no provisional security config set")]
+    EntityHasNoProvisionalSecurityConfigSet = 10254,
 }
 
 impl CommonError {

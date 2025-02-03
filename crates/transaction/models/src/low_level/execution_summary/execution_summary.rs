@@ -1,6 +1,5 @@
-use radix_rust::prelude::IndexMap;
-
 use crate::prelude::*;
+use radix_rust::prelude::IndexMap;
 
 pub(crate) fn to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
@@ -205,15 +204,16 @@ impl ExecutionSummary {
     /// Responsible for identifying if the summary can be classified as a securify summary.
     pub fn classify_securify_entity_if_present<F>(
         &mut self,
-        get_provisional_securified_config: F,
-    ) where
+        get_provisional_security_structure: F,
+    ) -> Result<()>
+    where
         F: Fn(
             AddressOfAccountOrPersona,
-        ) -> Option<SecurityStructureOfFactorInstances>,
+        ) -> Result<SecurityStructureOfFactorSources>,
     {
         // Only try to classify if RET analysis didn't yield any classification
         if !self.detailed_classification.is_empty() {
-            return;
+            return Ok(());
         }
 
         /////// TEMPORARY solution until RET classifies it properly
@@ -237,15 +237,19 @@ impl ExecutionSummary {
         ///// END of temporary code
 
         if let Some(address) = entity_address_to_securify {
-            if let Some(config) = get_provisional_securified_config(address) {
-                self.detailed_classification.push(
-                    DetailedManifestClass::SecurifyEntity {
-                        entity_address: address,
-                        provisional_security_structure: config,
-                    },
-                );
-            }
+            let security_structure =
+                get_provisional_security_structure(address)?;
+
+            self.detailed_classification.push(
+                DetailedManifestClass::SecurifyEntity {
+                    entity_address: address,
+                    provisional_security_structure_metadata: security_structure
+                        .metadata,
+                },
+            );
         }
+
+        Ok(())
     }
 }
 

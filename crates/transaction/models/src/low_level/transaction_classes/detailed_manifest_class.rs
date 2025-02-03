@@ -104,9 +104,9 @@ pub enum DetailedManifestClass {
         /// The entity address that is about to be securified
         entity_address: AddressOfAccountOrPersona,
 
-        /// The provisional security configuration that is about to be applied
+        /// The provisional security structure's metadata that is about to be applied
         /// into the entity address
-        provisional_security_structure: SecurityStructureOfFactorInstances,
+        provisional_security_structure_metadata: SecurityStructureMetadata,
     },
 }
 
@@ -465,8 +465,8 @@ mod tests {
         test(
             SUT::SecurifyEntity {
                 entity_address: AddressOfAccountOrPersona::sample(),
-                provisional_security_structure:
-                    SecurityStructureOfFactorInstances::sample(),
+                provisional_security_structure_metadata:
+                    SecurityStructureMetadata::sample(),
             },
             DetailedManifestClassKind::SecurifyEntity,
         );

@@ -105,9 +105,9 @@ pub enum DetailedManifestClass {
         /// The entity address that is about to be securified
         entity_address: AddressOfAccountOrPersona,
 
-        /// The provisional security configuration that is about to be applied
+        /// The provisional security structure metadata that is about to be applied
         /// into the entity address
-        provisional_security_structure: SecurityStructureOfFactorInstances,
+        provisional_security_structure_metadata: SecurityStructureMetadata,
     },
 }
 
