@@ -44,13 +44,19 @@ pub struct ApplicationInputForSecurifiedPersona {
     pub maybe_paying_account: Option<ApplicationInputPayingAccount>,
 }
 
-
 impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedPersona {
     fn xrd_of_vault_of_access_controller(&self) -> Decimal {
         self.entity_input.xrd_balance_of_access_controller
     }
 }
 
+impl ApplicationInputForSecurifiedPersona {
+    pub fn xrd_balance_and_account_topping_up(
+        &self,
+    ) -> Option<ApplicationInputPayingAccount> {
+        self.maybe_paying_account.clone()
+    }
+}
 
 impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedAccount {
     fn xrd_of_vault_of_access_controller(&self) -> Decimal {
@@ -58,6 +64,21 @@ impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedAccount {
     }
 }
 
+impl ApplicationInputForSecurifiedAccount {
+    pub fn xrd_balance_and_account_topping_up(
+        &self,
+    ) -> XrdBalanceOfEntity<Account> {
+        self.maybe_paying_account
+            .as_ref()
+            .map(|p| {
+                XrdBalanceOfEntity::new(p.account(), p.xrd_balance_of_account())
+            })
+            .unwrap_or(XrdBalanceOfEntity::new(
+                self.entity_input.securified_account.entity.clone(),
+                self.entity_input.xrd_balance_of_account,
+            ))
+    }
+}
 
 // ========================
 // ENTITY INPUT

@@ -25,7 +25,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
     ///
     /// And when we know the fee we can calculate how much to top up the XRD vault of the AccessController
     /// and call
-    /// * `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account`
+    /// * `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account`
     ///
     /// For timed confirmation - much later (`timed_recovery_delay_in_minutes` later ) the
     /// host app will need to call `confirm_timed_recovery`
@@ -120,7 +120,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         // Furthermore:
         // We do NOT top of XRD vault of AccessController - yet!
         // Host will need to call the function:
-        // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account`
+        // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account`
         // after user has selected account to pay in wallet GUI. And also call
         // `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`
 
@@ -161,7 +161,7 @@ mod tests {
         manifest_eq(manifest.clone(), expected_manifest_str);
         assert!(expected_manifest_str.contains("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g"));
 
-        let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account(entity_applying_shield.clone(), entity_applying_shield.clone(), manifest.clone(), Decimal192::ten()).unwrap();
+        let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(entity_applying_shield.clone(), entity_applying_shield.clone(), manifest.clone(), Decimal192::ten()).unwrap();
 
         let expected_manifest_str =
         fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C_with_top_up_where_payer_is_entity_applying_shield");

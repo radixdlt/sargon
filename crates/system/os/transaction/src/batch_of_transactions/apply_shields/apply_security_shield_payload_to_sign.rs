@@ -63,7 +63,7 @@ pub struct SecurityShieldApplicationForUnsecurifiedAccount {
     /// If `address_of_paying_account` is `Some(SECURIFIED_ACCOUNT)` then `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(SECURIFIED_ACCOUNT)` has been used.
     ///
     /// ## 2nd modification - top up AC XRD vault
-    /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account` has been called with `address_of_paying_account` or `address_of_account_applying_shield` as payer.
+    /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account` has been called with `address_of_paying_account` or `address_of_account_applying_shield` as payer.
     pub modified_manifest: TransactionManifest,
 }
 
@@ -117,7 +117,7 @@ pub struct SecurityShieldApplicationForUnsecurifiedPersona {
     /// If `paying_account` is `Some(UNSECURIFIED_ACCOUNT)` then `modify_manifest_lock_fee(UNSECURIFIED_ACCOUNT)` has been used.
     ///
     /// ## 2nd modification - top up AC XRD vault
-    /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account` has been called with `paying_account` as payer.
+    /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account` has been called with `paying_account` as payer.
     pub modified_manifest: TransactionManifest,
 }
 
@@ -144,7 +144,8 @@ pub struct SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount {
 
     /// The account topping up the XRD vault of `persona`s AccessControllers
     /// XRD vault.
-    pub account_topping_up_xrd_vault_of_access_controller: Option<ApplicationInputPayingAccount>,
+    pub account_topping_up_xrd_vault_of_access_controller:
+        Option<ApplicationInputPayingAccount>,
 }
 impl SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount {
     pub fn new(
@@ -171,7 +172,8 @@ pub struct SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccoun
 
     /// An optional account topping up the XRD vault of `accounts`s AccessControllers
     /// XRD vault - if `Some(other)` then `other != account`.
-    pub account_topping_up_xrd_vault_of_access_controller: Option<ApplicationInputPayingAccount>,
+    pub account_topping_up_xrd_vault_of_access_controller:
+        Option<ApplicationInputPayingAccount>,
 }
 
 impl SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount {

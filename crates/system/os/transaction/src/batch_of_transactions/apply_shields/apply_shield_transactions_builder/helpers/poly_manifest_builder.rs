@@ -16,47 +16,80 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
 
     fn modify_manifest_add_fee_securified_persona(
         input: ApplicationInputForSecurifiedPersona,
-        manifest_variant: RolesExercisableInTransactionManifestCombination,
+        _manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<ApplicationInputForSecurifiedPersona> {
-        todo!()
+        let entity_applying_shield =
+            input.entity_input.securified_persona.clone();
+        let estimated_xrd_fee = input.estimated_xrd_fee;
+        input.modifying_manifest(|m| {
+            let m = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+                m,
+                estimated_xrd_fee,
+                entity_applying_shield
+            );
+            Ok(m)
+        })
     }
+
     fn modify_manifest_add_fee_securified_account(
         input: ApplicationInputForSecurifiedAccount,
-        manifest_variant: RolesExercisableInTransactionManifestCombination,
+        _manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<ApplicationInputForSecurifiedAccount> {
-        todo!()
+        let entity_applying_shield =
+            input.entity_input.securified_account.clone();
+        let estimated_xrd_fee = input.estimated_xrd_fee;
+        input.modifying_manifest(|m| {
+            let m = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+                m,
+                estimated_xrd_fee,
+                entity_applying_shield
+            );
+            Ok(m)
+        })
     }
 
     fn modify_manifest_add_fee_for_unsecurified_account(
         input: ApplicationInputForUnsecurifiedAccount,
     ) -> Result<ApplicationInputForUnsecurifiedAccount> {
-        // Self::_modify_manifest_add_fee(input, None)
-        todo!()
+        let payer = input.payer();
+        let estimated_xrd_fee = input.estimated_xrd_fee;
+        input.modifying_manifest(|m| {
+            let m = m.modify_add_lock_fee(&payer.address, estimated_xrd_fee);
+            Ok(m)
+        })
     }
 
     fn modify_manifest_add_fee_for_unsecurified_persona(
         input: ApplicationInputForUnsecurifiedPersona,
     ) -> Result<ApplicationInputForUnsecurifiedPersona> {
-        // Self::_modify_manifest_add_fee(input, None)
-        todo!()
+        let payer = input.payer();
+        let estimated_xrd_fee = input.estimated_xrd_fee;
+        input.modifying_manifest(|m| {
+            let m = m.modify_add_lock_fee(&payer.address, estimated_xrd_fee);
+            Ok(m)
+        })
     }
 
     fn modify_manifest_add_xrd_vault_contribution_for_unsecurified_account_applying_shield(
         input: ApplicationInputForUnsecurifiedAccount,
     ) -> Result<ApplicationInputForUnsecurifiedAccount> {
-
         let payer_balance = input.xrd_balance_of_paying_account();
 
-        if payer_with_balance.balance < input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition() {
+        if payer_balance
+            < input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition()
+        {
             return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
         }
 
-        let payer = payer_with_balance.entity;
-        let unsecurified_account_applying_shield =
-            unsecurified_account_applying_shield_with_balance.entity;
+        let payer = input
+            .maybe_paying_account
+            .clone()
+            .map(|p| p.account())
+            .unwrap_or(input.entity_input.unsecurified_entity.entity.clone());
+        let entity = input.entity_input.unsecurified_entity.clone().into();
 
         input.modifying_manifest(|m| {
-                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(payer, unsecurified_account_applying_shield.into(), m, None);
+                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(payer, entity, m, None);
 
                 Ok(m)
             })
@@ -68,24 +101,24 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
         ApplicationInputForUnsecurifiedPersona,
         ApplicationInputPayingAccount,
     )> {
-        // let payer_with_balance: ! = input.payer_with_balance()?;
+        let payer_balance = input.xrd_balance_of_paying_account();
 
-        // if payer_with_balance.balance < input.needed_xrd_for_fee_and_topup() {
-        //     return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
-        // }
+        if payer_balance
+            < input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition()
+        {
+            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+        }
 
-        // let unsecurified_persona_applying_shield = input
-        //     .get_entity_applying_shield_and_balance()
-        //     .entity
-        //     .clone()
-        //     .into();
+        let payer_info = input.paying_account.clone();
+        let payer = payer_info.account();
 
-        // input.modifying_manifest(|m| {
-        //         let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(payer_with_balance.entity.clone(), unsecurified_persona_applying_shield, m, None);
+        let entity = input.entity_input.clone().into();
 
-        //         Ok(m)
-        //     }).map(|m| (m, payer_with_balance.entity))
-        todo!()
+        input.modifying_manifest(|m| {
+                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(payer, entity, m, None);
+
+                Ok(m)
+            }).map(|modified| (modified, payer_info))
     }
 
     fn shield_application_for_unsecurified_account(
@@ -136,14 +169,57 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
         input: ApplicationInputForSecurifiedPersona,
         manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<ApplicationInputForSecurifiedPersona> {
-        todo!()
+        if !manifest_variant.can_quick_confirm() {
+            // If we cannot quick confirm the topping up of the XRD vault instructions
+            // must not go into this manifest for initiate recovery, we should
+            // include the top up in the Confirm Recovery Manifest happening later (
+            // after time delay).
+            return Ok(input);
+        }
+        let Some(payer) = input.xrd_balance_and_account_topping_up() else {
+            return Err(CommonError::Unknown); // CommonError::NoAccountToTopUpXrdVault
+        };
+
+        if payer.xrd_balance_of_account()
+            < input.xrd_needed_for_tx_fee_and_xrd_vault_top_up()
+        {
+            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+        }
+
+        let payer_info = payer.clone();
+        let payer = payer_info.account();
+
+        let entity = input.entity_input.clone().securified_persona;
+
+        input.modifying_manifest(|m| {
+                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None)
+            })
     }
 
     fn modify_manifest_add_xrd_vault_contribution_for_securified_account_applying_shield(
         input: ApplicationInputForSecurifiedAccount,
         manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<ApplicationInputForSecurifiedAccount> {
-        todo!()
+        if !manifest_variant.can_quick_confirm() {
+            // If we cannot quick confirm the topping up of the XRD vault instructions
+            // must not go into this manifest for initiate recovery, we should
+            // include the top up in the Confirm Recovery Manifest happening later (
+            // after time delay).
+            return Ok(input);
+        }
+        let payer = input.xrd_balance_and_account_topping_up();
+
+        if payer.balance < input.xrd_needed_for_tx_fee_and_xrd_vault_top_up() {
+            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+        }
+
+        let payer = payer.entity.clone();
+
+        let entity = input.entity_input.clone().securified_account;
+
+        input.modifying_manifest(|m| {
+                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None)
+            })
     }
 
     fn shield_application_for_securified_account(

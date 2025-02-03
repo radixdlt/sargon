@@ -50,6 +50,13 @@ impl ApplicationInputForUnsecurifiedAccount {
             .map(|p| p.xrd_balance_of_account())
             .unwrap_or(self.entity_input.xrd_balance_of_account)
     }
+
+    pub fn payer(&self) -> Account {
+        self.maybe_paying_account
+            .clone()
+            .map(|p| p.account())
+            .unwrap_or(self.entity_input.unsecurified_entity.entity.clone())
+    }
 }
 
 /// Without Intents (with **single** Manifest) | With balance
@@ -66,12 +73,16 @@ impl ApplicationInputForUnsecurifiedPersona {
     pub fn xrd_balance_of_paying_account(&self) -> Decimal {
         self.paying_account.xrd_balance_of_account()
     }
+
+    pub fn payer(&self) -> Account {
+        self.paying_account.account()
+    }
 }
 
 trait HasEstimatedXrdFee {
     fn estimated_xrd_fee(&self) -> Decimal;
 }
-trait HasXrdAmountForInitialXrdVaultContributionAndFee {
+pub trait HasXrdAmountForInitialXrdVaultContributionAndFee {
     fn xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition(
         &self,
     ) -> Decimal192;
@@ -87,7 +98,7 @@ impl<T: HasEstimatedXrdFee + IsUnsecurifiedMarker>
     }
 }
 
-trait HasXrdAmountForXrdVaultTopUpAndFee {
+pub trait HasXrdAmountForXrdVaultTopUpAndFee {
     fn xrd_needed_for_tx_fee_and_xrd_vault_top_up(&self) -> Decimal192;
 }
 impl<T: HasEstimatedXrdFee + IsSecurifiedWithXrdOfVaultMarker>
@@ -110,6 +121,64 @@ impl<T: HasEstimatedXrdFee + IsSecurifiedWithXrdOfVaultMarker>
 pub trait IsSecurifiedMarker {}
 pub trait IsSecurifiedWithXrdOfVaultMarker: IsSecurifiedMarker {
     fn xrd_of_vault_of_access_controller(&self) -> Decimal;
+}
+
+pub trait ReviewedManifestOwner {
+    fn get_reviewed_manifest(&self) -> TransactionManifest;
+    fn set_manifest(&mut self, manifest: TransactionManifest);
+}
+
+impl ReviewedManifestOwner for ApplicationInputForUnsecurifiedPersona {
+    fn get_reviewed_manifest(&self) -> TransactionManifest {
+        self.reviewed_manifest.clone()
+    }
+    fn set_manifest(&mut self, manifest: TransactionManifest) {
+        self.reviewed_manifest = manifest;
+    }
+}
+impl ReviewedManifestOwner for ApplicationInputForUnsecurifiedAccount {
+    fn get_reviewed_manifest(&self) -> TransactionManifest {
+        self.reviewed_manifest.clone()
+    }
+    fn set_manifest(&mut self, manifest: TransactionManifest) {
+        self.reviewed_manifest = manifest;
+    }
+}
+impl ReviewedManifestOwner for ApplicationInputForSecurifiedAccount {
+    fn get_reviewed_manifest(&self) -> TransactionManifest {
+        self.reviewed_manifest.clone()
+    }
+    fn set_manifest(&mut self, manifest: TransactionManifest) {
+        self.reviewed_manifest = manifest;
+    }
+}
+
+impl ReviewedManifestOwner for ApplicationInputForSecurifiedPersona {
+    fn get_reviewed_manifest(&self) -> TransactionManifest {
+        self.reviewed_manifest.clone()
+    }
+    fn set_manifest(&mut self, manifest: TransactionManifest) {
+        self.reviewed_manifest = manifest;
+    }
+}
+
+pub trait ManifestModying: Sized {
+    fn modifying_manifest(
+        self,
+        modified: impl FnOnce(TransactionManifest) -> Result<TransactionManifest>,
+    ) -> Result<Self>;
+}
+impl<T: ReviewedManifestOwner> ManifestModying for T {
+    fn modifying_manifest(
+        self,
+        modified: impl FnOnce(TransactionManifest) -> Result<TransactionManifest>,
+    ) -> Result<Self> {
+        let reviewed_manifest = self.get_reviewed_manifest();
+        let modified_manifest = modified(reviewed_manifest)?;
+        let mut self_ = self;
+        self_.set_manifest(modified_manifest);
+        Ok(self_)
+    }
 }
 
 pub trait IsUnsecurifiedMarker {}

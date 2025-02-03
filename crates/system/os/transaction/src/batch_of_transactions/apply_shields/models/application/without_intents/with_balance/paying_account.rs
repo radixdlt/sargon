@@ -10,9 +10,13 @@ pub enum ApplicationInputPayingAccount {
 }
 impl ApplicationInputPayingAccount {
     pub fn account_address(&self) -> AccountAddress {
+        self.account().address
+    }
+
+    pub fn account(&self) -> Account {
         match self {
-            Self::Securified(input) => input.account.entity.address,
-            Self::Unsecurified(input) => input.account.entity.address,
+            Self::Securified(input) => input.account.entity.clone(),
+            Self::Unsecurified(input) => input.account.entity.clone(),
         }
     }
 

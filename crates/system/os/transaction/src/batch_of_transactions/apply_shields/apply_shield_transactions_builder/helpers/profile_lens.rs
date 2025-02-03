@@ -132,10 +132,8 @@ impl ApplyShieldTransactionsProfileLens
             .into_iter()
             .map(|manifest_with_payer_by_address| {
                 let manifest = manifest_with_payer_by_address.manifest;
-                
                 let estimated_xrd_fee =
                     manifest_with_payer_by_address.estimated_xrd_fee;
-                
                 let address_of_ac_or_entity_applying_shield =
                     extract_address_of_entity_updating_shield(&manifest)?;
 
@@ -174,12 +172,12 @@ impl ShieldApplicationInputWithoutXrdBalance {
         estimated_xrd_fee: Decimal,
         manifest: TransactionManifest,
         entity_applying_shield: EntityApplyingShield,
-        maybe_paying_account: Option<Account>
+        maybe_paying_account: Option<Account>,
     ) -> Result<Self> {
-        let self_ =match entity_applying_shield {
+        let self_ = match entity_applying_shield {
             EntityApplyingShield::Unsecurified(unsec) => {
                 let entity = match &unsec.entity {
-                    AccountOrPersona::AccountEntity(a) => { 
+                    AccountOrPersona::AccountEntity(a) => {
                         let a = ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
                             reviewed_manifest: manifest,
                             estimated_xrd_fee,
@@ -187,9 +185,10 @@ impl ShieldApplicationInputWithoutXrdBalance {
                             maybe_paying_account: maybe_paying_account.map(|e| e.into()),
                         };
                         ApplicationInputForUnsecurifiedEntityWithoutXrdBalance::from(a)
-                    },
+                    }
                     AccountOrPersona::PersonaEntity(p) => {
-                        let paying_account = maybe_paying_account.ok_or(CommonError::Unknown)?; // TODO Add new error type
+                        let paying_account =
+                            maybe_paying_account.ok_or(CommonError::Unknown)?; // TODO Add new error type
                         let p = ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
                             reviewed_manifest: manifest,
                             estimated_xrd_fee,
@@ -197,10 +196,10 @@ impl ShieldApplicationInputWithoutXrdBalance {
                             paying_account,
                         };
                         ApplicationInputForUnsecurifiedEntityWithoutXrdBalance::from(p)
-                    },
+                    }
                 };
                 Self::from(entity)
-            },
+            }
             EntityApplyingShield::Securified(sec) => {
                 let entity = match &sec.entity {
                     AccountOrPersona::AccountEntity(a) => {
@@ -211,7 +210,7 @@ impl ShieldApplicationInputWithoutXrdBalance {
                             maybe_paying_account,
                         };
                         ApplicationInputForSecurifiedEntityWithoutXrdBalance::from(a)
-                    },
+                    }
                     AccountOrPersona::PersonaEntity(p) => {
                         let p = ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
                             reviewed_manifest: manifest,
@@ -220,7 +219,7 @@ impl ShieldApplicationInputWithoutXrdBalance {
                             maybe_paying_account,
                         };
                         ApplicationInputForSecurifiedEntityWithoutXrdBalance::from(p)
-                    },
+                    }
                 };
                 Self::from(entity)
             }
@@ -229,40 +228,62 @@ impl ShieldApplicationInputWithoutXrdBalance {
     }
 }
 
-impl From<ApplicationInputForUnsecurifiedAccountWithoutXrdBalance> for ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
-    fn from(value: ApplicationInputForUnsecurifiedAccountWithoutXrdBalance) -> Self {
+impl From<ApplicationInputForUnsecurifiedAccountWithoutXrdBalance>
+    for ApplicationInputForUnsecurifiedEntityWithoutXrdBalance
+{
+    fn from(
+        value: ApplicationInputForUnsecurifiedAccountWithoutXrdBalance,
+    ) -> Self {
         Self::Account(value)
     }
 }
 
-impl From<ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance> for ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
-    fn from(value: ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance) -> Self {
+impl From<ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance>
+    for ApplicationInputForUnsecurifiedEntityWithoutXrdBalance
+{
+    fn from(
+        value: ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance,
+    ) -> Self {
         Self::Persona(value)
     }
 }
 
-
-impl From<ApplicationInputForSecurifiedAccountWithoutXrdBalance> for ApplicationInputForSecurifiedEntityWithoutXrdBalance {
-    fn from(value: ApplicationInputForSecurifiedAccountWithoutXrdBalance) -> Self {
+impl From<ApplicationInputForSecurifiedAccountWithoutXrdBalance>
+    for ApplicationInputForSecurifiedEntityWithoutXrdBalance
+{
+    fn from(
+        value: ApplicationInputForSecurifiedAccountWithoutXrdBalance,
+    ) -> Self {
         Self::Account(value)
     }
 }
 
-impl From<ApplicationInputForSecurifiedPersonaWithoutXrdBalance> for ApplicationInputForSecurifiedEntityWithoutXrdBalance {
-    fn from(value: ApplicationInputForSecurifiedPersonaWithoutXrdBalance) -> Self {
+impl From<ApplicationInputForSecurifiedPersonaWithoutXrdBalance>
+    for ApplicationInputForSecurifiedEntityWithoutXrdBalance
+{
+    fn from(
+        value: ApplicationInputForSecurifiedPersonaWithoutXrdBalance,
+    ) -> Self {
         Self::Persona(value)
     }
 }
 
-
-impl From<ApplicationInputForUnsecurifiedEntityWithoutXrdBalance> for ShieldApplicationInputWithoutXrdBalance {
-    fn from(value: ApplicationInputForUnsecurifiedEntityWithoutXrdBalance) -> Self {
+impl From<ApplicationInputForUnsecurifiedEntityWithoutXrdBalance>
+    for ShieldApplicationInputWithoutXrdBalance
+{
+    fn from(
+        value: ApplicationInputForUnsecurifiedEntityWithoutXrdBalance,
+    ) -> Self {
         Self::Unsecurified(value)
     }
 }
 
-impl From<ApplicationInputForSecurifiedEntityWithoutXrdBalance> for ShieldApplicationInputWithoutXrdBalance {
-    fn from(value: ApplicationInputForSecurifiedEntityWithoutXrdBalance) -> Self {
+impl From<ApplicationInputForSecurifiedEntityWithoutXrdBalance>
+    for ShieldApplicationInputWithoutXrdBalance
+{
+    fn from(
+        value: ApplicationInputForSecurifiedEntityWithoutXrdBalance,
+    ) -> Self {
         Self::Securified(value)
     }
 }

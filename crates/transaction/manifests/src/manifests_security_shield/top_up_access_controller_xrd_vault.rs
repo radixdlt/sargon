@@ -12,7 +12,8 @@ use crate::prelude::*;
 const XRD_TO_AC_VAULT_FIRST_TOP_UP: ScryptoDecimal192 =
     ScryptoDecimal192::ONE_HUNDRED;
 
-pub fn xrd_amount_for_initial_xrd_contribution_of_vault_of_access_controller() -> Decimal192 {
+pub fn xrd_amount_for_initial_xrd_contribution_of_vault_of_access_controller(
+) -> Decimal192 {
     XRD_TO_AC_VAULT_FIRST_TOP_UP.into()
 }
 
@@ -41,7 +42,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
     /// We allow to pass amount so that we can top of with more or less based on
     /// token balance of `payer` and current balance of the access controller (when
     /// we use this method for securified entities.)
-    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(
+    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
         payer: impl Into<Account>,
         // TODO: remove `unsecurified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
         unsecurified_entity_applying_shield: AnyUnsecurifiedEntity,
@@ -56,7 +57,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         ).expect("Should never fail")
     }
 
-    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account(
+    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
         payer: impl Into<Account>,
         // TODO: remove `securified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
         securified_entity_applying_shield: impl Into<AnySecurifiedEntity>,

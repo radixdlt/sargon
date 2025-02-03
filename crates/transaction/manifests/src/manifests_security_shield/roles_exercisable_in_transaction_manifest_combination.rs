@@ -175,7 +175,7 @@ impl RolesExercisableInTransactionManifestCombination {
         }
     }
 
-    fn can_quick_confirm(&self) -> bool {
+    pub fn can_quick_confirm(&self) -> bool {
         match self {
             Self::InitiateWithPrimaryCompleteWithConfirmation
             | Self::InitiateWithRecoveryCompleteWithConfirmation

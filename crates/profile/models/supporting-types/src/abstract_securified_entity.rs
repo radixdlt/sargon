@@ -49,6 +49,10 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsSecurifiedEntity
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     AbstractSecurifiedEntity<E>
 {
+    pub fn access_controller_address(&self) -> AccessControllerAddress {
+        self.securified_entity_control.access_controller_address()
+    }
+
     pub fn with_securified_entity_control(
         entity: E,
         securified_entity_control: SecuredEntityControl,
