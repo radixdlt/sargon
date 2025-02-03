@@ -12,9 +12,10 @@ pub struct ApplyShieldTransactionsSignerImpl {}
 
 impl ApplyShieldTransactionsSignerImpl {
     pub fn new<'a>(_os: &'a SargonOS) -> Self {
-        todo!(
-            "Actually might only need the `sign_transactions_interactor` here"
-        )
+        warn!(
+            "ApplyShieldTransactionsSignerImpl is not implemented yet. Actually might only need the `sign_transactions_interactor` here"
+        );
+        Self {}
     }
 }
 
@@ -24,6 +25,9 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
         &self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload> {
-        todo!()
+        error!("Signing transaction intents is not implemented yet");
+        Ok(ApplySecurityShieldSignedPayload {
+            notarized_transactions: vec![],
+        })
     }
 }

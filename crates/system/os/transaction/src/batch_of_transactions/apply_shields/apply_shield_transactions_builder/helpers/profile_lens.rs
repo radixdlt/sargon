@@ -75,7 +75,9 @@ impl ApplyShieldTransactionsProfileLensImpl {
         if manifests_with_entities_without_xrd_balances
             .as_ref()
             .iter()
-            .any(|i| payer_addresses.contains(&i.address_erased()))
+            .any(|i| {
+                payer_addresses.contains(&i.address_of_entity_applying_shield())
+            })
         {
             return Err(CommonError::Unknown); // CommonError::PayerCannotBeInBatchOfEntitiesApplyingShield
         }

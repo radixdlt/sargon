@@ -14,11 +14,20 @@ impl ShieldApplicationInputWithoutXrdBalance {
             Self::Securified(s) => s.addresses_to_fetch_xrd_balance_for(),
         }
     }
-    pub fn address_erased(&self) -> AddressOfAccountOrPersona {
-        todo!()
+    pub fn address_of_entity_applying_shield(
+        &self,
+    ) -> AddressOfAccountOrPersona {
+        match self {
+            Self::Unsecurified(u) => u.address_of_entity_applying_shield(),
+            Self::Securified(s) => s.address_of_entity_applying_shield(),
+        }
     }
+
     pub fn get_payer(&self) -> Option<Account> {
-        todo!()
+        match self {
+            Self::Unsecurified(u) => u.get_payer(),
+            Self::Securified(s) => s.get_payer(),
+        }
     }
 }
 
@@ -37,6 +46,22 @@ impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
         match self {
             Self::Account(a) => a.addresses_to_fetch_xrd_balance_for(),
             Self::Persona(p) => p.addresses_to_fetch_xrd_balance_for(),
+        }
+    }
+
+    pub fn address_of_entity_applying_shield(
+        &self,
+    ) -> AddressOfAccountOrPersona {
+        match self {
+            Self::Account(a) => a.entity_input.address(),
+            Self::Persona(p) => p.entity_input.address(),
+        }
+    }
+
+    pub fn get_payer(&self) -> Option<Account> {
+        match self {
+            Self::Account(a) => a.maybe_paying_account.clone(),
+            Self::Persona(p) => Some(p.paying_account.clone()),
         }
     }
 }
@@ -92,6 +117,22 @@ impl ApplicationInputForSecurifiedEntityWithoutXrdBalance {
         match self {
             Self::Account(a) => a.addresses_to_fetch_xrd_balance_for(),
             Self::Persona(p) => p.addresses_to_fetch_xrd_balance_for(),
+        }
+    }
+
+    pub fn address_of_entity_applying_shield(
+        &self,
+    ) -> AddressOfAccountOrPersona {
+        match self {
+            Self::Account(a) => a.entity_input.address(),
+            Self::Persona(p) => p.entity_input.address(),
+        }
+    }
+
+    pub fn get_payer(&self) -> Option<Account> {
+        match self {
+            Self::Account(a) => a.maybe_paying_account.clone(),
+            Self::Persona(p) => p.maybe_paying_account.clone(),
         }
     }
 }

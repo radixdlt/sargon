@@ -12,7 +12,8 @@ pub struct ApplyShieldTransactionsEnqueuerImpl {}
 
 impl ApplyShieldTransactionsEnqueuerImpl {
     pub fn new<'a>(os: &'a SargonOS) -> Self {
-        todo!("Maybe we dont need SargonOS here... Maybe we just need StorageClient?")
+        warn!("ApplyShieldTransactionsEnqueuerImpl is not implemented yet. We might not need `os` here.");
+        Self {}
     }
 }
 
@@ -22,6 +23,11 @@ impl ApplyShieldTransactionsEnqueuer for ApplyShieldTransactionsEnqueuerImpl {
         &self,
         signed_payload: ApplySecurityShieldSignedPayload,
     ) -> Result<IndexSet<TransactionIntentHash>> {
-        todo!()
+        warn!("Enqueuing signed transactions is not implemented yet");
+        Ok(signed_payload
+            .notarized_transactions
+            .into_iter()
+            .map(|nt| nt.signed_intent().intent().transaction_intent_hash())
+            .collect())
     }
 }
