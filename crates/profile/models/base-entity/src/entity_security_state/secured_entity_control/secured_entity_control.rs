@@ -260,7 +260,10 @@ mod tests {
                  }
                }
              },
-             "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
+            "addresses": {
+                "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a", 
+                "xrdVaultAddress": "internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"
+            },
              "securityStructure": {
                "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                "matrixOfFactors": {
