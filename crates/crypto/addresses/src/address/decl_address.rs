@@ -249,36 +249,36 @@ macro_rules! decl_address {
                 }
 
                 /// Attempts to construct this type from a Bech32m string.
-                    /// The network id does not need to be passed as it will be
-                    /// determined based on the HRP of the address
-                    pub fn try_from_bech32(
-                        address_string: &str,
-                    ) -> Result<Self> {
-                        // Find the network definition based on the network of
-                        // the passed address.
-                        let network_definition = network_id_from_address_string(address_string)
-                            .map(network_definition_from_network_id)
-                            .ok_or(
-                                CommonError::FailedToFindNetworkIdFromBech32mString {
-                                    bech32m_encoded_address: address_string.to_owned(),
-                                },
-                            )?;
+                /// The network id does not need to be passed as it will be
+                /// determined based on the HRP of the address
+                pub fn try_from_bech32(
+                    address_string: &str,
+                ) -> Result<Self> {
+                    // Find the network definition based on the network of
+                    // the passed address.
+                    let network_definition = network_id_from_address_string(address_string)
+                        .map(network_definition_from_network_id)
+                        .ok_or(
+                            CommonError::FailedToFindNetworkIdFromBech32mString {
+                                bech32m_encoded_address: address_string.to_owned(),
+                            },
+                        )?;
 
-                        // Construct the decoder and decode the address
-                        let decoder = AddressBech32Decoder::new(&network_definition);
-                        let (_, data) = decoder.validate_and_decode(address_string).unwrap();
+                    // Construct the decoder and decode the address
+                    let decoder = AddressBech32Decoder::new(&network_definition);
+                    let (_, data) = decoder.validate_and_decode(address_string).unwrap();
 
-                        // Construct a NodeId from the returned data.
-                        let node_id = data.try_into().map(ScryptoNodeId)
-                         .map_err(|vec| {
-                            CommonError::InvalidNodeIdLength {
-                                expected: ScryptoNodeId::LENGTH,
-                                actual: vec.len(),
-                            }
-                        })?;
+                    // Construct a NodeId from the returned data.
+                    let node_id = data.try_into().map(ScryptoNodeId)
+                        .map_err(|vec| {
+                        CommonError::InvalidNodeIdLength {
+                            expected: ScryptoNodeId::LENGTH,
+                            actual: vec.len(),
+                        }
+                    })?;
 
-                        Self::new_from_node_id(node_id, network_definition.id.try_into()?)
-                    }
+                    Self::new_from_node_id(node_id, network_definition.id.try_into()?)
+                }
             }
 
             #[cfg(test)]
