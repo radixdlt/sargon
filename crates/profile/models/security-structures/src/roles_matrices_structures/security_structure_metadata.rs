@@ -1,6 +1,9 @@
 use time_utils::now;
 
 use crate::prelude::*;
+use crate::roles_matrices_structures::security_structure_flags::{
+    SecurityStructureFlag, SecurityStructureFlags,
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
@@ -9,6 +12,7 @@ pub struct SecurityStructureMetadata {
     pub display_name: DisplayName,
     pub created_on: Timestamp,
     pub last_updated_on: Timestamp,
+    pub flags: SecurityStructureFlags,
 }
 
 impl Identifiable for SecurityStructureMetadata {
@@ -25,24 +29,43 @@ impl SecurityStructureMetadata {
         display_name: DisplayName,
         created_on: Timestamp,
         last_updated_on: Timestamp,
+        flags: SecurityStructureFlags,
     ) -> Self {
         Self {
             id,
             display_name,
             created_on,
             last_updated_on,
+            flags,
         }
     }
 
-    pub fn new(display_name: DisplayName) -> Self {
+    pub fn new(
+        display_name: DisplayName,
+        flags: SecurityStructureFlags,
+    ) -> Self {
         Self::with_details(
             SecurityStructureID::from(Uuid::new_v4()),
             display_name,
             now(),
             now(),
+            flags,
         )
     }
+
+    pub fn insert_flag(&mut self, flag: SecurityStructureFlag) {
+        self.flags.insert(flag);
+    }
+
+    pub fn remove_flag(&mut self, flag: SecurityStructureFlag) {
+        self.flags.remove_id(&flag.id());
+    }
+
+    pub fn is_main(&self) -> bool {
+        self.flags.contains_id(SecurityStructureFlag::Main)
+    }
 }
+
 impl HasSampleValues for SecurityStructureMetadata {
     fn sample() -> Self {
         Self::with_details(
@@ -50,6 +73,7 @@ impl HasSampleValues for SecurityStructureMetadata {
             DisplayName::sample(),
             Timestamp::sample(),
             Timestamp::sample(),
+            SecurityStructureFlags::just(SecurityStructureFlag::Main),
         )
     }
     fn sample_other() -> Self {
@@ -58,6 +82,7 @@ impl HasSampleValues for SecurityStructureMetadata {
             DisplayName::sample_other(),
             Timestamp::sample_other(),
             Timestamp::sample_other(),
+            SecurityStructureFlags::new(),
         )
     }
 }

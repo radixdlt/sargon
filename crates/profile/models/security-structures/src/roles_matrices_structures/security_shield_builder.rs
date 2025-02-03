@@ -870,6 +870,7 @@ impl SecurityShieldBuilder {
             display_name,
             self.created_on,
             self.created_on,
+            SecurityStructureFlags::new(),
         );
 
         let shield = SecurityStructureOfFactorSourceIds {

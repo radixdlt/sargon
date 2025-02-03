@@ -59,6 +59,9 @@ pub enum EventKind {
 
     /// Profile updated with a new Security Structure.
     SecurityStructureAdded,
+
+    /// Security structures have been updated
+    SecurityStructuresUpdated,
 }
 
 impl EventKind {
@@ -132,7 +135,13 @@ impl EventKind {
     /// If security structures have changed
     pub fn affects_security_structures(&self) -> bool {
         use EventKind::*;
-        matches!(*self, Booted | ProfileImported | SecurityStructureAdded)
+        matches!(
+            *self,
+            Booted
+                | ProfileImported
+                | SecurityStructureAdded
+                | SecurityStructuresUpdated
+        )
     }
 
     /// If hosts UI displaying factor sources (of any kind) should re-fetch
@@ -200,6 +209,7 @@ mod tests {
                 ProfileUsedOnOtherDevice
                 | ProfileSaved
                 | SecurityStructureAdded
+                | SecurityStructuresUpdated
                 | FactorSourceAdded
                 | FactorSourcesAdded
                 | FactorSourceUpdated
@@ -230,6 +240,7 @@ mod tests {
                 ProfileUsedOnOtherDevice
                 | ProfileSaved
                 | SecurityStructureAdded
+                | SecurityStructuresUpdated
                 | FactorSourceAdded
                 | FactorSourcesAdded
                 | FactorSourceUpdated
@@ -260,6 +271,7 @@ mod tests {
                 | ProfileSaved
                 | AccountAdded
                 | SecurityStructureAdded
+                | SecurityStructuresUpdated
                 | FactorSourcesAdded
                 | AccountsAdded
                 | AccountUpdated
@@ -278,7 +290,10 @@ mod tests {
             .into_iter()
             .map(|sut| (sut, sut.affects_security_structures()))
             .for_each(|(sut, affects)| match sut {
-                Booted | ProfileImported | SecurityStructureAdded => {
+                Booted
+                | ProfileImported
+                | SecurityStructureAdded
+                | SecurityStructuresUpdated => {
                     assert!(affects)
                 }
                 ProfileUsedOnOtherDevice
@@ -317,6 +332,7 @@ mod tests {
                 | AccountAdded
                 | FactorSourcesAdded
                 | SecurityStructureAdded
+                | SecurityStructuresUpdated
                 | AccountsAdded
                 | AccountUpdated
                 | AccountsUpdated
@@ -343,6 +359,7 @@ mod tests {
                 | GatewayChangedCurrent
                 | ProfileSaved
                 | SecurityStructureAdded
+                | SecurityStructuresUpdated
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
