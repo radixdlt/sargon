@@ -12,7 +12,7 @@ pub struct ApplyShieldTransactionsEnqueuerImpl {}
 
 impl ApplyShieldTransactionsEnqueuerImpl {
     pub fn new<'a>(os: &'a SargonOS) -> Self {
-        todo!()
+        todo!("Maybe we dont need SargonOS here... Maybe we just need StorageClient?")
     }
 }
 

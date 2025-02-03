@@ -11,9 +11,10 @@ pub trait ApplyShieldTransactionsProfileLens: Send + Sync {
 pub struct ApplyShieldTransactionsProfileLensImpl {
     profile: Profile,
 }
+
 impl ApplyShieldTransactionsProfileLensImpl {
     pub fn new(profile: Profile) -> Self {
-        todo!()
+        Self { profile }
     }
 }
 
@@ -100,6 +101,25 @@ impl ApplyShieldTransactionsProfileLensImpl {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum EntityApplyingShield {
+    Unsecurified(AnyUnsecurifiedEntity),
+    Securified(AnySecurifiedEntity),
+}
+impl EntityApplyingShield {
+    pub fn unsecurified_account(entity: UnsecurifiedAccount) -> Self {
+        EntityApplyingShield::Unsecurified(AnyUnsecurifiedEntity::from(entity))
+    }
+
+    pub fn unsecurified_persona(entity: UnsecurifiedPersona) -> Self {
+        EntityApplyingShield::Unsecurified(AnyUnsecurifiedEntity::from(entity))
+    }
+
+    pub fn securified(entity: AnySecurifiedEntity) -> Self {
+        EntityApplyingShield::Securified(entity)
+    }
+}
+
 #[async_trait::async_trait]
 impl ApplyShieldTransactionsProfileLens
     for ApplyShieldTransactionsProfileLensImpl
@@ -112,8 +132,10 @@ impl ApplyShieldTransactionsProfileLens
             .into_iter()
             .map(|manifest_with_payer_by_address| {
                 let manifest = manifest_with_payer_by_address.manifest;
+                
                 let estimated_xrd_fee =
                     manifest_with_payer_by_address.estimated_xrd_fee;
+                
                 let address_of_ac_or_entity_applying_shield =
                     extract_address_of_entity_updating_shield(&manifest)?;
 
@@ -121,24 +143,20 @@ impl ApplyShieldTransactionsProfileLens
                     address_of_ac_or_entity_applying_shield,
                 )?;
 
-                if let Some(payer_address) =
-                    manifest_with_payer_by_address.payer
-                {
-                    let payer = self.account_by_address(payer_address)?;
-                    Ok(ShieldApplicationInputWithoutXrdBalance::new(
-                        payer,
-                        entity_applying_shield,
-                        manifest,
-                        estimated_xrd_fee,
-                    ))
-                } else {
-                    Ok(ShieldApplicationInputWithoutXrdBalance::new(
-                        None,
-                        entity_applying_shield,
-                        manifest,
-                        estimated_xrd_fee,
-                    ))
-                }
+                let maybe_entity_paying: Option<Account> = {
+                    if let Some(address_of_paying_account) = manifest_with_payer_by_address.payer {
+                        self.account_by_address(address_of_paying_account).map(Some)
+                    } else {
+                        Ok(None)
+                    }
+                }?;
+
+                ShieldApplicationInputWithoutXrdBalance::new(
+                    estimated_xrd_fee,
+                    manifest,
+                    entity_applying_shield,
+                    maybe_entity_paying
+                )
             })
             .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()?;
 
@@ -148,5 +166,103 @@ impl ApplyShieldTransactionsProfileLens
         )?;
 
         Ok(manifests_with_entities_without_xrd_balances)
+    }
+}
+
+impl ShieldApplicationInputWithoutXrdBalance {
+    pub fn new(
+        estimated_xrd_fee: Decimal,
+        manifest: TransactionManifest,
+        entity_applying_shield: EntityApplyingShield,
+        maybe_paying_account: Option<Account>
+    ) -> Result<Self> {
+        let self_ =match entity_applying_shield {
+            EntityApplyingShield::Unsecurified(unsec) => {
+                let entity = match &unsec.entity {
+                    AccountOrPersona::AccountEntity(a) => { 
+                        let a = ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
+                            reviewed_manifest: manifest,
+                            estimated_xrd_fee,
+                            entity_input: UnsecurifiedAccount::with_unsecured_entity_control(a.clone(), unsec.unsecured_entity_control),
+                            maybe_paying_account: maybe_paying_account.map(|e| e.into()),
+                        };
+                        ApplicationInputForUnsecurifiedEntityWithoutXrdBalance::from(a)
+                    },
+                    AccountOrPersona::PersonaEntity(p) => {
+                        let paying_account = maybe_paying_account.ok_or(CommonError::Unknown)?; // TODO Add new error type
+                        let p = ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
+                            reviewed_manifest: manifest,
+                            estimated_xrd_fee,
+                            entity_input: UnsecurifiedPersona::with_unsecured_entity_control(p.clone(), unsec.unsecured_entity_control),
+                            paying_account,
+                        };
+                        ApplicationInputForUnsecurifiedEntityWithoutXrdBalance::from(p)
+                    },
+                };
+                Self::from(entity)
+            },
+            EntityApplyingShield::Securified(sec) => {
+                let entity = match &sec.entity {
+                    AccountOrPersona::AccountEntity(a) => {
+                        let a = ApplicationInputForSecurifiedAccountWithoutXrdBalance {
+                            reviewed_manifest: manifest,
+                            estimated_xrd_fee,
+                            entity_input: SecurifiedAccount::with_securified_entity_control(a.clone(), sec.securified_entity_control()),
+                            maybe_paying_account,
+                        };
+                        ApplicationInputForSecurifiedEntityWithoutXrdBalance::from(a)
+                    },
+                    AccountOrPersona::PersonaEntity(p) => {
+                        let p = ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
+                            reviewed_manifest: manifest,
+                            estimated_xrd_fee,
+                            entity_input: SecurifiedPersona::with_securified_entity_control(p.clone(), sec.securified_entity_control()),
+                            maybe_paying_account,
+                        };
+                        ApplicationInputForSecurifiedEntityWithoutXrdBalance::from(p)
+                    },
+                };
+                Self::from(entity)
+            }
+        };
+        Ok(self_)
+    }
+}
+
+impl From<ApplicationInputForUnsecurifiedAccountWithoutXrdBalance> for ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
+    fn from(value: ApplicationInputForUnsecurifiedAccountWithoutXrdBalance) -> Self {
+        Self::Account(value)
+    }
+}
+
+impl From<ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance> for ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
+    fn from(value: ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance) -> Self {
+        Self::Persona(value)
+    }
+}
+
+
+impl From<ApplicationInputForSecurifiedAccountWithoutXrdBalance> for ApplicationInputForSecurifiedEntityWithoutXrdBalance {
+    fn from(value: ApplicationInputForSecurifiedAccountWithoutXrdBalance) -> Self {
+        Self::Account(value)
+    }
+}
+
+impl From<ApplicationInputForSecurifiedPersonaWithoutXrdBalance> for ApplicationInputForSecurifiedEntityWithoutXrdBalance {
+    fn from(value: ApplicationInputForSecurifiedPersonaWithoutXrdBalance) -> Self {
+        Self::Persona(value)
+    }
+}
+
+
+impl From<ApplicationInputForUnsecurifiedEntityWithoutXrdBalance> for ShieldApplicationInputWithoutXrdBalance {
+    fn from(value: ApplicationInputForUnsecurifiedEntityWithoutXrdBalance) -> Self {
+        Self::Unsecurified(value)
+    }
+}
+
+impl From<ApplicationInputForSecurifiedEntityWithoutXrdBalance> for ShieldApplicationInputWithoutXrdBalance {
+    fn from(value: ApplicationInputForSecurifiedEntityWithoutXrdBalance) -> Self {
+        Self::Securified(value)
     }
 }
