@@ -869,7 +869,7 @@ pub enum CommonError {
     NoEntityFoundWithAccessControllerAddress { bad_value: String } = 10249,
 
     #[error("Failed to cast Address to specific type '{expected_specific_type}', from value: '{got_value}'")]
-    FailedToMapAddressToSpecficType {
+    FailedToMapAddressToSpecificType {
         expected_specific_type: String,
         got_value: String,
     } = 10250,

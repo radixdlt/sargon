@@ -20,7 +20,7 @@ impl TryFrom<Address> for AddressOfVaultOrAccount {
             Address::Account(account) => {
                 Ok(AddressOfVaultOrAccount::Account(account))
             }
-            _ => Err(CommonError::FailedToMapAddressToSpecficType {
+            _ => Err(CommonError::FailedToMapAddressToSpecificType {
                 expected_specific_type: Self::type_name(),
                 got_value: value.to_string(),
             }),

@@ -81,7 +81,7 @@ impl EntityApplyingShieldAddress {
 }
 
 // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
-// is merge remove this and use static analisys using RET to get this.
+// is merge remove this and use static analysis using RET to get this.
 fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shield(
     manifest: &TransactionManifest,
 ) -> Result<EntityApplyingShieldAddress> {
@@ -105,7 +105,7 @@ fn _extract_address_of_entity_updating_shield(
 }
 
 // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
-// is merge remove this and use static analisys using RET to get this.
+// is merge remove this and use static analysis using RET to get this.
 pub fn extract_address_of_entity_updating_shield(
     manifest: &TransactionManifest,
 ) -> Result<EntityApplyingShieldAddress> {
@@ -168,7 +168,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
          }).collect_vec();
 
         // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
-        // is merge remove this and use static analisys using RET to get this.
+        // is merge remove this and use static analysis using RET to get this.
         hacky_tmp_set_entities_applying_shield(manifests_for_entity);
 
         Ok(DappToWalletInteractionBatchOfTransactions::new(
@@ -265,7 +265,7 @@ mod tests {
                         .unwrap()
                         .transaction_signing
                         .clone(),
-                    AddressessOfAccessController::sample_mainnet(),
+                    AddressesOfAccessController::sample_mainnet(),
                     account_security_structure_of_instances,
                 )
                 .unwrap();
@@ -290,7 +290,7 @@ mod tests {
                         .unwrap()
                         .transaction_signing
                         .clone(),
-                    AddressessOfAccessController::sample_mainnet_other(),
+                    AddressesOfAccessController::sample_mainnet_other(),
                     persona_security_structure_of_instances,
                 )
                 .unwrap();

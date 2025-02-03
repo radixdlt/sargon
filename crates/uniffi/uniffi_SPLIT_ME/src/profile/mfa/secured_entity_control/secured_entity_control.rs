@@ -1,9 +1,9 @@
 use crate::prelude::*;
-use sargon::AddressessOfAccessController as InternalAddressessOfAccessController;
+use sargon::AddressesOfAccessController as InternalAddressesOfAccessController;
 
-/// Addressess of the access controller which controls a securified entity.
+/// Addresses of the access controller which controls a securified entity.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
-pub struct AddressessOfAccessController {
+pub struct AddressesOfAccessController {
     /// The address of the access controller which controls this entity.
     ///
     /// Looking up the public key (hashes) set in the key-value store at
@@ -35,7 +35,7 @@ pub struct SecuredEntityControl {
     /// this entity. It will be the same as the ones in `security_structure`
     /// if we have not changed them locally, which we should not do unless
     /// we are sure the Ledger corresponds to the values in `security_structure`.
-    pub addresses: AddressessOfAccessController,
+    pub addresses: AddressesOfAccessController,
 
     /// The believed-to-be-current security structure of FactorInstances which
     /// secures this entity.

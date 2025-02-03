@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[async_trait::async_trait]
-pub trait ApplyShieldTransactionsCommiter: Send + Sync {
+pub trait ApplyShieldTransactionsCommitter: Send + Sync {
     async fn commit(
         &self,
         network_id: NetworkID,
@@ -11,13 +11,13 @@ pub trait ApplyShieldTransactionsCommiter: Send + Sync {
 
 /// Builds, signs and enqueues the transaction intents of manifests
 /// which applies a shields to entities.
-pub struct ApplyShieldTransactionsCommiterImpl {
+pub struct ApplyShieldTransactionsCommitterImpl {
     builder: Arc<dyn ApplyShieldTransactionsBuilder>,
     signer: Arc<dyn ApplyShieldTransactionsSigner>,
     enqueuer: Arc<dyn ApplyShieldTransactionsEnqueuer>,
 }
 
-impl ApplyShieldTransactionsCommiterImpl {
+impl ApplyShieldTransactionsCommitterImpl {
     pub fn new(os: &SargonOS) -> Result<Self> {
         let builder = ApplyShieldTransactionsBuilderImpl::new(os)?;
         Ok(Self {
@@ -29,7 +29,7 @@ impl ApplyShieldTransactionsCommiterImpl {
 }
 
 #[async_trait::async_trait]
-impl ApplyShieldTransactionsCommiter for ApplyShieldTransactionsCommiterImpl {
+impl ApplyShieldTransactionsCommitter for ApplyShieldTransactionsCommitterImpl {
     /// Builds, signs and enqueues the transaction intents of manifests
     /// which applies a shields to entities.
     async fn commit(

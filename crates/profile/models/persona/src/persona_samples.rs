@@ -243,7 +243,7 @@ impl Persona {
             DisplayName::new(name).unwrap(),
             SecuredEntityControl::new(
                 veci.clone(),
-                AddressessOfAccessController::sample_from_identity_address(
+                AddressesOfAccessController::sample_from_identity_address(
                     address,
                 ),
                 security_structure_of_factor_instances,

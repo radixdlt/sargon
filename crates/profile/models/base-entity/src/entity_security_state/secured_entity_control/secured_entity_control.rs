@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-/// Addressess of the access controller which controls a securified entity.
+/// Addresses of the access controller which controls a securified entity.
 #[derive(
     Serialize, Deserialize, Clone, PartialEq, Eq, Hash, derive_more::Debug,
 )]
 #[serde(rename_all = "camelCase")]
-pub struct AddressessOfAccessController {
+pub struct AddressesOfAccessController {
     /// The address of the access controller which controls this entity.
     ///
     /// Looking up the public key (hashes) set in the key-value store at
@@ -19,7 +19,7 @@ pub struct AddressessOfAccessController {
     pub xrd_vault_address: VaultAddress,
 }
 
-impl AddressessOfAccessController {
+impl AddressesOfAccessController {
     pub fn new(
         access_controller_address: AccessControllerAddress,
         xrd_vault_address: VaultAddress,
@@ -44,7 +44,7 @@ impl AddressessOfAccessController {
         )
     }
 }
-impl HasSampleValues for AddressessOfAccessController {
+impl HasSampleValues for AddressesOfAccessController {
     fn sample() -> Self {
         Self::new(AccessControllerAddress::sample(), VaultAddress::sample())
     }
@@ -70,7 +70,7 @@ pub struct SecuredEntityControl {
     /// account recovery scan we might not know the veci
     pub veci: Option<HierarchicalDeterministicFactorInstance>,
 
-    pub addresses: AddressessOfAccessController,
+    pub addresses: AddressesOfAccessController,
 
     /// The believed-to-be-current security structure of FactorInstances which
     /// secures this entity.
@@ -136,7 +136,7 @@ impl SecuredEntityControl {
     /// not a "VECI".
     pub fn new(
         veci: impl Into<Option<HierarchicalDeterministicFactorInstance>>,
-        addresses: AddressessOfAccessController,
+        addresses: AddressesOfAccessController,
         security_structure: SecurityStructureOfFactorInstances,
     ) -> Result<Self> {
         let veci = veci.into();
@@ -172,7 +172,7 @@ impl HasSampleValues for SecuredEntityControl {
     fn sample() -> Self {
         let mut sample = Self::new(
             HierarchicalDeterministicFactorInstance::sample(),
-            AddressessOfAccessController::sample(),
+            AddressesOfAccessController::sample(),
             SecurityStructureOfFactorInstances::sample(),
         )
         .unwrap();
@@ -182,7 +182,7 @@ impl HasSampleValues for SecuredEntityControl {
     }
 
     fn sample_other() -> Self {
-        Self::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0), AddressessOfAccessController::sample_other(), SecurityStructureOfFactorInstances::sample_other()).unwrap()
+        Self::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0), AddressesOfAccessController::sample_other(), SecurityStructureOfFactorInstances::sample_other()).unwrap()
     }
 }
 
@@ -223,7 +223,7 @@ mod tests {
         _ = SUT::new(
 
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
-            AddressessOfAccessController::sample(),
+            AddressesOfAccessController::sample(),
             SecurityStructureOfFactorInstances::sample(),
         );
     }

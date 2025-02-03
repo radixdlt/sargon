@@ -119,7 +119,7 @@ macro_rules! address_union {
                     fn try_from(value: $union_name) -> Result<Self> {
                         match value {
                             $union_name::$variant_name(address) => Ok(address),
-                            _ => Err(CommonError::FailedToMapAddressToSpecficType {
+                            _ => Err(CommonError::FailedToMapAddressToSpecificType {
                                 expected_specific_type: stringify!($variant_type).to_string(),
                                 got_value: value.to_string(),
                             }),

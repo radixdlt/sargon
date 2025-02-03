@@ -48,8 +48,8 @@ impl ApplySecurityShieldCommitting for SargonOS {
         network_id: NetworkID,
         manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
     ) -> Result<IndexSet<TransactionIntentHash>> {
-        let commiter = ApplyShieldTransactionsCommiterImpl::new(self)?;
-        commiter.commit(network_id, manifest_and_payer_tuples).await
+        let committer = ApplyShieldTransactionsCommitterImpl::new(self)?;
+        committer.commit(network_id, manifest_and_payer_tuples).await
     }
 }
 

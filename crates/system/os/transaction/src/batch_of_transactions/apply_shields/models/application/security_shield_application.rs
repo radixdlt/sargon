@@ -2,7 +2,7 @@ use crate::{
     create_application_for_securified_entity_with_manifests, prelude::*,
 };
 
-/// Securiy shield application is the application of a security shield
+/// Security shield application is the application of a security shield
 /// to some entity. This entity can be either an account or a persona.
 /// Essentially holds four
 /// different kinds of value, application for:

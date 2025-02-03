@@ -53,7 +53,7 @@ impl OsTestDummySecurifyEntities for SargonOS {
         let mut entity = self.entity_by_address(entity_address)?;
 
         let veci: HierarchicalDeterministicFactorInstance;
-        let addresses_of_access_controller: AddressessOfAccessController;
+        let addresses_of_access_controller: AddressesOfAccessController;
 
         match entity.security_state() {
             EntitySecurityState::Unsecured { value } => {
@@ -61,7 +61,7 @@ impl OsTestDummySecurifyEntities for SargonOS {
                 // THIS IS COMPLETELY WRONG!
                 // The real solution should get the AccessControllerAddress on chain
                 addresses_of_access_controller =
-                    AddressessOfAccessController::new(
+                    AddressesOfAccessController::new(
                         AccessControllerAddress::with_node_id_of(
                             &entity.address(),
                         ),
