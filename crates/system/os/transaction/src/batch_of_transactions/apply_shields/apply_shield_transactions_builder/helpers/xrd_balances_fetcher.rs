@@ -132,16 +132,16 @@ impl XrdBalances {
         let xrd_vault_address = sec.xrd_vault_address();
         let access_controller_address = sec.access_controller_address();
 
-        let xrd_balance_of_of_account = self.take(account_address)?;
+        let xrd_balance_of_account = self.take(account_address)?;
         let xrd_balance_of_access_controller = self.take(xrd_vault_address)?;
 
         Ok(ApplicationInputPayingAccount::Securified(
             ApplicationInputPayingAccountSecurified {
-                account_address,
+                account,
                 access_controller_address,
                 xrd_vault_address,
                 xrd_balance_of_access_controller,
-                xrd_balance_of_of_account,
+                xrd_balance_of_account,
             },
         ))
     }
@@ -151,11 +151,11 @@ impl XrdBalances {
         account: UnsecurifiedAccount,
     ) -> Result<ApplicationInputPayingAccount> {
         let account_address = account.entity.address;
-        let xrd_balance_of_of_account = self.take(account_address)?;
+        let xrd_balance_of_account = self.take(account_address)?;
         Ok(ApplicationInputPayingAccount::Unsecurified(
             ApplicationInputPayingAccountUnsecurified {
-                account_address,
-                xrd_balance_of_of_account,
+                account,
+                xrd_balance_of_account,
             },
         ))
     }
@@ -194,6 +194,8 @@ impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
             balances.maybe_take_payer(self.maybe_paying_account)?;
 
         Ok(ApplicationInputForUnsecurifiedAccount {
+            reviewed_manifest: self.reviewed_manifest,
+            estimated_xrd_fee: self.estimated_xrd_fee,
             entity_input: UnsecurifiedAccountEntityInput {
                 unsecurified_entity: self.entity_input,
                 xrd_balance_of_account,
@@ -212,6 +214,8 @@ impl ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
         let paying_account = balances.take_payer(self.paying_account)?;
 
         Ok(ApplicationInputForUnsecurifiedPersona {
+            reviewed_manifest: self.reviewed_manifest,
+            estimated_xrd_fee: self.estimated_xrd_fee,
             entity_input: self.entity_input,
             paying_account,
         }
@@ -255,6 +259,8 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
         )?;
 
         Ok(ApplicationInputForSecurifiedAccount {
+            reviewed_manifest: self.reviewed_manifest,
+            estimated_xrd_fee: self.estimated_xrd_fee,
             entity_input: SecurifiedAccountEntityInput {
                 securified_account: self.entity_input,
                 xrd_balance_of_access_controller,
@@ -281,6 +287,8 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
         )?;
 
         Ok(ApplicationInputForSecurifiedPersona {
+            reviewed_manifest: self.reviewed_manifest,
+            estimated_xrd_fee: self.estimated_xrd_fee,
             entity_input: SecurifiedPersonaEntityInput {
                 securified_persona: self.entity_input,
                 xrd_balance_of_access_controller,

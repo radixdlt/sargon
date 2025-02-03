@@ -29,6 +29,8 @@ impl From<ApplicationInputForSecurifiedPersona>
 /// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ApplicationInputForSecurifiedAccount {
+    pub reviewed_manifest: TransactionManifest,
+    pub estimated_xrd_fee: Decimal,
     pub entity_input: SecurifiedAccountEntityInput,
     pub maybe_paying_account: Option<ApplicationInputPayingAccount>,
 }
@@ -36,9 +38,26 @@ pub struct ApplicationInputForSecurifiedAccount {
 /// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ApplicationInputForSecurifiedPersona {
+    pub reviewed_manifest: TransactionManifest,
+    pub estimated_xrd_fee: Decimal,
     pub entity_input: SecurifiedPersonaEntityInput,
     pub maybe_paying_account: Option<ApplicationInputPayingAccount>,
 }
+
+
+impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedPersona {
+    fn xrd_of_vault_of_access_controller(&self) -> Decimal {
+        self.entity_input.xrd_balance_of_access_controller
+    }
+}
+
+
+impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedAccount {
+    fn xrd_of_vault_of_access_controller(&self) -> Decimal {
+        self.entity_input.xrd_balance_of_access_controller
+    }
+}
+
 
 // ========================
 // ENTITY INPUT

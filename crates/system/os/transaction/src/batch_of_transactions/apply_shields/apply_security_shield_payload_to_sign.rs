@@ -46,7 +46,7 @@ pub struct SecurityShieldApplicationForUnsecurifiedAccount {
     /// Optionally user can chose to use a different account to pay
     /// TX fee paying + AC vault filling account. If `Some` it is ensured
     /// that `address_of_paying_account != address_of_account_applying_shield`
-    pub paying_account: Option<Account>,
+    pub paying_account: Option<ApplicationInputPayingAccount>,
 
     /// Manifest for exercising the primary role. This manifest will
     /// create an AccessController with factors specified in the shield.
@@ -72,12 +72,12 @@ impl SecurityShieldApplicationForUnsecurifiedAccount {
     /// Panics if `address_of_paying_account` is `Some` and `address_of_paying_account == address_of_account_applying_shield`
     pub fn with_modified_manifest(
         account_applying_shield: UnsecurifiedAccount,
-        paying_account: impl Into<Option<Account>>,
+        paying_account: impl Into<Option<ApplicationInputPayingAccount>>,
         modified_manifest: TransactionManifest,
     ) -> Self {
         let paying_account = paying_account.into();
         if let Some(payer) = paying_account.as_ref() {
-            assert_ne!(payer.address(), account_applying_shield.entity.address(), "Specify None as payer if it is the same as address_of_account_applying_shield");
+            assert_ne!(payer.account_address(), account_applying_shield.entity.address(), "Specify None as payer if it is the same as address_of_account_applying_shield");
         }
 
         Self {
@@ -101,7 +101,7 @@ pub struct SecurityShieldApplicationForUnsecurifiedPersona {
     pub persona: UnsecurifiedPersona,
 
     /// Address of TX fee paying + AC vault filling account
-    pub paying_account: Account,
+    pub paying_account: ApplicationInputPayingAccount,
 
     /// Manifest for exercising the primary role. This manifest will
     /// create an AccessController with factors specified in the shield.
@@ -124,7 +124,7 @@ pub struct SecurityShieldApplicationForUnsecurifiedPersona {
 impl SecurityShieldApplicationForUnsecurifiedPersona {
     pub fn with_modified_manifest(
         persona_applying_shield: UnsecurifiedPersona,
-        paying_account: Account,
+        paying_account: ApplicationInputPayingAccount,
         modified_manifest: TransactionManifest,
     ) -> Self {
         Self {
@@ -144,13 +144,13 @@ pub struct SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount {
 
     /// The account topping up the XRD vault of `persona`s AccessControllers
     /// XRD vault.
-    pub account_topping_up_xrd_vault_of_access_controller: Option<Account>,
+    pub account_topping_up_xrd_vault_of_access_controller: Option<ApplicationInputPayingAccount>,
 }
 impl SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount {
     pub fn new(
         persona: SecurifiedPersona,
         account_topping_up_xrd_vault_of_access_controller: impl Into<
-            Option<Account>,
+            Option<ApplicationInputPayingAccount>,
         >,
     ) -> Self {
         Self {
@@ -171,13 +171,14 @@ pub struct SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccoun
 
     /// An optional account topping up the XRD vault of `accounts`s AccessControllers
     /// XRD vault - if `Some(other)` then `other != account`.
-    pub account_topping_up_xrd_vault_of_access_controller: Option<Account>,
+    pub account_topping_up_xrd_vault_of_access_controller: Option<ApplicationInputPayingAccount>,
 }
+
 impl SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount {
     pub fn new(
         account: SecurifiedAccount,
         account_topping_up_xrd_vault_of_access_controller: impl Into<
-            Option<Account>,
+            Option<ApplicationInputPayingAccount>,
         >,
     ) -> Self {
         Self {
