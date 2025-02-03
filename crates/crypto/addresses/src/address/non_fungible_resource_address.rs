@@ -44,7 +44,7 @@ macro_rules! decl_specialized_address {
                 /// Returns a new address, with the same node_id, but using `network_id` as
                 /// network.
                 pub fn map_to_network(&self, network_id: NetworkID) -> Self {
-                    self.0.map_to_network(network_id).try_into().unwrap()
+                    self.0.map_to_network(network_id).try_into().expect("Should always be able to map an address to a different network.")
                 }
 
                 pub fn new_from_bech32(bech32: String) -> Result<Self> {

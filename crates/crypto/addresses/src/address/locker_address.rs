@@ -12,7 +12,7 @@ decl_address!(
     /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalLockerAddress`][ret].
     ///
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/476d779fee08ed1e561ac8fc8730a2a404b7de79/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L262-L265
-    locker =>  [
+    locker => [
         ScryptoEntityType::GlobalAccountLocker,
     ]
 );

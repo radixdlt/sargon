@@ -880,12 +880,12 @@ pub enum CommonError {
     AddressNodeIdNoEntityType { node_id_as_hex: String } = 10250,
 
     #[error(
-        "Failed to find network id from Bech32m string:{bech32m_encoded_address}"
+        "Failed to find network id from Bech32m string: {bech32m_encoded_address}"
     )]
     FailedToFindNetworkIdFromBech32mString { bech32m_encoded_address: String } =
         10251,
 
-    #[error("Invalid NodeId length :{actual}, expected: {expected}")]
+    #[error("Invalid NodeId length: {actual}, expected: {expected}")]
     InvalidNodeIdLength { expected: usize, actual: usize } = 10252,
 }
 
