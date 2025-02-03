@@ -254,13 +254,21 @@ impl OsExecutionSummary for SargonOS {
         execution_summary.classify_securify_entity_if_present(
             |entity_address| {
                 self.entity_by_address(entity_address)
-                    .ok()
-                    .and_then(|entity| entity.get_provisional())
-                    .and_then(|provisional| {
-                        provisional.into_factor_instances_derived().ok()
+                    .and_then(|entity| {
+                        if let Some(provisional) = entity.get_provisional() {
+                            provisional.into_factor_instances_derived()
+                                .map_err(|_| CommonError::EntityHasNoProvisionalSecurityConfigSet)
+                        } else {
+                            Err(CommonError::EntityHasNoProvisionalSecurityConfigSet)
+                        }
+                    })
+                    .and_then(|security_structure| {
+                        self.security_structure_of_factor_sources_from_security_structure_id(
+                            security_structure.security_structure_id
+                        )
                     })
             },
-        );
+        )?;
 
         Ok(execution_summary)
     }
@@ -946,23 +954,12 @@ mod transaction_preview_analysis_tests {
             .first()
             .map(|a| AddressOfAccountOrPersona::from(a.address))
             .unwrap();
-        let apply_result = os
+        let _ = os
             .apply_security_shield_with_id_to_entities(
                 structure_source_ids_sample.id(),
                 IndexSet::just(entity_address_to_securify.clone()),
             )
             .await
-            .unwrap();
-        let account_in_provisional_state = apply_result
-            .unsecurified_accounts_on_network
-            .get_id(entity_address_to_securify.clone())
-            .unwrap();
-
-        let provisional_state = account_in_provisional_state
-            .clone()
-            .provisional_securified_config
-            .unwrap()
-            .into_factor_instances_derived()
             .unwrap();
 
         let transaction_to_review = os
@@ -985,7 +982,8 @@ mod transaction_preview_analysis_tests {
                 .unwrap(),
             DetailedManifestClass::SecurifyEntity {
                 entity_address: entity_address_to_securify.clone(),
-                provisional_security_structure: provisional_state
+                provisional_security_structure_metadata:
+                    structure_source_ids_sample.metadata
             }
         );
     }
@@ -1031,23 +1029,12 @@ mod transaction_preview_analysis_tests {
             .first()
             .map(|p| AddressOfAccountOrPersona::from(p.address))
             .unwrap();
-        let apply_result = os
+        let _ = os
             .apply_security_shield_with_id_to_entities(
                 structure_source_ids_sample.id(),
                 IndexSet::just(entity_address_to_securify.clone()),
             )
             .await
-            .unwrap();
-        let persona_in_provisional_state = apply_result
-            .unsecurified_personas_on_network
-            .get_id(entity_address_to_securify.clone())
-            .unwrap();
-
-        let provisional_state = persona_in_provisional_state
-            .clone()
-            .provisional_securified_config
-            .unwrap()
-            .into_factor_instances_derived()
             .unwrap();
 
         let transaction_to_review = os
@@ -1070,7 +1057,8 @@ mod transaction_preview_analysis_tests {
                 .unwrap(),
             DetailedManifestClass::SecurifyEntity {
                 entity_address: entity_address_to_securify.clone(),
-                provisional_security_structure: provisional_state
+                provisional_security_structure_metadata:
+                    structure_source_ids_sample.metadata
             }
         );
     }
