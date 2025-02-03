@@ -7,15 +7,6 @@ address_union!(
 
 impl IsBaseEntityAddress for AddressOfAccountOrPersona {}
 
-impl HasNodeId for AddressOfAccountOrPersona {
-    fn node_id(&self) -> ScryptoNodeId {
-        match self {
-            Self::Account(a) => a.node_id(),
-            Self::Identity(i) => i.node_id(),
-        }
-    }
-}
-
 impl HasEntityKindObjectSafe for AddressOfAccountOrPersona {
     fn get_entity_kind(&self) -> CAP26EntityKind {
         match self {

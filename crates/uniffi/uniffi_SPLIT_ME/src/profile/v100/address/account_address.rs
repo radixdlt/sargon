@@ -31,7 +31,7 @@ pub fn new_account_address_from(
     public_key: PublicKey,
     network_id: NetworkID,
 ) -> AccountAddress {
-    InternalAccountAddress::new(
+    InternalAccountAddress::new_from_public_key(
         public_key.into_internal(),
         network_id.into_internal(),
     )

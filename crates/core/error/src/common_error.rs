@@ -864,6 +864,29 @@ pub enum CommonError {
         "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
     )]
     StructureAlreadyExists { bad_value: String } = 10248,
+
+    #[error(
+        "Tried to create {address_kind}Address with wrong entity type: {entity_type}, for node id: {node_id_as_hex}"
+    )]
+    AddressInvalidEntityType {
+        address_kind: String,
+        entity_type: u8,
+        node_id_as_hex: String,
+    } = 10249,
+
+    #[error(
+        "Tried to create an Address with node id: {node_id_as_hex} which does not have entity type"
+    )]
+    AddressNodeIdNoEntityType { node_id_as_hex: String } = 10250,
+
+    #[error(
+        "Failed to find network id from Bech32m string:{bech32m_encoded_address}"
+    )]
+    FailedToFindNetworkIdFromBech32mString { bech32m_encoded_address: String } =
+        10251,
+
+    #[error("Invalid NodeId length :{actual}, expected: {expected}")]
+    InvalidNodeIdLength { expected: usize, actual: usize } = 10252,
 }
 
 impl CommonError {

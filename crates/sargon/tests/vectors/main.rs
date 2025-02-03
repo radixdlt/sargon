@@ -172,8 +172,10 @@ mod cap26_tests {
             public_key.to_hex(),
             public_key_hex.as_ref()
         );
-        let account_address =
-            AccountAddress::new(public_key.public_key, network_id);
+        let account_address = AccountAddress::new_from_public_key(
+            public_key.public_key,
+            network_id,
+        );
         let factor_source_id = FactorSourceIDFromHash::new_for_device(
             &MnemonicWithPassphrase::new(mnemonic),
         );

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ret_wrapped_address!(
+decl_address!(
     /// Address to a Validator that secures the network by validating transactions, users can stake to these
     /// validators (Delegated Proof of Stake) by using the Dashboard and sending a TX to the Radix Wallet to sign;
     /// e.g.:
@@ -12,7 +12,7 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L249-L250
-    validator
+    validator => [ScryptoEntityType::GlobalValidator]
 );
 
 impl HasSampleValues for ValidatorAddress {

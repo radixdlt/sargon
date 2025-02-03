@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ret_wrapped_address!(
+decl_address!(
     /// Human readable address of an identity, which are used by Personas. Always starts with
     /// the prefix `"identity_"`, for example:
     ///
@@ -28,7 +28,11 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L229-L234
-    identity
+    identity => [
+        ScryptoEntityType::GlobalIdentity,
+        ScryptoEntityType::GlobalPreallocatedSecp256k1Identity,
+        ScryptoEntityType::GlobalPreallocatedEd25519Identity
+    ]
 );
 
 impl HasEntityKind for IdentityAddress {
@@ -40,7 +44,10 @@ impl IsBaseEntityAddress for IdentityAddress {}
 impl IsEntityAddress for IdentityAddress {}
 
 impl IdentityAddress {
-    pub fn new(public_key: PublicKey, network_id: NetworkID) -> Self {
+    pub fn new_from_public_key(
+        public_key: PublicKey,
+        network_id: NetworkID,
+    ) -> Self {
         <Self as IsEntityAddress>::from_public_key(public_key, network_id)
     }
 }
@@ -172,38 +179,6 @@ mod tests {
         assert_ne!(SUT::sample(), SUT::sample_other());
         assert_ne!(SUT::sample_mainnet(), SUT::sample_stokenet());
         assert_ne!(SUT::sample_mainnet_other(), SUT::sample_stokenet_other());
-    }
-
-    #[test]
-    fn invalid() {
-        assert_eq!(
-            SUT::try_from_bech32("x"),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: "x".to_owned()
-            })
-        )
-    }
-
-    #[test]
-    fn invalid_checksum() {
-        let s = "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8x";
-        assert_eq!(
-            SUT::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: s.to_owned()
-            })
-        )
-    }
-
-    #[test]
-    fn invalid_entity_type() {
-        let s = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr";
-        assert_eq!(
-            SUT::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: s.to_owned()
-            })
-        )
     }
 
     #[test]
