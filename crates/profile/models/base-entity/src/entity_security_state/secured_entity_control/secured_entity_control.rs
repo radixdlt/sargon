@@ -29,6 +29,20 @@ impl AddressessOfAccessController {
             xrd_vault_address,
         }
     }
+
+    pub fn sample_mainnet() -> Self {
+        Self::new(
+            AccessControllerAddress::sample_mainnet(),
+            VaultAddress::sample_mainnet(),
+        )
+    }
+
+    pub fn sample_mainnet_other() -> Self {
+        Self::new(
+            AccessControllerAddress::sample_mainnet_other(),
+            VaultAddress::sample_mainnet_other(),
+        )
+    }
 }
 impl HasSampleValues for AddressessOfAccessController {
     fn sample() -> Self {
@@ -56,7 +70,7 @@ pub struct SecuredEntityControl {
     /// account recovery scan we might not know the veci
     pub veci: Option<HierarchicalDeterministicFactorInstance>,
 
-    addresses: AddressessOfAccessController,
+    pub addresses: AddressessOfAccessController,
 
     /// The believed-to-be-current security structure of FactorInstances which
     /// secures this entity.
@@ -209,7 +223,7 @@ mod tests {
         _ = SUT::new(
 
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
-            AccessControllerAddress::sample(),
+            AddressessOfAccessController::sample(),
             SecurityStructureOfFactorInstances::sample(),
         );
     }

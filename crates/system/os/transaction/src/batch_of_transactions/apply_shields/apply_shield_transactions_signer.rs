@@ -23,7 +23,7 @@ impl ApplyShieldTransactionsSignerImpl {
 impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     async fn sign_transaction_intents(
         &self,
-        payload_to_sign: ApplySecurityShieldPayloadToSign,
+        _payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload> {
         error!("Signing transaction intents is not implemented yet");
         Ok(ApplySecurityShieldSignedPayload {

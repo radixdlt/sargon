@@ -99,7 +99,7 @@ fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shiel
 // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
 // impl this
 fn _extract_address_of_entity_updating_shield(
-    manifest: &TransactionManifest,
+    _manifest: &TransactionManifest,
 ) -> Result<EntityApplyingShieldAddress> {
     todo!("cannot be implemented yet, awaiting #132 RET PR")
 }
@@ -265,7 +265,7 @@ mod tests {
                         .unwrap()
                         .transaction_signing
                         .clone(),
-                    AccessControllerAddress::sample_mainnet(),
+                    AddressessOfAccessController::sample_mainnet(),
                     account_security_structure_of_instances,
                 )
                 .unwrap();
@@ -290,7 +290,7 @@ mod tests {
                         .unwrap()
                         .transaction_signing
                         .clone(),
-                    AccessControllerAddress::sample_mainnet_other(),
+                    AddressessOfAccessController::sample_mainnet_other(),
                     persona_security_structure_of_instances,
                 )
                 .unwrap();

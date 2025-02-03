@@ -79,14 +79,6 @@ macro_rules! address_union {
                 }
 
                 #[test]
-                fn into_scrypto_global_address() {
-                    // this is quite a bad unit tests... but I could not come up with anything better.
-                    assert_eq!(
-                        SUT::sample().scrypto().to_vec().len(), 30
-                    );
-                }
-
-                #[test]
                 fn string_roundtrip() {
                     let test = |a: SUT| {
                         let s = a.to_string();

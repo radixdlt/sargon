@@ -53,25 +53,30 @@ impl OsTestDummySecurifyEntities for SargonOS {
         let mut entity = self.entity_by_address(entity_address)?;
 
         let veci: HierarchicalDeterministicFactorInstance;
-        let access_controller_address: AccessControllerAddress;
+        let addresses_of_access_controller: AddressessOfAccessController;
 
         match entity.security_state() {
             EntitySecurityState::Unsecured { value } => {
                 veci = value.transaction_signing.clone();
                 // THIS IS COMPLETELY WRONG!
                 // The real solution should get the AccessControllerAddress on chain
-                access_controller_address =
-                    AccessControllerAddress::with_node_id_of(&entity.address());
+                addresses_of_access_controller =
+                    AddressessOfAccessController::new(
+                        AccessControllerAddress::with_node_id_of(
+                            &entity.address(),
+                        ),
+                        VaultAddress::with_node_id_of(&entity.address()),
+                    );
             }
             EntitySecurityState::Securified { value } => {
                 veci = value.veci.clone().unwrap();
-                access_controller_address = value.access_controller_address;
+                addresses_of_access_controller = value.addresses;
             }
         };
 
         let securified_control = SecuredEntityControl::new(
             veci,
-            access_controller_address,
+            addresses_of_access_controller,
             security_structure_of_factor_instances,
         )?;
 

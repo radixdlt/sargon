@@ -148,7 +148,7 @@ mod tests {
     fn update_shield_of_securified_account_with_top_up_where_payer_is_entity_applying_shield(
     ) {
         let entity_applying_shield = SecurifiedAccount::sample();
-        assert_eq!(entity_applying_shield.securified_entity_control.access_controller_address.to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
+        assert_eq!(entity_applying_shield.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
 
         let manifest = SUT::apply_security_shield_for_securified_entity(
             entity_applying_shield.clone(),

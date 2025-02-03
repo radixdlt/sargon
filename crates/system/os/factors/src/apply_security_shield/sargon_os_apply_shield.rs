@@ -571,7 +571,7 @@ mod tests {
                         .unwrap()
                         .transaction_signing
                         .clone(),
-                    AccessControllerAddress::sample_mainnet(),
+                    AddressessOfAccessController::sample_mainnet(),
                     account_security_structure_of_instances,
                 )
                 .unwrap();
@@ -596,7 +596,7 @@ mod tests {
                         .unwrap()
                         .transaction_signing
                         .clone(),
-                    AccessControllerAddress::sample_mainnet_other(),
+                    AddressessOfAccessController::sample_mainnet_other(),
                     persona_security_structure_of_instances,
                 )
                 .unwrap();
