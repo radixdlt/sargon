@@ -24,7 +24,7 @@ class AccessControllerAddressTest: SampleTestable<AccessControllerAddress> {
 
         assertEquals(bech32, address.string)
         assertEquals(NetworkId.MAINNET, address.networkId)
-        assertThrows<CommonException.FailedToDecodeAddressFromBech32> {
+        assertThrows<CommonException.FailedToFindNetworkIdFromBech32mString> {
             AccessControllerAddress.init(validatingAddress = "just text")
         }
     }

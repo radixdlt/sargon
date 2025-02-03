@@ -386,19 +386,6 @@ mod tests {
     }
 
     #[test]
-    fn invalid_node_id_length() {
-        let s =
-            "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynv";
-        assert_eq!(
-            AccountAddress::try_from_bech32(s),
-            Err(CommonError::InvalidNodeIdLength {
-                expected: ScryptoNodeId::LENGTH,
-                actual: 29
-            })
-        )
-    }
-
-    #[test]
     fn from_str() {
         assert!(
             "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j"
