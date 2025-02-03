@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ShieldApplicationInput {
     Unsecurified(ApplicationInputForUnsecurifiedEntity),

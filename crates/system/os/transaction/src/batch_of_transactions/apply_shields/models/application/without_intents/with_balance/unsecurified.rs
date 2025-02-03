@@ -3,6 +3,8 @@ use crate::prelude::*;
 // ========================
 // UNSECURIFIED
 // ========================
+
+/// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ApplicationInputForUnsecurifiedEntity {
     Account(ApplicationInputForUnsecurifiedAccount),
@@ -24,12 +26,14 @@ impl From<ApplicationInputForUnsecurifiedPersona>
     }
 }
 
+/// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ApplicationInputForUnsecurifiedAccount {
     pub entity_input: UnsecurifiedAccountEntityInput,
     pub maybe_paying_account: Option<ApplicationInputPayingAccount>,
 }
 
+/// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ApplicationInputForUnsecurifiedPersona {
     pub entity_input: UnsecurifiedPersona,
