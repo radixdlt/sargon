@@ -204,11 +204,11 @@ jobs:
 
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
-          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-sargon-secrets-read-access'
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
           app_name: 'sargon'
           step_name: 'sargon-code-cov-token'
           prefix: GH_CODECOV
-          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:/github-actions/radixdlt/sargon/codecov-token-BtadB4'
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:/github-actions/common/codecov-o1ImFr''
           parse_json: true
 
       - uses: RDXWorks-actions/setup-xcode@master
@@ -245,11 +245,11 @@ jobs:
 
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
-          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-sargon-secrets-read-access'
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
           app_name: 'sargon'
           step_name: 'sargon-code-cov-token'
           prefix: GH_CODECOV
-          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:/github-actions/radixdlt/sargon/codecov-token-BtadB4'
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:/github-actions/common/codecov-o1ImFr'
           parse_json: true
 
       - name: Remove unused software
@@ -309,11 +309,11 @@ jobs:
 
       - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
         with:
-          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-sargon-secrets-read-access'
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
           app_name: 'sargon'
           step_name: 'sargon-code-cov-token'
           prefix: GH_CODECOV
-          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:/github-actions/radixdlt/sargon/codecov-token-BtadB4'
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:/github-actions/common/codecov-o1ImFr''
           parse_json: true
           
       - uses: RDXWorks-actions/setup-xcode@master
