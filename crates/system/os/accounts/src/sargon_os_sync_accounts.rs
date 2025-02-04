@@ -178,7 +178,7 @@ mod tests {
     ) -> MockNetworkingDriverResponse {
         let body = StateNonFungibleLocationResponse {
             ledger_state: LedgerState::sample_stokenet(),
-            resource_address: ResourceAddress::new(
+            resource_address: ResourceAddress::new_from_node_id(
                 SCRYPTO_ACCOUNT_OWNER_BADGE,
                 NetworkID::Stokenet,
             )

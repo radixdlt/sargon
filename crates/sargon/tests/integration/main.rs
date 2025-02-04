@@ -159,7 +159,8 @@ mod integration_tests {
         let public_key = private_key.public_key();
 
         println!("✨ public_key: {}", &public_key);
-        let address = AccountAddress::new(public_key, network_id);
+        let address =
+            AccountAddress::new_from_public_key(public_key, network_id);
         let manifest = TransactionManifest::faucet(true, &address);
 
         let start_epoch_inclusive =

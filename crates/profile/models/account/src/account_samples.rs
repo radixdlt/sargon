@@ -140,7 +140,7 @@ impl Account {
     ) -> Self {
         Self::with(
             NetworkID::Mainnet,
-            AccountAddress::new(
+            AccountAddress::new_from_public_key(
                 genesis_factor_instance.public_key.public_key,
                 NetworkID::Mainnet,
             ),
@@ -181,8 +181,10 @@ impl Account {
         }
 
         let network_id = NetworkID::Mainnet;
-        let address =
-            AccountAddress::new(veci.public_key(), NetworkID::Mainnet);
+        let address = AccountAddress::new_from_public_key(
+            veci.public_key(),
+            NetworkID::Mainnet,
+        );
 
         let security_structure_of_factor_instances =
             SecurityStructureOfFactorInstances::new(
