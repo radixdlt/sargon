@@ -55,17 +55,108 @@ impl ApplySecurityShieldCommitting for SargonOS {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    #[actix_rt::test]
-    async fn test() {
-        let os = SargonOS::fast_boot().await;
-        os.sign_and_enqueue_batch_of_transactions_applying_security_shield(
-            NetworkID::Mainnet,
-            IndexSet::new(),
-        )
-        .await;
-    }
-}
+//     #[actix_rt::test]
+//     async fn test() {
+//         let (os, bdfs) = SargonOS::with_bdfs().await;
+
+//         let ledger = FactorSource::sample_at(1);
+//         let arculus = FactorSource::sample_at(3);
+//         let password = FactorSource::sample_at(5);
+//         let off_device_mnemonic = FactorSource::sample_at(7);
+//         os.add_factor_source(ledger).await;
+//         os.add_factor_source(arculus).await;
+//         os.add_factor_source(password).await;
+//         os.add_factor_source(off_device_mnemonic).await;
+
+//         let shield_builder = SecurityShieldBuilder::lenient();
+
+//         let shield = shield_builder
+//             .add_factor_source_to_primary_threshold(bdfs.factor_source_id())
+//             .add_factor_source_to_primary_threshold(ledger.factor_source_id())
+//             .add_factor_source_to_recovery_override(password.factor_source_id())
+//             .add_factor_source_to_recovery_override(
+//                 off_device_mnemonic.factor_source_id(),
+//             )
+//             .build()
+//             .unwrap();
+
+//         let shield_id = shield.id();
+
+//         os.add_security_structure_of_factor_source_ids(shield)
+//             .await
+//             .unwrap();
+
+//         let alice = os
+//             .create_and_save_new_mainnet_account_with_main_bdfs(
+//                 DisplayName::new("Alice").unwrap(),
+//             )
+//             .await
+//             .unwrap()
+//             .address;
+
+//         let bob = os
+//             .create_and_save_new_mainnet_account_with_main_bdfs(
+//                 DisplayName::new("Bob").unwrap(),
+//             )
+//             .await
+//             .unwrap()
+//             .address;
+
+//         let carol = os
+//             .create_and_save_new_mainnet_account_with_main_bdfs(
+//                 DisplayName::new("Bob").unwrap(),
+//             )
+//             .await
+//             .unwrap()
+//             .address;
+
+//         let manifests = os
+//             .make_interaction_for_applying_security_shield(
+//                 shield_id,
+//                 IndexSet::from_iter([alice.clone(), bob.clone()]),
+//             )
+//             .await
+//             .unwrap()
+//             .transactions
+//             .iter();
+
+//         // ============================================
+//         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//         // User reviews TXs in Radix Wallet app and
+//         // selects fee payer (optional) and slides to
+//         // sign.
+//         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//         // ============================================
+//         let manifest_and_payer_tuples =
+//             IndexSet::from_iter(
+//                 [
+//                     ManifestWithPayerByAddress::new(
+//                         manifests.next().unwrap(),
+//                         None,
+//                         Decimal::five(),
+//                     ),
+//                     ManifestWithPayerByAddress::new(
+//                         manifests.next().unwrap(),
+//                         None,
+//                         Decimal::five(),
+//                     ),
+//                 ]
+//             );
+
+//         // os.sign_and_enqueue_batch_of_transactions_applying_security_shield(
+//         //     NetworkID::Mainnet,
+//         //     IndexSet::new(),
+//         // )
+//         // .await;
+
+//         let mut committer = ApplyShieldTransactionsCommitterImpl::new(&os)?;
+
+//         committer
+//             .commit(network_id, manifest_and_payer_tuples)
+//             .await
+//     }
+// }

@@ -152,19 +152,18 @@ impl OsApplySecurityShieldInteraction for SargonOS {
              .map(|e| {
                 let provisional = e.entity.get_provisional().expect("Entity should have a provisional config set since we applied shield above");
                 let derived = provisional.as_factor_instances_derived().expect("Should have derived factors");
-                TransactionManifest::apply_security_shield_for_securified_entity(
+                let manifest = TransactionManifest::apply_security_shield_for_securified_entity(
                     e.clone(),
                     derived.clone(),
                     RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()
-                ).inspect(|m| {
-                    manifests_for_entity.insert(
-                        EntityApplyingShieldAddress::AccessController(
-                            e.securified_entity_control.access_controller_address()
-                        ),
-                        m.clone()
-                    );
-                })
-                .map(UnvalidatedTransactionManifest::from).unwrap()
+                );
+                manifests_for_entity.insert(
+                    EntityApplyingShieldAddress::AccessController(
+                        e.securified_entity_control.access_controller_address()
+                    ),
+                    manifest.clone()
+                );
+                UnvalidatedTransactionManifest::from(manifest)
          }).collect_vec();
 
         // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132

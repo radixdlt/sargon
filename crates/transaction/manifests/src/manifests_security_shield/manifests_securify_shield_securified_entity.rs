@@ -12,7 +12,7 @@ pub trait TransactionManifestSecurifySecurifiedEntity:
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
         roles_combination: RolesExercisableInTransactionManifestCombination,
-    ) -> Option<TransactionManifest>;
+    ) -> TransactionManifest;
 }
 
 impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
@@ -34,7 +34,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
         roles_combination: RolesExercisableInTransactionManifestCombination,
-    ) -> Option<Self> {
+    ) -> Self {
         let securified_entity = securified_entity.into();
         let kind = roles_combination;
         let entity_address = securified_entity.entity.address();
@@ -124,7 +124,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         // after user has selected account to pay in wallet GUI. And also call
         // `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`
 
-        Some(manifest)
+        manifest
     }
 }
 
@@ -154,7 +154,7 @@ mod tests {
             entity_applying_shield.clone(),
             SecurityStructureOfFactorInstances::sample(),
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation,
-        ).unwrap();
+        );
 
         let expected_manifest_str =
             fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C");
