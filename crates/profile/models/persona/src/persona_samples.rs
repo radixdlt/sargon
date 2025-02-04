@@ -149,7 +149,7 @@ impl Persona {
     ) -> Self {
         Self::with(
             NetworkID::Mainnet,
-            IdentityAddress::new(
+            IdentityAddress::new_from_public_key(
                 genesis_factor_instance.public_key.public_key,
                 NetworkID::Mainnet,
             ),
@@ -221,8 +221,10 @@ impl Persona {
                 ),
             );
         }
-        let address =
-            IdentityAddress::new(veci.public_key(), NetworkID::Mainnet);
+        let address = IdentityAddress::new_from_public_key(
+            veci.public_key(),
+            NetworkID::Mainnet,
+        );
 
         let security_structure_of_factor_instances =
             SecurityStructureOfFactorInstances::new(

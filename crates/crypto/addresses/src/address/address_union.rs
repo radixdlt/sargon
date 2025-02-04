@@ -141,6 +141,16 @@ macro_rules! address_union {
                 }
             }
 
+            impl HasNodeId for $union_name {
+                fn node_id(&self) -> ScryptoNodeId {
+                    match self {
+                        $(
+                            Self::$variant_name(address) => address.node_id(),
+                        )+
+                    }
+                }
+            }
+
             impl FromStr for $union_name {
                 type Err = CommonError;
 

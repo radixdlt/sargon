@@ -178,7 +178,11 @@ impl SubintentManifest {
         addresses
             .into_iter()
             .filter_map(|a| {
-                ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
+                ResourceAddress::new_from_node_id(
+                    *a.as_node_id(),
+                    self.network_id(),
+                )
+                .ok()
             })
             .collect_vec()
     }
@@ -188,7 +192,11 @@ impl SubintentManifest {
         addresses
             .into_iter()
             .filter_map(|a| {
-                PoolAddress::new(*a.as_node_id(), self.network_id()).ok()
+                PoolAddress::new_from_node_id(
+                    *a.as_node_id(),
+                    self.network_id(),
+                )
+                .ok()
             })
             .collect_vec()
     }

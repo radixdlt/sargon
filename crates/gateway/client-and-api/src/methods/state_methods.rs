@@ -113,8 +113,10 @@ impl GatewayClient {
         account_addresses: impl IntoIterator<Item = AccountAddress>,
     ) -> Result<IndexMap<AccountAddress, bool>> {
         // Construct the owner badge resource address
-        let owner_badge_resource_address =
-            ResourceAddress::new(SCRYPTO_ACCOUNT_OWNER_BADGE, network_id)?;
+        let owner_badge_resource_address = ResourceAddress::new_from_node_id(
+            SCRYPTO_ACCOUNT_OWNER_BADGE,
+            network_id,
+        )?;
 
         // Break accounts into chunks
         let account_address_chunks = account_addresses

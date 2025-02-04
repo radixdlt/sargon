@@ -117,6 +117,14 @@ pub enum CommonError {
     InvalidInstructionsString {
         underlying: String,
     },
+    AddressInvalidEntityType {
+        address_kind: String,
+        entity_type: u8,
+        node_id_as_hex: String,
+    },
+    FailedToFindNetworkIdFromBech32mString {
+        bech32m_encoded_address: String,
+    },
 }
 
 #[uniffi::export]
@@ -349,6 +357,20 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
+            AddressInvalidEntityType {
+                address_kind,
+                entity_type,
+                node_id_as_hex,
+            } => InternalCommonError::AddressInvalidEntityType {
+                address_kind: address_kind.clone(),
+                entity_type: *entity_type,
+                node_id_as_hex: node_id_as_hex.clone(),
+            },
+            FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address,
+            } => InternalCommonError::FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address: bech32m_encoded_address.clone(),
+            },
             _ => InternalCommonError::Unknown,
         }
     }
@@ -502,6 +524,20 @@ impl From<InternalCommonError> for CommonError {
                     underlying: underlying.clone(),
                 }
             }
+            InternalCommonError::AddressInvalidEntityType {
+                address_kind,
+                entity_type,
+                node_id_as_hex,
+            } => AddressInvalidEntityType {
+                address_kind: address_kind.clone(),
+                entity_type,
+                node_id_as_hex: node_id_as_hex.clone(),
+            },
+            InternalCommonError::FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address,
+            } => FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address: bech32m_encoded_address.clone(),
+            },
             _ => Self::erased(value),
         }
     }
