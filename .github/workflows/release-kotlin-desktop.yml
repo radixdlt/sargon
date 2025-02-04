@@ -23,6 +23,7 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         build-target:
           - runner: ubuntu-latest
