@@ -4,6 +4,7 @@ use crate::prelude::*;
 /// but also includes additional information about this class that the wallet
 /// requires to display to the user.
 #[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
+#[allow(clippy::large_enum_variant)]
 pub enum DetailedManifestClass {
     /// A general manifest that involves any amount of arbitrary components
     /// and packages where nothing more concrete can be said about the manifest

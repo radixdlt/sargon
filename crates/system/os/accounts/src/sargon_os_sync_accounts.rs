@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait OsSyncAccountsDeletedOnLedger {
+    async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport>;
+
     async fn sync_accounts_deleted_on_ledger(&self) -> Result<bool>;
     async fn check_accounts_deleted_on_ledger(
         &self,
@@ -15,6 +17,108 @@ pub trait OsSyncAccountsDeletedOnLedger {
 // ==================
 #[async_trait::async_trait]
 impl OsSyncAccountsDeletedOnLedger for SargonOS {
+    async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport> {
+        let mut entities = Vec::<AddressOfAccountOrPersona>::new();
+        entities.extend(self.accounts_on_current_network().map(
+            |accounts| {
+                accounts
+                    .iter()
+                    .map(|a| AddressOfAccountOrPersona::from(a.address))
+                    .collect_vec()
+            },
+        )?);
+        entities.extend(self.personas_on_current_network().map(
+            |personas| {
+                personas
+                    .iter()
+                    .map(|p| AddressOfAccountOrPersona::from(p.address))
+                    .collect_vec()
+            },
+        )?);
+        let network_id = self.current_network_id()?;
+
+        let gateway_client =
+            GatewayClient::new(self.http_client.driver.clone(), network_id);
+
+        // Fetch ancestor addresses
+        let ancestor_address_per_entity = gateway_client
+            .fetch_owning_vault_global_ancestor_address_for_entities(
+                network_id, entities,
+            )
+            .await?;
+
+        // Collect sync actions based on the profile state
+        let mut sync_actions =
+            IndexMap::<AddressOfAccountOrPersona, EntitySyncAction>::new();
+        for (entity_address, maybe_ancestor_address) in
+            ancestor_address_per_entity
+        {
+            let Some(ancestor_address) = maybe_ancestor_address else {
+                continue;
+            };
+
+            let sync_action = match ancestor_address {
+                Address::AccessController(
+                    access_controller_ancestor_address,
+                ) => {
+                    let entity = self.entity_by_address(entity_address)?;
+
+                    if !entity.is_securified() {
+                        EntitySyncAction::ToSecurify(
+                            access_controller_ancestor_address,
+                        )
+                    } else {
+                        // TODO check if it needs to update security state
+                        // currently returns no update
+                        continue;
+                    }
+                }
+                Address::Account(account_ancestor_address) => {
+                    if AddressOfAccountOrPersona::from(account_ancestor_address)
+                        == entity_address
+                    {
+                        EntitySyncAction::ToTombstone
+                    } else {
+                        continue;
+                    }
+                }
+                _ => {
+                    continue;
+                }
+            };
+
+            sync_actions.insert(entity_address, sync_action);
+        }
+
+        if !sync_actions.is_empty() {
+            // Perform sync
+            self.update_profile_with(move |profile| {
+                let mut actions_performed = IndexSet::<EntitySyncActionPerformed>::new();
+
+                for (address, action) in &sync_actions {
+                    match action {
+                        EntitySyncAction::ToTombstone => {
+                            // profile.networks.tombstone_account(&address);
+                            actions_performed.insert(EntitySyncActionPerformed::SomeEntitiesTombstoned);
+                        }
+                        EntitySyncAction::ToSecurify(access_controller_address) => {
+                            // self.mark_entity_as_securified(
+                            //     *access_controller_address,
+                            //     AddressOfAccountOrPersona::from(*address)
+                            // )?;  // TODO What if not provisional state?
+
+                            actions_performed.insert(EntitySyncActionPerformed::SomeEntitiesSecurified);
+                        }
+                    }
+                }
+
+                Ok(EntitySyncReport::new(actions_performed))
+            }).await
+        } else {
+            Ok(EntitySyncReport::no_action())
+        }
+    }
+
     /// Checks all active accounts in current network on ledger, if any of them are deleted.
     /// Any deleted account is marked as tombstoned in profile.
     ///
@@ -72,6 +176,36 @@ impl OsSyncAccountsDeletedOnLedger for SargonOS {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
+enum EntitySyncAction {
+    ToTombstone,
+    ToSecurify(AccessControllerAddress),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
+pub enum EntitySyncActionPerformed {
+    SomeEntitiesTombstoned,
+    SomeEntitiesSecurified,
+}
+
+/// The report that gathers the different actions performed on profile after sync completes.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EntitySyncReport {
+    pub actions_performed: IndexSet<EntitySyncActionPerformed>,
+}
+
+impl EntitySyncReport {
+    pub fn new(actions: IndexSet<EntitySyncActionPerformed>) -> Self {
+        Self {
+            actions_performed: actions,
+        }
+    }
+
+    pub fn no_action() -> Self {
+        Self::new(IndexSet::new())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;
@@ -80,7 +214,9 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
+    use crate::sargon_os_sync_accounts::EntitySyncAction;
     use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
+    use radix_common::prelude::IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE;
 
     #[actix_rt::test]
     async fn test_sync_accounts_deleted_on_ledger() {
@@ -201,5 +337,157 @@ mod tests {
         };
 
         MockNetworkingDriverResponse::new_success(body)
+    }
+
+    #[actix_rt::test]
+    async fn test_sync_entities_on_ledger() {
+        // ARRANGE
+        let account_deleted_on_ledger = Account::sample_mainnet_alice();
+        let account_active_on_ledger = Account::sample_mainnet_bob();
+        let account_securified_on_ledger = Account::sample_mainnet_carol();
+        let identity_securified_on_ledger = Persona::sample_mainnet();
+        let all_initial_accounts = vec![
+            account_deleted_on_ledger.clone(),
+            account_active_on_ledger.clone(),
+            account_securified_on_ledger.clone(),
+        ];
+        let mock_driver = MockNetworkingDriver::new_with_responses(
+            mock_location_responses(HashMap::from_iter([
+                (
+                    AddressOfAccountOrPersona::from(
+                        account_deleted_on_ledger.address,
+                    ),
+                    EntitySyncAction::ToTombstone,
+                ),
+                (
+                    AddressOfAccountOrPersona::from(
+                        account_securified_on_ledger.address,
+                    ),
+                    EntitySyncAction::ToSecurify(
+                        AccessControllerAddress::sample_mainnet(),
+                    ),
+                ),
+                (
+                    AddressOfAccountOrPersona::from(
+                        identity_securified_on_ledger.address,
+                    ),
+                    EntitySyncAction::ToSecurify(
+                        AccessControllerAddress::sample_mainnet_other(),
+                    ),
+                ),
+            ])),
+        );
+        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
+        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+            .await
+            .unwrap()
+            .unwrap();
+        os.import_wallet(
+            &Profile::with(
+                Header::sample(),
+                FactorSources::sample(),
+                AppPreferences::sample(),
+                ProfileNetworks::just(ProfileNetwork::new(
+                    NetworkID::Mainnet,
+                    all_initial_accounts.clone(),
+                    vec![identity_securified_on_ledger],
+                    AuthorizedDapps::new(),
+                    ResourcePreferences::new(),
+                )),
+            ),
+            true,
+        )
+        .await
+        .unwrap();
+
+        let report = os.sync_entities_state_on_ledger().await.unwrap();
+
+        assert!(report
+            .actions_performed
+            .contains(&EntitySyncActionPerformed::SomeEntitiesTombstoned));
+        assert!(report
+            .actions_performed
+            .contains(&EntitySyncActionPerformed::SomeEntitiesSecurified));
+    }
+
+    fn mock_location_responses(
+        entity_with_action: HashMap<
+            AddressOfAccountOrPersona,
+            EntitySyncAction,
+        >,
+    ) -> Vec<MockNetworkingDriverResponse> {
+        let location_responses = |input: HashMap<
+            AddressOfAccountOrPersona,
+            EntitySyncAction,
+        >|
+         -> Vec<
+            StateNonFungibleLocationResponseItem,
+        > {
+            input
+                .into_iter()
+                .map(|(address, action)| {
+                    let local_id = NonFungibleLocalId::from(address.clone());
+                    let ancestor = match action {
+                        EntitySyncAction::ToTombstone => match address {
+                            AddressOfAccountOrPersona::Account(
+                                account_address,
+                            ) => Address::from(account_address),
+                            AddressOfAccountOrPersona::Identity(
+                                identity_address,
+                            ) => Address::from(identity_address),
+                        },
+                        EntitySyncAction::ToSecurify(
+                            access_controller_address,
+                        ) => Address::from(access_controller_address),
+                    };
+
+                    StateNonFungibleLocationResponseItem {
+                        non_fungible_id: local_id,
+                        is_burned: false,
+                        last_updated_at_state_version: 0,
+                        owning_vault_address: VaultAddress::sample_mainnet(),
+                        owning_vault_parent_ancestor_address: Some(ancestor),
+                        owning_vault_global_ancestor_address: Some(ancestor),
+                    }
+                })
+                .collect_vec()
+        };
+
+        let response_for_accounts = MockNetworkingDriverResponse::new_success(
+            StateNonFungibleLocationResponse {
+                ledger_state: LedgerState::sample(),
+                resource_address: ResourceAddress::new_from_node_id(
+                    SCRYPTO_ACCOUNT_OWNER_BADGE,
+                    NetworkID::Mainnet,
+                )
+                .unwrap(),
+                non_fungible_ids: location_responses(
+                    entity_with_action
+                        .clone()
+                        .into_iter()
+                        .filter(|(address, action)| address.is_account())
+                        .collect::<HashMap<_, _>>(),
+                ),
+            },
+        );
+
+        let response_for_identities = MockNetworkingDriverResponse::new_success(
+            StateNonFungibleLocationResponse {
+                ledger_state: LedgerState::sample(),
+                resource_address: ResourceAddress::new_from_node_id(
+                    SCRYPTO_IDENTITY_OWNER_BADGE,
+                    NetworkID::Mainnet,
+                )
+                .unwrap(),
+                non_fungible_ids: location_responses(
+                    entity_with_action
+                        .into_iter()
+                        .filter(|(address, action)| address.is_identity())
+                        .collect::<HashMap<_, _>>(),
+                ),
+            },
+        );
+
+        vec![response_for_accounts, response_for_identities]
     }
 }
