@@ -73,7 +73,11 @@ jobs:
       CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
     steps:
       - uses: RDXWorks-actions/checkout@main
-
+      - name: Run pwd before artifacts
+        run: |
+          pwd
+          ls -lh
+          ls -lh */*
       - uses: RDXWorks-actions/download-artifact-v4@main
         with:
           name: aarch64-apple-darwin
@@ -89,6 +93,14 @@ jobs:
         with:
           distribution: "adopt"
           java-version: "17"
+
+      - name: Run pwd after artifacts
+        run: |
+          pwd
+          ls -lh
+          ls -lh sargon
+          ls -lh sargon/artifacts
+          ls -lh */*
 
       - name: Prune Tags
         run: git fetch --prune --tags
