@@ -74,14 +74,14 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - uses: RDXWorks-actions/download-artifact@main
-        with:
-          name: x86_64-unknown-linux-gnu
-          path: artifacts
-
-      - uses: RDXWorks-actions/download-artifact@main
+      - uses: RDXWorks-actions/download-artifact-v4@main
         with:
           name: aarch64-apple-darwin
+          path: artifacts
+
+      - uses: RDXWorks-actions/download-artifact-v4@main
+        with:
+          name: x86_64-unknown-linux-gnu
           path: artifacts
 
       - name: Set up JDK 17
