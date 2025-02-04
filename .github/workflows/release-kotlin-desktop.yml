@@ -23,6 +23,7 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         build-target:
           - runner: ubuntu-latest
@@ -59,7 +60,7 @@ jobs:
           build-root-directory: jvm
 
       - name: Upload Artifacts
-        uses: RDXWorks-actions/upload-artifact@main
+        uses: RDXWorks-actions/upload-artifact-v4@main
         with:
           name: ${{ matrix.build-target.toolchain }}
           path: "target/${{ matrix.build-target.toolchain }}/release/${{ matrix.build-target.binary }}"
