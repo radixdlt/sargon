@@ -98,8 +98,7 @@ jobs:
         run: |
           pwd
           ls -lh
-          ls -lh sargon
-          ls -lh sargon/artifacts
+          ls -lh artifacts
           ls -lh */*
 
       - name: Prune Tags
