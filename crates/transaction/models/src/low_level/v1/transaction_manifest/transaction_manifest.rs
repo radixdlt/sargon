@@ -165,7 +165,7 @@ impl TransactionManifest {
             .into_iter()
             .filter_map(|a| {
                 ResourceAddress::new_from_node_id(
-                    *a.as_node_id(),
+                    a,
                     self.network_id(),
                 )
                 .ok()
@@ -179,7 +179,7 @@ impl TransactionManifest {
             .into_iter()
             .filter_map(|a| {
                 PoolAddress::new_from_node_id(
-                    *a.as_node_id(),
+                    a,
                     self.network_id(),
                 )
                 .ok()

@@ -4,7 +4,7 @@ impl DynamicallyAnalyzableManifest for ScryptoTransactionManifestV2 {
     fn ret_dynamically_analyze(
         &self,
         receipt: &ScryptoRuntimeToolkitTransactionReceipt,
-    ) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
+    ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError> {
         RET_dynamically_analyze_v2(self, receipt)
     }
 }

@@ -1,3 +1,5 @@
+use radix_engine_toolkit::types::EitherGuaranteedOrPredicted;
+
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -35,6 +37,8 @@ impl FungibleResourceIndicator {
         }
     }
 }
+
+pub type RetFungibleResourceIndicator = EitherGuaranteedOrPredicted<ScryptoDecimal192>;
 
 impl From<RetFungibleResourceIndicator> for FungibleResourceIndicator {
     fn from(value: RetFungibleResourceIndicator) -> Self {

@@ -19,7 +19,7 @@ pub enum DetailedManifestClass {
         /// regard this as a "simple transfer" and communicate this information
         /// to the ledger hardware wallet. Otherwise, if `false`, then this is
         /// not a one-to-one transfer.
-        is_one_to_one: bool,
+        is_one_to_one_transfer: bool,
     },
 
     /// A manifest where XRD is claimed from one or more validators.
@@ -147,16 +147,14 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
         match value.0 {
             RetDetailedManifestClass::General => Self::General,
 
-            RetDetailedManifestClass::Transfer { is_one_to_one } => {
-                Self::Transfer { is_one_to_one }
+            RetDetailedManifestClass::Transfer { is_one_to_one_transfer } => {
+                Self::Transfer { is_one_to_one_transfer }
             }
 
-            RetDetailedManifestClass::PoolContribution {
-                pool_addresses,
-                pool_contributions,
-            } => {
+            RetDetailedManifestClass::PoolContribution(outpout) => {
                 let pool_contributions =
-                    to_vec_network_aware(pool_contributions, n);
+                    to_vec_network_aware(outpout.contribution_operations, n);
+                let pool_addresses = outpout.contribution_operations.iter().map(|x| x.pool_address).collect();
                 let pool_addresses = to_vec_network_aware(pool_addresses, n);
 
                 Self::PoolContribution {
@@ -165,65 +163,60 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                 }
             }
 
-            RetDetailedManifestClass::PoolRedemption {
-                pool_addresses,
-                pool_redemptions,
-            } => Self::PoolRedemption {
-                pool_addresses: to_vec_network_aware(pool_addresses, n),
-                pool_redemptions: to_vec_network_aware(pool_redemptions, n),
-            },
+            RetDetailedManifestClass::PoolRedemption(output) => {
+                let pool_redemptions = output.redemption_operations;
+                let pool_addresses = output.redemption_operations.iter().map(|x| x.pool_address).collect();
 
-            RetDetailedManifestClass::ValidatorStake {
-                validator_addresses,
-                validator_stakes,
-            } => Self::ValidatorStake {
+                Self::PoolRedemption {
+                    pool_addresses: to_vec_network_aware(pool_addresses, n),
+                    pool_redemptions: to_vec_network_aware(pool_redemptions, n),
+                }
+            }
+
+            RetDetailedManifestClass::ValidatorStake(output) => {
+                let validator_stakes = output.stake_operations;
+                let validator_addresses = output.stake_operations.iter().map(|x| x.validator_address).collect();
+
+                 Self::ValidatorStake {
                 validator_addresses: to_vec_network_aware(
                     validator_addresses,
                     n,
                 ),
                 validator_stakes: to_vec_network_aware(validator_stakes, n),
+                }
             },
 
-            RetDetailedManifestClass::ValidatorUnstake {
-                validator_addresses,
-                validator_unstakes: _,
-                claims_non_fungible_data,
-            } => Self::ValidatorUnstake {
-                validator_addresses: to_vec_network_aware(
-                    validator_addresses,
-                    n,
-                ),
-                claims_non_fungible_data: claims_non_fungible_data
-                    .into_iter()
-                    .map(|(k, v)| {
-                        (
-                            NonFungibleGlobalId::from((k, n)),
-                            UnstakeData::from(v),
-                        )
-                    })
-                    .collect::<HashMap<_, _>>(),
+            RetDetailedManifestClass::ValidatorUnstake(output) => {
+                let unstakes = output.unstake_operations;
+                let validator_addresses = output.unstake_operations.iter().map(|x| x.validator_address).collect();
+
+                Self::ValidatorUnstake {
+                    validator_addresses: to_vec_network_aware(
+                        validator_addresses,
+                        n,
+                    ),
+                    claims_non_fungible_data: HashMap::new(),
+                }
             },
 
-            RetDetailedManifestClass::ValidatorClaim {
-                validator_addresses,
-                validator_claims,
-            } => Self::ValidatorClaim {
-                validator_addresses: to_vec_network_aware(
-                    validator_addresses,
-                    n,
-                ),
-                validator_claims: to_vec_network_aware(validator_claims, n),
+            RetDetailedManifestClass::ValidatorClaimXrd(output) => {
+                let validator_claims = output.claim_operations;
+                let validator_addresses = output.claim_operations.iter().map(|x| x.validator_address).collect();
+
+                Self::ValidatorClaim {
+                    validator_addresses: to_vec_network_aware(
+                        validator_addresses,
+                        n,
+                    ),
+                    validator_claims: to_vec_network_aware(validator_claims, n),
+                }
             },
 
-            RetDetailedManifestClass::AccountDepositSettingsUpdate {
-                resource_preferences_updates,
-                deposit_mode_updates,
-                authorized_depositors_updates,
-            } => {
+            RetDetailedManifestClass::AccountDepositSettingsUpdate(output) => {
                 let deposit_mode_updates: HashMap<AccountAddress, DepositRule> =
-                    to_hashmap_network_aware_key(deposit_mode_updates, n);
+                    to_hashmap_network_aware_key(output.default_deposit_rule_updates, n);
 
-                let resource_preferences_updates = resource_preferences_updates
+                let resource_preferences_updates = output.resource_preference_updates
                     .into_iter()
                     .map(|(k, v)| {
                         (
@@ -247,7 +240,7 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                     >>();
 
                 let split_map_auth_dep = |o: RetOperation| {
-                    authorized_depositors_updates.clone().into_iter().map(|(k, v)| {
+                    output.authorized_depositor_updates.clone().into_iter().map(|(k, v)| {
                             (
                                 AccountAddress::from((k, n)),
                                 v.into_iter().filter(|x| x.1 == o).map(|x| (x.0, n)).map(ResourceOrNonFungible::from).collect_vec()

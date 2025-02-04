@@ -63,18 +63,18 @@ impl ResourceIndicator {
     }
 }
 
-impl From<(RetResourceIndicator, NetworkID)> for ResourceIndicator {
-    fn from(value: (RetResourceIndicator, NetworkID)) -> Self {
+impl From<(RetInvocationIoItem, NetworkID)> for ResourceIndicator {
+    fn from(value: (RetInvocationIoItem, NetworkID)) -> Self {
         let (ret, network_id) = value;
         match ret {
-            RetResourceIndicator::Fungible(
+            RetInvocationIoItem::Fungible(
                 resource_address,
                 fungible_indicator,
             ) => Self::fungible(
                 (resource_address, network_id),
                 fungible_indicator,
             ),
-            RetResourceIndicator::NonFungible(
+            RetInvocationIoItem::NonFungible(
                 resource_address,
                 non_fungible_indicator,
             ) => Self::non_fungible(

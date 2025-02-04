@@ -10,22 +10,23 @@ address_union!(
 
 macro_rules! impl_try_from_for_manifest_encountered_address {
     ($($variant:ident => $address_type:ty),*) => {
-        impl TryFrom<(ScryptoGlobalAddress, NetworkID)> for ManifestEncounteredComponentAddress {
-            type Error = CommonError;
+        impl TryFrom<(ScryptoManifestAddress, NetworkID)> for ManifestEncounteredComponentAddress {
+            type Error = ();
 
-            fn try_from(value: (ScryptoGlobalAddress, NetworkID)) -> Result<Self> {
-                let (global_address, network_id) = value;
+            fn try_from(value: (ScryptoManifestAddress, NetworkID)) -> Result<Self, Self::Error> {
+                let (address, network_id) = value;
 
-                $(
-                    if let Ok(address) = <$address_type>::try_from((global_address, network_id)) {
-                        return Ok(ManifestEncounteredComponentAddress::$variant(address));
-                    }
-                )*
-
-                Err(CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
-                    global_address_as_hex: global_address.to_hex(),
-                    network_id: network_id.to_string(),
-                })
+                match address {
+                    ScryptoManifestAddress::NodeId(node_id) => {
+                        $(
+                            if let Ok(address) = <$address_type>::new_from_node_id(node_id, network_id) {
+                                return Ok(ManifestEncounteredComponentAddress::$variant(address));
+                            }
+                        )*
+                        Err(())
+                    },
+                    _ => Err(()),
+                }            
             }
         }
     };

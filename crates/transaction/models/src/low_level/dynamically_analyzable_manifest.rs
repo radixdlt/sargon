@@ -6,7 +6,7 @@ pub trait DynamicallyAnalyzableManifest {
     fn ret_dynamically_analyze(
         &self,
         receipt: &ScryptoRuntimeToolkitTransactionReceipt,
-    ) -> Result<RetDynamicAnalysis, RetTransactionTypesError>;
+    ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError>;
 
     /// Get the execution summary on an given network from a given transaction receipt
     fn execution_summary(

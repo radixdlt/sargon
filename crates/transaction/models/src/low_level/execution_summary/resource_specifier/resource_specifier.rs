@@ -49,19 +49,22 @@ impl ResourceSpecifier {
     }
 }
 
-impl From<(ScryptoResourceSpecifier, NetworkID)> for ResourceSpecifier {
-    fn from(value: (ScryptoResourceSpecifier, NetworkID)) -> Self {
+impl TryFrom<(RetManifestResourceSpecifier, NetworkID)> for ResourceSpecifier {
+    type Error = ();
+
+    fn try_from(value: (RetManifestResourceSpecifier, NetworkID)) -> Result<Self, Self::Error> {
         let (scrypto_value, network_id) = value;
         match scrypto_value {
-            ScryptoResourceSpecifier::Amount(resource_address, amount) => {
-                Self::fungible((resource_address, network_id), amount)
+            RetManifestResourceSpecifier::Amount(RetManifestResourceAddress::Static(resource_address), amount) => {
+                Ok(Self::fungible((resource_address, network_id), amount))
             }
-            ScryptoResourceSpecifier::Ids(resource_address, ids) => {
-                Self::non_fungible(
+            RetManifestResourceSpecifier::Ids(RetManifestResourceAddress::Static(resource_address), ids) => {
+                Ok(Self::non_fungible(
                     (resource_address, network_id),
                     ids.into_iter().map(NonFungibleLocalId::from).collect(),
-                )
-            }
+                ))
+            },
+            _ => Err(()),
         }
     }
 }

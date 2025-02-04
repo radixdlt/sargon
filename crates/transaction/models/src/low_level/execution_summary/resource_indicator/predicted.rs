@@ -29,10 +29,10 @@ macro_rules! decl_predicted {
                     instruction_index
                 }
             }
-            pub fn from_ret<T>(ret_predicted: RetPredicted<T>) -> Self where T: Into<$wrapped_type> {
+            pub fn from_ret<T>(ret_predicted: RetTracked<T>) -> Self where T: Into<$wrapped_type> {
                 Self::new(
                     ret_predicted.value,
-                    ret_predicted.instruction_index as u64
+                    ret_predicted.created_at.value() as u64
                 )
             }
         }
@@ -92,7 +92,7 @@ decl_predicted!(
 );
 
 type ScryptoNonFungibleLocalIds = IndexSet<ScryptoNonFungibleLocalId>;
-type RetPredictedNonFungibleLocalIds = RetPredicted<ScryptoNonFungibleLocalIds>;
+type RetPredictedNonFungibleLocalIds = RetTracked<ScryptoNonFungibleLocalIds>;
 
 impl From<RetPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds {
     fn from(value: RetPredictedNonFungibleLocalIds) -> Self {

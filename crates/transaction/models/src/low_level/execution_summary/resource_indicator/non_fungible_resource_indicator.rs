@@ -1,88 +1,76 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum NonFungibleResourceIndicator {
-    ByAll {
-        predicted_amount: PredictedDecimal,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    },
-    ByAmount {
-        amount: Decimal192,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    },
-    ByIds {
-        ids: Vec<NonFungibleLocalId>,
-    },
+pub enum GuaranteedOrPredicted<T> {
+    Guaranteed(T),
+    Predicted(Predicted<T>),
 }
 
-impl NonFungibleResourceIndicator {
-    pub fn by_all(
-        predicted_amount: PredictedDecimal,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    ) -> Self {
-        Self::ByAll {
-            predicted_amount,
-            predicted_ids,
-        }
-    }
-    pub fn by_amount(
-        amount: impl Into<Decimal192>,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    ) -> Self {
-        Self::ByAmount {
-            amount: amount.into(),
-            predicted_ids,
-        }
-    }
-    pub fn by_ids(ids: impl IntoIterator<Item = NonFungibleLocalId>) -> Self {
-        Self::ByIds {
-            ids: ids.into_iter().collect(),
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Predicted<T> {
+    pub value: T,
+    pub instruction_index: u64,
+}
+
+impl<R, S> From<RetEitherGuaranteedOrPredicted<R>> for GuaranteedOrPredicted<S>
+where
+    S: From<R>,
+{
+    fn from(ret: RetEitherGuaranteedOrPredicted<R>) -> Self {
+        match ret {
+            RetEitherGuaranteedOrPredicted::Guaranteed(value) => {
+                GuaranteedOrPredicted::Guaranteed(S::from(value))
+            }
+            RetEitherGuaranteedOrPredicted::Predicted(predicted) => {
+                GuaranteedOrPredicted::Predicted(Predicted::from(predicted))
+            }
         }
     }
 }
 
+impl<R, S> From<RetTracked<R>> for Predicted<S>
+where
+    S: From<R>,
+{
+    fn from(tracked: RetTracked<R>) -> Self {
+        Self {
+            value: S::from(tracked.value),
+            instruction_index: *tracked.created_at.value() as u64,
+        }
+    }
+}
+
+impl<R, S> From<RetTracked<IndexSet<R>>> for Predicted<IndexSet<S>>
+where
+    S: From<R>,
+{
+    fn from(tracked: RetTracked<R>) -> Self {
+        Self {
+            value: S::from(tracked.value),
+            instruction_index: *tracked.created_at.value() as u64,
+        }
+    }
+}
+
+pub type NonFungibleResourceIndicator = GuaranteedOrPredicted<IndexSet<NonFungibleLocalId>>;
+pub type FunibleResourceIndicator = GuaranteedOrPredicted<Decimal>;
+
+
 impl NonFungibleResourceIndicator {
-    pub fn ids(&self) -> Vec<NonFungibleLocalId> {
+    pub fn ids(&self) -> IndexSet<NonFungibleLocalId> {
         match self {
-            NonFungibleResourceIndicator::ByAll {
-                predicted_amount: _,
-                predicted_ids,
-            } => predicted_ids.value.clone(),
-            NonFungibleResourceIndicator::ByAmount {
-                amount: _,
-                predicted_ids,
-            } => predicted_ids.value.clone(),
-            NonFungibleResourceIndicator::ByIds { ids } => ids.clone(),
-        }
-    }
-}
-
-impl From<RetNonFungibleResourceIndicator> for NonFungibleResourceIndicator {
-    fn from(value: RetNonFungibleResourceIndicator) -> Self {
-        match value {
-            RetNonFungibleResourceIndicator::ByAll {
-                predicted_amount,
-                predicted_ids,
-            } => Self::ByAll {
-                predicted_amount: PredictedDecimal::from_ret(predicted_amount),
-                predicted_ids: predicted_ids.into(),
-            },
-            RetNonFungibleResourceIndicator::ByAmount {
-                amount,
-                predicted_ids,
-            } => Self::ByAmount {
-                amount: amount.into(),
-                predicted_ids: predicted_ids.into(),
-            },
-            RetNonFungibleResourceIndicator::ByIds(ids) => Self::ByIds {
-                ids: ids.into_iter().map(NonFungibleLocalId::from).collect(),
-            },
+            GuaranteedOrPredicted::Guaranteed(ids) => ids.clone(),
+            GuaranteedOrPredicted::Predicted(predicted_ids) => predicted_ids
+                .value
+                .clone()
         }
     }
 }
 
 impl HasSampleValues for NonFungibleResourceIndicator {
     fn sample() -> Self {
+        let idx: IndexSet<ScryptoNonFungibleLocalId>;
+        let y = IndexSet<NonFungibleLocalId>::from
         Self::by_amount(3, PredictedNonFungibleLocalIds::sample())
     }
 

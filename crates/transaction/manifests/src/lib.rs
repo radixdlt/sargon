@@ -121,22 +121,6 @@ pub mod prelude {
                 },
             },
         },
-        models::{
-            canonical_address_types::{
-                CanonicalAccessControllerAddress as RetAccessControllerAddress,
-                CanonicalAccountAddress as RetAccountAddress,
-                CanonicalAddress as RetIsAddressTrait,
-                CanonicalComponentAddress as RetComponentAddress,
-                CanonicalIdentityAddress as RetIdentityAddress,
-                CanonicalLockerAddress as RetLockerAddress,
-                CanonicalPackageAddress as RetPackageAddress,
-                CanonicalPoolAddress as RetPoolAddress,
-                CanonicalResourceAddress as RetResourceAddress,
-                CanonicalValidatorAddress as RetValidatorAddress,
-                CanonicalVaultAddress as RetVaultAddress,
-            },
-            node_id::TypedNodeId as RetTypedNodeId,
-        },
         transaction_types::{
             DetailedManifestClass as RetDetailedManifestClass,
             DynamicAnalysis as RetDynamicAnalysis, FeeSummary as RetFeeSummary,
