@@ -184,7 +184,7 @@ impl ShieldApplicationInputWithoutXrdBalance {
                             reviewed_manifest: manifest,
                             estimated_xrd_fee,
                             entity_input: UnsecurifiedAccount::with_unsecured_entity_control(a.clone(), unsec.unsecured_entity_control),
-                            maybe_paying_account: maybe_paying_account,
+                            maybe_paying_account,
                         };
                         ApplicationInputForUnsecurifiedEntityWithoutXrdBalance::from(a)
                     }

@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub type AddressOfPayerOfShieldApplication = AddressOfVaultOrAccount;
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, PartialEq, Eq, EnumAsInner)]
 pub enum SecurityShieldApplicationWithTransactionIntents {
     /// Application for an unsecurified entity.
