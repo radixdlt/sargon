@@ -32,7 +32,7 @@ macro_rules! decl_predicted {
             pub fn from_ret<T>(ret_predicted: RetTracked<T>) -> Self where T: Into<$wrapped_type> {
                 Self::new(
                     ret_predicted.value,
-                    ret_predicted.created_at.value() as u64
+                    *ret_predicted.created_at.value() as u64
                 )
             }
         }

@@ -71,7 +71,7 @@ impl HasSampleValues for FungibleResourceIndicator {
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_toolkit::transaction_types::Predicted;
+    use super::*;
 
     use super::*;
 

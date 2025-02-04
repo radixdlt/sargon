@@ -1,76 +1,42 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum GuaranteedOrPredicted<T> {
-    Guaranteed(T),
-    Predicted(Predicted<T>),
+pub enum NonFungibleResourceIndicator {
+    Guaranteed { ids: IndexSet<NonFungibleLocalId> },
+    Predicted { predicted_ids: PredictedNonFungibleLocalIds },
 }
-
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Predicted<T> {
-    pub value: T,
-    pub instruction_index: u64,
-}
-
-impl<R, S> From<RetEitherGuaranteedOrPredicted<R>> for GuaranteedOrPredicted<S>
-where
-    S: From<R>,
-{
-    fn from(ret: RetEitherGuaranteedOrPredicted<R>) -> Self {
-        match ret {
-            RetEitherGuaranteedOrPredicted::Guaranteed(value) => {
-                GuaranteedOrPredicted::Guaranteed(S::from(value))
-            }
-            RetEitherGuaranteedOrPredicted::Predicted(predicted) => {
-                GuaranteedOrPredicted::Predicted(Predicted::from(predicted))
-            }
-        }
-    }
-}
-
-impl<R, S> From<RetTracked<R>> for Predicted<S>
-where
-    S: From<R>,
-{
-    fn from(tracked: RetTracked<R>) -> Self {
-        Self {
-            value: S::from(tracked.value),
-            instruction_index: *tracked.created_at.value() as u64,
-        }
-    }
-}
-
-impl<R, S> From<RetTracked<IndexSet<R>>> for Predicted<IndexSet<S>>
-where
-    S: From<R>,
-{
-    fn from(tracked: RetTracked<R>) -> Self {
-        Self {
-            value: S::from(tracked.value),
-            instruction_index: *tracked.created_at.value() as u64,
-        }
-    }
-}
-
-pub type NonFungibleResourceIndicator = GuaranteedOrPredicted<IndexSet<NonFungibleLocalId>>;
-pub type FunibleResourceIndicator = GuaranteedOrPredicted<Decimal>;
-
 
 impl NonFungibleResourceIndicator {
-    pub fn ids(&self) -> IndexSet<NonFungibleLocalId> {
+    pub fn ids(&self) -> Vec<NonFungibleLocalId> {
         match self {
-            GuaranteedOrPredicted::Guaranteed(ids) => ids.clone(),
-            GuaranteedOrPredicted::Predicted(predicted_ids) => predicted_ids
-                .value
-                .clone()
+            NonFungibleResourceIndicator::Guaranteed { ids } => ids.iter().cloned().collect(),
+            NonFungibleResourceIndicator::Predicted { predicted_ids } => {
+                predicted_ids.value.iter().cloned().collect()
+            }
+        }
+    }
+}
+
+type RetNonFungibleResourceIndicator = RetEitherGuaranteedOrPredicted<IndexSet<ScryptoNonFungibleLocalId>>;
+impl From<RetNonFungibleResourceIndicator> for NonFungibleResourceIndicator {
+    fn from(value: RetNonFungibleResourceIndicator) -> Self {
+        match value {
+            RetNonFungibleResourceIndicator::Guaranteed(ids) => {
+                Self::Guaranteed {
+                    ids: ids.into_iter().map(NonFungibleLocalId::from).collect(),
+                }
+            }
+            RetNonFungibleResourceIndicator::Predicted(predicted_ids) => {
+                Self::Predicted {
+                    predicted_ids: PredictedNonFungibleLocalIds::from_ret(predicted_ids),
+                }
+            }
         }
     }
 }
 
 impl HasSampleValues for NonFungibleResourceIndicator {
     fn sample() -> Self {
-        let idx: IndexSet<ScryptoNonFungibleLocalId>;
-        let y = IndexSet<NonFungibleLocalId>::from
         Self::by_amount(3, PredictedNonFungibleLocalIds::sample())
     }
 
