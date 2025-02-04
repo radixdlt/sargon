@@ -76,6 +76,12 @@ jobs:
 
       - uses: RDXWorks-actions/download-artifact@main
         with:
+          name: x86_64-unknown-linux-gnu
+          path: artifacts
+
+      - uses: RDXWorks-actions/download-artifact@main
+        with:
+          name: aarch64-apple-darwin
           path: artifacts
 
       - name: Set up JDK 17
