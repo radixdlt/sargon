@@ -255,12 +255,10 @@ impl OsExecutionSummary for SargonOS {
             |entity_address| {
                 self.entity_by_address(entity_address)
                     .and_then(|entity| {
-                        if let Some(provisional) = entity.get_provisional() {
-                            provisional.into_factor_instances_derived()
-                                .map_err(|_| CommonError::EntityHasNoProvisionalSecurityConfigSet)
-                        } else {
-                            Err(CommonError::EntityHasNoProvisionalSecurityConfigSet)
-                        }
+                        entity
+                            .get_provisional()
+                            .and_then(|p| p.into_factor_instances_derived().ok())
+                            .ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)
                     })
                     .and_then(|security_structure| {
                         self.security_structure_of_factor_sources_from_security_structure_id(
