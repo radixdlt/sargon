@@ -295,20 +295,20 @@ sargon-uniffi-conversion-macros = { path = "crates/uniffi/conversion-macros" }
 
 
 # ==== RADIX DEPENDENCIES ====
-radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
+radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
     "serde",
     "secp256k1_sign_and_validate",
 ] }
-radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "2ab5b35a6cb96c9faeb98ed8df67b870336e6873" }
-radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
+radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "99c4665b160b2c1e5009686dec98f3a271b9b662" }
+radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
     "serde",
 ] }
-radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 
 
 # ==== EXTERNAL DEPENDENCIES ====
