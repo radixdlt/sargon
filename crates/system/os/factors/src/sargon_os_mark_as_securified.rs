@@ -2,20 +2,21 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait OsMarkAsSecurified {
-    async fn mark_entity_as_securified(
+    /// Marks the entity as securified and returns the mutated entity.
+    /// Does not save into profile.
+    fn mark_entity_as_securified(
         &self,
         access_controller_address: AccessControllerAddress,
         entity_address: AddressOfAccountOrPersona,
-    ) -> Result<()>;
+    ) -> Result<AccountOrPersona>;
 }
 
-#[async_trait::async_trait]
 impl OsMarkAsSecurified for SargonOS {
-    async fn mark_entity_as_securified(
+    fn mark_entity_as_securified(
         &self,
         access_controller_address: AccessControllerAddress,
         entity_address: AddressOfAccountOrPersona,
-    ) -> Result<()> {
+    ) -> Result<AccountOrPersona> {
         let mut entity = self.entity_by_address(entity_address)?;
 
         let transaction_signing = entity
@@ -40,14 +41,7 @@ impl OsMarkAsSecurified for SargonOS {
             value: secured_entity_control,
         })?;
 
-        match entity {
-            AccountOrPersona::AccountEntity(account_entity) => {
-                self.update_entity(account_entity).await
-            }
-            AccountOrPersona::PersonaEntity(persona_entity) => {
-                self.update_entity(persona_entity).await
-            }
-        }
+        Ok(entity)
     }
 }
 
@@ -83,17 +77,14 @@ mod tests {
         let access_controller_address = AccessControllerAddress::sample();
 
         // ACT
-        sut.mark_entity_as_securified(
-            access_controller_address,
-            account_address.clone(),
-        )
-        .await
-        .unwrap();
+        let updated_entity = sut
+            .mark_entity_as_securified(
+                access_controller_address,
+                account_address.clone(),
+            )
+            .unwrap();
 
         // ASSERT
-        let profile = sut.profile().unwrap();
-        let updated_entity =
-            profile.entity_by_address(account_address).unwrap();
         assert_eq!(updated_entity.get_provisional(), None);
         let security_state = updated_entity.security_state();
         let securified = security_state.as_securified().unwrap();
