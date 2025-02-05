@@ -87,11 +87,11 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(10)
+                                FungibleResourceIndicator::new_guaranteed(10)
                             ),
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(5)
+                                FungibleResourceIndicator::new_guaranteed(5)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7".parse::<ResourceAddress>().unwrap(),
@@ -114,7 +114,7 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(10)
+                                FungibleResourceIndicator::new_guaranteed(10)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7".parse::<ResourceAddress>().unwrap(),
@@ -129,7 +129,7 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(5)
+                                FungibleResourceIndicator::new_guaranteed(5)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(),
@@ -251,7 +251,7 @@ mod tests {
                     acc_v3,
                     vec![ResourceIndicator::fungible(
                         token_address,
-                        FungibleResourceIndicator::predicted(21000000, 1)
+                        FungibleResourceIndicator::new_predicted(21000000, 1)
                     )]
                 )],
                 [], // addresses_of_accounts_requiring_auth
@@ -382,7 +382,7 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(5)
+                                FungibleResourceIndicator::new_guaranteed(5)
                             ),
                         ]
                     )
@@ -450,7 +450,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
-                                    FungibleResourceIndicator::guaranteed(1)
+                                    FungibleResourceIndicator::new_guaranteed(1)
                                 ),
                             ]
                         )
@@ -538,11 +538,11 @@ mod tests {
                     vec![
                         ResourceIndicator::fungible(
                             ResourceAddress::sample_stokenet_xrd(),
-                            FungibleResourceIndicator::guaranteed(237)
+                            FungibleResourceIndicator::new_guaranteed(237)
                         ),
                         ResourceIndicator::fungible(
                             r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
-                            FungibleResourceIndicator::guaranteed(1337)
+                            FungibleResourceIndicator::new_guaranteed(1337)
                         ),
                     ]
                 )],
@@ -602,7 +602,7 @@ mod tests {
                     acc_gk,
                     vec![ResourceIndicator::fungible(
                         ResourceAddress::sample_stokenet_xrd(),
-                        FungibleResourceIndicator::guaranteed(3000)
+                        FungibleResourceIndicator::new_guaranteed(3000)
                     )]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
@@ -610,15 +610,15 @@ mod tests {
                     vec![
                         ResourceIndicator::fungible(
                             validator_0_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(0, 5)
+                            FungibleResourceIndicator::new_predicted(0, 5)
                         ),
                         ResourceIndicator::fungible(
                             validator_1_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(0, 10)
+                            FungibleResourceIndicator::new_predicted(0, 10)
                         ),
                         ResourceIndicator::fungible(
                             validator_2_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(0, 15)
+                            FungibleResourceIndicator::new_predicted(0, 15)
                         ),
                     ]
                 )], // addresses_of_accounts_deposited_into
@@ -673,7 +673,7 @@ mod tests {
                     acc_gk,
                     vec![ResourceIndicator::fungible(
                         resource_address_of_pool,
-                        FungibleResourceIndicator::guaranteed(1)
+                        FungibleResourceIndicator::new_guaranteed(1)
                     )]
                 )], // addresses_of_accounts_withdrawn_from
                 [], // addresses_of_accounts_deposited_into
@@ -731,7 +731,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse::<ResourceAddress>().unwrap(), 
-                                    FungibleResourceIndicator::guaranteed(500)
+                                    FungibleResourceIndicator::new_guaranteed(500)
                                 ),
                             ]
                         )
@@ -821,7 +821,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     ResourceAddress::sample_stokenet_xrd(),
-                                    FungibleResourceIndicator::guaranteed(150)
+                                    FungibleResourceIndicator::new_guaranteed(150)
                                 ),
                             ]
                         ),
@@ -889,7 +889,7 @@ mod tests {
                         ),
                         ResourceIndicator::fungible(
                             fungible_address,
-                            FungibleResourceIndicator::guaranteed(3)
+                            FungibleResourceIndicator::new_guaranteed(3)
                         ),
                     ]
                 )],

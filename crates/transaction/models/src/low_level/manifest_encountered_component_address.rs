@@ -17,7 +17,7 @@ macro_rules! impl_try_from_for_manifest_encountered_address {
                 let (address, network_id) = value;
 
                 match address {
-                    ScryptoManifestAddress::NodeId(node_id) => {
+                    ScryptoManifestAddress::Static(node_id) => {
                         $(
                             if let Ok(address) = <$address_type>::new_from_node_id(node_id, network_id) {
                                 return Ok(ManifestEncounteredComponentAddress::$variant(address));
@@ -56,19 +56,19 @@ mod tests {
 
     #[test]
     fn try_from_failure() {
-        let global_address = ScryptoGlobalAddress::new_or_panic(
+        let manifest_address = ScryptoManifestAddress::Static(
             ResourceAddress::sample_stokenet()
                 .scrypto()
                 .into_node_id()
-                .0,
         );
         let network_id = NetworkID::Stokenet;
 
-        let result = SUT::try_from((global_address, network_id));
+        let result = SUT::try_from((manifest_address, network_id));
         assert_eq!(
             result.unwrap_err(),
             CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
-                global_address_as_hex: global_address.to_hex(),
+                global_address_as_hex: ResourceAddress::sample_stokenet()
+                .scrypto().to_hex(),
                 network_id: network_id.to_string(),
             }
         );

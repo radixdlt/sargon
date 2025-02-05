@@ -113,6 +113,8 @@ impl HasSampleValues for ResourceIndicator {
 #[cfg(test)]
 mod tests {
 
+    use radix_engine_toolkit::types::InstructionIndex;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -141,9 +143,9 @@ mod tests {
     #[test]
     fn from_ret_fungible() {
         let resource_address = ResourceAddress::sample();
-        let ret = RetResourceIndicator::Fungible(
+        let ret = RetInvocationIoItem::new_guaranteed_fungible(
             resource_address.into(),
-            RetFungibleResourceIndicator::Guaranteed(1.into()),
+            1.into(),
         );
 
         assert_eq!(SUT::from((ret.clone(), NetworkID::Mainnet)), SUT::sample());
@@ -156,21 +158,14 @@ mod tests {
     fn from_ret_non_fungible() {
         let resource_address = NonFungibleResourceAddress::sample_other();
 
-        let ret = RetResourceIndicator::NonFungible(
+        let ret = RetInvocationIoItem::new_predicted_non_fungible(
             ResourceAddress::from(resource_address).into(),
-            RetNonFungibleResourceIndicator::ByAll {
-                predicted_amount: RetPredicted {
-                    value: 1.into(),
-                    instruction_index: 0,
-                },
-                predicted_ids: RetPredicted {
-                    value: [NonFungibleLocalId::sample_other()]
+             [NonFungibleLocalId::sample_other()]
                         .into_iter()
                         .map(ScryptoNonFungibleLocalId::from)
                         .collect(),
-                    instruction_index: 1,
-                },
-            },
+                    InstructionIndex::of(1),
+  
         );
 
         assert_eq!(

@@ -146,6 +146,33 @@ macro_rules! decl_address {
                 }
             }
 
+            impl TryFrom<(ScryptoManifestGlobalAddress, NetworkID)> for [< $address_type:camel Address >] {
+                type Error = CommonError;
+                fn try_from(value: (ScryptoManifestGlobalAddress, NetworkID)) -> Result<Self> {
+                    match value.0 {
+                        ScryptoManifestGlobalAddress::Static(node_id) => {
+                            Self::new_from_node_id(node_id, value.1)
+                        },
+                        _ => Err(CommonError::NamedAddressesAreNotSupported),
+                    }
+                }
+            }
+
+            impl TryFrom<(ScryptoManifestAddress, NetworkID)> for [< $address_type:camel Address >] {
+                type Error = CommonError;
+
+                fn try_from(value: (ScryptoManifestAddress, NetworkID)) -> Result<Self> {
+                    let (address, network_id) = value;
+
+                    match address {
+                        ScryptoManifestAddress::Static(node_id) => {
+                            Self::new_from_node_id(node_id, network_id)
+                        },
+                        _ => Err(CommonError::NamedAddressesAreNotSupported),
+                    }
+                }
+            }
+
             #[cfg(test)]
             impl From<&str> for [< $address_type:camel Address >] {
                 /// TEST ONLY
@@ -230,7 +257,7 @@ macro_rules! decl_address {
                     }
                 }
 
-                pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
+                pub fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
                 }

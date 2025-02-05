@@ -79,7 +79,7 @@ pub struct ExecutionSummary {
 
     /// The set of instructions encountered in the manifest that are reserved
     /// and can only be included in the manifest by the wallet itself.
-    pub reserved_instructions: RetReservedInstructionsOutput,
+    pub reserved_instructions: IndexSet<ReservedInstruction>,
 
     /// The list of the resources of proofs that were presented in the manifest.
     pub presented_proofs: Vec<ResourceSpecifier>,
@@ -112,7 +112,7 @@ impl ExecutionSummary {
             Item = IdentityAddress,
         >,
         newly_created_non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
-        reserved_instructions: RetReservedInstructionsOutput,
+        reserved_instructions: impl Into<IndexSet<ReservedInstruction>>,
         presented_proofs: impl IntoIterator<Item = ResourceSpecifier>,
         encountered_addresses: impl IntoIterator<
             Item = ManifestEncounteredComponentAddress,
@@ -136,7 +136,7 @@ impl ExecutionSummary {
             newly_created_non_fungibles: newly_created_non_fungibles
                 .into_iter()
                 .collect_vec(),
-            reserved_instructions,
+            reserved_instructions: reserved_instructions.into(),
             presented_proofs: presented_proofs.into_iter().collect_vec(),
             encountered_addresses: encountered_addresses
                 .into_iter()
@@ -169,7 +169,7 @@ impl ExecutionSummary {
                     .filter_map(|resource| {
                         resource.get_non_fungible_indicator()
                     })
-                    .flat_map(|indicator| indicator.ids())
+                    .flat_map(|indicator| indicator.get_value())
                     // Find the account badge in the list of deposits
                     .any(|id| id.derives_account_address(*account_address))
                     .then_some(*account_address)
@@ -235,7 +235,7 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
             map_manifest_global_address(ret.entities_requiring_auth_summary.accounts, n),
             map_manifest_global_address(ret.entities_requiring_auth_summary.identities, n),
             newly_created_non_fungibles,
-            ret.reserved_instructions_summary,
+            ReservedInstruction::from_ret_reserved_instructions_output(ret.reserved_instructions_summary),
             ret.proofs_created_summary.created_proofs
                 .values()
                 .cloned()
@@ -275,7 +275,7 @@ impl ExecutionSummary {
             ],
             addresses_of_identities_requiring_auth: Vec::new(),
             newly_created_non_fungibles: Vec::new(),
-            reserved_instructions: ReservedInstructionsOutput,
+            reserved_instructions: IndexSet::from([ReservedInstruction::sample()]),
             presented_proofs: Vec::new(),
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample_component_stokenet(
@@ -308,7 +308,7 @@ impl HasSampleValues for ExecutionSummary {
                 IdentityAddress::sample(),
             ],
             newly_created_non_fungibles: vec![NonFungibleGlobalId::sample()],
-            reserved_instructions: vec![ReservedInstruction::sample()],
+            reserved_instructions: IndexSet::from([ReservedInstruction::sample()]),
             presented_proofs: vec![ResourceSpecifier::sample()],
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample(),
@@ -342,7 +342,7 @@ impl HasSampleValues for ExecutionSummary {
             newly_created_non_fungibles: vec![
                 NonFungibleGlobalId::sample_other(),
             ],
-            reserved_instructions: vec![ReservedInstruction::sample_other()],
+            reserved_instructions: IndexSet::from([ReservedInstruction::sample_other()]),
             presented_proofs: vec![ResourceSpecifier::sample_other()],
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample_other(),

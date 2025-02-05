@@ -115,6 +115,7 @@ pub mod prelude {
             PoolRedemptionOperation as RetPoolRedemptionOperation,
             ValidatorStakeOperation as RetValidatorStakeOperation,
             ValidatorClaimOperation as RetValidatorClaimOperation,
+            NewEntitiesOutput as RetNewEntitiesOutput,
             // FungibleResourceIndicator as RetFungibleResourceIndicator,
             // ManifestClass as RetManifestClass, NewEntities as RetNewEntities,
             // NonFungibleResourceIndicator as RetNonFungibleResourceIndicator,

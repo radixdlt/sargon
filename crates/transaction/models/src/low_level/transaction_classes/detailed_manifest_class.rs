@@ -13,6 +13,11 @@ pub enum DetailedManifestClass {
     /// will provide.
     General,
 
+    /// A general subintent manifest that has a number of arbitrary package and
+    /// component invocations. This manifest is guaranteed to be subintent since
+    /// we require that a yield to child is present in the manifest.
+    GeneralSubintent,
+
     /// A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
     Transfer {
         /// When `true`, then this is a one-to-one transfer and the wallet can
@@ -141,11 +146,14 @@ impl DetailedManifestClass {
     }
 }
 
+fn filter_named_address()
+
 impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
     fn from(value: (RetDetailedManifestClass, NetworkID)) -> Self {
         let n = value.1;
         match value.0 {
             RetDetailedManifestClass::General => Self::General,
+            RetDetailedManifestClass::GeneralSubintent => Self::GeneralSubintent,
 
             RetDetailedManifestClass::Transfer { is_one_to_one_transfer } => {
                 Self::Transfer { is_one_to_one_transfer }

@@ -887,6 +887,9 @@ pub enum CommonError {
 
     #[error("Invalid NodeId length: {actual}, expected: {expected}")]
     InvalidNodeIdLength { expected: usize, actual: usize } = 10252,
+
+    #[error("Named addresses are not supported")]
+    NamedAddressesAreNotSupported = 10253,
 }
 
 impl CommonError {
