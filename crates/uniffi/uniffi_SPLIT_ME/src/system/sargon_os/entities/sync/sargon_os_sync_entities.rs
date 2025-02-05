@@ -1,4 +1,4 @@
-use sargon::OsSyncAccountsDeletedOnLedger;
+use sargon::OsSyncEntitiesStateOnLedger;
 
 use crate::prelude::*;
 
@@ -7,6 +7,22 @@ use crate::prelude::*;
 // ==================
 #[uniffi::export]
 impl SargonOS {
+    /// Syncs entities in profile with on ledger state.
+    /// Returns a summary report of the actions performed.
+    ///
+    /// Checks performed on entities are:
+    /// 1. Checks if active accounts on profile are deleted on ledger.
+    ///    Action => to mark them as tombstoned
+    /// 2. Checks if entities with provisional shield are securified on ledger.
+    ///    Action => to mark them as securified
+    /// TODO more checks will be developed...
+    async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport> {
+        self.wrapped
+            .sync_entities_state_on_ledger()
+            .await
+            .into_result()
+    }
+
     /// Checks all active accounts in current network on ledger, if any of them are deleted.
     /// Any deleted account is marked as tombstoned in profile.
     ///
