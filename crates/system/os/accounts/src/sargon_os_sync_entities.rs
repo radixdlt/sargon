@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[async_trait::async_trait]
-pub trait OsSyncAccountsDeletedOnLedger {
+pub trait OsSyncEntitiesStateOnLedger {
     async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport>;
 
     async fn sync_accounts_deleted_on_ledger(&self) -> Result<bool>;
@@ -16,7 +16,16 @@ pub trait OsSyncAccountsDeletedOnLedger {
 // Sync Profile Accounts with status on ledger
 // ==================
 #[async_trait::async_trait]
-impl OsSyncAccountsDeletedOnLedger for SargonOS {
+impl OsSyncEntitiesStateOnLedger for SargonOS {
+    /// Syncs entities in profile with on ledger state.
+    /// Returns a summary report of the actions performed.
+    ///
+    /// Checks performed on entities are:
+    /// 1. Checks if active accounts on profile are deleted on ledger.
+    ///    Action => to mark them as tombstoned
+    /// 2. Checks if entities with provisional shield are securified on ledger.
+    ///    Action => to mark them as securified
+    /// TODO more checks will be developed...
     async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport> {
         let mut entities = Vec::<AddressOfAccountOrPersona>::new();
         entities.extend(self.accounts_on_current_network().map(
