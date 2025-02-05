@@ -376,7 +376,7 @@ mod tests {
         let account_deleted_on_ledger = Account::sample_mainnet_alice();
         let account_active_on_ledger = Account::sample_mainnet_bob();
         let account_securified_on_ledger = Account::sample_mainnet_carol();
-        let identity_securified_on_ledger = Persona::sample_mainnet();
+        let persona_securified_on_ledger = Persona::sample_mainnet();
         let all_initial_accounts = vec![
             account_deleted_on_ledger.clone(),
             account_active_on_ledger.clone(),
@@ -395,7 +395,7 @@ mod tests {
                 ),
                 EntitySyncAction::ToSecurify(
                     AddressOfAccountOrPersona::from(
-                        identity_securified_on_ledger.clone().address,
+                        persona_securified_on_ledger.clone().address,
                     ),
                     AccessControllerAddress::sample_mainnet_other(),
                 ),
@@ -414,7 +414,7 @@ mod tests {
                 ProfileNetworks::just(ProfileNetwork::new(
                     NetworkID::Mainnet,
                     all_initial_accounts.clone(),
-                    vec![identity_securified_on_ledger.clone()],
+                    vec![persona_securified_on_ledger.clone()],
                     AuthorizedDapps::new(),
                     ResourcePreferences::new(),
                 )),
@@ -441,7 +441,7 @@ mod tests {
                     account_securified_on_ledger.address,
                 ),
                 AddressOfAccountOrPersona::from(
-                    identity_securified_on_ledger.address,
+                    persona_securified_on_ledger.address,
                 ),
             ]),
         )
@@ -456,6 +456,23 @@ mod tests {
         assert!(report
             .actions_performed
             .contains(&EntitySyncActionPerformed::SomeEntitiesSecurified));
+
+        let mutated_profile = sut.profile().unwrap();
+        let network = mutated_profile.current_network().unwrap();
+        assert!(network
+            .accounts
+            .iter()
+            .find(|a| a.address == account_deleted_on_ledger.address())
+            .unwrap()
+            .is_tombstoned());
+        assert!(sut
+            .account_by_address(account_securified_on_ledger.address())
+            .unwrap()
+            .is_securified());
+        assert!(sut
+            .persona_by_address(persona_securified_on_ledger.address())
+            .unwrap()
+            .is_securified());
     }
 
     fn mock_location_responses(

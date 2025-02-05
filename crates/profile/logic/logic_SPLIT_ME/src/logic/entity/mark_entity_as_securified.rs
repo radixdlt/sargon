@@ -15,7 +15,6 @@ impl ProfileMarkEntityAsSecurified for Profile {
         entity_address: AddressOfAccountOrPersona,
     ) -> Result<AccountOrPersona> {
         let mut entity = self.entity_by_address(entity_address)?;
-
         let transaction_signing = entity
             .security_state()
             .as_unsecured()
@@ -37,6 +36,8 @@ impl ProfileMarkEntityAsSecurified for Profile {
         entity.set_security_state(EntitySecurityState::Securified {
             value: secured_entity_control,
         })?;
+
+        self.update_entities_erased(IdentifiedVecOf::just(entity.clone()))?;
 
         Ok(entity)
     }
