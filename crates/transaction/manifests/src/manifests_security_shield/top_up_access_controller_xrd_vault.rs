@@ -90,8 +90,8 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             let payer_is_entity_applying_shield =
                 entity_applying_shield.address() == payer.address().into();
             if payer_is_entity_applying_shield {
-                let cannot_exercise_primary_role =
-                    !manifest.explicitly_references_primary_role();
+                let cannot_exercise_primary_role = !manifest
+                    .implicitly_or_explicitly_references_primary_role();
                 let is_unable_to_top_up_xrd_vault =
                     payer_is_entity_applying_shield
                         && cannot_exercise_primary_role;
@@ -99,7 +99,11 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
                     // The payer is the entity applying the shield, but the manifest is not classified as
                     // to be able to exercise the primary role. Thus we will not be able to
                     // top up the XRD vault of the access controller.
-                    return Err(CommonError::Unknown); // TODO: Add error
+                    return Err(CommonError::UnableToTopUpXrdVault {
+                        payer_is_entity_applying_shield,
+                        can_exericse_primary_role:
+                            !cannot_exercise_primary_role,
+                    });
                 }
             }
         }

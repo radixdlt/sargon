@@ -59,11 +59,44 @@ impl ApplySecurityShieldCommitting for SargonOS {
 mod tests {
     use super::*;
 
-    #[ignore = "Make it possible to mock XRD fetcher"]
     #[actix_rt::test]
     async fn test() {
-        let (os, bdfs) = SargonOS::with_bdfs().await;
+        let network_id = NetworkID::Mainnet;
+        let mock_networking_driver: Arc<dyn NetworkingDriver> =
+            Arc::new(MockNetworkingDriver::with_lazy_response(
+                |req: StateEntityDetailsRequest,
+                 _: u64|
+                 -> StateEntityDetailsResponse {
+                    println!("🔮🔮🔮 Mocking response for request: {:?}", req);
+                    StateEntityDetailsResponse::new(
+                        None,
+                        req.addresses.iter().map(|address| {
+                            let items =
+                                vec![FungibleResourcesCollectionItem::global(
+                                    ResourceAddress::xrd_on_network(
+                                        NetworkID::Mainnet,
+                                    ),
+                                    Decimal::from_str("10000000").unwrap(),
+                                )];
+                            StateEntityDetailsResponseItem::new(
+                                address.clone(),
+                                FungibleResourcesCollection::new(
+                                    None, None, items,
+                                ),
+                                None, // non-fungible
+                                EntityMetadataCollection::empty(),
+                                None, // details
+                            )
+                        }),
+                    )
+                },
+            ));
 
+        let os =
+            SargonOS::boot_test_with_networking_driver(mock_networking_driver)
+                .await
+                .unwrap();
+        let bdfs = os.main_bdfs().unwrap();
         let ledger = FactorSource::sample_at(1);
         let arculus = FactorSource::sample_at(3);
         let password = FactorSource::sample_at(5);
@@ -110,14 +143,6 @@ mod tests {
             .unwrap()
             .address;
 
-        let carol = os
-            .create_and_save_new_mainnet_account_with_main_bdfs(
-                DisplayName::new("Bob").unwrap(),
-            )
-            .await
-            .unwrap()
-            .address;
-
         let manifests = os
             .make_interaction_for_applying_security_shield(
                 shield_id,
@@ -131,8 +156,6 @@ mod tests {
             .transactions;
 
         let mut manifests_iter = manifests.iter();
-
-        let network_id = NetworkID::Mainnet;
 
         // ============================================
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -154,8 +177,7 @@ mod tests {
             ),
         ];
 
-        let mut committer =
-            ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+        let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
 
         let txids = committer
             .commit(network_id, manifest_and_payer_tuples)

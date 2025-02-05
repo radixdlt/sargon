@@ -245,18 +245,40 @@ impl RolesExercisableInTransactionManifestCombination {
 }
 
 pub trait TransactionManifestExplicitlyReferencesPrimaryRole {
-    fn explicitly_references_primary_role(&self) -> bool;
+    fn __constains_call_method_instruction_with_method_named(
+        &self,
+        method_name: &str,
+    ) -> bool;
+
+    fn _explicitly_references_primary_role(&self) -> bool {
+        self.__constains_call_method_instruction_with_method_named(
+            SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
+        )
+    }
+
+    fn _implicitly_references_primary_role(&self) -> bool {
+        self.__constains_call_method_instruction_with_method_named(
+            SCRYPTO_ACCOUNT_SECURIFY_IDENT,
+        ) || self.__constains_call_method_instruction_with_method_named(
+            SCRYPTO_IDENTITY_SECURIFY_IDENT,
+        )
+    }
+
+    fn implicitly_or_explicitly_references_primary_role(&self) -> bool {
+        self._explicitly_references_primary_role()
+            || self._implicitly_references_primary_role()
+    }
 }
+
 impl TransactionManifestExplicitlyReferencesPrimaryRole
     for TransactionManifest
 {
-    fn explicitly_references_primary_role(&self) -> bool {
-        let has = |identifier: &str| -> bool {
-            self.instructions()
-                .iter()
-                .any(|instruction| matches!(instruction, ScryptoInstruction::CallMethod(method) if method.method_name == identifier))
-        };
-
-        has(SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT)
+    fn __constains_call_method_instruction_with_method_named(
+        &self,
+        method_name: &str,
+    ) -> bool {
+        self.instructions()
+            .iter()
+            .any(|instruction| matches!(instruction, ScryptoInstruction::CallMethod(method) if method.method_name == method_name))
     }
 }

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
+// #[derive(Debug)]
 pub struct Bios {
     pub drivers: Arc<Drivers>,
 }
