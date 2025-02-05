@@ -216,4 +216,15 @@ impl SargonOS {
             .await
             .into_result()
     }
+
+    /// Performs a spot check on the factor source, and returns whether the spot check was successful.
+    pub async fn perform_spot_check(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<bool> {
+        self.wrapped
+            .perform_spot_check(factor_source.into_internal())
+            .await
+            .into_result()
+    }
 }

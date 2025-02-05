@@ -26,7 +26,10 @@ impl SargonOS {
                 Arc::new(UseFactorSourcesInteractorAdapter::new(
                     interactor.clone(),
                 )),
-                Arc::new(AuthorizationInteractorAdapter::new(interactor)),
+                Arc::new(AuthorizationInteractorAdapter::new(
+                    interactor.clone(),
+                )),
+                Arc::new(SpotCheckInteractorAdapter::new(interactor)),
             ),
         )
         .await;
