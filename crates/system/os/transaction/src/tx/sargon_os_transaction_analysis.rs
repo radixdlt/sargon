@@ -955,7 +955,7 @@ mod transaction_preview_analysis_tests {
         let _ = os
             .apply_security_shield_with_id_to_entities(
                 structure_source_ids_sample.id(),
-                IndexSet::just(entity_address_to_securify.clone()),
+                IndexSet::just(entity_address_to_securify),
             )
             .await
             .unwrap();
@@ -979,7 +979,7 @@ mod transaction_preview_analysis_tests {
                 .first()
                 .unwrap(),
             DetailedManifestClass::SecurifyEntity {
-                entity_address: entity_address_to_securify.clone(),
+                entity_address: entity_address_to_securify,
                 provisional_security_structure_metadata:
                     structure_source_ids_sample.metadata
             }
@@ -1030,7 +1030,7 @@ mod transaction_preview_analysis_tests {
         let _ = os
             .apply_security_shield_with_id_to_entities(
                 structure_source_ids_sample.id(),
-                IndexSet::just(entity_address_to_securify.clone()),
+                IndexSet::just(entity_address_to_securify),
             )
             .await
             .unwrap();
@@ -1054,7 +1054,7 @@ mod transaction_preview_analysis_tests {
                 .first()
                 .unwrap(),
             DetailedManifestClass::SecurifyEntity {
-                entity_address: entity_address_to_securify.clone(),
+                entity_address: entity_address_to_securify,
                 provisional_security_structure_metadata:
                     structure_source_ids_sample.metadata
             }
