@@ -15,10 +15,12 @@ impl SargonOS {
     ///    Action => to mark them as tombstoned
     /// 2. Checks if entities with provisional shield are securified on ledger.
     ///    Action => to mark them as securified
-    /// TODO more checks will be developed...
-    async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport> {
+    /// 3. more checks will be developed...
+    async fn wip_sync_entities_state_on_ledger(
+        &self,
+    ) -> Result<EntitySyncReport> {
         self.wrapped
-            .sync_entities_state_on_ledger()
+            .wip_sync_entities_state_on_ledger()
             .await
             .into_result()
     }

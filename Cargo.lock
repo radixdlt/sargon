@@ -3918,6 +3918,7 @@ dependencies = [
  "pretty_assertions",
  "profile",
  "profile-logic",
+ "radix-common",
  "radix-connect",
  "sargon-os",
  "serde",

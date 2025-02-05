@@ -890,6 +890,11 @@ pub enum CommonError {
 
     #[error("Entity has no provisional security config set")]
     EntityHasNoProvisionalSecurityConfigSet = 10253,
+
+    #[error("Entity {entity_bech32m_encoded_address} is not controller by access controller on ledger")]
+    EntityIsNotControlledByAnAccessControllerOnLedger {
+        entity_bech32m_encoded_address: String,
+    } = 10254,
 }
 
 impl CommonError {

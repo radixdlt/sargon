@@ -2,7 +2,9 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait OsSyncEntitiesStateOnLedger {
-    async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport>;
+    async fn wip_sync_entities_state_on_ledger(
+        &self,
+    ) -> Result<EntitySyncReport>;
 
     async fn sync_accounts_deleted_on_ledger(&self) -> Result<bool>;
     async fn check_accounts_deleted_on_ledger(
@@ -17,6 +19,8 @@ pub trait OsSyncEntitiesStateOnLedger {
 // ==================
 #[async_trait::async_trait]
 impl OsSyncEntitiesStateOnLedger for SargonOS {
+    /// **WORK IN PROGRESS**
+    ///
     /// Syncs entities in profile with on ledger state.
     /// Returns a summary report of the actions performed.
     ///
@@ -25,8 +29,10 @@ impl OsSyncEntitiesStateOnLedger for SargonOS {
     ///    Action => to mark them as tombstoned
     /// 2. Checks if entities with provisional shield are securified on ledger.
     ///    Action => to mark them as securified
-    /// TODO more checks will be developed...
-    async fn sync_entities_state_on_ledger(&self) -> Result<EntitySyncReport> {
+    /// 3. more checks will be developed...
+    async fn wip_sync_entities_state_on_ledger(
+        &self,
+    ) -> Result<EntitySyncReport> {
         let mut entities = Vec::<AddressOfAccountOrPersona>::new();
         entities.extend(self.accounts_on_current_network().map(
             |accounts| {
@@ -448,7 +454,7 @@ mod tests {
         .await
         .unwrap();
 
-        let report = sut.sync_entities_state_on_ledger().await.unwrap();
+        let report = sut.wip_sync_entities_state_on_ledger().await.unwrap();
 
         assert!(report
             .actions_performed
