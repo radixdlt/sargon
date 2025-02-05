@@ -48,8 +48,7 @@ impl OsSyncAccountsDeletedOnLedger for SargonOS {
             .await?;
 
         // Collect sync actions based on the profile state
-        let mut sync_actions =
-            IndexMap::<AddressOfAccountOrPersona, EntitySyncAction>::new();
+        let mut sync_actions = IndexSet::<EntitySyncAction>::new();
         for (entity_address, maybe_ancestor_address) in
             ancestor_address_per_entity
         {
@@ -65,6 +64,7 @@ impl OsSyncAccountsDeletedOnLedger for SargonOS {
 
                     if !entity.is_securified() {
                         EntitySyncAction::ToSecurify(
+                            entity_address,
                             access_controller_ancestor_address,
                         )
                     } else {
@@ -77,7 +77,7 @@ impl OsSyncAccountsDeletedOnLedger for SargonOS {
                     if AddressOfAccountOrPersona::from(account_ancestor_address)
                         == entity_address
                     {
-                        EntitySyncAction::ToTombstone
+                        EntitySyncAction::ToTombstone(account_ancestor_address)
                     } else {
                         continue;
                     }
@@ -87,25 +87,33 @@ impl OsSyncAccountsDeletedOnLedger for SargonOS {
                 }
             };
 
-            sync_actions.insert(entity_address, sync_action);
+            sync_actions.insert(sync_action);
         }
 
         if !sync_actions.is_empty() {
             // Perform sync
-            self.update_profile_with(move |profile| {
+            self.update_profile_with(|profile| {
                 let mut actions_performed = IndexSet::<EntitySyncActionPerformed>::new();
 
-                for (address, action) in &sync_actions {
+                for action in &sync_actions {
                     match action {
-                        EntitySyncAction::ToTombstone => {
-                            // profile.networks.tombstone_account(&address);
+                        EntitySyncAction::ToTombstone(account_address) => {
+                            profile.networks.tombstone_account(account_address);
                             actions_performed.insert(EntitySyncActionPerformed::SomeEntitiesTombstoned);
                         }
-                        EntitySyncAction::ToSecurify(access_controller_address) => {
-                            // self.mark_entity_as_securified(
-                            //     *access_controller_address,
-                            //     AddressOfAccountOrPersona::from(*address)
-                            // )?;  // TODO What if not provisional state?
+                        EntitySyncAction::ToSecurify(
+                            entity_address,
+                            access_controller_address
+                        ) => {
+                            profile.mark_entity_as_securified(
+                                *access_controller_address,
+                                *entity_address
+                            )?;
+
+                            // TODO What if not in provisional state?
+                            // 1. Should we not early return error, perform sync in all
+                            //    remaining entities and
+                            // 2. report that this entity is in bad state?
 
                             actions_performed.insert(EntitySyncActionPerformed::SomeEntitiesSecurified);
                         }
@@ -176,12 +184,14 @@ impl OsSyncAccountsDeletedOnLedger for SargonOS {
     }
 }
 
+/// An action that implies a synchronisation needs to be applied in an entity in the local profile.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 enum EntitySyncAction {
-    ToTombstone,
-    ToSecurify(AccessControllerAddress),
+    ToTombstone(AccountAddress),
+    ToSecurify(AddressOfAccountOrPersona, AccessControllerAddress),
 }
 
+/// The kinds of sync actions performed on entities in profile.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub enum EntitySyncActionPerformed {
     SomeEntitiesTombstoned,
@@ -208,15 +218,27 @@ impl EntitySyncReport {
 
 #[cfg(test)]
 mod tests {
-    use crate::prelude::*;
+    use super::*;
     use actix_rt::time::timeout;
+    use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
+    use radix_common::prelude::IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE;
+    use sargon_os_factors::prelude::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
-    use crate::sargon_os_sync_accounts::EntitySyncAction;
-    use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
-    use radix_common::prelude::IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE;
+    impl EntitySyncAction {
+        fn entity_address(&self) -> AddressOfAccountOrPersona {
+            match self {
+                EntitySyncAction::ToTombstone(account_address) => {
+                    AddressOfAccountOrPersona::from(*account_address)
+                }
+                EntitySyncAction::ToSecurify(entity_address, _) => {
+                    *entity_address
+                }
+            }
+        }
+    }
 
     #[actix_rt::test]
     async fn test_sync_accounts_deleted_on_ledger() {
@@ -352,37 +374,30 @@ mod tests {
             account_securified_on_ledger.clone(),
         ];
         let mock_driver = MockNetworkingDriver::new_with_responses(
-            mock_location_responses(HashMap::from_iter([
-                (
-                    AddressOfAccountOrPersona::from(
-                        account_deleted_on_ledger.address,
-                    ),
-                    EntitySyncAction::ToTombstone,
+            mock_location_responses(vec![
+                EntitySyncAction::ToTombstone(
+                    account_deleted_on_ledger.address,
                 ),
-                (
+                EntitySyncAction::ToSecurify(
                     AddressOfAccountOrPersona::from(
                         account_securified_on_ledger.address,
                     ),
-                    EntitySyncAction::ToSecurify(
-                        AccessControllerAddress::sample_mainnet(),
-                    ),
+                    AccessControllerAddress::sample_mainnet(),
                 ),
-                (
+                EntitySyncAction::ToSecurify(
                     AddressOfAccountOrPersona::from(
-                        identity_securified_on_ledger.address,
+                        identity_securified_on_ledger.clone().address,
                     ),
-                    EntitySyncAction::ToSecurify(
-                        AccessControllerAddress::sample_mainnet_other(),
-                    ),
+                    AccessControllerAddress::sample_mainnet_other(),
                 ),
-            ])),
+            ]),
         );
         let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
-        let os = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+        let sut = timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
             .await
             .unwrap()
             .unwrap();
-        os.import_wallet(
+        sut.import_wallet(
             &Profile::with(
                 Header::sample(),
                 FactorSources::sample(),
@@ -390,7 +405,7 @@ mod tests {
                 ProfileNetworks::just(ProfileNetwork::new(
                     NetworkID::Mainnet,
                     all_initial_accounts.clone(),
-                    vec![identity_securified_on_ledger],
+                    vec![identity_securified_on_ledger.clone()],
                     AuthorizedDapps::new(),
                     ResourcePreferences::new(),
                 )),
@@ -400,7 +415,31 @@ mod tests {
         .await
         .unwrap();
 
-        let report = os.sync_entities_state_on_ledger().await.unwrap();
+        sut.add_factor_sources(FactorSources::sample_values_all_hd())
+            .await
+            .unwrap();
+        let structure_source_ids_sample =
+            SecurityStructureOfFactorSourceIDs::sample();
+        sut.add_security_structure_of_factor_source_ids(
+            &structure_source_ids_sample,
+        )
+        .await
+        .unwrap();
+        sut.apply_security_shield_with_id_to_entities(
+            structure_source_ids_sample.id(),
+            IndexSet::from_iter([
+                AddressOfAccountOrPersona::from(
+                    account_securified_on_ledger.address,
+                ),
+                AddressOfAccountOrPersona::from(
+                    identity_securified_on_ledger.address,
+                ),
+            ]),
+        )
+        .await
+        .unwrap();
+
+        let report = sut.sync_entities_state_on_ledger().await.unwrap();
 
         assert!(report
             .actions_performed
@@ -411,34 +450,26 @@ mod tests {
     }
 
     fn mock_location_responses(
-        entity_with_action: HashMap<
-            AddressOfAccountOrPersona,
-            EntitySyncAction,
-        >,
+        sync_actions: Vec<EntitySyncAction>,
     ) -> Vec<MockNetworkingDriverResponse> {
-        let location_responses = |input: HashMap<
-            AddressOfAccountOrPersona,
-            EntitySyncAction,
-        >|
-         -> Vec<
+        let location_responses = |input: Vec<EntitySyncAction>| -> Vec<
             StateNonFungibleLocationResponseItem,
         > {
             input
                 .into_iter()
-                .map(|(address, action)| {
-                    let local_id = NonFungibleLocalId::from(address.clone());
-                    let ancestor = match action {
-                        EntitySyncAction::ToTombstone => match address {
-                            AddressOfAccountOrPersona::Account(
-                                account_address,
-                            ) => Address::from(account_address),
-                            AddressOfAccountOrPersona::Identity(
-                                identity_address,
-                            ) => Address::from(identity_address),
-                        },
+                .map(|action| {
+                    let (ancestor, local_id) = match action {
+                        EntitySyncAction::ToTombstone(account_address) => (
+                            Address::from(account_address),
+                            NonFungibleLocalId::from(account_address),
+                        ),
                         EntitySyncAction::ToSecurify(
+                            entity_address,
                             access_controller_address,
-                        ) => Address::from(access_controller_address),
+                        ) => (
+                            Address::from(access_controller_address),
+                            NonFungibleLocalId::from(entity_address),
+                        ),
                     };
 
                     StateNonFungibleLocationResponseItem {
@@ -462,11 +493,11 @@ mod tests {
                 )
                 .unwrap(),
                 non_fungible_ids: location_responses(
-                    entity_with_action
+                    sync_actions
                         .clone()
                         .into_iter()
-                        .filter(|(address, action)| address.is_account())
-                        .collect::<HashMap<_, _>>(),
+                        .filter(|action| action.entity_address().is_account())
+                        .collect_vec(),
                 ),
             },
         );
@@ -480,10 +511,11 @@ mod tests {
                 )
                 .unwrap(),
                 non_fungible_ids: location_responses(
-                    entity_with_action
+                    sync_actions
+                        .clone()
                         .into_iter()
-                        .filter(|(address, action)| address.is_identity())
-                        .collect::<HashMap<_, _>>(),
+                        .filter(|action| action.entity_address().is_identity())
+                        .collect_vec(),
                 ),
             },
         );

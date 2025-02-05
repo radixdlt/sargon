@@ -15,7 +15,6 @@ transaction-models = { workspace = true }
 manifests = { workspace = true }
 gateway-client-and-api = { workspace = true }
 profile-logic = { workspace = true }
-sargon-os-factors = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-engine-interface = { workspace = true }
@@ -29,3 +28,6 @@ indexmap = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true }
 itertools = { workspace = true }
+
+[dev-dependencies]
+sargon-os-factors = { workspace = true }

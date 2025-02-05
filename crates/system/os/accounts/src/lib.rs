@@ -12,7 +12,6 @@ pub mod prelude {
     pub use prelude::prelude::*;
     pub(crate) use profile_logic::prelude::*;
     pub(crate) use sargon_os::prelude::*;
-    pub(crate) use sargon_os_factors::prelude::*;
 
     pub(crate) use indexmap::IndexMap;
     pub(crate) use itertools::Itertools;
