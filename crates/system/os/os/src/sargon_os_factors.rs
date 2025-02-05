@@ -518,6 +518,44 @@ impl SargonOS {
     }
 }
 
+impl SargonOS {
+    /// Performs a spot check on the factor source, and returns whether the spot check was successful.
+    pub async fn perform_spot_check(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<bool> {
+        let factor_source_id = factor_source.factor_source_id();
+        let Some(id_from_hash) = factor_source_id.as_hash().cloned() else {
+            panic!("Address FactorSourceID not supported for spot check")
+        };
+        let response = self
+            .spot_check_interactor()
+            .spot_check(id_from_hash)
+            .await?;
+        let kind = factor_source_id.get_factor_source_kind();
+        match response {
+            SpotCheckResponse::Ledger { id } => {
+                assert_eq!(
+                    kind,
+                    FactorSourceKind::LedgerHQHardwareWallet,
+                    "Unexpected Ledger Response for {:?}",
+                    kind
+                );
+                let built_id = FactorSourceIDFromHash::new(kind, id);
+                Ok(built_id == id_from_hash)
+            }
+            SpotCheckResponse::MnemonicWithPassphrase { value } => {
+                assert_ne!(kind, FactorSourceKind::LedgerHQHardwareWallet, "Unexpected MnemonicWithPassphrase Response for LedgerHQHardwareWallet");
+                let built_id =
+                    FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+                        kind, &value,
+                    );
+                Ok(built_id == id_from_hash)
+            }
+        }
+    }
+}
+
 #[cfg(debug_assertions)]
 impl SargonOS {
     /// For tests
