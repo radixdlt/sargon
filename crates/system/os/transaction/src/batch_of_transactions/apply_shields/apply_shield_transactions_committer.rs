@@ -5,7 +5,7 @@ pub trait ApplyShieldTransactionsCommitter: Send + Sync {
     async fn commit(
         &self,
         network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<IndexSet<TransactionIntentHash>>;
 }
 
@@ -35,7 +35,7 @@ impl ApplyShieldTransactionsCommitter for ApplyShieldTransactionsCommitterImpl {
     async fn commit(
         &self,
         network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<IndexSet<TransactionIntentHash>> {
         let payload_to_sign = self
             .builder

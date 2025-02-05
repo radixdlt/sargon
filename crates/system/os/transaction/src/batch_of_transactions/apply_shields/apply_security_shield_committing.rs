@@ -37,7 +37,7 @@ pub trait ApplySecurityShieldCommitting: Send + Sync {
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
         &self,
         network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<IndexSet<TransactionIntentHash>>;
 }
 
@@ -46,7 +46,7 @@ impl ApplySecurityShieldCommitting for SargonOS {
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
         &self,
         network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<IndexSet<TransactionIntentHash>> {
         let committer = ApplyShieldTransactionsCommitterImpl::new(self)?;
         committer
@@ -55,108 +55,113 @@ impl ApplySecurityShieldCommitting for SargonOS {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[actix_rt::test]
-//     async fn test() {
-//         let (os, bdfs) = SargonOS::with_bdfs().await;
+    #[ignore = "Make it possible to mock XRD fetcher"]
+    #[actix_rt::test]
+    async fn test() {
+        let (os, bdfs) = SargonOS::with_bdfs().await;
 
-//         let ledger = FactorSource::sample_at(1);
-//         let arculus = FactorSource::sample_at(3);
-//         let password = FactorSource::sample_at(5);
-//         let off_device_mnemonic = FactorSource::sample_at(7);
-//         os.add_factor_source(ledger).await;
-//         os.add_factor_source(arculus).await;
-//         os.add_factor_source(password).await;
-//         os.add_factor_source(off_device_mnemonic).await;
+        let ledger = FactorSource::sample_at(1);
+        let arculus = FactorSource::sample_at(3);
+        let password = FactorSource::sample_at(5);
+        let off_device_mnemonic = FactorSource::sample_at(7);
+        os.add_factor_source(ledger.clone()).await.unwrap();
+        os.add_factor_source(arculus.clone()).await.unwrap();
+        os.add_factor_source(password.clone()).await.unwrap();
+        os.add_factor_source(off_device_mnemonic.clone())
+            .await
+            .unwrap();
 
-//         let shield_builder = SecurityShieldBuilder::lenient();
+        let shield_builder = SecurityShieldBuilder::lenient();
 
-//         let shield = shield_builder
-//             .add_factor_source_to_primary_threshold(bdfs.factor_source_id())
-//             .add_factor_source_to_primary_threshold(ledger.factor_source_id())
-//             .add_factor_source_to_recovery_override(password.factor_source_id())
-//             .add_factor_source_to_recovery_override(
-//                 off_device_mnemonic.factor_source_id(),
-//             )
-//             .build()
-//             .unwrap();
+        let shield = shield_builder
+            .add_factor_source_to_primary_threshold(bdfs.factor_source_id())
+            .add_factor_source_to_primary_threshold(password.factor_source_id())
+            .add_factor_source_to_recovery_override(ledger.factor_source_id())
+            .add_factor_source_to_confirmation_override(
+                off_device_mnemonic.factor_source_id(),
+            )
+            .set_authentication_signing_factor(bdfs.factor_source_id())
+            .build()
+            .unwrap();
 
-//         let shield_id = shield.id();
+        let shield_id = shield.id();
 
-//         os.add_security_structure_of_factor_source_ids(shield)
-//             .await
-//             .unwrap();
+        os.add_security_structure_of_factor_source_ids(&shield)
+            .await
+            .unwrap();
 
-//         let alice = os
-//             .create_and_save_new_mainnet_account_with_main_bdfs(
-//                 DisplayName::new("Alice").unwrap(),
-//             )
-//             .await
-//             .unwrap()
-//             .address;
+        let alice = os
+            .create_and_save_new_mainnet_account_with_main_bdfs(
+                DisplayName::new("Alice").unwrap(),
+            )
+            .await
+            .unwrap()
+            .address;
 
-//         let bob = os
-//             .create_and_save_new_mainnet_account_with_main_bdfs(
-//                 DisplayName::new("Bob").unwrap(),
-//             )
-//             .await
-//             .unwrap()
-//             .address;
+        let bob = os
+            .create_and_save_new_mainnet_account_with_main_bdfs(
+                DisplayName::new("Bob").unwrap(),
+            )
+            .await
+            .unwrap()
+            .address;
 
-//         let carol = os
-//             .create_and_save_new_mainnet_account_with_main_bdfs(
-//                 DisplayName::new("Bob").unwrap(),
-//             )
-//             .await
-//             .unwrap()
-//             .address;
+        let carol = os
+            .create_and_save_new_mainnet_account_with_main_bdfs(
+                DisplayName::new("Bob").unwrap(),
+            )
+            .await
+            .unwrap()
+            .address;
 
-//         let manifests = os
-//             .make_interaction_for_applying_security_shield(
-//                 shield_id,
-//                 IndexSet::from_iter([alice.clone(), bob.clone()]),
-//             )
-//             .await
-//             .unwrap()
-//             .transactions
-//             .iter();
+        let manifests = os
+            .make_interaction_for_applying_security_shield(
+                shield_id,
+                IndexSet::from_iter([
+                    AddressOfAccountOrPersona::from(alice.clone()),
+                    bob.clone().into(),
+                ]),
+            )
+            .await
+            .unwrap()
+            .transactions;
 
-//         // ============================================
-//         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//         // User reviews TXs in Radix Wallet app and
-//         // selects fee payer (optional) and slides to
-//         // sign.
-//         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//         // ============================================
-//         let manifest_and_payer_tuples =
-//             IndexSet::from_iter(
-//                 [
-//                     ManifestWithPayerByAddress::new(
-//                         manifests.next().unwrap(),
-//                         None,
-//                         Decimal::five(),
-//                     ),
-//                     ManifestWithPayerByAddress::new(
-//                         manifests.next().unwrap(),
-//                         None,
-//                         Decimal::five(),
-//                     ),
-//                 ]
-//             );
+        let mut manifests_iter = manifests.iter();
 
-//         // os.sign_and_enqueue_batch_of_transactions_applying_security_shield(
-//         //     NetworkID::Mainnet,
-//         //     IndexSet::new(),
-//         // )
-//         // .await;
+        let network_id = NetworkID::Mainnet;
 
-//         let mut committer = ApplyShieldTransactionsCommitterImpl::new(&os)?;
+        // ============================================
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // User reviews TXs in Radix Wallet app and
+        // selects fee payer (optional) and slides to
+        // sign.
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // ============================================
+        let manifest_and_payer_tuples = vec![
+            ManifestWithPayerByAddress::new(
+                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
+                None,
+                Decimal::five(),
+            ),
+            ManifestWithPayerByAddress::new(
+                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
+                None,
+                Decimal::five(),
+            ),
+        ];
 
-//         committer
-//             .commit(network_id, manifest_and_payer_tuples)
-//             .await
-//     }
-// }
+        let mut committer =
+            ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+
+        let txids = committer
+            .commit(network_id, manifest_and_payer_tuples)
+            .await
+            .unwrap();
+
+        assert_eq!(txids.len(), 2);
+    }
+}

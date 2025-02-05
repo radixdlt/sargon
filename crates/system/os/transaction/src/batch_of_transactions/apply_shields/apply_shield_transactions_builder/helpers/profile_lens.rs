@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub trait ApplyShieldTransactionsProfileLens: Send + Sync {
     fn lookup_entities_for_manifests(
         &self,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<Vec<ShieldApplicationInputWithoutXrdBalance>>;
 }
 
@@ -79,7 +79,9 @@ impl ApplyShieldTransactionsProfileLensImpl {
                 payer_addresses.contains(&i.address_of_entity_applying_shield())
             })
         {
-            return Err(CommonError::Unknown); // CommonError::PayerCannotBeInBatchOfEntitiesApplyingShield
+            return Err(
+                CommonError::PayerCannotBeInBatchOfEntitiesApplyingShield,
+            );
         }
 
         Ok(())
@@ -128,7 +130,7 @@ impl ApplyShieldTransactionsProfileLens
 {
     fn lookup_entities_for_manifests(
         &self,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<Vec<ShieldApplicationInputWithoutXrdBalance>> {
         let manifests_with_entities_without_xrd_balances = manifest_and_payer_tuples
             .into_iter()

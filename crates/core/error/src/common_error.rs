@@ -896,6 +896,23 @@ pub enum CommonError {
         expected_specific_type: String,
         got_value: String,
     } = 10254,
+
+    #[error("Payer cannot be in batch of entities applying shield")]
+    PayerCannotBeInBatchOfEntitiesApplyingShield = 10255,
+
+    #[error("No XrdBalance fetched for entity or XrdVault, address {address}")]
+    NoXrdBalanceFetchedForEntityOrXrdVault { address: String } = 10256,
+
+    #[error("Unable to contribute to AccessControllers Xrd Vault, insufficient balance of payer {payer}, vault of entity {vault_of_entity}, payer balance {payer_balance}, needed balance {needed_balance}")]
+    UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+        payer: String,
+        vault_of_entity: String,
+        payer_balance: String,
+        needed_balance: String,
+    } = 10257,
+
+    #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
+    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10258,
 }
 
 impl CommonError {

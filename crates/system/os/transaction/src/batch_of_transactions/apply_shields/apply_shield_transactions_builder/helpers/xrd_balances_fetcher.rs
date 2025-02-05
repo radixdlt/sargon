@@ -118,9 +118,12 @@ impl XrdBalances {
         &mut self,
         address: impl Into<AddressOfPayerOfShieldApplication>,
     ) -> Result<Decimal> {
-        self.0
-            .shift_remove(&address.into())
-            .ok_or(CommonError::Unknown) // TODO: Special Error case
+        let address = address.into();
+        self.0.shift_remove(&address).ok_or(
+            CommonError::NoXrdBalanceFetchedForEntityOrXrdVault {
+                address: address.to_string(),
+            },
+        )
     }
 
     fn take_securified_payer(

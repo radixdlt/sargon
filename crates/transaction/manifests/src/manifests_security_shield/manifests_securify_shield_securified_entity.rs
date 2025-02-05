@@ -107,11 +107,6 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
             }
         }
 
-        let manifest = TransactionManifest::sargon_built(
-            builder,
-            securified_entity.network_id(),
-        );
-
         // N.B.
         // We will not lock fee against the XRD vault yet - we will do that
         // later when we have made a preview/dry-run of the `manifest` to get
@@ -124,7 +119,10 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         // after user has selected account to pay in wallet GUI. And also call
         // `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`
 
-        manifest
+        TransactionManifest::sargon_built(
+            builder,
+            securified_entity.network_id(),
+        )
     }
 }
 
@@ -185,8 +183,7 @@ mod tests {
             entity_applying_shield.clone(),
             instances,
             roles,
-        )
-        .unwrap();
+        );
         let expected_manifest_str = rtm();
         manifest_eq(manifest.clone(), expected_manifest_str);
         manifest

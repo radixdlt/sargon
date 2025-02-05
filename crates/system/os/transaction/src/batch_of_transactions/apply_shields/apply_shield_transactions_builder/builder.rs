@@ -5,7 +5,7 @@ pub trait ApplyShieldTransactionsBuilder: Send + Sync {
     async fn build_payload_to_sign(
         &self,
         network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<ApplySecurityShieldPayloadToSign>;
 }
 
@@ -62,7 +62,7 @@ impl ApplyShieldTransactionsBuilder for ApplyShieldTransactionsBuilderImpl {
     async fn build_payload_to_sign(
         &self,
         network_id: NetworkID,
-        manifest_and_payer_tuples: IndexSet<ManifestWithPayerByAddress>,
+        manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<ApplySecurityShieldPayloadToSign> {
         // Map Address -> Entity by Profile lookup
         let manifests_with_entities_without_xrd_balances = self

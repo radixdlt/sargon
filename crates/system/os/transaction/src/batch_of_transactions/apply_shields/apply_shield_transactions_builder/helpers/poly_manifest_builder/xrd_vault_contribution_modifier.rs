@@ -51,10 +51,16 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
     ) -> Result<ApplicationInputForUnsecurifiedAccount> {
         let payer_balance = input.xrd_balance_of_paying_account();
 
-        if payer_balance
-            < input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition()
-        {
-            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+        let needed_balance =
+            input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition();
+
+        if payer_balance < needed_balance {
+            return Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+                payer: input.payer().address.to_string(),
+                vault_of_entity: input.entity_input.unsecurified_entity.address().to_string(),
+                payer_balance: payer_balance.to_string(),
+                needed_balance: needed_balance.to_string(),
+            });
         }
 
         let payer = input
@@ -79,11 +85,17 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         ApplicationInputPayingAccount,
     )> {
         let payer_balance = input.xrd_balance_of_paying_account();
-
+        let needed_balance =
+            input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition();
         if payer_balance
             < input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition()
         {
-            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+            return Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+                payer: input.payer().address.to_string(),
+                vault_of_entity: input.entity_input.address().to_string(),
+                payer_balance: payer_balance.to_string(),
+                needed_balance: needed_balance.to_string(),
+            });
         }
 
         let payer_info = input.paying_account.clone();
@@ -110,15 +122,19 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
             // after time delay).
             return Ok(input);
         }
+        let entity = input.entity_input.clone().securified_account;
         let payer = input.xrd_balance_and_account_topping_up();
-
-        if payer.balance < input.xrd_needed_for_tx_fee_and_xrd_vault_top_up() {
-            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+        let needed_balance = input.xrd_needed_for_tx_fee_and_xrd_vault_top_up();
+        if payer.balance < needed_balance {
+            return Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+                payer: payer.entity.address.to_string(),
+                vault_of_entity: entity.address().to_string(),
+                payer_balance: payer.balance.to_string(),
+                needed_balance: needed_balance.to_string(),
+            });
         }
 
         let payer = payer.entity.clone();
-
-        let entity = input.entity_input.clone().securified_account;
 
         input.modifying_manifest(|m| {
                 TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None)
@@ -137,20 +153,27 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
             // after time delay).
             return Ok(input);
         }
+
         let Some(payer) = input.xrd_balance_and_account_topping_up() else {
-            return Err(CommonError::Unknown); // CommonError::NoAccountToTopUpXrdVault
+            return Err(
+                CommonError::UnableContributeToAcXrdVaultPersonaRequiresPayer,
+            );
         };
 
+        let entity = input.entity_input.clone().securified_persona;
+        let payer_info = payer.clone();
+        let needed_balance = input.xrd_needed_for_tx_fee_and_xrd_vault_top_up();
         if payer.xrd_balance_of_account()
             < input.xrd_needed_for_tx_fee_and_xrd_vault_top_up()
         {
-            return Err(CommonError::Unknown); // CommonError::InsufficientXrdBalance
+            return Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+                payer: payer_info.account().to_string(),
+                vault_of_entity: entity.address().to_string(),
+                payer_balance: payer.xrd_balance_of_account().to_string(),
+                needed_balance: needed_balance.to_string(),
+            });
         }
-
-        let payer_info = payer.clone();
         let payer = payer_info.account();
-
-        let entity = input.entity_input.clone().securified_persona;
 
         input.modifying_manifest(|m| {
                 TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None)
