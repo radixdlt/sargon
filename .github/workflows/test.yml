@@ -207,7 +207,7 @@ jobs:
           role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
           app_name: 'sargon'
           step_name: 'sargon-code-cov-token'
-          prefix: GH_CODECOV
+          secret_prefix: GH_CODECOV
           secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
           parse_json: true
 
@@ -248,7 +248,7 @@ jobs:
           role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
           app_name: 'sargon'
           step_name: 'sargon-code-cov-token'
-          prefix: GH_CODECOV
+          secret_prefix: GH_CODECOV
           secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
           parse_json: true
 
@@ -312,7 +312,7 @@ jobs:
           role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
           app_name: 'sargon'
           step_name: 'sargon-code-cov-token'
-          prefix: GH_CODECOV
+          secret_prefix: GH_CODECOV
           secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
           parse_json: true
           
