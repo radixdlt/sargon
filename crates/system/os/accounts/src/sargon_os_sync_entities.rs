@@ -213,10 +213,30 @@ pub enum EntitySyncActionPerformed {
     SomeEntitiesSecurified,
 }
 
+impl HasSampleValues for EntitySyncActionPerformed {
+    fn sample() -> Self {
+        Self::SomeEntitiesTombstoned
+    }
+
+    fn sample_other() -> Self {
+        Self::SomeEntitiesSecurified
+    }
+}
+
 /// The report that gathers the different actions performed on profile after sync completes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EntitySyncReport {
     pub actions_performed: IndexSet<EntitySyncActionPerformed>,
+}
+
+impl HasSampleValues for EntitySyncReport {
+    fn sample() -> Self {
+        Self::new(IndexSet::just(EntitySyncActionPerformed::sample()))
+    }
+
+    fn sample_other() -> Self {
+        Self::no_action()
+    }
 }
 
 impl EntitySyncReport {
