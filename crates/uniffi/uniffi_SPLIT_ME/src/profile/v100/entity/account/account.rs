@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use profile_logic::AccountIsLegacyOlympia;
 use sargon::Account as InternalAccount;
 
 decl_vec_samples_for!(Accounts, Account);
@@ -128,4 +129,9 @@ pub fn new_account_sample_stokenet_olivia() -> Account {
 #[uniffi::export]
 pub fn new_account_sample_stokenet_paige() -> Account {
     InternalAccount::sample_stokenet_paige().into()
+}
+
+#[uniffi::export]
+pub fn account_is_legacy_olympia(account: Account) -> bool {
+    account.into_internal().is_legacy_olympia()
 }
