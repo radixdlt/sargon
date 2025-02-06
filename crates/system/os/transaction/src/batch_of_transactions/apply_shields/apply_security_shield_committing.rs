@@ -98,7 +98,7 @@ mod tests {
                                     ),
                                 ];
                                 StateEntityDetailsResponseItem::new(
-                                    address.clone(),
+                                    *address,
                                     FungibleResourcesCollection::new(
                                         None, None, items,
                                     ),
@@ -177,8 +177,8 @@ mod tests {
             .make_interaction_for_applying_security_shield(
                 shield_id,
                 IndexSet::from_iter([
-                    AddressOfAccountOrPersona::from(alice.clone()),
-                    bob.clone().into(),
+                    AddressOfAccountOrPersona::from(alice),
+                    bob.into(),
                 ]),
             )
             .await
