@@ -914,10 +914,10 @@ pub enum CommonError {
     #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
     UnableContributeToAcXrdVaultPersonaRequiresPayer = 10258,
 
-    #[error("Unable to top up Xrd Vault, payer is entity applying shield: {payer_is_entity_applying_shield}, can exercise primary role: {can_exericse_primary_role}")]
+    #[error("Unable to top up Xrd Vault, payer is entity applying shield: {payer_is_entity_applying_shield}, can exercise primary role: {can_exercise_primary_role}")]
     UnableToTopUpXrdVault {
         payer_is_entity_applying_shield: bool,
-        can_exericse_primary_role: bool,
+        can_exercise_primary_role: bool,
     } = 10259,
 }
 

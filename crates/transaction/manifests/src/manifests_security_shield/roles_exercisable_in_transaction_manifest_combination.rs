@@ -245,21 +245,21 @@ impl RolesExercisableInTransactionManifestCombination {
 }
 
 pub trait TransactionManifestExplicitlyReferencesPrimaryRole {
-    fn __constains_call_method_instruction_with_method_named(
+    fn __contains_call_method_instruction_with_method_named(
         &self,
         method_name: &str,
     ) -> bool;
 
     fn _explicitly_references_primary_role(&self) -> bool {
-        self.__constains_call_method_instruction_with_method_named(
+        self.__contains_call_method_instruction_with_method_named(
             SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
         )
     }
 
     fn _implicitly_references_primary_role(&self) -> bool {
-        self.__constains_call_method_instruction_with_method_named(
+        self.__contains_call_method_instruction_with_method_named(
             SCRYPTO_ACCOUNT_SECURIFY_IDENT,
-        ) || self.__constains_call_method_instruction_with_method_named(
+        ) || self.__contains_call_method_instruction_with_method_named(
             SCRYPTO_IDENTITY_SECURIFY_IDENT,
         )
     }
@@ -273,7 +273,7 @@ pub trait TransactionManifestExplicitlyReferencesPrimaryRole {
 impl TransactionManifestExplicitlyReferencesPrimaryRole
     for TransactionManifest
 {
-    fn __constains_call_method_instruction_with_method_named(
+    fn __contains_call_method_instruction_with_method_named(
         &self,
         method_name: &str,
     ) -> bool {

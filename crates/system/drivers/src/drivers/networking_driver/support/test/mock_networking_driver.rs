@@ -133,7 +133,7 @@ impl MockNetworkingDriver {
             200,
             vec![],
             |_, _| {},
-            MockNetworkingDriverLazyResponder::new_with_reponses(provide_lazy),
+            MockNetworkingDriverLazyResponder::new_with_responses(provide_lazy),
         )
     }
 
@@ -149,7 +149,7 @@ impl MockNetworkingDriver {
             200,
             vec![],
             |_, _| {},
-            MockNetworkingDriverLazyResponder::new_with_reponse(provide_lazy),
+            MockNetworkingDriverLazyResponder::new_with_response(provide_lazy),
         )
     }
 }
@@ -162,7 +162,7 @@ pub struct MockNetworkingDriverLazyResponder {
 }
 
 impl MockNetworkingDriverLazyResponder {
-    fn new_with_reponses(
+    fn new_with_responses(
         provide: impl Fn(NetworkRequest, u64) -> NetworkResponse
             + Send
             + Sync
@@ -173,14 +173,14 @@ impl MockNetworkingDriverLazyResponder {
         }
     }
     /// N.B. the inverse of Serialize/Deserialize!
-    fn new_with_reponse<Req, Resp>(
+    fn new_with_response<Req, Resp>(
         provide: impl Fn(Req, u64) -> Resp + Send + Sync + 'static,
     ) -> Self
     where
         Resp: Serialize,
         Req: for<'a> Deserialize<'a>,
     {
-        Self::new_with_reponses(move |req, count| {
+        Self::new_with_responses(move |req, count| {
             println!("🔮MOCK DRIVER got req: {:?}", req);
             let s = String::from_utf8_lossy(&req.body);
             println!("🔮MOCK DRIVER RAW json: {:?}", s);

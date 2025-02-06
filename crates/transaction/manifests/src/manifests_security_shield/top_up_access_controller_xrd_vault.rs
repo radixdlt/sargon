@@ -101,7 +101,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
                     // top up the XRD vault of the access controller.
                     return Err(CommonError::UnableToTopUpXrdVault {
                         payer_is_entity_applying_shield,
-                        can_exericse_primary_role:
+                        can_exercise_primary_role:
                             !cannot_exercise_primary_role,
                     });
                 }
