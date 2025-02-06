@@ -4,7 +4,7 @@ use sargon::AuthIntentHash as InternalAuthIntentHash;
 use sargon::AuthorizationInteractor as InternalAuthorizationInteractor;
 use sargon::AuthorizationPurpose as InternalAuthorizationPurpose;
 use sargon::AuthorizationResponse as InternalAuthorizationResponse;
-use sargon::FactorSourceIDFromHash as InternalFactorSourceIDFromHash;
+use sargon::FactorSource as InternalFactorSource;
 use sargon::KeyDerivationInteractor as InternalKeyDerivationInteractor;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
@@ -60,7 +60,7 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
 
     async fn spot_check(
         &self,
-        factor_source_id: FactorSourceIDFromHash,
+        factor_source: FactorSource,
     ) -> Result<SpotCheckResponse>;
 }
 
@@ -103,10 +103,10 @@ impl SpotCheckInteractorAdapter {
 impl InternalSpotCheckInteractor for SpotCheckInteractorAdapter {
     async fn spot_check(
         &self,
-        factor_source_id: InternalFactorSourceIDFromHash,
+        factor_source: InternalFactorSource,
     ) -> InternalResult<InternalSpotCheckResponse> {
         self.wrapped
-            .spot_check(factor_source_id.into())
+            .spot_check(factor_source.into())
             .await
             .into_internal_result()
     }
