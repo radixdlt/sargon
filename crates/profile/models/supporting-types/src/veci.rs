@@ -89,14 +89,14 @@ impl VirtualEntityCreatingInstance {
         address: &AddressOfAccountOrPersona,
     ) {
         let discrepancy_found =
-            factor_instance.derivation_path().get_entity_kind()
-                == address.get_entity_kind();
+            factor_instance.clone().derivation_path().get_entity_kind()
+                != address.clone().get_entity_kind();
         let error_msg = "Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds.";
         if discrepancy_found {
             error!("{}", error_msg);
         }
         #[cfg(test)]
-        debug_assert!(discrepancy_found, "{}", error_msg);
+        debug_assert!(!discrepancy_found, "{}", error_msg);
     }
 }
 
