@@ -66,6 +66,7 @@ impl<T: Serialize> IntoNetworkResponse for T {
 pub trait NetworkRequestParseOriginal {
     fn parse_original<T: for<'a> Deserialize<'a>>(&self) -> T;
 }
+
 impl NetworkRequestParseOriginal for NetworkRequest {
     fn parse_original<T: for<'a> Deserialize<'a>>(&self) -> T {
         serde_json::from_slice(&self.body).unwrap()
