@@ -75,15 +75,15 @@ impl NetworkRequestParseOriginal for NetworkRequest {
 
 #[cfg(test)]
 pub trait EveronesRichMockNetworkingDriver {
-    fn everyones_rich() -> Arc<dyn NetworkingDriver>;
+    fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
 #[cfg(test)]
 impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
-    fn everyones_rich() -> Arc<dyn NetworkingDriver> {
+    fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver> {
         Arc::new(MockNetworkingDriver::with_lazy_responses(
-            |req: NetworkRequest, _count: u64| -> NetworkResponse {
+            move |req: NetworkRequest, _: u64| -> NetworkResponse {
                 let path = req.url.path();
-                if path == "/state/entity/details" {
+                if path.ends_with(GatewayClient::PATH_STATE_ENTITY_DETAILS) {
                     let request =
                         req.parse_original::<StateEntityDetailsRequest>();
 
@@ -92,9 +92,7 @@ impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
                         request.addresses.iter().map(|address| {
                             let items =
                                 vec![FungibleResourcesCollectionItem::global(
-                                    ResourceAddress::xrd_on_network(
-                                        NetworkID::Mainnet,
-                                    ),
+                                    ResourceAddress::xrd_on_network(network_id),
                                     Decimal::from_str("999999999").unwrap(),
                                 )];
                             StateEntityDetailsResponseItem::new(
@@ -109,7 +107,9 @@ impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
                         }),
                     )
                     .into_network_response()
-                } else if path == "/transaction/construction" {
+                } else if path
+                    .ends_with(GatewayClient::PATH_TRANSACTION_CONSTRUCTION)
+                {
                     TransactionConstructionResponse::new(LedgerState::new(
                         NetworkID::Mainnet.logical_name(),
                         1,
@@ -133,7 +133,8 @@ mod tests {
     #[actix_rt::test]
     async fn test() {
         let network_id = NetworkID::Mainnet;
-        let mock_networking_driver = MockNetworkingDriver::everyones_rich();
+        let mock_networking_driver =
+            MockNetworkingDriver::everyones_rich(network_id);
 
         let os =
             SargonOS::boot_test_with_networking_driver(mock_networking_driver)

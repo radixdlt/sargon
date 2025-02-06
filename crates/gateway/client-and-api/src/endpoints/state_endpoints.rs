@@ -12,7 +12,8 @@ impl GatewayClient {
         &self,
         request: StateEntityDetailsRequest,
     ) -> Result<StateEntityDetailsResponse> {
-        self.post("state/entity/details", request, res_id).await
+        self.post(Self::PATH_STATE_ENTITY_DETAILS, request, res_id)
+            .await
     }
 
     /// Get page of Global Entity Fungible Resource Balances
@@ -28,7 +29,7 @@ impl GatewayClient {
         &self,
         request: StateEntityPageFungiblesRequest,
     ) -> Result<PageResponse<FungibleResourcesCollectionItem>> {
-        self.post("state/entity/page/fungibles/", request, res_id)
+        self.post(Self::PATH_STATE_ENTITY_PAGE_FUNGIBLES, request, res_id)
             .await
     }
 
@@ -45,7 +46,7 @@ impl GatewayClient {
         &self,
         request: StateEntityPageNonFungiblesRequest,
     ) -> Result<PageResponse<NonFungibleResourcesCollectionItem>> {
-        self.post("state/entity/page/non-fungibles/", request, res_id)
+        self.post(Self::PATH_STATE_ENTITY_PAGE_NON_FUNGIBLES, request, res_id)
             .await
     }
 
@@ -66,8 +67,12 @@ impl GatewayClient {
             NonFungibleResourcesCollectionItemVaultAggregatedVaultItem,
         >,
     > {
-        self.post("state/entity/page/non_fungible-vaults/", request, res_id)
-            .await
+        self.post(
+            Self::PATH_STATE_ENTITY_PAGE_NON_FUNGIBLE_VAULTS,
+            request,
+            res_id,
+        )
+        .await
     }
 
     /// Get page of Non-Fungibles in Vault
@@ -84,8 +89,12 @@ impl GatewayClient {
         &self,
         request: StateEntityPageNonFungibleVaultIdsRequest,
     ) -> Result<PageResponse<NonFungibleLocalId>> {
-        self.post("state/entity/page/non_fungible-vault/ids", request, res_id)
-            .await
+        self.post(
+            Self::PATH_STATE_ENTITY_PAGE_NON_FUNGIBLE_VAULT_IDS,
+            request,
+            res_id,
+        )
+        .await
     }
 }
 
@@ -101,8 +110,12 @@ impl GatewayClient {
         &self,
         request: AccountPageResourcePreferencesRequest,
     ) -> Result<PageResponse<AccountResourcePreference>> {
-        self.post("state/account/page/resource-preferences", request, res_id)
-            .await
+        self.post(
+            Self::PATH_ACCOUNT_PAGE_RESOURCE_PREFERENCES,
+            request,
+            res_id,
+        )
+        .await
     }
 
     /// Get Account authorized depositors
@@ -116,8 +129,12 @@ impl GatewayClient {
         &self,
         request: AccountPageAuthorizedDepositorsRequest,
     ) -> Result<PageResponse<AccountAuthorizedDepositor>> {
-        self.post("state/account/page/authorized-depositors", request, res_id)
-            .await
+        self.post(
+            Self::PATH_ACCOUNT_PAGE_AUTHORIZED_DEPOSITORS,
+            request,
+            res_id,
+        )
+        .await
     }
 }
 
@@ -133,7 +150,7 @@ impl GatewayClient {
         &self,
         request: StateNonFungibleLocationRequest,
     ) -> Result<StateNonFungibleLocationResponse> {
-        self.post("/state/non-fungible/location", request, res_id)
+        self.post(Self::PATH_STATE_NON_FUNGIBLE_LOCATION, request, res_id)
             .await
     }
 }

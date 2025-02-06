@@ -127,7 +127,10 @@ impl MockNetworkingDriver {
     }
 
     pub fn with_lazy_responses(
-        provide_lazy: fn(NetworkRequest, u64) -> NetworkResponse,
+        provide_lazy: impl Fn(NetworkRequest, u64) -> NetworkResponse
+            + Send
+            + Sync
+            + 'static,
     ) -> Self {
         Self::_new(
             200,
