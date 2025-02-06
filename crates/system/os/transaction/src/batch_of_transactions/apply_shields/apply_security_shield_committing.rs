@@ -55,6 +55,23 @@ impl ApplySecurityShieldCommitting for SargonOS {
     }
 }
 
+pub trait IntoNetworkResponse {
+    fn into_network_response(self) -> NetworkResponse;
+}
+impl<T: Serialize> IntoNetworkResponse for T {
+    fn into_network_response(self) -> NetworkResponse {
+        NetworkResponse::new(200, serde_json::to_vec(&self).unwrap())
+    }
+}
+pub trait NetworkRequestParseOriginal {
+    fn parse_original<T: for<'a> Deserialize<'a>>(&self) -> T;
+}
+impl NetworkRequestParseOriginal for NetworkRequest {
+    fn parse_original<T: for<'a> Deserialize<'a>>(&self) -> T {
+        serde_json::from_slice(&self.body).unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -63,32 +80,46 @@ mod tests {
     async fn test() {
         let network_id = NetworkID::Mainnet;
         let mock_networking_driver: Arc<dyn NetworkingDriver> =
-            Arc::new(MockNetworkingDriver::with_lazy_response(
-                |req: StateEntityDetailsRequest,
-                 _: u64|
-                 -> StateEntityDetailsResponse {
-                    println!("🔮🔮🔮 Mocking response for request: {:?}", req);
-                    StateEntityDetailsResponse::new(
-                        None,
-                        req.addresses.iter().map(|address| {
-                            let items =
-                                vec![FungibleResourcesCollectionItem::global(
-                                    ResourceAddress::xrd_on_network(
-                                        NetworkID::Mainnet,
+            Arc::new(MockNetworkingDriver::with_lazy_responses(
+                |req: NetworkRequest, count: u64| -> NetworkResponse {
+                    println!("🔮🔮🔮 Mocking for request: {:?}", String::from_utf8_lossy(&req.body));
+                    if count <= 2 {
+                        let request =
+                            req.parse_original::<StateEntityDetailsRequest>();
+
+                        StateEntityDetailsResponse::new(
+                            None,
+                            request.addresses.iter().map(|address| {
+                                let items = vec![
+                                    FungibleResourcesCollectionItem::global(
+                                        ResourceAddress::xrd_on_network(
+                                            NetworkID::Mainnet,
+                                        ),
+                                        Decimal::from_str("10000000").unwrap(),
                                     ),
-                                    Decimal::from_str("10000000").unwrap(),
-                                )];
-                            StateEntityDetailsResponseItem::new(
-                                address.clone(),
-                                FungibleResourcesCollection::new(
-                                    None, None, items,
-                                ),
-                                None, // non-fungible
-                                EntityMetadataCollection::empty(),
-                                None, // details
-                            )
-                        }),
-                    )
+                                ];
+                                StateEntityDetailsResponseItem::new(
+                                    address.clone(),
+                                    FungibleResourcesCollection::new(
+                                        None, None, items,
+                                    ),
+                                    None, // non-fungible
+                                    EntityMetadataCollection::empty(),
+                                    None, // details
+                                )
+                            }),
+                        )
+                        .into_network_response()
+                    } else {
+                        TransactionConstructionResponse::new(LedgerState::new(
+                            NetworkID::Mainnet.logical_name(),
+                            1,
+                            "2021-01-01T00:00:00Z",
+                            1, // epoch
+                            1,
+                        ))
+                        .into_network_response()
+                    }
                 },
             ));
 
