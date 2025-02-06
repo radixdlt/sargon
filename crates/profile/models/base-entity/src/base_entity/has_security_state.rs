@@ -52,4 +52,37 @@ pub trait HasSecurityState: HasFactorInstances + IsSecurityStateAware {
             .cloned()
             .ok_or(CommonError::SecurityStateSecurifiedButExpectedUnsecurified)
     }
+
+    fn is_linked_to_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> bool {
+        match self.security_state() {
+            EntitySecurityState::Unsecured { value } => {
+                if let Some(
+                    ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                        value: security_structure,
+                    },
+                ) = &value.provisional_securified_config
+                {
+                    return security_structure.security_structure_id
+                        == shield_id;
+                }
+                false
+            }
+            EntitySecurityState::Securified { value } => {
+                if let Some(
+                    ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                        value: provisional_security_structure,
+                    },
+                ) = &value.provisional_securified_config
+                {
+                    return provisional_security_structure
+                        .security_structure_id
+                        == shield_id;
+                }
+                value.security_structure.security_structure_id == shield_id
+            }
+        }
+    }
 }
