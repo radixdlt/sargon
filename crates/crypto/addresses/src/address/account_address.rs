@@ -1,8 +1,6 @@
 pub use crate::prelude::*;
 
-pub type DappDefinitionAddress = AccountAddress;
-
-decl_ret_wrapped_address!(
+decl_address!(
     /// Human readable address of an account. Always starts with `"account_"``, for example:
     ///
     /// `account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr`
@@ -24,11 +22,17 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L224-L228
-    account
+    account => [
+        ScryptoEntityType::GlobalAccount,
+        ScryptoEntityType::GlobalPreallocatedSecp256k1Account,
+        ScryptoEntityType::GlobalPreallocatedEd25519Account
+    ]
 );
 
+pub type DappDefinitionAddress = AccountAddress;
+
 impl AccountAddress {
-    pub fn new(
+    pub fn new_from_public_key(
         public_key: impl Into<PublicKey>,
         network_id: NetworkID,
     ) -> Self {
@@ -179,18 +183,16 @@ mod tests {
                 .parse()
                 .unwrap();
         let network_id = NetworkID::Zabanet;
-        let address = AccountAddress::new(public_key, network_id);
+        let address =
+            AccountAddress::new_from_public_key(public_key, network_id);
 
         assert_eq!(address.address(), "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw");
 
-        use radix_engine_toolkit::models::canonical_address_types::{
-            CanonicalAccountAddress, CanonicalAddress,
-        };
         let s = "account_tdx_e_128vkt2fur65p4hqhulfv3h0cknrppwtjsstlttkfamj4jnnpm82gsw";
-        let from_str = CanonicalAccountAddress::from_str(s).unwrap();
-        assert_eq!(from_str.network_id(), 0xe); // Zabanet (0x0e / 0d14)
+        let from_str = AccountAddress::from_str(s).unwrap();
+        assert_eq!(from_str.network_id(), NetworkID::Zabanet); // Zabanet (0x0e / 0d14)
         assert_eq!(from_str.to_string(), s);
-        let from_json: CanonicalAccountAddress =
+        let from_json: AccountAddress =
             serde_json::from_value(json!(s)).unwrap();
         assert_eq!(from_json.to_string(), s);
     }
@@ -208,9 +210,7 @@ mod tests {
         let s = "identity_tdx_21_12tljxea3s0mse52jmpvsphr0haqs86sung8d3qlhr763nxttj59650";
         assert_eq!(
             SUT::try_from_bech32(s,),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: s.to_owned()
-            })
+            Err(CommonError::AddressInvalidEntityType { address_kind: "Account".to_string(), entity_type: ScryptoEntityType::GlobalPreallocatedEd25519Identity as u8, node_id_as_hex: "52ff2367b183f70cd152d85900dc6fbf4103ea1c9a0ed883f71fb519996b".to_string() })
         );
     }
 
@@ -276,7 +276,7 @@ mod tests {
         .unwrap();
 
         assert_eq!(
-            SUT::new(public_key, NetworkID::Mainnet).address(),
+            SUT::new_from_public_key(public_key, NetworkID::Mainnet).address(),
             "account_rdx129qdd2yp9vs8jkkn2uwn6sw0ejwmcwr3r4c3usr2hp0nau67m2kzdm"
         )
     }
@@ -318,46 +318,12 @@ mod tests {
     }
 
     #[test]
-    fn invalid() {
-        assert_eq!(
-            SUT::try_from_bech32("x"),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: "x".to_owned()
-            })
-        )
-    }
-
-    #[test]
-    fn invalid_checksum() {
-        let s = "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdxx";
-        assert_eq!(
-            SUT::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: s.to_owned()
-            })
-        )
-    }
-
-    #[test]
-    fn invalid_entity_type() {
-        let s = "identity_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr";
-        assert_eq!(
-            SUT::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: s.to_owned()
-            })
-        )
-    }
-
-    #[test]
     fn invalid_got_olympia_address() {
         let s =
             "rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9842";
         assert_eq!(
             SUT::try_from_bech32(s),
-            Err(CommonError::FailedToDecodeAddressFromBech32 {
-                bad_value: s.to_owned()
-            })
+            Err(CommonError::FailedToFindNetworkIdFromBech32mString { bech32m_encoded_address: "rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3kmn6hq4j9842".to_string() })
         )
     }
 

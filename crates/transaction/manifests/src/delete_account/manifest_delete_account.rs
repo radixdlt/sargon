@@ -106,8 +106,11 @@ impl ManifestForAccountDeletion for TransactionManifest {
 
         // Make the deposit of the account owner badge allowed into the account
         let asset_exception = AssetException::new(
-            ResourceAddress::new(owner_badge, account_address.network_id())
-                .unwrap(),
+            ResourceAddress::new_from_node_id(
+                owner_badge,
+                account_address.network_id(),
+            )
+            .unwrap(),
             DepositAddressExceptionRule::Allow,
         );
         builder = builder.call_method(

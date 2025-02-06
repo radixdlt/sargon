@@ -37,7 +37,11 @@ pub fn new_identity_address_from(
     public_key: PublicKey,
     network_id: NetworkID,
 ) -> IdentityAddress {
-    InternalIdentityAddress::new(public_key.into(), network_id.into()).into()
+    InternalIdentityAddress::new_from_public_key(
+        public_key.into(),
+        network_id.into(),
+    )
+    .into()
 }
 
 #[uniffi::export]

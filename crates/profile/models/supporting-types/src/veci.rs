@@ -60,10 +60,10 @@ impl VirtualEntityCreatingInstance {
         let public_key = factor_instance.public_key();
         let address = match entity_kind {
             CAP26EntityKind::Account => AddressOfAccountOrPersona::from(
-                AccountAddress::new(public_key, network_id),
+                AccountAddress::new_from_public_key(public_key, network_id),
             ),
             CAP26EntityKind::Identity => AddressOfAccountOrPersona::from(
-                IdentityAddress::new(public_key, network_id),
+                IdentityAddress::new_from_public_key(public_key, network_id),
             ),
         };
         Self::new(factor_instance, address)
@@ -171,7 +171,7 @@ mod test_instance {
             fi.derivation_path().get_entity_kind(),
             CAP26EntityKind::Account
         );
-        let identity_address = IdentityAddress::new(
+        let identity_address = IdentityAddress::new_from_public_key(
             fi.public_key(),
             fi.derivation_path().network_id(),
         );

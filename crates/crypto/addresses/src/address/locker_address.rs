@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ret_wrapped_address!(
+decl_address!(
     /// Addresses to a specific locker, owned by a dApp, holding assets, either fungible or non_fungible,
     /// that can be claimed by destined account addresses.
     /// Identities cannot own assets so they do not have vaults, but Accounts do, e.g.:
@@ -12,7 +12,9 @@ decl_ret_wrapped_address!(
     /// Implementation wise we wrap [Radix Engine Toolkit's `CanonicalLockerAddress`][ret].
     ///
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/476d779fee08ed1e561ac8fc8730a2a404b7de79/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L262-L265
-    locker
+    locker => [
+        ScryptoEntityType::GlobalAccountLocker,
+    ]
 );
 
 impl HasSampleValues for LockerAddress {

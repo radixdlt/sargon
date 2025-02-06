@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ret_wrapped_address!(
+decl_address!(
     /// Addresses identifying an asset, either fungible (Token) or non_fungible (NFT), on the Radix network, e.g.
     /// `"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"`
     /// Being the unique identifier of the Radix Token, the Rad, on mainnet.
@@ -13,20 +13,24 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L236-L239
-    resource
+    resource => [
+        ScryptoEntityType::GlobalFungibleResourceManager,
+        ScryptoEntityType::GlobalNonFungibleResourceManager
+    ]
 );
 
 impl ResourceAddress {
     pub fn is_fungible(&self) -> bool {
-        self.0.is_fungible()
+        self.node_id.is_global_fungible_resource_manager()
     }
 
     pub fn is_non_fungible(&self) -> bool {
-        self.0.is_non_fungible()
+        self.node_id.is_global_non_fungible_resource_manager()
     }
 
     pub fn xrd_on_network(id: NetworkID) -> Self {
-        Self::new(XRD, id).expect("Should never fail to get XRD on network.")
+        Self::new_from_node_id(XRD, id)
+            .expect("Should never fail to get XRD on network.")
     }
 
     pub fn is_xrd_on_network(&self, id: NetworkID) -> bool {

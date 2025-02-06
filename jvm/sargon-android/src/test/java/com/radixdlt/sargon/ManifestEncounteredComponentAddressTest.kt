@@ -33,7 +33,7 @@ class ManifestEncounteredComponentAddressTest : SampleTestable<ManifestEncounter
             assertEquals(NetworkId.MAINNET, networkId)
         }
 
-        assertThrows<CommonException.FailedToDecodeAddressFromBech32> {
+        assertThrows<CommonException.AddressInvalidEntityType> {
             ManifestEncounteredComponentAddress.init(validating = PackageAddress.sampleMainnet().string)
         }
     }
