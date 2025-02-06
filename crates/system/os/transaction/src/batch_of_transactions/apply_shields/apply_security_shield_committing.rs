@@ -204,22 +204,26 @@ mod tests {
             .unwrap()
             .address;
 
+        let addresses = IndexSet::from_iter([
+            AddressOfAccountOrPersona::from(alice),
+            batman.into(),
+            carla.into(),
+            AddressOfAccountOrPersona::from(ziggy),
+        ]);
+
         let manifests = os
-            .make_interaction_for_applying_security_shield(
-                shield_id,
-                IndexSet::from_iter([
-                    AddressOfAccountOrPersona::from(alice),
-                    bob.into(),
-                    carla.into(),
-                    AddressOfAccountOrPersona::from(ziggy),
-                    batman.into(),
-                ]),
-            )
+            .make_interaction_for_applying_security_shield(shield_id, addresses)
             .await
             .unwrap()
             .transactions;
 
         let mut manifests_iter = manifests.iter();
+
+        println!("🔮 Alice: {alice}");
+        println!("🔮 Bob: {bob}");
+        println!("🔮 Carla: {carla}");
+        println!("🔮 Batman: {batman}");
+        println!("🔮 Ziggy: {ziggy}");
 
         // ============================================
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -230,21 +234,32 @@ mod tests {
         // ============================================
         let manifest_and_payer_tuples = vec![
             ManifestWithPayerByAddress::new(
+                // Alice
                 manifests_iter.next().unwrap().manifest(network_id).unwrap(),
                 None,
                 Decimal::one(),
             ),
             ManifestWithPayerByAddress::new(
+                // Batman
                 manifests_iter.next().unwrap().manifest(network_id).unwrap(),
-                None,
-                Decimal::three(),
+                bob, // Bob is rich and generous
+                Decimal::five(),
             ),
             ManifestWithPayerByAddress::new(
+                // Carla
                 manifests_iter.next().unwrap().manifest(network_id).unwrap(),
                 None,
                 Decimal::five(),
             ),
+            ManifestWithPayerByAddress::new(
+                // Ziggy
+                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
+                bob, // Bob is rich and generous
+                Decimal::five(),
+            ),
         ];
+
+        assert_eq!(manifest_and_payer_tuples.len(), manifests.len());
 
         let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
 
@@ -253,6 +268,6 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(txids.len(), 3);
+        assert_eq!(txids.len(), 4);
     }
 }

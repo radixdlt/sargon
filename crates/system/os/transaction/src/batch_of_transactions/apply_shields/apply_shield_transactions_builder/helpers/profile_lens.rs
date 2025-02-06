@@ -192,7 +192,9 @@ impl ShieldApplicationInputWithoutXrdBalance {
                     }
                     AccountOrPersona::PersonaEntity(p) => {
                         let paying_account =
-                            maybe_paying_account.ok_or(CommonError::Unknown)?; // TODO Add new error type
+                            maybe_paying_account.ok_or(CommonError::UnsecurifiedPersonasRequireAnAccountFeePayerButNoneWasProvided {
+                                identity_address: p.address.to_string(),
+                            })?; // TODO Add new error type
                         let p = ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
                             reviewed_manifest: manifest,
                             estimated_xrd_fee,

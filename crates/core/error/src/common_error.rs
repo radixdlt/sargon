@@ -920,6 +920,11 @@ pub enum CommonError {
         payer_is_entity_applying_shield: bool,
         can_exercise_primary_role: bool,
     } = 10259,
+
+    #[error("Unsecurified Personas require an account fee payer, but none was provided, for persona with address: {identity_address}")]
+    UnsecurifiedPersonasRequireAnAccountFeePayerButNoneWasProvided {
+        identity_address: String,
+    } = 10260,
 }
 
 impl CommonError {
