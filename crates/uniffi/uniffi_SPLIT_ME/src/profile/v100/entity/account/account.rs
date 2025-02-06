@@ -1,5 +1,7 @@
 use crate::prelude::*;
-use profile_logic::AccountIsLegacyOlympia;
+use profile_logic::{
+    AccountIsLegacyOlympia, AccountIsUnsecuredLedgerControlled,
+};
 use sargon::Account as InternalAccount;
 
 decl_vec_samples_for!(Accounts, Account);
@@ -134,4 +136,19 @@ pub fn new_account_sample_stokenet_paige() -> Account {
 #[uniffi::export]
 pub fn account_is_legacy_olympia(account: Account) -> bool {
     account.into_internal().is_legacy_olympia()
+}
+
+#[uniffi::export]
+pub fn account_is_unsecured_ledger_controlled(account: Account) -> bool {
+    account.into_internal().is_unsecured_ledger_controlled()
+}
+
+#[uniffi::export]
+pub fn account_unsecured_ledger_controlled_public_key(
+    account: Account,
+) -> Option<HierarchicalDeterministicPublicKey> {
+    account
+        .into_internal()
+        .unsecured_ledger_controlled_public_key()
+        .map(|key| key.into())
 }
