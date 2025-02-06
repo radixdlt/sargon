@@ -209,12 +209,32 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
                     .map(|x| x.validator_address)
                     .collect();
 
+                let claims_non_fungible_data = output
+                    .unstake_operations
+                    .iter()
+                    .flat_map(|op| {
+                        op.claim_nfts.iter().map(|(local_id, v)| {
+                            let nft_resource_address =
+                                NonFungibleResourceAddress(
+                                    (op.claim_nft_address, n).into(),
+                                );
+                            (
+                                NonFungibleGlobalId::new(
+                                    nft_resource_address,
+                                    local_id.clone().into(),
+                                ),
+                                UnstakeData::from(v.clone()),
+                            )
+                        })
+                    })
+                    .collect::<_>();
+
                 Self::ValidatorUnstake {
                     validator_addresses: to_vec_network_aware(
                         validator_addresses,
                         n,
                     ),
-                    claims_non_fungible_data: HashMap::new(),
+                    claims_non_fungible_data,
                 }
             }
 
