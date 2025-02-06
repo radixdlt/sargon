@@ -21,6 +21,8 @@ pub enum SpotCheckResponse {
     ArculusCard { id: FactorSourceIDFromHash },
 
     /// The user retrieved a `MnemonicWithPassphrase`.
-    /// Used for the identification of any other `FactorSource`.
-    MnemonicWithPassphrase { value: MnemonicWithPassphrase },
+    /// Used for the identification of any software `FactorSource`.
+    Software {
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+    },
 }

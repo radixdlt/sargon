@@ -16,8 +16,10 @@ impl SpotCheckInteractor for TestSpotCheckInteractor {
             SpotCheckUser::ArculusCard(id) => {
                 Ok(SpotCheckResponse::ArculusCard { id })
             }
-            SpotCheckUser::MnemonicWithPassphrase(value) => {
-                Ok(SpotCheckResponse::MnemonicWithPassphrase { value })
+            SpotCheckUser::Software(mnemonic_with_passphrase) => {
+                Ok(SpotCheckResponse::Software {
+                    mnemonic_with_passphrase,
+                })
             }
         }
     }
@@ -28,7 +30,7 @@ pub enum SpotCheckUser {
     Failure(CommonError),
     Ledger(Exactly32Bytes),
     ArculusCard(FactorSourceIDFromHash),
-    MnemonicWithPassphrase(MnemonicWithPassphrase),
+    Software(MnemonicWithPassphrase),
 }
 
 impl TestSpotCheckInteractor {
@@ -51,11 +53,9 @@ impl TestSpotCheckInteractor {
         Self::new(SpotCheckUser::ArculusCard(id))
     }
 
-    pub fn new_mnemonic_with_passphrase(
+    pub fn new_software(
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Self {
-        Self::new(SpotCheckUser::MnemonicWithPassphrase(
-            mnemonic_with_passphrase,
-        ))
+        Self::new(SpotCheckUser::Software(mnemonic_with_passphrase))
     }
 }

@@ -553,7 +553,9 @@ impl SargonOS {
                 );
                 Ok(id == id_from_hash)
             }
-            SpotCheckResponse::MnemonicWithPassphrase { value } => {
+            SpotCheckResponse::Software {
+                mnemonic_with_passphrase,
+            } => {
                 let accepted_kinds = [
                     FactorSourceKind::Device,
                     FactorSourceKind::OffDeviceMnemonic,
@@ -562,12 +564,13 @@ impl SargonOS {
                 ];
                 assert!(
                     accepted_kinds.contains(&kind),
-                    "Unexpected MnemonicWithPassphrase Response for {:?}",
+                    "Unexpected Software Response for {:?}",
                     kind
                 );
                 let built_id =
                     FactorSourceIDFromHash::from_mnemonic_with_passphrase(
-                        kind, &value,
+                        kind,
+                        &mnemonic_with_passphrase,
                     );
                 Ok(built_id == id_from_hash)
             }
@@ -1124,9 +1127,7 @@ mod tests {
         let interactors =
             Interactors::new_from_clients_and_spot_check_interactor(
                 &clients,
-                Arc::new(
-                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(mwp),
-                ),
+                Arc::new(TestSpotCheckInteractor::new_software(mwp)),
             );
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
@@ -1153,9 +1154,7 @@ mod tests {
         let interactors =
             Interactors::new_from_clients_and_spot_check_interactor(
                 &clients,
-                Arc::new(
-                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(mwp),
-                ),
+                Arc::new(TestSpotCheckInteractor::new_software(mwp)),
             );
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
@@ -1273,19 +1272,17 @@ mod tests {
 
     #[actix_rt::test]
     #[should_panic(
-        expected = "Unexpected MnemonicWithPassphrase Response for LedgerHQHardwareWallet"
+        expected = "Unexpected Software Response for LedgerHQHardwareWallet"
     )]
-    async fn spot_check__ledger__mvp_response() {
+    async fn spot_check__ledger__software_response() {
         let clients = Clients::new(Bios::new(Drivers::test()));
         let factor_source = LedgerHardwareWalletFactorSource::sample();
         let interactors =
             Interactors::new_from_clients_and_spot_check_interactor(
                 &clients,
-                Arc::new(
-                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(
-                        MnemonicWithPassphrase::sample(),
-                    ),
-                ),
+                Arc::new(TestSpotCheckInteractor::new_software(
+                    MnemonicWithPassphrase::sample(),
+                )),
             );
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
@@ -1358,20 +1355,16 @@ mod tests {
     }
 
     #[actix_rt::test]
-    #[should_panic(
-        expected = "Unexpected MnemonicWithPassphrase Response for ArculusCard"
-    )]
-    async fn spot_check__arculus__mvp_response() {
+    #[should_panic(expected = "Unexpected Software Response for ArculusCard")]
+    async fn spot_check__arculus__software_response() {
         let clients = Clients::new(Bios::new(Drivers::test()));
         let factor_source = ArculusCardFactorSource::sample();
         let interactors =
             Interactors::new_from_clients_and_spot_check_interactor(
                 &clients,
-                Arc::new(
-                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(
-                        MnemonicWithPassphrase::sample(),
-                    ),
-                ),
+                Arc::new(TestSpotCheckInteractor::new_software(
+                    MnemonicWithPassphrase::sample(),
+                )),
             );
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
