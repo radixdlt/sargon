@@ -82,8 +82,7 @@ mod tests {
         let mock_networking_driver: Arc<dyn NetworkingDriver> =
             Arc::new(MockNetworkingDriver::with_lazy_responses(
                 |req: NetworkRequest, count: u64| -> NetworkResponse {
-                    println!("🔮🔮🔮 Mocking for request: {:?}", String::from_utf8_lossy(&req.body));
-                    if count <= 2 {
+                    if count == 0 {
                         let request =
                             req.parse_original::<StateEntityDetailsRequest>();
 
