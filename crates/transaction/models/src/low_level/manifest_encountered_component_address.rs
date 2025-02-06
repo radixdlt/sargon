@@ -11,22 +11,20 @@ address_union!(
 macro_rules! impl_try_from_for_manifest_encountered_address {
     ($($variant:ident => $address_type:ty),*) => {
         impl TryFrom<(ScryptoManifestAddress, NetworkID)> for ManifestEncounteredComponentAddress {
-            type Error = ();
+            type Error = CommonError;
 
             fn try_from(value: (ScryptoManifestAddress, NetworkID)) -> Result<Self, Self::Error> {
                 let (address, network_id) = value;
 
-                match address {
-                    ScryptoManifestAddress::Static(node_id) => {
-                        $(
-                            if let Ok(address) = <$address_type>::new_from_node_id(node_id, network_id) {
-                                return Ok(ManifestEncounteredComponentAddress::$variant(address));
-                            }
-                        )*
-                        Err(())
-                    },
-                    _ => Err(()),
-                }            
+                $(
+                    if let Ok(address) = <$address_type>::try_from(value) {
+                        return Ok(ManifestEncounteredComponentAddress::$variant(address));
+                    }
+                )*
+                Err(CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
+                    global_address_as_hex: "".to_string(),
+                    network_id: network_id.to_string(),
+                })
             }
         }
     };
@@ -57,9 +55,7 @@ mod tests {
     #[test]
     fn try_from_failure() {
         let manifest_address = ScryptoManifestAddress::Static(
-            ResourceAddress::sample_stokenet()
-                .scrypto()
-                .into_node_id()
+            ResourceAddress::sample_stokenet().scrypto().into_node_id(),
         );
         let network_id = NetworkID::Stokenet;
 
@@ -68,7 +64,8 @@ mod tests {
             result.unwrap_err(),
             CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
                 global_address_as_hex: ResourceAddress::sample_stokenet()
-                .scrypto().to_hex(),
+                    .scrypto()
+                    .to_hex(),
                 network_id: network_id.to_string(),
             }
         );
@@ -79,12 +76,12 @@ mod tests {
         $(
             #[test]
             fn $variant() {
-                let global_address = ScryptoGlobalAddress::new_or_panic(
-                    <$address_type>::sample_stokenet().scrypto().into_node_id().0
+                let manifest_addres = ScryptoManifestAddress::Static(
+                    <$address_type>::sample_stokenet().scrypto().into_node_id()
                 );
                 let network_id = NetworkID::Stokenet;
 
-                let result = SUT::try_from((global_address, network_id));
+                let result = SUT::try_from((manifest_addres, network_id));
                 assert!(result.is_ok());
             }
         )*

@@ -51,7 +51,7 @@ impl ReservedInstruction {
         if ret.has_identity_update_owner_keys_metadata_field_invocations() {
             result.insert(Self::IdentityUpdateOwnerKeysMetadataField);
         }
-        
+
         result
     }
 }
@@ -88,17 +88,36 @@ mod tests {
     #[test]
     fn from_ret() {
         let ret = RetReservedInstructionsOutput {
-            account_lock_fee_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
-            account_securify_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
-            identity_securify_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
-            access_controller_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
-            account_lock_owner_keys_metadata_field_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
-            account_update_owner_keys_metadata_field_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
-            identity_lock_owner_keys_metadata_field_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
-            identity_update_owner_keys_metadata_field_invocations: IndexSet::from([ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))]),
+            account_lock_fee_invocations: IndexSet::from([
+                ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0)),
+            ]),
+            account_securify_invocations: IndexSet::from([
+                ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0)),
+            ]),
+            identity_securify_invocations: IndexSet::from([
+                ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0)),
+            ]),
+            access_controller_invocations: IndexSet::from([
+                ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0)),
+            ]),
+            account_lock_owner_keys_metadata_field_invocations: IndexSet::from(
+                [ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))],
+            ),
+            account_update_owner_keys_metadata_field_invocations:
+                IndexSet::from([ScryptoManifestGlobalAddress::Named(
+                    ManifestNamedAddress(0),
+                )]),
+            identity_lock_owner_keys_metadata_field_invocations: IndexSet::from(
+                [ScryptoManifestGlobalAddress::Named(ManifestNamedAddress(0))],
+            ),
+            identity_update_owner_keys_metadata_field_invocations:
+                IndexSet::from([ScryptoManifestGlobalAddress::Named(
+                    ManifestNamedAddress(0),
+                )]),
         };
 
-        let reserved_instructions = SUT::from_ret_reserved_instructions_output(ret);
+        let reserved_instructions =
+            SUT::from_ret_reserved_instructions_output(ret);
 
         assert_eq!(
             reserved_instructions,

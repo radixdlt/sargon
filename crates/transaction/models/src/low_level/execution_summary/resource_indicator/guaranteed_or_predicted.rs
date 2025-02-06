@@ -13,11 +13,12 @@ impl<T> GuaranteedOrPredicted<T> {
 
     pub fn new_predicted(value: impl Into<T>, instruction_index: u64) -> Self {
         Self::Predicted(Predicted::new(value, instruction_index))
-    }    
+    }
 }
 
-impl<T> GuaranteedOrPredicted<T> 
-where T: Clone
+impl<T> GuaranteedOrPredicted<T>
+where
+    T: Clone,
 {
     pub fn get_value(&self) -> T {
         match self {

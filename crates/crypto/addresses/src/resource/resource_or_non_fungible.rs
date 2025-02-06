@@ -83,6 +83,31 @@ impl From<(ScryptoResourceOrNonFungible, NetworkID)> for ResourceOrNonFungible {
     }
 }
 
+impl TryFrom<(ScryptoManifestResourceOrNonFungible, NetworkID)>
+    for ResourceOrNonFungible
+{
+    type Error = CommonError;
+
+    fn try_from(
+        value: (ScryptoManifestResourceOrNonFungible, NetworkID),
+    ) -> Result<Self> {
+        let (manifest_resource, n) = value;
+
+        match manifest_resource {
+            ScryptoManifestResourceOrNonFungible::Resource(
+                resource_address,
+            ) => Ok(Self::Resource {
+                value: (resource_address, n).try_into()?,
+            }),
+            ScryptoManifestResourceOrNonFungible::NonFungible(nf) => {
+                Ok(Self::NonFungible {
+                    value: (nf, n).into(),
+                })
+            }
+        }
+    }
+}
+
 impl HasSampleValues for ResourceOrNonFungible {
     fn sample() -> Self {
         Self::Resource {

@@ -28,6 +28,8 @@ pub mod prelude {
     pub use crate::transaction_status::*;
     pub use crate::unvalidated_transaction_manifest::*;
 
+    pub(crate) use either::Either;
+
     pub(crate) use radix_common::{
         crypto::Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
         math::Decimal as ScryptoDecimal192,
@@ -36,7 +38,6 @@ pub mod prelude {
 
     pub(crate) use radix_engine::{
         blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
-        system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier,
         transaction::FeeLocks as ScryptoFeeLocks,
     };
 
@@ -106,16 +107,7 @@ pub mod prelude {
             },
         },
         manifest_analysis::{
-            DetailedManifestClassification as RetDetailedManifestClass,
-            DynamicAnalysis as RetDynamicAnalysis,
-            FeeSummary as RetFeeSummary,
-            ManifestAnalysisError as RetManifestAnalysisError,
-            ReservedInstructionsOutput as RetReservedInstructionsOutput,
-            PoolContributionOperation as RetPoolContributionOperation,
-            PoolRedemptionOperation as RetPoolRedemptionOperation,
-            ValidatorStakeOperation as RetValidatorStakeOperation,
-            ValidatorClaimOperation as RetValidatorClaimOperation,
-            NewEntitiesOutput as RetNewEntitiesOutput,
+            AccountStaticResourceMovementsOutput as RetAccountStaticResourceMovementsOutput,
             // FungibleResourceIndicator as RetFungibleResourceIndicator,
             // ManifestClass as RetManifestClass, NewEntities as RetNewEntities,
             // NonFungibleResourceIndicator as RetNonFungibleResourceIndicator,
@@ -128,13 +120,26 @@ pub mod prelude {
             // TrackedValidatorClaim as RetTrackedValidatorClaim,
             // TrackedValidatorStake as RetTrackedValidatorStake,
             // Update as RetUpdate,
+            DetailedManifestClassification as RetDetailedManifestClass,
+            DynamicAnalysis as RetDynamicAnalysis,
+            FeeSummary as RetFeeSummary,
+            ManifestAnalysisError as RetManifestAnalysisError,
+            ManifestClassification as RetManifestClass,
+            NewEntitiesOutput as RetNewEntitiesOutput,
+            PoolContributionOperation as RetPoolContributionOperation,
+            PoolRedemptionOperation as RetPoolRedemptionOperation,
+            ReservedInstructionsOutput as RetReservedInstructionsOutput,
+            StaticAnalysis as RetStaticAnalysis,
+            ValidatorClaimOperation as RetValidatorClaimOperation,
+            ValidatorStakeOperation as RetValidatorStakeOperation,
         },
         types::{
+            EitherGuaranteedOrPredicted as RetEitherGuaranteedOrPredicted,
             InvocationIoItem as RetInvocationIoItem,
             ManifestResourceSpecifier as RetManifestResourceSpecifier,
-            EitherGuaranteedOrPredicted as RetEitherGuaranteedOrPredicted,
-            Tracked as RetTracked,
-        }
+            Operation as RetOperation, Tracked as RetTracked,
+            Update as RetUpdate,
+        },
     };
 
     pub(crate) use radix_engine_toolkit_common::receipt::{

@@ -5,7 +5,7 @@ impl DynamicallyAnalyzableManifest for ScryptoTransactionManifestV2 {
         &self,
         receipt: &ScryptoRuntimeToolkitTransactionReceipt,
     ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError> {
-        RET_dynamically_analyze_v2(self, receipt)
+        RET_dynamically_analyze_v2(self, receipt.clone())
     }
 }
 

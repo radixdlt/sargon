@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-
 macro_rules! from_scrypto_address_variant {
 
     ($address_type: ty) => {

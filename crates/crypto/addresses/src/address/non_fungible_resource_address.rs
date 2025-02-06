@@ -149,8 +149,7 @@ impl NonFungibleResourceAddress {
             entity_byte,
             &generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>(),
         );
-        Self::new_from_node_id(node_id, network_id)
-                .unwrap()
+        Self::new_from_node_id(node_id, network_id).unwrap()
     }
 
     pub fn sample_mainnet() -> Self {

@@ -30,6 +30,23 @@ where
         .collect::<HashMap<L, U>>()
 }
 
+pub(crate) fn filter_try_to_hashmap_network_aware_key<K, V, L, U>(
+    values: impl IntoIterator<Item = (K, V)>,
+    network_id: NetworkID,
+) -> HashMap<L, U>
+where
+    L: Eq + std::hash::Hash + TryFrom<(K, NetworkID)>,
+    U: From<V>,
+{
+    values
+        .into_iter()
+        .filter_map(|(k, v)| {
+            let l = L::try_from((k, network_id)).ok()?;
+            Some((l, U::from(v)))
+        })
+        .collect::<HashMap<L, U>>()
+}
+
 pub(crate) fn filter_try_to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
     network_id: NetworkID,
@@ -186,8 +203,6 @@ impl ExecutionSummary {
     }
 }
 
-
-
 fn addresses_of_accounts_from_ret(
     ret: IndexMap<ScryptoGlobalAddress, Vec<RetInvocationIoItem>>,
     network_id: NetworkID,
@@ -195,8 +210,10 @@ fn addresses_of_accounts_from_ret(
     ret.into_iter()
         .map(|(address, invocation)| {
             (
-                AccountAddress::new_from_global_address(address, network_id).unwrap(),
-                invocation.into_iter()
+                AccountAddress::new_from_global_address(address, network_id)
+                    .unwrap(),
+                invocation
+                    .into_iter()
                     .map(|i| (i, network_id))
                     .map(ResourceIndicator::from)
                     .collect_vec(),
@@ -206,17 +223,20 @@ fn addresses_of_accounts_from_ret(
 }
 
 use radix_common::prelude::ManifestGlobalAddress;
-fn map_manifest_global_address<U>(addresses: IndexSet<ManifestGlobalAddress>, network_id: NetworkID) -> Vec<U>
+fn map_manifest_global_address<U>(
+    addresses: IndexSet<ManifestGlobalAddress>,
+    network_id: NetworkID,
+) -> Vec<U>
 where
     U: From<(ScryptoGlobalAddress, NetworkID)>,
 {
-    let global_addresses = addresses.into_iter().filter_map(|address| {
-        match address {
+    let global_addresses = addresses
+        .into_iter()
+        .filter_map(|address| match address {
             ManifestGlobalAddress::Static(address) => Some(address),
             ManifestGlobalAddress::Named(_) => None,
-        }
-    })
-    .collect_vec();
+        })
+        .collect_vec();
 
     to_vec_network_aware(global_addresses, network_id)
 }
@@ -225,28 +245,56 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
     fn from(value: (RetDynamicAnalysis, NetworkID)) -> Self {
         let (ret, n) = value;
 
-        let mut newly_created_non_fungibles =
-            to_vec_network_aware(ret.entities_newly_created_summary.new_non_fungibles, n);
+        let mut newly_created_non_fungibles = to_vec_network_aware(
+            ret.entities_newly_created_summary.new_non_fungibles,
+            n,
+        );
         newly_created_non_fungibles.sort();
 
         let mut summary = Self::new(
-            addresses_of_accounts_from_ret(ret.account_dynamic_resource_movements_summary.account_withdraws, n),
-            addresses_of_accounts_from_ret(ret.account_dynamic_resource_movements_summary.account_deposits, n),
-            map_manifest_global_address(ret.entities_requiring_auth_summary.accounts, n),
-            map_manifest_global_address(ret.entities_requiring_auth_summary.identities, n),
+            addresses_of_accounts_from_ret(
+                ret.account_dynamic_resource_movements_summary
+                    .account_withdraws,
+                n,
+            ),
+            addresses_of_accounts_from_ret(
+                ret.account_dynamic_resource_movements_summary
+                    .account_deposits,
+                n,
+            ),
+            map_manifest_global_address(
+                ret.entities_requiring_auth_summary.accounts,
+                n,
+            ),
+            map_manifest_global_address(
+                ret.entities_requiring_auth_summary.identities,
+                n,
+            ),
             newly_created_non_fungibles,
-            ReservedInstruction::from_ret_reserved_instructions_output(ret.reserved_instructions_summary),
-            ret.proofs_created_summary.created_proofs
+            ReservedInstruction::from_ret_reserved_instructions_output(
+                ret.reserved_instructions_summary,
+            ),
+            ret.proofs_created_summary
+                .created_proofs
                 .values()
                 .cloned()
                 .flat_map(|vec| filter_try_to_vec_network_aware(vec, n)),
-            filter_try_to_vec_network_aware(ret.entities_encountered_summary.entities, n),
+            filter_try_to_vec_network_aware(
+                ret.entities_encountered_summary.entities,
+                n,
+            ),
             ret.detailed_manifest_classification
                 .into_iter()
                 .map(|d| DetailedManifestClass::from((d, n))),
             ret.fee_locks_summary,
             ret.fee_consumption_summary,
-            (ret.entities_newly_created_summary, n),
+            (
+                (
+                    ret.entities_newly_created_summary.new_resource_entities,
+                    ret.entities_newly_created_summary.global_entities_metadata,
+                ),
+                n,
+            ),
         );
 
         summary.classify_delete_accounts_if_present();
@@ -275,7 +323,9 @@ impl ExecutionSummary {
             ],
             addresses_of_identities_requiring_auth: Vec::new(),
             newly_created_non_fungibles: Vec::new(),
-            reserved_instructions: IndexSet::from([ReservedInstruction::sample()]),
+            reserved_instructions: IndexSet::from([
+                ReservedInstruction::sample(),
+            ]),
             presented_proofs: Vec::new(),
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample_component_stokenet(
@@ -308,7 +358,9 @@ impl HasSampleValues for ExecutionSummary {
                 IdentityAddress::sample(),
             ],
             newly_created_non_fungibles: vec![NonFungibleGlobalId::sample()],
-            reserved_instructions: IndexSet::from([ReservedInstruction::sample()]),
+            reserved_instructions: IndexSet::from([
+                ReservedInstruction::sample(),
+            ]),
             presented_proofs: vec![ResourceSpecifier::sample()],
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample(),
@@ -342,7 +394,9 @@ impl HasSampleValues for ExecutionSummary {
             newly_created_non_fungibles: vec![
                 NonFungibleGlobalId::sample_other(),
             ],
-            reserved_instructions: IndexSet::from([ReservedInstruction::sample_other()]),
+            reserved_instructions: IndexSet::from([
+                ReservedInstruction::sample_other(),
+            ]),
             presented_proofs: vec![ResourceSpecifier::sample_other()],
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample_other(),

@@ -1,13 +1,18 @@
 use crate::prelude::*;
 
 pub type FungibleResourceIndicator = GuaranteedOrPredicted<Decimal>;
-pub(crate) type RetFungibleResourceIndicator = RetEitherGuaranteedOrPredicted<ScryptoDecimal192>;
+pub(crate) type RetFungibleResourceIndicator =
+    RetEitherGuaranteedOrPredicted<ScryptoDecimal192>;
 
 impl From<RetFungibleResourceIndicator> for FungibleResourceIndicator {
     fn from(value: RetFungibleResourceIndicator) -> Self {
         match value {
-            RetEitherGuaranteedOrPredicted::Guaranteed(value) => Self::Guaranteed(value.into()),
-            RetEitherGuaranteedOrPredicted::Predicted(value) => Self::Predicted(value.into()),
+            RetEitherGuaranteedOrPredicted::Guaranteed(value) => {
+                Self::Guaranteed(value.into())
+            }
+            RetEitherGuaranteedOrPredicted::Predicted(value) => {
+                Self::Predicted(value.into())
+            }
         }
     }
 }

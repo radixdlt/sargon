@@ -160,12 +160,10 @@ mod tests {
 
         let ret = RetInvocationIoItem::new_predicted_non_fungible(
             ResourceAddress::from(resource_address).into(),
-             [NonFungibleLocalId::sample_other()]
-                        .into_iter()
-                        .map(ScryptoNonFungibleLocalId::from)
-                        .collect(),
-                    InstructionIndex::of(1),
-  
+            [NonFungibleLocalId::sample_other()]
+                .into_iter()
+                .map(ScryptoNonFungibleLocalId::from),
+            InstructionIndex::of(0),
         );
 
         assert_eq!(

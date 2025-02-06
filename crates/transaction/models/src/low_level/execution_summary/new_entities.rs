@@ -19,16 +19,37 @@ impl NewEntities {
     }
 }
 
-impl From<(RetNewEntitiesOutput, NetworkID)> for NewEntities {
-    fn from(value: (RetNewEntitiesOutput, NetworkID)) -> Self {
-        let (ret, network_id) = value;
+impl
+    From<(
+        (
+            IndexSet<ScryptoResourceAddress>,
+            IndexMap<
+                ScryptoGlobalAddress,
+                IndexMap<String, Option<ScryptoMetadataValue>>,
+            >,
+        ),
+        NetworkID,
+    )> for NewEntities
+{
+    fn from(
+        value: (
+            (
+                IndexSet<ScryptoResourceAddress>,
+                IndexMap<
+                    ScryptoGlobalAddress,
+                    IndexMap<String, Option<ScryptoMetadataValue>>,
+                >,
+            ),
+            NetworkID,
+        ),
+    ) -> Self {
+        let ((new_resources, global_metadata), network_id) = value;
 
-        Self::new(ret.new_resource_entities.into_iter().map(|r| {
+        Self::new(new_resources.into_iter().map(|r| {
             let resource_address = ResourceAddress::from((r, network_id));
             let global_address = ScryptoGlobalAddress::from(resource_address);
 
-            let newly_created_resource = ret
-                .global_entities_metadata
+            let newly_created_resource = global_metadata
                 .get(&global_address)
                 .map(|m| NewlyCreatedResource::from(m.clone()))
                 .unwrap_or_default();

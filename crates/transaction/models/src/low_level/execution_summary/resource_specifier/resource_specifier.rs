@@ -52,18 +52,34 @@ impl ResourceSpecifier {
 impl TryFrom<(RetManifestResourceSpecifier, NetworkID)> for ResourceSpecifier {
     type Error = CommonError;
 
-    fn try_from(value: (RetManifestResourceSpecifier, NetworkID)) -> Result<Self, Self::Error> {
+    fn try_from(
+        value: (RetManifestResourceSpecifier, NetworkID),
+    ) -> Result<Self, Self::Error> {
         let (scrypto_value, network_id) = value;
         match scrypto_value {
-            RetManifestResourceSpecifier::Amount(address, amount) => {
-                Ok(Self::fungible((address, network_id).try_into()?, amount))
-            }
-            RetManifestResourceSpecifier::Ids(address, ids) => {
-                Ok(Self::non_fungible(
-                    (address, network_id).try_into()?,
-                    ids.into_iter().map(NonFungibleLocalId::from).collect(),
-                ))
-            }
+            RetManifestResourceSpecifier::Amount(
+                ScryptoManifestResourceAddress::Static(resource_address),
+                amount,
+            ) => Ok(Self::fungible(
+                ResourceAddress::new_from_node_id(
+                    resource_address.into_node_id(),
+                    network_id,
+                )
+                .unwrap(),
+                amount,
+            )),
+            RetManifestResourceSpecifier::Ids(
+                ScryptoManifestResourceAddress::Static(resource_address),
+                ids,
+            ) => Ok(Self::non_fungible(
+                ResourceAddress::new_from_node_id(
+                    resource_address.into_node_id(),
+                    network_id,
+                )
+                .unwrap(),
+                ids.into_iter().map(NonFungibleLocalId::from).collect(),
+            )),
+            _ => Err(CommonError::NamedAddressesAreNotSupported),
         }
     }
 }

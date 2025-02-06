@@ -14,6 +14,7 @@ pub mod prelude {
     pub use crate::address::*;
     pub use crate::resource::*;
 
+    pub(crate) use radix_engine_interface::blueprints::resource::ManifestResourceOrNonFungible as ScryptoManifestResourceOrNonFungible;
     pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
 
     pub use radix_common::{

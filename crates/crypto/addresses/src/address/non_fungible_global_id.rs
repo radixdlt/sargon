@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use core_utils::prelude::format_string;
-use radix_common::{address::{AddressBech32Decoder, AddressBech32Encoder}, prelude::NetworkDefinition};
+use radix_common::{
+    address::{AddressBech32Decoder, AddressBech32Encoder},
+    prelude::NetworkDefinition,
+};
 use radix_engine_toolkit::prelude::NetworkDefinitionExt;
 
 #[derive(
@@ -96,9 +99,11 @@ impl FromStr for NonFungibleGlobalId {
             },
         )?;
 
-        let network_definition = NetworkDefinition::from_address_string(resource_address_string).ok_or(CommonError::InvalidNonFungibleGlobalID {
-            bad_value: s.to_owned(),
-        })?;
+        let network_definition =
+            NetworkDefinition::from_address_string(resource_address_string)
+                .ok_or(CommonError::InvalidNonFungibleGlobalID {
+                    bad_value: s.to_owned(),
+                })?;
         let bech32_decoder = AddressBech32Decoder::new(&network_definition);
 
         let non_fungible_global_id =
@@ -112,9 +117,11 @@ impl FromStr for NonFungibleGlobalId {
                 }
             })?;
 
-        TryInto::<NetworkID>::try_into(network_definition.id).map(|network_id| {
-            NonFungibleGlobalId::from((non_fungible_global_id, network_id))
-        })
+        TryInto::<NetworkID>::try_into(network_definition.id).map(
+            |network_id| {
+                NonFungibleGlobalId::from((non_fungible_global_id, network_id))
+            },
+        )
     }
 }
 

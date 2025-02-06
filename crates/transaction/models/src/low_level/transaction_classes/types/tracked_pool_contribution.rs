@@ -29,7 +29,9 @@ impl TrackedPoolContribution {
     }
 }
 
-impl From<(RetPoolContributionOperation, NetworkID)> for TrackedPoolContribution {
+impl From<(RetPoolContributionOperation, NetworkID)>
+    for TrackedPoolContribution
+{
     fn from(value: (RetPoolContributionOperation, NetworkID)) -> Self {
         let (ret, network_id) = value;
         Self::new(

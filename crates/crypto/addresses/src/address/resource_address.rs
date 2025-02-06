@@ -40,15 +40,17 @@ impl ResourceAddress {
 
 impl TryFrom<(ScryptoManifestResourceAddress, NetworkID)> for ResourceAddress {
     type Error = CommonError;
-    fn try_from(value: (ScryptoManifestResourceAddress, NetworkID)) -> Result<Self> {
+    fn try_from(
+        value: (ScryptoManifestResourceAddress, NetworkID),
+    ) -> Result<Self> {
         match value.0 {
             ScryptoManifestResourceAddress::Static(resource_address) => {
                 Ok(ResourceAddress::from((resource_address, value.1)))
-            },
+            }
             _ => Err(CommonError::NamedAddressesAreNotSupported),
         }
     }
-} 
+}
 
 impl HasSampleValues for ResourceAddress {
     /// The RAD on mainnet
