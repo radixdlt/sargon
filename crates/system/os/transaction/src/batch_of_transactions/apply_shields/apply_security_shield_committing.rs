@@ -74,54 +74,66 @@ impl NetworkRequestParseOriginal for NetworkRequest {
 }
 
 #[cfg(test)]
+pub trait EveronesRichMockNetworkingDriver {
+    fn everyones_rich() -> Arc<dyn NetworkingDriver>;
+}
+#[cfg(test)]
+impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
+    fn everyones_rich() -> Arc<dyn NetworkingDriver> {
+        Arc::new(MockNetworkingDriver::with_lazy_responses(
+            |req: NetworkRequest, _count: u64| -> NetworkResponse {
+                let path = req.url.path();
+                if path == "/state/entity/details" {
+                    let request =
+                        req.parse_original::<StateEntityDetailsRequest>();
+
+                    StateEntityDetailsResponse::new(
+                        None,
+                        request.addresses.iter().map(|address| {
+                            let items =
+                                vec![FungibleResourcesCollectionItem::global(
+                                    ResourceAddress::xrd_on_network(
+                                        NetworkID::Mainnet,
+                                    ),
+                                    Decimal::from_str("999999999").unwrap(),
+                                )];
+                            StateEntityDetailsResponseItem::new(
+                                *address,
+                                FungibleResourcesCollection::new(
+                                    None, None, items,
+                                ),
+                                None, // non-fungible
+                                EntityMetadataCollection::empty(),
+                                None, // details
+                            )
+                        }),
+                    )
+                    .into_network_response()
+                } else if path == "/transaction/construction" {
+                    TransactionConstructionResponse::new(LedgerState::new(
+                        NetworkID::Mainnet.logical_name(),
+                        1,
+                        "2021-01-01T00:00:00Z",
+                        1, // epoch
+                        1,
+                    ))
+                    .into_network_response()
+                } else {
+                    todo!("Unimplemented mock data for path: {:?}", path)
+                }
+            },
+        ))
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
     #[actix_rt::test]
     async fn test() {
         let network_id = NetworkID::Mainnet;
-        let mock_networking_driver: Arc<dyn NetworkingDriver> =
-            Arc::new(MockNetworkingDriver::with_lazy_responses(
-                |req: NetworkRequest, count: u64| -> NetworkResponse {
-                    if count == 0 {
-                        let request =
-                            req.parse_original::<StateEntityDetailsRequest>();
-
-                        StateEntityDetailsResponse::new(
-                            None,
-                            request.addresses.iter().map(|address| {
-                                let items = vec![
-                                    FungibleResourcesCollectionItem::global(
-                                        ResourceAddress::xrd_on_network(
-                                            NetworkID::Mainnet,
-                                        ),
-                                        Decimal::from_str("10000000").unwrap(),
-                                    ),
-                                ];
-                                StateEntityDetailsResponseItem::new(
-                                    *address,
-                                    FungibleResourcesCollection::new(
-                                        None, None, items,
-                                    ),
-                                    None, // non-fungible
-                                    EntityMetadataCollection::empty(),
-                                    None, // details
-                                )
-                            }),
-                        )
-                        .into_network_response()
-                    } else {
-                        TransactionConstructionResponse::new(LedgerState::new(
-                            NetworkID::Mainnet.logical_name(),
-                            1,
-                            "2021-01-01T00:00:00Z",
-                            1, // epoch
-                            1,
-                        ))
-                        .into_network_response()
-                    }
-                },
-            ));
+        let mock_networking_driver = MockNetworkingDriver::everyones_rich();
 
         let os =
             SargonOS::boot_test_with_networking_driver(mock_networking_driver)
