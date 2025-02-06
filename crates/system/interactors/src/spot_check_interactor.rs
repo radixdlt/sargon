@@ -16,6 +16,10 @@ pub enum SpotCheckResponse {
     /// Used for the identification of `LedgerHardwareWalletFactorSource`.
     Ledger { id: Exactly32Bytes },
 
+    /// The user retrieved the `FactorSourceIdFromHash` that identified an Arculus card.
+    /// /// Used for the identification of `ArculusCardFactorSource`.
+    ArculusCard { id: FactorSourceIDFromHash },
+
     /// The user retrieved a `MnemonicWithPassphrase`.
     /// Used for the identification of any other `FactorSource`.
     MnemonicWithPassphrase { value: MnemonicWithPassphrase },

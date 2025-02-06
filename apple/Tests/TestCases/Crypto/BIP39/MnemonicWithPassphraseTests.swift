@@ -55,4 +55,9 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 	func testJSONRoundtripAllSamples() throws {
 		try eachSampleCodableRoundtripTest()
 	}
+	
+	func testInitWithoutPaspshrase() {
+		let sut = SUT.init(mnemonic: .sample)
+		XCTAssertEqual(sut.passphrase, "")
+	}
 }
