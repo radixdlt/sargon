@@ -40,6 +40,14 @@ pub trait OsSecurityStructuresQuerying {
         &self,
         shield_id: SecurityStructureID,
     ) -> Result<()>;
+
+    async fn entities_linked_to_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+        profile_to_check: ProfileToCheck,
+    ) -> Result<EntitiesLinkedToSecurityStructure>;
+
+    async fn get_shields_for_display(&self) -> Result<ShieldsForDisplay>;
 }
 
 #[async_trait::async_trait]
@@ -184,6 +192,63 @@ impl OsSecurityStructuresQuerying for SargonOS {
             .await;
 
         Ok(())
+    }
+
+    async fn entities_linked_to_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+        profile_to_check: ProfileToCheck,
+    ) -> Result<EntitiesLinkedToSecurityStructure> {
+        match profile_to_check {
+            ProfileToCheck::Current => self
+                .profile()?
+                .current_network()?
+                .entities_linked_to_security_structure(shield_id),
+            ProfileToCheck::Specific(specific_profile) => {
+                let profile_network = specific_profile
+                    .networks
+                    .get_id(NetworkID::Mainnet)
+                    .ok_or(CommonError::Unknown)?;
+                profile_network.entities_linked_to_security_structure(shield_id)
+            }
+        }
+    }
+
+    async fn get_shields_for_display(&self) -> Result<ShieldsForDisplay> {
+        let security_structures =
+            self.security_structures_of_factor_source_ids()?;
+
+        let mut shields_for_display = ShieldsForDisplay::new();
+        for security_structure in security_structures.iter() {
+            let linked_entities = self
+                .entities_linked_to_security_structure(
+                    security_structure.id(),
+                    ProfileToCheck::Current,
+                )
+                .await?;
+
+            shields_for_display.insert(ShieldForDisplay {
+                metadata: security_structure.metadata.clone(),
+                number_of_linked_accounts: linked_entities
+                    .accounts
+                    .iter()
+                    .count(),
+                number_of_linked_hidden_accounts: linked_entities
+                    .hidden_accounts
+                    .iter()
+                    .count(),
+                number_of_linked_personas: linked_entities
+                    .personas
+                    .iter()
+                    .count(),
+                number_of_linked_hidden_personas: linked_entities
+                    .hidden_personas
+                    .iter()
+                    .count(),
+            });
+        }
+
+        Ok(shields_for_display)
     }
 }
 
@@ -654,5 +719,273 @@ mod tests {
         let os = SUT::fast_boot().await;
         let result = os.security_shield_prerequisites_status().unwrap();
         assert_eq!(result, SecurityShieldPrerequisitesStatus::HardwareRequired);
+    }
+
+    #[actix_rt::test]
+    async fn test_get_entities_linked_to_secure_structure() {
+        // ARRANGE
+        let os = SargonOS::fast_boot().await;
+        let shield_id = add_unsafe_shield(&os).await.unwrap();
+
+        // Two visible accounts
+        let accounts = Accounts::from_iter([
+            Account::sample_mainnet_alice(),
+            Account::sample_mainnet_bob(),
+        ]);
+        // One hidden account
+        let hidden_accounts =
+            Accounts::from_iter([Account::sample_mainnet_diana()]);
+        // Two visible personas
+        let personas = Personas::from_iter([
+            Persona::sample_mainnet_batman(),
+            Persona::sample_mainnet_satoshi(),
+        ]);
+        // One hidden persona
+        let hidden_personas =
+            Personas::from_iter([Persona::sample_mainnet_turing()]);
+
+        let all_accounts = accounts
+            .iter()
+            .chain(hidden_accounts.iter())
+            .collect::<Accounts>();
+        let all_personas = personas
+            .iter()
+            .chain(hidden_personas.iter())
+            .collect::<Personas>();
+
+        os.add_accounts(all_accounts.clone()).await.unwrap();
+        os.add_personas(all_personas.clone()).await.unwrap();
+
+        let addresses: IndexSet<AddressOfAccountOrPersona> = all_accounts
+            .iter()
+            .map(|account| account.address().into())
+            .chain(all_personas.iter().map(|persona| persona.address().into()))
+            .collect();
+
+        // ACT
+        os.apply_security_shield_with_id_to_entities(shield_id, addresses)
+            .await
+            .unwrap();
+
+        let result = os
+            .entities_linked_to_security_structure(
+                shield_id,
+                ProfileToCheck::Current,
+            )
+            .await
+            .unwrap();
+
+        // ASSERT
+        let updated_accounts = os.accounts_on_current_network().unwrap();
+        assert_eq!(result.accounts, updated_accounts);
+        let updated_hidden_accounts = os
+            .profile()
+            .unwrap()
+            .hidden_accounts_on_current_network()
+            .unwrap();
+        assert_eq!(result.hidden_accounts, updated_hidden_accounts);
+        let updated_personas = os.personas_on_current_network().unwrap();
+        assert_eq!(result.personas, updated_personas);
+        let updated_hidden_personas = os
+            .profile()
+            .unwrap()
+            .hidden_personas_on_current_network()
+            .unwrap();
+        assert_eq!(result.hidden_personas, updated_hidden_personas)
+    }
+
+    #[actix_rt::test]
+    async fn test_get_entities_linked_to_secure_structure_for_specific_profile()
+    {
+        // ARRANGE
+        // Verify the entities when checking for a specific Profile
+        // (which will check on Mainnet, regardless of the current network set on Profile)
+        let mut profile_to_check = Profile::sample();
+        profile_to_check
+            .app_preferences
+            .gateways
+            .change_current(Gateway::stokenet());
+        let structure_ids_sample_other =
+            SecurityStructureOfFactorSourceIDs::sample();
+        profile_to_check
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .append(structure_ids_sample_other.clone());
+
+        let (os, shield_id, account, persona) = {
+            let os = SargonOS::fast_boot().await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let account = os
+                .create_and_save_new_account_with_main_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+            let persona = os
+                .create_and_save_new_persona_with_main_bdfs(
+                    network,
+                    DisplayName::sample_other(),
+                    None,
+                )
+                .await
+                .unwrap();
+            (os, shield_id, account, persona)
+        };
+
+        // add security shield on mainnet entities
+        os.apply_security_shield_with_id_to_entities(
+            shield_id,
+            [
+                AddressOfAccountOrPersona::from(account.address()),
+                AddressOfAccountOrPersona::from(persona.address()),
+            ]
+            .iter()
+            .cloned()
+            .collect(),
+        )
+        .await
+        .unwrap();
+
+        // ACT
+        let result = os
+            .entities_linked_to_security_structure(
+                shield_id,
+                ProfileToCheck::Specific(profile_to_check),
+            )
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert!(result.accounts.is_empty());
+        assert!(result.hidden_accounts.is_empty());
+        assert!(result.personas.is_empty());
+        assert!(result.hidden_personas.is_empty())
+    }
+
+    #[actix_rt::test]
+    async fn test_specific_profile_mainnet_missing() {
+        // Test the failure case when checking entities for a specific Profile that doesn't have Mainnet in its networks
+        let profile = Profile::sample_other();
+        let os = SargonOS::fast_boot().await;
+        let shield_id = add_unsafe_shield(&os).await.unwrap();
+
+        let result = os
+            .entities_linked_to_security_structure(
+                shield_id,
+                ProfileToCheck::Specific(profile),
+            )
+            .await
+            .expect_err("Expected an error");
+        assert_eq!(result, CommonError::Unknown);
+    }
+
+    #[actix_rt::test]
+    async fn test_get_shields_for_display() {
+        // ARRANGE
+        let os = SargonOS::fast_boot().await;
+        let shield_id_sample = add_unsafe_shield(&os).await.unwrap();
+        let shield_id_sample_other =
+            add_unsafe_shield_with_matrix_with_fixed_metadata(
+                &os,
+                SecurityStructureMetadata::sample_other(),
+            )
+            .await
+            .unwrap()
+            .id();
+
+        let main_account = Account::sample_mainnet_carol();
+
+        // some other accounts and personas
+        let accounts = Accounts::from_iter([
+            Account::sample_mainnet_alice(),
+            Account::sample_mainnet_bob(),
+        ]);
+        let hidden_accounts =
+            Accounts::from_iter([Account::sample_mainnet_diana()]);
+        let personas = Personas::from_iter([
+            Persona::sample_mainnet_batman(),
+            Persona::sample_mainnet_satoshi(),
+        ]);
+        let hidden_personas =
+            Personas::from_iter([Persona::sample_mainnet_turing()]);
+
+        let all_accounts = accounts
+            .iter()
+            .chain(hidden_accounts.iter())
+            .chain(__std_iter::once(main_account.clone()))
+            .collect::<Accounts>();
+        let all_personas = personas
+            .iter()
+            .chain(hidden_personas.iter())
+            .collect::<Personas>();
+
+        os.add_accounts(all_accounts.clone()).await.unwrap();
+        os.add_personas(all_personas.clone()).await.unwrap();
+
+        let address_of_main_account: IndexSet<AddressOfAccountOrPersona> =
+            [main_account.address().into()].into_iter().collect();
+
+        let addresses_of_rest_entities: IndexSet<AddressOfAccountOrPersona> =
+            all_accounts
+                .iter()
+                .map(|account| account.address().into())
+                .chain(
+                    all_personas.iter().map(|persona| persona.address().into()),
+                )
+                .collect();
+
+        // ACT
+        os.apply_security_shield_with_id_to_entities(
+            shield_id_sample,
+            addresses_of_rest_entities,
+        )
+        .await
+        .unwrap();
+
+        os.apply_security_shield_with_id_to_entities(
+            shield_id_sample_other,
+            address_of_main_account,
+        )
+        .await
+        .unwrap();
+
+        let result = os.get_shields_for_display().await.unwrap();
+
+        // ASSERT
+        assert_eq!(result.iter().count(), 2);
+        assert_eq!(result.first().unwrap().metadata.id, shield_id_sample);
+        assert_eq!(result.first().unwrap().number_of_linked_accounts, 2);
+        assert_eq!(result.first().unwrap().number_of_linked_hidden_accounts, 1);
+        assert_eq!(result.first().unwrap().number_of_linked_personas, 2);
+        assert_eq!(result.first().unwrap().number_of_linked_hidden_personas, 1);
+        assert_eq!(
+            result.get_at_index(1).unwrap().metadata.id,
+            shield_id_sample_other
+        );
+        assert_eq!(
+            result.get_at_index(1).unwrap().number_of_linked_accounts,
+            1
+        );
+        assert_eq!(
+            result
+                .get_at_index(1)
+                .unwrap()
+                .number_of_linked_hidden_accounts,
+            0
+        );
+        assert_eq!(
+            result.get_at_index(1).unwrap().number_of_linked_personas,
+            0
+        );
+        assert_eq!(
+            result
+                .get_at_index(1)
+                .unwrap()
+                .number_of_linked_hidden_personas,
+            0
+        )
     }
 }
