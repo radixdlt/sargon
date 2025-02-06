@@ -188,10 +188,21 @@ mod tests {
             .address;
 
         let carla = Account::sample_at(2);
-        // let david = Account::sample_at(3);
 
         os.add_account(carla.clone()).await.unwrap();
         let carla = carla.address;
+
+        let ziggy = Persona::sample_at(2);
+        os.add_persona(ziggy.clone()).await.unwrap();
+        let ziggy = ziggy.address;
+
+        let batman = os
+            .create_and_save_new_mainnet_persona_with_main_bdfs(
+                DisplayName::new("Batman").unwrap(),
+            )
+            .await
+            .unwrap()
+            .address;
 
         let manifests = os
             .make_interaction_for_applying_security_shield(
@@ -200,6 +211,8 @@ mod tests {
                     AddressOfAccountOrPersona::from(alice),
                     bob.into(),
                     carla.into(),
+                    AddressOfAccountOrPersona::from(ziggy),
+                    batman.into(),
                 ]),
             )
             .await
