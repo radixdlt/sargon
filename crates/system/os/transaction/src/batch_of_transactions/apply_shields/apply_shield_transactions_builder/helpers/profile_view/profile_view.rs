@@ -1,24 +1,28 @@
 use crate::prelude::*;
 
+/// A "view" into Profile which provides methods for looking up entities by
+/// their addresses.
 #[async_trait::async_trait]
-pub trait ApplyShieldTransactionsProfileLens: Send + Sync {
+pub trait ApplyShieldTransactionsProfileView: Send + Sync {
     fn lookup_entities_for_manifests(
         &self,
         manifest_and_payer_tuples: Vec<ManifestWithPayerByAddress>, // TODO: Want IndexSet but not Hash
     ) -> Result<Vec<ShieldApplicationInputWithoutXrdBalance>>;
 }
 
-pub struct ApplyShieldTransactionsProfileLensImpl {
+/// A "view" into Profile which provides methods for looking up entities by
+/// their addresses.
+pub struct ApplyShieldTransactionsProfileViewImpl {
     profile: Profile,
 }
 
-impl ApplyShieldTransactionsProfileLensImpl {
+impl ApplyShieldTransactionsProfileViewImpl {
     pub fn new(profile: Profile) -> Self {
         Self { profile }
     }
 }
 
-impl ApplyShieldTransactionsProfileLensImpl {
+impl ApplyShieldTransactionsProfileViewImpl {
     /// Looks up the account by account address, returns Err if the account is
     /// unknown, will return a hidden account if queried for.
     pub fn account_by_address(
@@ -105,28 +109,9 @@ impl ApplyShieldTransactionsProfileLensImpl {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum EntityApplyingShield {
-    Unsecurified(AnyUnsecurifiedEntity),
-    Securified(AnySecurifiedEntity),
-}
-impl EntityApplyingShield {
-    pub fn unsecurified_account(entity: UnsecurifiedAccount) -> Self {
-        EntityApplyingShield::Unsecurified(AnyUnsecurifiedEntity::from(entity))
-    }
-
-    pub fn unsecurified_persona(entity: UnsecurifiedPersona) -> Self {
-        EntityApplyingShield::Unsecurified(AnyUnsecurifiedEntity::from(entity))
-    }
-
-    pub fn securified(entity: AnySecurifiedEntity) -> Self {
-        EntityApplyingShield::Securified(entity)
-    }
-}
-
 #[async_trait::async_trait]
-impl ApplyShieldTransactionsProfileLens
-    for ApplyShieldTransactionsProfileLensImpl
+impl ApplyShieldTransactionsProfileView
+    for ApplyShieldTransactionsProfileViewImpl
 {
     fn lookup_entities_for_manifests(
         &self,

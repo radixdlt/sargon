@@ -10,7 +10,7 @@ pub trait ApplyShieldTransactionsBuilder: Send + Sync {
 }
 
 pub struct ApplyShieldTransactionsBuilderImpl {
-    profile_lens: Arc<dyn ApplyShieldTransactionsProfileLens>,
+    profile_lens: Arc<dyn ApplyShieldTransactionsProfileView>,
     xrd_balances_fetcher: Arc<dyn ApplyShieldTransactionsXrdBalancesFetcher>,
     poly_manifest_builder: Arc<dyn ApplyShieldTransactionsPolyManifestBuilder>,
     transaction_intent_builder:
@@ -23,7 +23,7 @@ impl ApplyShieldTransactionsBuilderImpl {
             let networking_driver = os.http_client.driver.clone();
             Self {
                 profile_lens: Arc::new(
-                    ApplyShieldTransactionsProfileLensImpl::new(profile),
+                    ApplyShieldTransactionsProfileViewImpl::new(profile),
                 ),
                 xrd_balances_fetcher: Arc::new(
                     ApplyShieldTransactionsXrdBalancesFetcherImpl::new(

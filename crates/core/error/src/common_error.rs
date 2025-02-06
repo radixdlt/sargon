@@ -900,8 +900,14 @@ pub enum CommonError {
     #[error("Payer cannot be in batch of entities applying shield")]
     PayerCannotBeInBatchOfEntitiesApplyingShield = 10255,
 
-    #[error("No XrdBalance fetched for entity or XrdVault, address {address}")]
-    NoXrdBalanceFetchedForEntityOrXrdVault { address: String } = 10256,
+    #[error("No XRD balance fetched for entity applying shield (or XRD Vault of AC), address {address}")]
+    NoXrdBalanceFetchedForEntityApplyingShieldOrItsVault { address: String } =
+        10256,
+
+    #[error("No XRD balance fetched for payer of application of shield, address_of_payer {address_of_payer}")]
+    NoXrdBalanceFetchedForPayerOfApplicationOfShield {
+        address_of_payer: String,
+    } = 10257,
 
     #[error("Unable to contribute to AccessControllers Xrd Vault, insufficient balance of payer {payer}, vault of entity {vault_of_entity}, payer balance {payer_balance}, needed balance {needed_balance}")]
     UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
@@ -909,22 +915,22 @@ pub enum CommonError {
         vault_of_entity: String,
         payer_balance: String,
         needed_balance: String,
-    } = 10257,
+    } = 10258,
 
     #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
-    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10258,
+    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10259,
 
     #[error("Unable to top up Xrd Vault, payer is entity applying shield: {payer_is_entity_applying_shield}, can exercise primary role: {can_exercise_primary_role} for entity owning AccessController: {entity_owning_access_controller}")]
     UnableToTopUpXrdVault {
         entity_owning_access_controller: String,
         payer_is_entity_applying_shield: bool,
         can_exercise_primary_role: bool,
-    } = 10259,
+    } = 10260,
 
     #[error("Unsecurified Personas require an account fee payer, but none was provided, for persona with address: {identity_address}")]
     UnsecurifiedPersonasRequireAnAccountFeePayerButNoneWasProvided {
         identity_address: String,
-    } = 10260,
+    } = 10261,
 }
 
 impl CommonError {

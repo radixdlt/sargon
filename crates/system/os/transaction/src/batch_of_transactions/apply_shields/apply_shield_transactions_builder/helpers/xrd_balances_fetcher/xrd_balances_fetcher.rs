@@ -1,7 +1,22 @@
 use crate::prelude::*;
 
+use super::XrdBalances;
+
+/// Fetches XRD balances of AccessControllers of securified **Personas**
+/// and **Accounts** and the XRD balances of the accounts applying the shield.
+/// (Personas do not have an XRD balance).
+///
+/// And ornaments `Vec<ShieldApplicationInputWithoutXrdBalance>` with the
+/// fetched XRD balances and returns `Vec<ShieldApplicationInput>` with
+/// which we are ready to modify the manifests and add Lock fee and XRD
+/// vault top up instructions.
 #[async_trait::async_trait]
 pub trait ApplyShieldTransactionsXrdBalancesFetcher: Send + Sync {
+    /// Fetches XRD balances of AccessControllers of securified **Personas**
+    /// and **Accounts** and the XRD balances of the accounts applying the shield.
+    /// (Personas do not have an XRD balance).
+    ///
+    /// And ornaments the inputs with the fetched XRD balances.
     async fn get_xrd_balances(
         &self,
         network_id: NetworkID,
@@ -20,7 +35,9 @@ impl ApplyShieldTransactionsXrdBalancesFetcherImpl {
         Self { networking_driver }
     }
 
-    /// Also fetched XRD balances of AccessControllers of securified **Personas**
+    /// Fetches XRD balances of AccessControllers of securified **Personas**
+    /// and **Accounts** and the XRD balances of the accounts applying the shield.
+    /// (Personas do not have an XRD balance).
     async fn batch_fetch_xrd_balances_of_accounts_or_access_controllers(
         &self,
         network_id: NetworkID,
@@ -47,6 +64,11 @@ impl ApplyShieldTransactionsXrdBalancesFetcherImpl {
 impl ApplyShieldTransactionsXrdBalancesFetcher
     for ApplyShieldTransactionsXrdBalancesFetcherImpl
 {
+    /// Fetches XRD balances of AccessControllers of securified **Personas**
+    /// and **Accounts** and the XRD balances of the accounts applying the shield.
+    /// (Personas do not have an XRD balance).
+    ///
+    /// And ornaments the inputs with the fetched XRD balances.
     async fn get_xrd_balances(
         &self,
         network_id: NetworkID,
@@ -59,8 +81,6 @@ impl ApplyShieldTransactionsXrdBalancesFetcher
             .flat_map(|i| i.addresses_to_fetch_xrd_balance_for())
             .collect::<IndexSet<AddressOfPayerOfShieldApplication>>();
 
-        println!("🐉 fetching balances for: {:?}", addresses_to_query);
-
         let mut balances = self
             .batch_fetch_xrd_balances_of_accounts_or_access_controllers(
                 network_id,
@@ -68,7 +88,6 @@ impl ApplyShieldTransactionsXrdBalancesFetcher
             )
             .await?;
 
-        println!("🐉 got balances for: {:?}", balances.0);
         manifests_with_entities_without_xrd_balances
             .into_iter()
             .map(|i| {
@@ -79,7 +98,8 @@ impl ApplyShieldTransactionsXrdBalancesFetcher
 }
 
 impl ShieldApplicationInput {
-    pub fn taking_xrd_balances(
+    /// Ornaments the input with the XRD balances fetched from the `XrdBalances`.
+    fn taking_xrd_balances(
         input: ShieldApplicationInputWithoutXrdBalance,
         balances: &mut XrdBalances,
     ) -> Result<Self> {
@@ -98,7 +118,9 @@ impl ShieldApplicationInput {
 }
 
 impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
-    pub fn into_shield_application_input_taking_from_xrd_balances(
+    /// Ornaments this input with the XRD balance of the unsecurified entity applying the shield.
+    /// and the XRD balance of the paying account (if any).
+    fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
@@ -115,87 +137,16 @@ impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
     }
 }
 
-pub struct XrdBalances(IndexMap<AddressOfPayerOfShieldApplication, Decimal>);
-impl XrdBalances {
-    pub fn get(
-        &mut self,
-        address: impl Into<AddressOfPayerOfShieldApplication>,
-    ) -> Result<Decimal> {
-        let address = address.into();
-        self.0
-            .get(&address)
-            .ok_or(CommonError::NoXrdBalanceFetchedForEntityOrXrdVault {
-                address: address.to_string(),
-            })
-            .cloned()
-    }
-
-    fn get_securified_payer(
-        &mut self,
-        account: SecurifiedAccount,
-    ) -> Result<ApplicationInputPayingAccount> {
-        let account_address = account.entity.address;
-        let sec = account.securified_entity_control();
-        let xrd_vault_address = sec.xrd_vault_address();
-        let access_controller_address = sec.access_controller_address();
-
-        let xrd_balance_of_account = self.get(account_address)?;
-        let xrd_balance_of_access_controller = self.get(xrd_vault_address)?;
-
-        Ok(ApplicationInputPayingAccount::Securified(
-            ApplicationInputPayingAccountSecurified {
-                account,
-                access_controller_address,
-                xrd_vault_address,
-                xrd_balance_of_access_controller,
-                xrd_balance_of_account,
-            },
-        ))
-    }
-
-    fn get_unsecurified_payer(
-        &mut self,
-        account: UnsecurifiedAccount,
-    ) -> Result<ApplicationInputPayingAccount> {
-        let account_address = account.entity.address;
-        let xrd_balance_of_account = self.get(account_address)?;
-        Ok(ApplicationInputPayingAccount::Unsecurified(
-            ApplicationInputPayingAccountUnsecurified {
-                account,
-                xrd_balance_of_account,
-            },
-        ))
-    }
-
-    pub fn get_payer(
-        &mut self,
-        account: Account,
-    ) -> Result<ApplicationInputPayingAccount> {
-        SecurifiedAccount::try_from(account.clone())
-            .and_then(|sa| self.get_securified_payer(sa))
-            .or(UnsecurifiedAccount::try_from(account)
-                .and_then(|ua| self.get_unsecurified_payer(ua)))
-    }
-
-    pub fn maybe_get_payer(
-        &mut self,
-        account: Option<Account>,
-    ) -> Result<Option<ApplicationInputPayingAccount>> {
-        if let Some(account) = account {
-            self.get_payer(account).map(Some)
-        } else {
-            Ok(None)
-        }
-    }
-}
-
 impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
-    pub fn into_shield_application_input_taking_from_xrd_balances(
+    /// Ornaments this input with the XRD balance of the account applying the shield.
+    /// and with the XRD balance of the paying account (if any).
+    fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
-        let xrd_balance_of_account =
-            balances.get(self.entity_input.entity.address)?;
+        let xrd_balance_of_account = balances.take_for_entity_applying_shield(
+            self.entity_input.entity.address,
+        )?;
 
         let maybe_paying_account =
             balances.maybe_get_payer(self.maybe_paying_account)?;
@@ -214,7 +165,8 @@ impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
 }
 
 impl ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
-    pub fn into_shield_application_input_taking_from_xrd_balances(
+    /// Ornaments this input with the XRD balance of the paying account.
+    fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
@@ -231,7 +183,11 @@ impl ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
 }
 
 impl ApplicationInputForSecurifiedEntityWithoutXrdBalance {
-    pub fn into_shield_application_input_taking_from_xrd_balances(
+    /// Ornaments this input with the XRD balances of the AccessControllers of the
+    /// securified entity. and with the XRD balance of the paying account (if any),
+    /// and with the XRD balance of the entitu applying the shield if it an Account
+    /// (Persona does not have an XRD balance).
+    fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
@@ -249,21 +205,26 @@ impl ApplicationInputForSecurifiedEntityWithoutXrdBalance {
 }
 
 impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
-    pub fn into_shield_application_input_taking_from_xrd_balances(
+    /// Ornaments this input with the XRD balances of the AccessControllers of the
+    /// securified **Account**. and with the XRD balance of the paying account (if
+    /// any), and with the XRD balance of the account applying the shield.
+    fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
-        let xrd_balance_of_account =
-            balances.get(self.entity_input.entity.address)?;
+        let xrd_balance_of_account = balances.take_for_entity_applying_shield(
+            self.entity_input.entity.address,
+        )?;
 
         let maybe_paying_account =
             balances.maybe_get_payer(self.maybe_paying_account)?;
 
-        let xrd_balance_of_access_controller = balances.get(
-            self.entity_input
-                .securified_entity_control()
-                .xrd_vault_address(),
-        )?;
+        let xrd_balance_of_access_controller = balances
+            .take_for_entity_applying_shield(
+                self.entity_input
+                    .securified_entity_control()
+                    .xrd_vault_address(),
+            )?;
 
         Ok(ApplicationInputForSecurifiedAccount {
             reviewed_manifest: self.reviewed_manifest,
@@ -280,18 +241,21 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
 }
 
 impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
-    pub fn into_shield_application_input_taking_from_xrd_balances(
+    /// Ornaments this input with the XRD balances of the AccessControllers of the
+    /// securified **Persona**. and with the XRD balance of the paying account.
+    fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
         let maybe_paying_account =
             balances.maybe_get_payer(self.maybe_paying_account)?;
 
-        let xrd_balance_of_access_controller = balances.get(
-            self.entity_input
-                .securified_entity_control()
-                .xrd_vault_address(),
-        )?;
+        let xrd_balance_of_access_controller = balances
+            .take_for_entity_applying_shield(
+                self.entity_input
+                    .securified_entity_control()
+                    .xrd_vault_address(),
+            )?;
 
         Ok(ApplicationInputForSecurifiedPersona {
             reviewed_manifest: self.reviewed_manifest,
