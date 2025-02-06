@@ -10,6 +10,11 @@ pub trait InteractorsCtors {
         authorization_interactor: Arc<dyn AuthorizationInteractor>,
     ) -> Interactors;
 
+    fn new_from_clients_and_spot_check_interactor(
+        clients: &Clients,
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
+    ) -> Interactors;
+
     fn new_from_clients(clients: &Clients) -> Interactors {
         Self::new_with_derivation_interactor(Arc::new(
             TestDerivationInteractor::new(
@@ -80,6 +85,34 @@ impl InteractorsCtors for Interactors {
             Arc::new(use_factor_sources_interactors),
             authorization_interactor,
             Arc::new(TestSpotCheckInteractor::new_failing()),
+        )
+    }
+
+    fn new_from_clients_and_spot_check_interactor(
+        clients: &Clients,
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
+    ) -> Interactors {
+        let use_factor_sources_interactors =
+            TestUseFactorSourcesInteractors::new(
+                Arc::new(TestSignInteractor::<TransactionIntent>::new(
+                    SimulatedUser::prudent_no_fail(),
+                )),
+                Arc::new(TestSignInteractor::<Subintent>::new(
+                    SimulatedUser::prudent_no_fail(),
+                )),
+                Arc::new(TestDerivationInteractor::new(
+                    false,
+                    Arc::new(clients.secure_storage.clone()),
+                )),
+                Arc::new(TestSignInteractor::<AuthIntent>::new(
+                    SimulatedUser::prudent_no_fail(),
+                )),
+            );
+
+        Self::new(
+            Arc::new(use_factor_sources_interactors),
+            Arc::new(TestAuthorizationInteractor::stubborn_authorizing()),
+            spot_check_interactor,
         )
     }
 }

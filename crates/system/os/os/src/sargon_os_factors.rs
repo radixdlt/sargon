@@ -544,8 +544,25 @@ impl SargonOS {
                 let built_id = FactorSourceIDFromHash::new(kind, id);
                 Ok(built_id == id_from_hash)
             }
+            SpotCheckResponse::ArculusCard { id } => {
+                assert_eq!(
+                    kind,
+                    FactorSourceKind::ArculusCard,
+                    "Unexpected ArculusCard Response for {:?}",
+                    kind
+                );
+                Ok(id == id_from_hash)
+            }
             SpotCheckResponse::MnemonicWithPassphrase { value } => {
-                assert_ne!(kind, FactorSourceKind::LedgerHQHardwareWallet, "Unexpected MnemonicWithPassphrase Response for LedgerHQHardwareWallet");
+                let accepted_kinds = [FactorSourceKind::Device,
+                    FactorSourceKind::OffDeviceMnemonic,
+                    FactorSourceKind::Password,
+                    FactorSourceKind::SecurityQuestions];
+                assert!(
+                    accepted_kinds.contains(&kind),
+                    "Unexpected MnemonicWithPassphrase Response for {:?}",
+                    kind
+                );
                 let built_id =
                     FactorSourceIDFromHash::from_mnemonic_with_passphrase(
                         kind, &value,
@@ -578,6 +595,7 @@ impl SargonOS {
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
 
     use super::*;
@@ -1094,6 +1112,321 @@ mod tests {
                     ids: vec![factor_source.factor_source_id()],
                 }
             }));
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__device__mwp_matches() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let mwp = MnemonicWithPassphrase::sample_device();
+        let factor_source = DeviceFactorSource::sample(); // created with same mwp
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(
+                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(mwp),
+                ),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await
+            .unwrap();
+
+        assert!(result);
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__device__mwp_does_not_match() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let mwp = MnemonicWithPassphrase::sample_device();
+        let factor_source = DeviceFactorSource::sample_other(); // created with different mwp
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(
+                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(mwp),
+                ),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await
+            .unwrap();
+
+        assert!(!result);
+    }
+
+    #[actix_rt::test]
+    #[should_panic(expected = "Unexpected Ledger Response for Device")]
+    async fn spot_check__device__ledger_response() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let factor_source = DeviceFactorSource::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_ledger(
+                    Exactly32Bytes::sample(),
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let _ = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await;
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__ledger__id_matches() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let bytes = Exactly32Bytes::sample();
+        let id = FactorSourceIDFromHash::new(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            bytes,
+        );
+        let factor_source = LedgerHardwareWalletFactorSource::new(
+            id,
+            FactorSourceCommon::sample(),
+            LedgerHardwareWalletHint::sample(),
+        );
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_ledger(bytes)),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await
+            .unwrap();
+
+        assert!(result);
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__ledger__id_does_not_match() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let id = FactorSourceIDFromHash::new(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            Exactly32Bytes::sample(),
+        );
+        let factor_source = LedgerHardwareWalletFactorSource::new(
+            id,
+            FactorSourceCommon::sample(),
+            LedgerHardwareWalletHint::sample(),
+        );
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_ledger(
+                    Exactly32Bytes::sample_other(),
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await
+            .unwrap();
+
+        assert!(!result);
+    }
+
+    #[actix_rt::test]
+    #[should_panic(
+        expected = "Unexpected MnemonicWithPassphrase Response for LedgerHQHardwareWallet"
+    )]
+    async fn spot_check__ledger__mvp_response() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let factor_source = LedgerHardwareWalletFactorSource::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(
+                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(
+                        MnemonicWithPassphrase::sample(),
+                    ),
+                ),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let _ = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await;
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__arculus__id_matches() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let factor_source = ArculusCardFactorSource::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_arculus_card(
+                    factor_source.clone().id,
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await
+            .unwrap();
+
+        assert!(result);
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__arculus__id_does_not_match() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let factor_source = ArculusCardFactorSource::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_arculus_card(
+                    FactorSourceIDFromHash::sample_other(),
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await
+            .unwrap();
+
+        assert!(!result);
+    }
+
+    #[actix_rt::test]
+    #[should_panic(
+        expected = "Unexpected MnemonicWithPassphrase Response for ArculusCard"
+    )]
+    async fn spot_check__arculus__mvp_response() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let factor_source = ArculusCardFactorSource::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(
+                    TestSpotCheckInteractor::new_mnemonic_with_passphrase(
+                        MnemonicWithPassphrase::sample(),
+                    ),
+                ),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let _ = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await;
+    }
+
+    #[actix_rt::test]
+    async fn spot_check_failing_interactor() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let error = CommonError::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_failing_error(
+                    error.clone(),
+                )),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let factor_source = ArculusCardFactorSource::sample();
+        let result = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await
+            .expect_err("Expected an error");
+
+        assert_eq!(result, error);
+    }
+
+    #[actix_rt::test]
+    #[should_panic(
+        expected = "Address FactorSourceID not supported for spot check"
+    )]
+    async fn spot_check_address_factor_source_id_panics() {
+        let os = SUT::fast_boot().await;
+
+        let factor_source = TrustedContactFactorSource::sample();
+        let _ = os
+            .with_timeout(|x| {
+                x.perform_spot_check(factor_source.clone().into())
+            })
+            .await;
     }
 
     async fn boot(event_bus_driver: Arc<RustEventBusDriver>) -> Arc<SUT> {
