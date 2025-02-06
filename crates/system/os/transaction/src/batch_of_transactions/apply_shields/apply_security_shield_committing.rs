@@ -187,12 +187,19 @@ mod tests {
             .unwrap()
             .address;
 
+        let carla = Account::sample_at(2);
+        // let david = Account::sample_at(3);
+
+        os.add_account(carla.clone()).await.unwrap();
+        let carla = carla.address;
+
         let manifests = os
             .make_interaction_for_applying_security_shield(
                 shield_id,
                 IndexSet::from_iter([
                     AddressOfAccountOrPersona::from(alice),
                     bob.into(),
+                    carla.into(),
                 ]),
             )
             .await
@@ -212,7 +219,12 @@ mod tests {
             ManifestWithPayerByAddress::new(
                 manifests_iter.next().unwrap().manifest(network_id).unwrap(),
                 None,
-                Decimal::five(),
+                Decimal::one(),
+            ),
+            ManifestWithPayerByAddress::new(
+                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
+                None,
+                Decimal::three(),
             ),
             ManifestWithPayerByAddress::new(
                 manifests_iter.next().unwrap().manifest(network_id).unwrap(),
@@ -228,6 +240,6 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(txids.len(), 2);
+        assert_eq!(txids.len(), 3);
     }
 }

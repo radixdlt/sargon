@@ -54,6 +54,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             unsecurified_entity_applying_shield.entity,
             manifest,
             top_up_amount,
+            true, false
         ).expect("Should never fail")
     }
 
@@ -63,12 +64,15 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         securified_entity_applying_shield: impl Into<AnySecurifiedEntity>,
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
+        manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<TransactionManifest> {
         Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
             payer,
             securified_entity_applying_shield.into().entity,
             manifest,
             top_up_amount,
+            manifest_variant.can_exercise_primary_role(),
+            manifest_variant.can_quick_confirm(),
         )
     }
 
@@ -78,6 +82,8 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         entity_applying_shield: AccountOrPersona,
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
+        can_exercise_primary_role: bool,
+        can_quick_confirm: bool,
     ) -> Result<TransactionManifest> {
         let payer = payer.into();
         let address_of_paying_account = payer.address();
@@ -90,19 +96,22 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             let payer_is_entity_applying_shield =
                 entity_applying_shield.address() == payer.address().into();
             if payer_is_entity_applying_shield {
-                let cannot_exercise_primary_role = !manifest
-                    .implicitly_or_explicitly_references_primary_role();
-                let is_unable_to_top_up_xrd_vault =
-                    payer_is_entity_applying_shield
-                        && cannot_exercise_primary_role;
+                // If user can quick confirm they can sign with NEW factors. If manifest
+                // is not quick confirming and user has access to primary she can use old factors
+                // and exercise the primary role.
+                let is_unable_to_top_up_xrd_vault = !(can_exercise_primary_role
+                    || can_quick_confirm)
+                    && payer_is_entity_applying_shield;
                 if is_unable_to_top_up_xrd_vault {
                     // The payer is the entity applying the shield, but the manifest is not classified as
                     // to be able to exercise the primary role. Thus we will not be able to
                     // top up the XRD vault of the access controller.
                     return Err(CommonError::UnableToTopUpXrdVault {
+                        entity_owning_access_controller: entity_applying_shield
+                            .address()
+                            .to_string(),
                         payer_is_entity_applying_shield,
-                        can_exercise_primary_role:
-                            !cannot_exercise_primary_role,
+                        can_exercise_primary_role,
                     });
                 }
             }

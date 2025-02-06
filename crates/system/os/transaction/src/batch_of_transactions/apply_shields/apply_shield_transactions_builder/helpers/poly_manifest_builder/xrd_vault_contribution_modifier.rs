@@ -115,13 +115,19 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         input: ApplicationInputForSecurifiedAccount,
         manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<ApplicationInputForSecurifiedAccount> {
-        if !manifest_variant.can_quick_confirm() {
+        if !manifest_variant.can_quick_confirm()
+            && !manifest_variant.can_exercise_primary_role()
+        {
             // If we cannot quick confirm the topping up of the XRD vault instructions
             // must not go into this manifest for initiate recovery, we should
             // include the top up in the Confirm Recovery Manifest happening later (
             // after time delay).
+            //
+            // If we can exercise the primary role, we can auth with Primary Role of
+            // old factors
             return Ok(input);
         }
+
         let entity = input.entity_input.clone().securified_account;
         let payer = input.xrd_balance_and_account_topping_up();
         let needed_balance = input.xrd_needed_for_tx_fee_and_xrd_vault_top_up();
@@ -137,7 +143,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let payer = payer.entity.clone();
 
         input.modifying_manifest(|m| {
-                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None)
+                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None, manifest_variant)
             })
     }
 
@@ -176,7 +182,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let payer = payer_info.account();
 
         input.modifying_manifest(|m| {
-                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None)
+                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None, manifest_variant)
             })
     }
 }

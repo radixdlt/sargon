@@ -161,6 +161,16 @@ impl RolesExercisableInTransactionManifestCombination {
         }
     }
 
+    pub fn can_exercise_primary_role(&self) -> bool {
+        match self {
+            Self::InitiateWithPrimaryCompleteWithConfirmation
+            | Self::InitiateWithPrimaryDelayedCompletion
+            | Self::InitiateWithRecoveryCompleteWithPrimary => true,
+            Self::InitiateWithRecoveryCompleteWithConfirmation
+            | Self::InitiateWithRecoveryDelayedCompletion => false,
+        }
+    }
+
     fn role_initiating_recovery(&self) -> RoleInitiatingRecovery {
         match self {
             Self::InitiateWithPrimaryCompleteWithConfirmation
@@ -241,44 +251,5 @@ impl RolesExercisableInTransactionManifestCombination {
             // can call this method after the time has elapsed.
             None
         }
-    }
-}
-
-pub trait TransactionManifestExplicitlyReferencesPrimaryRole {
-    fn __contains_call_method_instruction_with_method_named(
-        &self,
-        method_name: &str,
-    ) -> bool;
-
-    fn _explicitly_references_primary_role(&self) -> bool {
-        self.__contains_call_method_instruction_with_method_named(
-            SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
-        )
-    }
-
-    fn _implicitly_references_primary_role(&self) -> bool {
-        self.__contains_call_method_instruction_with_method_named(
-            SCRYPTO_ACCOUNT_SECURIFY_IDENT,
-        ) || self.__contains_call_method_instruction_with_method_named(
-            SCRYPTO_IDENTITY_SECURIFY_IDENT,
-        )
-    }
-
-    fn implicitly_or_explicitly_references_primary_role(&self) -> bool {
-        self._explicitly_references_primary_role()
-            || self._implicitly_references_primary_role()
-    }
-}
-
-impl TransactionManifestExplicitlyReferencesPrimaryRole
-    for TransactionManifest
-{
-    fn __contains_call_method_instruction_with_method_named(
-        &self,
-        method_name: &str,
-    ) -> bool {
-        self.instructions()
-            .iter()
-            .any(|instruction| matches!(instruction, ScryptoInstruction::CallMethod(method) if method.method_name == method_name))
     }
 }
