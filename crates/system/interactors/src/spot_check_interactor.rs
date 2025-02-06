@@ -6,7 +6,7 @@ use crate::prelude::*;
 pub trait SpotCheckInteractor: Send + Sync {
     async fn spot_check(
         &self,
-        factor_source_id: FactorSourceIDFromHash,
+        factor_source: FactorSource,
     ) -> Result<SpotCheckResponse>;
 }
 

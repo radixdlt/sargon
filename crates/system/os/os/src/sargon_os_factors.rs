@@ -530,9 +530,9 @@ impl SargonOS {
         };
         let response = self
             .spot_check_interactor()
-            .spot_check(id_from_hash)
+            .spot_check(factor_source)
             .await?;
-        let kind = factor_source_id.get_factor_source_kind();
+        let kind = id_from_hash.kind;
         match response {
             SpotCheckResponse::Ledger { id } => {
                 assert_eq!(
@@ -554,10 +554,12 @@ impl SargonOS {
                 Ok(id == id_from_hash)
             }
             SpotCheckResponse::MnemonicWithPassphrase { value } => {
-                let accepted_kinds = [FactorSourceKind::Device,
+                let accepted_kinds = [
+                    FactorSourceKind::Device,
                     FactorSourceKind::OffDeviceMnemonic,
                     FactorSourceKind::Password,
-                    FactorSourceKind::SecurityQuestions];
+                    FactorSourceKind::SecurityQuestions,
+                ];
                 assert!(
                     accepted_kinds.contains(&kind),
                     "Unexpected MnemonicWithPassphrase Response for {:?}",

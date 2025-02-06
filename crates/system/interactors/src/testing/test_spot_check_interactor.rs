@@ -8,7 +8,7 @@ pub struct TestSpotCheckInteractor {
 impl SpotCheckInteractor for TestSpotCheckInteractor {
     async fn spot_check(
         &self,
-        _factor_source_id: FactorSourceIDFromHash,
+        _factor_source: FactorSource,
     ) -> Result<SpotCheckResponse> {
         match self.user.clone() {
             SpotCheckUser::Failure(common_error) => Err(common_error),
