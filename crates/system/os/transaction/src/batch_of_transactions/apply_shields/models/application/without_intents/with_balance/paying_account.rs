@@ -34,9 +34,6 @@ pub struct ApplicationInputPayingAccountSecurified {
     pub access_controller_address: AccessControllerAddress,
     pub xrd_vault_address: VaultAddress,
 
-    /// XRD balance of `xrd_vault_address`
-    pub xrd_balance_of_access_controller: Decimal,
-
     /// XRD balance of `account`
     pub xrd_balance_of_account: Decimal,
 }

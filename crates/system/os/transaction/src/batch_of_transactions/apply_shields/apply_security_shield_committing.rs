@@ -171,59 +171,141 @@ mod tests {
             .await
             .unwrap();
 
+        // Unsecurified Account
         let alice = os
             .create_and_save_new_mainnet_account_with_main_bdfs(
                 DisplayName::new("Alice").unwrap(),
             )
             .await
-            .unwrap()
-            .address;
+            .unwrap();
+        println!("🔮 Alice: {}", alice.address_erased());
 
+        // Unsecurified Account
         let bob = os
             .create_and_save_new_mainnet_account_with_main_bdfs(
                 DisplayName::new("Bob").unwrap(),
             )
             .await
-            .unwrap()
-            .address;
+            .unwrap();
+        println!("🔮 Bob: {}", bob.address_erased());
 
-        let carla = Account::sample_at(2);
+        // Unsecurified Account 2
+        let carla = os
+            .create_and_save_new_mainnet_account_with_main_bdfs(
+                DisplayName::new("Carla").unwrap(),
+            )
+            .await
+            .unwrap();
+        println!("🔮 Carla: {}", carla.address_erased());
 
-        os.add_account(carla.clone()).await.unwrap();
-        let carla = carla.address;
+        // Unsecurified account 3
+        let peter = os
+            .create_and_save_new_mainnet_account_with_main_bdfs(
+                DisplayName::new("Peter").unwrap(),
+            )
+            .await
+            .unwrap();
+        println!("🔮 Peter: {}", peter.address_erased());
 
+        // Securified Account 2
+        let david = Account::sample_at(3);
+        println!("🔮 David: {}", david.address_erased());
+        os.add_account(david.clone()).await.unwrap();
+
+        // Securified Account 3
+        let emily = Account::sample_at(4);
+        println!("🔮 Emily: {}", emily.address_erased());
+        os.add_account(emily.clone()).await.unwrap();
+
+        // Securified Account 4
+        let frank = Account::sample_at(5);
+        println!("🔮 Frank: {}", frank.address_erased());
+        os.add_account(frank.clone()).await.unwrap();
+
+        // Securified Account 5
+        let mut paige = Account::sample_at(6);
+        paige.display_name = DisplayName::new("Paige").unwrap();
+        println!("🔮 Paige: {}", paige.address_erased());
+        os.add_account(paige.clone()).await.unwrap();
+
+        // Securified Persona
         let ziggy = Persona::sample_at(2);
+        println!("🔮 Ziggy: {}", ziggy.address_erased());
         os.add_persona(ziggy.clone()).await.unwrap();
-        let ziggy = ziggy.address;
 
+        // Securified Persona 2
+        let superman = Persona::sample_at(4);
+        println!("🔮 Superman: {}", superman.address_erased());
+        os.add_persona(superman.clone()).await.unwrap();
+
+        // Unsecurified Persona
+        let satoshi = os
+            .create_and_save_new_mainnet_persona_with_main_bdfs(
+                DisplayName::new("satoshi").unwrap(),
+            )
+            .await
+            .unwrap();
+        println!("🔮 Satoshi: {}", satoshi.address_erased());
+
+        // Unsecurified Persona 2
         let batman = os
             .create_and_save_new_mainnet_persona_with_main_bdfs(
                 DisplayName::new("Batman").unwrap(),
             )
             .await
-            .unwrap()
-            .address;
+            .unwrap();
+        println!("🔮 Batman: {}", batman.address_erased());
 
+        // does not include paige and peter which are payers,
+        // and payers cannot be in the list of entities to apply the shield for.
         let addresses = IndexSet::from_iter([
-            AddressOfAccountOrPersona::from(alice),
-            batman.into(),
-            carla.into(),
-            AddressOfAccountOrPersona::from(ziggy),
+            alice.address_erased(),
+            bob.address_erased(),
+            carla.address_erased(),
+            satoshi.address_erased(),
+            batman.address_erased(),
+            david.address_erased(),
+            emily.address_erased(),
+            frank.address_erased(),
+            ziggy.address_erased(),
+            superman.address_erased(),
         ]);
 
         let manifests = os
-            .make_interaction_for_applying_security_shield(shield_id, addresses)
+            .make_interaction_for_applying_security_shield(
+                shield_id,
+                addresses.clone(),
+            )
             .await
             .unwrap()
             .transactions;
 
-        let mut manifests_iter = manifests.iter();
+        // let mut manifests_iter = manifests.iter();
+        let lookup_map = hacky_tmp_get_entities_applying_shield();
+        let _get = |entity: AccountOrPersona,
+                    account: Option<&Account>|
+         -> ManifestWithPayerByAddress {
+            println!("🌈 Trying to get key for {} ☑️", entity.address_erased());
+            let key = EntityApplyingShieldAddress::from(entity);
+            println!("🌈 Got the key {:?} ✅", key);
+            let manifest = lookup_map.get(&key).unwrap();
+            ManifestWithPayerByAddress::new(
+                manifest.clone(),
+                account.map(|a| a.address),
+                Decimal192::ten(),
+            )
+        };
 
-        println!("🔮 Alice: {alice}");
-        println!("🔮 Bob: {bob}");
-        println!("🔮 Carla: {carla}");
-        println!("🔮 Batman: {batman}");
-        println!("🔮 Ziggy: {ziggy}");
+        let get_with_payer = |entity: AccountOrPersona,
+                              account: &Account|
+         -> ManifestWithPayerByAddress {
+            _get(entity, Some(account))
+        };
+
+        let get_without_payer =
+            |entity: AccountOrPersona| -> ManifestWithPayerByAddress {
+                _get(entity, None)
+            };
 
         // ============================================
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -233,30 +315,28 @@ mod tests {
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // ============================================
         let manifest_and_payer_tuples = vec![
-            ManifestWithPayerByAddress::new(
-                // Alice
-                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
-                None,
-                Decimal::one(),
-            ),
-            ManifestWithPayerByAddress::new(
-                // Batman
-                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
-                bob, // Bob is rich and generous
-                Decimal::five(),
-            ),
-            ManifestWithPayerByAddress::new(
-                // Carla
-                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
-                None,
-                Decimal::five(),
-            ),
-            ManifestWithPayerByAddress::new(
-                // Ziggy
-                manifests_iter.next().unwrap().manifest(network_id).unwrap(),
-                bob, // Bob is rich and generous
-                Decimal::five(),
-            ),
+            // ~~~~~ UNSECURIFIED ENTITIES ~~~~~
+            // Scenario: Alice is an Unsecurified Account paying for herself
+            get_without_payer(alice.into()),
+            // Scenario: Bob is an Unsecurified Account payed by Unsecurified Payer "Paige"
+            get_with_payer(bob.into(), &paige),
+            // Scenario: Carla is an Unsecurified Account payed by Securified Payer "Peter"
+            get_with_payer(carla.into(), &peter),
+            // Scenario: Satoshi is an Unsecurified Persona payed by Unsecurified Payer "Paige"
+            get_with_payer(satoshi.into(), &paige),
+            // Scenario: Batman is an Unsecurified Persona payed by Securified Payer "Peter"
+            get_with_payer(batman.into(), &peter),
+            // ~~~~~ SECURIFIED ENTITIES ~~~~~
+            // Scenario: David is a Securified Account paying for himself
+            get_without_payer(david.into()),
+            // Scenario: Emily is a Securified Account payed by Unsecurified Payer "Paige"
+            get_with_payer(emily.into(), &paige),
+            // Scenario: Frank is a Securified Account payed by Securified Payer "Peter"
+            get_with_payer(frank.into(), &peter),
+            // Scenario: Ziggy is a Securified Persona payed by Unsecurified Payer "Paige"
+            get_with_payer(ziggy.into(), &paige),
+            // Scenario: Superman is a Securified Persona payed by Securified Payer "Peter"
+            get_with_payer(superman.into(), &peter),
         ];
 
         assert_eq!(manifest_and_payer_tuples.len(), manifests.len());
@@ -268,6 +348,6 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(txids.len(), 4);
+        assert_eq!(txids.len(), addresses.len());
     }
 }

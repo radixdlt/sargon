@@ -17,12 +17,11 @@ impl XrdBalances {
         address: impl Into<AddressOfPayerOfShieldApplication>,
     ) -> Result<Decimal> {
         let address = address.into();
-        self.0
-            .get(&address)
-            .ok_or(CommonError::NoXrdBalanceFetchedForEntityApplyingShieldOrItsVault {
+        self.0.swap_remove(&address).ok_or(
+            CommonError::NoXrdBalanceFetchedForEntityApplyingShieldOrItsVault {
                 address: address.to_string(),
-            })
-            .cloned()
+            },
+        )
     }
 
     /// Reads the XRD balance of the payer of the shield application - without
@@ -61,15 +60,15 @@ impl XrdBalances {
 
         let xrd_balance_of_account =
             self.get_paying_component(account_address)?;
-        let xrd_balance_of_access_controller =
-            self.get_paying_component(xrd_vault_address)?;
+
+        // N.B We do NOT fetch the XRD balance of the the XRD vault of the securified payer.
+        // We never want to use that balance for anything, so we don't need to fetch it.
 
         Ok(ApplicationInputPayingAccount::Securified(
             ApplicationInputPayingAccountSecurified {
                 account,
                 access_controller_address,
                 xrd_vault_address,
-                xrd_balance_of_access_controller,
                 xrd_balance_of_account,
             },
         ))
@@ -104,10 +103,13 @@ impl XrdBalances {
         &mut self,
         account: Account,
     ) -> Result<ApplicationInputPayingAccount> {
-        SecurifiedAccount::try_from(account.clone())
-            .and_then(|sa| self.get_securified_payer(sa))
-            .or(UnsecurifiedAccount::try_from(account)
-                .and_then(|ua| self.get_unsecurified_payer(ua)))
+        if account.is_securified() {
+            let account = SecurifiedAccount::try_from(account.clone()).unwrap();
+            self.get_securified_payer(account)
+        } else {
+            let account = UnsecurifiedAccount::try_from(account).unwrap();
+            self.get_unsecurified_payer(account)
+        }
     }
 
     /// Tries to read the XRD balance of the payer of the shield application - without
