@@ -1,7 +1,17 @@
 use crate::prelude::*;
 
+/// Builder of `ApplySecurityShieldPayloadToSign`.
 #[async_trait::async_trait]
 pub trait ApplyShieldTransactionsBuilder: Send + Sync {
+    /// Prepares a batch of Applications of SecurityShields ready to be signed
+    /// from a list of Manifests and Payers.
+    ///
+    /// This is a complex multi-step process:
+    /// 1. Lookup entities for each manifest and payer
+    /// 2. Fetch XRD balances for each entity
+    /// 3. Create 5 variants of each manifest for securified entities
+    /// 4. Build TransactionIntents for each of these applications
+    /// 5. Persist notary private keys to be able to cancel transactions
     async fn build_payload_to_sign(
         &self,
         network_id: NetworkID,
@@ -9,20 +19,32 @@ pub trait ApplyShieldTransactionsBuilder: Send + Sync {
     ) -> Result<ApplySecurityShieldPayloadToSign>;
 }
 
+/// Builder of `ApplySecurityShieldPayloadToSign`.
 pub struct ApplyShieldTransactionsBuilderImpl {
-    profile_lens: Arc<dyn ApplyShieldTransactionsProfileView>,
+    /// For looking up entities by address
+    profile_view: Arc<dyn ApplyShieldTransactionsProfileView>,
+
+    /// For fetching XRD balances of entities (also XRD vault of Accesses Controllers)
     xrd_balances_fetcher: Arc<dyn ApplyShieldTransactionsXrdBalancesFetcher>,
+
+    /// For creating 5 variants of each manifest for securified entities - one manifest
+    /// for each role combination. Including addition of lock fee and top up of XRD vault
+    /// instructions. One variant for unsecurified entities.
     poly_manifest_builder: Arc<dyn ApplyShieldTransactionsPolyManifestBuilder>,
+
+    /// For building TransactionIntents for each of application of security shield.
     transaction_intent_builder:
         Arc<dyn ApplyShieldTransactionsTransactionIntentBuilder>,
 }
 
 impl ApplyShieldTransactionsBuilderImpl {
+    /// Creates a new instance of `ApplyShieldTransactionsBuilderImpl`, using
+    /// SargonOS and its clients to init helpers.
     pub fn new(os: &SargonOS) -> Result<Self> {
         os.profile().map(|profile| {
             let networking_driver = os.http_client.driver.clone();
             Self {
-                profile_lens: Arc::new(
+                profile_view: Arc::new(
                     ApplyShieldTransactionsProfileViewImpl::new(profile),
                 ),
                 xrd_balances_fetcher: Arc::new(
@@ -42,6 +64,7 @@ impl ApplyShieldTransactionsBuilderImpl {
         })
     }
 
+    /// Persists notary private keys to be able to cancel transactions.
     async fn persist_notary_private_keys_to_be_able_to_cancel_transactions(
         &self,
         _transaction_id_to_notary_private_key: &IndexMap<
@@ -57,8 +80,15 @@ impl ApplyShieldTransactionsBuilderImpl {
 
 #[async_trait::async_trait]
 impl ApplyShieldTransactionsBuilder for ApplyShieldTransactionsBuilderImpl {
-    /// Builds transaction intents of manifests
-    /// which applies a shields to entities.
+    /// Prepares a batch of Applications of SecurityShields ready to be signed
+    /// from a list of Manifests and Payers.
+    ///
+    /// This is a complex multi-step process:
+    /// 1. Lookup entities for each manifest and payer
+    /// 2. Fetch XRD balances for each entity
+    /// 3. Create 5 variants of each manifest for securified entities
+    /// 4. Build TransactionIntents for each of these applications
+    /// 5. Persist notary private keys to be able to cancel transactions
     async fn build_payload_to_sign(
         &self,
         network_id: NetworkID,
@@ -66,7 +96,7 @@ impl ApplyShieldTransactionsBuilder for ApplyShieldTransactionsBuilderImpl {
     ) -> Result<ApplySecurityShieldPayloadToSign> {
         // Map Address -> Entity by Profile lookup
         let manifests_with_entities_without_xrd_balances = self
-            .profile_lens
+            .profile_view
             .lookup_entities_for_manifests(manifest_and_payer_tuples)?;
 
         // Get XRD balances of XRD Vaults of Access Controllers and Accounts

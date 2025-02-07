@@ -9,6 +9,9 @@ impl XrdBalances {
     /// Takes the XRD balance of the entity applying the shield, i.e. consumes it
     /// and returns it. We can do this since each entity applying a shield should
     /// occur only once in balances map.
+    ///
+    /// # Errors
+    /// Throws an error if no XRD balance of `account` is found.
     pub fn take_for_entity_applying_shield(
         &mut self,
         address: impl Into<AddressOfPayerOfShieldApplication>,
@@ -24,6 +27,9 @@ impl XrdBalances {
 
     /// Reads the XRD balance of the payer of the shield application - without
     /// consuming it, since the same payer can be used for multiple shield applications.
+    ///     
+    /// # Errors
+    /// Throws an error if no XRD balance of `account` is found.
     fn get_paying_component(
         &mut self,
         address_of_payer: impl Into<AddressOfPayerOfShieldApplication>,
@@ -39,6 +45,11 @@ impl XrdBalances {
             .cloned()
     }
 
+    /// Reads the XRD balance of the payer of the shield application - without
+    /// consuming it, since the same payer can be used for multiple shield applications.
+    ///   
+    /// # Errors
+    /// Throws an error if no XRD balance of `account` is found.
     fn get_securified_payer(
         &mut self,
         account: SecurifiedAccount,
@@ -64,6 +75,11 @@ impl XrdBalances {
         ))
     }
 
+    /// Reads the XRD balance of the payer of the shield application - without
+    /// consuming it, since the same payer can be used for multiple shield applications.    
+    ///
+    /// # Errors
+    /// Throws an error if no XRD balance of `account` is found.
     fn get_unsecurified_payer(
         &mut self,
         account: UnsecurifiedAccount,
@@ -79,6 +95,11 @@ impl XrdBalances {
         ))
     }
 
+    /// Reads the XRD balance of the payer of the shield application - without
+    /// consuming it, since the same payer can be used for multiple shield applications.
+    ///
+    /// # Errors
+    /// Throws an error if no XRD balance of `account` is found.
     pub fn get_payer(
         &mut self,
         account: Account,
@@ -89,6 +110,10 @@ impl XrdBalances {
                 .and_then(|ua| self.get_unsecurified_payer(ua)))
     }
 
+    /// Tries to read the XRD balance of the payer of the shield application - without
+    /// consuming it, since the same payer can be used for multiple shield applications.
+    ///
+    /// Returns None if the account is None.
     pub fn maybe_get_payer(
         &mut self,
         account: Option<Account>,
