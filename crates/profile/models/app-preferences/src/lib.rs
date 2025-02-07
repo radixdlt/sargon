@@ -1,14 +1,12 @@
 mod app_display_settings;
 mod app_preferences;
 mod security;
-mod shield_for_display;
 mod transaction_preferences;
 
 pub mod prelude {
     pub use crate::app_display_settings::*;
     pub use crate::app_preferences::*;
     pub use crate::security::*;
-    pub use crate::shield_for_display::*;
     pub use crate::transaction_preferences::*;
 
     pub use numeric::prelude::*;
