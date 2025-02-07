@@ -61,6 +61,7 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
     async fn spot_check(
         &self,
         factor_source: FactorSource,
+        allow_skip: bool,
     ) -> Result<SpotCheckResponse>;
 }
 
@@ -104,9 +105,10 @@ impl InternalSpotCheckInteractor for SpotCheckInteractorAdapter {
     async fn spot_check(
         &self,
         factor_source: InternalFactorSource,
+        allow_skip: bool,
     ) -> InternalResult<InternalSpotCheckResponse> {
         self.wrapped
-            .spot_check(factor_source.into())
+            .spot_check(factor_source.into(), allow_skip)
             .await
             .into_internal_result()
     }

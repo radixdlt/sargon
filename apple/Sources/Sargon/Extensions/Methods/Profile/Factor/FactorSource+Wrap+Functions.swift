@@ -17,4 +17,8 @@ extension FactorSource {
 	public var name: String {
 		factorSourceName(factorSource: self)
 	}
+
+	public func spotCheck(input: SpotCheckInput) -> Bool {
+		factorSourcePerformSpotCheck(factorSource: self, input: input)
+	}
 }
