@@ -214,6 +214,8 @@ impl OsSecurityStructuresQuerying for SargonOS {
         }
     }
 
+    /// Returns all the Security Shields along with the number of entities linked to each Security Shield,
+    /// either provisionally or currently securified.
     async fn get_shields_for_display(&self) -> Result<ShieldsForDisplay> {
         let security_structures =
             self.security_structures_of_factor_source_ids()?;
