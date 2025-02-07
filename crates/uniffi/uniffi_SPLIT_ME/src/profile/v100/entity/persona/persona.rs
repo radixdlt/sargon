@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use profile_logic::EntityUnsecuredControllingFactorInstance;
 use sargon::Persona as InternalPersona;
 
 decl_vec_samples_for!(Personas, Persona);
@@ -127,4 +128,14 @@ pub fn new_persona_sample_stokenet_hermione() -> Persona {
 #[uniffi::export]
 pub fn new_persona_sample_stokenet_connor() -> Persona {
     InternalPersona::sample_stokenet_connor().into()
+}
+
+#[uniffi::export]
+pub fn persona_unsecured_controlling_factor_instance(
+    persona: Persona,
+) -> Option<HierarchicalDeterministicFactorInstance> {
+    persona
+        .into_internal()
+        .unsecured_controlling_factor_instance()
+        .map(|key| key.into())
 }

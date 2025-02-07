@@ -1,9 +1,10 @@
 use crate::prelude::*;
+use sargon::SecuredEntityControl as InternalSecuredEntityControl;
 
 /// Advanced security control of an entity which has been "securified",
 /// meaning an MFA security structure (`SecurityStructureOfFactorSources`)
 /// which user has created has been applied to it.
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct SecuredEntityControl {
     /// Virtual Entity Creation (Factor)Instance
     ///

@@ -8,6 +8,10 @@ extension Persona: EntityBaseProtocol {
 	public var asGeneral: AccountOrPersona {
 		.persona(self)
 	}
+
+	public var unsecuredControllingFactorInstance: SargonUniFFI.HierarchicalDeterministicFactorInstance? {
+		personaUnsecuredControllingFactorInstance(persona: self)
+	}
 }
 
 // MARK: - Persona + EntityProtocol
