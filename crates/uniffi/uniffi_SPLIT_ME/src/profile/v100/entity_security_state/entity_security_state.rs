@@ -5,9 +5,13 @@ use sargon::EntitySecurityState as InternalEntitySecurityState;
 /// the user controls it, i.e. if it is controlled by a single factor (private key)
 ///  or an `AccessController` with a potential Multi-Factor setup.
 #[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
+#[allow(clippy::large_enum_variant)]
 pub enum EntitySecurityState {
-    /// The account is controlled by a single factor (private key)
+    /// The entity is controlled by a single factor (private key)
     Unsecured { value: UnsecuredEntityControl },
+
+    /// The entity is controlled by multi-factor
+    Securified { value: SecuredEntityControl },
 }
 
 impl EntitySecurityState {
@@ -23,8 +27,10 @@ impl From<InternalEntitySecurityState> for EntitySecurityState {
                     value: value.into(),
                 }
             }
-            InternalEntitySecurityState::Securified { value: _ } => {
-                panic!("Securified state not yet supported in the Wallet")
+            InternalEntitySecurityState::Securified { value } => {
+                EntitySecurityState::Securified {
+                    value: value.into(),
+                }
             }
         }
     }
@@ -35,6 +41,11 @@ impl From<EntitySecurityState> for InternalEntitySecurityState {
         match val {
             EntitySecurityState::Unsecured { value } => {
                 InternalEntitySecurityState::Unsecured {
+                    value: value.into_internal(),
+                }
+            }
+            EntitySecurityState::Securified { value } => {
+                InternalEntitySecurityState::Securified {
                     value: value.into_internal(),
                 }
             }
