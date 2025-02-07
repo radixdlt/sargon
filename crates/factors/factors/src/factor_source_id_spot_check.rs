@@ -47,7 +47,7 @@ impl FactorSourceIDSpotCheck for FactorSourceID {
             SpotCheckInput::Software {
                 mnemonic_with_passphrase,
             } => {
-                if !kind.is_software() {
+                if !kind.expects_software_spot_check_input() {
                     return false;
                 }
                 let built_id =
@@ -74,7 +74,8 @@ impl FactorSourceIDSpotCheck for FactorSourceIDFromHash {
 }
 
 impl FactorSourceKind {
-    fn is_software(&self) -> bool {
+    /// Returns whether the kind expects a `Software` input for spot check.
+    fn expects_software_spot_check_input(&self) -> bool {
         match self {
             FactorSourceKind::Device
             | FactorSourceKind::OffDeviceMnemonic
@@ -193,14 +194,20 @@ mod tests {
     }
 
     #[test]
-    fn kind_is_software() {
-        assert!(FactorSourceKind::Device.is_software());
-        assert!(FactorSourceKind::OffDeviceMnemonic.is_software());
-        assert!(FactorSourceKind::Password.is_software());
-        assert!(FactorSourceKind::SecurityQuestions.is_software());
-        assert!(!FactorSourceKind::LedgerHQHardwareWallet.is_software());
-        assert!(!FactorSourceKind::ArculusCard.is_software());
-        assert!(!FactorSourceKind::TrustedContact.is_software());
+    fn kind_expects_software_spot_check_input() {
+        assert!(FactorSourceKind::Device.expects_software_spot_check_input());
+        assert!(FactorSourceKind::OffDeviceMnemonic
+            .expects_software_spot_check_input());
+        assert!(FactorSourceKind::Password.expects_software_spot_check_input());
+        assert!(FactorSourceKind::SecurityQuestions
+            .expects_software_spot_check_input());
+        assert!(!FactorSourceKind::LedgerHQHardwareWallet
+            .expects_software_spot_check_input());
+        assert!(
+            !FactorSourceKind::ArculusCard.expects_software_spot_check_input()
+        );
+        assert!(!FactorSourceKind::TrustedContact
+            .expects_software_spot_check_input());
     }
 
     #[test]
