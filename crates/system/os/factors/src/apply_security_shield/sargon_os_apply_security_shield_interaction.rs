@@ -98,7 +98,7 @@ impl EntityApplyingShieldAddress {
     }
 }
 
-// TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+// TODO: when https://github.com/radixdlt/sargon/pull/373 and follow up PRs are merged and we can get those addresses from the manifest using RETs analysis
 // is merge remove this and use static analysis using RET to get this.
 fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shield(
     manifest: &TransactionManifest,
@@ -114,7 +114,7 @@ fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shiel
     address.ok_or(CommonError::Unknown)
 }
 
-// TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+// TODO: when https://github.com/radixdlt/sargon/pull/373 and follow up PRs are merged
 // impl this
 fn _extract_address_of_entity_updating_shield(
     _manifest: &TransactionManifest,
@@ -122,7 +122,7 @@ fn _extract_address_of_entity_updating_shield(
     todo!("cannot be implemented yet, awaiting #132 RET PR")
 }
 
-// TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+// TODO: when https://github.com/radixdlt/sargon/pull/373 and follow up PRs are merged
 // is merge remove this and use static analysis using RET to get this.
 pub fn extract_address_of_entity_updating_shield(
     manifest: &TransactionManifest,
@@ -184,7 +184,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
                 UnvalidatedTransactionManifest::from(manifest)
          }).collect_vec();
 
-        // TODO: when RET PR https://github.com/radixdlt/radix-engine-toolkit/pull/132
+        // TODO: when https://github.com/radixdlt/sargon/pull/373 and follow up PRs are merged
         // is merge remove this and use static analysis using RET to get this.
         hacky_tmp_set_entities_applying_shield(manifests_for_entity);
 
