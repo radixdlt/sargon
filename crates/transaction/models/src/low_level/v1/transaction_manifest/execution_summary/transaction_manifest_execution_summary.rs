@@ -21,8 +21,8 @@ impl TransactionManifest {
 impl DynamicallyAnalyzableManifest for TransactionManifest {
     fn ret_dynamically_analyze(
         &self,
-        receipt: &ScryptoRuntimeToolkitTransactionReceipt,
-    ) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
+        receipt: ScryptoRuntimeToolkitTransactionReceipt,
+    ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError> {
         RET_dynamically_analyze(&self.scrypto_manifest(), receipt)
     }
 }
@@ -87,21 +87,21 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(10)
+                                FungibleResourceIndicator::new_guaranteed(10)
                             ),
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(5)
+                                FungibleResourceIndicator::new_guaranteed(5)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7".parse::<ResourceAddress>().unwrap(),
-                                NonFungibleResourceIndicator::by_ids([
+                                NonFungibleResourceIndicator::new_guaranteed([
                                     NonFungibleLocalId::integer(64),
                                 ])
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(),
-                                NonFungibleResourceIndicator::by_ids([
+                                NonFungibleResourceIndicator::new_guaranteed([
                                     NonFungibleLocalId::string("Member_6").unwrap(),
                                 ])
                             ),
@@ -114,11 +114,11 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(10)
+                                FungibleResourceIndicator::new_guaranteed(10)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1n2uml563pnl0yjmd57xnj80mzdwyh4ca4w29zt2ljwpwq2p837c4a7".parse::<ResourceAddress>().unwrap(),
-                                NonFungibleResourceIndicator::by_ids([
+                                NonFungibleResourceIndicator::new_guaranteed([
                                     NonFungibleLocalId::integer(64),
                                 ])
                             ),
@@ -129,11 +129,11 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1t4nnqzrdympy0n74yhvkp7vnver90j5yurlhqu3083z8mt2gdvu7sq".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(5)
+                                FungibleResourceIndicator::new_guaranteed(5)
                             ),
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(),
-                                NonFungibleResourceIndicator::by_ids([
+                                NonFungibleResourceIndicator::new_guaranteed([
                                     NonFungibleLocalId::string("Member_6").unwrap(),
                                 ])
                             ),
@@ -147,10 +147,10 @@ mod tests {
                 [],
                 [],
                 [
+                    DetailedManifestClass::General,
                     DetailedManifestClass::Transfer {
-                        is_one_to_one: false
+                        is_one_to_one_transfer: false
                     },
-                    DetailedManifestClass::General
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
@@ -251,7 +251,7 @@ mod tests {
                     acc_v3,
                     vec![ResourceIndicator::fungible(
                         token_address,
-                        FungibleResourceIndicator::predicted(21000000, 1)
+                        FungibleResourceIndicator::new_predicted(21000000, 1)
                     )]
                 )],
                 [], // addresses_of_accounts_requiring_auth
@@ -302,9 +302,7 @@ mod tests {
                         vec![
                             ResourceIndicator::non_fungible(
                                 non_fungible_address,
-                                NonFungibleResourceIndicator::by_all(
-                                    PredictedDecimal::new(10, 1),
-                                    PredictedNonFungibleLocalIds::new(
+                                NonFungibleResourceIndicator::new_predicted(
                                         [
                                             NonFungibleLocalId::integer(0),
                                             NonFungibleLocalId::integer(1),
@@ -318,7 +316,6 @@ mod tests {
                                             NonFungibleLocalId::integer(9),
                                         ],
                                         1
-                                    )
                                 )
                             ),
                         ]
@@ -382,7 +379,7 @@ mod tests {
                         vec![
                             ResourceIndicator::fungible(
                                 "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
-                                FungibleResourceIndicator::guaranteed(5)
+                                FungibleResourceIndicator::new_guaranteed(5)
                             ),
                         ]
                     )
@@ -393,10 +390,10 @@ mod tests {
                         vec![
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(),
-                                NonFungibleResourceIndicator::by_amount(1, PredictedNonFungibleLocalIds::new(
+                                NonFungibleResourceIndicator::new_predicted(
                                     [],
                                     4
-                                ))
+                                )
                             )
                         ]
                     )
@@ -450,7 +447,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
-                                    FungibleResourceIndicator::guaranteed(1)
+                                    FungibleResourceIndicator::new_guaranteed(1)
                                 ),
                             ]
                         )
@@ -525,10 +522,10 @@ mod tests {
             Blobs::default(),
         )
         .unwrap();
+
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
         let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
-        let pool_address = "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3".parse::<PoolAddress>().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -538,11 +535,11 @@ mod tests {
                     vec![
                         ResourceIndicator::fungible(
                             ResourceAddress::sample_stokenet_xrd(),
-                            FungibleResourceIndicator::guaranteed(237)
+                            FungibleResourceIndicator::new_guaranteed(237)
                         ),
                         ResourceIndicator::fungible(
                             r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
-                            FungibleResourceIndicator::guaranteed(1337)
+                            FungibleResourceIndicator::new_guaranteed(1337)
                         ),
                     ]
                 )],
@@ -553,8 +550,10 @@ mod tests {
                 [],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
-                [DetailedManifestClass::PoolContribution {
-                    pool_addresses: vec![pool_address],
+                [
+                    DetailedManifestClass::General,
+                    DetailedManifestClass::PoolContribution {
+                    pool_addresses: vec![],
                     pool_contributions: vec![]
                 }],
                 FeeLocks::new(0.36962, 0),
@@ -602,7 +601,7 @@ mod tests {
                     acc_gk,
                     vec![ResourceIndicator::fungible(
                         ResourceAddress::sample_stokenet_xrd(),
-                        FungibleResourceIndicator::guaranteed(3000)
+                        FungibleResourceIndicator::new_guaranteed(3000)
                     )]
                 )], // addresses_of_accounts_withdrawn_from
                 [(
@@ -610,15 +609,15 @@ mod tests {
                     vec![
                         ResourceIndicator::fungible(
                             validator_0_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(0, 5)
+                            FungibleResourceIndicator::new_predicted(0, 5)
                         ),
                         ResourceIndicator::fungible(
                             validator_1_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(0, 10)
+                            FungibleResourceIndicator::new_predicted(0, 10)
                         ),
                         ResourceIndicator::fungible(
                             validator_2_resource_address_of_stake,
-                            FungibleResourceIndicator::predicted(0, 15)
+                            FungibleResourceIndicator::new_predicted(0, 15)
                         ),
                     ]
                 )], // addresses_of_accounts_deposited_into
@@ -673,7 +672,7 @@ mod tests {
                     acc_gk,
                     vec![ResourceIndicator::fungible(
                         resource_address_of_pool,
-                        FungibleResourceIndicator::guaranteed(1)
+                        FungibleResourceIndicator::new_guaranteed(1)
                     )]
                 )], // addresses_of_accounts_withdrawn_from
                 [], // addresses_of_accounts_deposited_into
@@ -683,15 +682,18 @@ mod tests {
                 [ReservedInstruction::AccountLockFee],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
-                [DetailedManifestClass::PoolRedemption {
+                [
+                    DetailedManifestClass::General,
+                    DetailedManifestClass::PoolRedemption {
                     pool_addresses: vec![pool_address],
                     pool_redemptions: vec![TrackedPoolRedemption::new(
                         pool_address,
-                        ResourceAddress::from_str("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc").unwrap(),
-                        3.162277,
+                        ResourceAddress::from_str("resource_tdx_2_1thgnc84xkcjhs46pfvm9s8zn8t9kxwryvyr9x3947xpt6jxty7qn25").unwrap(),
+                        1,
                         []
                     )]
-                }],
+                }
+                ],
                 FeeLocks::default(),
                 FeeSummary::new("0.26154965".parse::<Decimal>().unwrap(), "0.0325088".parse::<Decimal>().unwrap(), "0.12760162134".parse::<Decimal>().unwrap(), 0,),
                 NewEntities::default()
@@ -720,8 +722,6 @@ mod tests {
 
         let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}".parse().unwrap();
 
-        let validator: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
-
         pretty_assertions::assert_eq!(
                 sut,
                 SUT::new(
@@ -731,7 +731,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     "resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn".parse::<ResourceAddress>().unwrap(), 
-                                    FungibleResourceIndicator::guaranteed(500)
+                                    FungibleResourceIndicator::new_guaranteed(500)
                                 ),
                             ]
                         )
@@ -742,12 +742,9 @@ mod tests {
                         vec![
                             ResourceIndicator::non_fungible(
                                 "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj".parse::<ResourceAddress>().unwrap(),
-                                NonFungibleResourceIndicator::by_all(
-                                    PredictedDecimal::new(0, 4),
-                                    PredictedNonFungibleLocalIds::new(
+                                NonFungibleResourceIndicator::new_predicted(
                                         [],
                                         4
-                                    )
                                 )
                             )
                         ]
@@ -760,8 +757,9 @@ mod tests {
                     [], // presented_proofs
                     [], // encountered_component_addresses
                     [
+                        DetailedManifestClass::General,
                         DetailedManifestClass::ValidatorUnstake {
-                            validator_addresses: vec![validator],
+                            validator_addresses: vec![],
                             claims_non_fungible_data: HashMap::<NonFungibleGlobalId, UnstakeData>::new(),
                         }
                     ],
@@ -796,8 +794,6 @@ mod tests {
 
         let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
 
-        let validator: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().unwrap();
-
         pretty_assertions::assert_eq!(
                 sut,
                 SUT::new(
@@ -807,7 +803,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::non_fungible(
                                     "resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw".parse::<ResourceAddress>().unwrap(),
-                                    NonFungibleResourceIndicator::by_ids([
+                                    NonFungibleResourceIndicator::new_guaranteed([
                                         NonFungibleLocalId::ruid(hex_decode("1c1ce92c810094a765659db6a666c19c6cea4367bb789b55276b137712ceecce").unwrap()).unwrap(),
                                         NonFungibleLocalId::ruid(hex_decode("5aebd0270caf3f8751031498741f57b5d24fe0d62a976589519c6a92423888cc").unwrap()).unwrap()
                                     ])
@@ -821,7 +817,7 @@ mod tests {
                             vec![
                                 ResourceIndicator::fungible(
                                     ResourceAddress::sample_stokenet_xrd(),
-                                    FungibleResourceIndicator::guaranteed(150)
+                                    FungibleResourceIndicator::new_guaranteed(150)
                                 ),
                             ]
                         ),
@@ -833,8 +829,9 @@ mod tests {
                     [], // presented_proofs
                     [], // encountered_component_addresses
                     [
+                        DetailedManifestClass::General,
                         DetailedManifestClass::ValidatorClaim {
-                            validator_addresses: vec![validator],
+                            validator_addresses: vec![],
                             validator_claims: vec![]
                         }
                     ],
@@ -881,15 +878,14 @@ mod tests {
                     vec![
                         ResourceIndicator::non_fungible(
                             non_fungible_address,
-                            NonFungibleResourceIndicator::by_amount(1, PredictedNonFungibleLocalIds::new(
-                                [
-                                ],
+                            NonFungibleResourceIndicator::new_predicted(
+                                [],
                                 2
-                            ))
+                            )
                         ),
                         ResourceIndicator::fungible(
                             fungible_address,
-                            FungibleResourceIndicator::guaranteed(3)
+                            FungibleResourceIndicator::new_guaranteed(3)
                         ),
                     ]
                 )],
@@ -942,10 +938,7 @@ mod tests {
                 acc,
                 vec![ResourceIndicator::non_fungible(
                     badge_address,
-                    NonFungibleResourceIndicator::by_all(
-                        PredictedDecimal::new(1, 1),
-                        PredictedNonFungibleLocalIds::new([badge_id], 1),
-                    ),
+                    NonFungibleResourceIndicator::new_guaranteed([badge_id]),
                 )],
             )],
             vec![acc], // addresses_of_accounts_requiring_auth

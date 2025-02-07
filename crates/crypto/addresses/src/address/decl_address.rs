@@ -42,7 +42,8 @@ macro_rules! decl_address {
     ) => {
         paste::paste! {
             use std::str::FromStr;
-            use radix_common::prelude::{AddressBech32Decoder, AddressBech32Encoder, fmt};
+            use radix_common::prelude::{AddressBech32Decoder, AddressBech32Encoder, fmt, NetworkDefinition};
+            use radix_engine_toolkit::prelude::NetworkDefinitionExt;
 
 
             $(
@@ -101,7 +102,7 @@ macro_rules! decl_address {
             impl Display for [< $address_type:camel Address >] {
                 fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                     let encoder = AddressBech32Encoder::new(
-                        &network_definition_from_network_id(self.network_id.discriminant()),
+                        &NetworkDefinition::from_network_id(self.network_id.discriminant()),
                     );
                     encoder
                         .encode_to_fmt(formatter, &self.node_id.0)
@@ -131,20 +132,44 @@ macro_rules! decl_address {
 
             impl IsAddress for [< $address_type:camel Address >] {}
 
-            // Temporary code, will be removed with the integration of upgraded toolkit
-            impl From<[< Ret $address_type:camel Address >]> for [< $address_type:camel Address >] {
-                fn from(value: [< Ret $address_type:camel Address >]) -> Self {
-                    Self::new_from_node_id(
-                        value.node_id(),
-                        value.network_id().try_into().unwrap()
-                    ).unwrap()
-                }
-            }
-
             impl FromStr for [< $address_type:camel Address >] {
                 type Err = CommonError;
                 fn from_str(s: &str) -> Result<Self> {
                     Self::try_from_bech32(s)
+                }
+            }
+
+            impl From<(ScryptoGlobalAddress, NetworkID)> for [< $address_type:camel Address >] {
+                fn from(value: (ScryptoGlobalAddress, NetworkID)) -> Self {
+                    Self::new_from_global_address(value.0, value.1)
+                    .expect("Should always be able to convert from ScryptoGlobalAddress to Sargon Address")
+                }
+            }
+
+            impl TryFrom<(ScryptoManifestGlobalAddress, NetworkID)> for [< $address_type:camel Address >] {
+                type Error = CommonError;
+                fn try_from(value: (ScryptoManifestGlobalAddress, NetworkID)) -> Result<Self> {
+                    match value.0 {
+                        ScryptoManifestGlobalAddress::Static(node_id) => {
+                            Self::new_from_node_id(node_id, value.1)
+                        },
+                        _ => Err(CommonError::NamedAddressesAreNotSupported),
+                    }
+                }
+            }
+
+            impl TryFrom<(ScryptoManifestAddress, NetworkID)> for [< $address_type:camel Address >] {
+                type Error = CommonError;
+
+                fn try_from(value: (ScryptoManifestAddress, NetworkID)) -> Result<Self> {
+                    let (address, network_id) = value;
+
+                    match address {
+                        ScryptoManifestAddress::Static(node_id) => {
+                            Self::new_from_node_id(node_id, network_id)
+                        },
+                        _ => Err(CommonError::NamedAddressesAreNotSupported),
+                    }
                 }
             }
 
@@ -191,6 +216,10 @@ macro_rules! decl_address {
             use core_utils::prelude::format_string;
 
             impl [< $address_type:camel Address >] {
+                pub fn new_from_global_address(global_address: ScryptoGlobalAddress, network_id: NetworkID) -> Result<Self> {
+                    Self::new_from_node_id(global_address.into_node_id(), network_id)
+                }
+
                 pub fn entity_type(&self) -> ScryptoEntityType {
                     self.entity_type
                 }
@@ -218,10 +247,8 @@ macro_rules! decl_address {
                 ) -> Self {
                     let entity_byte = Self::sample().node_id().as_bytes()[0];
                     let node_id = ScryptoNodeId::new(entity_byte, node_id_bytes);
-                    let ret_address = [<Ret $address_type:camel Address>]::new(node_id, network_id.discriminant()).unwrap();
-                    Self::from(ret_address)
+                    Self::new_from_node_id(node_id, network_id).unwrap()
                 }
-
 
                 pub fn formatted(&self, format: AddressFormat) -> String {
                     match format {
@@ -230,7 +257,7 @@ macro_rules! decl_address {
                     }
                 }
 
-                pub(crate) fn scrypto(&self) -> ScryptoGlobalAddress {
+                pub fn scrypto(&self) -> ScryptoGlobalAddress {
                     ScryptoGlobalAddress::try_from(self.node_id())
                     .expect("Should always be able to convert a Sargon Address into radix engine 'GlobalAddress'.")
                 }
@@ -256,8 +283,7 @@ macro_rules! decl_address {
                 ) -> Result<Self> {
                     // Find the network definition based on the network of
                     // the passed address.
-                    let network_definition = network_id_from_address_string(address_string)
-                        .map(network_definition_from_network_id)
+                    let network_definition = NetworkDefinition::from_address_string(address_string)
                         .ok_or(
                             CommonError::FailedToFindNetworkIdFromBech32mString {
                                 bech32m_encoded_address: address_string.to_owned(),

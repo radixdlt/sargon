@@ -611,7 +611,7 @@ mod transaction_preview_analysis_tests {
         assert_eq!(
             result,
             Err(CommonError::ExecutionSummaryFail {
-                underlying: "InvalidReceipt".to_string()
+                underlying: "NotACommitSuccessReceipt".to_string()
             })
         )
     }

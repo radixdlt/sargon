@@ -1,28 +1,5 @@
 use crate::prelude::*;
 
-macro_rules! from_scrypto_global_address {
-    ($address_type: ty) => {
-        paste::paste! {
-            impl TryFrom<(ScryptoGlobalAddress, NetworkID)> for $address_type {
-                type Error = crate::CommonError;
-                fn try_from(value: (ScryptoGlobalAddress, NetworkID)) -> Result<Self> {
-                    $address_type::new_from_node_id(value.0.into_node_id(), value.1)
-                }
-            }
-        }
-    };
-}
-
-from_scrypto_global_address!(PackageAddress);
-from_scrypto_global_address!(ResourceAddress);
-from_scrypto_global_address!(NonFungibleResourceAddress);
-from_scrypto_global_address!(ValidatorAddress);
-from_scrypto_global_address!(AccessControllerAddress);
-from_scrypto_global_address!(AccountAddress);
-from_scrypto_global_address!(IdentityAddress);
-from_scrypto_global_address!(ComponentAddress);
-from_scrypto_global_address!(LockerAddress);
-
 macro_rules! from_scrypto_address_variant {
 
     ($address_type: ty) => {

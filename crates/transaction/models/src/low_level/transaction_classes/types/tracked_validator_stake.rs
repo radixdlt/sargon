@@ -29,13 +29,13 @@ impl TrackedValidatorStake {
     }
 }
 
-impl From<(RetTrackedValidatorStake, NetworkID)> for TrackedValidatorStake {
-    fn from(value: (RetTrackedValidatorStake, NetworkID)) -> Self {
+impl From<(RetValidatorStakeOperation, NetworkID)> for TrackedValidatorStake {
+    fn from(value: (RetValidatorStakeOperation, NetworkID)) -> Self {
         let (ret, n) = value;
         Self::new(
             (ret.validator_address, n),
-            ret.xrd_amount,
-            (ret.liquid_stake_unit_address, n),
+            ret.staked_xrd_amount,
+            (ret.liquid_stake_unit_resource_address, n),
             ret.liquid_stake_unit_amount,
         )
     }

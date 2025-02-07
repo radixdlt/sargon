@@ -29,8 +29,8 @@ impl TrackedPoolRedemption {
     }
 }
 
-impl From<(RetTrackedPoolRedemption, NetworkID)> for TrackedPoolRedemption {
-    fn from(value: (RetTrackedPoolRedemption, NetworkID)) -> Self {
+impl From<(RetPoolRedemptionOperation, NetworkID)> for TrackedPoolRedemption {
+    fn from(value: (RetPoolRedemptionOperation, NetworkID)) -> Self {
         let (ret, n) = value;
         Self::new(
             (ret.pool_address, n),

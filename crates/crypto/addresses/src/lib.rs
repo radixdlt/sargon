@@ -14,6 +14,7 @@ pub mod prelude {
     pub use crate::address::*;
     pub use crate::resource::*;
 
+    pub(crate) use radix_engine_interface::blueprints::resource::ManifestResourceOrNonFungible as ScryptoManifestResourceOrNonFungible;
     pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
 
     pub use radix_common::{
@@ -52,8 +53,10 @@ pub mod prelude {
             ManifestCustomValue as ScryptoManifestCustomValue,
             ManifestCustomValueKind as ScryptoManifestCustomValueKind,
             ManifestEncode as ScryptoManifestEncode,
+            ManifestGlobalAddress as ScryptoManifestGlobalAddress,
             ManifestNamedAddress as ScryptoManifestNamedAddress,
             ManifestProof as ScryptoManifestProof,
+            ManifestResourceAddress as ScryptoManifestResourceAddress,
             ManifestValue as ScryptoManifestValue,
             NonFungibleData as ScryptoNonFungibleData,
             NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
@@ -68,24 +71,6 @@ pub mod prelude {
     };
 
     pub(crate) use radix_engine::system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier;
-
-    pub use radix_engine_toolkit::models::{
-        canonical_address_types::{
-            CanonicalAccessControllerAddress as RetAccessControllerAddress,
-            CanonicalAccountAddress as RetAccountAddress,
-            CanonicalAddress as RetIsAddressTrait,
-            CanonicalComponentAddress as RetComponentAddress,
-            CanonicalIdentityAddress as RetIdentityAddress,
-            CanonicalLockerAddress as RetLockerAddress,
-            CanonicalPackageAddress as RetPackageAddress,
-            CanonicalPoolAddress as RetPoolAddress,
-            CanonicalResourceAddress as RetResourceAddress,
-            CanonicalValidatorAddress as RetValidatorAddress,
-            CanonicalVaultAddress as RetVaultAddress,
-        },
-        node_id::TypedNodeId as RetTypedNodeId,
-    };
-    pub(crate) use radix_engine_toolkit::utils::*;
 
     pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use log::*;

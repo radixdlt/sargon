@@ -1,102 +1,68 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum NonFungibleResourceIndicator {
-    ByAll {
-        predicted_amount: PredictedDecimal,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    },
-    ByAmount {
-        amount: Decimal192,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    },
-    ByIds {
-        ids: Vec<NonFungibleLocalId>,
-    },
-}
+pub type NonFungibleLocalIds = Vec<NonFungibleLocalId>;
+pub type NonFungibleResourceIndicator =
+    GuaranteedOrPredicted<NonFungibleLocalIds>;
+pub type PredictedNonFungibleLocalIds = Predicted<NonFungibleLocalIds>;
 
-impl NonFungibleResourceIndicator {
-    pub fn by_all(
-        predicted_amount: PredictedDecimal,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    ) -> Self {
-        Self::ByAll {
-            predicted_amount,
-            predicted_ids,
-        }
-    }
-    pub fn by_amount(
-        amount: impl Into<Decimal192>,
-        predicted_ids: PredictedNonFungibleLocalIds,
-    ) -> Self {
-        Self::ByAmount {
-            amount: amount.into(),
-            predicted_ids,
-        }
-    }
-    pub fn by_ids(ids: impl IntoIterator<Item = NonFungibleLocalId>) -> Self {
-        Self::ByIds {
-            ids: ids.into_iter().collect(),
-        }
-    }
-}
-
-impl NonFungibleResourceIndicator {
-    pub fn ids(&self) -> Vec<NonFungibleLocalId> {
-        match self {
-            NonFungibleResourceIndicator::ByAll {
-                predicted_amount: _,
-                predicted_ids,
-            } => predicted_ids.value.clone(),
-            NonFungibleResourceIndicator::ByAmount {
-                amount: _,
-                predicted_ids,
-            } => predicted_ids.value.clone(),
-            NonFungibleResourceIndicator::ByIds { ids } => ids.clone(),
-        }
-    }
-}
-
+type RetNonFungibleResourceIndicator =
+    RetEitherGuaranteedOrPredicted<IndexSet<ScryptoNonFungibleLocalId>>;
 impl From<RetNonFungibleResourceIndicator> for NonFungibleResourceIndicator {
     fn from(value: RetNonFungibleResourceIndicator) -> Self {
         match value {
-            RetNonFungibleResourceIndicator::ByAll {
-                predicted_amount,
-                predicted_ids,
-            } => Self::ByAll {
-                predicted_amount: PredictedDecimal::from_ret(predicted_amount),
-                predicted_ids: predicted_ids.into(),
-            },
-            RetNonFungibleResourceIndicator::ByAmount {
-                amount,
-                predicted_ids,
-            } => Self::ByAmount {
-                amount: amount.into(),
-                predicted_ids: predicted_ids.into(),
-            },
-            RetNonFungibleResourceIndicator::ByIds(ids) => Self::ByIds {
-                ids: ids.into_iter().map(NonFungibleLocalId::from).collect(),
-            },
+            RetEitherGuaranteedOrPredicted::Guaranteed(value) => {
+                Self::Guaranteed(
+                    value
+                        .into_iter()
+                        .map(NonFungibleLocalId::from)
+                        .collect_vec(),
+                )
+            }
+            RetEitherGuaranteedOrPredicted::Predicted(value) => {
+                Self::Predicted(PredictedNonFungibleLocalIds::from(value))
+            }
         }
+    }
+}
+
+type RetPredictedNonFungibleLocalIds =
+    RetTracked<IndexSet<ScryptoNonFungibleLocalId>>;
+impl From<RetPredictedNonFungibleLocalIds> for PredictedNonFungibleLocalIds {
+    fn from(value: RetPredictedNonFungibleLocalIds) -> Self {
+        Self::new(
+            value
+                .value
+                .into_iter()
+                .map(NonFungibleLocalId::from)
+                .collect_vec(),
+            *value.created_at.value() as u64,
+        )
     }
 }
 
 impl HasSampleValues for NonFungibleResourceIndicator {
     fn sample() -> Self {
-        Self::by_amount(3, PredictedNonFungibleLocalIds::sample())
+        Self::new_guaranteed(NonFungibleLocalIds::sample())
     }
 
     fn sample_other() -> Self {
-        Self::by_all(
-            PredictedDecimal::sample(),
-            PredictedNonFungibleLocalIds::sample_other(),
-        )
+        Self::new_predicted(NonFungibleLocalIds::sample_other(), 0)
+    }
+}
+
+impl HasSampleValues for PredictedNonFungibleLocalIds {
+    fn sample() -> Self {
+        Self::new(vec![NonFungibleLocalId::sample()], 0)
+    }
+
+    fn sample_other() -> Self {
+        Self::new(vec![NonFungibleLocalId::sample_other()], 0)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use radix_engine_toolkit::transaction_types::Predicted;
+    use radix_engine_toolkit::types::InstructionIndex;
 
     use super::*;
 
@@ -117,25 +83,9 @@ mod tests {
             NonFungibleLocalId::random(),
         ];
 
-        assert_eq!(
-            SUT::by_all(
-                PredictedDecimal::sample(),
-                PredictedNonFungibleLocalIds::new(ids.clone(), 0)
-            )
-            .ids(),
-            ids.clone()
-        );
+        assert_eq!(SUT::new_guaranteed(ids.clone()).get_value(), ids.clone());
 
-        assert_eq!(
-            SUT::by_amount(
-                0,
-                PredictedNonFungibleLocalIds::new(ids.clone(), 0)
-            )
-            .ids(),
-            ids.clone()
-        );
-
-        assert_eq!(SUT::by_ids(ids.clone()).ids(), ids);
+        assert_eq!(SUT::new_predicted(ids.clone(), 0).get_value(), ids.clone());
     }
 
     #[test]
@@ -144,37 +94,32 @@ mod tests {
     }
 
     #[test]
-    fn from_ret_by_amount() {
-        let ret = RetNonFungibleResourceIndicator::ByAmount {
-            amount: 3.into(),
-            predicted_ids: Predicted {
-                value: [
-                    NonFungibleLocalId::sample(),
-                    NonFungibleLocalId::sample_other(),
-                ]
+    fn from_ret_guaranteed() {
+        let ret = RetNonFungibleResourceIndicator::new_guaranteed(
+            SUT::sample()
+                .get_value()
                 .into_iter()
                 .map(ScryptoNonFungibleLocalId::from)
                 .collect(),
-                instruction_index: 0,
-            },
-        };
+        );
         assert_eq!(SUT::from(ret), SUT::sample());
     }
 
     #[test]
-    fn from_ret_by_ids() {
+    fn from_ret_predicted() {
         let ids = vec![
             NonFungibleLocalId::sample(),
             NonFungibleLocalId::sample_other(),
         ];
 
-        let ret = RetNonFungibleResourceIndicator::ByIds(
+        let ret = RetNonFungibleResourceIndicator::new_predicted(
             ids.clone()
                 .into_iter()
                 .map(ScryptoNonFungibleLocalId::from)
                 .collect(),
+            InstructionIndex::of(0),
         );
 
-        assert_eq!(SUT::from(ret), SUT::by_ids(ids));
+        assert_eq!(SUT::from(ret), SUT::new_predicted(ids, 0));
     }
 }

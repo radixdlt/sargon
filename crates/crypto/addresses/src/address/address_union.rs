@@ -160,7 +160,6 @@ macro_rules! address_union {
                         )+
                     }
                 }
-
             }
 
             impl $union_name {

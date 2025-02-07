@@ -49,18 +49,24 @@ impl ResourceSpecifier {
     }
 }
 
-impl From<(ScryptoResourceSpecifier, NetworkID)> for ResourceSpecifier {
-    fn from(value: (ScryptoResourceSpecifier, NetworkID)) -> Self {
-        let (scrypto_value, network_id) = value;
+impl TryFrom<(RetManifestResourceSpecifier, NetworkID)> for ResourceSpecifier {
+    type Error = CommonError;
+
+    fn try_from(
+        (scrypto_value, n): (RetManifestResourceSpecifier, NetworkID),
+    ) -> Result<Self, Self::Error> {
         match scrypto_value {
-            ScryptoResourceSpecifier::Amount(resource_address, amount) => {
-                Self::fungible((resource_address, network_id), amount)
+            RetManifestResourceSpecifier::Amount(resource_address, amount) => {
+                Ok(Self::fungible(
+                    ResourceAddress::try_from((resource_address, n))?,
+                    amount,
+                ))
             }
-            ScryptoResourceSpecifier::Ids(resource_address, ids) => {
-                Self::non_fungible(
-                    (resource_address, network_id),
+            RetManifestResourceSpecifier::Ids(resource_address, ids) => {
+                Ok(Self::non_fungible(
+                    ResourceAddress::try_from((resource_address, n))?,
                     ids.into_iter().map(NonFungibleLocalId::from).collect(),
-                )
+                ))
             }
         }
     }
@@ -76,5 +82,58 @@ impl HasSampleValues for ResourceSpecifier {
             ResourceAddress::sample_other(),
             vec![NonFungibleLocalId::sample_other()],
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ResourceSpecifier;
+
+    #[test]
+    fn get_address() {
+        let address = ResourceAddress::sample();
+        let ids = vec![NonFungibleLocalId::sample()];
+        let sut = SUT::non_fungible(address, ids.clone());
+
+        assert_eq!(sut.get_address(), address);
+    }
+
+    #[test]
+    fn try_from_manifest_resource_specifier_ids() {
+        let address = ResourceAddress::sample();
+        let ids = vec![NonFungibleLocalId::sample()];
+        let sut = SUT::non_fungible(address, ids.clone());
+
+        let ret = RetManifestResourceSpecifier::Ids(
+            ScryptoManifestResourceAddress::Static(
+                ScryptoResourceAddress::try_from(address.scrypto()).unwrap(),
+            ),
+            ids.into_iter()
+                .map(ScryptoNonFungibleLocalId::from)
+                .collect(),
+        );
+
+        let result = SUT::try_from((ret, NetworkID::Mainnet));
+        assert_eq!(result.unwrap(), sut);
+    }
+
+    #[test]
+    fn try_from_manifest_resource_specifier_amount() {
+        let address = ResourceAddress::sample();
+        let amount = 3.into();
+        let sut = SUT::fungible(address, amount);
+
+        let ret = RetManifestResourceSpecifier::Amount(
+            ScryptoManifestResourceAddress::Static(
+                ScryptoResourceAddress::try_from(address.scrypto()).unwrap(),
+            ),
+            amount,
+        );
+
+        let result = SUT::try_from((ret, NetworkID::Mainnet));
+        assert_eq!(result.unwrap(), sut);
     }
 }

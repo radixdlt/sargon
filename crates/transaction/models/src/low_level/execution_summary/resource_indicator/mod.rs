@@ -1,9 +1,9 @@
 mod fungible_resource_indicator;
+mod guaranteed_or_predicted;
 mod non_fungible_resource_indicator;
-mod predicted;
 mod resource_indicator;
 
 pub use fungible_resource_indicator::*;
+pub use guaranteed_or_predicted::*;
 pub use non_fungible_resource_indicator::*;
-pub use predicted::*;
 pub use resource_indicator::*;

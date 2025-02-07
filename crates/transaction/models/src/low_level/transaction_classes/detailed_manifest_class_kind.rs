@@ -8,6 +8,9 @@ pub enum DetailedManifestClassKind {
     #[display("General")]
     General,
 
+    #[display("GeneralSubintent")]
+    GeneralSubintent,
+
     #[display("Transfer")]
     Transfer,
 
