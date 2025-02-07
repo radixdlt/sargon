@@ -1,4 +1,4 @@
-use profile::prelude::*;
+use crate::prelude::*;
 
 /// This is the result of checking what entities are linked to a given `SecurityStructure`.
 #[derive(Clone, Debug, PartialEq)]
