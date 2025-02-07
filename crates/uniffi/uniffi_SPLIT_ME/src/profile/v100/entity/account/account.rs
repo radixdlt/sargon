@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use profile_logic::{
-    AccountIsLegacyOlympia, EntityUnsecuredControllingFactorInstance,
+    AccountIsLegacy, EntityUnsecuredControllingFactorInstance,
 };
 use sargon::Account as InternalAccount;
 
@@ -134,8 +134,8 @@ pub fn new_account_sample_stokenet_paige() -> Account {
 }
 
 #[uniffi::export]
-pub fn account_is_legacy_olympia(account: Account) -> bool {
-    account.into_internal().is_legacy_olympia()
+pub fn account_is_legacy(account: Account) -> bool {
+    account.into_internal().is_legacy()
 }
 
 #[uniffi::export]

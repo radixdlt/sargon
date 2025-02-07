@@ -1,11 +1,11 @@
 use crate::prelude::*;
 
-pub trait AccountIsLegacyOlympia {
-    fn is_legacy_olympia(&self) -> bool;
+pub trait AccountIsLegacy {
+    fn is_legacy(&self) -> bool;
 }
 
-impl AccountIsLegacyOlympia for Account {
-    fn is_legacy_olympia(&self) -> bool {
+impl AccountIsLegacy for Account {
+    fn is_legacy(&self) -> bool {
         let Some(unsecured_entity_control) = self.security_state.as_unsecured()
         else {
             return false;
@@ -43,7 +43,7 @@ mod tests {
             ),
         );
 
-        assert!(account.is_legacy_olympia());
+        assert!(account.is_legacy());
     }
 
     #[test]
@@ -63,7 +63,7 @@ mod tests {
             ),
         );
 
-        assert!(!account.is_legacy_olympia());
+        assert!(!account.is_legacy());
     }
 
     #[test]
@@ -86,6 +86,6 @@ mod tests {
             },
         );
 
-        assert!(!account.is_legacy_olympia());
+        assert!(!account.is_legacy());
     }
 }
