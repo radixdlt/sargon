@@ -92,4 +92,15 @@ impl SargonOS {
             .security_shield_prerequisites_status()
             .into_result()
     }
+
+    /// Returns all the Security Shields along with the number of entities linked to each Security Shield,
+    /// either provisionally or currently securified.
+    pub async fn get_shields_for_display(
+        &self,
+    ) -> Result<Vec<ShieldForDisplay>> {
+        self.wrapped
+            .get_shields_for_display()
+            .await
+            .into_iter_result()
+    }
 }
