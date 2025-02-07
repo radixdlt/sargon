@@ -8,16 +8,21 @@ pub struct Interactors {
 
     /// Interactor that asks the user to authorize
     pub authorization_interactor: Arc<dyn AuthorizationInteractor>,
+
+    /// Interactor that asks the user perform a spot check
+    pub spot_check_interactor: Arc<dyn SpotCheckInteractor>,
 }
 
 impl Interactors {
     pub fn new(
         use_factor_sources_interactor: Arc<dyn UseFactorSourcesInteractor>,
         authorization_interactor: Arc<dyn AuthorizationInteractor>,
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
     ) -> Self {
         Self {
             use_factor_sources_interactor,
             authorization_interactor,
+            spot_check_interactor,
         }
     }
 }

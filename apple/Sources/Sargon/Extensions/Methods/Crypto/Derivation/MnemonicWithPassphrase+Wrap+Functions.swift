@@ -2,6 +2,10 @@ import Foundation
 import SargonUniFFI
 
 extension MnemonicWithPassphrase {
+	public init(mnemonic: Mnemonic) {
+		self.init(mnemonic: mnemonic, passphrase: "")
+	}
+
 	public init(jsonData: some DataProtocol) throws {
 		self = try newMnemonicWithPassphraseFromJsonBytes(
 			jsonBytes: Data(jsonData)

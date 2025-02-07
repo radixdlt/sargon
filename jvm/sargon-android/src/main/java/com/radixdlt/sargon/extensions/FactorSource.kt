@@ -10,10 +10,12 @@ import com.radixdlt.sargon.LedgerHardwareWalletFactorSource
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.OffDeviceMnemonicFactorSource
 import com.radixdlt.sargon.PasswordFactorSource
+import com.radixdlt.sargon.SpotCheckInput
 import com.radixdlt.sargon.deviceFactorSourceIsMainBdfs
 import com.radixdlt.sargon.factorSourceSupportsBabylon
 import com.radixdlt.sargon.factorSourceSupportsOlympia
 import com.radixdlt.sargon.factorSourceName
+import com.radixdlt.sargon.factorSourcePerformSpotCheck
 import com.radixdlt.sargon.newDeviceFactorSourceBabylon
 import com.radixdlt.sargon.newDeviceFactorSourceOlympia
 
@@ -65,6 +67,10 @@ fun FactorSource.Device.Companion.babylon(
     mnemonicWithPassphrase = mnemonicWithPassphrase,
     hostInfo = hostInfo
 ).asGeneral()
+
+fun FactorSource.spotCheck(
+    input: SpotCheckInput
+) = factorSourcePerformSpotCheck(this, input)
 
 val FactorSource.Device.isMain: Boolean
     get() = deviceFactorSourceIsMainBdfs(deviceFactorSource = value)

@@ -26,7 +26,7 @@ pub struct LedgerHardwareWalletFactorSource {
     pub hint: LedgerHardwareWalletHint,
 }
 
-fn new_ledger_with_mwp(
+unsafe fn new_ledger_with_mwp(
     mwp: MnemonicWithPassphrase,
     hint: LedgerHardwareWalletHint,
     common: FactorSourceCommon,
@@ -51,19 +51,23 @@ impl LedgerHardwareWalletFactorSource {
 
 impl HasSampleValues for LedgerHardwareWalletFactorSource {
     fn sample() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger(),
-            LedgerHardwareWalletHint::sample(),
-            FactorSourceCommon::new_bdfs(false),
-        )
+        unsafe {
+            new_ledger_with_mwp(
+                MnemonicWithPassphrase::sample_ledger(),
+                LedgerHardwareWalletHint::sample(),
+                FactorSourceCommon::new_bdfs(false),
+            )
+        }
     }
 
     fn sample_other() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger_other(),
-            LedgerHardwareWalletHint::sample_other(),
-            FactorSourceCommon::new_olympia(),
-        )
+        unsafe {
+            new_ledger_with_mwp(
+                MnemonicWithPassphrase::sample_ledger_other(),
+                LedgerHardwareWalletHint::sample_other(),
+                FactorSourceCommon::new_olympia(),
+            )
+        }
     }
 }
 
