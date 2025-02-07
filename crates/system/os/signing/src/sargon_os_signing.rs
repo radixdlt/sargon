@@ -464,7 +464,7 @@ mod test {
         let interactors = Interactors::new(
             use_factor_sources_interactors,
             Arc::new(TestAuthorizationInteractor::stubborn_authorizing()),
-            Arc::new(TestSpotCheckInteractor::new_failing()),
+            Arc::new(TestSpotCheckInteractor::new_valid()),
         );
         SUT::boot_with_clients_and_interactor(clients, interactors).await
     }

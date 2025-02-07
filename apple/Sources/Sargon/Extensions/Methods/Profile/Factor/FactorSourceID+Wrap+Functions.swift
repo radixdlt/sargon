@@ -12,4 +12,8 @@ extension FactorSourceID {
 			value.kind
 		}
 	}
+
+	public func spotCheck(input: SpotCheckInput) -> Bool {
+		factorSourceIdPerformSpotCheck(factorSourceId: self, input: input)
+	}
 }

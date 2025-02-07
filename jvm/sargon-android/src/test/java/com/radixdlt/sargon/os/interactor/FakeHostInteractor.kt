@@ -38,7 +38,10 @@ class FakeHostInteractor: HostInteractor {
         return AuthorizationResponse.REJECTED
     }
 
-    override suspend fun spotCheck(factorSource: FactorSource): SpotCheckResponse {
+    override suspend fun spotCheck(
+        factorSource: FactorSource,
+        allowSkip: Boolean
+    ): SpotCheckResponse {
         throw CommonException.HostInteractionAborted()
     }
 

@@ -1,20 +1,15 @@
 use crate::prelude::*;
 use sargon::SpotCheckResponse as InternalSpotCheckResponse;
 
-/// The purpose of the authorization request
+/// An enum indicating the result of a spot check.
+///
+/// Note that there isn't a failure case since user never fails a spot check: it either succeeds,
+/// skips it or aborts the interaction.
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum SpotCheckResponse {
-    /// The user retrieved the id of a Ledger device.
-    /// Used for the identification of `LedgerHardwareWalletFactorSource`.
-    Ledger { id: Exactly32Bytes },
+    /// The factor source was successfully validated.
+    Valid,
 
-    /// The user retrieved the `FactorSourceIdFromHash` that identified an Arculus card.
-    /// /// Used for the identification of `ArculusCardFactorSource`.
-    ArculusCard { id: FactorSourceIDFromHash },
-
-    /// The user retrieved a `MnemonicWithPassphrase`.
-    /// Used for the identification of any software `FactorSource`.
-    Software {
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
-    },
+    /// The user skipped the spot check.
+    Skipped,
 }

@@ -4,25 +4,24 @@ use crate::prelude::*;
 /// on a factor source.
 #[async_trait::async_trait]
 pub trait SpotCheckInteractor: Send + Sync {
+    /// Perform a spot check on the given `FactorSource`.
+    /// If `allow_skip`, host should allow users to skip the spot check.
     async fn spot_check(
         &self,
         factor_source: FactorSource,
+        allow_skip: bool,
     ) -> Result<SpotCheckResponse>;
 }
 
+/// An enum indicating the result of a spot check.
+///
+/// Note that there isn't a failure case since user never fails a spot check: it either succeeds,
+/// skips it or aborts the interaction.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub enum SpotCheckResponse {
-    /// The user retrieved the id of a Ledger device.
-    /// Used for the identification of `LedgerHardwareWalletFactorSource`.
-    Ledger { id: Exactly32Bytes },
+    /// The factor source was successfully validated.
+    Valid,
 
-    /// The user retrieved the `FactorSourceIdFromHash` that identified an Arculus card.
-    /// /// Used for the identification of `ArculusCardFactorSource`.
-    ArculusCard { id: FactorSourceIDFromHash },
-
-    /// The user retrieved a `MnemonicWithPassphrase`.
-    /// Used for the identification of any software `FactorSource`.
-    Software {
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
-    },
+    /// The user skipped the spot check.
+    Skipped,
 }

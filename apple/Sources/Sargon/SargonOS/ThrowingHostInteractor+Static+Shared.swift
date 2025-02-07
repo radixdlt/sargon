@@ -22,7 +22,7 @@ public class ThrowingHostInteractor: HostInteractor {
 		.rejected
 	}
 
-	public func spotCheck(factorSource: FactorSource) async throws -> SpotCheckResponse {
+	public func spotCheck(factorSource: FactorSource, allowSkip: Bool) async throws -> SpotCheckResponse {
 		throw CommonError.HostInteractionAborted
 	}
 }
