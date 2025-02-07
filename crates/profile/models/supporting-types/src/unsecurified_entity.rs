@@ -193,4 +193,20 @@ mod tests {
     fn network_id() {
         assert_eq!(SUT::sample_other().network_id(), NetworkID::Mainnet);
     }
+
+    #[test]
+    fn erased_address() {
+        let entity = SUT::sample();
+        assert_eq!(entity.address_erased(), entity.address().into());
+    }
+
+    #[test]
+    fn from_sut_for_account() {
+        let entity = SecurifiedAccount::sample();
+        let account = Account::from(entity.clone());
+        assert_eq!(
+            AddressOfAccountOrPersona::from(account.address()),
+            entity.address()
+        );
+    }
 }
