@@ -3,7 +3,7 @@ use crate::prelude::*;
 impl DynamicallyAnalyzableManifest for ScryptoTransactionManifestV2 {
     fn ret_dynamically_analyze(
         &self,
-        receipt: &ScryptoRuntimeToolkitTransactionReceipt,
+        receipt: ScryptoRuntimeToolkitTransactionReceipt,
     ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError> {
         RET_dynamically_analyze_v2(self, receipt.clone())
     }

@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Sargon representation for [`RetEitherGuaranteedOrPredicted`].
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum GuaranteedOrPredicted<T> {
     Guaranteed(T),
@@ -28,6 +29,7 @@ where
     }
 }
 
+/// Sargon representation for [`RetTracked`].
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Predicted<T> {
     pub value: T,

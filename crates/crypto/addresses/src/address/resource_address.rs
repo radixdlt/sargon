@@ -41,11 +41,11 @@ impl ResourceAddress {
 impl TryFrom<(ScryptoManifestResourceAddress, NetworkID)> for ResourceAddress {
     type Error = CommonError;
     fn try_from(
-        value: (ScryptoManifestResourceAddress, NetworkID),
+        (address, n): (ScryptoManifestResourceAddress, NetworkID),
     ) -> Result<Self> {
-        match value.0 {
+        match address {
             ScryptoManifestResourceAddress::Static(resource_address) => {
-                Ok(ResourceAddress::from((resource_address, value.1)))
+                Ok(ResourceAddress::from((resource_address, n)))
             }
             _ => Err(CommonError::NamedAddressesAreNotSupported),
         }
@@ -162,6 +162,7 @@ impl ResourceAddress {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use radix_common::prelude::ManifestNamedAddress;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourceAddress;
@@ -384,5 +385,30 @@ mod tests {
     #[test]
     fn xrd_on_stokenet() {
         assert_eq!(SUT::xrd_on_network(NetworkID::Stokenet).to_string(), "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc");
+    }
+
+    #[test]
+    fn from_static_scrypto_manifest_resource_address() {
+        let expected_address = SUT::sample_mainnet_xrd();
+        let address = ScryptoManifestResourceAddress::Static(
+            ScryptoResourceAddress::try_from(expected_address.scrypto())
+                .unwrap(),
+        );
+        let network_id = NetworkID::Mainnet;
+        assert_eq!(
+            SUT::try_from((address, network_id)).unwrap(),
+            expected_address
+        );
+    }
+
+    #[test]
+    fn from_named_scrypto_manifest_resource_address() {
+        let address =
+            ScryptoManifestResourceAddress::Named(ManifestNamedAddress(0));
+        let network_id = NetworkID::Mainnet;
+        assert_eq!(
+            SUT::try_from((address, network_id)),
+            Err(CommonError::NamedAddressesAreNotSupported)
+        );
     }
 }

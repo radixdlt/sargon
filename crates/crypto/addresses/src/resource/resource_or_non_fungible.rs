@@ -66,17 +66,21 @@ impl Identifiable for ResourceOrNonFungible {
 }
 
 impl From<(ScryptoResourceOrNonFungible, NetworkID)> for ResourceOrNonFungible {
-    fn from(value: (ScryptoResourceOrNonFungible, NetworkID)) -> Self {
-        let (resource_or_non_fungible, network_id) = value;
+    fn from(
+        (resource_or_non_fungible, n): (
+            ScryptoResourceOrNonFungible,
+            NetworkID,
+        ),
+    ) -> Self {
         match resource_or_non_fungible {
             ScryptoResourceOrNonFungible::NonFungible(nf) => {
                 Self::NonFungible {
-                    value: (nf, network_id).into(),
+                    value: (nf, n).into(),
                 }
             }
             ScryptoResourceOrNonFungible::Resource(resource_address) => {
                 Self::Resource {
-                    value: (resource_address, network_id).into(),
+                    value: (resource_address, n).into(),
                 }
             }
         }
@@ -89,10 +93,11 @@ impl TryFrom<(ScryptoManifestResourceOrNonFungible, NetworkID)>
     type Error = CommonError;
 
     fn try_from(
-        value: (ScryptoManifestResourceOrNonFungible, NetworkID),
+        (manifest_resource, n): (
+            ScryptoManifestResourceOrNonFungible,
+            NetworkID,
+        ),
     ) -> Result<Self> {
-        let (manifest_resource, n) = value;
-
         match manifest_resource {
             ScryptoManifestResourceOrNonFungible::Resource(
                 resource_address,
@@ -213,5 +218,35 @@ mod tests {
 
         // Not equals, when wrong NetworkID
         assert_ne!(SUT::from((scrypto, NetworkID::Mainnet)), expected);
+    }
+
+    #[test]
+    fn from_scrypto_manifest_non_fungible() {
+        let global_id = NonFungibleGlobalId::sample();
+        let scrypto = ScryptoManifestResourceOrNonFungible::NonFungible(
+            ScryptoNonFungibleGlobalId::new(
+                global_id.resource_address.into(),
+                global_id.non_fungible_local_id.into(),
+            ),
+        );
+        assert_eq!(
+            SUT::try_from((scrypto.clone(), NetworkID::Mainnet)).unwrap(),
+            SUT::sample_other()
+        );
+    }
+
+    #[test]
+    fn from_scrypto_manifest_resource() {
+        let resource_address = ResourceAddress::sample_stokenet_gum();
+        let scrypto = ScryptoManifestResourceOrNonFungible::Resource(
+            ScryptoManifestResourceAddress::Static(resource_address.into()),
+        );
+        let expected = SUT::Resource {
+            value: resource_address,
+        };
+        assert_eq!(
+            SUT::try_from((scrypto.clone(), NetworkID::Stokenet)).unwrap(),
+            expected.clone()
+        );
     }
 }

@@ -208,10 +208,10 @@ fn addresses_of_accounts_from_ret(
     network_id: NetworkID,
 ) -> HashMap<AccountAddress, Vec<ResourceIndicator>> {
     ret.into_iter()
+        .filter(|(_, deposits)| !deposits.is_empty())
         .map(|(address, invocation)| {
             (
-                AccountAddress::new_from_global_address(address, network_id)
-                    .unwrap(),
+                (address, network_id).into(),
                 invocation
                     .into_iter()
                     .map(|i| (i, network_id))
@@ -220,25 +220,6 @@ fn addresses_of_accounts_from_ret(
             )
         })
         .collect::<HashMap<_, _>>()
-}
-
-use radix_common::prelude::ManifestGlobalAddress;
-fn map_manifest_global_address<U>(
-    addresses: IndexSet<ManifestGlobalAddress>,
-    network_id: NetworkID,
-) -> Vec<U>
-where
-    U: From<(ScryptoGlobalAddress, NetworkID)>,
-{
-    let global_addresses = addresses
-        .into_iter()
-        .filter_map(|address| match address {
-            ManifestGlobalAddress::Static(address) => Some(address),
-            ManifestGlobalAddress::Named(_) => None,
-        })
-        .collect_vec();
-
-    to_vec_network_aware(global_addresses, network_id)
 }
 
 impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
@@ -251,6 +232,14 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
         );
         newly_created_non_fungibles.sort();
 
+        let new_entities = NewEntities::from((
+            (
+                ret.entities_newly_created_summary.new_resource_entities,
+                ret.entities_newly_created_summary.global_entities_metadata,
+            ),
+            n,
+        ));
+
         let mut summary = Self::new(
             addresses_of_accounts_from_ret(
                 ret.account_dynamic_resource_movements_summary
@@ -262,11 +251,11 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
                     .account_deposits,
                 n,
             ),
-            map_manifest_global_address(
+            filter_try_to_vec_network_aware(
                 ret.entities_requiring_auth_summary.accounts,
                 n,
             ),
-            map_manifest_global_address(
+            filter_try_to_vec_network_aware(
                 ret.entities_requiring_auth_summary.identities,
                 n,
             ),
@@ -288,13 +277,7 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
                 .map(|d| DetailedManifestClass::from((d, n))),
             ret.fee_locks_summary,
             ret.fee_consumption_summary,
-            (
-                (
-                    ret.entities_newly_created_summary.new_resource_entities,
-                    ret.entities_newly_created_summary.global_entities_metadata,
-                ),
-                n,
-            ),
+            new_entities,
         );
 
         summary.classify_delete_accounts_if_present();

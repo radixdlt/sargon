@@ -13,17 +13,15 @@ macro_rules! impl_try_from_for_manifest_encountered_address {
         impl TryFrom<(ScryptoManifestAddress, NetworkID)> for ManifestEncounteredComponentAddress {
             type Error = CommonError;
 
-            fn try_from(value: (ScryptoManifestAddress, NetworkID)) -> Result<Self, Self::Error> {
-                let (address, network_id) = value;
-
+            fn try_from((address, n): (ScryptoManifestAddress, NetworkID)) -> Result<Self, Self::Error> {
                 $(
-                    if let Ok(address) = <$address_type>::try_from(value) {
+                    if let Ok(address) = <$address_type>::try_from((address, n)) {
                         return Ok(ManifestEncounteredComponentAddress::$variant(address));
                     }
                 )*
-                Err(CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
+                Err(CommonError::FailedToCreateAddressFromManifestAddressAndNetworkID {
                     global_address_as_hex: "".to_string(),
-                    network_id: network_id.to_string(),
+                    network_id: n.to_string(),
                 })
             }
         }
@@ -62,7 +60,7 @@ mod tests {
         let result = SUT::try_from((manifest_address, network_id));
         assert_eq!(
             result.unwrap_err(),
-            CommonError::FailedToCreateAddressFromGlobalAddressAndNetworkID {
+            CommonError::FailedToCreateAddressFromManifestAddressAndNetworkID {
                 global_address_as_hex: ResourceAddress::sample_stokenet()
                     .scrypto()
                     .to_hex(),

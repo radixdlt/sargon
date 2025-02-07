@@ -165,161 +165,191 @@ impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
             },
 
             RetDetailedManifestClass::PoolContribution(output) => {
-                let pool_contributions: Vec<TrackedPoolContribution> =
-                    to_vec_network_aware(output.contribution_operations, n);
-                let pool_addresses =
-                    pool_contributions.iter().map(|x| x.pool_address).collect();
-
-                Self::PoolContribution {
-                    pool_addresses,
-                    pool_contributions,
-                }
+                Self::from((output, n))
             }
 
             RetDetailedManifestClass::PoolRedemption(output) => {
-                let pool_redemptions: Vec<TrackedPoolRedemption> =
-                    to_vec_network_aware(output.redemption_operations, n);
-                let pool_addresses =
-                    pool_redemptions.iter().map(|x| x.pool_address).collect();
-
-                Self::PoolRedemption {
-                    pool_addresses,
-                    pool_redemptions,
-                }
+                Self::from((output, n))
             }
 
             RetDetailedManifestClass::ValidatorStake(output) => {
-                let validator_stakes: Vec<TrackedValidatorStake> =
-                    to_vec_network_aware(output.stake_operations, n);
-                let validator_addresses = validator_stakes
-                    .iter()
-                    .map(|x| x.validator_address)
-                    .collect();
-
-                Self::ValidatorStake {
-                    validator_addresses,
-                    validator_stakes,
-                }
+                Self::from((output, n))
             }
 
             RetDetailedManifestClass::ValidatorUnstake(output) => {
-                let validator_addresses: Vec<ScryptoComponentAddress> = output
-                    .unstake_operations
-                    .iter()
-                    .map(|x| x.validator_address)
-                    .collect();
-
-                let claims_non_fungible_data = output
-                    .unstake_operations
-                    .iter()
-                    .flat_map(|op| {
-                        op.claim_nfts.iter().map(|(local_id, v)| {
-                            let nft_resource_address =
-                                NonFungibleResourceAddress(
-                                    (op.claim_nft_address, n).into(),
-                                );
-                            (
-                                NonFungibleGlobalId::new(
-                                    nft_resource_address,
-                                    local_id.clone().into(),
-                                ),
-                                UnstakeData::from(v.clone()),
-                            )
-                        })
-                    })
-                    .collect::<_>();
-
-                Self::ValidatorUnstake {
-                    validator_addresses: to_vec_network_aware(
-                        validator_addresses,
-                        n,
-                    ),
-                    claims_non_fungible_data,
-                }
+                Self::from((output, n))
             }
 
             RetDetailedManifestClass::ValidatorClaimXrd(output) => {
-                let validator_claims: Vec<TrackedValidatorClaim> =
-                    to_vec_network_aware(output.claim_operations, n);
-                let validator_addresses = validator_claims
-                    .iter()
-                    .map(|x| x.validator_address)
-                    .collect();
-
-                Self::ValidatorClaim {
-                    validator_addresses,
-                    validator_claims,
-                }
+                Self::from((output, n))
             }
 
             RetDetailedManifestClass::AccountDepositSettingsUpdate(output) => {
-                let deposit_mode_updates: HashMap<AccountAddress, DepositRule> =
-                    filter_try_to_hashmap_network_aware_key(
-                        output.default_deposit_rule_updates,
-                        n,
-                    );
-
-                type ResourcePreferenceUpdates = HashMap<
-                    AccountAddress,
-                    HashMap<ResourceAddress, ResourcePreferenceUpdate>,
-                >;
-                let resource_preferences_updates =
-                    output.resource_preference_updates.into_iter().fold(
-                        ResourcePreferenceUpdates::new(),
-                        |mut acc, ((account, resource), v)| {
-                            let account_address =
-                                AccountAddress::try_from((account, n));
-                            let resource_address =
-                                ResourceAddress::try_from((resource, n));
-                            let update = ResourcePreferenceUpdate::from(v);
-                            if let (Ok(account_address), Ok(resource_address)) =
-                                (account_address, resource_address)
-                            {
-                                acc.entry(account_address)
-                                    .or_default()
-                                    .insert(resource_address, update);
-                            };
-                            acc
-                        },
-                    );
-
-                let (
-                    authorized_depositors_added,
-                    authorized_depositors_removed,
-                ): (Vec<_>, Vec<_>) = output
-                    .authorized_depositor_updates
-                    .into_iter()
-                    .filter_map(|((account, manifest_resource), op)| {
-                        let account_address =
-                            AccountAddress::try_from((account, n)).ok()?;
-                        let resource = ResourceOrNonFungible::try_from((
-                            manifest_resource,
-                            n,
-                        ))
-                        .ok()?;
-                        Some(((account_address, resource), op))
-                    })
-                    .partition_map(|(account_resource_tuple, v)| match v {
-                        RetOperation::Added => {
-                            Either::Left(account_resource_tuple)
-                        }
-                        RetOperation::Removed => {
-                            Either::Right(account_resource_tuple)
-                        }
-                    });
-                let authorized_depositors_added =
-                    authorized_depositors_added.into_iter().into_group_map();
-
-                let authorized_depositors_removed =
-                    authorized_depositors_removed.into_iter().into_group_map();
-
-                Self::AccountDepositSettingsUpdate {
-                    resource_preferences_updates,
-                    deposit_mode_updates,
-                    authorized_depositors_added,
-                    authorized_depositors_removed,
-                }
+                Self::from((output, n))
             }
+        }
+    }
+}
+
+impl From<(RetPoolContributionOutput, NetworkID)> for DetailedManifestClass {
+    fn from((output, n): (RetPoolContributionOutput, NetworkID)) -> Self {
+        let pool_contributions: Vec<TrackedPoolContribution> =
+            to_vec_network_aware(output.contribution_operations, n);
+        let pool_addresses =
+            pool_contributions.iter().map(|x| x.pool_address).collect();
+
+        Self::PoolContribution {
+            pool_addresses,
+            pool_contributions,
+        }
+    }
+}
+
+impl From<(RetPoolRedemptionOutput, NetworkID)> for DetailedManifestClass {
+    fn from((output, n): (RetPoolRedemptionOutput, NetworkID)) -> Self {
+        let pool_redemptions: Vec<TrackedPoolRedemption> =
+            to_vec_network_aware(output.redemption_operations, n);
+        let pool_addresses =
+            pool_redemptions.iter().map(|x| x.pool_address).collect();
+
+        Self::PoolRedemption {
+            pool_addresses,
+            pool_redemptions,
+        }
+    }
+}
+
+impl From<(RetValidatorStakingOutput, NetworkID)> for DetailedManifestClass {
+    fn from((output, n): (RetValidatorStakingOutput, NetworkID)) -> Self {
+        let validator_stakes: Vec<TrackedValidatorStake> =
+            to_vec_network_aware(output.stake_operations, n);
+        let validator_addresses = validator_stakes
+            .iter()
+            .map(|x| x.validator_address)
+            .collect();
+
+        Self::ValidatorStake {
+            validator_addresses,
+            validator_stakes,
+        }
+    }
+}
+
+impl From<(RetValidatorUnstakingOutput, NetworkID)> for DetailedManifestClass {
+    fn from((output, n): (RetValidatorUnstakingOutput, NetworkID)) -> Self {
+        let validator_addresses: Vec<ScryptoComponentAddress> = output
+            .unstake_operations
+            .iter()
+            .map(|x| x.validator_address)
+            .collect();
+
+        let claims_non_fungible_data = output
+            .unstake_operations
+            .iter()
+            .flat_map(|op| {
+                op.claim_nfts.iter().map(|(local_id, v)| {
+                    let nft_resource_address = NonFungibleResourceAddress(
+                        (op.claim_nft_address, n).into(),
+                    );
+                    (
+                        NonFungibleGlobalId::new(
+                            nft_resource_address,
+                            local_id.clone().into(),
+                        ),
+                        UnstakeData::from(v.clone()),
+                    )
+                })
+            })
+            .collect::<_>();
+
+        Self::ValidatorUnstake {
+            validator_addresses: to_vec_network_aware(validator_addresses, n),
+            claims_non_fungible_data,
+        }
+    }
+}
+
+impl From<(RetValidatorClaimingXrdOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from((output, n): (RetValidatorClaimingXrdOutput, NetworkID)) -> Self {
+        let validator_claims: Vec<TrackedValidatorClaim> =
+            to_vec_network_aware(output.claim_operations, n);
+        let validator_addresses = validator_claims
+            .iter()
+            .map(|x| x.validator_address)
+            .collect();
+
+        Self::ValidatorClaim {
+            validator_addresses,
+            validator_claims,
+        }
+    }
+}
+
+impl From<(RetAccountSettingsUpdateOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from((output, n): (RetAccountSettingsUpdateOutput, NetworkID)) -> Self {
+        let deposit_mode_updates: HashMap<AccountAddress, DepositRule> =
+            filter_try_to_hashmap_network_aware_key(
+                output.default_deposit_rule_updates,
+                n,
+            );
+
+        type ResourcePreferenceUpdates = HashMap<
+            AccountAddress,
+            HashMap<ResourceAddress, ResourcePreferenceUpdate>,
+        >;
+        let resource_preferences_updates =
+            output.resource_preference_updates.into_iter().fold(
+                ResourcePreferenceUpdates::new(),
+                |mut acc, ((account, resource), v)| {
+                    let account_address =
+                        AccountAddress::try_from((account, n));
+                    let resource_address =
+                        ResourceAddress::try_from((resource, n));
+                    let update = ResourcePreferenceUpdate::from(v);
+                    if let (Ok(account_address), Ok(resource_address)) =
+                        (account_address, resource_address)
+                    {
+                        acc.entry(account_address)
+                            .or_default()
+                            .insert(resource_address, update);
+                    };
+                    acc
+                },
+            );
+
+        let (authorized_depositors_added, authorized_depositors_removed): (
+            Vec<_>,
+            Vec<_>,
+        ) = output
+            .authorized_depositor_updates
+            .into_iter()
+            .filter_map(|((account, manifest_resource), op)| {
+                let account_address =
+                    AccountAddress::try_from((account, n)).ok()?;
+                let resource =
+                    ResourceOrNonFungible::try_from((manifest_resource, n))
+                        .ok()?;
+                Some(((account_address, resource), op))
+            })
+            .partition_map(|(account_resource_tuple, v)| match v {
+                RetOperation::Added => Either::Left(account_resource_tuple),
+                RetOperation::Removed => Either::Right(account_resource_tuple),
+            });
+        let authorized_depositors_added =
+            authorized_depositors_added.into_iter().into_group_map();
+
+        let authorized_depositors_removed =
+            authorized_depositors_removed.into_iter().into_group_map();
+
+        Self::AccountDepositSettingsUpdate {
+            resource_preferences_updates,
+            deposit_mode_updates,
+            authorized_depositors_added,
+            authorized_depositors_removed,
         }
     }
 }

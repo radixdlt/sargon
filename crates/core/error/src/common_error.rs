@@ -624,7 +624,7 @@ pub enum CommonError {
     ProfileStateNotLoaded { current_state: String } = 10180,
 
     #[error("Failed to create Address from global_address (hex): {global_address_as_hex}, network_id: {network_id}")]
-    FailedToCreateAddressFromGlobalAddressAndNetworkID {
+    FailedToCreateAddressFromManifestAddressAndNetworkID {
         global_address_as_hex: String,
         network_id: String,
     } = 10181,

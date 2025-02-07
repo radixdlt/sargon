@@ -21,9 +21,9 @@ impl TransactionManifest {
 impl DynamicallyAnalyzableManifest for TransactionManifest {
     fn ret_dynamically_analyze(
         &self,
-        receipt: &ScryptoRuntimeToolkitTransactionReceipt,
+        receipt: ScryptoRuntimeToolkitTransactionReceipt,
     ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError> {
-        RET_dynamically_analyze(&self.scrypto_manifest(), receipt.clone())
+        RET_dynamically_analyze(&self.scrypto_manifest(), receipt)
     }
 }
 
@@ -147,10 +147,10 @@ mod tests {
                 [],
                 [],
                 [
+                    DetailedManifestClass::General,
                     DetailedManifestClass::Transfer {
                         is_one_to_one_transfer: false
                     },
-                    DetailedManifestClass::General
                 ],
                 FeeLocks::default(),
                 FeeSummary::new(
@@ -522,63 +522,49 @@ mod tests {
             Blobs::default(),
         )
         .unwrap();
-        let ret = RET_dynamically_analyze(
-            &transaction_manifest.scrypto_manifest(),
-            receipt
-                .clone()
-                .into_runtime_receipt(&ScryptoAddressBech32Decoder::new(
-                    &NetworkID::Stokenet.network_definition(),
-                ))
-                .unwrap(),
-        )
-        .unwrap();
+
+        let sut = transaction_manifest.execution_summary(receipt).unwrap();
+
+        let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
+        let pool_address = "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3".parse::<PoolAddress>().unwrap();
 
         pretty_assertions::assert_eq!(
-            ret.detailed_manifest_classification,
-            vec![RetDetailedManifestClass::General]
+            sut,
+            SUT::new(
+                [(
+                    acc_gk,
+                    vec![
+                        ResourceIndicator::fungible(
+                            ResourceAddress::sample_stokenet_xrd(),
+                            FungibleResourceIndicator::new_guaranteed(237)
+                        ),
+                        ResourceIndicator::fungible(
+                            r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
+                            FungibleResourceIndicator::new_guaranteed(1337)
+                        ),
+                    ]
+                )],
+                [],       // addresses_of_accounts_deposited_into
+                [acc_gk], // addresses_of_accounts_requiring_auth
+                [],       // addresses_of_identities_requiring_auth
+                [],       // newly_created_non_fungibles
+                [],       // reserved_instructions
+                [],       // presented_proofs
+                [],       // encountered_component_addresses
+                [DetailedManifestClass::PoolContribution {
+                    pool_addresses: vec![pool_address],
+                    pool_contributions: vec![]
+                }],
+                FeeLocks::new(0.36962, 0),
+                FeeSummary::new(
+                    "0.1493972".parse::<Decimal>().unwrap(),
+                    "0.01125345".parse::<Decimal>().unwrap(),
+                    "0.0782012926".parse::<Decimal>().unwrap(),
+                    0,
+                ),
+                NewEntities::default()
+            )
         );
-        // let sut = transaction_manifest.execution_summary(receipt).unwrap();
-
-        // let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
-        // let pool_address = "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3".parse::<PoolAddress>().unwrap();
-
-        // pretty_assertions::assert_eq!(
-        //     sut,
-        //     SUT::new(
-        //         [(
-        //             acc_gk,
-        //             vec![
-        //                 ResourceIndicator::fungible(
-        //                     ResourceAddress::sample_stokenet_xrd(),
-        //                     FungibleResourceIndicator::new_guaranteed(237)
-        //                 ),
-        //                 ResourceIndicator::fungible(
-        //                     r"resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy".parse::<ResourceAddress>().unwrap(),
-        //                     FungibleResourceIndicator::new_guaranteed(1337)
-        //                 ),
-        //             ]
-        //         )],
-        //         [],       // addresses_of_accounts_deposited_into
-        //         [acc_gk], // addresses_of_accounts_requiring_auth
-        //         [],       // addresses_of_identities_requiring_auth
-        //         [],       // newly_created_non_fungibles
-        //         [],       // reserved_instructions
-        //         [],       // presented_proofs
-        //         [],       // encountered_component_addresses
-        //         [DetailedManifestClass::PoolContribution {
-        //             pool_addresses: vec![pool_address],
-        //             pool_contributions: vec![]
-        //         }],
-        //         FeeLocks::new(0.36962, 0),
-        //         FeeSummary::new(
-        //             "0.1493972".parse::<Decimal>().unwrap(),
-        //             "0.01125345".parse::<Decimal>().unwrap(),
-        //             "0.0782012926".parse::<Decimal>().unwrap(),
-        //             0,
-        //         ),
-        //         NewEntities::default()
-        //     )
-        // );
     }
 
     #[test]
@@ -695,15 +681,18 @@ mod tests {
                 [ReservedInstruction::AccountLockFee],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
-                [DetailedManifestClass::PoolRedemption {
+                [
+                    DetailedManifestClass::General,
+                    DetailedManifestClass::PoolRedemption {
                     pool_addresses: vec![pool_address],
                     pool_redemptions: vec![TrackedPoolRedemption::new(
                         pool_address,
-                        ResourceAddress::from_str("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc").unwrap(),
-                        3.162277,
+                        ResourceAddress::from_str("resource_tdx_2_1thgnc84xkcjhs46pfvm9s8zn8t9kxwryvyr9x3947xpt6jxty7qn25").unwrap(),
+                        1,
                         []
                     )]
-                }],
+                }
+                ],
                 FeeLocks::default(),
                 FeeSummary::new("0.26154965".parse::<Decimal>().unwrap(), "0.0325088".parse::<Decimal>().unwrap(), "0.12760162134".parse::<Decimal>().unwrap(), 0,),
                 NewEntities::default()
@@ -842,6 +831,7 @@ mod tests {
                     [], // presented_proofs
                     [], // encountered_component_addresses
                     [
+                        DetailedManifestClass::General,
                         DetailedManifestClass::ValidatorClaim {
                             validator_addresses: vec![validator],
                             validator_claims: vec![]
