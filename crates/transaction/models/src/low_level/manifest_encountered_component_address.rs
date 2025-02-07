@@ -20,7 +20,7 @@ macro_rules! impl_try_from_for_manifest_encountered_address {
                     }
                 )*
                 Err(CommonError::FailedToCreateAddressFromManifestAddressAndNetworkID {
-                    global_address_as_hex: "".to_string(),
+                    manifest_address: format!("{:?}", address),
                     network_id: n.to_string(),
                 })
             }
@@ -61,7 +61,7 @@ mod tests {
         assert_eq!(
             result.unwrap_err(),
             CommonError::FailedToCreateAddressFromManifestAddressAndNetworkID {
-                global_address_as_hex: ResourceAddress::sample_stokenet()
+                manifest_address: ResourceAddress::sample_stokenet()
                     .scrypto()
                     .to_hex(),
                 network_id: network_id.to_string(),
