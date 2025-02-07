@@ -526,7 +526,6 @@ mod tests {
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
         let acc_gk: AccountAddress = "account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk".parse().unwrap();
-        let pool_address = "pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3".parse::<PoolAddress>().unwrap();
 
         pretty_assertions::assert_eq!(
             sut,
@@ -551,8 +550,10 @@ mod tests {
                 [],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
-                [DetailedManifestClass::PoolContribution {
-                    pool_addresses: vec![pool_address],
+                [
+                    DetailedManifestClass::General,
+                    DetailedManifestClass::PoolContribution {
+                    pool_addresses: vec![],
                     pool_contributions: vec![]
                 }],
                 FeeLocks::new(0.36962, 0),
@@ -721,8 +722,6 @@ mod tests {
 
         let nf_global_id: NonFungibleGlobalId = "resource_tdx_2_1ngw8z6ut9mw54am4rr65kwcuz24q3n7waxtzyfvug5g4yuc00jydqj:{8a190d8fd0725713-e9072f0fd954196f-5f9be7adaf8d5b78-cf811ea9992983c3}".parse().unwrap();
 
-        let validator: ValidatorAddress = "validator_tdx_2_1sdlkptcwjpajqawnuya8r2mgl3eqt89hw27ww6du8kxmx3thmyu8l4".parse().unwrap();
-
         pretty_assertions::assert_eq!(
                 sut,
                 SUT::new(
@@ -758,8 +757,9 @@ mod tests {
                     [], // presented_proofs
                     [], // encountered_component_addresses
                     [
+                        DetailedManifestClass::General,
                         DetailedManifestClass::ValidatorUnstake {
-                            validator_addresses: vec![validator],
+                            validator_addresses: vec![],
                             claims_non_fungible_data: HashMap::<NonFungibleGlobalId, UnstakeData>::new(),
                         }
                     ],
@@ -793,8 +793,6 @@ mod tests {
         let sut = transaction_manifest.execution_summary(receipt).unwrap();
 
         let acc_gk: AccountAddress = "account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a".parse().unwrap();
-
-        let validator: ValidatorAddress = "validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94".parse().unwrap();
 
         pretty_assertions::assert_eq!(
                 sut,
@@ -833,7 +831,7 @@ mod tests {
                     [
                         DetailedManifestClass::General,
                         DetailedManifestClass::ValidatorClaim {
-                            validator_addresses: vec![validator],
+                            validator_addresses: vec![],
                             validator_claims: vec![]
                         }
                     ],
