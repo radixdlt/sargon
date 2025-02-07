@@ -175,13 +175,13 @@ impl Account {
                         .into_iter()
                         .map(FactorInstance::from)
                         .collect_vec(),
-                ), 
-                RecoveryRoleWithFactorInstances::empty(), 
-                ConfirmationRoleWithFactorInstances::empty(), 
-                TimePeriod::with_days(237)
+                ),
+                RecoveryRoleWithFactorInstances::empty(),
+                ConfirmationRoleWithFactorInstances::empty(),
+                TimePeriod::with_days(237),
             )
         };
-       
+
         let network_id = NetworkID::Mainnet;
         let address = AccountAddress::new_from_public_key(
             veci.public_key(),

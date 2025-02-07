@@ -47,18 +47,19 @@ address_union!(
 );
 
 impl From<AccountOrPersona> for EntityApplyingShieldAddress {
-
     fn from(value: AccountOrPersona) -> Self {
         match value.security_state() {
             EntitySecurityState::Securified { value } => {
                 Self::AccessController(value.access_controller_address())
-            },
-            EntitySecurityState::Unsecured { .. } => {
-                match value {
-                    AccountOrPersona::AccountEntity(account) => Self::Account(account.address),
-                    AccountOrPersona::PersonaEntity(persona) => Self::Identity(persona.address),
-                }
             }
+            EntitySecurityState::Unsecured { .. } => match value {
+                AccountOrPersona::AccountEntity(account) => {
+                    Self::Account(account.address)
+                }
+                AccountOrPersona::PersonaEntity(persona) => {
+                    Self::Identity(persona.address)
+                }
+            },
         }
     }
 }

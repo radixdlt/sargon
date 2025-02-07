@@ -46,7 +46,10 @@ pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
 impl<FACTOR: IsMaybeKeySpaceAware>
     AbstractRoleBuilderOrBuilt<ROLE_RECOVERY, IS_BUILT_ROLE, FACTOR>
 {
-
+    /// # Safety
+    /// Rust memory safe, but marked "unsafe" since it might allow for instantiation
+    /// of unsafe - as in application **unsecure** - Role of Factors, which might
+    /// lead to increase risk for end user to loose funds.
     pub unsafe fn empty() -> Self {
         Self::override_only([])
     }
@@ -66,10 +69,14 @@ impl<FACTOR: IsMaybeKeySpaceAware>
 impl<FACTOR: IsMaybeKeySpaceAware>
     AbstractRoleBuilderOrBuilt<ROLE_CONFIRMATION, IS_BUILT_ROLE, FACTOR>
 {
+    /// # Safety
+    /// Rust memory safe, but marked "unsafe" since it might allow for instantiation
+    /// of unsafe - as in application **unsecure** - Role of Factors, which might
+    /// lead to increase risk for end user to loose funds.
     pub unsafe fn empty() -> Self {
         Self::override_only([])
     }
-    
+
     pub fn override_only(
         override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {

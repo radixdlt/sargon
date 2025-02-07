@@ -171,10 +171,7 @@ impl<T: IsBaseEntity + std::hash::Hash + Eq + Clone>
         }
         if let Some(paying_account) = &self.maybe_paying_account {
             addresses.insert(paying_account.address.into());
-            if let Some(secured_payer) = paying_account.security_state().as_securified() {
-                addresses.insert(paying_account.address.into());
-
-            }
+            // N.B. We dont check the XRD balance of the payer since we should not use it to pay for others.
         }
         addresses
     }
