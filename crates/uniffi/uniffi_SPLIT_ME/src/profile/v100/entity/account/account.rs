@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use profile_logic::{
-    AccountIsLegacyOlympia, AccountIsUnsecuredLedgerControlled,
+    AccountIsLegacyOlympia, EntityUnsecuredControllingFactorInstance,
 };
 use sargon::Account as InternalAccount;
 
@@ -139,16 +139,11 @@ pub fn account_is_legacy_olympia(account: Account) -> bool {
 }
 
 #[uniffi::export]
-pub fn account_is_unsecured_ledger_controlled(account: Account) -> bool {
-    account.into_internal().is_unsecured_ledger_controlled()
-}
-
-#[uniffi::export]
-pub fn account_unsecured_ledger_controlled_public_key(
+pub fn account_unsecured_controlling_factor_instance(
     account: Account,
-) -> Option<HierarchicalDeterministicPublicKey> {
+) -> Option<HierarchicalDeterministicFactorInstance> {
     account
         .into_internal()
-        .unsecured_ledger_controlled_public_key()
+        .unsecured_controlling_factor_instance()
         .map(|key| key.into())
 }
