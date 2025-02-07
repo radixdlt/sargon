@@ -6,7 +6,7 @@ import com.radixdlt.sargon.extensions.derivePublicKey
 import com.radixdlt.sargon.extensions.factorSourceId
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.initFromLocal
-import com.radixdlt.sargon.extensions.isLegacyOlympia
+import com.radixdlt.sargon.extensions.isLegacy
 import com.radixdlt.sargon.extensions.isUnsecuredLedgerControlled
 import com.radixdlt.sargon.extensions.unsecuredControllingFactorInstance
 import com.radixdlt.sargon.samples.Sample
@@ -23,7 +23,7 @@ class AccountTest: SampleTestable<Account> {
     @Test
     fun testIsLegacyOlympia() {
         assertEquals(
-            Account.sampleMainnet().isLegacyOlympia,
+            Account.sampleMainnet().isLegacy,
             false
         )
     }
@@ -34,12 +34,44 @@ class AccountTest: SampleTestable<Account> {
     }
 
     @Test
+    fun testDeviceAccountIsUnsecuredLedgerControlledReturnsFalse() {
+        assert(!Account.sampleMainnet().isUnsecuredLedgerControlled)
+    }
+
+    @Test
+    fun testSecurifiedAccountIsUnsecuredLedgerControlledReturnsFalse() {
+        val securifiedAccount = Account(
+            networkId = NetworkId.MAINNET,
+            address = AccountAddress.sampleMainnet(),
+            displayName = DisplayName.init("Securified"),
+            securityState = EntitySecurityState.Securified(
+                SecuredEntityControl(
+                    veci = HierarchicalDeterministicFactorInstance.sample(),
+                    accessControllerAddress = AccessControllerAddress.sampleMainnet(),
+                    securityStructure = SecurityStructureOfFactorInstances.sample(),
+                    provisionalSecurifiedConfig = null
+                )
+            ),
+            appearanceId = AppearanceId.sample(),
+            flags = emptyList(),
+            onLedgerSettings = OnLedgerSettings.default()
+        )
+
+        assert(!Account.sampleMainnet().isUnsecuredLedgerControlled)
+    }
+
+    @Test
     fun testUnsecuredControllingFactorInstanceForAccount() {
         val (account, hdPublicKey) = ledgerControlledAccountWithFactorInstance()
         assertEquals(
             account.unsecuredControllingFactorInstance,
             hdPublicKey
         )
+    }
+
+    @Test
+    fun testIsUnsecuredLedgerControlled() {
+        assert(ledgerControlledAccountWithFactorInstance().first.isUnsecuredLedgerControlled)
     }
 
     private fun ledgerControlledAccountWithFactorInstance(): Pair<Account, HierarchicalDeterministicFactorInstance> {
