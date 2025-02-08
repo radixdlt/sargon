@@ -68,12 +68,18 @@ impl EntitiesOnNetwork {
         let len = splitting.len();
         let unsecurified = splitting
             .iter()
-            .filter_map(|e| AnyUnsecurifiedEntity::new(e).ok())
+            .filter(|e| !e.is_securified())
+            .map(|e| {
+                AnyUnsecurifiedEntity::new(e).expect("Filtered before mapped")
+            })
             .collect::<IdentifiedVecOf<_>>();
 
         let securified = splitting
             .iter()
-            .filter_map(|e| AnySecurifiedEntity::new(e).ok())
+            .filter(|e| e.is_securified())
+            .map(|e| {
+                AnySecurifiedEntity::new(e).expect("Filtered before mapped")
+            })
             .collect::<IdentifiedVecOf<_>>();
 
         let _self = Self::with_split(

@@ -7,6 +7,7 @@ macro_rules! decl_bool_type {
             Serialize,
             Deserialize,
             Debug,
+            Copy,
             PartialEq,
             Eq,
             Clone,

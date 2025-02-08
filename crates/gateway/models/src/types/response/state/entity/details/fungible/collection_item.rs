@@ -14,6 +14,18 @@ pub enum FungibleResourcesCollectionItem {
     Global(FungibleResourcesCollectionItemGloballyAggregated),
 }
 
+impl FungibleResourcesCollectionItem {
+    pub fn global(
+        resource_address: ResourceAddress,
+        amount: impl Into<Decimal192>,
+    ) -> Self {
+        Self::Global(FungibleResourcesCollectionItemGloballyAggregated::new(
+            resource_address,
+            amount,
+        ))
+    }
+}
+
 impl HasSampleValues for FungibleResourcesCollectionItem {
     fn sample() -> Self {
         Self::Global(FungibleResourcesCollectionItemGloballyAggregated::sample())

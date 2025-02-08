@@ -21,7 +21,7 @@ pub trait TransactionManifestSecurifyUnsecurifiedEntity:
 impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
     /// We do NOT top of XRD vault of AccessController - yet!
     /// Host will need to call the function:
-    /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account`
+    /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account`
     /// after user has selected account to pay in wallet GUI.
     /// (and as usual also call `modify_manifest_lock_fee`)
     fn apply_security_shield_for_unsecurified_entity(
@@ -108,7 +108,7 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
         // N.B.
         // We do NOT top of XRD vault of AccessController - yet!
         // Host will need to call the function:
-        // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account`
+        // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account`
         // after user has selected account to pay in wallet GUI.
         // (and as usual also call `modify_manifest_lock_fee`)
 
@@ -158,7 +158,7 @@ mod tests {
 
         let bob = Account::sample_bob();
 
-        let with_ac_xrd_vault_top_up_by_unsecurified_account = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(
+        let with_ac_xrd_vault_top_up_by_unsecurified_account = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
             bob.clone(),
             AnyUnsecurifiedEntity::new( account.clone()).unwrap(),
             manifest.clone(),
@@ -186,7 +186,7 @@ mod tests {
             },
         );
 
-        let with_ac_xrd_vault_top_up_by_securified_account_amount_42 = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(
+        let with_ac_xrd_vault_top_up_by_securified_account_amount_42 = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
             grace_secure.clone(),
             AnyUnsecurifiedEntity::new(account.clone()).unwrap(),
             manifest.clone(),
@@ -237,7 +237,7 @@ mod tests {
 
         let bob = Account::sample_bob();
 
-        let with_ac_xrd_vault_top_up_by_unsecurified_account = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(
+        let with_ac_xrd_vault_top_up_by_unsecurified_account = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
                 bob.clone(),
                 AnyUnsecurifiedEntity::new(persona.clone()).unwrap(),
                 manifest.clone(),
@@ -265,7 +265,7 @@ mod tests {
                 },
             );
 
-        let with_ac_xrd_vault_top_up_by_securified_account_amount_42 = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(
+        let with_ac_xrd_vault_top_up_by_securified_account_amount_42 = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
                 grace_secure.clone(),
                 AnyUnsecurifiedEntity::new( persona.clone()).unwrap(),
                 manifest.clone(),

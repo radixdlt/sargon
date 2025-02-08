@@ -3,6 +3,7 @@ mod account_address;
 mod address;
 mod address_format;
 mod address_of_account_or_persona;
+mod address_of_vault_or_account;
 
 #[macro_use]
 mod address_union;
@@ -29,6 +30,7 @@ pub use account_address::*;
 pub use address::*;
 pub use address_format::*;
 pub use address_of_account_or_persona::*;
+pub use address_of_vault_or_account::*;
 pub use component_address::*;
 pub use decl_address::*;
 pub use entity_address::*;

@@ -1,5 +1,15 @@
 use crate::prelude::*;
 
+pub trait HasEntityAddress {
+    fn address_erased(&self) -> AddressOfAccountOrPersona;
+}
+
+impl<T: IsBaseEntity> HasEntityAddress for T {
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.address().into()
+    }
+}
+
 /// A trait bridging AccountOrPersona, Account and Persona.
 pub trait IsBaseEntity:
     HasEntityKindObjectSafe + IsNetworkAware + HasSecurityState

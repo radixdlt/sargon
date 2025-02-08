@@ -12,7 +12,7 @@ pub trait TransactionManifestSecurifySecurifiedEntity:
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
         roles_combination: RolesExercisableInTransactionManifestCombination,
-    ) -> Option<TransactionManifest>;
+    ) -> TransactionManifest;
 }
 
 impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
@@ -25,7 +25,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
     ///
     /// And when we know the fee we can calculate how much to top up the XRD vault of the AccessController
     /// and call
-    /// * `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account`
+    /// * `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account`
     ///
     /// For timed confirmation - much later (`timed_recovery_delay_in_minutes` later ) the
     /// host app will need to call `confirm_timed_recovery`
@@ -34,7 +34,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         security_structure_of_factor_instances:
         SecurityStructureOfFactorInstances,
         roles_combination: RolesExercisableInTransactionManifestCombination,
-    ) -> Option<Self> {
+    ) -> Self {
         let securified_entity = securified_entity.into();
         let kind = roles_combination;
         let entity_address = securified_entity.entity.address();
@@ -61,7 +61,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
 
         let access_controller_address = securified_entity
             .securified_entity_control
-            .access_controller_address;
+            .access_controller_address();
 
         let factors_and_time_input = &AccessControllerFactorsAndTimeInput::new(
             &security_structure_of_factor_instances,
@@ -107,11 +107,6 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
             }
         }
 
-        let manifest = TransactionManifest::sargon_built(
-            builder,
-            securified_entity.network_id(),
-        );
-
         // N.B.
         // We will not lock fee against the XRD vault yet - we will do that
         // later when we have made a preview/dry-run of the `manifest` to get
@@ -120,11 +115,14 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         // Furthermore:
         // We do NOT top of XRD vault of AccessController - yet!
         // Host will need to call the function:
-        // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account`
+        // `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account`
         // after user has selected account to pay in wallet GUI. And also call
         // `modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller`
 
-        Some(manifest)
+        TransactionManifest::sargon_built(
+            builder,
+            securified_entity.network_id(),
+        )
     }
 }
 
@@ -148,20 +146,20 @@ mod tests {
     fn update_shield_of_securified_account_with_top_up_where_payer_is_entity_applying_shield(
     ) {
         let entity_applying_shield = SecurifiedAccount::sample();
-        assert_eq!(entity_applying_shield.securified_entity_control.access_controller_address.to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
+        assert_eq!(entity_applying_shield.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
 
         let manifest = SUT::apply_security_shield_for_securified_entity(
             entity_applying_shield.clone(),
             SecurityStructureOfFactorInstances::sample(),
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation,
-        ).unwrap();
+        );
 
         let expected_manifest_str =
             fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C");
         manifest_eq(manifest.clone(), expected_manifest_str);
         assert!(expected_manifest_str.contains("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g"));
 
-        let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account(entity_applying_shield.clone(), entity_applying_shield.clone(), manifest.clone(), Decimal192::ten()).unwrap();
+        let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(entity_applying_shield.clone(), entity_applying_shield.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
 
         let expected_manifest_str =
         fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C_with_top_up_where_payer_is_entity_applying_shield");
@@ -185,8 +183,7 @@ mod tests {
             entity_applying_shield.clone(),
             instances,
             roles,
-        )
-        .unwrap();
+        );
         let expected_manifest_str = rtm();
         manifest_eq(manifest.clone(), expected_manifest_str);
         manifest
