@@ -77,57 +77,80 @@ impl NetworkRequestParseOriginal for NetworkRequest {
 pub trait EveronesRichMockNetworkingDriver {
     fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
+
 #[cfg(test)]
 impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
     fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver> {
-        Arc::new(MockNetworkingDriver::with_lazy_responses(
-            move |req: NetworkRequest, _: u64| -> NetworkResponse {
-                let path = req.url.path();
-                if path.ends_with(GatewayClient::PATH_STATE_ENTITY_DETAILS) {
-                    let request =
-                        req.parse_original::<StateEntityDetailsRequest>();
-
-                    StateEntityDetailsResponse::new(
-                        None,
-                        request.addresses.iter().map(|address| {
-                            let items =
-                                vec![FungibleResourcesCollectionItem::global(
-                                    ResourceAddress::xrd_on_network(network_id),
-                                    Decimal::from_str("999999999").unwrap(),
-                                )];
-                            StateEntityDetailsResponseItem::new(
-                                *address,
-                                FungibleResourcesCollection::new(
-                                    None, None, items,
-                                ),
-                                None, // non-fungible
-                                EntityMetadataCollection::empty(),
-                                None, // details
-                            )
-                        }),
-                    )
-                    .into_network_response()
-                } else if path
-                    .ends_with(GatewayClient::PATH_TRANSACTION_CONSTRUCTION)
-                {
-                    TransactionConstructionResponse::new(LedgerState::new(
-                        NetworkID::Mainnet.logical_name(),
-                        1,
-                        "2021-01-01T00:00:00Z",
-                        1, // epoch
-                        1,
-                    ))
-                    .into_network_response()
-                } else {
-                    todo!("Unimplemented mock data for path: {:?}", path)
-                }
-            },
-        ))
+        mock_networking_driver_balance(network_id, |_| {
+            Decimal::from(1_000_000_000)
+        })
     }
 }
 
 #[cfg(test)]
+pub trait EveronesBrokeMockNetworkingDriver {
+    fn everyones_broke(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
+}
+
+#[cfg(test)]
+impl EveronesBrokeMockNetworkingDriver for MockNetworkingDriver {
+    fn everyones_broke(network_id: NetworkID) -> Arc<dyn NetworkingDriver> {
+        mock_networking_driver_balance(network_id, |_| Decimal::zero())
+    }
+}
+
+#[cfg(test)]
+fn mock_networking_driver_balance(
+    network_id: NetworkID,
+    balance_of: impl Fn(&Address) -> Decimal + Sync + Send + 'static,
+) -> Arc<dyn NetworkingDriver> {
+    Arc::new(MockNetworkingDriver::with_lazy_responses(
+        move |req: NetworkRequest, _: u64| -> NetworkResponse {
+            let path = req.url.path();
+            if path.ends_with(GatewayClient::PATH_STATE_ENTITY_DETAILS) {
+                let request = req.parse_original::<StateEntityDetailsRequest>();
+
+                StateEntityDetailsResponse::new(
+                    None,
+                    request.addresses.iter().map(|address| {
+                        let balance = balance_of(address);
+                        let items =
+                            vec![FungibleResourcesCollectionItem::global(
+                                ResourceAddress::xrd_on_network(network_id),
+                                balance,
+                            )];
+                        StateEntityDetailsResponseItem::new(
+                            *address,
+                            FungibleResourcesCollection::new(None, None, items),
+                            None, // non-fungible
+                            EntityMetadataCollection::empty(),
+                            None, // details
+                        )
+                    }),
+                )
+                .into_network_response()
+            } else if path
+                .ends_with(GatewayClient::PATH_TRANSACTION_CONSTRUCTION)
+            {
+                TransactionConstructionResponse::new(LedgerState::new(
+                    NetworkID::Mainnet.logical_name(),
+                    1,
+                    "2021-01-01T00:00:00Z",
+                    1, // epoch
+                    1,
+                ))
+                .into_network_response()
+            } else {
+                todo!("Unimplemented mock data for path: {:?}", path)
+            }
+        },
+    ))
+}
+
+#[cfg(test)]
 mod tests {
+    use std::{future::Future, pin::Pin};
+
     use super::*;
 
     #[actix_rt::test]
@@ -178,7 +201,6 @@ mod tests {
             )
             .await
             .unwrap();
-        println!("🔮 Alice: {}", alice.address_erased());
 
         // Unsecurified Account
         let bob = os
@@ -187,7 +209,6 @@ mod tests {
             )
             .await
             .unwrap();
-        println!("🔮 Bob: {}", bob.address_erased());
 
         // Unsecurified Account 2
         let carla = os
@@ -196,7 +217,6 @@ mod tests {
             )
             .await
             .unwrap();
-        println!("🔮 Carla: {}", carla.address_erased());
 
         // Unsecurified account 3
         let peter = os
@@ -205,37 +225,30 @@ mod tests {
             )
             .await
             .unwrap();
-        println!("🔮 Peter: {}", peter.address_erased());
 
         // Securified Account 2
         let david = Account::sample_at(3);
-        println!("🔮 David: {}", david.address_erased());
         os.add_account(david.clone()).await.unwrap();
 
         // Securified Account 3
         let emily = Account::sample_at(4);
-        println!("🔮 Emily: {}", emily.address_erased());
         os.add_account(emily.clone()).await.unwrap();
 
         // Securified Account 4
         let frank = Account::sample_at(5);
-        println!("🔮 Frank: {}", frank.address_erased());
         os.add_account(frank.clone()).await.unwrap();
 
         // Securified Account 5
         let mut paige = Account::sample_at(6);
         paige.display_name = DisplayName::new("Paige").unwrap();
-        println!("🔮 Paige: {}", paige.address_erased());
         os.add_account(paige.clone()).await.unwrap();
 
         // Securified Persona
         let ziggy = Persona::sample_at(2);
-        println!("🔮 Ziggy: {}", ziggy.address_erased());
         os.add_persona(ziggy.clone()).await.unwrap();
 
         // Securified Persona 2
         let superman = Persona::sample_at(4);
-        println!("🔮 Superman: {}", superman.address_erased());
         os.add_persona(superman.clone()).await.unwrap();
 
         // Unsecurified Persona
@@ -245,7 +258,6 @@ mod tests {
             )
             .await
             .unwrap();
-        println!("🔮 Satoshi: {}", satoshi.address_erased());
 
         // Unsecurified Persona 2
         let batman = os
@@ -254,7 +266,6 @@ mod tests {
             )
             .await
             .unwrap();
-        println!("🔮 Batman: {}", batman.address_erased());
 
         // does not include paige and peter which are payers,
         // and payers cannot be in the list of entities to apply the shield for.
@@ -285,9 +296,7 @@ mod tests {
         let _get = |entity: AccountOrPersona,
                     account: Option<&Account>|
          -> ManifestWithPayerByAddress {
-            println!("🌈 Trying to get key for {} ☑️", entity.address_erased());
             let key = EntityApplyingShieldAddress::from(entity);
-            println!("🌈 Got the key {:?} ✅", key);
             let manifest = lookup_map.get(&key).unwrap();
             ManifestWithPayerByAddress::new(
                 manifest.clone(),
@@ -318,24 +327,24 @@ mod tests {
             // ~~~~~ UNSECURIFIED ENTITIES ~~~~~
             // Scenario: Alice is an Unsecurified Account paying for herself
             get_without_payer(alice.into()),
-            // Scenario: Bob is an Unsecurified Account payed by Unsecurified Payer "Paige"
+            // Scenario: Bob is an Unsecurified Account paid by Unsecurified Payer "Paige"
             get_with_payer(bob.into(), &paige),
-            // Scenario: Carla is an Unsecurified Account payed by Securified Payer "Peter"
+            // Scenario: Carla is an Unsecurified Account paid by Securified Payer "Peter"
             get_with_payer(carla.into(), &peter),
-            // Scenario: Satoshi is an Unsecurified Persona payed by Unsecurified Payer "Paige"
+            // Scenario: Satoshi is an Unsecurified Persona paid by Unsecurified Payer "Paige"
             get_with_payer(satoshi.into(), &paige),
-            // Scenario: Batman is an Unsecurified Persona payed by Securified Payer "Peter"
+            // Scenario: Batman is an Unsecurified Persona paid by Securified Payer "Peter"
             get_with_payer(batman.into(), &peter),
             // ~~~~~ SECURIFIED ENTITIES ~~~~~
             // Scenario: David is a Securified Account paying for himself
             get_without_payer(david.into()),
-            // Scenario: Emily is a Securified Account payed by Unsecurified Payer "Paige"
+            // Scenario: Emily is a Securified Account paid by Unsecurified Payer "Paige"
             get_with_payer(emily.into(), &paige),
-            // Scenario: Frank is a Securified Account payed by Securified Payer "Peter"
+            // Scenario: Frank is a Securified Account paid by Securified Payer "Peter"
             get_with_payer(frank.into(), &peter),
-            // Scenario: Ziggy is a Securified Persona payed by Unsecurified Payer "Paige"
+            // Scenario: Ziggy is a Securified Persona paid by Unsecurified Payer "Paige"
             get_with_payer(ziggy.into(), &paige),
-            // Scenario: Superman is a Securified Persona payed by Securified Payer "Peter"
+            // Scenario: Superman is a Securified Persona paid by Securified Payer "Peter"
             get_with_payer(superman.into(), &peter),
         ];
 
@@ -349,5 +358,112 @@ mod tests {
             .unwrap();
 
         assert_eq!(txids.len(), addresses.len());
+    }
+
+    #[actix_rt::test]
+    async fn not_enough_xrd_for_unsecurified_account() {
+        not_enough_xrd_for(
+            |network_id| { MockNetworkingDriver::everyones_broke(network_id) },
+            |os: Arc<SargonOS>| {
+                Box::pin(async move {
+                let alice = os
+                    .create_and_save_new_mainnet_account_with_main_bdfs(
+                        DisplayName::new("Alice").unwrap(),
+                    )
+                    .await
+                    .unwrap();
+
+                let addresses = IndexSet::from_iter([alice.address_erased()]);
+                addresses
+            })
+            },
+            |_, manifests| {
+                let manifest_and_payer_tuples =
+                    vec![ManifestWithPayerByAddress::new(
+                        manifests.iter().next().unwrap().clone(),
+                        None,
+                        Decimal192::ten(),
+                    )];
+                manifest_and_payer_tuples
+            },
+            |addresses, result| {
+                assert_eq!(result, Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+                    payer: addresses[0].to_string(),
+                    vault_of_entity: addresses[0].to_string(),
+                    payer_balance: "0".to_owned(),
+                    needed_balance: "110".to_owned(),
+                }));
+            },
+        )
+        .await;
+    }
+
+    async fn not_enough_xrd_for(
+        arrange_networking: impl FnOnce(NetworkID) -> Arc<dyn NetworkingDriver>,
+        arrange_entities: impl FnOnce(
+            Arc<SargonOS>,
+        ) -> Pin<
+            Box<dyn Future<Output = IndexSet<AddressOfAccountOrPersona>>>,
+        >,
+        arrange_input: impl FnOnce(
+            IndexSet<AddressOfAccountOrPersona>,
+            Vec<TransactionManifest>,
+        ) -> Vec<ManifestWithPayerByAddress>,
+        assert: impl FnOnce(
+            IndexSet<AddressOfAccountOrPersona>,
+            Result<IndexSet<TransactionIntentHash>>,
+        ),
+    ) {
+        let network_id = NetworkID::Mainnet;
+        let mock_networking_driver = arrange_networking(network_id);
+
+        let os =
+            SargonOS::boot_test_with_networking_driver(mock_networking_driver)
+                .await
+                .unwrap();
+
+        let addresses = arrange_entities(os.clone()).await;
+
+        let bdfs = os.main_bdfs().unwrap();
+
+        let shield_builder = SecurityShieldBuilder::lenient();
+
+        let shield = shield_builder
+            .add_factor_source_to_primary_threshold(bdfs.factor_source_id())
+            // .add_factor_source_to_primary_threshold(password.factor_source_id())
+            .add_factor_source_to_recovery_override(bdfs.factor_source_id())
+            .add_factor_source_to_confirmation_override(bdfs.factor_source_id())
+            .set_authentication_signing_factor(bdfs.factor_source_id())
+            .build()
+            .unwrap();
+
+        os.add_security_structure_of_factor_source_ids(&shield)
+            .await
+            .unwrap();
+
+        let shield_id = shield.id();
+
+        let manifests = os
+            .make_interaction_for_applying_security_shield(
+                shield_id,
+                addresses.clone(),
+            )
+            .await
+            .unwrap()
+            .transactions;
+        let manifests = manifests
+            .into_iter()
+            .map(|uvm| uvm.manifest(network_id).unwrap())
+            .collect_vec();
+        let manifests_and_payer_tuples =
+            arrange_input(addresses.clone(), manifests);
+
+        let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+
+        let result = committer
+            .commit(network_id, manifests_and_payer_tuples)
+            .await;
+
+        assert(addresses, result)
     }
 }
