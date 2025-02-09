@@ -19,4 +19,24 @@ impl EntityApplyingShield {
     pub fn securified(entity: AnySecurifiedEntity) -> Self {
         EntityApplyingShield::Securified(entity)
     }
+
+    pub fn securified_account(account: SecurifiedAccount) -> Self {
+        EntityApplyingShield::Securified(AnySecurifiedEntity::from(account))
+    }
+    pub fn securified_persona(persona: SecurifiedPersona) -> Self {
+        EntityApplyingShield::Securified(AnySecurifiedEntity::from(persona))
+    }
+}
+
+impl EntityApplyingShield {
+    pub fn entity(&self) -> AccountOrPersona {
+        match self {
+            EntityApplyingShield::Unsecurified(unsec) => unsec.entity.clone(),
+            EntityApplyingShield::Securified(sec) => sec.entity.clone(),
+        }
+    }
+
+    pub fn address(&self) -> AddressOfAccountOrPersona {
+        self.entity().address()
+    }
 }

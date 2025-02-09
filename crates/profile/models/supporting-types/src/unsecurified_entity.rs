@@ -89,6 +89,16 @@ pub type AnyUnsecurifiedEntity = AbstractUnsecurifiedEntity<AccountOrPersona>;
 
 pub type UnsecurifiedAccount = AbstractUnsecurifiedEntity<Account>;
 
+impl HasSampleValues for UnsecurifiedAccount {
+    fn sample() -> Self {
+        Self::new(Account::sample()).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(Account::sample_other()).unwrap()
+    }
+}
+
 impl From<UnsecurifiedAccount> for Account {
     fn from(value: UnsecurifiedAccount) -> Self {
         value.entity
@@ -96,6 +106,16 @@ impl From<UnsecurifiedAccount> for Account {
 }
 
 pub type UnsecurifiedPersona = AbstractUnsecurifiedEntity<Persona>;
+
+impl HasSampleValues for UnsecurifiedPersona {
+    fn sample() -> Self {
+        Self::new(Persona::sample()).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(Persona::sample_other()).unwrap()
+    }
+}
 
 impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedAccount {
     type Error = CommonError;

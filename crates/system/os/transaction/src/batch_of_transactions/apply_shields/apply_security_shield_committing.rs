@@ -363,7 +363,20 @@ mod tests {
     #[actix_rt::test]
     async fn not_enough_xrd_for_unsecurified_account() {
         not_enough_xrd_for_unsecurified(
-            AnyUnsecurifiedEntity::new(Account::sample()).unwrap(),
+            EntityApplyingShield::unsecurified_account(
+                UnsecurifiedAccount::sample(),
+            ),
+            None,
+        )
+        .await
+    }
+
+    #[actix_rt::test]
+    async fn not_enough_xrd_for_securified_account() {
+        not_enough_xrd_for_unsecurified(
+            EntityApplyingShield::securified_account(
+                SecurifiedAccount::sample(),
+            ),
             None,
         )
         .await
@@ -372,14 +385,25 @@ mod tests {
     #[actix_rt::test]
     async fn not_enough_xrd_for_unsecurified_persona() {
         not_enough_xrd_for_unsecurified(
-            AnyUnsecurifiedEntity::new(Persona::sample()).unwrap(),
+            EntityApplyingShield::unsecurified_persona(
+                UnsecurifiedPersona::sample(),
+            ),
             Account::sample(),
         )
         .await
     }
 
+    // #[actix_rt::test]
+    // async fn not_enough_xrd_for_securified_persona() {
+    //     not_enough_xrd_for_unsecurified(
+    //         EntityApplyingShield::securified_persona(SecurifiedPersona::sample()),
+    //         Account::sample(),
+    //     )
+    //     .await
+    // }
+
     async fn not_enough_xrd_for_unsecurified(
-        entity: AnyUnsecurifiedEntity,
+        entity: EntityApplyingShield,
         fee_payer: impl Into<Option<Account>>,
     ) {
         let fee_payer = fee_payer.into();
@@ -388,7 +412,7 @@ mod tests {
             |network_id| { MockNetworkingDriver::everyones_broke(network_id) },
             |os: Arc<SargonOS>| {
                 Box::pin(async move {
-                    match entity.entity {
+                    match entity.entity() {
                         AccountOrPersona::AccountEntity(ref account) => {
                             os.add_account(account.clone()).await.unwrap();
                         }
