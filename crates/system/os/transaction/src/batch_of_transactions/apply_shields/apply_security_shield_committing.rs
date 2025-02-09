@@ -362,33 +362,58 @@ mod tests {
 
     #[actix_rt::test]
     async fn not_enough_xrd_for_unsecurified_account() {
+        not_enough_xrd_for_unsecurified(
+            AnyUnsecurifiedEntity::new(Account::sample()).unwrap(),
+            None,
+        )
+        .await
+    }
+
+    #[actix_rt::test]
+    async fn not_enough_xrd_for_unsecurified_persona() {
+        not_enough_xrd_for_unsecurified(
+            AnyUnsecurifiedEntity::new(Persona::sample()).unwrap(),
+            Account::sample(),
+        )
+        .await
+    }
+
+    async fn not_enough_xrd_for_unsecurified(
+        entity: AnyUnsecurifiedEntity,
+        fee_payer: impl Into<Option<Account>>,
+    ) {
+        let fee_payer = fee_payer.into();
+        let account_to_add = fee_payer.clone();
         not_enough_xrd_for(
             |network_id| { MockNetworkingDriver::everyones_broke(network_id) },
             |os: Arc<SargonOS>| {
                 Box::pin(async move {
-                let alice = os
-                    .create_and_save_new_mainnet_account_with_main_bdfs(
-                        DisplayName::new("Alice").unwrap(),
-                    )
-                    .await
-                    .unwrap();
-
-                let addresses = IndexSet::from_iter([alice.address_erased()]);
-                addresses
+                    match entity.entity {
+                        AccountOrPersona::AccountEntity(ref account) => {
+                            os.add_account(account.clone()).await.unwrap();
+                        }
+                        AccountOrPersona::PersonaEntity(ref persona) => {
+                            os.add_persona(persona.clone()).await.unwrap();
+                        }
+                    }
+                    if let Some(fee_payer) = account_to_add.as_ref() {
+                        os.add_account(fee_payer.clone()).await.unwrap();
+                    }
+                IndexSet::from_iter([entity.address()])
             })
             },
             |_, manifests| {
                 let manifest_and_payer_tuples =
                     vec![ManifestWithPayerByAddress::new(
                         manifests.iter().next().unwrap().clone(),
-                        None,
+                        fee_payer.clone().map(|a| a.address.clone()),
                         Decimal192::ten(),
                     )];
                 manifest_and_payer_tuples
             },
             |addresses, result| {
                 assert_eq!(result, Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
-                    payer: addresses[0].to_string(),
+                    payer: fee_payer.clone().map(|a| a.address.clone().to_string()).unwrap_or(addresses[0].to_string()),
                     vault_of_entity: addresses[0].to_string(),
                     payer_balance: "0".to_owned(),
                     needed_balance: "110".to_owned(),
