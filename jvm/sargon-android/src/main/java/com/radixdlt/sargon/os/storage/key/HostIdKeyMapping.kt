@@ -81,9 +81,9 @@ internal class HostIdKeyMapping(
 @Serializable
 data class HostIdAndroidEntry(
     @Serializable(with = UuidSerializer::class)
-    val id: Uuid,
+    private val id: Uuid,
     @Serializable(with = TimestampSerializer::class)
-    val date: Timestamp
+    private val date: Timestamp
 ) {
 
     fun toHostId() = HostId(

@@ -43,12 +43,6 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 		XCTAssertFalse(SUT.sample.isDeleted)
 	}
 
-	func test_hasAuthenticationSigningKey() {
-		eachSample { sut in
-			XCTAssertFalse(sut.hasAuthenticationSigningKey)
-		}
-	}
-
 	func test_deviceFactorSourceID() {
 		eachSample { sut in
 			XCTAssertTrue(
@@ -72,10 +66,8 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 				case .ed25519: break // good
 				case .secp256k1: XCTFail("Wrong key kind")
 				}
-				// TODO: Handle
-				//			case .securified(value: _):
-				//				XCTFail("Wrong security state")
-				//			}
+			case .securified(value: _):
+				XCTFail("Wrong security state")
 			}
 		}
 	}
