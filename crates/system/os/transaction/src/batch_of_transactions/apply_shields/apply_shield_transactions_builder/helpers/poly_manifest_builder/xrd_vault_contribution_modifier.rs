@@ -63,11 +63,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
             });
         }
 
-        let payer = input
-            .maybe_paying_account
-            .clone()
-            .map(|p| p.account())
-            .unwrap_or(input.entity_input.unsecurified_entity.entity.clone());
+        let payer = input.paying_account.account();
         let entity = input.entity_input.unsecurified_entity.clone().into();
 
         input.modifying_manifest(|m| {
@@ -160,11 +156,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
             return Ok(input);
         }
 
-        let Some(payer) = input.xrd_balance_and_account_topping_up() else {
-            return Err(
-                CommonError::UnableContributeToAcXrdVaultPersonaRequiresPayer,
-            );
-        };
+        let payer = input.xrd_balance_and_account_topping_up();
 
         let entity = input.entity_input.clone().securified_persona;
         let payer_info = payer.clone();

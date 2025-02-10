@@ -148,8 +148,7 @@ impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
             self.entity_input.entity.address,
         )?;
 
-        let maybe_paying_account =
-            balances.maybe_get_payer(self.maybe_paying_account)?;
+        let paying_account = balances.get_payer(self.paying_account)?;
 
         Ok(ApplicationInputForUnsecurifiedAccount {
             reviewed_manifest: self.reviewed_manifest,
@@ -158,7 +157,7 @@ impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
                 unsecurified_entity: self.entity_input,
                 xrd_balance_of_account,
             },
-            maybe_paying_account,
+            paying_account,
         }
         .into())
     }
@@ -216,8 +215,7 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
             self.entity_input.entity.address,
         )?;
 
-        let maybe_paying_account =
-            balances.maybe_get_payer(self.maybe_paying_account)?;
+        let paying_account = balances.get_payer(self.paying_account)?;
 
         let xrd_balance_of_access_controller = balances
             .take_for_entity_applying_shield(
@@ -234,7 +232,7 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
                 xrd_balance_of_access_controller,
                 xrd_balance_of_account,
             },
-            maybe_paying_account,
+            paying_account,
         }
         .into())
     }
@@ -247,8 +245,7 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
-        let maybe_paying_account =
-            balances.maybe_get_payer(self.maybe_paying_account)?;
+        let paying_account = balances.get_payer(self.paying_account)?;
 
         let xrd_balance_of_access_controller = balances
             .take_for_entity_applying_shield(
@@ -264,7 +261,7 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
                 securified_persona: self.entity_input,
                 xrd_balance_of_access_controller,
             },
-            maybe_paying_account,
+            paying_account,
         }
         .into())
     }

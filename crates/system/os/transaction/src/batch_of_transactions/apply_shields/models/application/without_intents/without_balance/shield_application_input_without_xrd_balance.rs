@@ -23,7 +23,11 @@ impl ShieldApplicationInputWithoutXrdBalance {
         }
     }
 
-    pub fn get_payer(&self) -> Option<Account> {
+    pub fn payer_is_entity(&self) -> bool {
+        self.address_of_entity_applying_shield()
+            == self.get_payer().address.into()
+    }
+    pub fn get_payer(&self) -> Account {
         match self {
             Self::Unsecurified(u) => u.get_payer(),
             Self::Securified(s) => s.get_payer(),
@@ -58,10 +62,10 @@ impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
         }
     }
 
-    pub fn get_payer(&self) -> Option<Account> {
+    pub fn get_payer(&self) -> Account {
         match self {
-            Self::Account(a) => a.maybe_paying_account.clone(),
-            Self::Persona(p) => Some(p.paying_account.clone()),
+            Self::Account(a) => a.paying_account.clone(),
+            Self::Persona(p) => p.paying_account.clone(),
         }
     }
 }
@@ -71,18 +75,16 @@ pub struct ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
     pub entity_input: UnsecurifiedAccount,
-    pub maybe_paying_account: Option<Account>,
+    pub paying_account: Account,
 }
 impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
     pub fn addresses_to_fetch_xrd_balance_for(
         &self,
     ) -> IndexSet<AddressOfPayerOfShieldApplication> {
-        let mut addresses =
-            IndexSet::from_iter([self.entity_input.entity.address.into()]);
-        if let Some(paying_account) = &self.maybe_paying_account {
-            addresses.insert(paying_account.address.into());
-        }
-        addresses
+        IndexSet::from_iter([
+            self.entity_input.entity.address.into(),
+            self.paying_account.address.into(),
+        ])
     }
 }
 
@@ -129,10 +131,10 @@ impl ApplicationInputForSecurifiedEntityWithoutXrdBalance {
         }
     }
 
-    pub fn get_payer(&self) -> Option<Account> {
+    pub fn get_payer(&self) -> Account {
         match self {
-            Self::Account(a) => a.maybe_paying_account.clone(),
-            Self::Persona(p) => p.maybe_paying_account.clone(),
+            Self::Account(a) => a.paying_account.clone(),
+            Self::Persona(p) => p.paying_account.clone(),
         }
     }
 }
@@ -145,7 +147,7 @@ where
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
     pub entity_input: AbstractSecurifiedEntity<T>,
-    pub maybe_paying_account: Option<Account>,
+    pub paying_account: Account,
 }
 
 impl<T: IsBaseEntity + std::hash::Hash + Eq + Clone>
@@ -169,10 +171,9 @@ impl<T: IsBaseEntity + std::hash::Hash + Eq + Clone>
                 // nothing to do
             }
         }
-        if let Some(paying_account) = &self.maybe_paying_account {
-            addresses.insert(paying_account.address.into());
-            // N.B. We dont check the XRD balance of the payer since we should not use it to pay for others.
-        }
+        // N.B. We dont check the XRD balance of the payer since we should not use it to pay for others.
+        addresses.insert(self.paying_account.address.into());
+
         addresses
     }
 }

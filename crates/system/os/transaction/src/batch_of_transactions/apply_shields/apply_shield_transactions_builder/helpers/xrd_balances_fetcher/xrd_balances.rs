@@ -111,19 +111,4 @@ impl XrdBalances {
             self.get_unsecurified_payer(account)
         }
     }
-
-    /// Tries to read the XRD balance of the payer of the shield application - without
-    /// consuming it, since the same payer can be used for multiple shield applications.
-    ///
-    /// Returns None if the account is None.
-    pub fn maybe_get_payer(
-        &mut self,
-        account: Option<Account>,
-    ) -> Result<Option<ApplicationInputPayingAccount>> {
-        if let Some(account) = account {
-            self.get_payer(account).map(Some)
-        } else {
-            Ok(None)
-        }
-    }
 }

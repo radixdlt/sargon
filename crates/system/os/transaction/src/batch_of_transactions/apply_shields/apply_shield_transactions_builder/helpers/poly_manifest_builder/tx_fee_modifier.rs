@@ -49,8 +49,11 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
         let estimated_xrd_fee = input.estimated_xrd_fee;
 
         input.clone().modifying_manifest(|m| {
-            if let Some(payer) = input.maybe_paying_account.as_ref() {
-                let other_payer = payer.account_address();
+            if AddressOfAccountOrPersona::from(
+                input.paying_account.account_address(),
+            ) != input.entity_input.unsecurified_entity.address()
+            {
+                let other_payer = input.paying_account.account_address();
                 // We do not lock fee against the other account's Xrd Vault
                 let m = m.modify_add_lock_fee(&other_payer, estimated_xrd_fee);
                 Ok(m)

@@ -50,7 +50,7 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
 
         Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
             input.entity_input.unsecurified_entity.clone(),
-            input.maybe_paying_account,
+            input.paying_account,
             input.reviewed_manifest,
         ))
     }
@@ -117,7 +117,11 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
 
         let initiate_with_primary_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion)?;
 
-        let account_with_optional_paying_account = SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount::new(input.entity_input.securified_account.clone(), input.maybe_paying_account);
+        let account_with_optional_paying_account =
+            SecurityShieldApplicationForSecurifiedAccountWithPayingAccount::new(
+                input.entity_input.securified_account.clone(),
+                input.paying_account,
+            );
 
         Ok(SecurityShieldApplicationForSecurifiedAccount::new(
             account_with_optional_paying_account,
@@ -164,7 +168,7 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
         let payer =
             SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount::new(
                 input.entity_input.securified_persona.clone(),
-                input.maybe_paying_account, // TODO Should we fail here if the an account doing top up is not specified?
+                input.paying_account,
             );
 
         Ok(SecurityShieldApplicationForSecurifiedPersona::new(

@@ -1,6 +1,4 @@
-use crate::{
-    create_application_for_securified_entity_with_manifests, prelude::*,
-};
+use crate::prelude::*;
 
 /// Security shield application is the application of a security shield
 /// to some entity. This entity can be either an account or a persona.
@@ -34,6 +32,22 @@ pub enum SecurityShieldApplicationForUnsecurifiedEntity {
     /// AccessControl XRD vault.
     Persona(SecurityShieldApplicationForUnsecurifiedPersona),
 }
+
+impl From<SecurityShieldApplicationForUnsecurifiedAccount>
+    for SecurityShieldApplicationForUnsecurifiedEntity
+{
+    fn from(account: SecurityShieldApplicationForUnsecurifiedAccount) -> Self {
+        Self::Account(account)
+    }
+}
+impl From<SecurityShieldApplicationForUnsecurifiedPersona>
+    for SecurityShieldApplicationForUnsecurifiedEntity
+{
+    fn from(persona: SecurityShieldApplicationForUnsecurifiedPersona) -> Self {
+        Self::Persona(persona)
+    }
+}
+
 impl SecurityShieldApplicationForUnsecurifiedEntity {
     pub fn manifest(&self) -> &TransactionManifest {
         match self {
@@ -47,18 +61,21 @@ impl SecurityShieldApplicationForUnsecurifiedEntity {
     }
 }
 
-create_application_for_securified_entity_with_manifests! {
-    SecurityShieldApplicationForSecurifiedAccount,
-    /// The account we are applying the shield for and an optional other payer
-    account_with_optional_paying_account: SecurityShieldApplicationForSecurifiedAccountWithOptionalPayingAccount
-}
+pub type SecurityShieldApplicationForSecurifiedAccount =
+    AbstractSecurityShieldApplicationForSecurifiedEntityWithManifest<
+        SecurityShieldApplicationForSecurifiedAccountWithPayingAccount,
+    >;
 
-create_application_for_securified_entity_with_manifests! {
-    SecurityShieldApplicationForSecurifiedPersona,
-    /// The persona we are applyying the shield for
-    /// and the account that will pay the topping up of the AccessControllers XRD vault.
-    persona_with_paying_account: SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount
-}
+pub type SecurityShieldApplicationForSecurifiedPersona =
+    AbstractSecurityShieldApplicationForSecurifiedEntityWithManifest<
+        SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount,
+    >;
+
+pub type AbstractSecurityShieldApplicationForSecurifiedEntityWithManifest<E> =
+    AbstractSecurityShieldApplicationForSecurifiedEntityWithPayload<
+        E,
+        TransactionManifest,
+    >;
 
 /// An application of a security shield to a securified entity
 /// holds many tuples of manifests for each combination of role.

@@ -40,22 +40,16 @@ pub struct ApplicationInputForUnsecurifiedAccount {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
     pub entity_input: UnsecurifiedAccountEntityInput,
-    pub maybe_paying_account: Option<ApplicationInputPayingAccount>,
+    pub paying_account: ApplicationInputPayingAccount,
 }
 impl ApplicationInputForUnsecurifiedAccount {
-    /// we do NOT take Xrd of `maybe_paying_account`'s Xrd Vault - if it is securified.
+    /// we do NOT take Xrd of `paying_account`'s Xrd Vault - if it is securified.
     pub fn xrd_balance_of_paying_account(&self) -> Decimal {
-        self.maybe_paying_account
-            .as_ref()
-            .map(|p| p.xrd_balance_of_account())
-            .unwrap_or(self.entity_input.xrd_balance_of_account)
+        self.paying_account.xrd_balance_of_account()
     }
 
     pub fn payer(&self) -> Account {
-        self.maybe_paying_account
-            .clone()
-            .map(|p| p.account())
-            .unwrap_or(self.entity_input.unsecurified_entity.entity.clone())
+        self.paying_account.account()
     }
 }
 

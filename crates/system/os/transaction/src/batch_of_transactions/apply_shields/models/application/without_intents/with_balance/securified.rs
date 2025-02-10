@@ -32,7 +32,7 @@ pub struct ApplicationInputForSecurifiedAccount {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
     pub entity_input: SecurifiedAccountEntityInput,
-    pub maybe_paying_account: Option<ApplicationInputPayingAccount>,
+    pub paying_account: ApplicationInputPayingAccount,
 }
 
 /// Without Intents (with **single** Manifest) | With balance
@@ -41,7 +41,7 @@ pub struct ApplicationInputForSecurifiedPersona {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
     pub entity_input: SecurifiedPersonaEntityInput,
-    pub maybe_paying_account: Option<ApplicationInputPayingAccount>,
+    pub paying_account: ApplicationInputPayingAccount,
 }
 
 impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedPersona {
@@ -53,8 +53,8 @@ impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedPersona {
 impl ApplicationInputForSecurifiedPersona {
     pub fn xrd_balance_and_account_topping_up(
         &self,
-    ) -> Option<ApplicationInputPayingAccount> {
-        self.maybe_paying_account.clone()
+    ) -> ApplicationInputPayingAccount {
+        self.paying_account.clone()
     }
 }
 
@@ -68,15 +68,10 @@ impl ApplicationInputForSecurifiedAccount {
     pub fn xrd_balance_and_account_topping_up(
         &self,
     ) -> XrdBalanceOfEntity<Account> {
-        self.maybe_paying_account
-            .as_ref()
-            .map(|p| {
-                XrdBalanceOfEntity::new(p.account(), p.xrd_balance_of_account())
-            })
-            .unwrap_or(XrdBalanceOfEntity::new(
-                self.entity_input.securified_account.entity.clone(),
-                self.entity_input.xrd_balance_of_account,
-            ))
+        XrdBalanceOfEntity::new(
+            self.paying_account.account(),
+            self.paying_account.xrd_balance_of_account(),
+        )
     }
 }
 
