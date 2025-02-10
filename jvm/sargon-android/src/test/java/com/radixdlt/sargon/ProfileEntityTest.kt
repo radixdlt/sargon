@@ -4,6 +4,7 @@ import com.radixdlt.sargon.extensions.ProfileEntity
 import com.radixdlt.sargon.extensions.asProfileEntity
 import com.radixdlt.sargon.samples.sampleMainnet
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class ProfileEntityTest {
@@ -35,6 +36,8 @@ class ProfileEntityTest {
             Account.sampleMainnet().flags,
             sut.flags.asList()
         )
+
+        assertNotNull(sut.unsecuredControllingFactorInstance)
     }
 
     @Test
@@ -65,5 +68,7 @@ class ProfileEntityTest {
             Persona.sampleMainnet().flags,
             sut.flags.asList()
         )
+
+        assertNotNull(sut.unsecuredControllingFactorInstance)
     }
 }
