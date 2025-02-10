@@ -155,6 +155,17 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 EventProfileModified::SecurityStructureAdded { id },
             ))
             .await;
+
+        if !self
+            .profile()?
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .iter()
+            .any(|s| s.metadata.is_main())
+        {
+            self.set_main_security_structure(id).await?;
+        }
         Ok(())
     }
 
@@ -368,6 +379,35 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn add_first_structure_sets_it_as_main() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        // ACT
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample_other();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure_ids)
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let added_structure = os
+            .profile()
+            .unwrap()
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .iter()
+            .find(|s| s.metadata.id == structure_ids.metadata.id)
+            .unwrap();
+        assert!(added_structure.metadata.is_main());
+    }
+
+    #[actix_rt::test]
     async fn when_setting_main_security_structure_with_invalid_id_error_is_thrown(
     ) {
         // ARRANGE
@@ -536,6 +576,13 @@ mod tests {
             .await
             .unwrap();
 
+        let structure_ids_sample = SecurityStructureOfFactorSourceIDs::sample();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure_ids_sample)
+        })
+        .await
+        .unwrap();
+
         let structure_ids_sample_other =
             SecurityStructureOfFactorSourceIDs::sample_other();
         os.with_timeout(|x| {
@@ -563,7 +610,10 @@ mod tests {
         assert!(events.iter().any(|e| e.event
             == Event::ProfileModified {
                 change: EventProfileModified::SecurityStructuresUpdated {
-                    ids: vec![structure_ids_sample_other.metadata.id()]
+                    ids: vec![
+                        structure_ids_sample.metadata.id(),
+                        structure_ids_sample_other.metadata.id()
+                    ]
                 }
             }));
     }

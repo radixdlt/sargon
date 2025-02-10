@@ -26,6 +26,18 @@ impl SargonOS {
             .into_iter_result()
     }
 
+    /// Returns the `SecurityStructureOfFactorSourceIDs` with the given `shield_id`.
+    pub fn security_structure_of_factor_source_ids_by_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSourceIDs> {
+        self.wrapped
+            .security_structure_of_factor_source_ids_by_security_structure_id(
+                shield_id.into_internal(),
+            )
+            .into_result()
+    }
+
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
     /// in profile.
     pub fn security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
