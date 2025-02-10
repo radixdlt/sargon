@@ -12,8 +12,8 @@ impl SpotCheckInteractor for TestSpotCheckInteractor {
         _allow_skip: bool,
     ) -> Result<SpotCheckResponse> {
         match self.user.clone() {
-            SpotCheckUser::Failure(common_error) => Err(common_error),
-            SpotCheckUser::Valid => Ok(SpotCheckResponse::Valid),
+            SpotCheckUser::Failed(common_error) => Err(common_error),
+            SpotCheckUser::Succeeded => Ok(SpotCheckResponse::Valid),
             SpotCheckUser::Skipped => Ok(SpotCheckResponse::Skipped),
         }
     }
@@ -21,8 +21,8 @@ impl SpotCheckInteractor for TestSpotCheckInteractor {
 
 #[derive(Clone)]
 pub enum SpotCheckUser {
-    Failure(CommonError),
-    Valid,
+    Failed(CommonError),
+    Succeeded,
     Skipped,
 }
 
@@ -31,12 +31,12 @@ impl TestSpotCheckInteractor {
         Self { user }
     }
 
-    pub fn new_failing(common_error: CommonError) -> Self {
-        Self::new(SpotCheckUser::Failure(common_error))
+    pub fn new_failed(common_error: CommonError) -> Self {
+        Self::new(SpotCheckUser::Failed(common_error))
     }
 
-    pub fn new_valid() -> Self {
-        Self::new(SpotCheckUser::Valid)
+    pub fn new_succeeded() -> Self {
+        Self::new(SpotCheckUser::Succeeded)
     }
 
     pub fn new_skipped() -> Self {

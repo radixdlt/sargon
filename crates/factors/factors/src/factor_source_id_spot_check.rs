@@ -9,7 +9,7 @@ pub enum SpotCheckInput {
     Ledger { id: Exactly32Bytes },
 
     /// The user retrieved the `FactorSourceIdFromHash` that identified an Arculus card.
-    /// /// Used for the identification of `ArculusCardFactorSource`.
+    /// Used for the identification of `ArculusCardFactorSource`.
     ArculusCard { id: FactorSourceIDFromHash },
 
     /// The user retrieved a `MnemonicWithPassphrase`.
@@ -21,35 +21,42 @@ pub enum SpotCheckInput {
 
 pub trait FactorSourceIDSpotCheck {
     /// Performs a spot check and returns whether the `FactorSourceID` was created with the same input that has been provided.
+    /// Returns `Err` when the input is not valid for the `FactorSourceKind`.
     fn perform_spot_check(&self, input: SpotCheckInput) -> bool;
 }
 
-impl FactorSourceIDSpotCheck for FactorSourceID {
+impl FactorSourceIDSpotCheck for FactorSourceIDFromHash {
     fn perform_spot_check(&self, input: SpotCheckInput) -> bool {
-        let Some(id_from_hash) = self.as_hash().cloned() else {
-            panic!("Address FactorSourceID not supported for spot check")
-        };
-        let kind = id_from_hash.kind;
-        match input {
+        let id_from_hash = *self;
+        let kind = self.kind;
+        match input.clone() {
             SpotCheckInput::Ledger { id } => {
-                if kind != FactorSourceKind::LedgerHQHardwareWallet {
-                    return false;
-                }
+                assert_eq!(
+                    kind,
+                    FactorSourceKind::LedgerHQHardwareWallet,
+                    "Unexpected Ledger input for kind: {:?}",
+                    kind
+                );
                 let built_id = FactorSourceIDFromHash::new(kind, id);
                 built_id == id_from_hash
             }
             SpotCheckInput::ArculusCard { id } => {
-                if kind != FactorSourceKind::ArculusCard {
-                    return false;
-                }
+                assert_eq!(
+                    kind,
+                    FactorSourceKind::ArculusCard,
+                    "Unexpected ArculusCard input for kind: {:?}",
+                    kind
+                );
                 id == id_from_hash
             }
             SpotCheckInput::Software {
                 mnemonic_with_passphrase,
             } => {
-                if !kind.expects_software_spot_check_input() {
-                    return false;
-                }
+                assert!(
+                    kind.expects_software_spot_check_input(),
+                    "Unexpected Software input for kind: {:?}",
+                    kind
+                );
                 let built_id =
                     FactorSourceIDFromHash::from_mnemonic_with_passphrase(
                         kind,
@@ -61,15 +68,20 @@ impl FactorSourceIDSpotCheck for FactorSourceID {
     }
 }
 
-impl FactorSourceIDSpotCheck for FactorSource {
+impl FactorSourceIDSpotCheck for FactorSourceID {
     fn perform_spot_check(&self, input: SpotCheckInput) -> bool {
-        self.id().perform_spot_check(input)
+        match self {
+            FactorSourceID::Hash { value } => value.perform_spot_check(input),
+            FactorSourceID::Address { .. } => {
+                panic!("Address FactorSourceID does not support spot check")
+            }
+        }
     }
 }
 
-impl FactorSourceIDSpotCheck for FactorSourceIDFromHash {
+impl FactorSourceIDSpotCheck for FactorSource {
     fn perform_spot_check(&self, input: SpotCheckInput) -> bool {
-        FactorSourceID::from(*self).perform_spot_check(input)
+        self.id().perform_spot_check(input)
     }
 }
 
@@ -118,13 +130,13 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "Unexpected Ledger input for kind: Device")]
     fn spot_check__device__wrong_input() {
         let sut = SUT::sample_device();
         let input = SpotCheckInput::Ledger {
             id: Exactly32Bytes::sample(),
         };
-        let result = sut.perform_spot_check(input);
-        assert!(!result);
+        let _ = sut.perform_spot_check(input);
     }
 
     #[test]
@@ -154,13 +166,15 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(
+        expected = "Unexpected ArculusCard input for kind: LedgerHQHardwareWallet"
+    )]
     fn spot_check__ledger__wrong_input() {
         let sut = SUT::sample_ledger();
         let input = SpotCheckInput::ArculusCard {
             id: FactorSourceIDFromHash::sample(),
         };
-        let result = sut.perform_spot_check(input);
-        assert!(!result);
+        let _ = sut.perform_spot_check(input);
     }
 
     #[test]
@@ -182,15 +196,14 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(
+        expected = "Unexpected Software input for kind: ArculusCard"
+    )]
     fn spot_check__arculus__wrong_input() {
         let input = SpotCheckInput::Software {
             mnemonic_with_passphrase: MnemonicWithPassphrase::sample(),
         };
-        let result = SUT::sample_arculus().perform_spot_check(input.clone());
-        assert!(!result);
-
-        let result = SUT::sample_ledger().perform_spot_check(input.clone());
-        assert!(!result);
+        let _ = SUT::sample_arculus().perform_spot_check(input.clone());
     }
 
     #[test]

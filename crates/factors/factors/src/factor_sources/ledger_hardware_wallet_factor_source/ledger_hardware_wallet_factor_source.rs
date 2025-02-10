@@ -26,6 +26,10 @@ pub struct LedgerHardwareWalletFactorSource {
     pub hint: LedgerHardwareWalletHint,
 }
 
+/// # Safety
+/// Rust memory safe, but marked "unsafe" since this ctor is only used for tests (and shouldn't be
+/// used by production code). A real Ledger device won't be initialized with a `MnemonicWithPassphrase`,
+/// but with `Exactly32Bytes` detailing the device's ID.
 unsafe fn new_ledger_with_mwp(
     mwp: MnemonicWithPassphrase,
     hint: LedgerHardwareWalletHint,

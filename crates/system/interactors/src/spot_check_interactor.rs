@@ -15,8 +15,10 @@ pub trait SpotCheckInteractor: Send + Sync {
 
 /// An enum indicating the result of a spot check.
 ///
-/// Note that there isn't a failure case since user never fails a spot check: it either succeeds,
-/// skips it or aborts the interaction.
+/// Note that there isn't a failure case since user never fails a spot check. It either:
+/// - succeeds (`Valid` returned by host),
+/// - skips (`Skipped` returned by host),
+/// - aborts (`CommonError::HostInteractionAborted` thrown by host)
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub enum SpotCheckResponse {
     /// The factor source was successfully validated.

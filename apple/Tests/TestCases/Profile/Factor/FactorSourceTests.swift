@@ -33,6 +33,5 @@ final class FactorSourceTests: FactorSourceTest<FactorSource> {
 	func test_spot_check() {
 		let input = SpotCheckInput.software(mnemonicWithPassphrase: .sample)
 		XCTAssertTrue(SUT.sample.spotCheck(input: input))
-		XCTAssertFalse(SUT.sampleOther.spotCheck(input: input))
 	}
 }

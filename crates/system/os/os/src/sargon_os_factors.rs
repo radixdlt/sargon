@@ -1082,7 +1082,7 @@ mod tests {
         let interactors =
             Interactors::new_from_clients_and_spot_check_interactor(
                 &clients,
-                Arc::new(TestSpotCheckInteractor::new_valid()),
+                Arc::new(TestSpotCheckInteractor::new_succeeded()),
             );
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,
@@ -1133,7 +1133,7 @@ mod tests {
         let interactors =
             Interactors::new_from_clients_and_spot_check_interactor(
                 &clients,
-                Arc::new(TestSpotCheckInteractor::new_failing(error.clone())),
+                Arc::new(TestSpotCheckInteractor::new_failed(error.clone())),
             );
         let os = timeout(
             SARGON_OS_TEST_MAX_ASYNC_DURATION,

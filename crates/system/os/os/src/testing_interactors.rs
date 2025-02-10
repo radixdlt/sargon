@@ -59,7 +59,7 @@ impl InteractorsCtors for Interactors {
         Self::new(
             Arc::new(use_factor_sources_interactors),
             Arc::new(TestAuthorizationInteractor::stubborn_authorizing()),
-            Arc::new(TestSpotCheckInteractor::new_valid()),
+            Arc::new(TestSpotCheckInteractor::new_succeeded()),
         )
     }
 
@@ -84,7 +84,7 @@ impl InteractorsCtors for Interactors {
         Self::new(
             Arc::new(use_factor_sources_interactors),
             authorization_interactor,
-            Arc::new(TestSpotCheckInteractor::new_valid()),
+            Arc::new(TestSpotCheckInteractor::new_succeeded()),
         )
     }
 
