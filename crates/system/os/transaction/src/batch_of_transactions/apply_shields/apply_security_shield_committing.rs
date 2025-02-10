@@ -393,15 +393,6 @@ mod tests {
         .await
     }
 
-    // #[actix_rt::test]
-    // async fn not_enough_xrd_for_securified_persona() {
-    //     not_enough_xrd_for_unsecurified(
-    //         EntityApplyingShield::securified_persona(SecurifiedPersona::sample()),
-    //         Account::sample(),
-    //     )
-    //     .await
-    // }
-
     async fn not_enough_xrd_for_unsecurified(
         entity: EntityApplyingShield,
         fee_payer: impl Into<Option<Account>>,
