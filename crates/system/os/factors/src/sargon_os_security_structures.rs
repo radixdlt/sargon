@@ -156,14 +156,7 @@ impl OsSecurityStructuresQuerying for SargonOS {
             ))
             .await;
 
-        if !self
-            .profile()?
-            .app_preferences
-            .security
-            .security_structures_of_factor_source_ids
-            .iter()
-            .any(|s| s.metadata.is_main())
-        {
+        if !self.profile()?.has_any_main_security_structure() {
             self.set_main_security_structure(id).await?;
         }
         Ok(())
