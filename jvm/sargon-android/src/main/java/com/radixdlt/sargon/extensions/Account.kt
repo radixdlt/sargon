@@ -10,9 +10,17 @@ val Account.isLegacy: Boolean
     get() = accountIsLegacy(account = this)
 
 val Account.isUnsecuredLedgerControlled: Boolean
-    get() = unsecuredControllingFactorInstance
-        ?.factorSourceId
-        ?.kind == FactorSourceKind.LEDGER_HQ_HARDWARE_WALLET
+    get() {
+        val unsecuredTransactionSigningFactorSourceId = unsecuredControllingFactorInstance
+            ?.factorSourceId
+
+        return if (unsecuredTransactionSigningFactorSourceId != null) {
+            unsecuredTransactionSigningFactorSourceId.kind ==
+                    FactorSourceKind.LEDGER_HQ_HARDWARE_WALLET
+        } else {
+            false
+        }
+    }
 
 val Account.unsecuredControllingFactorInstance: HierarchicalDeterministicFactorInstance?
     get() = accountUnsecuredControllingFactorInstance(account = this)

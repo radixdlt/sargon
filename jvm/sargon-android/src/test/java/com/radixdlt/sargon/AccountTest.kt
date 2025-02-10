@@ -16,7 +16,7 @@ import com.radixdlt.sargon.samples.sampleStokenet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class AccountTest: SampleTestable<Account> {
+class AccountTest : SampleTestable<Account> {
     override val samples: List<Sample<Account>>
         get() = listOf(Account.sampleMainnet, Account.sampleStokenet)
 
@@ -30,7 +30,7 @@ class AccountTest: SampleTestable<Account> {
 
     @Test
     fun testUnsecuredLedgerControlledAccount() {
-        assert(ledgerControlledAccountWithFactorInstance().first.isUnsecuredLedgerControlled)
+        assert(unsecuredLedgerControlledAccountWithFactorInstance().first.isUnsecuredLedgerControlled)
     }
 
     @Test
@@ -62,21 +62,19 @@ class AccountTest: SampleTestable<Account> {
 
     @Test
     fun testUnsecuredControllingFactorInstanceForAccount() {
-        val (account, hdPublicKey) = ledgerControlledAccountWithFactorInstance()
+        val (account, hdPublicKey) = unsecuredLedgerControlledAccountWithFactorInstance()
         assertEquals(
             account.unsecuredControllingFactorInstance,
             hdPublicKey
         )
     }
 
-    @Test
-    fun testIsUnsecuredLedgerControlled() {
-        assert(ledgerControlledAccountWithFactorInstance().first.isUnsecuredLedgerControlled)
-    }
-
-    private fun ledgerControlledAccountWithFactorInstance(): Pair<Account, HierarchicalDeterministicFactorInstance> {
+    private fun unsecuredLedgerControlledAccountWithFactorInstance():
+            Pair<Account, HierarchicalDeterministicFactorInstance> {
         val mnemonic = MnemonicWithPassphrase.sample()
-        val factorSourceId = mnemonic.factorSourceId(kind = FactorSourceKind.LEDGER_HQ_HARDWARE_WALLET)
+        val factorSourceId = mnemonic.factorSourceId(
+            kind = FactorSourceKind.LEDGER_HQ_HARDWARE_WALLET
+        )
         val derivationPath = AccountPath.init(
             networkId = NetworkId.MAINNET,
             keyKind = Cap26KeyKind.TRANSACTION_SIGNING,

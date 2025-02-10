@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -94,6 +95,7 @@ class DeviceFactorSourceMnemonicKeyMappingTest {
         assertTrue(removeResult.isSuccess)
         val readResultWhenRemoved = sut.read()
         assertNull(readResultWhenRemoved.getOrThrow())
+        assertFalse(sut.keyExist())
     }
 
     private class TestBiometricAuthorizationDriver(
