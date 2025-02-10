@@ -6,30 +6,12 @@ pub struct XrdBalances(
 );
 
 impl XrdBalances {
-    /// Takes the XRD balance of the entity applying the shield, i.e. consumes it
-    /// and returns it. We can do this since each entity applying a shield should
-    /// occur only once in balances map.
-    ///
-    /// # Errors
-    /// Throws an error if no XRD balance of `account` is found.
-    pub fn take_for_entity_applying_shield(
-        &mut self,
-        address: impl Into<AddressOfPayerOfShieldApplication>,
-    ) -> Result<Decimal> {
-        let address = address.into();
-        self.0.swap_remove(&address).ok_or(
-            CommonError::NoXrdBalanceFetchedForEntityApplyingShieldOrItsVault {
-                address: address.to_string(),
-            },
-        )
-    }
-
     /// Reads the XRD balance of the payer of the shield application - without
     /// consuming it, since the same payer can be used for multiple shield applications.
     ///     
     /// # Errors
     /// Throws an error if no XRD balance of `account` is found.
-    fn get_paying_component(
+    pub fn get_paying_component(
         &mut self,
         address_of_payer: impl Into<AddressOfPayerOfShieldApplication>,
     ) -> Result<Decimal> {

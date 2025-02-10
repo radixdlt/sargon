@@ -94,8 +94,7 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     ) -> Self {
         Self {
             entity,
-            account_topping_up_xrd_vault_of_access_controller:
-                account_topping_up_xrd_vault_of_access_controller.into(),
+            account_topping_up_xrd_vault_of_access_controller,
         }
     }
 }

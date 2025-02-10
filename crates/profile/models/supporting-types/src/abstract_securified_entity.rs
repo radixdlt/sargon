@@ -98,7 +98,7 @@ mod tests {
     #[test]
     fn erased_address() {
         let entity = AnySecurifiedEntity::sample_account();
-        assert_eq!(entity.address_erased(), entity.address().into());
+        assert_eq!(entity.address_erased(), entity.address());
     }
 
     #[test]

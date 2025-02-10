@@ -202,26 +202,26 @@ mod tests {
         // let mut manifests_iter = manifests.iter();
         let lookup_map = hacky_tmp_get_entities_applying_shield();
         let _get = |entity: AccountOrPersona,
-                    account: Option<&Account>|
+                    account: AccountAddress|
          -> ManifestWithPayerByAddress {
             let key = EntityApplyingShieldAddress::from(entity);
             let manifest = lookup_map.get(&key).unwrap();
             ManifestWithPayerByAddress::new(
                 manifest.clone(),
-                account.map(|a| a.address),
                 Decimal192::ten(),
+                account,
             )
         };
 
         let get_with_payer = |entity: AccountOrPersona,
                               account: &Account|
          -> ManifestWithPayerByAddress {
-            _get(entity, Some(account))
+            _get(entity, account.address)
         };
 
-        let get_without_payer =
-            |entity: AccountOrPersona| -> ManifestWithPayerByAddress {
-                _get(entity, None)
+        let get_entity_is_payer =
+            |entity: Account| -> ManifestWithPayerByAddress {
+                _get(entity.clone().into(), entity.address)
             };
 
         // ============================================
@@ -234,7 +234,7 @@ mod tests {
         let manifest_and_payer_tuples = vec![
             // ~~~~~ UNSECURIFIED ENTITIES ~~~~~
             // Scenario: Alice is an Unsecurified Account paying for herself
-            get_without_payer(alice.into()),
+            get_entity_is_payer(alice),
             // Scenario: Bob is an Unsecurified Account paid by Unsecurified Payer "Paige"
             get_with_payer(bob.into(), &paige),
             // Scenario: Carla is an Unsecurified Account paid by Securified Payer "Peter"
@@ -245,7 +245,7 @@ mod tests {
             get_with_payer(batman.into(), &peter),
             // ~~~~~ SECURIFIED ENTITIES ~~~~~
             // Scenario: David is a Securified Account paying for himself
-            get_without_payer(david.into()),
+            get_entity_is_payer(david),
             // Scenario: Emily is a Securified Account paid by Unsecurified Payer "Paige"
             get_with_payer(emily.into(), &paige),
             // Scenario: Frank is a Securified Account paid by Securified Payer "Peter"
@@ -306,6 +306,13 @@ mod tests {
         fee_payer: impl Into<Option<Account>>,
     ) {
         let fee_payer = fee_payer.into();
+        let fee_payer = match fee_payer {
+            Some(fp) => fp,
+            None => entity
+                .clone()
+                .into_account()
+                .expect("Must specify fee payer"),
+        };
         let account_to_add = fee_payer.clone();
         not_enough_xrd_for(
             |network_id| { MockNetworkingDriver::everyones_broke(network_id) },
@@ -319,24 +326,22 @@ mod tests {
                             os.add_persona(persona.clone()).await.unwrap();
                         }
                     }
-                    if let Some(fee_payer) = account_to_add.as_ref() {
-                        os.add_account(fee_payer.clone()).await.unwrap();
-                    }
+                       let _ = os.add_account(account_to_add.clone()).await;
                 IndexSet::from_iter([entity.address()])
             })
             },
             |_, manifests| {
                 let manifest_and_payer_tuples =
                     vec![ManifestWithPayerByAddress::new(
-                        manifests.iter().next().unwrap().clone(),
-                        fee_payer.clone().map(|a| a.address.clone()),
+                        manifests.first().unwrap().clone(),
                         Decimal192::ten(),
+                        fee_payer.clone().address,
                     )];
                 manifest_and_payer_tuples
             },
             |addresses, result| {
                 assert_eq!(result, Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
-                    payer: fee_payer.clone().map(|a| a.address.clone().to_string()).unwrap_or(addresses[0].to_string()),
+                    payer: fee_payer.address.to_string(),
                     vault_of_entity: addresses[0].to_string(),
                     payer_balance: "0".to_owned(),
                     needed_balance: "110".to_owned(),
