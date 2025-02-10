@@ -26,7 +26,11 @@ pub struct LedgerHardwareWalletFactorSource {
     pub hint: LedgerHardwareWalletHint,
 }
 
-fn new_ledger_with_mwp(
+/// # Safety
+/// Rust memory safe, but marked "unsafe" since this ctor is only used for tests (and shouldn't be
+/// used by production code). A real Ledger device won't be initialized with a `MnemonicWithPassphrase`,
+/// but with `Exactly32Bytes` detailing the device's ID.
+unsafe fn new_ledger_with_mwp(
     mwp: MnemonicWithPassphrase,
     hint: LedgerHardwareWalletHint,
     common: FactorSourceCommon,
@@ -51,19 +55,23 @@ impl LedgerHardwareWalletFactorSource {
 
 impl HasSampleValues for LedgerHardwareWalletFactorSource {
     fn sample() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger(),
-            LedgerHardwareWalletHint::sample(),
-            FactorSourceCommon::new_bdfs(false),
-        )
+        unsafe {
+            new_ledger_with_mwp(
+                MnemonicWithPassphrase::sample_ledger(),
+                LedgerHardwareWalletHint::sample(),
+                FactorSourceCommon::new_bdfs(false),
+            )
+        }
     }
 
     fn sample_other() -> Self {
-        new_ledger_with_mwp(
-            MnemonicWithPassphrase::sample_ledger_other(),
-            LedgerHardwareWalletHint::sample_other(),
-            FactorSourceCommon::new_olympia(),
-        )
+        unsafe {
+            new_ledger_with_mwp(
+                MnemonicWithPassphrase::sample_ledger_other(),
+                LedgerHardwareWalletHint::sample_other(),
+                FactorSourceCommon::new_olympia(),
+            )
+        }
     }
 }
 
