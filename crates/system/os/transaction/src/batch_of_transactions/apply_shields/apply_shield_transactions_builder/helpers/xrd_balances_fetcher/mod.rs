@@ -1,3 +1,4 @@
+#[cfg(test)]
 mod mock_xrd_balances;
 mod xrd_balances;
 #[allow(clippy::module_inception)]

@@ -1,33 +1,29 @@
-#[cfg(test)]
+use crate::prelude::*;
+
 pub trait IntoNetworkResponse {
     fn into_network_response(self) -> NetworkResponse;
 }
 
-#[cfg(test)]
 impl<T: Serialize> IntoNetworkResponse for T {
     fn into_network_response(self) -> NetworkResponse {
         NetworkResponse::new(200, serde_json::to_vec(&self).unwrap())
     }
 }
 
-#[cfg(test)]
 pub trait NetworkRequestParseOriginal {
     fn parse_original<T: for<'a> Deserialize<'a>>(&self) -> T;
 }
 
-#[cfg(test)]
 impl NetworkRequestParseOriginal for NetworkRequest {
     fn parse_original<T: for<'a> Deserialize<'a>>(&self) -> T {
         serde_json::from_slice(&self.body).unwrap()
     }
 }
 
-#[cfg(test)]
 pub trait EveronesRichMockNetworkingDriver {
     fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
 
-#[cfg(test)]
 impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
     fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver> {
         mock_networking_driver_balance(network_id, |_| {
@@ -36,19 +32,16 @@ impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
     }
 }
 
-#[cfg(test)]
 pub trait EveronesBrokeMockNetworkingDriver {
     fn everyones_broke(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
 
-#[cfg(test)]
 impl EveronesBrokeMockNetworkingDriver for MockNetworkingDriver {
     fn everyones_broke(network_id: NetworkID) -> Arc<dyn NetworkingDriver> {
         mock_networking_driver_balance(network_id, |_| Decimal::zero())
     }
 }
 
-#[cfg(test)]
 pub(crate) fn mock_networking_driver_balance(
     network_id: NetworkID,
     balance_of: impl Fn(&Address) -> Decimal + Sync + Send + 'static,
