@@ -57,7 +57,7 @@ class AccountTest: SampleTestable<Account> {
             onLedgerSettings = OnLedgerSettings.default()
         )
 
-        assert(!Account.sampleMainnet().isUnsecuredLedgerControlled)
+        assert(!securifiedAccount.isUnsecuredLedgerControlled)
     }
 
     @Test
