@@ -21,7 +21,7 @@ import okhttp3.OkHttpClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class AddNewFactorBuilderTest {
+class AddNewFactorManagerTest {
 
     private val okHttpClient = mockk<OkHttpClient>()
     private val eventBusDriver = AndroidEventBusDriver

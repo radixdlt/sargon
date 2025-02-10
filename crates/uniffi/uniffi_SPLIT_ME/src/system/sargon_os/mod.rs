@@ -1,8 +1,8 @@
+mod add_factor;
 mod entities;
 mod pre_authorization;
 mod profile_state_holder;
 mod sargon_os;
-mod sargon_os_add_new_factor;
 mod sargon_os_apply_security_shield_interaction;
 mod sargon_os_derive_public_keys;
 mod sargon_os_entities_linked_to_factor_source;
@@ -15,6 +15,7 @@ mod sargon_os_security_structures;
 mod sargon_os_signing;
 mod transactions;
 
+pub use add_factor::*;
 pub use entities::*;
 pub use pre_authorization::*;
 pub use profile_state_holder::*;
