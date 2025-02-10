@@ -3,6 +3,9 @@ use crate::prelude::*;
 /// This is the result of checking what entities are linked to a given `SecurityStructure`.
 #[derive(Clone, Debug, PartialEq)]
 pub struct EntitiesLinkedToSecurityStructure {
+    /// The metadata of the linked security structure.
+    pub metadata: SecurityStructureMetadata,
+
     /// The visible accounts linked to the security structure.
     pub accounts: Accounts,
 
@@ -18,12 +21,14 @@ pub struct EntitiesLinkedToSecurityStructure {
 
 impl EntitiesLinkedToSecurityStructure {
     pub fn new(
+        metadata: SecurityStructureMetadata,
         accounts: Accounts,
         hidden_accounts: Accounts,
         personas: Personas,
         hidden_personas: Personas,
     ) -> Self {
         Self {
+            metadata,
             accounts,
             hidden_accounts,
             personas,
@@ -35,6 +40,7 @@ impl EntitiesLinkedToSecurityStructure {
 impl HasSampleValues for EntitiesLinkedToSecurityStructure {
     fn sample() -> Self {
         Self::new(
+            SecurityStructureMetadata::sample(),
             Accounts::sample(),
             Accounts::new(),
             Personas::sample(),
@@ -44,6 +50,7 @@ impl HasSampleValues for EntitiesLinkedToSecurityStructure {
 
     fn sample_other() -> Self {
         Self::new(
+            SecurityStructureMetadata::sample_other(),
             Accounts::sample_other(),
             Accounts::new(),
             Personas::sample_other(),

@@ -4,6 +4,9 @@ use sargon::EntitiesLinkedToSecurityStructure as InternalEntitiesLinkedToSecurit
 /// This is the result of checking what entities are controlled by a given `SecurityStructure`.
 #[derive(Clone, PartialEq, InternalConversion, uniffi::Record)]
 pub struct EntitiesLinkedToSecurityStructure {
+    /// The metadata of the linked security structure.
+    pub metadata: SecurityStructureMetadata,
+
     /// The visible accounts linked to the security structure.
     pub accounts: Vec<Account>,
 

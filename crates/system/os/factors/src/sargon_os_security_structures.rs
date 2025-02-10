@@ -199,17 +199,22 @@ impl OsSecurityStructuresQuerying for SargonOS {
         shield_id: SecurityStructureID,
         profile_to_check: ProfileToCheck,
     ) -> Result<EntitiesLinkedToSecurityStructure> {
+        let metadata = self
+            .security_structure_of_factor_source_ids_by_security_structure_id(
+                shield_id,
+            )?
+            .metadata;
         match profile_to_check {
             ProfileToCheck::Current => self
                 .profile()?
                 .current_network()?
-                .entities_linked_to_security_structure(shield_id),
+                .entities_linked_to_security_structure(metadata),
             ProfileToCheck::Specific(specific_profile) => {
                 let profile_network = specific_profile
                     .networks
                     .get_id(NetworkID::Mainnet)
                     .ok_or(CommonError::Unknown)?;
-                profile_network.entities_linked_to_security_structure(shield_id)
+                profile_network.entities_linked_to_security_structure(metadata)
             }
         }
     }
