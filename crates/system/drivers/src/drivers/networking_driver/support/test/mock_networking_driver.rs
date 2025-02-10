@@ -4,7 +4,6 @@ use crate::prelude::*;
 use std::sync::Mutex;
 
 /// A mocked network antenna, useful for testing.
-// #[derive(Debug)]
 pub struct MockNetworkingDriver {
     hard_coded_responses: Mutex<Vec<MockNetworkingDriverResponse>>,
     spy: fn(NetworkRequest, u64) -> (),
@@ -157,7 +156,6 @@ impl MockNetworkingDriver {
     }
 }
 
-// #[derive(Debug)]
 pub struct MockNetworkingDriverLazyResponder {
     provide_response_for: Arc<
         dyn Fn(NetworkRequest, u64) -> NetworkResponse + Send + Sync + 'static,
