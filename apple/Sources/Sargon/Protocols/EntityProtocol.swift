@@ -56,15 +56,6 @@ extension EntityBaseProtocol {
 		return factorInstances
 	}
 
-	public var hasAuthenticationSigningKey: Bool {
-		switch securityState {
-		case .unsecured:
-			false
-		case .securified(value: _):
-			false
-		}
-	}
-
 	public var deviceFactorSourceID: FactorSourceIDFromHash? {
 		guard let factorSourceId = unsecuredControllingFactorInstance?.factorSourceId, factorSourceId.kind == .device else {
 			return nil

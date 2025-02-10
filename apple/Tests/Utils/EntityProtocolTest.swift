@@ -43,12 +43,6 @@ class EntityBaseTest<SUT_: EntityBaseProtocol>: Test<SUT_> {
 		XCTAssertFalse(SUT.sample.isDeleted)
 	}
 
-	func test_hasAuthenticationSigningKey() {
-		eachSample { sut in
-			XCTAssertFalse(sut.hasAuthenticationSigningKey)
-		}
-	}
-
 	func test_deviceFactorSourceID() {
 		eachSample { sut in
 			XCTAssertTrue(
