@@ -13,25 +13,33 @@ impl ProfileNetworkQueryEntitiesLinkedToSecurityStructure for ProfileNetwork {
         &self,
         metadata: SecurityStructureMetadata,
     ) -> Result<EntitiesLinkedToSecurityStructure> {
+        fn filter(
+            e: &impl HasSecurityState,
+            metadata: SecurityStructureMetadata,
+        ) -> bool {
+            e.security_state()
+                .is_currently_or_provisionally_securified_with(metadata.id)
+        }
+
         let accounts = self
             .accounts_non_hidden()
             .iter()
-            .filter(|a| a.is_linked_to_security_structure(metadata.id))
+            .filter(|a| filter(a, metadata.clone()))
             .collect::<Accounts>();
         let hidden_accounts = self
             .accounts_hidden()
             .iter()
-            .filter(|a| a.is_linked_to_security_structure(metadata.id))
+            .filter(|a| filter(a, metadata.clone()))
             .collect::<Accounts>();
         let personas = self
             .personas_non_hidden()
             .iter()
-            .filter(|p| p.is_linked_to_security_structure(metadata.id))
+            .filter(|p| filter(p, metadata.clone()))
             .collect::<Personas>();
         let hidden_personas = self
             .personas_hidden()
             .iter()
-            .filter(|p| p.is_linked_to_security_structure(metadata.id))
+            .filter(|p| filter(p, metadata.clone()))
             .collect::<Personas>();
 
         Ok(EntitiesLinkedToSecurityStructure::new(
