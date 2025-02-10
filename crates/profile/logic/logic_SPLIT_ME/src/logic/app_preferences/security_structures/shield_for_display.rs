@@ -64,6 +64,22 @@ impl ShieldForDisplay {
             number_of_linked_hidden_personas,
         }
     }
+
+    pub fn with_linked(
+        linked_entities: EntitiesLinkedToSecurityStructure,
+    ) -> Self {
+        Self {
+            metadata: linked_entities.metadata,
+            number_of_linked_accounts: linked_entities.accounts.len(),
+            number_of_linked_hidden_accounts: linked_entities
+                .hidden_accounts
+                .len(),
+            number_of_linked_personas: linked_entities.personas.len(),
+            number_of_linked_hidden_personas: linked_entities
+                .hidden_personas
+                .len(),
+        }
+    }
 }
 
 impl HasSampleValues for ShieldForDisplay {

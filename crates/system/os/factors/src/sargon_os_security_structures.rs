@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use futures::future::join_all;
 
 #[async_trait::async_trait]
 pub trait OsSecurityStructuresQuerying {
@@ -225,37 +226,23 @@ impl OsSecurityStructuresQuerying for SargonOS {
         let security_structures =
             self.security_structures_of_factor_source_ids()?;
 
-        let mut shields_for_display = ShieldsForDisplay::new();
-        for security_structure in security_structures.iter() {
-            let linked_entities = self
-                .entities_linked_to_security_structure(
-                    security_structure.id(),
+        let get_all_entities_linked_to_security_structures =
+            security_structures.iter().map(|shield| {
+                self.entities_linked_to_security_structure(
+                    shield.metadata.id,
                     ProfileToCheck::Current,
                 )
-                .await?;
-
-            shields_for_display.insert(ShieldForDisplay {
-                metadata: security_structure.metadata.clone(),
-                number_of_linked_accounts: linked_entities
-                    .accounts
-                    .iter()
-                    .count(),
-                number_of_linked_hidden_accounts: linked_entities
-                    .hidden_accounts
-                    .iter()
-                    .count(),
-                number_of_linked_personas: linked_entities
-                    .personas
-                    .iter()
-                    .count(),
-                number_of_linked_hidden_personas: linked_entities
-                    .hidden_personas
-                    .iter()
-                    .count(),
             });
-        }
 
-        Ok(shields_for_display)
+        join_all(get_all_entities_linked_to_security_structures)
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>>>()
+            .map(|entities| {
+                ShieldsForDisplay::from_iter(
+                    entities.into_iter().map(ShieldForDisplay::with_linked),
+                )
+            })
     }
 }
 
