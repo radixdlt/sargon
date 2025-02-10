@@ -10,8 +10,9 @@ val Account.isLegacy: Boolean
     get() = accountIsLegacy(account = this)
 
 val Account.isUnsecuredLedgerControlled: Boolean
-    get() = unsecuredControllingFactorInstance?.factorSourceId?.kind ==
-            FactorSourceKind.LEDGER_HQ_HARDWARE_WALLET
+    get() = unsecuredControllingFactorInstance
+        ?.factorSourceId
+        ?.kind == FactorSourceKind.LEDGER_HQ_HARDWARE_WALLET
 
 val Account.unsecuredControllingFactorInstance: HierarchicalDeterministicFactorInstance?
     get() = accountUnsecuredControllingFactorInstance(account = this)
