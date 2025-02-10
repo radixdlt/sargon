@@ -716,7 +716,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_get_entities_linked_to_secure_structure() {
+    async fn get_entities_only_provisionally_securified_to_secure_structure() {
         // ARRANGE
         let os = SargonOS::fast_boot().await;
         let shield_id = add_unsafe_shield(&os).await.unwrap();
@@ -786,6 +786,143 @@ mod tests {
             .hidden_personas_on_current_network()
             .unwrap();
         assert_eq!(result.hidden_personas, updated_hidden_personas)
+    }
+
+    #[actix_rt::test]
+    async fn get_entities_currently_and_provisionally_securified_to_secure_structure(
+    ) {
+        // ARRANGE
+        let os = SargonOS::fast_boot().await;
+        let shield = add_unsafe_shield_with_matrix(&os).await.unwrap();
+        let shield_id = shield.id();
+
+        let accounts = Accounts::from_iter([
+            Account::sample_mainnet_alice(),
+            Account::sample_mainnet_bob(),
+        ]);
+        let personas = Personas::from_iter([
+            Persona::sample_mainnet_satoshi(),
+            Persona::sample_mainnet_batman(),
+        ]);
+
+        let all_accounts = accounts.iter().collect::<Accounts>();
+        let all_personas = personas.iter().collect::<Personas>();
+
+        os.add_accounts(all_accounts.clone()).await.unwrap();
+        os.add_personas(all_personas.clone()).await.unwrap();
+
+        let addresses: IndexSet<AddressOfAccountOrPersona> = all_accounts
+            .iter()
+            .map(|account| account.address().into())
+            .chain(all_personas.iter().map(|persona| persona.address().into()))
+            .collect();
+
+        os.apply_security_shield_with_id_to_entities(shield_id, addresses)
+            .await
+            .unwrap();
+
+        // ACT
+        let mut account_alice = os
+            .account_by_address(accounts.first().unwrap().address())
+            .unwrap();
+
+        let mut account_security_structure_of_instances = account_alice
+            .get_provisional()
+            .unwrap()
+            .as_factor_instances_derived()
+            .unwrap()
+            .clone();
+        account_security_structure_of_instances
+            .authentication_signing_factor_instance =
+            HierarchicalDeterministicFactorInstance::sample_other();
+        let account_secured_control = SecuredEntityControl::new(
+            account_alice
+                .clone()
+                .security_state()
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .clone(),
+            AccessControllerAddress::sample_mainnet(),
+            account_security_structure_of_instances,
+        )
+        .unwrap();
+        account_alice
+            .set_security_state(EntitySecurityState::Securified {
+                value: account_secured_control,
+            })
+            .unwrap();
+        os.update_account(account_alice.clone()).await.unwrap();
+
+        let mut persona_satoshi = os
+            .persona_by_address(personas.first().unwrap().address())
+            .unwrap();
+
+        let persona_security_structure_of_instances = persona_satoshi
+            .get_provisional()
+            .unwrap()
+            .as_factor_instances_derived()
+            .unwrap()
+            .clone();
+        let persona_secured_control = SecuredEntityControl::new(
+            persona_satoshi
+                .clone()
+                .security_state()
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .clone(),
+            AccessControllerAddress::sample_mainnet_other(),
+            persona_security_structure_of_instances,
+        )
+        .unwrap();
+        persona_satoshi
+            .set_security_state(EntitySecurityState::Securified {
+                value: persona_secured_control,
+            })
+            .unwrap();
+        os.update_persona(persona_satoshi.clone()).await.unwrap();
+
+        let result = os
+            .entities_linked_to_security_structure(
+                shield_id,
+                ProfileToCheck::Current,
+            )
+            .await
+            .unwrap();
+
+        // ASSERT
+        let updated_accounts = os.accounts_on_current_network().unwrap();
+        assert_eq!(result.accounts, updated_accounts);
+
+        let is_account_alice_currently_securified = updated_accounts
+            .first()
+            .unwrap()
+            .security_state()
+            .is_currently_securified_with(shield_id);
+        assert!(is_account_alice_currently_securified);
+        let is_account_bob_provisionally_securified = updated_accounts
+            .get_at_index(1)
+            .unwrap()
+            .security_state()
+            .is_provisionally_securified_with(shield_id);
+        assert!(is_account_bob_provisionally_securified);
+
+        let updated_personas = os.personas_on_current_network().unwrap();
+        assert_eq!(result.personas, updated_personas);
+
+        let is_persona_satoshi_currently_securified = updated_personas
+            .first()
+            .unwrap()
+            .security_state()
+            .is_currently_securified_with(shield_id);
+        assert!(is_persona_satoshi_currently_securified);
+        let is_persona_batman_provisionally_securified = updated_personas
+            .get_at_index(1)
+            .unwrap()
+            .security_state()
+            .is_provisionally_securified_with(shield_id);
+        assert!(is_persona_batman_provisionally_securified);
     }
 
     #[actix_rt::test]
