@@ -3,6 +3,7 @@
 //! returning the XRD balance of a single account, using the endpoint
 //! `/state/entity/details` and then refining the response.
 
+mod chunk;
 mod page_methods;
 mod state_methods;
 mod transaction_methods;

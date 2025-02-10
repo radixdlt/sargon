@@ -68,6 +68,12 @@ impl Ed25519PrivateKey {
     }
 
     pub fn from_exactly32_bytes(bytes: Exactly32Bytes) -> Self {
+        Self::from(bytes)
+    }
+}
+
+impl From<Exactly32Bytes> for Ed25519PrivateKey {
+    fn from(bytes: Exactly32Bytes) -> Self {
         Self::from_vec(bytes.to_vec()).expect("Should always be able to generate a Ed25519PrivateKey from 32 bytes.")
     }
 }
