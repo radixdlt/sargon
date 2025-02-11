@@ -32,7 +32,7 @@ impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
     }
 }
 
-pub trait EveronesBrokeMockNetworkingDriver {
+pub trait EveryoneIsBrokeMockNetworkingDriver {
     fn everyones_broke(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
 
