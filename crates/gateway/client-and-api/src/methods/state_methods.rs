@@ -15,7 +15,7 @@ impl GatewayClient {
         Ok(map.get(&address).cloned().flatten())
     }
 
-    /// Fetches the XRD balance of each account `address`. Returns the 
+    /// Fetches the XRD balance of each account `address`. Returns the
     /// balance for each account (being `None` if it has no balance).
     pub async fn xrd_balances_of_accounts(
         &self,
@@ -92,9 +92,11 @@ impl GatewayClient {
                     })
                     .collect::<Result<IndexMap<_, _>>>()?;
 
-                if map.len() != target_address_len {
-                    return Err(CommonError::Unknown); // TODO better error
-                }
+                debug_assert_eq!(
+                    map.len(),
+                    target_address_len,
+                    "Gateway did not respond with all requested addresses"
+                );
 
                 Ok(map)
             },

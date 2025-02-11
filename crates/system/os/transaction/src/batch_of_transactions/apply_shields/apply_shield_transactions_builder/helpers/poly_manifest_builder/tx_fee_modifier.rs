@@ -54,7 +54,7 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
             ) != input.entity_input.unsecurified_entity.address()
             {
                 let other_payer = input.paying_account.account_address();
-                // We do not lock fee against the other account's Xrd Vault
+                // We lock fee against the other account (but not against its AC vault)
                 let m = m.modify_add_lock_fee(&other_payer, estimated_xrd_fee);
                 Ok(m)
             } else {

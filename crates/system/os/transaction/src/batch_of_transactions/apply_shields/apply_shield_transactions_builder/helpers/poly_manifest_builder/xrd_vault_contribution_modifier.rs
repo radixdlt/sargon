@@ -66,10 +66,15 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let payer = input.paying_account.account();
         let entity = input.entity_input.unsecurified_entity.clone().into();
 
-        input.modifying_manifest(|m| {
-                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(payer, entity, m, None);
+        input.modifying_manifest(|manifest| {
+                let manifest = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
+                    payer,
+                    entity,
+                    manifest,
+                    None  // `None` means "use target Xrd balance"
+                );
 
-                Ok(m)
+                Ok(manifest)
             })
     }
 
@@ -83,9 +88,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let payer_balance = input.xrd_balance_of_paying_account();
         let needed_balance =
             input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition();
-        if payer_balance
-            < input.xrd_needed_for_tx_fee_and_initial_xrd_vault_contributition()
-        {
+        if payer_balance < needed_balance {
             return Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
                 payer: input.payer().address.to_string(),
                 vault_of_entity: input.entity_input.address().to_string(),
@@ -99,10 +102,15 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
 
         let entity = input.entity_input.clone().into();
 
-        input.modifying_manifest(|m| {
-                let m = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(payer, entity, m, None);
+        input.modifying_manifest(|manifest| {
+                let manifest = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
+                    payer,
+                    entity,
+                    manifest,
+                    None  // `None` means "use target Xrd balance"
+                );
 
-                Ok(m)
+                Ok(manifest)
             }).map(|modified| (modified, payer_info))
     }
 
@@ -136,10 +144,22 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
             });
         }
 
+        let topup_amount = payer.balance - input.estimated_xrd_fee;
         let payer = payer.entity.clone();
 
-        input.modifying_manifest(|m| {
-                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None, manifest_variant)
+        input.modifying_manifest(|manifest| {
+                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
+                    payer,
+                    entity,
+                    manifest,
+                    if topup_amount.is_positive() {
+                        Some(topup_amount)
+                    } else {
+                        // `None` means "use target Xrd balance"
+                        None
+                    },
+                    manifest_variant
+                )
             })
     }
 
@@ -171,10 +191,23 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
                 needed_balance: needed_balance.to_string(),
             });
         }
+        let topup_amount =
+            payer.xrd_balance_of_account() - input.estimated_xrd_fee;
         let payer = payer_info.account();
 
-        input.modifying_manifest(|m| {
-                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(payer, entity, m, None, manifest_variant)
-            })
+        input.modifying_manifest(|manifest| {
+            TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
+                payer,
+                entity,
+                 manifest,
+                  if topup_amount.is_positive() {
+                    Some(topup_amount)
+                } else {
+                    // `None` means "use target Xrd balance"
+                    None
+                },
+                manifest_variant
+            )
+        })
     }
 }

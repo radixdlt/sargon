@@ -16,11 +16,7 @@ pub trait ApplySecurityShieldCommitting: Send + Sync {
     ///
     /// We will map from `Vec<Manifest>` -> `Vec<Vec<Manifest>>` where for each entity
     /// being unsecurified the inner Vec will be unchanged - one single manifest. But
-    /// for each securified entity - which has a manifest which was create with `InitiateWithPrimaryCompleteWithRecovery` variant, we will map to 4 manifests, where
-    /// the three new manifests are created by specifying:
-    /// - `InitiateWithPrimaryCompleteWithConfirmation`
-    /// - `InitiateWithRecoveryCompleteWithConfirmation`
-    /// - `InitiateWithRecoveryDelayedCompletion`
+    /// for each securified entity - which has a manifest which was create with `InitiateWithRecoveryCompleteWithConfirmation` variant, we will map to all variants of the [`RolesExercisableInTransactionManifestCombination`] enum.
     ///
     /// Then we will inner map of the `Vec<Vec<Manifest>>` to
     /// perform look up of all `payer` address and get the Account from

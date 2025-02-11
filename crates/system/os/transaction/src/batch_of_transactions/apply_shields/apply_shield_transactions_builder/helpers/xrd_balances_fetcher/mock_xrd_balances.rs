@@ -24,7 +24,7 @@ pub trait EveryoneIsRichMockNetworkingDriver {
     fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
 
-impl EveronesRichMockNetworkingDriver for MockNetworkingDriver {
+impl EveryoneIsRichMockNetworkingDriver for MockNetworkingDriver {
     fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver> {
         mock_networking_driver_balance(network_id, |_| {
             Decimal::from(1_000_000_000)
@@ -36,7 +36,7 @@ pub trait EveryoneIsBrokeMockNetworkingDriver {
     fn everyones_broke(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
 
-impl EveronesBrokeMockNetworkingDriver for MockNetworkingDriver {
+impl EveryoneIsBrokeMockNetworkingDriver for MockNetworkingDriver {
     fn everyones_broke(network_id: NetworkID) -> Arc<dyn NetworkingDriver> {
         mock_networking_driver_balance(network_id, |_| Decimal::zero())
     }
