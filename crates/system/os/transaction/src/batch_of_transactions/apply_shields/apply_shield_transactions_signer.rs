@@ -8,14 +8,18 @@ pub trait ApplyShieldTransactionsSigner: Send + Sync {
     ) -> Result<ApplySecurityShieldSignedPayload>;
 }
 
-pub struct ApplyShieldTransactionsSignerImpl {}
+pub struct ApplyShieldTransactionsSignerImpl {
+    signing_manager: SigningManager,
+}
 
 impl ApplyShieldTransactionsSignerImpl {
-    pub fn new(_os: &SargonOS) -> Self {
-        warn!(
-            "ApplyShieldTransactionsSignerImpl is not implemented yet. Actually might only need the `sign_transactions_interactor` here"
-        );
-        Self {}
+    pub fn new(os: &SargonOS) -> Result<Self> {
+        os.profile()
+            .map(|profile| SigningManager {
+                profile,
+                interactor: os.sign_transactions_interactor(),
+            })
+            .map(|signing_manager| Self { signing_manager })
     }
 }
 
@@ -25,12 +29,12 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
         &self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload> {
-        let signing_manager = SigningManager;
         let notary_manager = NotaryManager {
             keys_for_intents: payload_to_sign.notary_keys,
         };
         let intent_sets = payload_to_sign.applications_with_intents;
-        let signed_sets = signing_manager.sign_intent_sets(intent_sets).await?;
+        let signed_sets =
+            self.signing_manager.sign_intent_sets(intent_sets).await?;
 
         let signed_intents = signed_sets
             .into_iter()
@@ -45,8 +49,58 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     }
 }
 
-pub struct SigningManager;
+pub struct SigningManager {
+    interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    profile: Profile, // TODO: Remove this AND requirement of it from SignaturesCollector
+}
+
+struct IntentToSign {
+    intent: TransactionIntent,
+    entities: Vec<AddressOfAccountOrPersona>, // often one, or two (payer != entity)
+    variant: Option<RolesExercisableInTransactionManifestCombination>,
+}
+
+struct IntentWithSignatures {
+    intent: TransactionIntent,
+    signatures: IndexSet<SignatureWithPublicKey>,
+}
+
+struct IntentsToSign {
+    intents: Vec<IntentToSign>,
+}
+
 impl SigningManager {
+    
+    fn do_sign_intents_with_role(
+        &self,
+        intents: Vec<IntentToSign>,
+        role: RoleKind,
+    ) -> Vec<IntentWithSignatures> {
+        todo!()
+    }
+
+    fn sign_intents_with_role(
+        &self,
+        intents: &[SecurityShieldApplicationWithTransactionIntents],
+        role: RoleKind,
+    ) -> Vec<IntentWithSignatures> {
+        todo!()
+    }
+
+    fn sign_intents_with_primary_role(
+        &self,
+        intents: &[SecurityShieldApplicationWithTransactionIntents],
+    ) -> Vec<IntentWithSignatures> {
+       self.sign_intents_with_role(intents, RoleKind::Primary)
+    }
+
+    fn sign_intents_with_recovery_role(
+        &self,
+        intents: &[SecurityShieldApplicationWithTransactionIntents],
+    ) -> Vec<IntentWithSignatures> {
+       self.sign_intents_with_role(intents, RoleKind::Recovery)
+    }
+
     /// A "TransactionIntent Set" is a "group" of TransactionsIntents having manifest per variant
     /// of [`RolesExercisableInTransactionManifestCombination`]. For manifests
     /// securifying an unsecurified entity the set will have only one intent.
@@ -57,15 +111,19 @@ impl SigningManager {
     /// time).
     pub async fn sign_intent_sets(
         &self,
-        _intent_sets: impl IntoIterator<
+        intent_sets: impl IntoIterator<
             Item = SecurityShieldApplicationWithTransactionIntents,
         >,
     ) -> Result<Vec<SignedIntentSet>> {
+        let intent_sets = intent_sets.into_iter().collect_vec();
+        let with_primary = self.sign_intents_with_primary_role(&intent_sets);
         todo!()
     }
 }
 
-pub struct SignedIntentSet;
+pub struct SignedIntentSet {
+    intents: IndexSet<IntentToSign>,
+}
 impl SignedIntentSet {
     pub fn get_best_signed_intent(&self) -> SignedIntent {
         todo!()
