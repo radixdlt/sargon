@@ -182,7 +182,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let payer_info = payer.clone();
         let needed_balance = input.xrd_needed_for_tx_fee_and_xrd_vault_top_up();
         if payer.xrd_balance_of_account()
-            < input.xrd_needed_for_tx_fee_and_xrd_vault_top_up()
+            < needed_balance
         {
             return Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
                 payer: payer_info.account().to_string(),
