@@ -18,6 +18,11 @@ pub struct AddressesOfAccessController {
     pub xrd_vault_address: VaultAddress,
 }
 
+delegate_debug_into!(
+    AddressesOfAccessController,
+    InternalAddressesOfAccessController
+);
+
 /// Advanced security control of an entity which has been "securified",
 /// meaning an MFA security structure (`SecurityStructureOfFactorSources`)
 /// which user has created has been applied to it.
@@ -45,4 +50,65 @@ pub struct SecuredEntityControl {
     /// A provisional new security structure configuration which user
     /// is about to change to
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
+}
+
+delegate_debug_into!(SecuredEntityControl, InternalSecuredEntityControl);
+
+#[uniffi::export]
+pub fn new_addresses_of_access_controller_sample() -> AddressesOfAccessController
+{
+    InternalAddressesOfAccessController::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_addresses_of_access_controller_sample_other(
+) -> AddressesOfAccessController {
+    InternalAddressesOfAccessController::sample_other().into()
+}
+
+#[uniffi::export]
+pub fn new_secured_entity_control_sample() -> SecuredEntityControl {
+    InternalSecuredEntityControl::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_secured_entity_control_sample_other() -> SecuredEntityControl {
+    InternalSecuredEntityControl::sample_other().into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn secured_entity_control_samples() {
+        assert_eq!(
+            new_secured_entity_control_sample(),
+            new_secured_entity_control_sample()
+        );
+        assert_eq!(
+            new_secured_entity_control_sample_other(),
+            new_secured_entity_control_sample_other()
+        );
+        assert_ne!(
+            new_secured_entity_control_sample(),
+            new_secured_entity_control_sample_other()
+        );
+    }
+
+    #[test]
+    fn addresses_of_access_controller_samples() {
+        assert_eq!(
+            new_addresses_of_access_controller_sample(),
+            new_addresses_of_access_controller_sample()
+        );
+        assert_eq!(
+            new_addresses_of_access_controller_sample_other(),
+            new_addresses_of_access_controller_sample_other(),
+        );
+        assert_ne!(
+            new_addresses_of_access_controller_sample(),
+            new_addresses_of_access_controller_sample_other(),
+        );
+    }
 }
