@@ -72,12 +72,12 @@ mod tests {
         $(
             #[test]
             fn $variant() {
-                let manifest_addres = ScryptoManifestAddress::Static(
+                let manifest_address = ScryptoManifestAddress::Static(
                     <$address_type>::sample_stokenet().scrypto().into_node_id()
                 );
                 let network_id = NetworkID::Stokenet;
 
-                let result = SUT::try_from((manifest_addres, network_id));
+                let result = SUT::try_from((manifest_address, network_id));
                 assert!(result.is_ok());
             }
         )*

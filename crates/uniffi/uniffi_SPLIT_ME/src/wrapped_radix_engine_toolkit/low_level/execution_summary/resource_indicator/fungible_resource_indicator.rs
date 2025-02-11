@@ -32,9 +32,9 @@ impl From<InternalFungibleResourceIndicator> for FungibleResourceIndicator {
     }
 }
 
-impl Into<InternalFungibleResourceIndicator> for FungibleResourceIndicator {
-    fn into(self) -> InternalFungibleResourceIndicator {
-        match self {
+impl From<FungibleResourceIndicator> for InternalFungibleResourceIndicator {
+    fn from(val: FungibleResourceIndicator) -> Self {
+        match val {
             FungibleResourceIndicator::Guaranteed { decimal } => {
                 InternalFungibleResourceIndicator::Guaranteed(decimal.into())
             }

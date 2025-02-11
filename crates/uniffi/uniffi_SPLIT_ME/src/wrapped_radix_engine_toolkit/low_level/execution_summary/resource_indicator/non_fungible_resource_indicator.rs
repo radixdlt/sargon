@@ -38,11 +38,11 @@ impl From<InternalNonFungibleResourceIndicator>
     }
 }
 
-impl Into<InternalNonFungibleResourceIndicator>
-    for NonFungibleResourceIndicator
+impl From<NonFungibleResourceIndicator>
+    for InternalNonFungibleResourceIndicator
 {
-    fn into(self) -> InternalNonFungibleResourceIndicator {
-        match self {
+    fn from(val: NonFungibleResourceIndicator) -> Self {
+        match val {
             NonFungibleResourceIndicator::Guaranteed { ids } => {
                 InternalNonFungibleResourceIndicator::Guaranteed(
                     ids.into_internal(),
