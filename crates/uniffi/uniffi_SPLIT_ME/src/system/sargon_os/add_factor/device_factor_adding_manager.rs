@@ -77,12 +77,7 @@ impl DeviceFactorAddingManager {
     }
 
     pub fn get_confirmation_indices(self: Arc<Self>) -> Vec<u8> {
-        self.get(|manager| {
-            manager
-                .get_confirmation_indices()
-                .into_iter()
-                .collect::<Vec<u8>>()
-        })
+        self.get(|manager| manager.get_confirmation_indices())
     }
 }
 
@@ -118,10 +113,27 @@ impl DeviceFactorAddingManager {
 
 #[uniffi::export]
 impl DeviceFactorAddingManager {
-    pub fn mnemonic_words_match(
+    pub fn is_word_at_index_correct(
         self: Arc<Self>,
-        words: Vec<BIP39Word>,
+        word: String,
+        index: u8,
     ) -> bool {
-        self.wrapped.mnemonic_words_match(words.into_internal())
+        self.wrapped.is_word_at_index_correct(word, index)
+    }
+
+    pub fn get_incorrect_confirmation_words(
+        self: Arc<Self>,
+        words_to_confirm: HashMap<u8, String>,
+    ) -> HashMap<u8, String> {
+        self.wrapped
+            .get_incorrect_confirmation_words(&words_to_confirm)
+    }
+
+    pub async fn is_factor_already_in_use(&self) -> Result<bool> {
+        self.wrapped.is_factor_already_in_use().await.into_result()
+    }
+
+    pub async fn add_factor(&self) -> Result<()> {
+        self.wrapped.add_factor().await.into_result()
     }
 }
