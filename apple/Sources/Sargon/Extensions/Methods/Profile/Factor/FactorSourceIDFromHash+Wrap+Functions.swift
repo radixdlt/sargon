@@ -20,4 +20,8 @@ extension FactorSourceIDFromHash {
 	public func toString() -> String {
 		factorSourceIdFromHashToString(factorSourceId: self)
 	}
+
+	public func spotCheck(input: SpotCheckInput) -> Bool {
+		factorSourceIdFromHashPerformSpotCheck(factorSourceIdFromHash: self, input: input)
+	}
 }

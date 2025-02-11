@@ -320,6 +320,10 @@ impl SargonOS {
         self.interactors.authorization_interactor.clone()
     }
 
+    pub fn spot_check_interactor(&self) -> Arc<dyn SpotCheckInteractor> {
+        self.interactors.spot_check_interactor.clone()
+    }
+
     pub fn host_id(&self) -> HostId {
         self.host_id
     }

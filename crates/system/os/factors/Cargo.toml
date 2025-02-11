@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os-factors"
-version = "1.1.133"
+version = "1.1.136"
 edition = "2021"
 
 [dependencies]
@@ -28,6 +28,7 @@ actix-rt = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }
 enum-as-inner = { workspace = true }
+futures = { workspace = true }
 log = { workspace = true }
 paste = { workspace = true }
 preinterpret = { workspace = true }
