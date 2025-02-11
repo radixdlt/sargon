@@ -54,51 +54,63 @@ pub struct SigningManager {
     profile: Profile, // TODO: Remove this AND requirement of it from SignaturesCollector
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct IntentToSign {
     intent: TransactionIntent,
     entities: Vec<AddressOfAccountOrPersona>, // often one, or two (payer != entity)
     variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct IntentWithSignatures {
     intent: TransactionIntent,
     signatures: IndexSet<SignatureWithPublicKey>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 struct IntentsToSign {
     intents: Vec<IntentToSign>,
 }
 
 impl SigningManager {
-    
-    fn do_sign_intents_with_role(
+    async fn do_sign_intents_with_role(
         &self,
         intents: Vec<IntentToSign>,
         role: RoleKind,
-    ) -> Vec<IntentWithSignatures> {
+    ) -> Result<IndexSet<IntentWithSignatures>> {
         todo!()
     }
 
-    fn sign_intents_with_role(
+    async fn sign_intents_with_role(
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
         role: RoleKind,
-    ) -> Vec<IntentWithSignatures> {
+    ) -> Result<IndexSet<IntentWithSignatures>> {
         todo!()
     }
 
-    fn sign_intents_with_primary_role(
+    async fn sign_intents_with_primary_role(
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
-    ) -> Vec<IntentWithSignatures> {
-       self.sign_intents_with_role(intents, RoleKind::Primary)
+    ) -> Result<IndexSet<IntentWithSignatures>> {
+        self.sign_intents_with_role(intents, RoleKind::Primary)
+            .await
     }
 
-    fn sign_intents_with_recovery_role(
+    async fn sign_intents_with_recovery_role(
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
-    ) -> Vec<IntentWithSignatures> {
-       self.sign_intents_with_role(intents, RoleKind::Recovery)
+    ) -> Result<IndexSet<IntentWithSignatures>> {
+        self.sign_intents_with_role(intents, RoleKind::Recovery)
+            .await
+    }
+
+    async fn sign_intents_with_confirmation_role(
+        &self,
+        intents: &[SecurityShieldApplicationWithTransactionIntents],
+    ) -> Result<IndexSet<IntentWithSignatures>> {
+        self.sign_intents_with_role(intents, RoleKind::Confirmation)
+            .await
     }
 
     /// A "TransactionIntent Set" is a "group" of TransactionsIntents having manifest per variant
@@ -116,7 +128,7 @@ impl SigningManager {
         >,
     ) -> Result<Vec<SignedIntentSet>> {
         let intent_sets = intent_sets.into_iter().collect_vec();
-        let with_primary = self.sign_intents_with_primary_role(&intent_sets);
+        let sign_with_recovery_result = self.sign_intents_with_recovery_role(&intent_sets).await;
         todo!()
     }
 }
