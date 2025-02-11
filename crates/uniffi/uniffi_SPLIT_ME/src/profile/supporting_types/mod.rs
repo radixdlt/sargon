@@ -7,6 +7,7 @@ mod email_address;
 mod host_id;
 mod host_info;
 mod host_os;
+mod shield_for_display;
 
 pub use account_for_display::*;
 pub use account_or_persona::*;
@@ -17,3 +18,4 @@ pub use email_address::*;
 pub use host_id::*;
 pub use host_info::*;
 pub use host_os::*;
+pub use shield_for_display::*;

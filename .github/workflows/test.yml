@@ -202,6 +202,15 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
+          app_name: 'sargon'
+          step_name: 'sargon-code-cov-token'
+          secret_prefix: GH_CODECOV
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
+          parse_json: true
+
       - uses: RDXWorks-actions/setup-xcode@master
         with:
           xcode-version: "16.0.0"
@@ -222,7 +231,7 @@ jobs:
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.GH_CODECOV_TOKEN }}
           fail_ci_if_error: true
           files: ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
           name: codecov-swift
@@ -233,6 +242,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
+          app_name: 'sargon'
+          step_name: 'sargon-code-cov-token'
+          secret_prefix: GH_CODECOV
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
+          parse_json: true
 
       - name: Remove unused software
         run: |
@@ -277,7 +295,7 @@ jobs:
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.GH_CODECOV_TOKEN }}
           fail_ci_if_error: true
           file: ./jvm/sargon-android/build/reports/kover/reportDebug.xml
           name: codecov-jvm
@@ -289,6 +307,15 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
+          app_name: 'sargon'
+          step_name: 'sargon-code-cov-token'
+          secret_prefix: GH_CODECOV
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
+          parse_json: true
+          
       - uses: RDXWorks-actions/setup-xcode@master
         with:
           # trying to fix https://github.com/rust-lang/rust/issues/113783
@@ -313,6 +340,6 @@ jobs:
       - name: Code Coverage - Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.GH_CODECOV_TOKEN }}
           fail_ci_if_error: true
           flags: rust

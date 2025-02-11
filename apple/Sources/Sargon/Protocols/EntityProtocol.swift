@@ -20,6 +20,7 @@ public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConverti
 	var securityState: EntitySecurityState { get }
 	var entityKind: EntityKind { get }
 	var asGeneral: AccountOrPersona { get }
+	var unsecuredControllingFactorInstance: HierarchicalDeterministicFactorInstance? { get }
 
 	#if DEBUG
 	static var sampleMainnet: Self { get }
@@ -47,30 +48,20 @@ extension EntityBaseProtocol {
 		Set<HierarchicalDeterministicFactorInstance>
 	{
 		var factorInstances = Set<HierarchicalDeterministicFactorInstance>()
-		switch securityState {
-		case let .unsecured(unsecuredEntityControl):
-			factorInstances.insert(unsecuredEntityControl.transactionSigning)
-			return factorInstances
-		}
-	}
 
-	public var hasAuthenticationSigningKey: Bool {
-		switch securityState {
-		case .unsecured:
-			false
+		if let unsecuredControllingFactorInstance {
+			factorInstances.insert(unsecuredControllingFactorInstance)
 		}
+
+		return factorInstances
 	}
 
 	public var deviceFactorSourceID: FactorSourceIDFromHash? {
-		switch self.securityState {
-		case let .unsecured(control):
-			let factorSourceID = control.transactionSigning.factorSourceID
-			guard factorSourceID.kind == .device else {
-				return nil
-			}
-
-			return factorSourceID
+		guard let factorSourceId = unsecuredControllingFactorInstance?.factorSourceId, factorSourceId.kind == .device else {
+			return nil
 		}
+
+		return factorSourceId
 	}
 }
 

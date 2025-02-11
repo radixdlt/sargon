@@ -83,6 +83,12 @@ extension AccountOrPersona: EntityBaseProtocol {
 			\.virtualHierarchicalDeterministicFactorInstances
 		)
 	}
+
+	public var unsecuredControllingFactorInstance: SargonUniFFI.HierarchicalDeterministicFactorInstance? {
+		property(
+			\.unsecuredControllingFactorInstance
+		)
+	}
 }
 
 extension AccountOrPersona {

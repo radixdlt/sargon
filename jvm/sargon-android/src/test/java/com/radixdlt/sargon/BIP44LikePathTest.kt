@@ -2,6 +2,7 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.addressIndex
 import com.radixdlt.sargon.extensions.asGeneral
+import com.radixdlt.sargon.extensions.displayString
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -38,6 +39,14 @@ class BIP44LikePathTest: SampleTestable<Bip44LikePath> {
         assertEquals(
             Bip44LikePath.sample().addressIndex,
             HdPathComponent.init(localKeySpace = 0u, KeySpace.Unsecurified(isHardened = false)),
+        )
+    }
+
+    @Test
+    fun testDisplayString() {
+        assertEquals(
+            "m/44H/1022H/0H/0/0",
+            Bip44LikePath.sample().displayString,
         )
     }
 }

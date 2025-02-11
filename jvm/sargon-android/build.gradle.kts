@@ -2,7 +2,6 @@ import com.radixdlt.cargo.desktop.DesktopTargetTriple
 import com.radixdlt.cargo.desktop.currentTargetTriple
 import com.radixdlt.cargo.toml.sargonVersion
 import org.gradle.configurationcache.extensions.capitalized
-import org.gradle.internal.logging.text.StyledTextOutput
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Files
 
@@ -342,16 +341,16 @@ tasks.register("copyExternalArtifacts") {
         val rustProjectDir = projectDir.parentFile.parentFile
         val artifactsDir = File(rustProjectDir, "artifacts")
 
-        val fileTargets = artifactsDir.listFiles()?.mapNotNull { file ->
+        val directoryTargets = artifactsDir.listFiles()?.mapNotNull { file ->
             val triple = DesktopTargetTriple.from(file.name) ?: return@mapNotNull null
             file to triple
         }.orEmpty()
 
-        if (fileTargets.isEmpty()) {
+        if (directoryTargets.isEmpty()) {
             error("No files found in ${artifactsDir.absolutePath}")
         }
 
-        fileTargets.forEach { target ->
+        directoryTargets.forEach { target ->
             exec {
                 workingDir = rustProjectDir
                 commandLine(

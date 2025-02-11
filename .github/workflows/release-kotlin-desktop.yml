@@ -23,6 +23,7 @@ env:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         build-target:
           - runner: ubuntu-latest
@@ -73,9 +74,15 @@ jobs:
     steps:
       - uses: RDXWorks-actions/checkout@main
 
-      - uses: RDXWorks-actions/download-artifact@main
+      - uses: RDXWorks-actions/download-artifact-v4@main
         with:
-          path: artifacts
+          name: aarch64-apple-darwin
+          path: artifacts/aarch64-apple-darwin
+
+      - uses: RDXWorks-actions/download-artifact-v4@main
+        with:
+          name: x86_64-unknown-linux-gnu
+          path: artifacts/x86_64-unknown-linux-gnu
 
       - name: Set up JDK 17
         uses: RDXWorks-actions/setup-java@v3

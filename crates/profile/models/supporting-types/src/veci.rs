@@ -27,7 +27,10 @@ impl VirtualEntityCreatingInstance {
             "Discrepancy! PublicKeys does not match, this is a programmer error!"
         );
 
-        assert_eq!(factor_instance.derivation_path().get_entity_kind(), address.get_entity_kind(), "Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds.");
+        Self::check_for_derivation_path_discrepancies(
+            &factor_instance,
+            &address,
+        );
 
         assert_eq!(
             factor_instance.derivation_path().network_id(),
@@ -64,6 +67,36 @@ impl VirtualEntityCreatingInstance {
             ),
         };
         Self::new(factor_instance, address)
+    }
+
+    /// In 2024, for circa 6 months, the Android host had a bug where Personas
+    /// was created with Account DerivationPath => same FactorInstance (PublicKey)
+    /// was used between Personas and Accounts!
+    ///
+    /// The bug was introduced in [Android Host PR][badpr], in 2024-07-11.
+    /// The bug was fixed in [Android Host PR][goodpr], in 2024-11-27.
+    ///
+    /// However, even though the bug was fixed after less than 5 months, we have
+    /// end users which are in this bad state (shared instances between Personas and Acccounts).
+    ///
+    /// Thus we can't assert the discrepancy.
+    ///
+    /// [identpr]: https://github.com/radixdlt/sargon/pull/254/files#r1860748013
+    /// [badpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1042
+    /// [goodpr]: https://github.com/radixdlt/babylon-wallet-android/pull/1256
+    fn check_for_derivation_path_discrepancies(
+        factor_instance: &HierarchicalDeterministicFactorInstance,
+        address: &AddressOfAccountOrPersona,
+    ) {
+        let discrepancy_found =
+            factor_instance.clone().derivation_path().get_entity_kind()
+                != address.clone().get_entity_kind();
+        let error_msg = "Discrepancy! Address and DerivationPath of FactorInstances have different entity kinds.";
+        if discrepancy_found {
+            error!("{}", error_msg);
+        }
+        #[cfg(test)]
+        debug_assert!(!discrepancy_found, "{}", error_msg);
     }
 }
 
