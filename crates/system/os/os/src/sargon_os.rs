@@ -561,6 +561,30 @@ impl SargonOS {
 
         Ok(os)
     }
+
+    pub async fn boot_test_empty_wallet_with_spot_check_interactor(
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
+    ) -> Arc<Self> {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                spot_check_interactor,
+            );
+        let os = actix_rt::time::timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            Self::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        // Create empty Wallet
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        os
+    }
 }
 
 #[cfg(test)]

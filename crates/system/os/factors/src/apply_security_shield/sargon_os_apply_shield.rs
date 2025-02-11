@@ -23,6 +23,11 @@ pub trait OsShieldApplying {
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<EntitiesOnNetwork>;
 
+    async fn _perform_spot_check_for_each_factor_source_of_security_structure(
+        &self,
+        shield: &SecurityStructureOfFactorSources,
+    ) -> Result<()>;
+
     async fn _provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
         &self,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
@@ -68,12 +73,28 @@ impl OsShieldApplying for SargonOS {
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<EntitiesOnNetwork> {
         let network = self.current_network_id()?;
+        self._perform_spot_check_for_each_factor_source_of_security_structure(
+            shield,
+        )
+        .await?;
         self._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
             shield,
             entity_addresses,
         )
         .await
         .and_then(|(entities, _)| EntitiesOnNetwork::new(network, entities))
+    }
+
+    async fn _perform_spot_check_for_each_factor_source_of_security_structure(
+        &self,
+        shield: &SecurityStructureOfFactorSources,
+    ) -> Result<()> {
+        let factor_sources = shield.all_factors();
+        let interactor = self.spot_check_interactor();
+        for factor_source in factor_sources {
+            let _ = interactor.spot_check(factor_source.clone(), true).await?;
+        }
+        Ok(())
     }
 
     async fn _apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
@@ -415,8 +436,8 @@ pub(crate) async fn add_unsafe_shield_with_matrix_with_fixed_metadata(
     os: &SargonOS,
     fixed_metadata: impl Into<Option<SecurityStructureMetadata>>,
 ) -> Result<SecurityStructureOfFactorSourceIDs> {
-    let bdsf = os.main_bdfs()?;
-    let mut shield_of_ids = unsafe_shield_with_bdfs(&bdsf.into());
+    let bdfs = os.main_bdfs()?;
+    let mut shield_of_ids = unsafe_shield_with_bdfs(&bdfs.into());
     if let Some(fixed_metadata) = fixed_metadata.into() {
         shield_of_ids.metadata = fixed_metadata;
     }
@@ -919,5 +940,107 @@ mod tests {
             result.err().unwrap(),
             CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_apply_security_shield_continues_when_user_skips_spot_check() {
+        // ARRANGE
+        let (os, shield_id, account, persona) = {
+            let os =
+                SargonOS::boot_test_empty_wallet_with_spot_check_interactor(
+                    Arc::new(TestSpotCheckInteractor::new_skipped()),
+                )
+                .await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let account = os
+                .create_and_save_new_account_with_main_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+            let persona = os
+                .create_and_save_new_persona_with_main_bdfs(
+                    network,
+                    DisplayName::sample_other(),
+                    None,
+                )
+                .await
+                .unwrap();
+            (os, shield_id, account, persona)
+        };
+
+        // ACT
+        let (account_provisional, persona_provisional) = {
+            os.apply_security_shield_with_id_to_entities(
+                shield_id,
+                [
+                    AddressOfAccountOrPersona::from(account.address()),
+                    AddressOfAccountOrPersona::from(persona.address()),
+                ]
+                .iter()
+                .cloned()
+                .collect(),
+            )
+            .await
+            .unwrap();
+            let account = os.account_by_address(account.address()).unwrap();
+            let persona = os.persona_by_address(persona.address()).unwrap();
+            let account_provisional = account
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            let persona_provisional = persona
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            (account_provisional, persona_provisional)
+        };
+
+        // ASSERT
+        assert_eq!(account_provisional.security_structure_id, shield_id);
+        assert_eq!(persona_provisional.security_structure_id, shield_id);
+    }
+
+    #[actix_rt::test]
+    async fn test_apply_security_shield_fails_when_spot_check_fails() {
+        // ARRANGE
+        let spot_check_error = CommonError::sample();
+        let (os, shield_id, account) = {
+            let os =
+                SargonOS::boot_test_empty_wallet_with_spot_check_interactor(
+                    Arc::new(TestSpotCheckInteractor::new_succeeded_first_n(
+                        1, // Spot check for creating account must succeed
+                        spot_check_error.clone(),
+                    )),
+                )
+                .await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let account = os
+                .create_and_save_new_account_with_main_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+            (os, shield_id, account)
+        };
+
+        // ACT
+        let error = os
+            .apply_security_shield_with_id_to_entities(
+                shield_id,
+                [AddressOfAccountOrPersona::from(account.address())]
+                    .iter()
+                    .cloned()
+                    .collect(),
+            )
+            .await
+            .expect_err("Expected an error");
+
+        // ASSERT
+        assert_eq!(error, spot_check_error);
     }
 }
