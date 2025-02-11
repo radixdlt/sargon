@@ -42,7 +42,7 @@ pub fn new_security_structure_metadata_named(
 }
 
 #[uniffi::export]
-pub fn security_structure_is_main(
+pub fn security_structure_metadata_is_main(
     security_structure_metadata: &SecurityStructureMetadata,
 ) -> bool {
     security_structure_metadata.into_internal().is_main()

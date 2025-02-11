@@ -7,6 +7,6 @@ extension SecurityStructureMetadata {
 	}
 
 	public var isMain: Bool {
-		securityStructureIsMain(securityStructureMetadata: self)
+		securityStructureMetadataIsMain(securityStructureMetadata: self)
 	}
 }
