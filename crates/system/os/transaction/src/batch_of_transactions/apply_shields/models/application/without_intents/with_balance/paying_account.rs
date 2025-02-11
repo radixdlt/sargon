@@ -31,11 +31,19 @@ impl ApplicationInputPayingAccount {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ApplicationInputPayingAccountSecurified {
     pub account: SecurifiedAccount,
-    pub access_controller_address: AccessControllerAddress,
-    pub xrd_vault_address: VaultAddress,
+    pub addresses_of_access_controller: AddressesOfAccessController,
 
-    /// XRD balance of `account`
+    /// XRD balance of `account` (not XRD vault)
     pub xrd_balance_of_account: Decimal,
+}
+impl ApplicationInputPayingAccountSecurified {
+    pub fn access_controller_address(&self) -> AccessControllerAddress {
+        self.addresses_of_access_controller
+            .access_controller_address
+    }
+    pub fn xrd_vault_address(&self) -> VaultAddress {
+        self.addresses_of_access_controller.xrd_vault_address
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

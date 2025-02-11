@@ -6,9 +6,10 @@ use std::sync::Mutex;
 /// A mocked network antenna, useful for testing.
 pub struct MockNetworkingDriver {
     hard_coded_responses: Mutex<Vec<MockNetworkingDriverResponse>>,
+    // `MockNetworkingDriver` will try to use a hard_coded_response first, and if it doesn't have one, it will use the lazy_responder.
+    lazy_responder: Option<MockNetworkingDriverLazyResponder>,
     spy: fn(NetworkRequest, u64) -> (),
     count: Mutex<u64>,
-    lazy_responder: Option<MockNetworkingDriverLazyResponder>,
 }
 
 #[derive(Debug)]

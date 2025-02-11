@@ -37,8 +37,7 @@ impl XrdBalances {
     ) -> Result<ApplicationInputPayingAccount> {
         let account_address = account.entity.address;
         let sec = account.securified_entity_control();
-        let xrd_vault_address = sec.xrd_vault_address();
-        let access_controller_address = sec.access_controller_address();
+        let addresses_of_access_controller = sec.addresses.clone();
 
         let xrd_balance_of_account =
             self.get_paying_component(account_address)?;
@@ -49,8 +48,7 @@ impl XrdBalances {
         Ok(ApplicationInputPayingAccount::Securified(
             ApplicationInputPayingAccountSecurified {
                 account,
-                access_controller_address,
-                xrd_vault_address,
+                addresses_of_access_controller,
                 xrd_balance_of_account,
             },
         ))
