@@ -61,11 +61,13 @@ struct IntentToSign {
     variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 
+type SignatureWithContext = HDSignature<TransactionIntentHash>;
+
 #[derive(Clone, PartialEq, Eq)]
 struct IntentWithSignatures {
     intent: IntentToSign,
-    signatures: IndexSet<HDSignature<TransactionIntentHash>>,
-    neglected_factor_sources: IndexSet<NeglectedFactor>,
+    signatures: IndexSet<SignatureWithContext>,
+    neglected_factor_sources: IndexSet<NeglectedFactor>, // TODO Needed?
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -80,7 +82,6 @@ impl SigningManager {
         role: RoleKind,
     ) -> Result<IndexSet<IntentWithSignatures>> {
   
-
         let transactions =
             intents.iter().map(|i| i.intent.clone()).collect_vec();
 
