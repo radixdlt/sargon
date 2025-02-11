@@ -67,26 +67,22 @@ impl std::hash::Hash for DeviceFactorAddingManager {
 impl FactorIdentification {
     const NUMBER_OF_CONFIRMATION_WORDS: u8 = 4;
 
-    async fn new(
-        sargon_os: &Arc<SargonOS>,
-        mnemonic: Mnemonic,
-    ) -> Result<Self> {
+    fn new(mnemonic: Mnemonic, host_info: HostInfo) -> Self {
         let mnemonic_words = mnemonic.clone().words;
         let number_of_words = mnemonic_words.clone().len() as u8;
-        let factor_source = sargon_os
-            .create_device_factor_source(
-                MnemonicWithPassphrase::new(mnemonic),
-                DeviceFactorSourceType::Babylon { is_main: false },
-            )
-            .await?;
+        let factor_source = DeviceFactorSource::babylon(
+            false,
+            &MnemonicWithPassphrase::new(mnemonic),
+            &host_info,
+        );
 
-        Ok(Self {
+        Self {
             factor_source,
             mnemonic_words,
             confirmation_indices: Self::generate_confirmation_indices(
                 number_of_words,
             ),
-        })
+        }
     }
 
     fn generate_confirmation_indices(number_of_words: u8) -> HashSet<u8> {
@@ -155,32 +151,36 @@ impl DeviceFactorAddingManager {
             .set_name(name.as_ref().to_owned());
         self
     }
-}
 
-impl DeviceFactorAddingManager {
-    pub async fn create_new_factor_source(&self) -> Result<&Self> {
+    pub fn create_new_factor_source(&self, host_info: HostInfo) -> &Self {
         let mnemonic = Mnemonic::generate_new();
-        self.create_factor_source(mnemonic).await?;
-        Ok(self)
+        self.create_factor_source(mnemonic, host_info);
+        self
     }
 
-    pub async fn create_factor_source_from_mnemonic_words(
+    pub fn create_factor_source_from_mnemonic_words(
         &self,
+        host_info: HostInfo,
         words: Vec<BIP39Word>,
     ) -> Result<&Self> {
         let mnemonic = Mnemonic::from_words(words)?;
-        self.create_factor_source(mnemonic).await?;
+        self.create_factor_source(mnemonic, host_info);
         Ok(self)
     }
 
+    fn create_factor_source(&self, mnemonic: Mnemonic, host_info: HostInfo) {
+        *self.factor_identification.write().unwrap() =
+            Some(FactorIdentification::new(mnemonic, host_info))
+    }
+}
+
+impl DeviceFactorAddingManager {
     pub fn mnemonic_words_match(&self, words: Vec<BIP39Word>) -> bool {
         self.get_mnemonic_words() == words
     }
 
-    async fn create_factor_source(&self, mnemonic: Mnemonic) -> Result<()> {
-        *self.factor_identification.write().unwrap() =
-            Some(FactorIdentification::new(&self.sargon_os, mnemonic).await?);
-        Ok(())
+    pub async fn resolve_host_info(&self) -> HostInfo {
+        self.sargon_os.resolve_host_info().await
     }
 }
 

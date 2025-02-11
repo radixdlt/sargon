@@ -44,6 +44,17 @@ impl DeviceFactorAddingManager {
             _ = write(&builder.wrapped);
         })
     }
+
+    fn set_from_result(
+        self: Arc<Self>,
+        write: impl Fn(
+            &Arc<sargon::DeviceFactorAddingManager>,
+        ) -> Result<&sargon::DeviceFactorAddingManager>,
+    ) -> Result<Arc<Self>> {
+        builder_arc_map_result(self, |builder| {
+            write(&builder.wrapped).map(|_| ())
+        })
+    }
 }
 
 // ====================
@@ -82,5 +93,35 @@ impl DeviceFactorAddingManager {
 impl DeviceFactorAddingManager {
     pub fn set_factor_name(self: Arc<Self>, name: String) -> Arc<Self> {
         self.set(|manager| manager.set_factor_name(&name))
+    }
+
+    pub async fn create_new_factor_source(self: Arc<Self>) -> Arc<Self> {
+        let host_info = self.wrapped.resolve_host_info().await;
+        self.set(|manager| manager.create_new_factor_source(host_info.clone()))
+    }
+
+    pub async fn create_factor_source_from_mnemonic_words(
+        self: Arc<Self>,
+        words: Vec<BIP39Word>,
+    ) -> Result<Arc<Self>> {
+        let host_info = self.wrapped.resolve_host_info().await;
+        self.set_from_result(|manager| {
+            manager
+                .create_factor_source_from_mnemonic_words(
+                    host_info.clone(),
+                    words.clone().into_internal(),
+                )
+                .into_result()
+        })
+    }
+}
+
+#[uniffi::export]
+impl DeviceFactorAddingManager {
+    pub fn mnemonic_words_match(
+        self: Arc<Self>,
+        words: Vec<BIP39Word>,
+    ) -> bool {
+        self.wrapped.mnemonic_words_match(words.into_internal())
     }
 }

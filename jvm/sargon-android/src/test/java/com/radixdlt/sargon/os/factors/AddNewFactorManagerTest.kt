@@ -4,6 +4,8 @@ import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.Drivers
 import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.SargonOs
+import com.radixdlt.sargon.extensions.kind
+import com.radixdlt.sargon.extensions.name
 import com.radixdlt.sargon.os.driver.AndroidEntropyProviderDriver
 import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
 import com.radixdlt.sargon.os.driver.AndroidNetworkingDriver
@@ -33,9 +35,13 @@ class AddNewFactorManagerTest {
     @Test
     fun addTest() = runTest(testDispatcher) {
         val sargonOs = SargonOs.boot(bios(), hostInteractor)
-        var builder = sargonOs.makeAddNewFactorBuilder(FactorSourceKind.DEVICE)
-        builder = builder.setName("New Test Factor")
-        assertEquals("New Test Factor", builder.getName())
+        var manager = sargonOs.makeDeviceFactorAddingManager()
+
+        manager.createNewFactorSource()
+        manager = manager.setFactorName("New Test Factor")
+
+        assert(manager.getFactorSource().kind == FactorSourceKind.DEVICE)
+        assertEquals("New Test Factor", manager.getFactorSource().name)
     }
 
     private fun bios() = Bios(

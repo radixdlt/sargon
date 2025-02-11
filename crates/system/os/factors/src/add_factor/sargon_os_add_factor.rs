@@ -29,14 +29,31 @@ impl OsNewFactorAdding for Arc<SargonOS> {
     }
 
     async fn add_factor(&self, factor_source: FactorSource) -> Result<()> {
+        self.update_profile_with(|p| {
+            p.factor_sources.append(factor_source.clone());
+            Ok(())
+        })
+        .await?;
         // 1. Save factor source into profile
         // 2. Pre-derive and fill cache with instances for factor source
         // 3. If pre-derived -> return Result::Ok, if not -> delete factor source from profile
         // (assert that it's not used anywhere else) and return Result::Err(CommonError::FactorNotCreated)
-        self.pre_derive_and_fill_cache_with_instances_for_factor_source(
-            factor_source,
-        )
-        .await?;
+        let result = self
+            .pre_derive_and_fill_cache_with_instances_for_factor_source(
+                factor_source.clone(),
+            )
+            .await;
+        let fsid = factor_source.factor_source_id();
+
+        if result.is_err() {
+            self.update_profile_with(|p| {
+                p.factor_sources.remove_id(&fsid);
+                Ok(())
+            })
+            .await?;
+            result?;
+        }
+
         Ok(())
     }
 }
