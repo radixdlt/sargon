@@ -52,7 +52,7 @@ name = "addresses"
 version = "1.1.136"
 dependencies = [
  "assert-json",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "cap26-models",
  "core-utils",
  "derive_more",
@@ -1111,7 +1111,7 @@ name = "ecc"
 version = "1.1.136"
 dependencies = [
  "assert-json",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "derive_more",
  "enum-as-inner",
  "error",
@@ -1214,7 +1214,7 @@ version = "1.1.136"
 dependencies = [
  "aes-gcm",
  "assert-json",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "derive_more",
  "error",
  "has-sample-values",
@@ -1405,7 +1405,7 @@ dependencies = [
 name = "factors"
 version = "1.1.136"
 dependencies = [
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -1731,7 +1731,7 @@ dependencies = [
 name = "hash"
 version = "1.1.136"
 dependencies = [
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "derive_more",
  "prelude",
  "radix-common",
@@ -1799,7 +1799,7 @@ version = "1.1.136"
 dependencies = [
  "assert-json",
  "bip39",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "cap26-models",
  "derive_more",
  "ecc",
@@ -1848,7 +1848,7 @@ dependencies = [
  "addresses",
  "async-trait",
  "base64",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "core-utils",
  "derive_more",
  "drivers",
@@ -1918,7 +1918,7 @@ name = "http-client"
 version = "1.1.136"
 dependencies = [
  "actix-rt",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "core-utils",
  "drivers",
  "error",
@@ -2679,7 +2679,7 @@ dependencies = [
 name = "numeric"
 version = "1.1.136"
 dependencies = [
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "delegate",
  "derive_more",
  "enum-iterator",
@@ -3288,7 +3288,7 @@ dependencies = [
  "assert-json",
  "async-trait",
  "base64",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "core-misc",
  "core-utils",
  "derive_more",
@@ -3320,7 +3320,7 @@ name = "radix-connect-models"
 version = "1.1.136"
 dependencies = [
  "addresses",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "core-misc",
  "derive_more",
  "error",
@@ -4435,7 +4435,7 @@ dependencies = [
  "addresses",
  "assert-json",
  "async-trait",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -4470,7 +4470,7 @@ name = "signing-traits"
 version = "1.1.136"
 dependencies = [
  "async-trait",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "core-collections",
  "derive_more",
  "ecc",
@@ -4947,7 +4947,7 @@ name = "transaction-foundation"
 version = "1.1.136"
 dependencies = [
  "assert-json",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "derive_more",
  "has-sample-values",
  "paste",
@@ -4962,7 +4962,7 @@ name = "transaction-models"
 version = "1.1.136"
 dependencies = [
  "addresses",
- "bytes 1.1.135",
+ "bytes 1.1.136",
  "cargo_toml",
  "core-collections",
  "core-misc",
