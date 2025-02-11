@@ -1,62 +1,13 @@
-use serde_json::value::Index;
-
 use crate::prelude::*;
-
-#[async_trait::async_trait]
-pub trait ApplyShieldTransactionsSigner: Send + Sync {
-    async fn sign_transaction_intents(
-        self,
-        payload_to_sign: ApplySecurityShieldPayloadToSign,
-    ) -> Result<ApplySecurityShieldSignedPayload>;
-}
-
-pub struct ApplyShieldTransactionsSignerImpl {
-    signing_manager: SigningManager,
-}
-
-impl ApplyShieldTransactionsSignerImpl {
-    pub fn new(os: &SargonOS) -> Result<Self> {
-        os.profile()
-            .map(|profile| {
-                SigningManager::new(profile, os.sign_transactions_interactor())
-            })
-            .map(|signing_manager| Self { signing_manager })
-    }
-}
-
-#[async_trait::async_trait]
-impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
-    async fn sign_transaction_intents(
-        self,
-        payload_to_sign: ApplySecurityShieldPayloadToSign,
-    ) -> Result<ApplySecurityShieldSignedPayload> {
-        let notary_manager = NotaryManager {
-            keys_for_intents: payload_to_sign.notary_keys,
-        };
-        let intent_sets = payload_to_sign.applications_with_intents;
-        let signed_sets =
-            self.signing_manager.sign_intent_sets(intent_sets).await?;
-
-        let signed_intents = signed_sets
-            .into_iter()
-            .map(|signed_set| signed_set.get_best_signed_intent())
-            .collect_vec();
-
-        let notarized_transactions = notary_manager.notarize(signed_intents)?;
-
-        Ok(ApplySecurityShieldSignedPayload {
-            notarized_transactions,
-        })
-    }
-}
 
 /// Implementation of complex signing flow laid out in this
 /// [whimsical diagram][flow].
 ///
 /// [flow]: https://whimsical.com/wallet-sargon-signing-flow-QFvU2NAVXFiX1VgNBuvj5g
 pub struct SigningManager {
+    /// FactorSources in Profile
+    factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
-    profile: Profile, // TODO: Remove this AND requirement of it from SignaturesCollector
 
     // ~~~ === INTERNAL STATE === ~~~
     roles_to_exercise: IndexSet<RoleKind>,
@@ -67,12 +18,12 @@ pub struct SigningManager {
 // ==============
 impl SigningManager {
     pub fn new(
-        profile: Profile,
+        factor_sources_in_profile: IndexSet<FactorSource>,
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
     ) -> Self {
         Self {
+            factor_sources_in_profile,
             interactor,
-            profile,
             roles_to_exercise: IndexSet::from_iter([
                 RoleKind::Recovery,
                 RoleKind::Confirmation,
@@ -109,19 +60,26 @@ impl SigningManager {
         intents: Vec<IntentToSign>,
         role: RoleKind,
     ) -> Result<IndexSet<IntentWithSignatures>> {
-        let transactions =
-            intents.iter().map(|i| i.intent.clone()).collect_vec();
+        let purpose = SigningPurpose::SignTX { role_kind: role };
 
-        // TODO: We should use a new ctor, and use `IntentToSign.entities`? and `IntentToSign.variant`?
-        let collector = SignaturesCollector::new(
+        let transactions_with_petitions = intents
+            .iter()
+            .into_iter()
+            .map(|t| {
+                SignableWithEntities::new(t.intent.clone(), t.entities.clone())
+            })
+            .collect::<IdentifiedVecOf<_>>();
+
+        let collector = SignaturesCollector::with(
             SigningFinishEarlyStrategy::default(),
-            transactions,
+            self.factor_sources_in_profile.clone(),
+            transactions_with_petitions,
             self.interactor.clone(),
-            &self.profile,
-            SigningPurpose::SignTX { role_kind: role },
-        )?;
+            purpose,
+        );
 
         let outcome = collector.collect_signatures().await?;
+
         todo!()
     }
 
@@ -173,7 +131,7 @@ impl SigningManager {
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct IntentToSign {
     intent: TransactionIntent,
-    entities: Vec<AddressOfAccountOrPersona>, // often one, or two (payer != entity)
+    entities: Vec<AccountOrPersona>, // often one, or two (payer != entity)
     variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 
@@ -200,39 +158,14 @@ impl SignedIntentSet {
     }
 }
 
-pub struct NotaryManager {
-    keys_for_intents: IndexMap<TransactionIntentHash, Ed25519PrivateKey>,
-}
-impl NotaryManager {
-    pub fn notarize(
-        self,
-        signed_intents: impl IntoIterator<Item = SignedIntent>,
-    ) -> Result<Vec<NotarizedTransaction>> {
-        let signed_intents = signed_intents.into_iter().collect_vec();
-        let mut key_for_intent = self.keys_for_intents;
-        signed_intents
-            .into_iter()
-            .map(|signed_intent| {
-                let intent = signed_intent.intent();
-                let private_key = key_for_intent
-                    .swap_remove(&intent.transaction_intent_hash())
-                    .ok_or_else(|| CommonError::Unknown)?;
-                let notary_signature =
-                    private_key.notarize_hash(&signed_intent.hash());
-                NotarizedTransaction::new(signed_intent, notary_signature)
-            })
-            .collect::<Result<Vec<_>>>()
-    }
-}
-
 #[cfg(test)]
 mod tests {
-use super::*;
+    use super::*;
 
-type SUT = SigningManager;
+    type SUT = SigningManager;
 
     #[actix_rt::test]
     async fn test() {
-        let sut = SUT::new(profile, interactor)
+        // let sut = SUT::new(profile, interactor)
     }
 }

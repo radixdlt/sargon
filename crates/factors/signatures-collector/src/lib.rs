@@ -9,7 +9,7 @@ mod tests;
 pub mod prelude {
     pub use crate::collector::*;
     pub use crate::petition_types::*;
-    pub(crate) use crate::signable_with_entities::*;
+    pub use crate::signable_with_entities::*;
     pub use crate::signatures_outcome_types::*;
 
     pub(crate) use addresses::prelude::*;
