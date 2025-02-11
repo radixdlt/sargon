@@ -33,7 +33,7 @@ pub struct ApplicationInputPayingAccountSecurified {
     pub account: SecurifiedAccount,
     pub addresses_of_access_controller: AddressesOfAccessController,
 
-    /// XRD balance of `account` (not XRD vault)
+    /// XRD balance of `account` (not AccessController XRD vault)
     pub xrd_balance_of_account: Decimal,
 }
 impl ApplicationInputPayingAccountSecurified {
