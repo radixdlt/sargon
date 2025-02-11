@@ -32,4 +32,4 @@ preinterpret = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-futures = "0.3.31"
+futures = { workspace = true }
