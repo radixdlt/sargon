@@ -59,7 +59,7 @@ impl OsTestDummySecurifyEntities for SargonOS {
             EntitySecurityState::Unsecured { value } => {
                 veci = value.transaction_signing.clone();
                 // THIS IS COMPLETELY WRONG!
-                // The real solution should get the AccessControllerAddress on chain
+                // The real solution should get the AddressesOfAccessController on chain
                 addresses_of_access_controller =
                     AddressesOfAccessController::new(
                         AccessControllerAddress::with_node_id_of(
