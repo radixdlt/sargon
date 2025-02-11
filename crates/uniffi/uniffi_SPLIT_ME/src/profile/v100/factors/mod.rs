@@ -6,6 +6,7 @@ mod factor_source_flag;
 mod factor_source_id;
 mod factor_source_id_from_address;
 mod factor_source_id_from_hash;
+mod factor_source_id_spot_check;
 mod factor_source_kind;
 mod factor_sources;
 mod hierarchical_deterministic_factor_instance;

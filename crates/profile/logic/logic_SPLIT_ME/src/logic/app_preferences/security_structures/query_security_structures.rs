@@ -69,12 +69,150 @@ impl ProfileSecurityShieldPrerequisitesStatus for Profile {
     }
 }
 
+pub trait LinkedToSecurityStructure {
+    fn is_currently_or_provisionally_securified_with(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> bool;
+
+    fn is_currently_securified_with(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> bool;
+
+    fn is_provisionally_securified_with(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> bool;
+}
+
+impl LinkedToSecurityStructure for EntitySecurityState {
+    fn is_currently_or_provisionally_securified_with(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> bool {
+        self.is_currently_securified_with(shield_id)
+            || self.is_provisionally_securified_with(shield_id)
+    }
+
+    fn is_currently_securified_with(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> bool {
+        self.as_securified()
+            .map(|s| s.security_structure.security_structure_id == shield_id)
+            .unwrap_or(false)
+    }
+
+    fn is_provisionally_securified_with(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> bool {
+        self.get_provisional()
+            .as_ref()
+            .and_then(|p| p.as_factor_instances_derived())
+            .map(|s| s.security_structure_id == shield_id)
+            .unwrap_or(false)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = Profile;
+
+    #[test]
+    fn test_account_is_currently_securified() {
+        let mut sut = SUT::sample();
+        let security_structure_sample =
+            SecurityStructureOfFactorSourceIDs::sample();
+
+        let accounts = sut.accounts_on_current_network().unwrap();
+        let account = accounts.first().unwrap();
+        let account_secured_control = SecuredEntityControl::new(
+            account
+                .security_state()
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .clone(),
+            AccessControllerAddress::sample_mainnet(),
+            SecurityStructureOfFactorInstances::sample(),
+        )
+        .unwrap();
+
+        let mut securify_account = account.clone();
+        securify_account
+            .set_security_state(EntitySecurityState::Securified {
+                value: account_secured_control,
+            })
+            .unwrap();
+
+        sut.update_entities_erased(
+            vec![AccountOrPersona::from(securify_account)].into(),
+        )
+        .unwrap();
+
+        let updated_accounts = sut.accounts_on_current_network().unwrap();
+        let updated_account = updated_accounts.first().unwrap();
+
+        let account_security_state = updated_account.security_state();
+
+        let is_currently_securified = account_security_state
+            .is_currently_securified_with(security_structure_sample.id());
+        assert!(is_currently_securified);
+
+        let is_provisionally_securified = account_security_state
+            .is_provisionally_securified_with(security_structure_sample.id());
+        assert!(!is_provisionally_securified);
+    }
+
+    #[test]
+    fn test_account_is_provisionally_securified() {
+        let mut sut = SUT::sample();
+        let security_structure_sample =
+            SecurityStructureOfFactorSourceIDs::sample();
+
+        let accounts = sut.accounts_on_current_network().unwrap();
+        let account = accounts.first().unwrap();
+        let account_secured_control = UnsecuredEntityControl::new(
+            account
+                .security_state()
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .clone(),
+            ProvisionalSecurifiedConfig::sample(),
+        )
+        .unwrap();
+
+        let mut securify_account = account.clone();
+        securify_account
+            .set_security_state(EntitySecurityState::Unsecured {
+                value: account_secured_control,
+            })
+            .unwrap();
+
+        sut.update_entities_erased(
+            vec![AccountOrPersona::from(securify_account)].into(),
+        )
+        .unwrap();
+
+        let updated_accounts = sut.accounts_on_current_network().unwrap();
+        let updated_account = updated_accounts.first().unwrap();
+
+        let account_security_state = updated_account.security_state();
+
+        let is_currently_securified = account_security_state
+            .is_currently_securified_with(security_structure_sample.id());
+        assert!(!is_currently_securified);
+
+        let is_provisionally_securified = account_security_state
+            .is_provisionally_securified_with(security_structure_sample.id());
+        assert!(is_provisionally_securified);
+    }
 
     #[test]
     fn security_shield_prerequisites_status_hardware_required() {
