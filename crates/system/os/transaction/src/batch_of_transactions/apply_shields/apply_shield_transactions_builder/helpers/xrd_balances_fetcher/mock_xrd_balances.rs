@@ -20,7 +20,7 @@ impl NetworkRequestParseOriginal for NetworkRequest {
     }
 }
 
-pub trait EveronesRichMockNetworkingDriver {
+pub trait EveryoneIsRichMockNetworkingDriver {
     fn everyones_rich(network_id: NetworkID) -> Arc<dyn NetworkingDriver>;
 }
 
