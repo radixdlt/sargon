@@ -12,7 +12,7 @@ pub trait ApplySecurityShieldCommitting: Send + Sync {
     /// Host presents batch TX review UI, and user needs to select payer for each manifest,
     /// MUST be done for Personas and in case of entity being an Account, the payer might
     /// be the same account as the entity applying the shield. That information is passed
-    /// when user slides to sign back to Sargon via the tuples of `ManifestWithPayer`.
+    /// when user slides to sign back to Sargon via the tuples of `ManifestWithPayerByAddress`.
     ///
     /// We will map from `Vec<Manifest>` -> `Vec<Vec<Manifest>>` where for each entity
     /// being unsecurified the inner Vec will be unchanged - one single manifest. But
