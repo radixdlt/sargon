@@ -49,6 +49,10 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     }
 }
 
+/// Implementation of complex signing flow laid out in this 
+/// [whimsical diagram][flow].
+/// 
+/// [flow]: https://whimsical.com/wallet-sargon-signing-flow-QFvU2NAVXFiX1VgNBuvj5g
 pub struct SigningManager {
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
     profile: Profile, // TODO: Remove this AND requirement of it from SignaturesCollector
