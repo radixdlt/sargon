@@ -15,8 +15,8 @@ impl GatewayClient {
         Ok(map.get(&address).cloned().flatten())
     }
 
-    /// Fetched the XRD balance of account of `address`, returns `None` if
-    /// it has no balance.
+    /// Fetches the XRD balance of each account `address`. Returns the 
+    /// balance for each account (being `None` if it has no balance).
     pub async fn xrd_balances_of_accounts(
         &self,
         network_id: NetworkID,
