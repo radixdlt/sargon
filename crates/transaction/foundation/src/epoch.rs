@@ -183,7 +183,7 @@ mod tests {
     }
 
     #[test]
-    fn epoch_window_is_one_year_for_ridicilus_amount_of_tx() {
+    fn epoch_window_is_more_than_one_year_for_ridicilus_amount_of_tx() {
         let duration = SUT::duration_one_week_or_more_if_many_manifests(13_000);
         assert!(duration > (SUT::NUMBER_OF_EPOCHS_PER_WEEK * 52));
     }
