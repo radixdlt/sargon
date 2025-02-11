@@ -287,7 +287,15 @@ impl SargonOS {
         name: DisplayName,
         persona_data: Option<PersonaData>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
-        debug!("Creating persona.");
+        debug!("Spot checking the factor source...");
+        let spot_check_response = self
+            .spot_check_interactor()
+            .spot_check(factor_source.clone(), true)
+            .await?;
+        debug!(
+            "Spot check response: {:?}. Creating persona...",
+            spot_check_response
+        );
         let (mut persona, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
@@ -1289,6 +1297,45 @@ mod tests {
         assert_eq!(
             os.persona_by_address(IdentityAddress::sample_mainnet()),
             Err(CommonError::UnknownPersona)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_persona_continues_when_user_skips_spot_check(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_skipped()),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        // Create empty Wallet
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        // Add Persona and verify it was added
+        let persona = os
+            .with_timeout(|x| {
+                x.create_and_save_new_persona_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                    None,
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            os.profile().unwrap().networks[0].personas,
+            Personas::just(persona)
         );
     }
 
