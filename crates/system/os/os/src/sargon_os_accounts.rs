@@ -301,7 +301,15 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-        debug!("Creating account.");
+        debug!("Spot checking the factor source...");
+        let spot_check_response = self
+            .spot_check_interactor()
+            .spot_check(factor_source.clone(), true)
+            .await?;
+        debug!(
+            "Spot check response: {:?}. Creating account...",
+            spot_check_response
+        );
         let (account, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_account_with_factor_source_with_derivation_outcome(
                 factor_source,
@@ -1324,6 +1332,44 @@ mod tests {
                 ProfileSaved,
                 AccountAdded
             ]
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_continues_when_user_skips_spot_check(
+    ) {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_skipped()),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        // Create empty Wallet
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        // Add Account and verify it was added
+        let account = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            os.profile().unwrap().networks[0].accounts,
+            Accounts::just(account)
         );
     }
 

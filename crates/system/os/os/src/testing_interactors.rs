@@ -5,9 +5,10 @@ pub trait InteractorsCtors {
         keys_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Interactors;
 
-    fn new_with_derivation_and_authorization_interactor(
+    fn new_with_derivation_authorization_and_spot_check_interactor(
         keys_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
         authorization_interactor: Arc<dyn AuthorizationInteractor>,
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
     ) -> Interactors;
 
     fn new_from_clients_and_spot_check_interactor(
@@ -28,12 +29,13 @@ pub trait InteractorsCtors {
         clients: &Clients,
         authorization_interactor: Arc<dyn AuthorizationInteractor>,
     ) -> Interactors {
-        Self::new_with_derivation_and_authorization_interactor(
+        Self::new_with_derivation_authorization_and_spot_check_interactor(
             Arc::new(TestDerivationInteractor::new(
                 false,
                 Arc::new(clients.secure_storage.clone()),
             )),
             authorization_interactor,
+            Arc::new(TestSpotCheckInteractor::new_succeeded()),
         )
     }
 }
@@ -63,9 +65,10 @@ impl InteractorsCtors for Interactors {
         )
     }
 
-    fn new_with_derivation_and_authorization_interactor(
+    fn new_with_derivation_authorization_and_spot_check_interactor(
         keys_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
         authorization_interactor: Arc<dyn AuthorizationInteractor>,
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
     ) -> Interactors {
         let use_factor_sources_interactors =
             TestUseFactorSourcesInteractors::new(
@@ -84,7 +87,7 @@ impl InteractorsCtors for Interactors {
         Self::new(
             Arc::new(use_factor_sources_interactors),
             authorization_interactor,
-            Arc::new(TestSpotCheckInteractor::new_succeeded()),
+            spot_check_interactor,
         )
     }
 
