@@ -1,9 +1,11 @@
+use serde_json::value::Index;
+
 use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait ApplyShieldTransactionsSigner: Send + Sync {
     async fn sign_transaction_intents(
-        &self,
+        self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload>;
 }
@@ -15,9 +17,8 @@ pub struct ApplyShieldTransactionsSignerImpl {
 impl ApplyShieldTransactionsSignerImpl {
     pub fn new(os: &SargonOS) -> Result<Self> {
         os.profile()
-            .map(|profile| SigningManager {
-                profile,
-                interactor: os.sign_transactions_interactor(),
+            .map(|profile| {
+                SigningManager::new(profile, os.sign_transactions_interactor())
             })
             .map(|signing_manager| Self { signing_manager })
     }
@@ -26,7 +27,7 @@ impl ApplyShieldTransactionsSignerImpl {
 #[async_trait::async_trait]
 impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     async fn sign_transaction_intents(
-        &self,
+        self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload> {
         let notary_manager = NotaryManager {
@@ -49,43 +50,65 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     }
 }
 
-/// Implementation of complex signing flow laid out in this 
+/// Implementation of complex signing flow laid out in this
 /// [whimsical diagram][flow].
-/// 
+///
 /// [flow]: https://whimsical.com/wallet-sargon-signing-flow-QFvU2NAVXFiX1VgNBuvj5g
 pub struct SigningManager {
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
     profile: Profile, // TODO: Remove this AND requirement of it from SignaturesCollector
+
+    // ~~~ === INTERNAL STATE === ~~~
+    roles_to_exercise: IndexSet<RoleKind>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct IntentToSign {
-    intent: TransactionIntent,
-    entities: Vec<AddressOfAccountOrPersona>, // often one, or two (payer != entity)
-    variant: Option<RolesExercisableInTransactionManifestCombination>,
+// ==============
+// === PUBLIC ===
+// ==============
+impl SigningManager {
+    pub fn new(
+        profile: Profile,
+        interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    ) -> Self {
+        Self {
+            interactor,
+            profile,
+            roles_to_exercise: IndexSet::from_iter([
+                RoleKind::Recovery,
+                RoleKind::Confirmation,
+                RoleKind::Primary,
+            ]),
+        }
+    }
+
+    /// A "TransactionIntent Set" is a "group" of TransactionsIntents having manifest per variant
+    /// of [`RolesExercisableInTransactionManifestCombination`]. For manifests
+    /// securifying an unsecurified entity the set will have only one intent.
+    ///
+    /// From each set we should only submit one to the Ledger, and that is the
+    /// "best one" of those which was signed. Successfully signed intent which
+    /// can exercise the Confirmation role are better than those using delay completion (
+    /// time).
+    pub async fn sign_intent_sets(
+        self,
+        intent_sets: impl IntoIterator<
+            Item = SecurityShieldApplicationWithTransactionIntents,
+        >,
+    ) -> Result<Vec<SignedIntentSet>> {
+        let mut self_ = self;
+        self_.do_sign_intent_sets(intent_sets).await
+    }
 }
 
-type SignatureWithContext = HDSignature<TransactionIntentHash>;
-
-#[derive(Clone, PartialEq, Eq)]
-struct IntentWithSignatures {
-    intent: IntentToSign,
-    signatures: IndexSet<SignatureWithContext>,
-    neglected_factor_sources: IndexSet<NeglectedFactor>, // TODO Needed?
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct IntentsToSign {
-    intents: Vec<IntentToSign>,
-}
-
+// ==============
+// === PRIVATE ===
+// ==============
 impl SigningManager {
     async fn do_sign_intents_with_role(
         &self,
         intents: Vec<IntentToSign>,
         role: RoleKind,
     ) -> Result<IndexSet<IntentWithSignatures>> {
-  
         let transactions =
             intents.iter().map(|i| i.intent.clone()).collect_vec();
 
@@ -134,16 +157,8 @@ impl SigningManager {
             .await
     }
 
-    /// A "TransactionIntent Set" is a "group" of TransactionsIntents having manifest per variant
-    /// of [`RolesExercisableInTransactionManifestCombination`]. For manifests
-    /// securifying an unsecurified entity the set will have only one intent.
-    ///
-    /// From each set we should only submit one to the Ledger, and that is the
-    /// "best one" of those which was signed. Successfully signed intent which
-    /// can exercise the Confirmation role are better than those using delay completion (
-    /// time).
-    pub async fn sign_intent_sets(
-        &self,
+    async fn do_sign_intent_sets(
+        &mut self,
         intent_sets: impl IntoIterator<
             Item = SecurityShieldApplicationWithTransactionIntents,
         >,
@@ -153,6 +168,27 @@ impl SigningManager {
             self.sign_intents_with_recovery_role(&intent_sets).await?;
         todo!()
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct IntentToSign {
+    intent: TransactionIntent,
+    entities: Vec<AddressOfAccountOrPersona>, // often one, or two (payer != entity)
+    variant: Option<RolesExercisableInTransactionManifestCombination>,
+}
+
+type SignatureWithContext = HDSignature<TransactionIntentHash>;
+
+#[derive(Clone, PartialEq, Eq)]
+struct IntentWithSignatures {
+    intent: IntentToSign,
+    signatures: IndexSet<SignatureWithContext>,
+    neglected_factor_sources: IndexSet<NeglectedFactor>, // TODO Needed?
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct IntentsToSign {
+    intents: Vec<IntentToSign>,
 }
 
 pub struct SignedIntentSet {
@@ -186,5 +222,17 @@ impl NotaryManager {
                 NotarizedTransaction::new(signed_intent, notary_signature)
             })
             .collect::<Result<Vec<_>>>()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+use super::*;
+
+type SUT = SigningManager;
+
+    #[actix_rt::test]
+    async fn test() {
+        let sut = SUT::new(profile, interactor)
     }
 }
