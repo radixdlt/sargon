@@ -61,10 +61,11 @@ struct IntentToSign {
     variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 struct IntentWithSignatures {
-    intent: TransactionIntent,
-    signatures: IndexSet<SignatureWithPublicKey>,
+    intent: IntentToSign,
+    signatures: IndexSet<HDSignature<TransactionIntentHash>>,
+    neglected_factor_sources: IndexSet<NeglectedFactor>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -78,6 +79,21 @@ impl SigningManager {
         intents: Vec<IntentToSign>,
         role: RoleKind,
     ) -> Result<IndexSet<IntentWithSignatures>> {
+  
+
+        let transactions =
+            intents.iter().map(|i| i.intent.clone()).collect_vec();
+
+        // TODO: We should use a new ctor, and use `IntentToSign.entities`? and `IntentToSign.variant`?
+        let collector = SignaturesCollector::new(
+            SigningFinishEarlyStrategy::default(),
+            transactions,
+            self.interactor.clone(),
+            &self.profile,
+            SigningPurpose::SignTX { role_kind: role },
+        )?;
+
+        let outcome = collector.collect_signatures().await?;
         todo!()
     }
 
@@ -128,7 +144,8 @@ impl SigningManager {
         >,
     ) -> Result<Vec<SignedIntentSet>> {
         let intent_sets = intent_sets.into_iter().collect_vec();
-        let sign_with_recovery_result = self.sign_intents_with_recovery_role(&intent_sets).await;
+        let sign_with_recovery =
+            self.sign_intents_with_recovery_role(&intent_sets).await?;
         todo!()
     }
 }

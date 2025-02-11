@@ -542,6 +542,7 @@ pub fn assert_petition<S: Signable>(
     }
 }
 
+#[cfg(debug_assertions)]
 impl<S: Signable> SignaturesCollector<S> {
     /// Used by tests
     pub fn petitions(self) -> Petitions<S> {
