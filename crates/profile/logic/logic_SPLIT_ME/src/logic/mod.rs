@@ -7,7 +7,6 @@ mod persona;
 mod profile_header;
 mod profile_network;
 mod profile_networks;
-mod profile_security_structure;
 mod profile_update;
 mod query_factor_sources;
 
@@ -19,6 +18,5 @@ pub use persona::*;
 pub use profile_header::*;
 pub use profile_network::*;
 pub use profile_networks::*;
-pub use profile_security_structure::*;
 pub use profile_update::*;
 pub use query_factor_sources::*;
