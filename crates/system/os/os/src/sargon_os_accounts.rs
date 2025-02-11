@@ -1338,23 +1338,10 @@ mod tests {
     #[actix_rt::test]
     async fn test_create_and_save_new_account_continues_when_user_skips_spot_check(
     ) {
-        let mut clients = Clients::new(Bios::new(Drivers::test()));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors =
-            Interactors::new_from_clients_and_spot_check_interactor(
-                &clients,
-                Arc::new(TestSpotCheckInteractor::new_skipped()),
-            );
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
+        let os = SUT::boot_test_empty_wallet_with_spot_check_interactor(
+            Arc::new(TestSpotCheckInteractor::new_skipped()),
         )
-        .await
-        .unwrap();
-
-        // Create empty Wallet
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        .await;
 
         // Add Account and verify it was added
         let account = os
@@ -1371,6 +1358,29 @@ mod tests {
             os.profile().unwrap().networks[0].accounts,
             Accounts::just(account)
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_fails_when_spot_check_fails() {
+        let spot_check_error = CommonError::sample_other();
+        let os =
+            SUT::boot_test_empty_wallet_with_spot_check_interactor(Arc::new(
+                TestSpotCheckInteractor::new_failed(spot_check_error.clone()),
+            ))
+            .await;
+
+        // Attempt to add Account and check it fails with expected error
+        let error = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                )
+            })
+            .await
+            .expect_err("Expected error");
+
+        assert_eq!(error, spot_check_error,);
     }
 
     #[actix_rt::test]
