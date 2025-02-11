@@ -23,55 +23,76 @@ impl ApplyShieldTransactionsSignerImpl {
 impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     async fn sign_transaction_intents(
         &self,
-        _payload_to_sign: ApplySecurityShieldPayloadToSign,
-    ) -> Result<ApplySecurityShieldSignedPayload> {
-        #[cfg(not(test))]
-        todo!("implement signing transaction intents");
-        #[cfg(test)]
-        self.fake_sign(_payload_to_sign)
-    }
-}
-
-#[cfg(test)]
-impl SecurityShieldApplicationWithTransactionIntents {
-    fn first_transaction_intent(&self) -> TransactionIntent {
-        match self {
-        SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(sec) => match sec {
-            SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents::Account(a) => a.initiate_with_primary_complete_with_confirmation.clone(),
-            SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents::Persona(p) => p.initiate_with_primary_complete_with_confirmation.clone(),
-        },
-        SecurityShieldApplicationWithTransactionIntents::ForUnsecurifiedEntity(unsec) => match unsec {
-            SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::Account(a) => a.transaction_intent.clone(),
-            SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::Persona(p) => p.transaction_intent.clone()
-        }
-    }
-    }
-}
-
-#[cfg(test)]
-impl ApplyShieldTransactionsSignerImpl {
-    fn fake_sign(
-        &self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload> {
-        error!("Signing transaction intents is not implemented yet");
-        Ok(ApplySecurityShieldSignedPayload {
-            notarized_transactions: payload_to_sign
-                .applications_with_intents
-                .into_iter()
-                .map(|i| {
-                    let intent = i.first_transaction_intent();
+        let signing_manager = SigningManager;
+        let notary_manager = NotaryManager {
+            keys_for_intents: payload_to_sign.notary_keys,
+        };
+        let intent_sets = payload_to_sign.applications_with_intents;
+        let signed_sets = signing_manager.sign_intent_sets(intent_sets).await?;
 
-                    NotarizedTransaction::new(
-                        SignedIntent {
-                            intent,
-                            intent_signatures: IntentSignatures::sample(),
-                        },
-                        NotarySignature::sample(),
-                    )
-                    .unwrap()
-                })
-                .collect_vec(),
+        let signed_intents = signed_sets
+            .into_iter()
+            .map(|signed_set| signed_set.get_best_signed_intent())
+            .collect_vec();
+
+        let notarized_transactions = notary_manager.notarize(signed_intents)?;
+
+        Ok(ApplySecurityShieldSignedPayload {
+            notarized_transactions,
         })
+    }
+}
+
+pub struct SigningManager;
+impl SigningManager {
+    /// A "TransactionIntent Set" is a "group" of TransactionsIntents having manifest per variant
+    /// of [`RolesExercisableInTransactionManifestCombination`]. For manifests
+    /// securifying an unsecurified entity the set will have only one intent.
+    ///
+    /// From each set we should only submit one to the Ledger, and that is the
+    /// "best one" of those which was signed. Successfully signed intent which
+    /// can exercise the Confirmation role are better than those using delay completion (
+    /// time).
+    pub async fn sign_intent_sets(
+        &self,
+        _intent_sets: impl IntoIterator<
+            Item = SecurityShieldApplicationWithTransactionIntents,
+        >,
+    ) -> Result<Vec<SignedIntentSet>> {
+        todo!()
+    }
+}
+
+pub struct SignedIntentSet;
+impl SignedIntentSet {
+    pub fn get_best_signed_intent(&self) -> SignedIntent {
+        todo!()
+    }
+}
+
+pub struct NotaryManager {
+    keys_for_intents: IndexMap<TransactionIntentHash, Ed25519PrivateKey>,
+}
+impl NotaryManager {
+    pub fn notarize(
+        self,
+        signed_intents: impl IntoIterator<Item = SignedIntent>,
+    ) -> Result<Vec<NotarizedTransaction>> {
+        let signed_intents = signed_intents.into_iter().collect_vec();
+        let mut key_for_intent = self.keys_for_intents;
+        signed_intents
+            .into_iter()
+            .map(|signed_intent| {
+                let intent = signed_intent.intent();
+                let private_key = key_for_intent
+                    .swap_remove(&intent.transaction_intent_hash())
+                    .ok_or_else(|| CommonError::Unknown)?;
+                let notary_signature =
+                    private_key.notarize_hash(&signed_intent.hash());
+                NotarizedTransaction::new(signed_intent, notary_signature)
+            })
+            .collect::<Result<Vec<_>>>()
     }
 }
