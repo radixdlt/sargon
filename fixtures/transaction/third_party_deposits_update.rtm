@@ -1,10 +1,5 @@
 CALL_METHOD
     Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
-    "lock_fee"
-    Decimal("0.2652577793095")
-;
-CALL_METHOD
-    Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
     "set_default_deposit_rule"
     Enum<1u8>()
 ;

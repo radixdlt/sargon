@@ -61,9 +61,7 @@ mod tests {
         assert_eq!(
             result.unwrap_err(),
             CommonError::FailedToCreateAddressFromManifestAddressAndNetworkID {
-                manifest_address: ResourceAddress::sample_stokenet()
-                    .scrypto()
-                    .to_hex(),
+                manifest_address: format!("{:?}", manifest_address),
                 network_id: network_id.to_string(),
             }
         );

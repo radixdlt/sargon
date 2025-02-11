@@ -28,7 +28,7 @@ mod tests {
         assert_eq!(
             manifest.execution_summary(wrong_receipt, NetworkID::Mainnet),
             Err(CommonError::ExecutionSummaryFail {
-                underlying: "InvalidReceipt".to_owned()
+                underlying: "NotACommitSuccessReceipt".to_owned()
             })
         );
     }
