@@ -1,5 +1,5 @@
-/// This struct hold `4` different combinations of manifests for different
-/// combinations of roles.
+/// This struct hold many different variants of manifest applying shield, one
+/// variant per variant in `RolesExercisableInTransactionManifestCombination` enum.
 ///
 /// Later when we want to sign these manifests using the `SignaturesCollector`,
 /// which currently (2025-01-16) can only be used with `1` Role at a time (later
@@ -7,14 +7,24 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AbstractSecurityShieldApplicationForSecurifiedEntityWithPayload<
     Entity,
-    Payload,
+    Payload, // TransactionManifest or TransactionIntent
 > {
+    /// Information containing the entity applying the shield.
     pub entity: Entity,
 
+    /// Payload variant for `R + P` roles combination.
     pub initiate_with_recovery_complete_with_primary: Payload,
+
+    /// Payload variant for `R + C` roles combination.
     pub initiate_with_recovery_complete_with_confirmation: Payload,
+
+    /// Payload variant for `R + T` (time) role combination.
     pub initiate_with_recovery_delayed_completion: Payload,
+
+    /// Payload variant for `P + C` roles combination.
     pub initiate_with_primary_complete_with_confirmation: Payload,
+
+    /// Payload variant for `P + T` (time) role combination.
     pub initiate_with_primary_delayed_completion: Payload,
 }
 

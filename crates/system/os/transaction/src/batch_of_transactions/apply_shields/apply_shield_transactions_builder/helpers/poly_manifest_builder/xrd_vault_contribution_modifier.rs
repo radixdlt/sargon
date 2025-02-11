@@ -144,7 +144,9 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
             });
         }
 
-        let topup_amount = payer.balance - input.estimated_xrd_fee;
+        // We top up with the amount which will be withdrawn from the XRD vault.
+        // Thus we will remain target amount always.
+        let top_up_amount = input.estimated_xrd_fee;
         let payer = payer.entity.clone();
 
         input.modifying_manifest(|manifest| {
@@ -152,12 +154,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
                     payer,
                     entity,
                     manifest,
-                    if topup_amount.is_positive() {
-                        Some(topup_amount)
-                    } else {
-                        // `None` means "use target Xrd balance"
-                        None
-                    },
+                    Some(top_up_amount),
                     manifest_variant
                 )
             })
@@ -181,9 +178,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let entity = input.entity_input.clone().securified_persona;
         let payer_info = payer.clone();
         let needed_balance = input.xrd_needed_for_tx_fee_and_xrd_vault_top_up();
-        if payer.xrd_balance_of_account()
-            < needed_balance
-        {
+        if payer.xrd_balance_of_account() < needed_balance {
             return Err(CommonError::UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
                 payer: payer_info.account().to_string(),
                 vault_of_entity: entity.address().to_string(),
@@ -191,21 +186,17 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
                 needed_balance: needed_balance.to_string(),
             });
         }
-        let topup_amount =
-            payer.xrd_balance_of_account() - input.estimated_xrd_fee;
+        // We top up with the amount which will be withdrawn from the XRD vault.
+        // Thus we will remain target amount always.
+        let top_up_amount = input.estimated_xrd_fee;
         let payer = payer_info.account();
 
         input.modifying_manifest(|manifest| {
             TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
                 payer,
                 entity,
-                 manifest,
-                  if topup_amount.is_positive() {
-                    Some(topup_amount)
-                } else {
-                    // `None` means "use target Xrd balance"
-                    None
-                },
+                manifest,
+                Some(top_up_amount),
                 manifest_variant
             )
         })

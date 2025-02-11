@@ -16,13 +16,6 @@ pub type SecurityShieldApplicationTransactionIntentsForSecurifiedPersona =
         SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<Persona>,
     >;
 
-pub type AbstractSecurityShieldApplicationForSecurifiedEntityWithIntent<
-    Entity,
-> = AbstractSecurityShieldApplicationForSecurifiedEntityWithPayload<
-    Entity,
-    TransactionIntent,
->;
-
 impl SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
     pub fn with_intents(
         without: SecurityShieldApplicationForSecurifiedEntity,

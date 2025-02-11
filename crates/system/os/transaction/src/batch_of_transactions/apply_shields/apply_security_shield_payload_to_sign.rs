@@ -45,6 +45,21 @@ pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<
 
     pub entity_applying_shield: AbstractUnsecurifiedEntity<E>,
     pub paying_account: ApplicationInputPayingAccount,
+
+    /// Manifest for exercising the primary role. This manifest will
+    /// create an AccessController with factors specified in the shield.
+    ///
+    /// # CREATION
+    /// Created by `TransactionManifest::apply_security_shield_for_unsecurified_entity`
+    ///
+    /// # MOFIFICATIONS
+    /// But we have made two modifications to the manifest output by it:
+    ///
+    /// ## 1st modification - lock fee
+    /// Locking fee against `paying_account
+    ///
+    /// ## 2nd modification - top up AC XRD vault
+    /// `modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account` has been called with `paying_account`
     pub modified_manifest: TransactionManifest,
 }
 

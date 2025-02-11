@@ -52,6 +52,7 @@ impl GatewayClient {
         let addresses = addresses.into_iter().collect::<IndexSet<_>>();
         let target_address_len = addresses.len();
         self.batch_fetch_chunking(
+            GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES,
             addresses,
             StateEntityDetailsRequest::addresses_only,
             |req| self.state_entity_details(req),
@@ -410,6 +411,7 @@ impl GatewayClient {
     ) -> Result<FetchTransferableResourcesOutput> {
         let non_transferable_resources = self
             .batch_fetch_chunking(
+                GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES,
                 output.resource_addresses(),
                 StateEntityDetailsRequest::addresses_only,
                 |req| self.state_entity_details(req),
