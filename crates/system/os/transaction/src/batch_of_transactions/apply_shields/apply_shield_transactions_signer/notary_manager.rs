@@ -5,6 +5,11 @@ pub struct NotaryManager {
 }
 
 impl NotaryManager {
+    pub fn new(
+        keys_for_intents: IndexMap<TransactionIntentHash, Ed25519PrivateKey>,
+    ) -> Self {
+        Self { keys_for_intents }
+    }
     pub fn notarize(
         self,
         signed_intents: impl IntoIterator<Item = SignedIntent>,

@@ -1,11 +1,9 @@
-use serde_json::value::Index;
-
 use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait ApplyShieldTransactionsSigner: Send + Sync {
     async fn sign_transaction_intents(
-        self,
+        &self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload>;
 }
@@ -19,7 +17,7 @@ impl ApplyShieldTransactionsSignerImpl {
         os.profile()
             .map(|profile| {
                 SigningManager::new(
-                    profile.factor_sources.clone(),
+                    profile.factor_sources(),
                     os.sign_transactions_interactor(),
                 )
             })
@@ -30,12 +28,10 @@ impl ApplyShieldTransactionsSignerImpl {
 #[async_trait::async_trait]
 impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     async fn sign_transaction_intents(
-        self,
+        &self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload> {
-        let notary_manager = NotaryManager {
-            keys_for_intents: payload_to_sign.notary_keys,
-        };
+        let notary_manager = NotaryManager::new(payload_to_sign.notary_keys);
         let intent_sets = payload_to_sign.applications_with_intents;
         let signed_sets =
             self.signing_manager.sign_intent_sets(intent_sets).await?;

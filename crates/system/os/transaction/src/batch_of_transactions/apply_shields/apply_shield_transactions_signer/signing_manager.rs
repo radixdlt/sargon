@@ -8,9 +8,6 @@ pub struct SigningManager {
     /// FactorSources in Profile
     factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
-
-    // ~~~ === INTERNAL STATE === ~~~
-    roles_to_exercise: IndexSet<RoleKind>,
 }
 
 // ==============
@@ -24,11 +21,6 @@ impl SigningManager {
         Self {
             factor_sources_in_profile,
             interactor,
-            roles_to_exercise: IndexSet::from_iter([
-                RoleKind::Recovery,
-                RoleKind::Confirmation,
-                RoleKind::Primary,
-            ]),
         }
     }
 
@@ -41,13 +33,15 @@ impl SigningManager {
     /// can exercise the Confirmation role are better than those using delay completion (
     /// time).
     pub async fn sign_intent_sets(
-        self,
+        &self,
         intent_sets: impl IntoIterator<
             Item = SecurityShieldApplicationWithTransactionIntents,
         >,
     ) -> Result<Vec<SignedIntentSet>> {
-        let mut self_ = self;
-        self_.do_sign_intent_sets(intent_sets).await
+        let intent_sets = intent_sets.into_iter().collect_vec();
+        let sign_with_recovery =
+            self.sign_intents_with_recovery_role(&intent_sets).await?;
+        todo!()
     }
 }
 
@@ -113,18 +107,6 @@ impl SigningManager {
     ) -> Result<IndexSet<IntentWithSignatures>> {
         self.sign_intents_with_role(intents, RoleKind::Confirmation)
             .await
-    }
-
-    async fn do_sign_intent_sets(
-        &mut self,
-        intent_sets: impl IntoIterator<
-            Item = SecurityShieldApplicationWithTransactionIntents,
-        >,
-    ) -> Result<Vec<SignedIntentSet>> {
-        let intent_sets = intent_sets.into_iter().collect_vec();
-        let sign_with_recovery =
-            self.sign_intents_with_recovery_role(&intent_sets).await?;
-        todo!()
     }
 }
 
