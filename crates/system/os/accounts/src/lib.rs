@@ -1,9 +1,11 @@
 mod delete_account;
 mod sargon_os_sync_entities;
+mod support;
 
 pub mod prelude {
     pub use super::delete_account::*;
     pub use super::sargon_os_sync_entities::*;
+    pub use super::support::*;
 
     pub(crate) use addresses::prelude::*;
     pub(crate) use error::prelude::*;
