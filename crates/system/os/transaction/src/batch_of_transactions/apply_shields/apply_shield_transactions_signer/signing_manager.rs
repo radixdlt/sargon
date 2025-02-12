@@ -18,8 +18,11 @@ pub struct SigningManager {
 }
 
 struct SigningManagerState {
+    /// Original input. We are not going to change this. Keep it intact.
     intent_sets: Vec<SecurityShieldApplicationWithTransactionIntents>,
+    
 }
+
 
 impl SigningManagerState {
     fn new(
@@ -99,55 +102,6 @@ impl SigningManager {
 // === PRIVATE ===
 // ===============
 impl SigningManager {
-    fn outcome(&self) -> Result<SigningManagerOutcome> {
-        let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
-        let _state = state.take().ok_or(CommonError::Unknown)?; // TODO specific error variant
-        todo!()
-    }
-
-    /// # Panics
-    /// Panics if recovery_outcome.role != RoleKind::Recovery
-    fn handle_recovery_outcome(
-        &self,
-        recovery_outcome: ExerciseRoleOutcome,
-    ) -> Result<()> {
-        assert_eq!(recovery_outcome.role, RoleKind::Recovery);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
-        Ok(())
-    }
-
-    /// # Panics
-    /// Panics if recovery_outcome.role != RoleKind::Confirmation
-    fn handle_confirmation_outcome(
-        &self,
-        confirmation_outcome: ExerciseRoleOutcome,
-    ) -> Result<()> {
-        assert_eq!(confirmation_outcome.role, RoleKind::Confirmation);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
-        Ok(())
-    }
-
-    /// # Panics
-    /// Panics if recovery_outcome.role != RoleKind::Primary
-    fn handle_primary_outcome(
-        &self,
-        primary_outcome: ExerciseRoleOutcome,
-    ) -> Result<()> {
-        assert_eq!(primary_outcome.role, RoleKind::Primary);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
-        Ok(())
-    }
-
-    /// # Panics
-    /// Panics if fee_payers_outcome.role != RoleKind::Primary (we are spending XRD)
-    fn handle_fee_payers_outcome(
-        &self,
-        fee_payers_outcome: ExerciseRoleOutcome,
-    ) -> Result<()> {
-        assert_eq!(fee_payers_outcome.role, RoleKind::Primary);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
-        Ok(())
-    }
 
     /// # Throws
     /// An error thrown means abort the whole process.
@@ -252,13 +206,58 @@ impl SigningManager {
             })
             .collect_vec();
 
-        let entities_not_signed_for: Vec<EntityNotSignedFor> = vec![];
+        let entities_not_signed_for: Vec<EntityNotSignedFor> =
+            { unimplemented!("impl me") };
 
         Ok(ExerciseRoleOutcome::new(
             role,
             entities_signed_for,
             entities_not_signed_for,
         ))
+    }
+
+    /// # Panics
+    /// Panics if recovery_outcome.role != RoleKind::Recovery
+    fn handle_recovery_outcome(
+        &self,
+        recovery_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(recovery_outcome.role, RoleKind::Recovery);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
+    }
+
+    /// # Panics
+    /// Panics if recovery_outcome.role != RoleKind::Confirmation
+    fn handle_confirmation_outcome(
+        &self,
+        confirmation_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(confirmation_outcome.role, RoleKind::Confirmation);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
+    }
+
+    /// # Panics
+    /// Panics if recovery_outcome.role != RoleKind::Primary
+    fn handle_primary_outcome(
+        &self,
+        primary_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(primary_outcome.role, RoleKind::Primary);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
+    }
+
+    /// # Panics
+    /// Panics if fee_payers_outcome.role != RoleKind::Primary (we are spending XRD)
+    fn handle_fee_payers_outcome(
+        &self,
+        fee_payers_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(fee_payers_outcome.role, RoleKind::Primary);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
     }
 
     fn updating_state(
@@ -310,6 +309,13 @@ impl SigningManager {
 
         self.handle_fee_payers_outcome(outcome)
     }
+
+    fn outcome(&self) -> Result<SigningManagerOutcome> {
+        let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
+        let _state = state.take().ok_or(CommonError::Unknown)?; // TODO specific error variant
+        todo!()
+    }
+
 }
 
 // ==================
