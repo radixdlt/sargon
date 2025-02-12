@@ -121,21 +121,19 @@ fn account_withdraw_from_scrypto(
     AccountWithdraw::from((item, network_id))
 }
 
-impl From<(RetStaticAnalysisWithResourceMovements, NetworkID)>
-    for ManifestSummary
-{
-    fn from(
-        value: (RetStaticAnalysisWithResourceMovements, NetworkID),
-    ) -> Self {
+impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
+    fn from(value: (RetStaticAnalysis, NetworkID)) -> Self {
         let (ret, network_id) = value;
 
         let account_withdraws = convert_from_scrypto(
-            ret.account_withdraws,
+            ret.account_static_resource_movements_summary
+                .account_withdraws,
             network_id,
             account_withdraw_from_scrypto,
         );
 
         let account_deposits: HashMap<AccountAddress, AccountDeposits> = ret
+            .account_static_resource_movements_summary
             .account_deposits
             .into_iter()
             .map(|(addr, items)| {
@@ -147,30 +145,44 @@ impl From<(RetStaticAnalysisWithResourceMovements, NetworkID)>
             .collect();
 
         let addresses_of_accounts_withdrawn_from =
-            to_vec_network_aware(ret.accounts_withdrawn_from, network_id);
+            filter_try_to_vec_network_aware(
+                ret.account_interactions_summary.accounts_withdrawn_from,
+                network_id,
+            );
 
         let addresses_of_accounts_deposited_into =
-            to_vec_network_aware(ret.accounts_deposited_into, network_id);
+            filter_try_to_vec_network_aware(
+                ret.account_interactions_summary.accounts_deposited_into,
+                network_id,
+            );
 
         let addresses_of_accounts_requiring_auth =
-            to_vec_network_aware(ret.accounts_requiring_auth, network_id);
+            filter_try_to_vec_network_aware(
+                ret.entities_requiring_auth_summary.accounts,
+                network_id,
+            );
 
         let addresses_of_personas_requiring_auth =
-            to_vec_network_aware(ret.identities_requiring_auth, network_id);
+            filter_try_to_vec_network_aware(
+                ret.entities_requiring_auth_summary.identities,
+                network_id,
+            );
 
-        let presented_proofs =
-            ret.presented_proofs.values().cloned().flat_map(|vec| {
-                filter_try_to_vec_network_aware(vec, network_id)
-            });
+        let presented_proofs = ret
+            .proofs_created_summary
+            .created_proofs
+            .values()
+            .cloned()
+            .flat_map(|vec| filter_try_to_vec_network_aware(vec, network_id));
 
         let encountered_entities = filter_try_to_vec_network_aware(
-            ret.encountered_entities,
+            ret.entities_encountered_summary.entities,
             network_id,
         );
-        let reserved_instructions = ret
-            .reserved_instructions
-            .into_iter()
-            .map(ReservedInstruction::from);
+        let reserved_instructions =
+            ReservedInstruction::from_ret_reserved_instructions_output(
+                ret.reserved_instructions_summary,
+            );
 
         Self::new(
             account_withdraws,
@@ -182,7 +194,7 @@ impl From<(RetStaticAnalysisWithResourceMovements, NetworkID)>
             addresses_of_accounts_requiring_auth,
             addresses_of_personas_requiring_auth,
             reserved_instructions,
-            ret.classification,
+            ret.manifest_classification,
         )
     }
 }

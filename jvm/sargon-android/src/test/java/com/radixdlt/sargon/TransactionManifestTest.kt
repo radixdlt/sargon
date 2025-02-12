@@ -520,7 +520,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         percentage =
                         1.toDecimal192(),
                         instructionIndex =
-                        12.toULong(),
+                        10.toULong(),
                         resourceAddress =
                         ResourceAddress.xrd(
                             NetworkId.STOKENET

@@ -1,33 +1,33 @@
 CALL_METHOD
-    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    Address("account_tdx_2_12xy3a3eme090gwzku277q0awutftu76nd4wddjvhtzelf84glmghae")
     "withdraw"
     Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
-    Decimal("237")
+    Decimal("100")
 ;
 TAKE_ALL_FROM_WORKTOP
     Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
     Bucket("bucket1")
 ;
 CALL_METHOD
-    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    Address("account_tdx_2_12xy3a3eme090gwzku277q0awutftu76nd4wddjvhtzelf84glmghae")
     "withdraw"
-    Address("resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy")
-    Decimal("1337")
+    Address("resource_tdx_2_1t5gweua2ggcgw6u0g6xvf7l5t40mvwww8a856q0tzcjdnut7jdh84d")
+    Decimal("100")
 ;
 TAKE_ALL_FROM_WORKTOP
-    Address("resource_tdx_2_1thw7yclz24h5xjp3086cj8z2ya0d7p9mydk0yh68c28ha02uhzrnyy")
+    Address("resource_tdx_2_1t5gweua2ggcgw6u0g6xvf7l5t40mvwww8a856q0tzcjdnut7jdh84d")
     Bucket("bucket2")
 ;
 CALL_METHOD
-    Address("pool_tdx_2_1ckfjmjswvvf6y635f8l89uunu9cwgnglhqdk8627wrpf8ultdx2vc3")
+    Address("pool_tdx_2_1c4cex49kkyxd4sscv4r9etzfr4tkm8aehwntqk4jak04zpjpelg3us")
     "contribute"
     Tuple(
-    Bucket("bucket1"),
-    Bucket("bucket2")
+        Bucket("bucket1"),
+        Bucket("bucket2")
     )
 ;
 CALL_METHOD
-    Address("account_tdx_2_1288efhmjt8kzce77par4ex997x2zgnlv5qqv9ltpxqg7ur0xpqm6gk")
+    Address("account_tdx_2_12xy3a3eme090gwzku277q0awutftu76nd4wddjvhtzelf84glmghae")
     "try_deposit_batch_or_abort"
     Expression("ENTIRE_WORKTOP")
     Enum<0u8>()
