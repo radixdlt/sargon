@@ -52,7 +52,7 @@ pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<
     /// # CREATION
     /// Created by `TransactionManifest::apply_security_shield_for_unsecurified_entity`
     ///
-    /// # MOFIFICATIONS
+    /// # MODIFICATIONS
     /// But we have made two modifications to the manifest output by it:
     ///
     /// ## 1st modification - lock fee

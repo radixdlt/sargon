@@ -14,13 +14,18 @@ pub enum DetailedManifestClass {
     /// will provide.
     General,
 
+    /// A general subintent manifest that has a number of arbitrary package and
+    /// component invocations. This manifest is guaranteed to be subintent since
+    /// we require that a yield to child is present in the manifest.
+    GeneralSubintent,
+
     /// A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
     Transfer {
         /// When `true`, then this is a one-to-one transfer and the wallet can
         /// regard this as a "simple transfer" and communicate this information
         /// to the ledger hardware wallet. Otherwise, if `false`, then this is
         /// not a one-to-one transfer.
-        is_one_to_one: bool,
+        is_one_to_one_transfer: bool,
     },
 
     /// A manifest where XRD is claimed from one or more validators.

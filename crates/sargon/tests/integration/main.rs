@@ -142,7 +142,7 @@ mod integration_tests {
                 to,
                 vec![ResourceIndicator::fungible(
                     resource,
-                    FungibleResourceIndicator::guaranteed(amount)
+                    FungibleResourceIndicator::new_guaranteed(amount)
                 )]
             )])
         );

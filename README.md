@@ -348,7 +348,7 @@ make bump
 make bump_and_commit
 ```
 
-To `patch` bump all crates
+To `patch` bump all crates. You can also manually set version using. See `cargo ws --help`.
 
 ## iOS
 

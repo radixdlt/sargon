@@ -623,9 +623,9 @@ pub enum CommonError {
     #[error("No Profile is yet loaded. Current state is: {current_state}")]
     ProfileStateNotLoaded { current_state: String } = 10180,
 
-    #[error("Failed to create Address from global_address (hex): {global_address_as_hex}, network_id: {network_id}")]
-    FailedToCreateAddressFromGlobalAddressAndNetworkID {
-        global_address_as_hex: String,
+    #[error("Failed to create Address from manifest address (hex): {manifest_address}, network_id: {network_id}")]
+    FailedToCreateAddressFromManifestAddressAndNetworkID {
+        manifest_address: String,
         network_id: String,
     } = 10181,
 
@@ -931,6 +931,9 @@ pub enum CommonError {
     UnsecurifiedPersonasRequireAnAccountFeePayerButNoneWasProvided {
         identity_address: String,
     } = 10261,
+
+    #[error("Named addresses are not supported")]
+    NamedAddressesAreNotSupported = 10262,
 }
 
 impl CommonError {
