@@ -22,7 +22,7 @@ impl NotaryManager {
                 let intent = signed_intent.intent();
                 let private_key = key_for_intent
                     .swap_remove(&intent.transaction_intent_hash())
-                    .ok_or_else(|| CommonError::Unknown)?;
+                    .ok_or(CommonError::Unknown)?;
                 let notary_signature =
                     private_key.notarize_hash(&signed_intent.hash());
                 NotarizedTransaction::new(signed_intent, notary_signature)

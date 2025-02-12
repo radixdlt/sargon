@@ -158,16 +158,37 @@ impl SigningManager {
     ) -> Result<ExerciseRoleOutcome> {
         let purpose = SigningPurpose::SignTX { role_kind: role };
 
+        let mut lookup_address_to_entity =
+            HashMap::<AddressOfAccountOrPersona, AccountOrPersona>::new();
+        let mut lookup_txid_to_intent_set =
+            HashMap::<TransactionIntentHash, IntentSetID>::new();
+        let mut lookup_txid_to_variant = HashMap::<
+            TransactionIntentHash,
+            Option<RolesExercisableInTransactionManifestCombination>,
+        >::new();
+
         let transactions_with_petitions = intent_sets
             .into_iter()
             .flat_map(|set| {
                 set.variants
                     .iter()
                     .map(|variant| {
-                        SignableWithEntities::new(
-                            variant.intent.clone(),
-                            set.entities.clone(),
-                        )
+                        let tx = variant.intent.clone();
+                        let txid = tx.transaction_intent_hash();
+                        // Insert TXID into the lookup so we can group the signatures
+                        // of each intent by IntentSetID.
+                        lookup_txid_to_intent_set.insert(txid.clone(), set.id);
+
+                        lookup_txid_to_variant
+                            .insert(txid.clone(), variant.variant);
+
+                        let entity_requiring_auth = set.entity.clone();
+                        lookup_address_to_entity.insert(
+                            entity_requiring_auth.address(),
+                            entity_requiring_auth.clone(),
+                        );
+
+                        SignableWithEntities::new(tx, [entity_requiring_auth])
                     })
                     .collect_vec()
             })
@@ -183,11 +204,53 @@ impl SigningManager {
 
         // Failure is not something we handle, it means the whole process should
         // be aborted by user
-        let _outcome = collector.collect_signatures().await?;
+        let outcome = collector.collect_signatures().await?;
 
         // TODO: Split `outcome` into `entities_signed_for` and `entities_not_signed_for`
 
-        let entities_signed_for: Vec<IntentWithSignatures> = vec![];
+        let entities_signed_for: Vec<IntentWithSignatures> = outcome
+            .successful_transactions()
+            .into_iter()
+            .map(|signed_tx| {
+                let txid = signed_tx.signable_id;
+                let signatures_with_inputs = signed_tx.signatures;
+                assert!(!signatures_with_inputs.is_empty(), "cannot be empty");
+                let owner_address = signatures_with_inputs
+                    .first()
+                    .unwrap()
+                    .owned_factor_instance()
+                    .owner;
+                assert!(
+                    signatures_with_inputs
+                        .iter()
+                        .all(|s| s.owned_factor_instance().owner
+                            == owner_address),
+                    "SigningManager expects"
+                );
+
+                let entity = lookup_address_to_entity
+                    .get(&owner_address)
+                    .unwrap()
+                    .clone();
+
+                let intent_set_id =
+                    *lookup_txid_to_intent_set.get(&txid).unwrap();
+
+                let manifest_variant =
+                    *lookup_txid_to_variant.get(&txid).unwrap();
+
+                IntentWithSignatures::new(
+                    intent_set_id,
+                    txid,
+                    entity,
+                    signatures_with_inputs
+                        .into_iter()
+                        .map(|s| s.signature)
+                        .collect(),
+                    manifest_variant,
+                )
+            })
+            .collect_vec();
 
         let entities_not_signed_for: Vec<EntityNotSignedFor> = vec![];
 
@@ -253,6 +316,22 @@ impl SigningManager {
 // ==== TO SIGN =====
 // ==================
 
+/// An ID generated for the purpose of being able to identify which "set" a
+/// TransactionIntent belongs to.
+#[derive(Clone, Copy, PartialEq, Eq, derive_more::Debug)]
+pub struct IntentSetID(Uuid);
+impl Default for IntentSetID {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl IntentSetID {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
+
 /// A "set" of TransactionIntents to sign, and entities to sign for.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 struct IntentSetToSign {
@@ -261,15 +340,26 @@ struct IntentSetToSign {
     #[debug(skip)]
     hidden: HiddenConstructor,
 
+    // An ID generated for the purpose of being able to identify which "set" a
+    // TransactionIntent belongs to.
+    id: IntentSetID,
+
     /// Will be a single one for unsecurified entities
     variants: Vec<IntentVariant>,
 
     /// For shield applying manifests this Vec contains a single entity, either
-    /// the entity applying the shield or the fee payer - we are doing
-    /// four passes to the SignaturesCollector, one for each role for the
-    /// entities applying the shield, then a fourth pass for the fee payer
-    /// of each transaction exercising its Primary role.
-    entities: Vec<AccountOrPersona>,
+    /// the entity applying the shield or the fee payer
+    entity: AccountOrPersona, // TODO: Generalization - in future change to support multiple entities
+}
+impl IntentSetToSign {
+    pub fn new(variants: Vec<IntentVariant>, entity: AccountOrPersona) -> Self {
+        Self {
+            hidden: HiddenConstructor,
+            id: IntentSetID::new(),
+            variants,
+            entity,
+        }
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
@@ -282,8 +372,6 @@ struct IntentVariant {
 // ==== SIGNED =====
 // =================
 
-type SignatureWithContext = HDSignature<TransactionIntentHash>;
-
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 pub(crate) struct IntentWithSignatures {
     #[allow(dead_code)]
@@ -291,15 +379,14 @@ pub(crate) struct IntentWithSignatures {
     #[debug(skip)]
     hidden: HiddenConstructor,
 
-    /// TransactionIntentHash of this intent MUST match `signatures.map(|s| s.input.payload_id)`
-    intent: TransactionIntent,
+    transaction_intent_hash: TransactionIntentHash,
+
+    part_of_intent_set: IntentSetID,
 
     /// Must match the owner inside `signatures.map(|s| s.input.owned_factor_instance.owner`
     entity: AccountOrPersona,
 
-    /// `signatures.map(|s| s.input.owned_factor_instance.owner` must match owner `entity`
-    /// `signatures.map(|s| s.input.payload_id)` must match TX hash of `intent`
-    signatures: IndexSet<SignatureWithContext>,
+    signatures: IndexSet<SignatureWithPublicKey>,
 
     /// None `intent` is the single intent of an IntentSet. If the intent
     /// is one of the many variants of an intentset then this variable must
@@ -307,20 +394,17 @@ pub(crate) struct IntentWithSignatures {
     variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 impl IntentWithSignatures {
-    /// # Panics
-    /// Panics if there is a discrepancy betwen TX hash of `intent and `signatures`.
     pub(crate) fn new(
-        intent: TransactionIntent,
+        part_of_intent_set: IntentSetID,
+        transaction_intent_hash: TransactionIntentHash,
         entity: AccountOrPersona,
-        signatures: IndexSet<SignatureWithContext>,
+        signatures: IndexSet<SignatureWithPublicKey>,
         variant: Option<RolesExercisableInTransactionManifestCombination>,
     ) -> Self {
-        assert!(signatures
-            .iter()
-            .all(|s| *s.payload_id() == intent.transaction_intent_hash()));
         Self {
             hidden: HiddenConstructor,
-            intent,
+            part_of_intent_set,
+            transaction_intent_hash,
             entity,
             signatures,
             variant,
@@ -375,6 +459,7 @@ impl ExerciseRoleOutcome {
                 .all(|v| v.can_exercise_role(role_kind)),
             "Discrepancy! Mismatch beween Role and TransactionManifest variant"
         );
+
         assert!(
             entities_not_signed_for
                 .iter()
@@ -382,6 +467,7 @@ impl ExerciseRoleOutcome {
                 .all(|v| v.can_exercise_role(role_kind)),
             "Discrepancy! Mismatch beween Role and TransactionManifest variant"
         );
+
         assert!(
             entities_signed_for
             .iter()
@@ -395,6 +481,7 @@ impl ExerciseRoleOutcome {
             ).collect_vec().is_empty(),
             "Discrepancy! entities_signed_for and entities_not_signed_for have common entities"
         );
+
         Self {
             hidden: HiddenConstructor,
             role: role_kind,
