@@ -112,9 +112,9 @@ impl FactorIdentification {
 }
 
 impl DeviceFactorAddingManager {
-    pub fn new(sargon_os: Arc<dyn OsNewFactorAdding>) -> Self {
+    pub fn new(os_ref: Arc<dyn OsNewFactorAdding>) -> Self {
         Self {
-            os_ref: sargon_os,
+            os_ref,
             factor_identification: RwLock::new(None),
         }
     }
@@ -160,29 +160,30 @@ impl DeviceFactorAddingManager {
         self
     }
 
-    pub fn create_new_factor_source(&self, host_info: HostInfo) -> &Self {
+    pub async fn create_new_factor_source(&self) -> &Self {
         let mnemonic = Mnemonic::generate_new();
-        self.create_factor_source(mnemonic, host_info);
+        self.create_factor_source(mnemonic).await;
         self
     }
 
-    pub fn create_factor_source_from_mnemonic_words(
+    pub async fn create_factor_source_from_mnemonic_words(
         &self,
-        host_info: HostInfo,
         words: Vec<BIP39Word>,
     ) -> Result<&Self> {
         let mnemonic = Mnemonic::from_words(words)?;
-        self.create_factor_source(mnemonic, host_info);
+        self.create_factor_source(mnemonic).await;
         Ok(self)
     }
 
-    fn create_factor_source(&self, mnemonic: Mnemonic, host_info: HostInfo) {
+    async fn create_factor_source(&self, mnemonic: Mnemonic) {
+        let host_info = self.os_ref.resolve_host_info().await;
         *self.factor_identification.write().unwrap() =
             Some(FactorIdentification::new(mnemonic, host_info))
     }
 }
 
 impl DeviceFactorAddingManager {
+    /// Returns true if the mnemonic `word` at the given `index` is correct.
     pub fn is_word_at_index_correct(
         &self,
         word: impl AsRef<str>,
@@ -211,16 +212,14 @@ impl DeviceFactorAddingManager {
             .collect()
     }
 
-    pub async fn resolve_host_info(&self) -> HostInfo {
-        self.os_ref.resolve_host_info().await
-    }
-
+    /// Checks if profile already contains a factor source with the same `FactorSourceID`.
     pub async fn is_factor_already_in_use(&self) -> Result<bool> {
         self.os_ref
             .is_factor_already_in_use(self.get_factor_source())
             .await
     }
 
+    /// Adds the factor source
     pub async fn add_factor(&self) -> Result<()> {
         self.os_ref
             .add_new_factor(
@@ -289,9 +288,8 @@ mod tests {
             MockOsNewFactorAdding::with_ok_factor_already_in_use(false);
         let sut = SUT::new(Arc::new(os_ref));
         let mnemonic = Mnemonic::sample();
-        let host_info = HostInfo::sample();
 
-        sut.create_factor_source(mnemonic, host_info);
+        sut.create_factor_source(mnemonic).await;
 
         let words_to_confirm: HashMap<u8, String> = vec![
             (0, "word1".into()),

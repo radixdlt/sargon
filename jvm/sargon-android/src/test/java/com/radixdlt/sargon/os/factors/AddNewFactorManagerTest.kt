@@ -1,8 +1,13 @@
 package com.radixdlt.sargon.os.factors
 
 import com.radixdlt.sargon.Bios
+import com.radixdlt.sargon.Bip39Entropy
+import com.radixdlt.sargon.Bip39Passphrase
+import com.radixdlt.sargon.Bip39Seed
+import com.radixdlt.sargon.Bip39WordListTest
 import com.radixdlt.sargon.Drivers
 import com.radixdlt.sargon.FactorSourceKind
+import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.SargonOs
 import com.radixdlt.sargon.extensions.kind
 import com.radixdlt.sargon.extensions.name
@@ -16,6 +21,7 @@ import com.radixdlt.sargon.os.driver.FakeLoggingDriver
 import com.radixdlt.sargon.os.driver.FakeSecureStorageDriver
 import com.radixdlt.sargon.os.driver.FakeUnsafeStorageDriver
 import com.radixdlt.sargon.os.interactor.FakeHostInteractor
+import com.radixdlt.sargon.samples.sample
 import io.mockk.mockk
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -33,15 +39,17 @@ class AddNewFactorManagerTest {
     private val testDispatcher = StandardTestDispatcher()
 
     @Test
-    fun addTest() = runTest(testDispatcher) {
+    fun test() = runTest(testDispatcher) {
         val sargonOs = SargonOs.boot(bios(), hostInteractor)
         var manager = sargonOs.makeDeviceFactorAddingManager()
+        val words = MnemonicWithPassphrase.sample().mnemonic.words
 
-        manager.createNewFactorSource()
+        manager.createFactorSourceFromMnemonicWords(words)
         manager = manager.setFactorName("New Test Factor")
 
         assert(manager.getFactorSource().kind == FactorSourceKind.DEVICE)
         assertEquals("New Test Factor", manager.getFactorSource().name)
+        assertEquals(manager.getMnemonicWords(), words)
     }
 
     private fun bios() = Bios(

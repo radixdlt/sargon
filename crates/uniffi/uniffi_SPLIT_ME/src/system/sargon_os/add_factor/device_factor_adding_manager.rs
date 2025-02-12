@@ -46,15 +46,24 @@ impl DeviceFactorAddingManager {
         })
     }
 
-    fn set_from_result(
-        self: Arc<Self>,
-        write: impl Fn(
-            &Arc<InternalDeviceFactorAddingManager>,
-        ) -> Result<&InternalDeviceFactorAddingManager>,
-    ) -> Result<Arc<Self>> {
-        builder_arc_map_result(self, |builder| {
-            write(&builder.wrapped).map(|_| ())
-        })
+    async fn _create_new_factor_source(
+        manager: Arc<InternalDeviceFactorAddingManager>,
+    ) -> Result<()> {
+        manager.create_new_factor_source().await;
+        Ok(())
+    }
+
+    async fn _create_factor_source_from_mnemonic_words(
+        manager: Arc<InternalDeviceFactorAddingManager>,
+        words: Vec<BIP39Word>,
+    ) -> Result<()> {
+        manager
+            .create_factor_source_from_mnemonic_words(
+                words.clone().into_internal(),
+            )
+            .await
+            .map(|_| ())
+            .into_result()
     }
 }
 
@@ -91,24 +100,26 @@ impl DeviceFactorAddingManager {
         self.set(|manager| manager.set_factor_name(&name))
     }
 
-    pub async fn create_new_factor_source(self: Arc<Self>) -> Arc<Self> {
-        let host_info = self.wrapped.resolve_host_info().await;
-        self.set(|manager| manager.create_new_factor_source(host_info.clone()))
+    pub async fn create_new_factor_source(
+        self: Arc<Self>,
+    ) -> Result<Arc<Self>> {
+        builder_arc_map_future_result(self, |manager| {
+            Self::_create_new_factor_source(manager.wrapped.clone())
+        })
+        .await
     }
 
     pub async fn create_factor_source_from_mnemonic_words(
         self: Arc<Self>,
         words: Vec<BIP39Word>,
     ) -> Result<Arc<Self>> {
-        let host_info = self.wrapped.resolve_host_info().await;
-        self.set_from_result(|manager| {
-            manager
-                .create_factor_source_from_mnemonic_words(
-                    host_info.clone(),
-                    words.clone().into_internal(),
-                )
-                .into_result()
+        builder_arc_map_future_result(self, |manager| {
+            Self::_create_factor_source_from_mnemonic_words(
+                manager.wrapped.clone(),
+                words,
+            )
         })
+        .await
     }
 }
 

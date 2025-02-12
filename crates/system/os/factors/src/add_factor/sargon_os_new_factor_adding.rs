@@ -18,6 +18,8 @@ pub trait OsNewFactorAdding: Send + Sync {
 
 #[async_trait::async_trait]
 impl OsNewFactorAdding for Arc<SargonOS> {
+    /// Accesses the active profile and checks if it already contains a factor source
+    /// with the same `FactorSourceID`.
     async fn is_factor_already_in_use(
         &self,
         factor_source: FactorSource,
@@ -28,6 +30,10 @@ impl OsNewFactorAdding for Arc<SargonOS> {
 
     /// Returns `Err(CommonError::FactorSourceAlreadyExists)` if the Profile already contained a
     /// factor source with the same id.
+    ///
+    /// Pre-derives and fill cache with instances for the `factor_source`. If failed to pre-derive,
+    /// removes the factor source from the profile and returns the error. If successful,
+    /// saves the mnemonic to secure storage.
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceAdded }`
@@ -84,7 +90,8 @@ impl OsNewFactorAdding for Arc<SargonOS> {
         Ok(())
     }
 
+    /// Resolves the host info. This is used to create a new `DeviceFactorSource`.
     async fn resolve_host_info(&self) -> HostInfo {
-        self.resolve_host_info().await
+        self.host.resolve_host_info().await
     }
 }
