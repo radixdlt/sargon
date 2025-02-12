@@ -11,6 +11,15 @@ pub enum SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
 }
 
 impl SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
+    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
+        match self {
+            Self::Account(a) => a.paying_account(),
+            Self::Persona(p) => p.paying_account(),
+        }
+    }
+}
+
+impl SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
     pub fn with_intent(
         without: impl Into<SecurityShieldApplicationForUnsecurifiedEntity>,
         intent: TransactionIntent,

@@ -8,7 +8,13 @@ pub struct SigningManager {
     /// FactorSources in Profile
     factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
-    state: RwLock<SigningManagerState>,
+
+    /// The internal state of the SigningManager
+    ///
+    /// We start with `None` in ctor, and set it to `Some` in `sign_intent_sets`.
+    /// We wanna init this SigninManager only with dependencies and not until
+    /// later when we call `sign_intent_sets` we can set the state.
+    state: RwLock<Option<SigningManagerState>>,
 }
 
 // ==============
@@ -22,7 +28,7 @@ impl SigningManager {
         Self {
             factor_sources_in_profile,
             interactor,
-            state: RwLock::new(SigningManagerState::new()),
+            state: RwLock::new(None),
         }
     }
 
@@ -41,21 +47,28 @@ impl SigningManager {
         >,
     ) -> Result<SigningManagerOutcome> {
         let intent_sets = intent_sets.into_iter().collect_vec(); // We want IndexSet but manifests are not `std::hash::Hash`
+        self.state
+            .write()
+            .unwrap()
+            .replace(SigningManagerState::new(intent_sets));
 
-        let sign_with_recovery =
-            self.sign_intents_with_recovery_role(&intent_sets).await?;
+        let sign_with_recovery = self.sign_intents_with_recovery_role().await?;
 
         self.handle_recovery_outcome(sign_with_recovery)?;
-
 
         todo!()
     }
 }
 
-struct SigningManagerState;
+struct SigningManagerState {
+    intent_sets: Vec<SecurityShieldApplicationWithTransactionIntents>,
+}
+
 impl SigningManagerState {
-    fn new() -> Self {
-        Self
+    fn new(
+        intent_sets: Vec<SecurityShieldApplicationWithTransactionIntents>,
+    ) -> Self {
+        Self { intent_sets }
     }
 }
 
@@ -72,8 +85,13 @@ impl SigningManager {
         &self,
         f: impl FnOnce(&mut SigningManagerState) -> Result<()>,
     ) -> Result<()> {
-        let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
-        f(&mut state)
+        let mut state_holder =
+            self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
+        if let Some(state) = state_holder.as_mut() {
+            f(state)
+        } else {
+            unreachable!("State should be Some");
+        }
     }
 
     /// # Panics
@@ -131,7 +149,6 @@ impl SigningManager {
 
     async fn sign_intents_with_role(
         &self,
-        intents: &[SecurityShieldApplicationWithTransactionIntents],
         role: RoleKind,
     ) -> Result<ExerciseRoleOutcome> {
         todo!()
@@ -141,24 +158,20 @@ impl SigningManager {
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
     ) -> Result<ExerciseRoleOutcome> {
-        self.sign_intents_with_role(intents, RoleKind::Primary)
-            .await
+        self.sign_intents_with_role(RoleKind::Primary).await
     }
 
     async fn sign_intents_with_recovery_role(
         &self,
-        intents: &[SecurityShieldApplicationWithTransactionIntents],
     ) -> Result<ExerciseRoleOutcome> {
-        self.sign_intents_with_role(intents, RoleKind::Recovery)
-            .await
+        self.sign_intents_with_role(RoleKind::Recovery).await
     }
 
     async fn sign_intents_with_confirmation_role(
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
     ) -> Result<ExerciseRoleOutcome> {
-        self.sign_intents_with_role(intents, RoleKind::Confirmation)
-            .await
+        self.sign_intents_with_role(RoleKind::Confirmation).await
     }
 }
 
@@ -168,7 +181,14 @@ impl SigningManager {
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct IntentToSign {
     intent: TransactionIntent,
-    entities: IndexSet<AccountOrPersona>, // often one, or two (payer != entity)
+
+    /// For shield applying manifests this Vec contains a single entity, either
+    /// the entity applying the shield or the fee payer - we are doing
+    /// four passes to the SignaturesCollector, one for each role for the
+    /// entities applying the shield, then a fourth pass for the fee payer
+    /// of each transaction exercising its Primary role.
+    entities: Vec<AccountOrPersona>,
+
     variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 
@@ -296,6 +316,7 @@ impl ExerciseRoleOutcome {
         );
         Self {
             hidden: HiddenConstructor,
+            role: role_kind,
             entities_signed_for,
             entities_not_signed_for,
         }
