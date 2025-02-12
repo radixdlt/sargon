@@ -398,9 +398,19 @@ impl SignedIntentSet {
     }
 }
 
-struct SigningManagerOutcome {
+pub struct SigningManagerOutcome {
     successfully_signed_intent_sets: Vec<SignedIntentSet>,
     failed_intent_sets: Vec<SignedIntentSet>,
+}
+impl SigningManagerOutcome {
+    // TODO: Implement support for handling of failed transactions, i.e. submit the successful ones even if some failed and do SOMETHING with the failed ones
+    pub fn validate_all_intent_sets_signed(self) -> Result<Vec<SignedIntentSet>> {
+        if self.failed_intent_sets.is_empty() {
+            Ok(self.successfully_signed_intent_sets)
+        } else {
+            Err(CommonError::Unknown) // TODO specific error variant
+        }
+    }
 }
 
 #[cfg(test)]
