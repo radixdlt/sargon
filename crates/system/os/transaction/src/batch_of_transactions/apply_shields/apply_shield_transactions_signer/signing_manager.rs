@@ -17,12 +17,109 @@ pub struct SigningManager {
     state: RwLock<Option<SigningManagerState>>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 struct SigningManagerState {
-    /// Original input. We are not going to change this. Keep it intact.
-    intent_sets: Vec<SecurityShieldApplicationWithTransactionIntents>,
-    
+    per_set_state: IndexMap<IntentSetID, IntentSetState>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct IntentSetState {
+    intent_set_id: IntentSetID,
+    internal_state: IntentSetInternalState,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum IntentSetInternalState {
+    Unsecurified(UnsecurifiedIntentSetInternalState),
+    Securified(SecurifiedIntentSetInternalState),
+}
+impl From<SecurityShieldApplicationWithTransactionIntents>
+    for IntentSetInternalState
+{
+    fn from(
+        shield_application: SecurityShieldApplicationWithTransactionIntents,
+    ) -> Self {
+        match shield_application {
+            SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(sec) => {
+                Self::Securified(SecurifiedIntentSetInternalState::from(sec))
+            },
+            SecurityShieldApplicationWithTransactionIntents::ForUnsecurifiedEntity(unsec) => {
+                Self::Unsecurified(UnsecurifiedIntentSetInternalState::from(unsec))
+            },
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct UnsecurifiedIntentSetInternalState {
+    account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
+    entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
+    transaction_intent: TransactionIntent,
+}
+impl From<SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent>
+    for UnsecurifiedIntentSetInternalState
+{
+    fn from(
+        _sec: SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent,
+    ) -> Self {
+        todo!()
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct IntentVariantState {
+    variant: RolesExercisableInTransactionManifestCombination,
+    intent: TransactionIntent,
+    /// The `role` of the values must match the key...
+    signatures_per_role:
+        IndexMap<RoleKind, IntentVariantSignaturesForRoleState>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct IntentVariantSignaturesForRoleState {
+    role: RoleKind,
+    signatures: IndexSet<SignatureWithPublicKey>,
+}
+
+struct SigningInstanceContext {
+    intent_set_id: IntentSetID,
+    role: RoleKind,
+}
+struct SigningInstanceSubcontext {
+    context: SigningInstanceContext,
+    variant: RolesExercisableInTransactionManifestCombination,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct SecurifiedIntentSetInternalState {
+    account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
+    entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
+    initiate_with_recovery_complete_with_primary: IntentVariantState,
+    initiate_with_recovery_complete_with_confirmation: IntentVariantState,
+    initiate_with_recovery_delayed_completion: IntentVariantState,
+    initiate_with_primary_complete_with_confirmation: IntentVariantState,
+    initiate_with_primary_delayed_completion: IntentVariantState,
+}
+impl From<SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents>
+    for SecurifiedIntentSetInternalState
+{
+    fn from(
+        _sec: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
+    ) -> Self {
+        todo!()
+    }
+}
+
+impl IntentSetState {
+    fn new(
+        intent_set_id: IntentSetID,
+        shield_application: SecurityShieldApplicationWithTransactionIntents,
+    ) -> Self {
+        Self {
+            intent_set_id,
+            internal_state: IntentSetInternalState::from(shield_application),
+        }
+    }
+}
 
 impl SigningManagerState {
     fn new(
@@ -31,7 +128,15 @@ impl SigningManagerState {
         >,
     ) -> Self {
         Self {
-            intent_sets: intent_sets.into_iter().collect(),
+            per_set_state: intent_sets
+                .into_iter()
+                .map(|shield_application| {
+                    let intent_set_id = IntentSetID::new();
+                    let value =
+                        IntentSetState::new(intent_set_id, shield_application);
+                    (intent_set_id, value)
+                })
+                .collect::<IndexMap<IntentSetID, _>>(),
         }
     }
 }
@@ -102,7 +207,6 @@ impl SigningManager {
 // === PRIVATE ===
 // ===============
 impl SigningManager {
-
     /// # Throws
     /// An error thrown means abort the whole process.
     async fn sign_intent_sets_with_role(
@@ -120,6 +224,8 @@ impl SigningManager {
             TransactionIntentHash,
             Option<RolesExercisableInTransactionManifestCombination>,
         >::new();
+        let mut lookup_intent_by_txid =
+            HashMap::<TransactionIntentHash, TransactionIntent>::new();
 
         let transactions_with_petitions = intent_sets
             .into_iter()
@@ -129,6 +235,9 @@ impl SigningManager {
                     .map(|variant| {
                         let tx = variant.intent.clone();
                         let txid = tx.transaction_intent_hash();
+
+                        lookup_intent_by_txid.insert(txid.clone(), tx.clone());
+
                         // Insert TXID into the lookup so we can group the signatures
                         // of each intent by IntentSetID.
                         lookup_txid_to_intent_set.insert(txid.clone(), set.id);
@@ -193,9 +302,11 @@ impl SigningManager {
                 let manifest_variant =
                     *lookup_txid_to_variant.get(&txid).unwrap();
 
+                let intent = lookup_intent_by_txid.get(&txid).unwrap().clone();
+
                 IntentWithSignatures::new(
                     intent_set_id,
-                    txid,
+                    intent,
                     entity,
                     signatures_with_inputs
                         .into_iter()
@@ -315,7 +426,6 @@ impl SigningManager {
         let _state = state.take().ok_or(CommonError::Unknown)?; // TODO specific error variant
         todo!()
     }
-
 }
 
 // ==================
@@ -324,7 +434,7 @@ impl SigningManager {
 
 /// An ID generated for the purpose of being able to identify which "set" a
 /// TransactionIntent belongs to.
-#[derive(Clone, Copy, PartialEq, Eq, derive_more::Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, StdHash, derive_more::Debug)]
 pub struct IntentSetID(Uuid);
 impl Default for IntentSetID {
     fn default() -> Self {
@@ -385,7 +495,7 @@ pub(crate) struct IntentWithSignatures {
     #[debug(skip)]
     hidden: HiddenConstructor,
 
-    transaction_intent_hash: TransactionIntentHash,
+    intent: TransactionIntent,
 
     part_of_intent_set: IntentSetID,
 
@@ -402,7 +512,7 @@ pub(crate) struct IntentWithSignatures {
 impl IntentWithSignatures {
     pub(crate) fn new(
         part_of_intent_set: IntentSetID,
-        transaction_intent_hash: TransactionIntentHash,
+        intent: TransactionIntent,
         entity: AccountOrPersona,
         signatures: IndexSet<SignatureWithPublicKey>,
         variant: Option<RolesExercisableInTransactionManifestCombination>,
@@ -410,7 +520,7 @@ impl IntentWithSignatures {
         Self {
             hidden: HiddenConstructor,
             part_of_intent_set,
-            transaction_intent_hash,
+            intent,
             entity,
             signatures,
             variant,
@@ -501,8 +611,52 @@ pub struct SignedIntentSet {
     intents: Vec<IntentWithSignatures>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
 }
 impl SignedIntentSet {
-    pub fn get_best_signed_intent(&self) -> SignedIntent {
-        todo!()
+    pub fn get_best_signed_intent(self) -> Result<SignedIntent> {
+        let first =
+            self.intents.first().ok_or(CommonError::Unknown).cloned()?; // TODO specific error variant
+
+        let from = |item: IntentWithSignatures| -> Result<SignedIntent> {
+            let intent = item.intent.clone();
+            let signatures = item
+                .signatures
+                .into_iter()
+                .map(|s| IntentSignature::from(s))
+                .collect_vec();
+
+            SignedIntent::new(intent, IntentSignatures::new(signatures))
+        };
+
+        if self.intents.len() == 1 {
+            from(first)
+        } else {
+            assert!(self.intents.iter().all(|i| i.variant.is_some()));
+
+            let rated_by_tx_variant = self
+                .intents
+                .into_iter()
+                .sorted_by_key(|i| i.variant.unwrap().rating())
+                .collect_vec();
+            let best = rated_by_tx_variant.first().unwrap().clone();
+            from(best)
+        }
+    }
+}
+
+trait HasTransactionVariantRating {
+    /// `0` means best
+    fn rating(&self) -> u8;
+}
+impl HasTransactionVariantRating
+    for RolesExercisableInTransactionManifestCombination
+{
+    fn rating(&self) -> u8 {
+        match self {
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation => { assert_eq!(*self, Self::best());0 }, // best
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary => 1,
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion => 2,
+            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation => 3,
+            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion => 4,
+        }
     }
 }
 

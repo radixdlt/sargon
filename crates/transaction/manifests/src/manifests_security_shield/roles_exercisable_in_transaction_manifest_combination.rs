@@ -123,8 +123,13 @@ impl RolesExercisableInTransactionManifestCombination {
         }
     }
 
-    pub fn manifest_end_user_gets_to_preview() -> Self {
+    /// "best" means most convenient to user, doing quick confirmation.
+    pub fn best() -> Self {
         Self::InitiateWithRecoveryCompleteWithConfirmation
+    }
+
+    pub fn manifest_end_user_gets_to_preview() -> Self {
+        Self::best()
     }
 
     pub fn all() -> IndexSet<Self> {
