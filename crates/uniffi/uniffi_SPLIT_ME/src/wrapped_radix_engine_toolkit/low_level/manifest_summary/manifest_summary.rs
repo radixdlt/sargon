@@ -75,7 +75,7 @@ pub enum ManifestClass {
     /// A manifest where XRD is unstaked from one or more validators.
     ValidatorUnstake,
     /// A manifest where XRD is claimed from one or more validators.
-    ValidatorClaim,
+    ValidatorClaimXrd,
     /// A manifest that updated the deposit settings of the account.
     AccountDepositSettingsUpdate,
 }

@@ -526,6 +526,24 @@ impl SargonOS {
     }
 }
 
+impl SargonOS {
+    /// Triggers the spot check for the given factor source, and returns whether the spot check was successful.
+    pub async fn trigger_spot_check(
+        &self,
+        factor_source: FactorSource,
+        allow_skip: bool,
+    ) -> Result<bool> {
+        let response = self
+            .spot_check_interactor()
+            .spot_check(factor_source, allow_skip)
+            .await?;
+        match response {
+            SpotCheckResponse::Valid => Ok(true),
+            SpotCheckResponse::Skipped => Ok(false),
+        }
+    }
+}
+
 #[cfg(debug_assertions)]
 impl SargonOS {
     /// For tests
@@ -1064,6 +1082,82 @@ mod tests {
                     ids: vec![factor_source.factor_source_id()],
                 }
             }));
+    }
+
+    #[actix_rt::test]
+    async fn trigger_spot_check_valid() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_succeeded()),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.trigger_spot_check(FactorSource::sample(), false)
+            })
+            .await
+            .unwrap();
+
+        assert!(result);
+    }
+
+    #[actix_rt::test]
+    async fn trigger_spot_check_skipped() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_skipped()),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.trigger_spot_check(FactorSource::sample(), true)
+            })
+            .await
+            .unwrap();
+
+        assert!(!result);
+    }
+
+    #[actix_rt::test]
+    async fn trigger_spot_check_failing() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let error = CommonError::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_failed(error.clone())),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.trigger_spot_check(FactorSource::sample(), false)
+            })
+            .await
+            .expect_err("Expected an error");
+
+        assert_eq!(result, error);
     }
 
     async fn boot(event_bus_driver: Arc<RustEventBusDriver>) -> Arc<SUT> {

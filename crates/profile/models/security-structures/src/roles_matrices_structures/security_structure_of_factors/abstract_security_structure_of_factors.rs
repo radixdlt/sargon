@@ -70,3 +70,9 @@ impl<FACTOR> AbstractSecurityStructure<FACTOR> {
         )
     }
 }
+
+impl<FACTOR> AbstractSecurityStructure<FACTOR> {
+    pub fn is_main(&self) -> bool {
+        self.metadata.is_main()
+    }
+}
