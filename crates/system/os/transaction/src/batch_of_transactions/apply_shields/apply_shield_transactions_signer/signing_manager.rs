@@ -51,11 +51,11 @@ impl SigningManager {
 impl SigningManager {
     /// # Throws
     /// An error thrown means abort the whole process.
-    async fn do_sign_intents_with_role<const ROLE: u8>(
+    async fn do_sign_intents_with_role(
         &self,
         intents: IndexSet<IntentToSign>,
-    ) -> Result<ExerciseRoleOutcome<ROLE>> {
-        let role = role_kind::<ROLE>();
+        role: RoleKind,
+    ) -> Result<ExerciseRoleOutcome> {
         let purpose = SigningPurpose::SignTX { role_kind: role };
 
         let transactions_with_petitions = intents
@@ -85,6 +85,7 @@ impl SigningManager {
         let entities_not_signed_for: Vec<EntityNotSignedFor> = vec![];
 
         Ok(ExerciseRoleOutcome::new(
+            role,
             entities_signed_for,
             entities_not_signed_for,
         ))
@@ -196,13 +197,15 @@ struct EntityNotSignedFor {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct ExerciseRoleOutcome<const ROLE: u8> {
+struct ExerciseRoleOutcome {
     #[allow(dead_code)]
     #[doc(hidden)]
     hidden: HiddenConstructor,
 
-    /// The `entities_signed_for.filter_map(|e| e.variant)` must "contain" `ROLE`, e.g.
-    /// if ROLE is ROLE_PRIMARY_ROLE then variant cannot be
+    role: RoleKind,
+
+    /// The `entities_signed_for.filter_map(|e| e.variant)` must "contain" `role`, e.g.
+    /// if role is ROLE_PRIMARY_ROLE then variant cannot be
     /// RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation
     /// which does not "contain" Primary.
     entities_signed_for: Vec<IntentWithSignatures>, // want IndexSet, but Item is not StdHash.
@@ -210,23 +213,14 @@ struct ExerciseRoleOutcome<const ROLE: u8> {
     entities_not_signed_for: Vec<EntityNotSignedFor>, // want IndexSet, but Item is not StdHash.
 }
 
-fn role_kind<const ROLE: u8>() -> RoleKind {
-    match ROLE {
-        1 => RoleKind::Primary,
-        2 => RoleKind::Recovery,
-        3 => RoleKind::Confirmation,
-        _ => unreachable!(),
-    }
-}
-
-impl<const ROLE: u8> ExerciseRoleOutcome<ROLE> {
+impl ExerciseRoleOutcome {
     /// # Panics
-    /// Panics if there is a discrepancy between the entities_signed_for variant and ROLE.
+    /// Panics if there is a discrepancy between the entities_signed_for variant and `role_kind``.
     pub fn new(
+        role_kind: RoleKind,
         entities_signed_for: Vec<IntentWithSignatures>,
         entities_not_signed_for: Vec<EntityNotSignedFor>,
     ) -> Self {
-        let role_kind = role_kind::<ROLE>();
         assert!(
             entities_signed_for
                 .iter()
