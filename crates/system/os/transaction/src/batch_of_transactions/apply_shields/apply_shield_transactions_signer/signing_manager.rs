@@ -17,6 +17,27 @@ pub struct SigningManager {
     state: RwLock<Option<SigningManagerState>>,
 }
 
+struct SigningManagerState {
+    intent_sets: Vec<SecurityShieldApplicationWithTransactionIntents>,
+}
+
+impl SigningManagerState {
+    fn new(
+        intent_sets: impl IntoIterator<
+            Item = SecurityShieldApplicationWithTransactionIntents,
+        >,
+    ) -> Self {
+        Self {
+            intent_sets: intent_sets.into_iter().collect(),
+        }
+    }
+}
+
+enum ExerciseOutcomeKind {
+    AllEntitiesSignedFor,
+    NotAllEntitiesSignedFor,
+}
+
 // ==============
 // === PUBLIC ===
 // ==============
@@ -40,58 +61,48 @@ impl SigningManager {
     /// "best one" of those which was signed. Successfully signed intent which
     /// can exercise the Confirmation role are better than those using delay completion (
     /// time).
+    ///
+    /// We are performing 4 passes to the SignaturesCollector, first
+    /// using Recovery role, then Confirmation role, then Primary role for
+    /// the entities applying the shield, and lastly we sign for the fee payers
+    /// using Primary role.
     pub async fn sign_intent_sets(
         &self,
         intent_sets: impl IntoIterator<
             Item = SecurityShieldApplicationWithTransactionIntents,
         >,
     ) -> Result<SigningManagerOutcome> {
-        let intent_sets = intent_sets.into_iter().collect_vec(); // We want IndexSet but manifests are not `std::hash::Hash`
+        // Init the state
         self.state
             .write()
             .unwrap()
             .replace(SigningManagerState::new(intent_sets));
 
-        let sign_with_recovery = self.sign_intents_with_recovery_role().await?;
+        // Start with Recovery role
+        self.sign_intents_with_recovery_role().await?;
 
-        self.handle_recovery_outcome(sign_with_recovery)?;
+        // Then we sign for the Confirmation role
+        self.sign_intents_with_confirmation_role().await?;
 
-        todo!()
+        // Then we sign for the Primary role
+        self.sign_intents_with_primary_role().await?;
+
+        // Lastly we sign for the fee payers using Primary role
+        self.sign_for_fee_payers().await?;
+
+        // Try to get the outcome
+        self.outcome()
     }
-}
-
-struct SigningManagerState {
-    intent_sets: Vec<SecurityShieldApplicationWithTransactionIntents>,
-}
-
-impl SigningManagerState {
-    fn new(
-        intent_sets: Vec<SecurityShieldApplicationWithTransactionIntents>,
-    ) -> Self {
-        Self { intent_sets }
-    }
-}
-
-enum ExerciseOutcomeKind {
-    AllEntitiesSignedFor,
-    NotAllEntitiesSignedFor,
 }
 
 // ===============
 // === PRIVATE ===
 // ===============
 impl SigningManager {
-    fn updating_state(
-        &self,
-        f: impl FnOnce(&mut SigningManagerState) -> Result<()>,
-    ) -> Result<()> {
-        let mut state_holder =
-            self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
-        if let Some(state) = state_holder.as_mut() {
-            f(state)
-        } else {
-            unreachable!("State should be Some");
-        }
+    fn outcome(&self) -> Result<SigningManagerOutcome> {
+        let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
+        let _state = state.take().ok_or(CommonError::Unknown)?; // TODO specific error variant
+        todo!()
     }
 
     /// # Panics
@@ -105,9 +116,42 @@ impl SigningManager {
         Ok(())
     }
 
+    /// # Panics
+    /// Panics if recovery_outcome.role != RoleKind::Confirmation
+    fn handle_confirmation_outcome(
+        &self,
+        confirmation_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(confirmation_outcome.role, RoleKind::Confirmation);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
+    }
+
+    /// # Panics
+    /// Panics if recovery_outcome.role != RoleKind::Primary
+    fn handle_primary_outcome(
+        &self,
+        primary_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(primary_outcome.role, RoleKind::Primary);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
+    }
+
+    /// # Panics
+    /// Panics if fee_payers_outcome.role != RoleKind::Primary (we are spending XRD)
+    fn handle_fee_payers_outcome(
+        &self,
+        fee_payers_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(fee_payers_outcome.role, RoleKind::Primary);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
+    }
+
     /// # Throws
     /// An error thrown means abort the whole process.
-    async fn do_sign_intents_with_role(
+    async fn sign_intents_with_role(
         &self,
         intents: IndexSet<IntentToSign>,
         role: RoleKind,
@@ -132,7 +176,7 @@ impl SigningManager {
 
         // Failure is not something we handle, it means the whole process should
         // be aborted by user
-        let outcome = collector.collect_signatures().await?;
+        let _outcome = collector.collect_signatures().await?;
 
         // TODO: Split `outcome` into `entities_signed_for` and `entities_not_signed_for`
 
@@ -147,31 +191,53 @@ impl SigningManager {
         ))
     }
 
-    async fn sign_intents_with_role(
+    fn updating_state(
         &self,
-        role: RoleKind,
-    ) -> Result<ExerciseRoleOutcome> {
-        todo!()
+        f: impl FnOnce(&mut SigningManagerState) -> Result<()>,
+    ) -> Result<()> {
+        let mut state_holder =
+            self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
+        if let Some(state) = state_holder.as_mut() {
+            f(state)
+        } else {
+            unreachable!("State should be Some");
+        }
     }
 
-    async fn sign_intents_with_primary_role(
-        &self,
-        intents: &[SecurityShieldApplicationWithTransactionIntents],
-    ) -> Result<ExerciseRoleOutcome> {
-        self.sign_intents_with_role(RoleKind::Primary).await
+    async fn sign_intents_with_recovery_role(&self) -> Result<()> {
+        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+        let outcome = self
+            .sign_intents_with_role(intents, RoleKind::Recovery)
+            .await?;
+        self.handle_recovery_outcome(outcome)
     }
 
-    async fn sign_intents_with_recovery_role(
-        &self,
-    ) -> Result<ExerciseRoleOutcome> {
-        self.sign_intents_with_role(RoleKind::Recovery).await
+    async fn sign_intents_with_confirmation_role(&self) -> Result<()> {
+        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+        let outcome = self
+            .sign_intents_with_role(intents, RoleKind::Confirmation)
+            .await?;
+        self.handle_confirmation_outcome(outcome)
     }
 
-    async fn sign_intents_with_confirmation_role(
-        &self,
-        intents: &[SecurityShieldApplicationWithTransactionIntents],
-    ) -> Result<ExerciseRoleOutcome> {
-        self.sign_intents_with_role(RoleKind::Confirmation).await
+    async fn sign_intents_with_primary_role(&self) -> Result<()> {
+        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+        let outcome = self
+            .sign_intents_with_role(intents, RoleKind::Primary)
+            .await?;
+        self.handle_primary_outcome(outcome)
+    }
+
+    async fn sign_for_fee_payers(&self) -> Result<()> {
+        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+
+        // We are goign to spend the fee paying accouts XRD
+        // so we use Primary role
+        let role = RoleKind::Primary;
+
+        let outcome = self.sign_intents_with_role(intents, role).await?;
+
+        self.handle_fee_payers_outcome(outcome)
     }
 }
 
