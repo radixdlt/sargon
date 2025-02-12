@@ -151,18 +151,25 @@ impl SigningManager {
 
     /// # Throws
     /// An error thrown means abort the whole process.
-    async fn sign_intents_with_role(
+    async fn sign_intent_sets_with_role(
         &self,
-        intents: IndexSet<IntentToSign>,
+        intent_sets: Vec<IntentSetToSign>,
         role: RoleKind,
     ) -> Result<ExerciseRoleOutcome> {
         let purpose = SigningPurpose::SignTX { role_kind: role };
 
-        let transactions_with_petitions = intents
-            .iter()
+        let transactions_with_petitions = intent_sets
             .into_iter()
-            .map(|t| {
-                SignableWithEntities::new(t.intent.clone(), t.entities.clone())
+            .flat_map(|set| {
+                set.variants
+                    .iter()
+                    .map(|variant| {
+                        SignableWithEntities::new(
+                            variant.intent.clone(),
+                            set.entities.clone(),
+                        )
+                    })
+                    .collect_vec()
             })
             .collect::<IdentifiedVecOf<_>>();
 
@@ -205,37 +212,38 @@ impl SigningManager {
     }
 
     async fn sign_intents_with_recovery_role(&self) -> Result<()> {
-        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
         let outcome = self
-            .sign_intents_with_role(intents, RoleKind::Recovery)
+            .sign_intent_sets_with_role(intent_sets, RoleKind::Recovery)
             .await?;
         self.handle_recovery_outcome(outcome)
     }
 
     async fn sign_intents_with_confirmation_role(&self) -> Result<()> {
-        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
         let outcome = self
-            .sign_intents_with_role(intents, RoleKind::Confirmation)
+            .sign_intent_sets_with_role(intent_sets, RoleKind::Confirmation)
             .await?;
         self.handle_confirmation_outcome(outcome)
     }
 
     async fn sign_intents_with_primary_role(&self) -> Result<()> {
-        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
         let outcome = self
-            .sign_intents_with_role(intents, RoleKind::Primary)
+            .sign_intent_sets_with_role(intent_sets, RoleKind::Primary)
             .await?;
         self.handle_primary_outcome(outcome)
     }
 
     async fn sign_for_fee_payers(&self) -> Result<()> {
-        let intents: IndexSet<IntentToSign> = IndexSet::new(); // TODO: Get intents from state
+        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
 
         // We are goign to spend the fee paying accouts XRD
         // so we use Primary role
         let role = RoleKind::Primary;
 
-        let outcome = self.sign_intents_with_role(intents, role).await?;
+        let outcome =
+            self.sign_intent_sets_with_role(intent_sets, role).await?;
 
         self.handle_fee_payers_outcome(outcome)
     }
@@ -244,9 +252,17 @@ impl SigningManager {
 // ==================
 // ==== TO SIGN =====
 // ==================
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct IntentToSign {
-    intent: TransactionIntent,
+
+/// A "set" of TransactionIntents to sign, and entities to sign for.
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+struct IntentSetToSign {
+    #[allow(dead_code)]
+    #[doc(hidden)]
+    #[debug(skip)]
+    hidden: HiddenConstructor,
+
+    /// Will be a single one for unsecurified entities
+    variants: Vec<IntentVariant>,
 
     /// For shield applying manifests this Vec contains a single entity, either
     /// the entity applying the shield or the fee payer - we are doing
@@ -254,13 +270,12 @@ struct IntentToSign {
     /// entities applying the shield, then a fourth pass for the fee payer
     /// of each transaction exercising its Primary role.
     entities: Vec<AccountOrPersona>,
-
-    variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct IntentSetToSign {
-    intents: Vec<IntentToSign>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
+#[derive(Clone, PartialEq, Eq, Debug)]
+struct IntentVariant {
+    variant: Option<RolesExercisableInTransactionManifestCombination>,
+    intent: TransactionIntent,
 }
 
 // =================
@@ -390,7 +405,7 @@ impl ExerciseRoleOutcome {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignedIntentSet {
-    intents: Vec<IntentToSign>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
+    intents: Vec<IntentWithSignatures>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
 }
 impl SignedIntentSet {
     pub fn get_best_signed_intent(&self) -> SignedIntent {
@@ -404,7 +419,9 @@ pub struct SigningManagerOutcome {
 }
 impl SigningManagerOutcome {
     // TODO: Implement support for handling of failed transactions, i.e. submit the successful ones even if some failed and do SOMETHING with the failed ones
-    pub fn validate_all_intent_sets_signed(self) -> Result<Vec<SignedIntentSet>> {
+    pub fn validate_all_intent_sets_signed(
+        self,
+    ) -> Result<Vec<SignedIntentSet>> {
         if self.failed_intent_sets.is_empty() {
             Ok(self.successfully_signed_intent_sets)
         } else {
