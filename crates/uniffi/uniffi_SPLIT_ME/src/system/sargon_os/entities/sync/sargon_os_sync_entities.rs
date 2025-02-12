@@ -18,7 +18,7 @@ impl SargonOS {
     /// 3. more checks will be developed...
     async fn wip_sync_entities_state_on_ledger(
         &self,
-    ) -> Result<EntitySyncReport> {
+    ) -> Result<EntitySyncOutcome> {
         self.wrapped
             .wip_sync_entities_state_on_ledger()
             .await

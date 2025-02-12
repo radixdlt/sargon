@@ -18,9 +18,8 @@ impl OsTxSubmitting for SargonOS {
         &self,
         notarized_transaction: NotarizedTransaction,
     ) -> Result<TransactionIntentHash> {
-        let network_id = self.current_network_id()?;
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let gateway_client = self.gateway_client()?;
+
         gateway_client
             .submit_notarized_transaction(notarized_transaction)
             .await

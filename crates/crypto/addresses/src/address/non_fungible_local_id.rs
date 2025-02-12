@@ -122,10 +122,10 @@ impl From<AddressOfAccountOrPersona> for NonFungibleLocalId {
     fn from(value: AddressOfAccountOrPersona) -> Self {
         match value {
             AddressOfAccountOrPersona::Account(account_address) => {
-                From::<AccountAddress>::from(account_address)
+                Self::from(account_address)
             }
             AddressOfAccountOrPersona::Identity(identity_address) => {
-                From::<IdentityAddress>::from(identity_address)
+                Self::from(identity_address)
             }
         }
     }

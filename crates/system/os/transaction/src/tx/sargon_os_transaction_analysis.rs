@@ -171,8 +171,7 @@ impl OsExecutionSummary for SargonOS {
         let signer_public_keys =
             self.extract_signer_public_keys(manifest.summary(network_id)?)?;
 
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let gateway_client = self.gateway_client_with(network_id);
 
         let epoch = gateway_client.current_epoch().await?;
 
@@ -187,8 +186,7 @@ impl OsExecutionSummary for SargonOS {
             )
             .await?;
 
-        Self::extract_execution_summary(
-            self,
+        self.extract_execution_summary(
             &manifest,
             receipts,
             network_id,
@@ -257,8 +255,11 @@ impl OsExecutionSummary for SargonOS {
                     .and_then(|entity| {
                         entity
                             .get_provisional()
-                            .and_then(|p| p.into_factor_instances_derived().ok())
                             .ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)
+                            .and_then(|p| {
+                                p.into_factor_instances_derived()
+                                    .or(Err(CommonError::ProvisionalConfigInWrongStateExpectedInstancesDerived))
+                            })
                     })
                     .and_then(|security_structure| {
                         self.security_structure_of_factor_sources_from_security_structure_id(

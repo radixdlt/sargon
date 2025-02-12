@@ -2,11 +2,11 @@ use crate::prelude::*;
 
 /// The report that gathers the different actions performed on profile after sync completes.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct EntitySyncReport {
+pub struct EntitySyncOutcome {
     pub actions_performed: IndexSet<EntitySyncActionPerformed>,
 }
 
-impl HasSampleValues for EntitySyncReport {
+impl HasSampleValues for EntitySyncOutcome {
     fn sample() -> Self {
         Self::new(IndexSet::just(EntitySyncActionPerformed::sample()))
     }
@@ -16,7 +16,7 @@ impl HasSampleValues for EntitySyncReport {
     }
 }
 
-impl EntitySyncReport {
+impl EntitySyncOutcome {
     pub fn new(actions: IndexSet<EntitySyncActionPerformed>) -> Self {
         Self {
             actions_performed: actions,
@@ -53,11 +53,11 @@ impl HasSampleValues for EntitySyncActionPerformed {
 }
 
 #[cfg(test)]
-mod entity_sync_report_tests {
+mod entity_sync_outcome_tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = EntitySyncReport;
+    type SUT = EntitySyncOutcome;
 
     #[test]
     fn equality() {
@@ -72,7 +72,7 @@ mod entity_sync_report_tests {
 
     #[test]
     fn test_no_action() {
-        assert_eq!(EntitySyncReport::no_action().actions_performed.len(), 0)
+        assert_eq!(EntitySyncOutcome::no_action().actions_performed.len(), 0)
     }
 }
 

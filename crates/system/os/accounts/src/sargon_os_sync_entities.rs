@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub trait OsSyncEntitiesStateOnLedger {
     async fn wip_sync_entities_state_on_ledger(
         &self,
-    ) -> Result<EntitySyncReport>;
+    ) -> Result<EntitySyncOutcome>;
 
     async fn sync_accounts_deleted_on_ledger(&self) -> Result<bool>;
     async fn check_accounts_deleted_on_ledger(
@@ -32,7 +32,7 @@ impl OsSyncEntitiesStateOnLedger for SargonOS {
     /// 3. more checks will be developed...
     async fn wip_sync_entities_state_on_ledger(
         &self,
-    ) -> Result<EntitySyncReport> {
+    ) -> Result<EntitySyncOutcome> {
         let mut entities = Vec::<AddressOfAccountOrPersona>::new();
         entities.extend(self.accounts_on_current_network().map(
             |accounts| {
@@ -50,10 +50,8 @@ impl OsSyncEntitiesStateOnLedger for SargonOS {
                     .collect_vec()
             },
         )?);
-        let network_id = self.current_network_id()?;
 
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let (gateway_client, network_id) = self.gateway_client_on()?;
 
         // Fetch ancestor addresses
         let ancestor_address_per_entity = gateway_client
@@ -135,10 +133,10 @@ impl OsSyncEntitiesStateOnLedger for SargonOS {
                     }
                 }
 
-                Ok(EntitySyncReport::new(actions_performed))
+                Ok(EntitySyncOutcome::new(actions_performed))
             }).await
         } else {
-            Ok(EntitySyncReport::no_action())
+            Ok(EntitySyncOutcome::no_action())
         }
     }
 
@@ -147,9 +145,8 @@ impl OsSyncEntitiesStateOnLedger for SargonOS {
     ///
     /// Returns true if any account became tombstoned.
     async fn sync_accounts_deleted_on_ledger(&self) -> Result<bool> {
-        let accounts = self.accounts_on_current_network()?;
-
         let network_id = self.current_network_id()?;
+        let accounts = self.accounts_on_current_network()?;
 
         let account_addresses_with_deleted_status = self
             .check_accounts_deleted_on_ledger(
@@ -190,8 +187,7 @@ impl OsSyncEntitiesStateOnLedger for SargonOS {
         network_id: NetworkID,
         account_addresses: IndexSet<AccountAddress>,
     ) -> Result<IndexMap<AccountAddress, bool>> {
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let gateway_client = self.gateway_client_with(network_id);
 
         gateway_client
             .check_accounts_are_deleted(network_id, account_addresses)

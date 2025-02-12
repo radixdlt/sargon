@@ -16,10 +16,7 @@ impl OsMarkAsSecurified for SargonOS {
         &self,
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<()> {
-        let network_id = self.current_network_id()?;
-
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let (gateway_client, network_id) = self.gateway_client_on()?;
 
         // Fetch ancestor addresses
         let ancestor_address_per_entity = gateway_client

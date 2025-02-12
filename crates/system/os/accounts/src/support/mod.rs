@@ -1,3 +1,3 @@
-mod entity_sync_report;
+mod entity_sync_outcome;
 
-pub use entity_sync_report::*;
+pub use entity_sync_outcome::*;

@@ -21,15 +21,18 @@ impl ProfileMarkEntityAsSecurified for Profile {
             .ok_or(CommonError::SecurityStateSecurifiedButExpectedUnsecurified)
             .map(|security_state| security_state.transaction_signing.clone())?;
 
-        let security_structure_of_factor_instances = entity
+        let provisional_config = entity
             .get_provisional()
-            .and_then(|p| p.into_factor_instances_derived().ok())
             .ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)?;
+
+        let security_structure_of_factor_instances = provisional_config
+            .as_factor_instances_derived()
+            .ok_or(CommonError::ProvisionalConfigInWrongStateExpectedInstancesDerived)?;
 
         let secured_entity_control = SecuredEntityControl::new(
             transaction_signing,
             access_controller_address,
-            security_structure_of_factor_instances,
+            security_structure_of_factor_instances.clone(),
         )?;
 
         entity.set_provisional(None);
