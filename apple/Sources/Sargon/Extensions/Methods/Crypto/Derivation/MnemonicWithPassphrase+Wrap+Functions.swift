@@ -36,6 +36,15 @@ extension MnemonicWithPassphrase {
 		)
 	}
 
+	public func derivePublicKeys(
+		paths: some Collection<some DerivationPathProtocol>,
+		factorSourceId: FactorSourceIDFromHash
+	) -> [HierarchicalDeterministicFactorInstance] {
+		derivePublicKeys(paths: paths).map {
+			.init(factorSourceId: factorSourceId, publicKey: $0)
+		}
+	}
+
 	public func sign(
 		hash: Hash,
 		path: some DerivationPathProtocol
