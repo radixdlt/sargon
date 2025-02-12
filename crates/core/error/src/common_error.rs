@@ -887,6 +887,9 @@ pub enum CommonError {
 
     #[error("Invalid NodeId length: {actual}, expected: {expected}")]
     InvalidNodeIdLength { expected: usize, actual: usize } = 10252,
+
+    #[error("Factor source already exists")]
+    FactorSourceAlreadyExists = 10253,
 }
 
 impl CommonError {

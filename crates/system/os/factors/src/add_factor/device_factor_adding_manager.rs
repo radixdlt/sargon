@@ -2,12 +2,13 @@ use crate::prelude::*;
 use rand::{rngs::OsRng, Rng};
 
 pub struct DeviceFactorAddingManager {
-    sargon_os: Arc<SargonOS>,
+    os_ref: Arc<dyn OsNewFactorAdding>,
     factor_identification: RwLock<Option<FactorIdentification>>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 struct FactorIdentification {
+    mnemonic_with_passphrase: MnemonicWithPassphrase,
     factor_source: DeviceFactorSource,
     mnemonic_words: Vec<BIP39Word>,
     confirmation_indices: Vec<u8>,
@@ -15,6 +16,7 @@ struct FactorIdentification {
 
 impl std::hash::Hash for FactorIdentification {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.mnemonic_with_passphrase.hash(state);
         self.factor_source.hash(state);
         self.mnemonic_words.hash(state);
         for index in &self.confirmation_indices {
@@ -43,7 +45,7 @@ impl Eq for DeviceFactorAddingManager {}
 impl Clone for DeviceFactorAddingManager {
     fn clone(&self) -> Self {
         Self {
-            sargon_os: self.sargon_os.clone(),
+            os_ref: self.os_ref.clone(),
             factor_identification: RwLock::new(
                 self.factor_identification
                     .read()
@@ -70,13 +72,16 @@ impl FactorIdentification {
     fn new(mnemonic: Mnemonic, host_info: HostInfo) -> Self {
         let mnemonic_words = mnemonic.clone().words;
         let number_of_words = mnemonic_words.clone().len() as u8;
+        let mnemonic_with_passphrase =
+            MnemonicWithPassphrase::new(mnemonic.clone());
         let factor_source = DeviceFactorSource::babylon(
             false,
-            &MnemonicWithPassphrase::new(mnemonic),
+            &mnemonic_with_passphrase,
             &host_info,
         );
 
         Self {
+            mnemonic_with_passphrase,
             factor_source,
             mnemonic_words,
             confirmation_indices: Self::generate_confirmation_indices(
@@ -107,9 +112,9 @@ impl FactorIdentification {
 }
 
 impl DeviceFactorAddingManager {
-    pub fn new(sargon_os: Arc<SargonOS>) -> Self {
+    pub fn new(sargon_os: Arc<dyn OsNewFactorAdding>) -> Self {
         Self {
-            sargon_os,
+            os_ref: sargon_os,
             factor_identification: RwLock::new(None),
         }
     }
@@ -207,18 +212,21 @@ impl DeviceFactorAddingManager {
     }
 
     pub async fn resolve_host_info(&self) -> HostInfo {
-        self.sargon_os.resolve_host_info().await
+        self.os_ref.resolve_host_info().await
     }
 
     pub async fn is_factor_already_in_use(&self) -> Result<bool> {
-        self.sargon_os
+        self.os_ref
             .is_factor_already_in_use(self.get_factor_source())
             .await
     }
 
     pub async fn add_factor(&self) -> Result<()> {
-        self.sargon_os
-            .add_new_factor(self.get_factor_source())
+        self.os_ref
+            .add_new_factor(
+                self.get_factor_source(),
+                self.get_factor_identification().mnemonic_with_passphrase,
+            )
             .await
     }
 }
@@ -226,10 +234,47 @@ impl DeviceFactorAddingManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use actix_rt::time::timeout;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DeviceFactorAddingManager;
+
+    struct MockOsNewFactorAdding {
+        stubbed_factor_already_in_use: Result<bool>,
+        stubbed_add_new_factor_result: Result<()>,
+        stubbed_host_info: HostInfo,
+    }
+
+    impl MockOsNewFactorAdding {
+        fn with_ok_factor_already_in_use(factor_already_in_use: bool) -> Self {
+            Self {
+                stubbed_factor_already_in_use: Ok(factor_already_in_use),
+                stubbed_add_new_factor_result: Ok(()),
+                stubbed_host_info: HostInfo::sample(),
+            }
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl OsNewFactorAdding for MockOsNewFactorAdding {
+        async fn is_factor_already_in_use(
+            &self,
+            _factor_source: FactorSource,
+        ) -> Result<bool> {
+            self.stubbed_factor_already_in_use.clone()
+        }
+
+        async fn add_new_factor(
+            &self,
+            _factor_source: FactorSource,
+            _mnemonic_with_passphrase: MnemonicWithPassphrase,
+        ) -> Result<()> {
+            self.stubbed_add_new_factor_result.clone()
+        }
+
+        async fn resolve_host_info(&self) -> HostInfo {
+            self.stubbed_host_info.clone()
+        }
+    }
 
     #[test]
     fn generate_confirmation_indices() {
@@ -240,8 +285,9 @@ mod tests {
 
     #[actix_rt::test]
     async fn get_incorrect_confirmation_words() {
-        let sargon_os = boot_sargon_os(RustEventBusDriver::new()).await;
-        let sut = SUT::new(sargon_os);
+        let os_ref =
+            MockOsNewFactorAdding::with_ok_factor_already_in_use(false);
+        let sut = SUT::new(Arc::new(os_ref));
         let mnemonic = Mnemonic::sample();
         let host_info = HostInfo::sample();
 
@@ -260,24 +306,5 @@ mod tests {
             sut.get_incorrect_confirmation_words(&words_to_confirm);
 
         assert_eq!(incorrect_words, words_to_confirm);
-    }
-
-    async fn boot_sargon_os(
-        event_bus_driver: Arc<RustEventBusDriver>,
-    ) -> Arc<SargonOS> {
-        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let mut clients = Clients::new(Bios::new(drivers));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors = Interactors::new_from_clients(&clients);
-
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SargonOS::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
-        os
     }
 }
