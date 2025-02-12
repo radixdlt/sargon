@@ -552,6 +552,26 @@ impl FactorInstancesCache {
         outcome.is_satisfied()
     }
 
+    /// Queries if the cache is satisfied for the given `factor_source_id` & `quantified_derivation_presets`
+    pub fn is_satisfied(
+        &self,
+        network_id: NetworkID,
+        factor_source_id: FactorSourceIDFromHash,
+        quantified_derivation_presets: &IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        >,
+    ) -> bool {
+        let Ok(outcome) = self.get(
+            &IndexSet::just(factor_source_id),
+            quantified_derivation_presets,
+            network_id,
+        ) else {
+            return false;
+        };
+
+        outcome.is_satisfied()
+    }
+
     pub fn assert_is_full(
         &self,
         network_id: NetworkID,

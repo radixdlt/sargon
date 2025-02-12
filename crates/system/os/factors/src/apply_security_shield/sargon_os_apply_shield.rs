@@ -23,9 +23,16 @@ pub trait OsShieldApplying {
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<EntitiesOnNetwork>;
 
-    async fn _perform_spot_check_for_each_factor_source_of_security_structure(
+    async fn _get_factor_sources_from_security_structure_that_require_spot_check(
         &self,
         shield: &SecurityStructureOfFactorSources,
+        entity_addresses: IndexSet<AddressOfAccountOrPersona>,
+        network_id: NetworkID,
+    ) -> Result<IndexSet<FactorSource>>;
+
+    async fn _perform_spot_check_on_factor_sources(
+        &self,
+        factor_sources: IndexSet<FactorSource>,
     ) -> Result<()>;
 
     async fn _provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
@@ -73,10 +80,9 @@ impl OsShieldApplying for SargonOS {
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<EntitiesOnNetwork> {
         let network = self.current_network_id()?;
-        self._perform_spot_check_for_each_factor_source_of_security_structure(
-            shield,
-        )
-        .await?;
+        let factor_sources = self._get_factor_sources_from_security_structure_that_require_spot_check(shield, entity_addresses.clone(), network).await?;
+        self._perform_spot_check_on_factor_sources(factor_sources)
+            .await?;
         self._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
             shield,
             entity_addresses,
@@ -85,11 +91,117 @@ impl OsShieldApplying for SargonOS {
         .and_then(|(entities, _)| EntitiesOnNetwork::new(network, entities))
     }
 
-    async fn _perform_spot_check_for_each_factor_source_of_security_structure(
+    async fn _get_factor_sources_from_security_structure_that_require_spot_check(
         &self,
         shield: &SecurityStructureOfFactorSources,
+        entity_addresses: IndexSet<AddressOfAccountOrPersona>,
+        network_id: NetworkID,
+    ) -> Result<IndexSet<FactorSource>> {
+        // We only want to perform spot check on Factor Sources for which we won't need to derive public keys.
+        // This is, Factor Sources that have enough keys in cache to securify the required entities.
+        let mut result: IndexSet<FactorSource> = IndexSet::new();
+
+        // First we get the Accounts & Personas we are going to securify
+        let account_addresses: Vec<AccountAddress> = entity_addresses
+            .iter()
+            .filter_map(|a| a.as_account().cloned())
+            .collect();
+        let persona_addresses: Vec<IdentityAddress> = entity_addresses
+            .iter()
+            .filter_map(|a| a.as_identity().cloned())
+            .collect();
+
+        let accounts: Accounts = self
+            .accounts_on_current_network()?
+            .iter()
+            .filter(|a| account_addresses.contains(&a.address))
+            .collect();
+        let personas: Personas = self
+            .personas_on_current_network()?
+            .iter()
+            .filter(|i| persona_addresses.contains(&i.address))
+            .collect();
+
+        let cache = self.cache_snapshot().await;
+
+        // We iterate over every factor source to find out if we have enough keys in cache and we need to perform spot check for it.
+        for factor_source in shield.all_factors() {
+            // To calculate the QuantifiedDerivationPresets, we need to know how many ROLA keys we need.
+            let account_rola_count: usize;
+            let identity_rola_count: usize;
+            if shield.authentication_signing_factor != *factor_source {
+                // The factor source isn't used as the shield's authentication signing factor.
+                // There are no `AccountRola` or `IdentityRola` derivations keys needed.
+                account_rola_count = 0;
+                identity_rola_count = 0;
+            } else {
+                // The factor source is used as authentication factor.
+                // We will need to derive ROLA key for each entity that is either unsecurified, or securified with a different factor source.
+                account_rola_count = accounts
+                    .iter()
+                    .filter(|a| match &a.security_state {
+                        EntitySecurityState::Unsecured { .. } => true,
+                        EntitySecurityState::Securified { value: sec } => {
+                            sec.security_structure
+                                .authentication_signing_factor_instance
+                                .factor_source_id
+                                != factor_source.id_from_hash()
+                        }
+                    })
+                    .count();
+
+                identity_rola_count = personas
+                    .iter()
+                    .filter(|p| match &p.security_state {
+                        EntitySecurityState::Unsecured { .. } => true,
+                        EntitySecurityState::Securified { value: sec } => {
+                            sec.security_structure
+                                .authentication_signing_factor_instance
+                                .factor_source_id
+                                != factor_source.id_from_hash()
+                        }
+                    })
+                    .count();
+            }
+            let quantified_derivation_presets: IdentifiedVecOf<
+                QuantifiedDerivationPreset,
+            > = vec![
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::AccountMfa,
+                    account_addresses.len(),
+                ),
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::AccountRola,
+                    account_rola_count,
+                ),
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::IdentityMfa,
+                    persona_addresses.len(),
+                ),
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::IdentityRola,
+                    identity_rola_count,
+                ),
+            ]
+            .into();
+
+            // If cache is satisfied, we won't need to derive public keys so we perform spot check
+            if cache.is_satisfied(
+                network_id,
+                factor_source.id_from_hash(),
+                &quantified_derivation_presets,
+            ) {
+                result.insert(factor_source.clone());
+            }
+        }
+
+        Ok(result)
+    }
+
+    async fn _perform_spot_check_on_factor_sources(
+        &self,
+        factor_sources: IndexSet<FactorSource>,
     ) -> Result<()> {
-        let factor_sources = shield.all_factors();
         let interactor = self.spot_check_interactor();
         for factor_source in factor_sources {
             let _ = interactor.spot_check(factor_source.clone(), true).await?;
