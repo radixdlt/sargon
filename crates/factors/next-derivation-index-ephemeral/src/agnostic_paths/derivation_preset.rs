@@ -43,7 +43,7 @@ pub enum DerivationPreset {
     IdentityMfa,
 
     /// Used to form DerivationPaths used to derive FactorInstances
-    /// for Authentication Signing (Securified) for peresonas
+    /// for Authentication Signing (Securified) for personas
     /// `(EntityKind::Identity, KeySpace::Securified, KeyKind::AuthenticationSigning)`
     #[debug("I-Rola")]
     IdentityRola,
