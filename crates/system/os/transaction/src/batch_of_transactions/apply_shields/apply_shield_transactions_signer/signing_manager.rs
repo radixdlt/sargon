@@ -8,6 +8,7 @@ pub struct SigningManager {
     /// FactorSources in Profile
     factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    state: RwLock<SigningManagerState>,
 }
 
 // ==============
@@ -21,6 +22,7 @@ impl SigningManager {
         Self {
             factor_sources_in_profile,
             interactor,
+            state: RwLock::new(SigningManagerState::new()),
         }
     }
 
@@ -39,16 +41,52 @@ impl SigningManager {
         >,
     ) -> Result<SigningManagerOutcome> {
         let intent_sets = intent_sets.into_iter().collect_vec(); // We want IndexSet but manifests are not `std::hash::Hash`
+
         let sign_with_recovery =
             self.sign_intents_with_recovery_role(&intent_sets).await?;
+
+        self.handle_recovery_outcome(sign_with_recovery)?;
+
+
         todo!()
     }
 }
 
-// ==============
+struct SigningManagerState;
+impl SigningManagerState {
+    fn new() -> Self {
+        Self
+    }
+}
+
+enum ExerciseOutcomeKind {
+    AllEntitiesSignedFor,
+    NotAllEntitiesSignedFor,
+}
+
+// ===============
 // === PRIVATE ===
-// ==============
+// ===============
 impl SigningManager {
+    fn updating_state(
+        &self,
+        f: impl FnOnce(&mut SigningManagerState) -> Result<()>,
+    ) -> Result<()> {
+        let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
+        f(&mut state)
+    }
+
+    /// # Panics
+    /// Panics if recovery_outcome.role != RoleKind::Recovery
+    fn handle_recovery_outcome(
+        &self,
+        recovery_outcome: ExerciseRoleOutcome,
+    ) -> Result<()> {
+        assert_eq!(recovery_outcome.role, RoleKind::Recovery);
+        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        Ok(())
+    }
+
     /// # Throws
     /// An error thrown means abort the whole process.
     async fn do_sign_intents_with_role(
@@ -95,14 +133,14 @@ impl SigningManager {
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
         role: RoleKind,
-    ) -> Result<IndexSet<IntentWithSignatures>> {
+    ) -> Result<ExerciseRoleOutcome> {
         todo!()
     }
 
     async fn sign_intents_with_primary_role(
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
-    ) -> Result<IndexSet<IntentWithSignatures>> {
+    ) -> Result<ExerciseRoleOutcome> {
         self.sign_intents_with_role(intents, RoleKind::Primary)
             .await
     }
@@ -110,7 +148,7 @@ impl SigningManager {
     async fn sign_intents_with_recovery_role(
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
-    ) -> Result<IndexSet<IntentWithSignatures>> {
+    ) -> Result<ExerciseRoleOutcome> {
         self.sign_intents_with_role(intents, RoleKind::Recovery)
             .await
     }
@@ -118,7 +156,7 @@ impl SigningManager {
     async fn sign_intents_with_confirmation_role(
         &self,
         intents: &[SecurityShieldApplicationWithTransactionIntents],
-    ) -> Result<IndexSet<IntentWithSignatures>> {
+    ) -> Result<ExerciseRoleOutcome> {
         self.sign_intents_with_role(intents, RoleKind::Confirmation)
             .await
     }
@@ -214,6 +252,14 @@ struct ExerciseRoleOutcome {
 }
 
 impl ExerciseRoleOutcome {
+    fn kind(&self) -> ExerciseOutcomeKind {
+        if self.entities_not_signed_for.is_empty() {
+            ExerciseOutcomeKind::AllEntitiesSignedFor
+        } else {
+            ExerciseOutcomeKind::NotAllEntitiesSignedFor
+        }
+    }
+
     /// # Panics
     /// Panics if there is a discrepancy between the entities_signed_for variant and `role_kind``.
     pub fn new(
