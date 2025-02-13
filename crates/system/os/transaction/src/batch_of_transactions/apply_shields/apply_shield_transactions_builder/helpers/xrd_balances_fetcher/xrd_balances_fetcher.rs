@@ -144,8 +144,10 @@ impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
-        let xrd_balance_of_account =
-            balances.get_paying_component(self.entity_input.entity.address)?;
+        let xrd_balance_of_account = balances
+            .get_xrd_balance_of_paying_component(
+                self.entity_input.entity.address,
+            )?;
 
         let paying_account = balances.get_payer(self.paying_account)?;
 
@@ -210,16 +212,19 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
         self,
         balances: &mut XrdBalances,
     ) -> Result<ShieldApplicationInput> {
-        let xrd_balance_of_account =
-            balances.get_paying_component(self.entity_input.entity.address)?;
+        let xrd_balance_of_account = balances
+            .get_xrd_balance_of_paying_component(
+                self.entity_input.entity.address,
+            )?;
 
         let paying_account = balances.get_payer(self.paying_account)?;
 
-        let xrd_balance_of_access_controller = balances.get_paying_component(
-            self.entity_input
-                .securified_entity_control()
-                .xrd_vault_address(),
-        )?;
+        let xrd_balance_of_access_controller = balances
+            .get_xrd_balance_of_paying_component(
+                self.entity_input
+                    .securified_entity_control()
+                    .xrd_vault_address(),
+            )?;
 
         Ok(ApplicationInputForSecurifiedAccount {
             reviewed_manifest: self.reviewed_manifest,
@@ -244,11 +249,12 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
     ) -> Result<ShieldApplicationInput> {
         let paying_account = balances.get_payer(self.paying_account)?;
 
-        let xrd_balance_of_access_controller = balances.get_paying_component(
-            self.entity_input
-                .securified_entity_control()
-                .xrd_vault_address(),
-        )?;
+        let xrd_balance_of_access_controller = balances
+            .get_xrd_balance_of_paying_component(
+                self.entity_input
+                    .securified_entity_control()
+                    .xrd_vault_address(),
+            )?;
 
         Ok(ApplicationInputForSecurifiedPersona {
             reviewed_manifest: self.reviewed_manifest,

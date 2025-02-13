@@ -33,6 +33,12 @@ impl ShieldApplicationInputWithoutXrdBalance {
             Self::Securified(s) => s.get_payer(),
         }
     }
+    pub fn fee_tip(&self) -> Option<Decimal> {
+        match self {
+            Self::Unsecurified(u) => u.fee_tip(),
+            Self::Securified(s) => s.fee_tip(),
+        }
+    }
 }
 
 // ========================
@@ -76,8 +82,28 @@ pub struct ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
     pub estimated_xrd_fee: Decimal,
     pub entity_input: UnsecurifiedAccount,
     pub paying_account: Account,
+    fee_tip: Option<Decimal>,
 }
 impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
+    pub fn new(
+        reviewed_manifest: TransactionManifest,
+        estimated_xrd_fee: Decimal,
+        entity_input: UnsecurifiedAccount,
+        paying_account: Account,
+        fee_tip: impl Into<Option<Decimal>>,
+    ) -> Self {
+        Self {
+            reviewed_manifest,
+            estimated_xrd_fee,
+            entity_input,
+            paying_account,
+            fee_tip: fee_tip.into(),
+        }
+    }
+
+    pub fn fee_tip(&self) -> Option<Decimal> {
+        self.fee_tip.clone()
+    }
     pub fn addresses_to_fetch_xrd_balance_for(
         &self,
     ) -> IndexSet<AddressOfPayerOfShieldApplication> {
@@ -94,8 +120,27 @@ pub struct ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
     pub estimated_xrd_fee: Decimal,
     pub entity_input: UnsecurifiedPersona,
     pub paying_account: Account,
+    fee_tip: Option<Decimal>,
 }
 impl ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
+    pub fn new(
+        reviewed_manifest: TransactionManifest,
+        estimated_xrd_fee: Decimal,
+        entity_input: UnsecurifiedPersona,
+        paying_account: Account,
+        fee_tip: impl Into<Option<Decimal>>,
+    ) -> Self {
+        Self {
+            reviewed_manifest,
+            estimated_xrd_fee,
+            entity_input,
+            paying_account,
+            fee_tip: fee_tip.into(),
+        }
+    }
+    pub fn fee_tip(&self) -> Option<Decimal> {
+        self.fee_tip.clone()
+    }
     pub fn addresses_to_fetch_xrd_balance_for(
         &self,
     ) -> IndexSet<AddressOfPayerOfShieldApplication> {

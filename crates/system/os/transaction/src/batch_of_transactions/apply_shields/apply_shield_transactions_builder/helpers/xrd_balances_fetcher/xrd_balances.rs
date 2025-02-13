@@ -11,7 +11,7 @@ impl XrdBalances {
     ///     
     /// # Errors
     /// Throws an error if no XRD balance of `account` is found.
-    pub fn get_paying_component(
+    pub fn get_xrd_balance_of_paying_component(
         &mut self,
         address_of_payer: impl Into<AddressOfPayerOfShieldApplication>,
     ) -> Result<Decimal> {
@@ -36,21 +36,18 @@ impl XrdBalances {
         account: SecurifiedAccount,
     ) -> Result<ApplicationInputPayingAccount> {
         let account_address = account.entity.address;
-        let sec = account.securified_entity_control();
-        let addresses_of_access_controller = sec.addresses.clone();
 
         let xrd_balance_of_account =
-            self.get_paying_component(account_address)?;
+            self.get_xrd_balance_of_paying_component(account_address)?;
 
-        // N.B We do NOT fetch the XRD balance of the the XRD vault of the securified payer.
-        // We never want to use that balance for anything, so we don't need to fetch it.
+        // N.B We do NOT fetch the XRD balance of the the XRD vault of the AC of the
+        // securified payer. We never want to use that balance for anything, so we don't need to fetch it.
 
         Ok(ApplicationInputPayingAccount::Securified(
-            ApplicationInputPayingAccountSecurified {
+            ApplicationInputPayingAccountSecurified::new(
                 account,
-                addresses_of_access_controller,
                 xrd_balance_of_account,
-            },
+            ),
         ))
     }
 
@@ -65,12 +62,13 @@ impl XrdBalances {
     ) -> Result<ApplicationInputPayingAccount> {
         let account_address = account.entity.address;
         let xrd_balance_of_account =
-            self.get_paying_component(account_address)?;
+            self.get_xrd_balance_of_paying_component(account_address)?;
         Ok(ApplicationInputPayingAccount::Unsecurified(
-            ApplicationInputPayingAccountUnsecurified {
+            ApplicationInputPayingAccountUnsecurified::new(
                 account,
                 xrd_balance_of_account,
-            },
+                fee_payer
+            ),
         ))
     }
 

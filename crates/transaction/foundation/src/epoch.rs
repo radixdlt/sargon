@@ -27,18 +27,10 @@ impl Epoch {
     pub const DEFAULT_EPOCH_WINDOW_SIZE: EpochInner =
         Self::NUMBER_OF_EPOCHS_PER_HOUR;
 
-    /// Arbitrarily set, you have a life.
-    const TX_PER_HOUR_USER_CAN_SPEND_ON_ADMIN_BROADCASTING_OF_TX: EpochInner =
-        4;
+    pub const NUMBER_OF_EPOCHS_PER_MONTH: EpochInner =
+        Self::NUMBER_OF_EPOCHS_PER_DAY * 30;
 
-    /// Arbitrarily set. You sleep and work too.
-    const HOURS_PER_DAY_USER_CAN_SPEND_ON_ADMIN_BROADCASTING_OF_TX: EpochInner =
-        8;
-
-    /// Arbitrarily set, you can't spend all day on this.
-    const TX_PER_DAY_USER_CAN_SPEND_ON_ADMIN_BROADCASTING_OF_TX: EpochInner =
-        Self::TX_PER_HOUR_USER_CAN_SPEND_ON_ADMIN_BROADCASTING_OF_TX
-            * Self::HOURS_PER_DAY_USER_CAN_SPEND_ON_ADMIN_BROADCASTING_OF_TX;
+    pub const MAX_EPOCH_WINDOW: EpochInner = Self::NUMBER_OF_EPOCHS_PER_MONTH;
 }
 
 pub type EpochInner = u64;
@@ -55,35 +47,8 @@ impl Epoch {
         Self::new(self.0 + amount)
     }
 
-    pub fn one_week_or_more_if_many_manifests_starting_from(
-        start: Self,
-        number_of_manifests: usize,
-    ) -> Self {
-        let end = Self::duration_one_week_or_more_if_many_manifests(
-            number_of_manifests,
-        );
-        Self::new(start.0 + end)
-    }
-
-    fn duration_one_week_or_more_if_many_manifests(
-        number_of_manifests: usize,
-    ) -> EpochInner {
-        std::cmp::max(
-            Self::NUMBER_OF_EPOCHS_PER_WEEK,
-            Self::duration_enough_for_broadcasting_manifests(
-                number_of_manifests,
-            ),
-        )
-    }
-
-    fn duration_enough_for_broadcasting_manifests(
-        number_of_manifests: usize,
-    ) -> EpochInner {
-        let tx_per_day =
-            Self::TX_PER_DAY_USER_CAN_SPEND_ON_ADMIN_BROADCASTING_OF_TX;
-        let days_needed = (number_of_manifests as f32) / (tx_per_day as f32);
-        let days_needed = days_needed.ceil() as EpochInner;
-        days_needed * Self::NUMBER_OF_EPOCHS_PER_DAY // epochs needed
+    pub fn max_window_from_start(start: Self) -> Self {
+        Self::new(start.0 + Self::MAX_EPOCH_WINDOW)
     }
 }
 
@@ -162,29 +127,8 @@ mod tests {
     }
 
     #[test]
-    fn epoch_window_is_always_at_least_one_week_even_if_one_manifest() {
-        let duration = SUT::duration_one_week_or_more_if_many_manifests(1);
-        assert_eq!(duration, SUT::NUMBER_OF_EPOCHS_PER_WEEK);
-    }
-
-    #[test]
-    fn epoch_window_more_than_a_week() {
-        let duration = SUT::duration_one_week_or_more_if_many_manifests(
-            225, // 7 (days per week) * Self::TX_PER_DAY_USER_CAN_SPEND_ON_ADMIN_BROADCASTING_OF_TX => 224
-        );
-        assert!(duration > SUT::NUMBER_OF_EPOCHS_PER_WEEK);
-    }
-
-    #[test]
-    fn epoch_window_is_two_weeks_for_many() {
-        let duration =
-            SUT::duration_one_week_or_more_if_many_manifests(224 * 2);
-        assert_eq!(duration, SUT::NUMBER_OF_EPOCHS_PER_WEEK * 2);
-    }
-
-    #[test]
-    fn epoch_window_is_more_than_one_year_for_ridicilus_amount_of_tx() {
-        let duration = SUT::duration_one_week_or_more_if_many_manifests(13_000);
-        assert!(duration > (SUT::NUMBER_OF_EPOCHS_PER_WEEK * 52));
+    fn max_is_one_month() {
+        let start = SUT::new(10u64);
+        assert_eq!(SUT::max_window_from_start(start).0, 10 + SUT::NUMBER_OF_EPOCHS_PER_MONTH);
     }
 }

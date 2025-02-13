@@ -28,6 +28,17 @@ impl SecurityShieldApplicationForUnsecurifiedEntity {
             }
         }
     }
+
+    pub fn fee_tip(&self) -> Option<Decimal> {
+        match self {
+            SecurityShieldApplicationForUnsecurifiedEntity::Account(a) => {
+                a.fee_tip()
+            }
+            SecurityShieldApplicationForUnsecurifiedEntity::Persona(p) => {
+                p.fee_tip()
+            }
+        }
+    }
 }
 
 pub type SecurityShieldApplicationForSecurifiedAccount =

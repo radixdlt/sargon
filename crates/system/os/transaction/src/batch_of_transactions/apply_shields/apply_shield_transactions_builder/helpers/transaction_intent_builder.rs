@@ -60,13 +60,10 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
 
         let start_epoch_inclusive = gateway_client.current_epoch().await?;
 
-        // We give the user/host (Radix wallet app) at least one week to broadcast
-        // all the transactions but if they are many
+        // We give the user/host (Radix wallet app) one month to submit
+        // all the transactions
         let end_epoch_exclusive =
-            Epoch::one_week_or_more_if_many_manifests_starting_from(
-                start_epoch_inclusive,
-                manifests_with_entities_with_xrd_balance.len(),
-            );
+            Epoch::max_window_from_start(start_epoch_inclusive);
 
         let mut transaction_id_to_notary_private_key: IndexMap<
             TransactionIntentHash,
@@ -76,6 +73,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
         // Builds a TransactionIntent for a given manifest, nonce and notary private key.
         // by forming a header with the fetched epoch.
         let mut build_intent = |manifest: &TransactionManifest,
+                                fee_tip: Option<Decimal>,
                                 nonce: Nonce,
                                 notary_private_key_bytes: Exactly32Bytes|
          -> Result<TransactionIntent> {
@@ -89,7 +87,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                 end_epoch_exclusive,
                 nonce,
                 notary_public_key,
-                NotaryIsSignatory(true),
+                NotaryIsSignatory(false),
                 0,
             );
 
@@ -110,7 +108,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
         };
 
         // Map each `SecurityShieldApplication` to a `SecurityShieldApplicationWithTransactionIntents`
-        let with_intents = manifests_with_entities_with_xrd_balance.into_iter().map(|m| {
+        let with_intents = manifests_with_entities_with_xrd_balance.into_iter().map(|shield_application| {
             // We tactically use the same nonce for all variants of the TransactionIntents
             // for securified entities - ensuring that we cannot accidentally submit
             // two variants of the same application.
@@ -118,7 +116,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
             // We can use the same notary private key for all variants since they
             // are in fact the same application
             let notary_private_key_bytes = Exactly32Bytes::generate();
-            match m {
+            match shield_application {
                 SecurityShieldApplication::ForUnsecurifiedEntity(unsec) => {
                     let intent = build_intent(
                         unsec.manifest(),

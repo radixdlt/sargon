@@ -66,6 +66,9 @@ pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     AbstractSecurityShieldApplicationForUnsecurifiedEntity<E>
 {
+    pub fn fee_tip(&self) -> Option<Decimal> {
+        self.paying_account.fee_tip()
+    }
     pub fn with_modified_manifest(
         entity_applying_shield: AbstractUnsecurifiedEntity<E>,
         paying_account: ApplicationInputPayingAccount,
