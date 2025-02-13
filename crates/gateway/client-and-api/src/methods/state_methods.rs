@@ -58,9 +58,16 @@ impl GatewayClient {
             .map(|x| x.unwrap_or(Decimal192::zero()))
     }
 
-    /// Fetches the ancestor global address for each account by querying the vault location
-    /// of the owner badge of that account.
-    pub async fn fetch_owning_vault_global_ancestor_address_for_entities(
+    /// Fetches the badge owner for each entity.
+    ///
+    /// Each entity is controlled by an owner badge NFT which can be constructed by its address.
+    /// By fetching this badge's location on ledger we can retrieve the owner of that badge.
+    /// For now the sargon cares about two kinds of owners:
+    /// - An account address as an owner:
+    ///   Means that the entity's badge owner is the entity itself. This entity is deleted.
+    /// - An access controller as an owner:
+    ///   Means that this entity is securified and is controlled ny that access controller.
+    pub async fn fetch_entities_badge_owners(
         &self,
         network_id: NetworkID,
         entity_addresses: impl IntoIterator<Item = AddressOfAccountOrPersona>,
@@ -168,7 +175,7 @@ impl GatewayClient {
     ) -> Result<IndexMap<AccountAddress, bool>> {
         let requested_addresses = account_addresses.into_iter().collect_vec();
         let global_ancestor_address_per_account = self
-            .fetch_owning_vault_global_ancestor_address_for_entities(
+            .fetch_entities_badge_owners(
                 network_id,
                 requested_addresses
                     .clone()

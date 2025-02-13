@@ -54,18 +54,14 @@ impl OsSyncEntitiesStateOnLedger for SargonOS {
         let (gateway_client, network_id) = self.gateway_client_on()?;
 
         // Fetch ancestor addresses
-        let ancestor_address_per_entity = gateway_client
-            .fetch_owning_vault_global_ancestor_address_for_entities(
-                network_id, entities,
-            )
+        let badge_owner_per_entity = gateway_client
+            .fetch_entities_badge_owners(network_id, entities)
             .await?;
 
         // Collect sync actions based on the profile state
         let mut sync_actions = IndexSet::<EntitySyncAction>::new();
-        for (entity_address, maybe_ancestor_address) in
-            ancestor_address_per_entity
-        {
-            let Some(ancestor_address) = maybe_ancestor_address else {
+        for (entity_address, maybe_badge_owner) in badge_owner_per_entity {
+            let Some(ancestor_address) = maybe_badge_owner else {
                 continue;
             };
 
