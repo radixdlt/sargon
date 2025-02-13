@@ -124,7 +124,7 @@ impl OsShieldApplying for SargonOS {
 
         let cache = self.cache_snapshot().await;
 
-        // We iterate over every factor source to find out if we have enough keys in cache and we need to perform spot check for it.
+        // We iterate over every factor source to find out if we have enough keys in cache, and we need to perform spot check for it.
         for factor_source in shield.all_factors() {
             // To calculate the QuantifiedDerivationPresets, we need to know how many ROLA keys we need.
             let account_rola_count: usize;
@@ -1154,5 +1154,168 @@ mod tests {
 
         // ASSERT
         assert_eq!(error, spot_check_error);
+    }
+
+    #[actix_rt::test]
+    async fn factor_sources_that_require_spot_check() {
+        // Set up OS with 3 factor sources:
+        // - `device`: a BDFS with keys in cache
+        // - `ledger`: a ledger with keys in cache
+        // - `arculus`: an arculusCard with keys in cache
+        let os = SargonOS::fast_boot().await;
+        let device: FactorSource = os.main_bdfs().unwrap().into();
+        let ledger = FactorSource::sample_ledger();
+        let arculus = FactorSource::sample_arculus();
+
+        os.add_factor_source(ledger.clone()).await.unwrap(); // This pre-derives keys for Ledger as well
+        os.add_factor_source(arculus.clone()).await.unwrap(); // This pre-derives keys for Arculus as well
+
+        // Set up a shield that requires all factor sources:
+        // `device` & `ledger` are used on P, R and C roles
+        // `arculus` is used for ROLA
+        let shield = add_sample_shield(
+            &os,
+            device.factor_source_id(),
+            ledger.factor_source_id(),
+            arculus.factor_source_id(),
+        )
+        .await;
+
+        let entity_addresses = add_entities(&os).await;
+
+        // Verify that spot check is performed for all Factor Sources (we have keys for all on cache)
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        let expected: IndexSet<FactorSource> = IndexSet::from_iter([
+            device.clone(),
+            ledger.clone(),
+            arculus.clone(),
+        ]);
+        assert_eq!(result, expected);
+
+        // Clear the cache and verify we don't perform spot check for any Factor Source (derivation of keys on both is required)
+        os.factor_instances_cache.clear().await.unwrap();
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        assert!(result.is_empty());
+
+        // Adds keys for ledger on cache
+        let cache = FactorInstancesCache::build_with_instances(
+            ledger.id_from_hash(),
+            0,
+            2,
+            0,
+            0,
+            1,
+            0,
+        );
+        os.factor_instances_cache
+            .set_cache(cache.serializable_snapshot())
+            .await
+            .unwrap();
+
+        // Verify that spot check is performed for only the ledger Factor Source (we have keys for it on cache, but not for device or arculus)
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        let expected: IndexSet<FactorSource> =
+            IndexSet::from_iter([ledger.clone()]);
+        assert_eq!(result, expected);
+
+        // Add keys for arculus on cache
+        cache.add_instances(arculus.id_from_hash(), 0, 3, 3, 0, 3, 3);
+        os.factor_instances_cache
+            .set_cache(cache.serializable_snapshot())
+            .await
+            .unwrap();
+
+        // Verify that spot check is now performed for arculus as well
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        let expected: IndexSet<FactorSource> =
+            IndexSet::from_iter([ledger.clone(), arculus.clone()]);
+        assert_eq!(result, expected);
+    }
+
+    /// Creates and adds 2 Accounts to the OS
+    /// Returns the addresses of the created entities.
+    async fn add_entities(
+        os: &SargonOS,
+    ) -> IndexSet<AddressOfAccountOrPersona> {
+        let account1: AddressOfAccountOrPersona = os
+            .create_and_save_new_account_with_main_bdfs(
+                NetworkID::Mainnet,
+                DisplayName::sample(),
+            )
+            .await
+            .unwrap()
+            .address
+            .into();
+
+        let account2: AddressOfAccountOrPersona = os
+            .create_and_save_new_account_with_main_bdfs(
+                NetworkID::Mainnet,
+                DisplayName::sample_other(),
+            )
+            .await
+            .unwrap()
+            .address
+            .into();
+
+        let persona: AddressOfAccountOrPersona = os
+            .create_and_save_new_persona_with_main_bdfs(
+                NetworkID::Mainnet,
+                DisplayName::sample_other(),
+                None,
+            )
+            .await
+            .unwrap()
+            .address
+            .into();
+
+        IndexSet::from_iter([account1, account2, persona])
+    }
+
+    /// Creates and adds a sample shield with the given device, ledger and arculus factor source ids.
+    /// It uses the device and ledger for the primary, recovery and confirmation roles, and arculus as ROLA signing factor.
+    async fn add_sample_shield(
+        os: &Arc<SargonOS>,
+        device_id: FactorSourceID,
+        ledger_id: FactorSourceID,
+        arculus_id: FactorSourceID,
+    ) -> SecurityStructureOfFactorSources {
+        let matrix = unsafe {
+            MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    Threshold::zero(),
+                    [device_id, ledger_id],
+                    [],
+                ),
+                RecoveryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    Threshold::zero(),
+                    [],
+                    [device_id],
+                ),
+                ConfirmationRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    Threshold::zero(),
+                    [],
+                    [ledger_id],
+                ),
+                TimePeriod::with_days(14),
+            )
+        };
+        // Create SEC of FSIds and add it
+        let sec = SecurityStructureOfFactorSourceIds::new(
+            DisplayName::new("Invalid Shield").unwrap(),
+            matrix,
+            arculus_id,
+        );
+        os.add_security_structure_of_factor_source_ids(&sec)
+            .await
+            .unwrap();
+
+        // Get Shield
+        let shield = os
+            .security_structure_of_factor_sources_from_security_structure_id(
+                sec.id(),
+            )
+            .unwrap();
+
+        shield
     }
 }
