@@ -974,10 +974,9 @@ mod transaction_preview_analysis_tests {
             .unwrap();
 
         assert_eq!(
-            *transaction_to_review
+            transaction_to_review
                 .execution_summary
                 .detailed_classification
-                .first()
                 .unwrap(),
             DetailedManifestClass::SecurifyEntity {
                 entity_address: entity_address_to_securify,
@@ -1048,10 +1047,9 @@ mod transaction_preview_analysis_tests {
             .unwrap();
 
         assert_eq!(
-            *transaction_to_review
+            transaction_to_review
                 .execution_summary
                 .detailed_classification
-                .first()
                 .unwrap(),
             DetailedManifestClass::SecurifyEntity {
                 entity_address: entity_address_to_securify,

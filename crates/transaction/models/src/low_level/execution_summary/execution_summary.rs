@@ -236,13 +236,12 @@ impl ExecutionSummary {
             let security_structure =
                 get_provisional_security_structure(address)?;
 
-            self.detailed_classification = Some(
-                DetailedManifestClass::SecurifyEntity {
+            self.detailed_classification =
+                Some(DetailedManifestClass::SecurifyEntity {
                     entity_address: address,
                     provisional_security_structure_metadata: security_structure
                         .metadata,
-                },
-            );
+                });
         }
 
         Ok(())
