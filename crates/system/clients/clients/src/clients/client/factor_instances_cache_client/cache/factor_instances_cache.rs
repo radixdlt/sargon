@@ -567,7 +567,6 @@ impl FactorInstancesCache {
         ) else {
             return false;
         };
-
         outcome.is_satisfied()
     }
 
@@ -1006,5 +1005,113 @@ mod tests {
                 derivation_path: fi0.derivation_path().to_string()
             }
         );
+    }
+
+    #[test]
+    fn is_satisfied() {
+        // Create a cache which has the following instances for factor source `fs`:
+        // - AccountVeci: 1
+        // - AccountMfa: 2
+        let sut = SUT::default();
+        let fs = FactorSourceIDFromHash::sample_at(0);
+
+        let av_fi_0 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fs,
+            CAP26EntityKind::Account,
+            Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
+        );
+        let am_fi_0 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fs,
+            CAP26EntityKind::Account,
+            Hardened::from_local_key_space(0u32, IsSecurified(true)).unwrap(),
+        );
+        let am_fi_1 = HierarchicalDeterministicFactorInstance::new_for_entity(
+            fs,
+            CAP26EntityKind::Account,
+            Hardened::from_local_key_space(1u32, IsSecurified(true)).unwrap(),
+        );
+
+        HierarchicalDeterministicFactorInstance::new_for_entity(
+            fs,
+            CAP26EntityKind::Account,
+            Hardened::from_local_key_space(1u32, IsSecurified(true)).unwrap(),
+        );
+
+        let instances: InstancesPerDerivationPresetPerFactorSource =
+            IndexMap::from_iter([
+                (
+                    DerivationPreset::AccountVeci,
+                    IndexMap::from_iter([(
+                        fs,
+                        FactorInstances::from_iter([av_fi_0]),
+                    )]),
+                ),
+                (
+                    DerivationPreset::AccountMfa,
+                    IndexMap::from_iter([(
+                        fs,
+                        FactorInstances::from_iter([am_fi_0, am_fi_1]),
+                    )]),
+                ),
+            ]);
+        sut.insert(&instances).unwrap();
+
+        // Test that cache is satisfied for Account entity creation
+        let result = sut.is_entity_creation_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            EntityKind::Account,
+        );
+        assert!(result);
+
+        // Test that cache is satisfied for 1 AccountVeci & 2 AccountMfa
+        let result = sut.is_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            &IdentifiedVecOf::from_iter([
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::AccountVeci,
+                    1,
+                ),
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::AccountMfa,
+                    2,
+                ),
+            ]),
+        );
+        assert!(result);
+
+        // Test that cache is not satisfied for 2 AccountVeci
+        let result = sut.is_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
+                DerivationPreset::AccountVeci,
+                2,
+            )]),
+        );
+        assert!(!result);
+
+        // Test that cache is not satisfied for 3 AccountMfa
+        let result = sut.is_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
+                DerivationPreset::AccountMfa,
+                3,
+            )]),
+        );
+        assert!(!result);
+
+        // Test that cache is not satisfied for 1 IdentityVeci
+        let result = sut.is_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
+                DerivationPreset::IdentityVeci,
+                1,
+            )]),
+        );
+        assert!(!result);
     }
 }
