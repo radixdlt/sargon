@@ -987,7 +987,6 @@ mod transaction_preview_analysis_tests {
         );
     }
 
-    #[ignore = "RET does not classify yet reserved instructions for securifying identity"]
     #[actix_rt::test]
     async fn test_classify_manifest_as_securify_entity_for_persona() {
         let transaction_preview_response =
