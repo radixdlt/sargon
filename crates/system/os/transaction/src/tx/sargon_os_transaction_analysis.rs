@@ -709,7 +709,7 @@ mod transaction_preview_analysis_tests {
                     [ReservedInstruction::AccountLockFee, ReservedInstruction::AccountUpdateOwnerKeysMetadataField],
                     [],
                     [],
-                    [],
+                    None,
                     FeeLocks::default(),
                     FeeSummary::new(0, 0, 0, 0,),
                     NewEntities::default()
@@ -881,7 +881,7 @@ mod transaction_preview_analysis_tests {
                     [],
                     [],
                     [],
-                    [DetailedManifestClass::General],
+                    Some(DetailedManifestClass::General),
                     FeeLocks::default(),
                     FeeSummary::new(0, 0, 0, 0,),
                     NewEntities::default()

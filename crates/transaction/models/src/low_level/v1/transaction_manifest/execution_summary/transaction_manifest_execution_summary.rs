@@ -148,12 +148,11 @@ mod tests {
                 [],
                 [],
                 [],
-                [
-                    DetailedManifestClass::General,
+                Some(
                     DetailedManifestClass::Transfer {
                         is_one_to_one_transfer: false
-                    },
-                ],
+                    }
+                ),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.37765305".parse::<Decimal>().unwrap(),
@@ -194,7 +193,7 @@ mod tests {
                 [],
                 [],               // presented_proofs
                 [],               // encountered_component_addresses
-                [
+                Some(
                     DetailedManifestClass::AccountDepositSettingsUpdate {
                         resource_preferences_updates: HashMap::<
                             AccountAddress,
@@ -214,7 +213,7 @@ mod tests {
                         authorized_depositors_added: HashMap::new(),
                         authorized_depositors_removed: HashMap::new(),
                     }
-                ],
+                ),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.07638415".parse::<Decimal>().unwrap(),
@@ -262,7 +261,7 @@ mod tests {
                 [], // reserved_instructions
                 [], // presented_proofs
                 [], // encountered_component_addresses
-                [DetailedManifestClass::General],
+                Some(DetailedManifestClass::General),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.1585925".parse::<Decimal>().unwrap(),
@@ -339,9 +338,7 @@ mod tests {
                     [], // reserved_instructions
                     [], // presented_proofs
                     [], // encountered_component_addresses
-                    [
-                        DetailedManifestClass::General
-                    ],
+                    Some(DetailedManifestClass::General),
                     FeeLocks::default(),
                     FeeSummary::new(
                         "0.18451315".parse::<Decimal>().unwrap(),
@@ -408,9 +405,7 @@ mod tests {
                 [], // reserved_instructions
                 [], // presented_proofs
                 ["component_tdx_2_1cpd3cgy9kaxvxlptkkgxkm3qvfyqkrsl03kyz532p7e2gk0ygs4xrd".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
-                [
-                    DetailedManifestClass::General
-                ],
+                Some(DetailedManifestClass::General),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.3737913".parse::<Decimal>().unwrap(),
@@ -471,9 +466,7 @@ mod tests {
                     [], // reserved_instructions
                     [ResourceSpecifier::non_fungible("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(), vec!["<Member_83>".parse().unwrap()])], // presented_proofs
                     ["component_tdx_2_1cr4pa9ex9xhwzfjzclv8vjnfylw93wvhkwcwc0xlahpkel0krxqedw".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
-                    [
-                        DetailedManifestClass::General
-                    ],
+                    Some(DetailedManifestClass::General),
                     FeeLocks::default(),
                     FeeSummary::new(
                         "0.4943021".parse::<Decimal>().unwrap(),
@@ -512,7 +505,7 @@ mod tests {
                 [], // reserved_instructions
                 [], // presented_proofs
                 [], // encountered_component_addresses
-                [DetailedManifestClass::General],
+                Some(DetailedManifestClass::General),
                 FeeLocks::default(),
                 FeeSummary::new("0.15184175".parse::<Decimal>().unwrap(), "0.1607719".parse::<Decimal>().unwrap(), "0.33388137243".parse::<Decimal>().unwrap(), 0,),
                 NewEntities::new([
@@ -571,27 +564,24 @@ mod tests {
                 [],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
-                [
-                    DetailedManifestClass::General,
-                    DetailedManifestClass::PoolContribution {
-                        pool_addresses: vec![pool_address],
-                        pool_contributions: vec![TrackedPoolContribution::new(
-                            pool_address,
-                            [
-                                (
-                                    star_resource_address,
-                                    "100".parse::<Decimal>().unwrap()
-                                ),
-                                (
-                                    ResourceAddress::sample_stokenet_xrd(),
-                                    "100".parse::<Decimal>().unwrap()
-                                ),
-                            ],
-                            pool_unit_resource_address,
-                            100,
-                        )]
-                    }
-                ],
+                Some(DetailedManifestClass::PoolContribution {
+                    pool_addresses: vec![pool_address],
+                    pool_contributions: vec![TrackedPoolContribution::new(
+                        pool_address,
+                        [
+                            (
+                                star_resource_address,
+                                "100".parse::<Decimal>().unwrap()
+                            ),
+                            (
+                                ResourceAddress::sample_stokenet_xrd(),
+                                "100".parse::<Decimal>().unwrap()
+                            ),
+                        ],
+                        pool_unit_resource_address,
+                        100,
+                    )]
+                }),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.27887505".parse::<Decimal>().unwrap(),
@@ -663,36 +653,33 @@ mod tests {
                 [],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
-                [
-                    DetailedManifestClass::General,
-                    DetailedManifestClass::ValidatorStake {
-                        validator_addresses: vec![
+                Some(DetailedManifestClass::ValidatorStake {
+                    validator_addresses: vec![
+                        validator_0,
+                        validator_1,
+                        validator_2
+                    ],
+                    validator_stakes: vec![
+                        TrackedValidatorStake::new(
                             validator_0,
+                            1000,
+                            validator_0_resource_address_of_stake,
+                            1000,
+                        ),
+                        TrackedValidatorStake::new(
                             validator_1,
-                            validator_2
-                        ],
-                        validator_stakes: vec![
-                            TrackedValidatorStake::new(
-                                validator_0,
-                                1000,
-                                validator_0_resource_address_of_stake,
-                                1000,
-                            ),
-                            TrackedValidatorStake::new(
-                                validator_1,
-                                1000,
-                                validator_1_resource_address_of_stake,
-                                1000,
-                            ),
-                            TrackedValidatorStake::new(
-                                validator_2,
-                                1000,
-                                validator_2_resource_address_of_stake,
-                                1000,
-                            ),
-                        ]
-                    }
-                ],
+                            1000,
+                            validator_1_resource_address_of_stake,
+                            1000,
+                        ),
+                        TrackedValidatorStake::new(
+                            validator_2,
+                            1000,
+                            validator_2_resource_address_of_stake,
+                            1000,
+                        ),
+                    ]
+                }),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.3527215".parse::<Decimal>().unwrap(),
@@ -784,8 +771,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             sut.detailed_classification,
-            vec![
-                DetailedManifestClass::General,
+            Some(
                 DetailedManifestClass::PoolRedemption {
                     pool_addresses: vec![pool_address],
                     pool_redemptions: vec![
@@ -806,7 +792,7 @@ mod tests {
                         )
                     ]
                 }
-            ]
+            )
         );
 
         pretty_assertions::assert_eq!(sut.fee_locks, FeeLocks::default());
@@ -873,16 +859,13 @@ mod tests {
                 [], // reserved_instructions
                 [], // presented_proofs
                 [], // encountered_component_addresses
-                [
-                    DetailedManifestClass::General,
-                    DetailedManifestClass::ValidatorUnstake {
-                        validator_addresses: vec![validator_address],
-                        claims_non_fungible_data: HashMap::from([(
-                            nf_global_id,
-                            UnstakeData::new("Stake Claim", 37923, 500)
-                        )]),
-                    }
-                ],
+                Some(DetailedManifestClass::ValidatorUnstake {
+                    validator_addresses: vec![validator_address],
+                    claims_non_fungible_data: HashMap::from([(
+                        nf_global_id,
+                        UnstakeData::new("Stake Claim", 37923, 500)
+                    )]),
+                }),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.2848875".parse::<Decimal>().unwrap(),
@@ -944,18 +927,15 @@ mod tests {
                 [],       // reserved_instructions
                 [],       // presented_proofs
                 [],       // encountered_component_addresses
-                [
-                    DetailedManifestClass::General,
-                    DetailedManifestClass::ValidatorClaim {
-                        validator_addresses: vec![validator_address],
-                        validator_claims: vec![TrackedValidatorClaim::new(
-                            validator_address,
-                            claim_nft_resource_address,
-                            [nf_id_1, nf_id_2],
-                            150
-                        )]
-                    }
-                ],
+                Some(DetailedManifestClass::ValidatorClaim {
+                    validator_addresses: vec![validator_address],
+                    validator_claims: vec![TrackedValidatorClaim::new(
+                        validator_address,
+                        claim_nft_resource_address,
+                        [nf_id_1, nf_id_2],
+                        150
+                    )]
+                }),
                 FeeLocks::default(),
                 FeeSummary::new(
                     "0.2383276".parse::<Decimal>().unwrap(),
@@ -1016,7 +996,7 @@ mod tests {
                 [], // reserved_instructions
                 [], // presented_proofs
                 ["locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx".parse::<ManifestEncounteredComponentAddress>().unwrap()],
-                [DetailedManifestClass::General],
+                Some(DetailedManifestClass::General),
                 FeeLocks::default(),
                 FeeSummary::new("0.2516311".parse::<Decimal>().unwrap(), "0.03200635".parse::<Decimal>().unwrap(), "0.12903213279".parse::<Decimal>().unwrap(), 0,),
                 NewEntities::default()
@@ -1068,9 +1048,9 @@ mod tests {
             [ReservedInstruction::AccountSecurify], // reserved_instructions
             [],        // presented_proofs
             [],
-            [DetailedManifestClass::DeleteAccounts {
+            Some(DetailedManifestClass::DeleteAccounts {
                 account_addresses: vec![acc],
-            }],
+            }),
             FeeLocks::default(),
             FeeSummary::new(
                 "0.21017315".parse::<Decimal>().unwrap(),

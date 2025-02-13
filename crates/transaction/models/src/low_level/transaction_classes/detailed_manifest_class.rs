@@ -13,11 +13,6 @@ pub enum DetailedManifestClass {
     /// will provide.
     General,
 
-    /// A general subintent manifest that has a number of arbitrary package and
-    /// component invocations. This manifest is guaranteed to be subintent since
-    /// we require that a yield to child is present in the manifest.
-    GeneralSubintent,
-
     /// A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
     Transfer {
         /// When `true`, then this is a one-to-one transfer and the wallet can
@@ -103,9 +98,6 @@ impl DetailedManifestClass {
     pub fn kind(&self) -> DetailedManifestClassKind {
         match self {
             Self::General => DetailedManifestClassKind::General,
-            Self::GeneralSubintent => {
-                DetailedManifestClassKind::GeneralSubintent
-            }
             Self::Transfer { .. } => DetailedManifestClassKind::Transfer,
             Self::ValidatorClaim { .. } => {
                 DetailedManifestClassKind::ValidatorClaim
@@ -149,44 +141,45 @@ impl DetailedManifestClass {
     }
 }
 
-impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
-    fn from(value: (RetDetailedManifestClass, NetworkID)) -> Self {
-        let n = value.1;
-        match value.0 {
-            RetDetailedManifestClass::General => Self::General,
-            RetDetailedManifestClass::GeneralSubintent => {
-                Self::GeneralSubintent
-            }
+impl DetailedManifestClass {
+    pub fn new_from(
+        ret_class: RetDetailedManifestClass,
+        network_id: NetworkID,
+    ) -> Option<Self> {
+        match ret_class {
+            RetDetailedManifestClass::General => Some(Self::General),
 
             RetDetailedManifestClass::Transfer {
                 is_one_to_one_transfer,
-            } => Self::Transfer {
+            } => Some(Self::Transfer {
                 is_one_to_one_transfer,
-            },
+            }),
 
             RetDetailedManifestClass::PoolContribution(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::PoolRedemption(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::ValidatorStake(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::ValidatorUnstake(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::ValidatorClaimXrd(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::AccountDepositSettingsUpdate(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
+
+            RetDetailedManifestClass::GeneralSubintent => None,
         }
     }
 }
