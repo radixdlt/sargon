@@ -208,7 +208,7 @@ impl ExecutionSummary {
         ) -> Result<SecurityStructureOfFactorSources>,
     {
         // Only try to classify if RET analysis didn't yield any classification
-        if !self.detailed_classification.is_empty() {
+        if self.detailed_classification.is_some() {
             return Ok(());
         }
 
@@ -236,7 +236,7 @@ impl ExecutionSummary {
             let security_structure =
                 get_provisional_security_structure(address)?;
 
-            self.detailed_classification.push(
+            self.detailed_classification = Some(
                 DetailedManifestClass::SecurifyEntity {
                     entity_address: address,
                     provisional_security_structure_metadata: security_structure
