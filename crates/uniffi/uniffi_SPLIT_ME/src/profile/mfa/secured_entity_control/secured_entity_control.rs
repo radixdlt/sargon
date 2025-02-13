@@ -61,20 +61,4 @@ mod tests {
             new_secured_entity_control_sample_other()
         );
     }
-
-    #[test]
-    fn addresses_of_access_controller_samples() {
-        assert_eq!(
-            new_addresses_of_access_controller_sample(),
-            new_addresses_of_access_controller_sample()
-        );
-        assert_eq!(
-            new_addresses_of_access_controller_sample_other(),
-            new_addresses_of_access_controller_sample_other(),
-        );
-        assert_ne!(
-            new_addresses_of_access_controller_sample(),
-            new_addresses_of_access_controller_sample_other(),
-        );
-    }
 }
