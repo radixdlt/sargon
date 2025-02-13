@@ -98,6 +98,17 @@ pub enum DetailedManifestClass {
         /// The addresses of the accounts that are being deleted
         account_addresses: Vec<AccountAddress>,
     },
+
+    /// A manifest that is presented when a provisional security structure is applied
+    /// to an entity
+    SecurifyEntity {
+        /// The entity address that is about to be securified
+        entity_address: AddressOfAccountOrPersona,
+
+        /// The provisional security structure metadata that is about to be applied
+        /// into the entity address
+        provisional_security_structure_metadata: SecurityStructureMetadata,
+    },
 }
 
 delegate_display_debug_into!(

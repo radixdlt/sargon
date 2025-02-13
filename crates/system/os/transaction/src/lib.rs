@@ -14,6 +14,7 @@ pub mod prelude {
     pub use prelude::prelude::*;
     pub(crate) use radix_connect_models::prelude::*;
     pub(crate) use sargon_os::prelude::*;
+    pub(crate) use sargon_os_factors::OsSecurityStructuresQuerying;
     pub(crate) use signatures_collector::prelude::*;
     pub(crate) use signing_traits::prelude::*;
 

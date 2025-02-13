@@ -34,6 +34,9 @@ pub enum DetailedManifestClassKind {
 
     #[display("DeleteAccounts")]
     DeleteAccounts,
+
+    #[display("SecurifyEntity")]
+    SecurifyEntity,
 }
 
 impl DetailedManifestClassKind {
