@@ -4,6 +4,7 @@ use crate::prelude::*;
 /// but also includes additional information about this class that the wallet
 /// requires to display to the user.
 #[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
+#[allow(clippy::large_enum_variant)]
 pub enum DetailedManifestClass {
     /// A general manifest that involves any amount of arbitrary components
     /// and packages where nothing more concrete can be said about the manifest
@@ -12,11 +13,6 @@ pub enum DetailedManifestClass {
     /// No additional information is required beyond what the execution summary
     /// will provide.
     General,
-
-    /// A general subintent manifest that has a number of arbitrary package and
-    /// component invocations. This manifest is guaranteed to be subintent since
-    /// we require that a yield to child is present in the manifest.
-    GeneralSubintent,
 
     /// A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
     Transfer {
@@ -97,15 +93,23 @@ pub enum DetailedManifestClass {
         /// The addresses of the accounts that are being deleted
         account_addresses: Vec<AccountAddress>,
     },
+
+    /// A manifest that is presented when a provisional security structure is applied
+    /// to an entity
+    SecurifyEntity {
+        /// The entity address that is about to be securified
+        entity_address: AddressOfAccountOrPersona,
+
+        /// The provisional security structure's metadata that is about to be applied
+        /// into the entity address
+        provisional_security_structure_metadata: SecurityStructureMetadata,
+    },
 }
 
 impl DetailedManifestClass {
     pub fn kind(&self) -> DetailedManifestClassKind {
         match self {
             Self::General => DetailedManifestClassKind::General,
-            Self::GeneralSubintent => {
-                DetailedManifestClassKind::GeneralSubintent
-            }
             Self::Transfer { .. } => DetailedManifestClassKind::Transfer,
             Self::ValidatorClaim { .. } => {
                 DetailedManifestClassKind::ValidatorClaim
@@ -128,6 +132,9 @@ impl DetailedManifestClass {
             Self::DeleteAccounts { .. } => {
                 DetailedManifestClassKind::DeleteAccounts
             }
+            Self::SecurifyEntity { .. } => {
+                DetailedManifestClassKind::SecurifyEntity
+            }
         }
     }
 
@@ -146,47 +153,49 @@ impl DetailedManifestClass {
     /// Checks the manifest class is reserved for Wallet interactions only
     pub fn is_reserved(&self) -> bool {
         self.kind() == DetailedManifestClassKind::DeleteAccounts
+            || self.kind() == DetailedManifestClassKind::SecurifyEntity
     }
 }
 
-impl From<(RetDetailedManifestClass, NetworkID)> for DetailedManifestClass {
-    fn from(value: (RetDetailedManifestClass, NetworkID)) -> Self {
-        let n = value.1;
-        match value.0 {
-            RetDetailedManifestClass::General => Self::General,
-            RetDetailedManifestClass::GeneralSubintent => {
-                Self::GeneralSubintent
-            }
+impl DetailedManifestClass {
+    pub fn new_from(
+        ret_class: RetDetailedManifestClass,
+        network_id: NetworkID,
+    ) -> Option<Self> {
+        match ret_class {
+            RetDetailedManifestClass::General => Some(Self::General),
 
             RetDetailedManifestClass::Transfer {
                 is_one_to_one_transfer,
-            } => Self::Transfer {
+            } => Some(Self::Transfer {
                 is_one_to_one_transfer,
-            },
+            }),
 
             RetDetailedManifestClass::PoolContribution(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::PoolRedemption(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::ValidatorStake(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::ValidatorUnstake(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::ValidatorClaimXrd(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
 
             RetDetailedManifestClass::AccountDepositSettingsUpdate(output) => {
-                Self::from((output, n))
+                Some(Self::from((output, network_id)))
             }
+
+            RetDetailedManifestClass::GeneralSubintent => None,
         }
     }
 }
@@ -446,6 +455,14 @@ mod tests {
                 account_addresses: Vec::<_>::sample(),
             },
             DetailedManifestClassKind::DeleteAccounts,
+        );
+        test(
+            SUT::SecurifyEntity {
+                entity_address: AddressOfAccountOrPersona::sample(),
+                provisional_security_structure_metadata:
+                    SecurityStructureMetadata::sample(),
+            },
+            DetailedManifestClassKind::SecurifyEntity,
         );
     }
 }

@@ -9,6 +9,7 @@ mod sargon_os;
 mod sargon_os_accounts;
 mod sargon_os_factors;
 mod sargon_os_gateway;
+mod sargon_os_gateway_client;
 mod sargon_os_personas;
 mod sargon_os_profile;
 mod testing_interactors;
@@ -21,6 +22,7 @@ pub mod prelude {
     pub use crate::sargon_os_accounts::*;
     pub use crate::sargon_os_factors::*;
     pub use crate::sargon_os_gateway::*;
+    pub use crate::sargon_os_gateway_client::*;
     pub use crate::sargon_os_personas::*;
     pub use crate::sargon_os_profile::*;
     pub use crate::testing_interactors::*;

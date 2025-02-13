@@ -44,9 +44,7 @@ impl OSCreateSubintent for SargonOS {
         }
 
         // Get current epoch
-        let network_id = self.current_network_id()?;
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let (gateway_client, network_id) = self.gateway_client_on()?;
         let current_epoch = gateway_client.current_epoch().await?;
 
         // Calculate header ranges

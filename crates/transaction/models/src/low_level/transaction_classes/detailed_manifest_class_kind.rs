@@ -8,9 +8,6 @@ pub enum DetailedManifestClassKind {
     #[display("General")]
     General,
 
-    #[display("GeneralSubintent")]
-    GeneralSubintent,
-
     #[display("Transfer")]
     Transfer,
 
@@ -34,6 +31,9 @@ pub enum DetailedManifestClassKind {
 
     #[display("DeleteAccounts")]
     DeleteAccounts,
+
+    #[display("SecurifyEntity")]
+    SecurifyEntity,
 }
 
 impl DetailedManifestClassKind {
