@@ -17,6 +17,17 @@ pub enum SecurityShieldApplicationForSecurifiedEntity {
 }
 
 impl SecurityShieldApplicationForSecurifiedEntity {
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            SecurityShieldApplicationForSecurifiedEntity::Account(a) => {
+                a.fee_tip_percentage()
+            }
+            SecurityShieldApplicationForSecurifiedEntity::Persona(p) => {
+                p.fee_tip_percentage()
+            }
+        }
+    }
+
     pub fn initiate_with_recovery_complete_with_confirmation(
         &self,
     ) -> &TransactionManifest {

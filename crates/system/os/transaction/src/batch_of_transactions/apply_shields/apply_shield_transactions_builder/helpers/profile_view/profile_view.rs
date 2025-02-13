@@ -143,7 +143,7 @@ impl ApplyShieldTransactionsProfileView
                     manifest,
                     entity_applying_shield,
                     entity_paying,
-                    manifest_with_payer_by_address.fee_tip
+                    manifest_with_payer_by_address.fee_tip_percentage
                 )
             })
             .collect::<Result<Vec<ShieldApplicationInputWithoutXrdBalance>>>()?;
@@ -163,7 +163,7 @@ impl ShieldApplicationInputWithoutXrdBalance {
         manifest: TransactionManifest,
         entity_applying_shield: EntityApplyingShield,
         paying_account: Account,
-        fee_tip: Option<Decimal>,
+        fee_tip_percentage: Option<u16>,
     ) -> Result<Self> {
         let self_ = match entity_applying_shield {
             EntityApplyingShield::Unsecurified(unsec) => {
@@ -174,7 +174,7 @@ impl ShieldApplicationInputWithoutXrdBalance {
                             estimated_xrd_fee,
                             UnsecurifiedAccount::with_unsecured_entity_control(a.clone(), unsec.unsecured_entity_control),
                             paying_account,
-                            fee_tip
+                            fee_tip_percentage
                         );
                         ApplicationInputForUnsecurifiedEntityWithoutXrdBalance::from(a)
                     }
@@ -184,7 +184,7 @@ impl ShieldApplicationInputWithoutXrdBalance {
                             estimated_xrd_fee,
                             UnsecurifiedPersona::with_unsecured_entity_control(p.clone(), unsec.unsecured_entity_control),
                             paying_account,
-                            fee_tip
+                            fee_tip_percentage
                         );
                         ApplicationInputForUnsecurifiedEntityWithoutXrdBalance::from(p)
                     }
@@ -194,21 +194,23 @@ impl ShieldApplicationInputWithoutXrdBalance {
             EntityApplyingShield::Securified(sec) => {
                 let entity = match &sec.entity {
                     AccountOrPersona::AccountEntity(a) => {
-                        let a = ApplicationInputForSecurifiedAccountWithoutXrdBalance {
-                            reviewed_manifest: manifest,
+                        let a = ApplicationInputForSecurifiedAccountWithoutXrdBalance::new(
+                            manifest,
                             estimated_xrd_fee,
-                            entity_input: SecurifiedAccount::with_securified_entity_control(a.clone(), sec.securified_entity_control()),
+                            SecurifiedAccount::with_securified_entity_control(a.clone(), sec.securified_entity_control()),
                             paying_account,
-                        };
+                            fee_tip_percentage
+                        );
                         ApplicationInputForSecurifiedEntityWithoutXrdBalance::from(a)
                     }
                     AccountOrPersona::PersonaEntity(p) => {
-                        let p = ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
-                            reviewed_manifest: manifest,
+                        let p = ApplicationInputForSecurifiedPersonaWithoutXrdBalance::new(
+                            manifest,
                             estimated_xrd_fee,
-                            entity_input: SecurifiedPersona::with_securified_entity_control(p.clone(), sec.securified_entity_control()),
+                            SecurifiedPersona::with_securified_entity_control(p.clone(), sec.securified_entity_control()),
                             paying_account,
-                        };
+                            fee_tip_percentage
+                        );
                         ApplicationInputForSecurifiedEntityWithoutXrdBalance::from(p)
                     }
                 };

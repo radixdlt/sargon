@@ -45,6 +45,7 @@ pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<
 
     pub entity_applying_shield: AbstractUnsecurifiedEntity<E>,
     pub paying_account: ApplicationInputPayingAccount,
+    fee_tip_percentage: Option<u16>,
 
     /// Manifest for exercising the primary role. This manifest will
     /// create an AccessController with factors specified in the shield.
@@ -66,19 +67,21 @@ pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     AbstractSecurityShieldApplicationForUnsecurifiedEntity<E>
 {
-    pub fn fee_tip(&self) -> Option<Decimal> {
-        self.paying_account.fee_tip()
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        self.fee_tip_percentage
     }
     pub fn with_modified_manifest(
         entity_applying_shield: AbstractUnsecurifiedEntity<E>,
         paying_account: ApplicationInputPayingAccount,
         modified_manifest: TransactionManifest,
+        fee_tip_percentage: impl Into<Option<u16>>,
     ) -> Self {
         Self {
             hidden: HiddenConstructor,
             entity_applying_shield,
             paying_account,
             modified_manifest,
+            fee_tip_percentage: fee_tip_percentage.into(),
         }
     }
 }
@@ -89,6 +92,10 @@ pub type SecurityShieldApplicationForUnsecurifiedAccount =
 pub type SecurityShieldApplicationForUnsecurifiedPersona =
     AbstractSecurityShieldApplicationForUnsecurifiedEntity<Persona>;
 
+pub(crate) trait HasFeeTipPercentage {
+    fn fee_tip_percentage(&self) -> Option<u16>;
+}
+
 /// The specified Persona to apply the shield for and the account that will
 /// pay for the topping up up the AccessControllers XRD vault.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -97,6 +104,8 @@ pub struct SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<
 > {
     /// The entity to apply the shield for.
     pub entity: AbstractSecurifiedEntity<E>,
+
+    fee_tip_percentage: Option<u16>,
 
     /// The account topping up the XRD vault of `persona`s AccessControllers
     /// XRD vault.
@@ -109,11 +118,21 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     pub fn new(
         entity: AbstractSecurifiedEntity<E>,
         account_topping_up_xrd_vault_of_access_controller: ApplicationInputPayingAccount,
+        fee_tip_percentage: impl Into<Option<u16>>,
     ) -> Self {
         Self {
             entity,
             account_topping_up_xrd_vault_of_access_controller,
+            fee_tip_percentage: fee_tip_percentage.into(),
         }
+    }
+}
+
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasFeeTipPercentage
+    for SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<E>
+{
+    fn fee_tip_percentage(&self) -> Option<u16> {
+        self.fee_tip_percentage
     }
 }
 

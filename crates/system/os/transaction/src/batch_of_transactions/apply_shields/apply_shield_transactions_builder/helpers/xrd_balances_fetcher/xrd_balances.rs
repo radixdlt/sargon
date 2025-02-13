@@ -67,7 +67,6 @@ impl XrdBalances {
             ApplicationInputPayingAccountUnsecurified::new(
                 account,
                 xrd_balance_of_account,
-                fee_payer
             ),
         ))
     }

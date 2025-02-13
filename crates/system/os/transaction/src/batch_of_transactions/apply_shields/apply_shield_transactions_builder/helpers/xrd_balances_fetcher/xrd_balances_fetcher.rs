@@ -103,15 +103,18 @@ impl ShieldApplicationInput {
         input: ShieldApplicationInputWithoutXrdBalance,
         balances: &mut XrdBalances,
     ) -> Result<Self> {
+        let fee_tip_percentage = input.fee_tip_percentage();
         match input {
             ShieldApplicationInputWithoutXrdBalance::Unsecurified(unsec) => {
                 unsec.into_shield_application_input_taking_from_xrd_balances(
                     balances,
+                    fee_tip_percentage,
                 )
             }
             ShieldApplicationInputWithoutXrdBalance::Securified(sec) => sec
                 .into_shield_application_input_taking_from_xrd_balances(
                     balances,
+                    fee_tip_percentage,
                 ),
         }
     }
@@ -123,15 +126,18 @@ impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
     fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
+        fee_tip_percentage: Option<u16>,
     ) -> Result<ShieldApplicationInput> {
         match self {
             Self::Account(unsec_acc) => unsec_acc
                 .into_shield_application_input_taking_from_xrd_balances(
                     balances,
+                    fee_tip_percentage,
                 ),
             Self::Persona(unsec_pers) => unsec_pers
                 .into_shield_application_input_taking_from_xrd_balances(
                     balances,
+                    fee_tip_percentage,
                 ),
         }
     }
@@ -143,6 +149,7 @@ impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
     fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
+        fee_tip_percentage: Option<u16>,
     ) -> Result<ShieldApplicationInput> {
         let xrd_balance_of_account = balances
             .get_xrd_balance_of_paying_component(
@@ -151,15 +158,16 @@ impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
 
         let paying_account = balances.get_payer(self.paying_account)?;
 
-        Ok(ApplicationInputForUnsecurifiedAccount {
-            reviewed_manifest: self.reviewed_manifest,
-            estimated_xrd_fee: self.estimated_xrd_fee,
-            entity_input: UnsecurifiedAccountEntityInput {
+        Ok(ApplicationInputForUnsecurifiedAccount::new(
+            self.reviewed_manifest,
+            self.estimated_xrd_fee,
+            UnsecurifiedAccountEntityInput {
                 unsecurified_entity: self.entity_input,
                 xrd_balance_of_account,
             },
             paying_account,
-        }
+            fee_tip_percentage,
+        )
         .into())
     }
 }
@@ -169,15 +177,17 @@ impl ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
     fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
+        fee_tip_percentage: Option<u16>,
     ) -> Result<ShieldApplicationInput> {
         let paying_account = balances.get_payer(self.paying_account)?;
 
-        Ok(ApplicationInputForUnsecurifiedPersona {
-            reviewed_manifest: self.reviewed_manifest,
-            estimated_xrd_fee: self.estimated_xrd_fee,
-            entity_input: self.entity_input,
+        Ok(ApplicationInputForUnsecurifiedPersona::new(
+            self.reviewed_manifest,
+            self.estimated_xrd_fee,
+            self.entity_input,
             paying_account,
-        }
+            fee_tip_percentage,
+        )
         .into())
     }
 }
@@ -190,15 +200,18 @@ impl ApplicationInputForSecurifiedEntityWithoutXrdBalance {
     fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
+        fee_tip_percentage: Option<u16>,
     ) -> Result<ShieldApplicationInput> {
         match self {
             Self::Account(sec_acc) => sec_acc
                 .into_shield_application_input_taking_from_xrd_balances(
                     balances,
+                    fee_tip_percentage,
                 ),
             Self::Persona(sec_pers) => sec_pers
                 .into_shield_application_input_taking_from_xrd_balances(
                     balances,
+                    fee_tip_percentage,
                 ),
         }
     }
@@ -211,6 +224,7 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
     fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
+        fee_tip_percentage: Option<u16>,
     ) -> Result<ShieldApplicationInput> {
         let xrd_balance_of_account = balances
             .get_xrd_balance_of_paying_component(
@@ -226,16 +240,17 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
                     .xrd_vault_address(),
             )?;
 
-        Ok(ApplicationInputForSecurifiedAccount {
-            reviewed_manifest: self.reviewed_manifest,
-            estimated_xrd_fee: self.estimated_xrd_fee,
-            entity_input: SecurifiedAccountEntityInput {
+        Ok(ApplicationInputForSecurifiedAccount::new(
+            self.reviewed_manifest,
+            self.estimated_xrd_fee,
+            SecurifiedAccountEntityInput {
                 securified_account: self.entity_input,
                 xrd_balance_of_access_controller,
                 xrd_balance_of_account,
             },
             paying_account,
-        }
+            fee_tip_percentage,
+        )
         .into())
     }
 }
@@ -246,6 +261,7 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
     fn into_shield_application_input_taking_from_xrd_balances(
         self,
         balances: &mut XrdBalances,
+        fee_tip_percentage: Option<u16>,
     ) -> Result<ShieldApplicationInput> {
         let paying_account = balances.get_payer(self.paying_account)?;
 
@@ -256,15 +272,16 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
                     .xrd_vault_address(),
             )?;
 
-        Ok(ApplicationInputForSecurifiedPersona {
-            reviewed_manifest: self.reviewed_manifest,
-            estimated_xrd_fee: self.estimated_xrd_fee,
-            entity_input: SecurifiedPersonaEntityInput {
+        Ok(ApplicationInputForSecurifiedPersona::new(
+            self.reviewed_manifest,
+            self.estimated_xrd_fee,
+            SecurifiedPersonaEntityInput {
                 securified_persona: self.entity_input,
                 xrd_balance_of_access_controller,
             },
             paying_account,
-        }
+            fee_tip_percentage,
+        )
         .into())
     }
 }

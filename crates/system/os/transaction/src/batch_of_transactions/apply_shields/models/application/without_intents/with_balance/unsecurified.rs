@@ -17,6 +17,13 @@ impl ApplicationInputForUnsecurifiedEntity {
             Self::Persona(p) => p.xrd_balance_of_paying_account(),
         }
     }
+
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            Self::Account(a) => a.fee_tip_percentage(),
+            Self::Persona(p) => p.fee_tip_percentage(),
+        }
+    }
 }
 
 impl From<ApplicationInputForUnsecurifiedAccount>
@@ -36,13 +43,39 @@ impl From<ApplicationInputForUnsecurifiedPersona>
 
 /// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ApplicationInputForUnsecurifiedAccount {
+pub struct AbstractApplicationInputForUnsecurifiedEntity<EntityInput> {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
-    pub entity_input: UnsecurifiedAccountEntityInput,
+    pub entity_input: EntityInput,
     pub paying_account: ApplicationInputPayingAccount,
+    fee_tip_percentage: Option<u16>,
 }
-impl ApplicationInputForUnsecurifiedAccount {
+
+pub type ApplicationInputForUnsecurifiedAccount =
+    AbstractApplicationInputForUnsecurifiedEntity<
+        UnsecurifiedAccountEntityInput,
+    >;
+
+pub type ApplicationInputForUnsecurifiedPersona =
+    AbstractApplicationInputForUnsecurifiedEntity<UnsecurifiedPersona>;
+
+impl<EntityInput> AbstractApplicationInputForUnsecurifiedEntity<EntityInput> {
+    pub fn new(
+        reviewed_manifest: TransactionManifest,
+        estimated_xrd_fee: Decimal,
+        entity_input: EntityInput,
+        paying_account: ApplicationInputPayingAccount,
+        fee_tip_percentage: impl Into<Option<u16>>,
+    ) -> Self {
+        Self {
+            reviewed_manifest,
+            estimated_xrd_fee,
+            entity_input,
+            paying_account,
+            fee_tip_percentage: fee_tip_percentage.into(),
+        }
+    }
+
     /// we do NOT take Xrd of `paying_account`'s Xrd Vault - if it is securified.
     pub fn xrd_balance_of_paying_account(&self) -> Decimal {
         self.paying_account.xrd_balance_of_account()
@@ -51,25 +84,9 @@ impl ApplicationInputForUnsecurifiedAccount {
     pub fn payer(&self) -> Account {
         self.paying_account.account()
     }
-}
 
-/// Without Intents (with **single** Manifest) | With balance
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ApplicationInputForUnsecurifiedPersona {
-    pub reviewed_manifest: TransactionManifest,
-    pub estimated_xrd_fee: Decimal,
-    pub entity_input: UnsecurifiedPersona,
-    pub paying_account: ApplicationInputPayingAccount,
-}
-
-impl ApplicationInputForUnsecurifiedPersona {
-    /// we do NOT take Xrd of `paying_account`'s Xrd Vault - if it is securified.
-    pub fn xrd_balance_of_paying_account(&self) -> Decimal {
-        self.paying_account.xrd_balance_of_account()
-    }
-
-    pub fn payer(&self) -> Account {
-        self.paying_account.account()
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        self.fee_tip_percentage
     }
 }
 
@@ -122,23 +139,9 @@ pub trait ReviewedManifestOwner {
     fn set_manifest(&mut self, manifest: TransactionManifest);
 }
 
-impl ReviewedManifestOwner for ApplicationInputForUnsecurifiedPersona {
-    fn get_reviewed_manifest(&self) -> TransactionManifest {
-        self.reviewed_manifest.clone()
-    }
-    fn set_manifest(&mut self, manifest: TransactionManifest) {
-        self.reviewed_manifest = manifest;
-    }
-}
-impl ReviewedManifestOwner for ApplicationInputForUnsecurifiedAccount {
-    fn get_reviewed_manifest(&self) -> TransactionManifest {
-        self.reviewed_manifest.clone()
-    }
-    fn set_manifest(&mut self, manifest: TransactionManifest) {
-        self.reviewed_manifest = manifest;
-    }
-}
-impl ReviewedManifestOwner for ApplicationInputForSecurifiedAccount {
+impl<EntityInput> ReviewedManifestOwner
+    for AbstractApplicationInputForUnsecurifiedEntity<EntityInput>
+{
     fn get_reviewed_manifest(&self) -> TransactionManifest {
         self.reviewed_manifest.clone()
     }
@@ -147,7 +150,9 @@ impl ReviewedManifestOwner for ApplicationInputForSecurifiedAccount {
     }
 }
 
-impl ReviewedManifestOwner for ApplicationInputForSecurifiedPersona {
+impl<EntityInput> ReviewedManifestOwner
+    for AbstractApplicationInputForSecurifiedEntity<EntityInput>
+{
     fn get_reviewed_manifest(&self) -> TransactionManifest {
         self.reviewed_manifest.clone()
     }
@@ -186,35 +191,36 @@ pub trait IsUnsecurifiedMarker {}
 pub trait IsAccountMarker {}
 pub trait IsPersonaMarker {}
 impl IsSecurifiedMarker for ApplicationInputForSecurifiedEntity {}
-impl IsSecurifiedMarker for ApplicationInputForSecurifiedAccount {}
-impl IsSecurifiedMarker for ApplicationInputForSecurifiedPersona {}
 impl IsUnsecurifiedMarker for ApplicationInputForUnsecurifiedEntity {}
-impl IsUnsecurifiedMarker for ApplicationInputForUnsecurifiedAccount {}
-impl IsUnsecurifiedMarker for ApplicationInputForUnsecurifiedPersona {}
 impl IsAccountMarker for ApplicationInputForSecurifiedAccount {}
 impl IsAccountMarker for ApplicationInputForUnsecurifiedAccount {}
 impl IsPersonaMarker for ApplicationInputForSecurifiedPersona {}
 impl IsPersonaMarker for ApplicationInputForUnsecurifiedPersona {}
 
-impl HasEstimatedXrdFee for ApplicationInputForUnsecurifiedAccount {
+impl<EntityInput> HasEstimatedXrdFee
+    for AbstractApplicationInputForUnsecurifiedEntity<EntityInput>
+{
     fn estimated_xrd_fee(&self) -> Decimal {
         self.estimated_xrd_fee
     }
 }
-impl HasEstimatedXrdFee for ApplicationInputForUnsecurifiedPersona {
+
+impl<EntityInput> HasEstimatedXrdFee
+    for AbstractApplicationInputForSecurifiedEntity<EntityInput>
+{
     fn estimated_xrd_fee(&self) -> Decimal {
         self.estimated_xrd_fee
     }
 }
-impl HasEstimatedXrdFee for ApplicationInputForSecurifiedAccount {
-    fn estimated_xrd_fee(&self) -> Decimal {
-        self.estimated_xrd_fee
-    }
+
+impl<EntityInput> IsUnsecurifiedMarker
+    for AbstractApplicationInputForUnsecurifiedEntity<EntityInput>
+{
 }
-impl HasEstimatedXrdFee for ApplicationInputForSecurifiedPersona {
-    fn estimated_xrd_fee(&self) -> Decimal {
-        self.estimated_xrd_fee
-    }
+
+impl<EntityInput> IsSecurifiedMarker
+    for AbstractApplicationInputForSecurifiedEntity<EntityInput>
+{
 }
 
 // ========================

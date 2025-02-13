@@ -129,6 +129,9 @@ mod tests {
     #[test]
     fn max_is_one_month() {
         let start = SUT::new(10u64);
-        assert_eq!(SUT::max_window_from_start(start).0, 10 + SUT::NUMBER_OF_EPOCHS_PER_MONTH);
+        assert_eq!(
+            SUT::max_window_from_start(start).0,
+            10 + SUT::NUMBER_OF_EPOCHS_PER_MONTH
+        );
     }
 }

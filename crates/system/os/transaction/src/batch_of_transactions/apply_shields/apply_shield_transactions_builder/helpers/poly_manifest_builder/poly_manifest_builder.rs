@@ -47,11 +47,12 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
         let input = self
             .xrd_vault_contributor
             .add_xrd_vault_contribution_for_unsecurified_account(input)?;
-
+        let fee_tip_percentage = input.fee_tip_percentage();
         Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
             input.entity_input.unsecurified_entity.clone(),
             input.paying_account,
             input.reviewed_manifest,
+            fee_tip_percentage
         ))
     }
 
@@ -64,10 +65,12 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
             .xrd_vault_contributor
             .add_xrd_vault_contribution_for_unsecurified_persona(input)?;
 
+        let fee_tip_percentage = input.fee_tip_percentage();
         Ok(SecurityShieldApplicationForUnsecurifiedPersona::with_modified_manifest(
             input.entity_input.clone(),
             paying_account,
             input.reviewed_manifest,
+            fee_tip_percentage,
         ))
     }
 
@@ -117,10 +120,12 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
 
         let initiate_with_primary_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion)?;
 
+        let fee_tip_percentage = input.fee_tip_percentage();
         let account_with_optional_paying_account =
             SecurityShieldApplicationForSecurifiedAccountWithPayingAccount::new(
                 input.entity_input.securified_account.clone(),
                 input.paying_account,
+                fee_tip_percentage,
             );
 
         Ok(SecurityShieldApplicationForSecurifiedAccount::new(
@@ -165,10 +170,12 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
 
         let initiate_with_primary_delayed_completion = manifest_for_variant(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion)?;
 
+        let fee_tip_percentage = input.fee_tip_percentage();
         let payer =
             SecurityShieldApplicationForSecurifiedPersonaWithPayingAccount::new(
                 input.entity_input.securified_persona.clone(),
                 input.paying_account,
+                fee_tip_percentage,
             );
 
         Ok(SecurityShieldApplicationForSecurifiedPersona::new(

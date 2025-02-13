@@ -33,10 +33,10 @@ impl ShieldApplicationInputWithoutXrdBalance {
             Self::Securified(s) => s.get_payer(),
         }
     }
-    pub fn fee_tip(&self) -> Option<Decimal> {
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
         match self {
-            Self::Unsecurified(u) => u.fee_tip(),
-            Self::Securified(s) => s.fee_tip(),
+            Self::Unsecurified(u) => u.fee_tip_percentage(),
+            Self::Securified(s) => s.fee_tip_percentage(),
         }
     }
 }
@@ -50,6 +50,13 @@ pub enum ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
     Persona(ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance),
 }
 impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            Self::Account(a) => a.fee_tip_percentage(),
+            Self::Persona(p) => p.fee_tip_percentage(),
+        }
+    }
+
     pub fn addresses_to_fetch_xrd_balance_for(
         &self,
     ) -> IndexSet<AddressOfPayerOfShieldApplication> {
@@ -77,76 +84,58 @@ impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
+pub struct AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<
+    E: IsBaseEntity + std::hash::Hash + Eq + Clone,
+> {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
-    pub entity_input: UnsecurifiedAccount,
+    pub entity_input: AbstractUnsecurifiedEntity<E>,
     pub paying_account: Account,
-    fee_tip: Option<Decimal>,
+    fee_tip_percentage: Option<u16>,
 }
-impl ApplicationInputForUnsecurifiedAccountWithoutXrdBalance {
+pub type ApplicationInputForUnsecurifiedAccountWithoutXrdBalance =
+    AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<Account>;
+
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
+    AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<E>
+{
     pub fn new(
         reviewed_manifest: TransactionManifest,
         estimated_xrd_fee: Decimal,
-        entity_input: UnsecurifiedAccount,
+        entity_input: AbstractUnsecurifiedEntity<E>,
         paying_account: Account,
-        fee_tip: impl Into<Option<Decimal>>,
+        fee_tip_percentage: impl Into<Option<u16>>,
     ) -> Self {
         Self {
             reviewed_manifest,
             estimated_xrd_fee,
             entity_input,
             paying_account,
-            fee_tip: fee_tip.into(),
+            fee_tip_percentage: fee_tip_percentage.into(),
         }
     }
 
-    pub fn fee_tip(&self) -> Option<Decimal> {
-        self.fee_tip.clone()
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        self.fee_tip_percentage
     }
+
     pub fn addresses_to_fetch_xrd_balance_for(
         &self,
     ) -> IndexSet<AddressOfPayerOfShieldApplication> {
-        IndexSet::from_iter([
-            self.entity_input.entity.address.into(),
-            self.paying_account.address.into(),
-        ])
+        match self.entity_input.address() {
+            AddressOfAccountOrPersona::Account(a) => IndexSet::from_iter([
+                a.into(),
+                self.paying_account.address.into(),
+            ]),
+            AddressOfAccountOrPersona::Identity(_) => {
+                IndexSet::from_iter([self.paying_account.address.into()])
+            }
+        }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
-    pub reviewed_manifest: TransactionManifest,
-    pub estimated_xrd_fee: Decimal,
-    pub entity_input: UnsecurifiedPersona,
-    pub paying_account: Account,
-    fee_tip: Option<Decimal>,
-}
-impl ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance {
-    pub fn new(
-        reviewed_manifest: TransactionManifest,
-        estimated_xrd_fee: Decimal,
-        entity_input: UnsecurifiedPersona,
-        paying_account: Account,
-        fee_tip: impl Into<Option<Decimal>>,
-    ) -> Self {
-        Self {
-            reviewed_manifest,
-            estimated_xrd_fee,
-            entity_input,
-            paying_account,
-            fee_tip: fee_tip.into(),
-        }
-    }
-    pub fn fee_tip(&self) -> Option<Decimal> {
-        self.fee_tip.clone()
-    }
-    pub fn addresses_to_fetch_xrd_balance_for(
-        &self,
-    ) -> IndexSet<AddressOfPayerOfShieldApplication> {
-        IndexSet::from_iter([self.paying_account.address.into()])
-    }
-}
+pub type ApplicationInputForUnsecurifiedPersonaWithoutXrdBalance =
+    AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<Persona>;
 
 // ========================
 // SECURIFIED
@@ -182,6 +171,13 @@ impl ApplicationInputForSecurifiedEntityWithoutXrdBalance {
             Self::Persona(p) => p.paying_account.clone(),
         }
     }
+
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            Self::Account(a) => a.fee_tip_percentage(),
+            Self::Persona(p) => p.fee_tip_percentage(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -193,11 +189,32 @@ where
     pub estimated_xrd_fee: Decimal,
     pub entity_input: AbstractSecurifiedEntity<T>,
     pub paying_account: Account,
+    fee_tip_percentage: Option<u16>,
 }
 
 impl<T: IsBaseEntity + std::hash::Hash + Eq + Clone>
     ApplicationInputForSecurifiedSpecificEntityWithoutXrdBalance<T>
 {
+    pub fn new(
+        reviewed_manifest: TransactionManifest,
+        estimated_xrd_fee: Decimal,
+        entity_input: AbstractSecurifiedEntity<T>,
+        paying_account: Account,
+        fee_tip_percentage: impl Into<Option<u16>>,
+    ) -> Self {
+        Self {
+            reviewed_manifest,
+            estimated_xrd_fee,
+            entity_input,
+            paying_account,
+            fee_tip_percentage: fee_tip_percentage.into(),
+        }
+    }
+
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        self.fee_tip_percentage
+    }
+
     pub fn addresses_to_fetch_xrd_balance_for(
         &self,
     ) -> IndexSet<AddressOfPayerOfShieldApplication> {

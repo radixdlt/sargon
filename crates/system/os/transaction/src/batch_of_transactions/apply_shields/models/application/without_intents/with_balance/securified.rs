@@ -11,6 +11,15 @@ pub enum ApplicationInputForSecurifiedEntity {
     Persona(ApplicationInputForSecurifiedPersona),
 }
 
+impl ApplicationInputForSecurifiedEntity {
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            Self::Account(a) => a.fee_tip_percentage,
+            Self::Persona(p) => p.fee_tip_percentage,
+        }
+    }
+}
+
 impl From<ApplicationInputForSecurifiedAccount>
     for ApplicationInputForSecurifiedEntity
 {
@@ -28,21 +37,41 @@ impl From<ApplicationInputForSecurifiedPersona>
 
 /// Without Intents (with **single** Manifest) | With balance
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ApplicationInputForSecurifiedAccount {
+pub struct AbstractApplicationInputForSecurifiedEntity<EntityInput> {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
-    pub entity_input: SecurifiedAccountEntityInput,
+    pub entity_input: EntityInput,
     pub paying_account: ApplicationInputPayingAccount,
+    fee_tip_percentage: Option<u16>,
 }
 
-/// Without Intents (with **single** Manifest) | With balance
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ApplicationInputForSecurifiedPersona {
-    pub reviewed_manifest: TransactionManifest,
-    pub estimated_xrd_fee: Decimal,
-    pub entity_input: SecurifiedPersonaEntityInput,
-    pub paying_account: ApplicationInputPayingAccount,
+impl<EntityInput> AbstractApplicationInputForSecurifiedEntity<EntityInput> {
+    pub fn new(
+        reviewed_manifest: TransactionManifest,
+        estimated_xrd_fee: Decimal,
+        entity_input: EntityInput,
+        paying_account: ApplicationInputPayingAccount,
+        fee_tip_percentage: impl Into<Option<u16>>,
+    ) -> Self {
+        Self {
+            reviewed_manifest,
+            estimated_xrd_fee,
+            entity_input,
+            paying_account,
+            fee_tip_percentage: fee_tip_percentage.into(),
+        }
+    }
+
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        self.fee_tip_percentage
+    }
 }
+
+pub type ApplicationInputForSecurifiedAccount =
+    AbstractApplicationInputForSecurifiedEntity<SecurifiedAccountEntityInput>;
+
+pub type ApplicationInputForSecurifiedPersona =
+    AbstractApplicationInputForSecurifiedEntity<SecurifiedPersonaEntityInput>;
 
 impl IsSecurifiedWithXrdOfVaultMarker for ApplicationInputForSecurifiedPersona {
     fn xrd_of_vault_of_access_controller(&self) -> Decimal {

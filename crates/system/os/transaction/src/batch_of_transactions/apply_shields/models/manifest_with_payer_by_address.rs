@@ -7,7 +7,7 @@ pub struct ManifestWithPayerByAddress {
     pub payer: AccountAddress,
     pub manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
-    pub fee_tip: Option<Decimal>,
+    pub fee_tip_percentage: Option<u16>,
 }
 
 impl ManifestWithPayerByAddress {
@@ -15,13 +15,13 @@ impl ManifestWithPayerByAddress {
         manifest: TransactionManifest,
         estimated_xrd_fee: Decimal,
         payer: impl Into<AccountAddress>,
-        fee_tip: impl Into<Option<Decimal>>,
+        fee_tip_percentage: impl Into<Option<u16>>,
     ) -> Self {
         Self {
             payer: payer.into(),
             manifest,
             estimated_xrd_fee,
-            fee_tip: fee_tip.into(),
+            fee_tip_percentage: fee_tip_percentage.into(),
         }
     }
 

@@ -7,6 +7,15 @@ pub enum ShieldApplicationInput {
     Securified(ApplicationInputForSecurifiedEntity),
 }
 
+impl ShieldApplicationInput {
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            Self::Unsecurified(a) => a.fee_tip_percentage(),
+            Self::Securified(a) => a.fee_tip_percentage(),
+        }
+    }
+}
+
 impl From<ApplicationInputForUnsecurifiedEntity> for ShieldApplicationInput {
     fn from(value: ApplicationInputForUnsecurifiedEntity) -> Self {
         Self::Unsecurified(value)

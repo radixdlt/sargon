@@ -12,6 +12,7 @@ impl From<AddressOfVaultOrAccount> for Address {
         }
     }
 }
+
 impl TryFrom<Address> for AddressOfVaultOrAccount {
     type Error = CommonError;
     fn try_from(value: Address) -> Result<Self> {

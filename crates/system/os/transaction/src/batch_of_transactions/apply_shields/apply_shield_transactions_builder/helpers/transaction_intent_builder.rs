@@ -73,7 +73,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
         // Builds a TransactionIntent for a given manifest, nonce and notary private key.
         // by forming a header with the fetched epoch.
         let mut build_intent = |manifest: &TransactionManifest,
-                                fee_tip: Option<Decimal>,
+                                fee_tip_percentage: Option<u16>,
                                 nonce: Nonce,
                                 notary_private_key_bytes: Exactly32Bytes|
          -> Result<TransactionIntent> {
@@ -88,7 +88,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                 nonce,
                 notary_public_key,
                 NotaryIsSignatory(false),
-                0,
+                fee_tip_percentage.unwrap_or(0),
             );
 
             let intent = TransactionIntent::new(
@@ -120,8 +120,9 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                 SecurityShieldApplication::ForUnsecurifiedEntity(unsec) => {
                     let intent = build_intent(
                         unsec.manifest(),
+                        unsec.fee_tip_percentage(),
                         nonce,
-                        notary_private_key_bytes
+                        notary_private_key_bytes,
                     )?;
                     let with_intent = SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::with_intent(unsec, intent);
 
@@ -130,32 +131,38 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                 SecurityShieldApplication::ForSecurifiedEntity(sec) => {
                     let with_intents: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents = {
 
+                        let fee_tip_percentage = sec.fee_tip_percentage();
                         let initiate_with_recovery_complete_with_primary = build_intent(
                             sec.initiate_with_recovery_complete_with_primary(),
+                            fee_tip_percentage,
                             nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_recovery_complete_with_confirmation = build_intent(
                             sec.initiate_with_recovery_complete_with_confirmation(),
+                            fee_tip_percentage,
                             nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_recovery_delayed_completion = build_intent(
                             sec.initiate_with_recovery_delayed_completion(),
+                            fee_tip_percentage,
                             nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_primary_complete_with_confirmation = build_intent(
                             sec.initiate_with_primary_complete_with_confirmation(),
+                            fee_tip_percentage,
                             nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_primary_delayed_completion = build_intent(
                             sec.initiate_with_primary_delayed_completion(),
+                            fee_tip_percentage,
                             nonce,
                             notary_private_key_bytes
                         )?;
