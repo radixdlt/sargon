@@ -5,25 +5,23 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-prelude = { workspace = true }
-sargon-os = { workspace = true }
-transaction-models = { workspace = true }
-manifests = { workspace = true }
-signing-traits = { workspace = true }
-radix-connect-models = { workspace = true }
-signatures-collector = { workspace = true }
 entity-by-address = { workspace = true }
-profile = { workspace = true }
-profile-logic = { workspace = true }
-sargon-os-factors = { workspace = true }
-profile-account-or-persona = { workspace = true }
 gateway-client-and-api = { workspace = true }
-profile-supporting-types = { workspace = true }
+manifests = { workspace = true }
+prelude = { workspace = true }
+profile = { workspace = true }
+profile-account-or-persona = { workspace = true }
+radix-connect-models = { workspace = true }
+sargon-os = { path = "../../../system/os/os" }
+sargon-os-factors = { workspace = true }
+signatures-collector = { workspace = true }
+signing-traits = { workspace = true }
+transaction-models = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
+radix-common = { workspace = true }
 radix-engine-interface = { workspace = true }
 radix-engine-toolkit-common = { workspace = true }
-radix-common = { workspace = true }
 
 # ==== EXTERNAL DEPENDENCIES ====
 actix-rt = { workspace = true }

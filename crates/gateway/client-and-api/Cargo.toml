@@ -15,6 +15,7 @@ http-client = { workspace = true }
 gateway-models = { workspace = true }
 transaction-models = { workspace = true }
 profile-gateway = { workspace = true }
+profile-base-entity = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

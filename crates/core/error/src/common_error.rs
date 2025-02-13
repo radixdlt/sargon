@@ -934,6 +934,17 @@ pub enum CommonError {
 
     #[error("Named addresses are not supported")]
     NamedAddressesAreNotSupported = 10262,
+
+    #[error("Entity has no provisional security config set")]
+    EntityHasNoProvisionalSecurityConfigSet = 10263,
+
+    #[error("Entity's provisional config is wrong. It is expected to be in instances derived state.")]
+    ProvisionalConfigInWrongStateExpectedInstancesDerived = 10264,
+
+    #[error("Entity {entity_bech32m_encoded_address} is not controller by access controller on ledger")]
+    EntityIsNotControlledByAnAccessControllerOnLedger {
+        entity_bech32m_encoded_address: String,
+    } = 10265,
 }
 
 impl CommonError {
