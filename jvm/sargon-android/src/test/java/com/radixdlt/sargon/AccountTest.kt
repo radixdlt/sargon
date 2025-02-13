@@ -45,7 +45,12 @@ class AccountTest : SampleTestable<Account> {
             address = AccountAddress.sampleMainnet(),
             displayName = DisplayName.init("Securified"),
             securityState = EntitySecurityState.Securified(
-                newSecuredEntityControlSampleOther()
+                SecuredEntityControl(
+                    veci = HierarchicalDeterministicFactorInstance.sample(),
+                    accessControllerAddress = AccessControllerAddress.sampleMainnet(),
+                    securityStructure = SecurityStructureOfFactorInstances.sample(),
+                    provisionalSecurifiedConfig = null
+                )
             ),
             appearanceId = AppearanceId.sample(),
             flags = emptyList(),

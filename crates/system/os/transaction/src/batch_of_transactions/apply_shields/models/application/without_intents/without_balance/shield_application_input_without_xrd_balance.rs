@@ -221,7 +221,7 @@ impl<T: IsBaseEntity + std::hash::Hash + Eq + Clone>
         let mut addresses = IndexSet::from_iter([self
             .entity_input
             .securified_entity_control()
-            .xrd_vault_address()
+            .access_controller_address()
             .into()]);
         match Into::<AddressOfAccountOrPersona>::into(
             self.entity_input.entity.address(),

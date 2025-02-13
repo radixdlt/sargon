@@ -1,61 +1,5 @@
 use crate::prelude::*;
 
-/// Addresses of the access controller which controls a securified entity.
-#[derive(
-    Serialize, Deserialize, Clone, PartialEq, Eq, Hash, derive_more::Debug,
-)]
-#[serde(rename_all = "camelCase")]
-pub struct AddressesOfAccessController {
-    /// The address of the access controller which controls this entity.
-    ///
-    /// Looking up the public key (hashes) set in the key-value store at
-    /// this address reveals the true factors (public keys) used to protect
-    /// this entity. It will be the same as the ones in `security_structure`
-    /// if we have not changed them locally, which we should not do unless
-    /// we are sure the Ledger corresponds to the values in `security_structure`.
-    pub access_controller_address: AccessControllerAddress,
-
-    /// The address of the XRD vault of the AccessController.
-    pub xrd_vault_address: VaultAddress,
-}
-
-impl AddressesOfAccessController {
-    pub fn new(
-        access_controller_address: AccessControllerAddress,
-        xrd_vault_address: VaultAddress,
-    ) -> Self {
-        Self {
-            access_controller_address,
-            xrd_vault_address,
-        }
-    }
-
-    pub fn sample_mainnet() -> Self {
-        Self::new(
-            AccessControllerAddress::sample_mainnet(),
-            VaultAddress::sample_mainnet(),
-        )
-    }
-
-    pub fn sample_mainnet_other() -> Self {
-        Self::new(
-            AccessControllerAddress::sample_mainnet_other(),
-            VaultAddress::sample_mainnet_other(),
-        )
-    }
-}
-impl HasSampleValues for AddressesOfAccessController {
-    fn sample() -> Self {
-        Self::new(AccessControllerAddress::sample(), VaultAddress::sample())
-    }
-    fn sample_other() -> Self {
-        Self::new(
-            AccessControllerAddress::sample_other(),
-            VaultAddress::sample_other(),
-        )
-    }
-}
-
 /// Advanced security control of an entity which has been "securified",
 /// meaning an MFA security structure (`SecurityStructureOfFactorSources`)
 /// which user has created has been applied to it.
@@ -70,7 +14,7 @@ pub struct SecuredEntityControl {
     /// account recovery scan we might not know the veci
     pub veci: Option<HierarchicalDeterministicFactorInstance>,
 
-    pub addresses: AddressesOfAccessController,
+    pub access_controller_address: AccessControllerAddress,
 
     /// The believed-to-be-current security structure of FactorInstances which
     /// secures this entity.
@@ -83,11 +27,8 @@ pub struct SecuredEntityControl {
 }
 
 impl SecuredEntityControl {
-    pub fn xrd_vault_address(&self) -> VaultAddress {
-        self.addresses.xrd_vault_address
-    }
     pub fn access_controller_address(&self) -> AccessControllerAddress {
-        self.addresses.access_controller_address
+        self.access_controller_address
     }
 }
 
@@ -136,7 +77,7 @@ impl SecuredEntityControl {
     /// not a "VECI".
     pub fn new(
         veci: impl Into<Option<HierarchicalDeterministicFactorInstance>>,
-        addresses: AddressesOfAccessController,
+        access_controller_address: AccessControllerAddress,
         security_structure: SecurityStructureOfFactorInstances,
     ) -> Result<Self> {
         let veci = veci.into();
@@ -147,7 +88,7 @@ impl SecuredEntityControl {
         };
         Ok(Self {
             veci,
-            addresses,
+            access_controller_address,
             security_structure,
             provisional_securified_config: None,
         })
@@ -172,7 +113,7 @@ impl HasSampleValues for SecuredEntityControl {
     fn sample() -> Self {
         let mut sample = Self::new(
             HierarchicalDeterministicFactorInstance::sample(),
-            AddressesOfAccessController::sample(),
+            AccessControllerAddress::sample(),
             SecurityStructureOfFactorInstances::sample(),
         )
         .unwrap();
@@ -182,7 +123,7 @@ impl HasSampleValues for SecuredEntityControl {
     }
 
     fn sample_other() -> Self {
-        Self::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0), AddressesOfAccessController::sample_other(), SecurityStructureOfFactorInstances::sample_other()).unwrap()
+        Self::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0), AccessControllerAddress::sample_other(), SecurityStructureOfFactorInstances::sample_other()).unwrap()
     }
 }
 
@@ -223,7 +164,7 @@ mod tests {
         _ = SUT::new(
 
             HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_0_securified_at_index(0),
-            AddressesOfAccessController::sample(),
+            AccessControllerAddress::sample(),
             SecurityStructureOfFactorInstances::sample(),
         );
     }
@@ -260,11 +201,8 @@ mod tests {
                  }
                }
              },
-            "addresses": {
-                "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a", 
-                "xrdVaultAddress": "internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"
-            },
-             "securityStructure": {
+            "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
+            "securityStructure": {
                "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                "matrixOfFactors": {
                  "primaryRole": {

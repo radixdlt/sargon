@@ -48,7 +48,7 @@ impl ApplyShieldTransactionsXrdBalancesFetcherImpl {
             GatewayClient::new(self.networking_driver.clone(), network_id);
 
         let balances = gateway_client
-            .xrd_balances_of_vault_or_account(network_id, addresses)
+            .xrd_balances_of_access_controller_or_account(network_id, addresses)
             .await?;
 
         let balances = balances
@@ -237,7 +237,7 @@ impl ApplicationInputForSecurifiedAccountWithoutXrdBalance {
             .get_xrd_balance_of_paying_component(
                 self.entity_input
                     .securified_entity_control()
-                    .xrd_vault_address(),
+                    .access_controller_address(),
             )?;
 
         Ok(ApplicationInputForSecurifiedAccount::new(
@@ -269,7 +269,7 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
             .get_xrd_balance_of_paying_component(
                 self.entity_input
                     .securified_entity_control()
-                    .xrd_vault_address(),
+                    .access_controller_address(),
             )?;
 
         Ok(ApplicationInputForSecurifiedPersona::new(

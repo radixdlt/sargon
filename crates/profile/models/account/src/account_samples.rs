@@ -207,9 +207,7 @@ impl Account {
             DisplayName::new(name).unwrap(),
             SecuredEntityControl::new(
                 Some(veci.clone()),
-                AddressesOfAccessController::sample_from_account_address(
-                    address,
-                ),
+                AccessControllerAddress::sample_from_account_address(address),
                 security_structure_of_factor_instances,
             )
             .unwrap(),

@@ -24,9 +24,11 @@ impl GatewayClient {
         addresses: impl IntoIterator<Item = AccountAddress>,
     ) -> Result<IndexMap<AccountAddress, Option<Decimal192>>> {
         let map = self
-            .xrd_balances_of_vault_or_account(
+            .xrd_balances_of_access_controller_or_account(
                 network_id,
-                addresses.into_iter().map(AddressOfVaultOrAccount::from),
+                addresses
+                    .into_iter()
+                    .map(AddressOfAccessControllerOrAccount::from),
             )
             .await?;
 
@@ -44,12 +46,13 @@ impl GatewayClient {
         Ok(map)
     }
 
-    /// Fetched the XRD balance of the component - either AccountAddress or VaultAddress
-    pub async fn xrd_balances_of_vault_or_account(
+    /// Fetched the XRD balance of the component - either AccountAddress or AccessControllerAddress.
+    pub async fn xrd_balances_of_access_controller_or_account(
         &self,
         network_id: NetworkID,
-        addresses: impl IntoIterator<Item = AddressOfVaultOrAccount>,
-    ) -> Result<IndexMap<AddressOfVaultOrAccount, Option<Decimal192>>> {
+        addresses: impl IntoIterator<Item = AddressOfAccessControllerOrAccount>,
+    ) -> Result<IndexMap<AddressOfAccessControllerOrAccount, Option<Decimal192>>>
+    {
         let addresses = addresses.into_iter().collect::<IndexSet<_>>();
         let target_address_len = addresses.len();
         self.batch_fetch_chunking(
@@ -67,7 +70,7 @@ impl GatewayClient {
                             .items
                             .into_iter()
                             .map(|response_item| {
-                                let owner = AddressOfVaultOrAccount::try_from(
+                                let owner = AddressOfAccessControllerOrAccount::try_from(
                                     response_item.address,
                                 )
                                 .expect("address is valid");

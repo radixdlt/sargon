@@ -1,27 +1,5 @@
 use crate::prelude::*;
-use sargon::AddressesOfAccessController as InternalAddressesOfAccessController;
 use sargon::SecuredEntityControl as InternalSecuredEntityControl;
-
-/// Addresses of the access controller which controls a securified entity.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
-pub struct AddressesOfAccessController {
-    /// The address of the access controller which controls this entity.
-    ///
-    /// Looking up the public key (hashes) set in the key-value store at
-    /// this address reveals the true factors (public keys) used to protect
-    /// this entity. It will be the same as the ones in `security_structure`
-    /// if we have not changed them locally, which we should not do unless
-    /// we are sure the Ledger corresponds to the values in `security_structure`.
-    pub access_controller_address: AccessControllerAddress,
-
-    /// The address of the XRD vault of the AccessController.
-    pub xrd_vault_address: VaultAddress,
-}
-
-delegate_debug_into!(
-    AddressesOfAccessController,
-    InternalAddressesOfAccessController
-);
 
 /// Advanced security control of an entity which has been "securified",
 /// meaning an MFA security structure (`SecurityStructureOfFactorSources`)
@@ -41,7 +19,7 @@ pub struct SecuredEntityControl {
     /// this entity. It will be the same as the ones in `security_structure`
     /// if we have not changed them locally, which we should not do unless
     /// we are sure the Ledger corresponds to the values in `security_structure`.
-    pub addresses: AddressesOfAccessController,
+    pub access_controller_address: AccessControllerAddress,
 
     /// The believed-to-be-current security structure of FactorInstances which
     /// secures this entity.
@@ -53,18 +31,6 @@ pub struct SecuredEntityControl {
 }
 
 delegate_debug_into!(SecuredEntityControl, InternalSecuredEntityControl);
-
-#[uniffi::export]
-pub fn new_addresses_of_access_controller_sample() -> AddressesOfAccessController
-{
-    InternalAddressesOfAccessController::sample().into()
-}
-
-#[uniffi::export]
-pub fn new_addresses_of_access_controller_sample_other(
-) -> AddressesOfAccessController {
-    InternalAddressesOfAccessController::sample_other().into()
-}
 
 #[uniffi::export]
 pub fn new_secured_entity_control_sample() -> SecuredEntityControl {

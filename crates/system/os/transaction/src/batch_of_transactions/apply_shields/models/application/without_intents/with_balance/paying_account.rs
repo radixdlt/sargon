@@ -60,7 +60,4 @@ impl ApplicationInputPayingAccountSecurified {
     pub fn access_controller_address(&self) -> AccessControllerAddress {
         self.account.access_controller_address()
     }
-    pub fn xrd_vault_address(&self) -> VaultAddress {
-        self.account.xrd_vault_address()
-    }
 }

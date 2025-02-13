@@ -11,8 +11,9 @@ manifests = { workspace = true }
 prelude = { workspace = true }
 profile = { workspace = true }
 profile-account-or-persona = { workspace = true }
+profile-logic = { workspace = true }
 radix-connect-models = { workspace = true }
-sargon-os = { path = "../../../system/os/os" }
+sargon-os = { workspace = true }
 sargon-os-factors = { workspace = true }
 signatures-collector = { workspace = true }
 signing-traits = { workspace = true }

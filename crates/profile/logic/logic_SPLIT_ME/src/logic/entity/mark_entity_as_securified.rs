@@ -3,7 +3,7 @@ use crate::prelude::*;
 pub trait ProfileMarkEntityAsSecurified {
     fn mark_entity_as_securified(
         &mut self,
-        addresses_of_access_controller: AddressesOfAccessController,
+        access_controller_address: AccessControllerAddress,
         entity_address: AddressOfAccountOrPersona,
     ) -> Result<AccountOrPersona>;
 }
@@ -11,7 +11,7 @@ pub trait ProfileMarkEntityAsSecurified {
 impl ProfileMarkEntityAsSecurified for Profile {
     fn mark_entity_as_securified(
         &mut self,
-        addresses_of_access_controller: AddressesOfAccessController,
+        access_controller_address: AccessControllerAddress,
         entity_address: AddressOfAccountOrPersona,
     ) -> Result<AccountOrPersona> {
         let mut entity = self.entity_by_address(entity_address)?;
@@ -31,7 +31,7 @@ impl ProfileMarkEntityAsSecurified for Profile {
 
         let secured_entity_control = SecuredEntityControl::new(
             transaction_signing,
-            addresses_of_access_controller,
+            access_controller_address,
             security_structure_of_factor_instances.clone(),
         )?;
 

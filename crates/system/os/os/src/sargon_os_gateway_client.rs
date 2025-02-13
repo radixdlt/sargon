@@ -86,14 +86,12 @@ mod tests {
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         // ACT
-        let error = sut.gateway_client().unwrap_err();
+        let res = sut.gateway_client();
 
         // ASSERT
-        assert_eq!(
-            CommonError::ProfileStateNotLoaded {
-                current_state: "None".to_string()
-            },
-            error,
-        )
+        assert!(matches!(
+            res,
+            Err(CommonError::ProfileStateNotLoaded { .. })
+        ))
     }
 }

@@ -32,7 +32,7 @@ impl EntitySyncOutcome {
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub(crate) enum EntitySyncAction {
     ToTombstone(AccountAddress),
-    ToSecurify(AddressOfAccountOrPersona, AddressesOfAccessController),
+    ToSecurify(AddressOfAccountOrPersona, AccessControllerAddress),
 }
 
 /// The kinds of sync actions performed on entities in profile.

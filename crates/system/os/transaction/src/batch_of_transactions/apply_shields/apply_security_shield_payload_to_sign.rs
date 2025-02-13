@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub type AddressOfPayerOfShieldApplication = AddressOfVaultOrAccount;
+pub type AddressOfPayerOfShieldApplication = AddressOfAccessControllerOrAccount;
 
 #[allow(clippy::large_enum_variant)]
 #[derive(Debug, PartialEq, Eq, EnumAsInner)]
