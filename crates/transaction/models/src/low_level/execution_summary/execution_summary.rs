@@ -86,9 +86,8 @@ pub struct ExecutionSummary {
     /// Information on the global entities created in the transaction.
     pub new_entities: NewEntities,
 
-    /// The various classifications that this manifest matched against. Note
-    /// that an empty set means that the manifest is non-conforming.
-    pub detailed_classification: Vec<DetailedManifestClass>,
+    /// The manifest classification if any. None means that the manifest is non-conforming.
+    pub detailed_classification: Option<DetailedManifestClass>,
 
     /// List of newly created Non-Fungibles during this transaction.
     pub newly_created_non_fungibles: Vec<NonFungibleGlobalId>,
@@ -133,7 +132,7 @@ impl ExecutionSummary {
         encountered_addresses: impl IntoIterator<
             Item = ManifestEncounteredComponentAddress,
         >,
-        detailed_classification: impl IntoIterator<Item = DetailedManifestClass>,
+        detailed_classification: Option<DetailedManifestClass>,
         fee_locks: impl Into<FeeLocks>,
         fee_summary: impl Into<FeeSummary>,
         new_entities: impl Into<NewEntities>,
@@ -157,9 +156,7 @@ impl ExecutionSummary {
             encountered_addresses: encountered_addresses
                 .into_iter()
                 .collect_vec(),
-            detailed_classification: detailed_classification
-                .into_iter()
-                .collect_vec(),
+            detailed_classification,
             fee_locks: fee_locks.into(),
             fee_summary: fee_summary.into(),
             new_entities: new_entities.into(),
@@ -170,7 +167,7 @@ impl ExecutionSummary {
 impl ExecutionSummary {
     pub fn classify_delete_accounts_if_present(&mut self) {
         // Only try to classify if RET analysis didn't yield any classification
-        if !self.detailed_classification.is_empty() {
+        if self.detailed_classification.is_some() {
             return;
         }
 
@@ -193,11 +190,10 @@ impl ExecutionSummary {
             .collect();
 
         if !deleted_accounts.is_empty() {
-            self.detailed_classification.push(
-                DetailedManifestClass::DeleteAccounts {
+            self.detailed_classification =
+                Some(DetailedManifestClass::DeleteAccounts {
                     account_addresses: deleted_accounts,
-                },
-            );
+                });
         }
     }
 
@@ -212,7 +208,7 @@ impl ExecutionSummary {
         ) -> Result<SecurityStructureOfFactorSources>,
     {
         // Only try to classify if RET analysis didn't yield any classification
-        if !self.detailed_classification.is_empty() {
+        if self.detailed_classification.is_some() {
             return Ok(());
         }
 
@@ -240,13 +236,12 @@ impl ExecutionSummary {
             let security_structure =
                 get_provisional_security_structure(address)?;
 
-            self.detailed_classification.push(
-                DetailedManifestClass::SecurifyEntity {
+            self.detailed_classification =
+                Some(DetailedManifestClass::SecurifyEntity {
                     entity_address: address,
                     provisional_security_structure_metadata: security_structure
                         .metadata,
-                },
-            );
+                });
         }
 
         Ok(())
@@ -290,6 +285,12 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
             n,
         ));
 
+        let classification = ret
+            .detailed_manifest_classification
+            .into_iter()
+            .filter_map(|d| DetailedManifestClass::new_from(d, n))
+            .find_or_first(|class| !class.is_general());
+
         let mut summary = Self::new(
             addresses_of_accounts_from_ret(
                 ret.account_dynamic_resource_movements_summary
@@ -322,9 +323,7 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
                 ret.entities_encountered_summary.entities,
                 n,
             ),
-            ret.detailed_manifest_classification
-                .into_iter()
-                .map(|d| DetailedManifestClass::from((d, n))),
+            classification,
             ret.fee_locks_summary,
             ret.fee_consumption_summary,
             new_entities,
@@ -364,7 +363,7 @@ impl ExecutionSummary {
                 ManifestEncounteredComponentAddress::sample_component_stokenet(
                 ),
             ],
-            detailed_classification: vec![DetailedManifestClass::sample()],
+            detailed_classification: Some(DetailedManifestClass::sample()),
             fee_locks: FeeLocks::sample(),
             fee_summary: FeeSummary::sample(),
             new_entities: NewEntities::sample(),
@@ -398,7 +397,7 @@ impl HasSampleValues for ExecutionSummary {
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample(),
             ],
-            detailed_classification: vec![DetailedManifestClass::sample()],
+            detailed_classification: Some(DetailedManifestClass::sample()),
             fee_locks: FeeLocks::sample(),
             fee_summary: FeeSummary::sample(),
             new_entities: NewEntities::sample(),
@@ -434,7 +433,7 @@ impl HasSampleValues for ExecutionSummary {
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample_other(),
             ],
-            detailed_classification: vec![DetailedManifestClass::sample_other()],
+            detailed_classification: Some(DetailedManifestClass::sample_other()),
             fee_locks: FeeLocks::sample_other(),
             fee_summary: FeeSummary::sample_other(),
             new_entities: NewEntities::sample_other(),
