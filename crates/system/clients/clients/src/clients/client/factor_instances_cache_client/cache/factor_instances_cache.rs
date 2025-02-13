@@ -286,7 +286,6 @@ impl FactorInstancesCache {
                             // for this factor source for this derivation preset
                             let instances_to_use_from_cache =
                                 for_preset.split_at(target_quantity).0;
-                            assert!(!instances_to_use_from_cache.is_empty());
                             Some(CacheInstancesAndRemainingQuantityToDerive {
                                 // Only take the first `target_quantity` instances
                                 // to be used, the rest are not needed and should
@@ -570,6 +569,27 @@ impl FactorInstancesCache {
         };
 
         outcome.is_satisfied()
+    }
+
+    /// Queries if the cache is satisfied for creating an entity with the given `factor_source_id` & `entity_kind`
+    pub fn is_entity_creation_satisfied(
+        &self,
+        network_id: NetworkID,
+        factor_source_id: FactorSourceIDFromHash,
+        entity_kind: EntityKind,
+    ) -> bool {
+        let derivation_preset = match entity_kind {
+            EntityKind::Account => DerivationPreset::AccountVeci,
+            EntityKind::Persona => DerivationPreset::IdentityVeci,
+        };
+        let quantified_derivation_presets: IdentifiedVecOf<
+            QuantifiedDerivationPreset,
+        > = vec![QuantifiedDerivationPreset::new(derivation_preset, 1)].into();
+        self.is_satisfied(
+            network_id,
+            factor_source_id,
+            &quantified_derivation_presets,
+        )
     }
 
     pub fn assert_is_full(

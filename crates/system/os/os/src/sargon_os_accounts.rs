@@ -301,15 +301,13 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-        debug!("Spot checking the factor source...");
-        let spot_check_response = self
-            .spot_check_interactor()
-            .spot_check(factor_source.clone(), true)
-            .await?;
-        debug!(
-            "Spot check response: {:?}. Creating account...",
-            spot_check_response
-        );
+        self.spot_check_factor_source_before_entity_creation_if_necessary(
+            factor_source.clone(),
+            network_id,
+            EntityKind::Account,
+        )
+        .await?;
+        debug!("Creating account.");
         let (account, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_account_with_factor_source_with_derivation_outcome(
                 factor_source,

@@ -287,15 +287,13 @@ impl SargonOS {
         name: DisplayName,
         persona_data: Option<PersonaData>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
-        debug!("Spot checking the factor source...");
-        let spot_check_response = self
-            .spot_check_interactor()
-            .spot_check(factor_source.clone(), true)
-            .await?;
-        debug!(
-            "Spot check response: {:?}. Creating persona...",
-            spot_check_response
-        );
+        self.spot_check_factor_source_before_entity_creation_if_necessary(
+            factor_source.clone(),
+            network_id,
+            EntityKind::Persona,
+        )
+        .await?;
+        debug!("Creating persona.");
         let (mut persona, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
