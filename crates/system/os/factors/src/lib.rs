@@ -1,4 +1,4 @@
-mod add_factor;
+mod add_factor_source;
 mod apply_security_shield;
 mod sargon_os_entities_linked_to_factor_source;
 mod sargon_os_security_structures;
@@ -12,7 +12,7 @@ pub mod prelude {
     pub use crate::sargon_os_entities_linked_to_factor_source::*;
     pub use crate::sargon_os_security_structures::*;
 
-    pub use crate::add_factor::*;
+    pub use crate::add_factor_source::*;
 
     pub use clients::prelude::*;
     pub use factor_instances_provider::prelude::*;

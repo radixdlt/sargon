@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[async_trait::async_trait]
-pub trait OsNewFactorAdding: Send + Sync {
-    async fn is_factor_already_in_use(
+pub trait OsFactorSourceAdder: Send + Sync {
+    async fn is_factor_source_already_in_use(
         &self,
         factor_source: FactorSource,
     ) -> Result<bool>;
 
-    async fn add_new_factor(
+    async fn add_new_factor_source(
         &self,
         factor_source: FactorSource,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
@@ -17,10 +17,10 @@ pub trait OsNewFactorAdding: Send + Sync {
 }
 
 #[async_trait::async_trait]
-impl OsNewFactorAdding for Arc<SargonOS> {
+impl OsFactorSourceAdder for Arc<SargonOS> {
     /// Accesses the active profile and checks if it already contains a factor source
     /// with the same `FactorSourceID`.
-    async fn is_factor_already_in_use(
+    async fn is_factor_source_already_in_use(
         &self,
         factor_source: FactorSource,
     ) -> Result<bool> {
@@ -40,7 +40,7 @@ impl OsNewFactorAdding for Arc<SargonOS> {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    async fn add_new_factor(
+    async fn add_new_factor_source(
         &self,
         factor_source: FactorSource,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
