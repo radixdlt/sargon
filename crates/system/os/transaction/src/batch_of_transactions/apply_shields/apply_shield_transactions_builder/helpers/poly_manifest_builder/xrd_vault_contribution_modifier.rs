@@ -116,16 +116,11 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         input: ApplicationInputForSecurifiedAccount,
         manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<ApplicationInputForSecurifiedAccount> {
-        if !manifest_variant.can_quick_confirm()
-            && !manifest_variant.can_exercise_primary_role()
-        {
+        if !manifest_variant.can_quick_confirm() {
             // If we cannot quick confirm the topping up of the XRD vault instructions
             // must not go into this manifest for initiate recovery, we should
             // include the top up in the Confirm Recovery Manifest happening later (
             // after time delay).
-            //
-            // If we can exercise the primary role, we can auth with Primary Role of
-            // old factors
             return Ok(input);
         }
 
