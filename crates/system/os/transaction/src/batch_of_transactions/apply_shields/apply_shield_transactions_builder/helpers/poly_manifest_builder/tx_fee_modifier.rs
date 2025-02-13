@@ -47,23 +47,9 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
         input: ApplicationInputForUnsecurifiedAccount,
     ) -> Result<ApplicationInputForUnsecurifiedAccount> {
         let estimated_xrd_fee = input.estimated_xrd_fee;
-
-        input.clone().modifying_manifest(|m| {
-            if AddressOfAccountOrPersona::from(
-                input.paying_account.account_address(),
-            ) != input.entity_input.unsecurified_entity.address()
-            {
-                let other_payer = input.paying_account.account_address();
-                // We lock fee against the other account (but not against its AC vault)
-                let m = m.modify_add_lock_fee(&other_payer, estimated_xrd_fee);
-                Ok(m)
-            } else {
-                // Not another account paying, and entity is unsecurified => use lock fee
-                let self_payer =
-                    input.entity_input.unsecurified_entity.entity.address;
-                let m = m.modify_add_lock_fee(&self_payer, estimated_xrd_fee);
-                Ok(m)
-            }
+        let payer = input.paying_account.account_address();
+        input.modifying_manifest(|m| {
+            m.modify_add_lock_fee(&payer, estimated_xrd_fee)
         })
     }
 
@@ -74,8 +60,7 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
         let payer = input.payer();
         let estimated_xrd_fee = input.estimated_xrd_fee;
         input.modifying_manifest(|m| {
-            let m = m.modify_add_lock_fee(&payer.address, estimated_xrd_fee);
-            Ok(m)
+            m.modify_add_lock_fee(&payer.address, estimated_xrd_fee)
         })
     }
 
@@ -87,13 +72,12 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
         let entity_applying_shield =
             input.entity_input.securified_persona.clone();
         let estimated_xrd_fee = input.estimated_xrd_fee;
-        input.clone().modifying_manifest(|m| {
-            let m = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+        input.modifying_manifest(|m| {
+            TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
                 m,
                 estimated_xrd_fee,
                 entity_applying_shield
-            );
-            Ok(m)
+            )
         })
     }
 
@@ -106,12 +90,11 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
             input.entity_input.securified_account.clone();
         let estimated_xrd_fee = input.estimated_xrd_fee;
         input.modifying_manifest(|m| {
-            let m = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+            TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
                 m,
                 estimated_xrd_fee,
                 entity_applying_shield
-            );
-            Ok(m)
+            )
         })
     }
 }

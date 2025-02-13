@@ -71,9 +71,11 @@ impl GatewayClient {
                                 )
                                 .expect("address is valid");
 
-                                let fungible_resources = response_item
-                                    .fungible_resources
-                                    .expect("Never None");
+                                let Some(fungible_resources) =
+                                    response_item.fungible_resources
+                                else {
+                                    return Ok((owner, None));
+                                };
 
                                 if let Some(xrd_resource_collection_item) =
                                     fungible_resources.items.into_iter().find(

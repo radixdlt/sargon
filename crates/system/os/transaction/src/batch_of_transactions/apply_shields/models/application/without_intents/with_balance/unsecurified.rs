@@ -157,13 +157,20 @@ impl ReviewedManifestOwner for ApplicationInputForSecurifiedPersona {
 }
 
 pub trait ManifestModying: Sized {
-    fn modifying_manifest(
+    fn try_modifying_manifest(
         self,
         modified: impl FnOnce(TransactionManifest) -> Result<TransactionManifest>,
     ) -> Result<Self>;
+
+    fn modifying_manifest(
+        self,
+        modified: impl FnOnce(TransactionManifest) -> TransactionManifest,
+    ) -> Result<Self> {
+        self.try_modifying_manifest(|m| Ok(modified(m)))
+    }
 }
 impl<T: ReviewedManifestOwner> ManifestModying for T {
-    fn modifying_manifest(
+    fn try_modifying_manifest(
         self,
         modified: impl FnOnce(TransactionManifest) -> Result<TransactionManifest>,
     ) -> Result<Self> {
