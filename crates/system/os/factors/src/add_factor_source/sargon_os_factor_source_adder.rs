@@ -4,16 +4,14 @@ use crate::prelude::*;
 pub trait OsFactorSourceAdder: Send + Sync {
     async fn is_factor_source_already_in_use(
         &self,
-        factor_source: FactorSource,
+        factor_source_id: FactorSourceID,
     ) -> Result<bool>;
 
     async fn add_new_factor_source(
         &self,
-        factor_source: FactorSource,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
+        name: DisplayName,
     ) -> Result<()>;
-
-    async fn resolve_host_info(&self) -> HostInfo;
 }
 
 #[async_trait::async_trait]
@@ -22,10 +20,9 @@ impl OsFactorSourceAdder for Arc<SargonOS> {
     /// with the same `FactorSourceID`.
     async fn is_factor_source_already_in_use(
         &self,
-        factor_source: FactorSource,
+        factor_source_id: FactorSourceID,
     ) -> Result<bool> {
-        self.profile_contains_factor_source(factor_source.factor_source_id())
-            .await
+        self.profile_contains_factor_source(factor_source_id).await
     }
 
     /// Returns `Err(CommonError::FactorSourceAlreadyExists)` if the Profile already contained a
@@ -42,9 +39,23 @@ impl OsFactorSourceAdder for Arc<SargonOS> {
     /// of the active profile to secure storage.
     async fn add_new_factor_source(
         &self,
-        factor_source: FactorSource,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
+        name: DisplayName,
     ) -> Result<()> {
+        let host_info = self.host.resolve_host_info().await;
+        let is_main = false;
+        let hint = DeviceFactorSourceHint::with_info_and_label(
+            &host_info,
+            mnemonic_with_passphrase.mnemonic.word_count,
+            name.value(),
+        );
+        let device_factor_source = DeviceFactorSource::babylon_with_hint(
+            is_main,
+            &mnemonic_with_passphrase,
+            hint,
+        );
+        let factor_source = FactorSource::from(device_factor_source);
+
         let id = factor_source.factor_source_id();
 
         let contains = self.profile_contains_factor_source(id).await?;
@@ -88,10 +99,5 @@ impl OsFactorSourceAdder for Arc<SargonOS> {
             .await;
 
         Ok(())
-    }
-
-    /// Resolves the host info. This is used to create a new `DeviceFactorSource`.
-    async fn resolve_host_info(&self) -> HostInfo {
-        self.host.resolve_host_info().await
     }
 }

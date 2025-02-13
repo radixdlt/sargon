@@ -902,8 +902,11 @@ pub enum CommonError {
         entity_bech32m_encoded_address: String,
     } = 10256,
 
+    #[error("Factor source name invalid")]
+    FactorSourceNameInvalid = 10257,
+
     #[error("Factor source already exists")]
-    FactorSourceAlreadyExists = 10257,
+    FactorSourceAlreadyExists = 10258,
 }
 
 impl CommonError {

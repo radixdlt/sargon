@@ -3,12 +3,12 @@ use crate::prelude::*;
 pub struct DeviceFactorSourceAddingManager {
     factor_adder: Arc<dyn OsFactorSourceAdder>,
     factor_source_identification: RwLock<Option<FactorSourceIdentification>>,
+    factor_source_name: RwLock<String>,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct FactorSourceIdentification {
     mnemonic_with_passphrase: MnemonicWithPassphrase,
-    device_factor_source: DeviceFactorSource,
 }
 
 impl PartialEq for DeviceFactorSourceAddingManager {
@@ -51,24 +51,11 @@ impl FactorSourceIdentification {
     const NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM_EXCL_CHECKSUM:
         usize = 3;
 
-    fn new(mnemonic: Mnemonic, host_info: HostInfo) -> Self {
+    fn new(mnemonic: Mnemonic) -> Self {
         let mnemonic_with_passphrase =
             MnemonicWithPassphrase::new(mnemonic.clone());
-        let is_main = false;
-        let device_factor_source = DeviceFactorSource::babylon(
-            is_main,
-            &mnemonic_with_passphrase,
-            &host_info,
-        );
-        Self::with_details(device_factor_source)
-    }
-
-    fn with_details(device_factor_source: DeviceFactorSource) -> Self {
         Self {
-            mnemonic_with_passphrase: device_factor_source
-                .id
-                .sample_associated_mnemonic(),
-            device_factor_source,
+            mnemonic_with_passphrase,
         }
     }
 
@@ -94,45 +81,49 @@ impl FactorSourceIdentification {
 
 impl HasSampleValues for FactorSourceIdentification {
     fn sample() -> Self {
-        FactorSourceIdentification::with_details(DeviceFactorSource::sample())
+        FactorSourceIdentification::new(Mnemonic::sample())
     }
 
     fn sample_other() -> Self {
-        FactorSourceIdentification::with_details(
-            DeviceFactorSource::sample_other(),
-        )
+        FactorSourceIdentification::new(Mnemonic::sample_other())
     }
 }
 
 impl HasSampleValues for DeviceFactorSourceAddingManager {
     fn sample() -> Self {
-        DeviceFactorSourceAddingManager::with_factor_identification(
+        DeviceFactorSourceAddingManager::with_details(
             Arc::new(MockOsFactorAdder::new()),
             Some(FactorSourceIdentification::sample()),
+            "First",
         )
     }
 
     fn sample_other() -> Self {
-        DeviceFactorSourceAddingManager::with_factor_identification(
+        DeviceFactorSourceAddingManager::with_details(
             Arc::new(MockOsFactorAdder::new()),
             Some(FactorSourceIdentification::sample_other()),
+            "Second",
         )
     }
 }
 
 impl DeviceFactorSourceAddingManager {
     pub fn new(os_ref: Arc<dyn OsFactorSourceAdder>) -> Self {
-        Self::with_factor_identification(os_ref, None)
+        Self::with_details(os_ref, None, "")
     }
 
-    fn with_factor_identification(
+    fn with_details(
         os_ref: Arc<dyn OsFactorSourceAdder>,
         factor_source_identification: Option<FactorSourceIdentification>,
+        factor_source_name: impl AsRef<str>,
     ) -> Self {
         Self {
             factor_adder: os_ref,
             factor_source_identification: RwLock::new(
                 factor_source_identification,
+            ),
+            factor_source_name: RwLock::new(
+                factor_source_name.as_ref().to_owned(),
             ),
         }
     }
@@ -142,12 +133,6 @@ impl DeviceFactorSourceAddingManager {
 // ==== GET / READ ====
 // ====================
 impl DeviceFactorSourceAddingManager {
-    pub fn get_factor_source(&self) -> FactorSource {
-        self.get_factor_source_identification()
-            .device_factor_source
-            .into()
-    }
-
     pub fn get_mnemonic_words(&self) -> Vec<BIP39Word> {
         self.get_factor_source_identification()
             .mnemonic_with_passphrase
@@ -167,7 +152,11 @@ impl DeviceFactorSourceAddingManager {
             .read()
             .unwrap()
             .clone()
-            .expect("Factor source identification not initialized")
+            .expect("Factor source identification should be initialized")
+    }
+
+    pub fn get_factor_source_name(&self) -> String {
+        self.factor_source_name.read().unwrap().clone()
     }
 }
 
@@ -175,36 +164,29 @@ impl DeviceFactorSourceAddingManager {
 // ===== MUTATION =====
 // ====================
 impl DeviceFactorSourceAddingManager {
-    pub fn set_factor_name(&self, name: DisplayName) -> &Self {
-        self.factor_source_identification
-            .write()
-            .unwrap()
-            .as_mut()
-            .expect("Factor source identification not initialized")
-            .device_factor_source
-            .set_name(name.value());
+    pub fn set_factor_source_name(&self, name: impl AsRef<str>) -> &Self {
+        *self.factor_source_name.write().unwrap() = name.as_ref().to_owned();
         self
     }
 
-    pub async fn create_new_factor_source(&self) -> &Self {
+    pub async fn create_new_mnemonic(&self) -> &Self {
         let mnemonic = Mnemonic::generate_new();
-        self.create_factor_source(mnemonic).await;
+        self.set_mnemonic(mnemonic).await;
         self
     }
 
-    pub async fn create_factor_source_from_mnemonic_words(
+    pub async fn create_mnemonic_from_words(
         &self,
         words: Vec<BIP39Word>,
     ) -> Result<&Self> {
         let mnemonic = Mnemonic::from_words(words)?;
-        self.create_factor_source(mnemonic).await;
+        self.set_mnemonic(mnemonic).await;
         Ok(self)
     }
 
-    async fn create_factor_source(&self, mnemonic: Mnemonic) {
-        let host_info = self.factor_adder.resolve_host_info().await;
+    async fn set_mnemonic(&self, mnemonic: Mnemonic) {
         *self.factor_source_identification.write().unwrap() =
-            Some(FactorSourceIdentification::new(mnemonic, host_info))
+            Some(FactorSourceIdentification::new(mnemonic))
     }
 }
 
@@ -240,18 +222,30 @@ impl DeviceFactorSourceAddingManager {
 
     /// Checks if profile already contains a factor source with the same `FactorSourceID`.
     pub async fn is_factor_source_already_in_use(&self) -> Result<bool> {
+        let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+            FactorSourceKind::Device,
+            &self
+                .get_factor_source_identification()
+                .mnemonic_with_passphrase,
+        );
         self.factor_adder
-            .is_factor_source_already_in_use(self.get_factor_source())
+            .is_factor_source_already_in_use(FactorSourceID::from(id))
             .await
     }
 
     /// Adds the factor source
     pub async fn add_factor_source(&self) -> Result<()> {
+        let display_name = DisplayName::new(self.get_factor_source_name())
+            .map_err(|e| {
+                error!("Invalid DisplayName {:?}", e);
+                CommonError::FactorSourceNameInvalid
+            })?;
+
         self.factor_adder
             .add_new_factor_source(
-                self.get_factor_source(),
                 self.get_factor_source_identification()
                     .mnemonic_with_passphrase,
+                display_name,
             )
             .await
     }
@@ -260,7 +254,6 @@ impl DeviceFactorSourceAddingManager {
 struct MockOsFactorAdder {
     stubbed_factor_source_already_in_use: Result<bool>,
     stubbed_add_factor_source_result: Result<()>,
-    stubbed_host_info: HostInfo,
 }
 
 impl MockOsFactorAdder {
@@ -276,7 +269,6 @@ impl MockOsFactorAdder {
                 factor_source_already_in_use,
             ),
             stubbed_add_factor_source_result: Ok(()),
-            stubbed_host_info: HostInfo::sample(),
         }
     }
 }
@@ -285,21 +277,17 @@ impl MockOsFactorAdder {
 impl OsFactorSourceAdder for MockOsFactorAdder {
     async fn is_factor_source_already_in_use(
         &self,
-        _factor_source: FactorSource,
+        _factor_source_id: FactorSourceID,
     ) -> Result<bool> {
         self.stubbed_factor_source_already_in_use.clone()
     }
 
     async fn add_new_factor_source(
         &self,
-        _factor_source: FactorSource,
         _mnemonic_with_passphrase: MnemonicWithPassphrase,
+        _name: DisplayName,
     ) -> Result<()> {
         self.stubbed_add_factor_source_result.clone()
-    }
-
-    async fn resolve_host_info(&self) -> HostInfo {
-        self.stubbed_host_info.clone()
     }
 }
 

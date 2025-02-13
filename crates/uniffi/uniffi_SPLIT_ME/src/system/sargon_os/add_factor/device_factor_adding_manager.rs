@@ -46,21 +46,19 @@ impl DeviceFactorSourceAddingManager {
         })
     }
 
-    async fn _create_new_factor_source(
+    async fn _create_new_mnemonic(
         manager: Arc<InternalDeviceFactorSourceAddingManager>,
     ) -> Result<()> {
-        manager.create_new_factor_source().await;
+        manager.create_new_mnemonic().await;
         Ok(())
     }
 
-    async fn _create_factor_source_from_mnemonic_words(
+    async fn _create_mnemonic_from_words(
         manager: Arc<InternalDeviceFactorSourceAddingManager>,
         words: Vec<BIP39Word>,
     ) -> Result<()> {
         manager
-            .create_factor_source_from_mnemonic_words(
-                words.clone().into_internal(),
-            )
+            .create_mnemonic_from_words(words.clone().into_internal())
             .await
             .map(|_| ())
             .into_result()
@@ -100,18 +98,15 @@ impl DeviceFactorSourceAddingManager {
 // ====================
 #[uniffi::export]
 impl DeviceFactorSourceAddingManager {
-    pub fn set_factor_source_name(
-        self: Arc<Self>,
-        name: DisplayName,
-    ) -> Arc<Self> {
-        self.set(|manager| manager.set_factor_name(name.into_internal()))
+    pub fn set_factor_source_name(self: Arc<Self>, name: String) -> Arc<Self> {
+        self.set(|manager| manager.set_factor_source_name(&name))
     }
 
     pub async fn create_new_factor_source(
         self: Arc<Self>,
     ) -> Result<Arc<Self>> {
         builder_arc_map_future_result(self, |manager| {
-            Self::_create_new_factor_source(manager.wrapped.clone())
+            Self::_create_new_mnemonic(manager.wrapped.clone())
         })
         .await
     }
@@ -121,10 +116,7 @@ impl DeviceFactorSourceAddingManager {
         words: Vec<BIP39Word>,
     ) -> Result<Arc<Self>> {
         builder_arc_map_future_result(self, |manager| {
-            Self::_create_factor_source_from_mnemonic_words(
-                manager.wrapped.clone(),
-                words,
-            )
+            Self::_create_mnemonic_from_words(manager.wrapped.clone(), words)
         })
         .await
     }
