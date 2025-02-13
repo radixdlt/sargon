@@ -1012,49 +1012,9 @@ mod tests {
         // Create a cache which has the following instances for factor source `fs`:
         // - AccountVeci: 1
         // - AccountMfa: 2
-        let sut = SUT::default();
+        // - IdentityRola: 3
         let fs = FactorSourceIDFromHash::sample_at(0);
-
-        let av_fi_0 = HierarchicalDeterministicFactorInstance::new_for_entity(
-            fs,
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space_unsecurified(0u32).unwrap(),
-        );
-        let am_fi_0 = HierarchicalDeterministicFactorInstance::new_for_entity(
-            fs,
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(0u32, IsSecurified(true)).unwrap(),
-        );
-        let am_fi_1 = HierarchicalDeterministicFactorInstance::new_for_entity(
-            fs,
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(1u32, IsSecurified(true)).unwrap(),
-        );
-
-        HierarchicalDeterministicFactorInstance::new_for_entity(
-            fs,
-            CAP26EntityKind::Account,
-            Hardened::from_local_key_space(1u32, IsSecurified(true)).unwrap(),
-        );
-
-        let instances: InstancesPerDerivationPresetPerFactorSource =
-            IndexMap::from_iter([
-                (
-                    DerivationPreset::AccountVeci,
-                    IndexMap::from_iter([(
-                        fs,
-                        FactorInstances::from_iter([av_fi_0]),
-                    )]),
-                ),
-                (
-                    DerivationPreset::AccountMfa,
-                    IndexMap::from_iter([(
-                        fs,
-                        FactorInstances::from_iter([am_fi_0, am_fi_1]),
-                    )]),
-                ),
-            ]);
-        sut.insert(&instances).unwrap();
+        let sut = SUT::build_with_instances(fs, 1, 2, 0, 0, 0, 3);
 
         // Test that cache is satisfied for Account entity creation
         let result = sut.is_entity_creation_satisfied(
@@ -1078,6 +1038,17 @@ mod tests {
                     2,
                 ),
             ]),
+        );
+        assert!(result);
+
+        // Test that cache is satisfied for 3 IdentityRola
+        let result = sut.is_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
+                DerivationPreset::IdentityRola,
+                3,
+            )]),
         );
         assert!(result);
 
@@ -1113,5 +1084,176 @@ mod tests {
             )]),
         );
         assert!(!result);
+    }
+}
+
+// #[cfg(test)]
+
+impl FactorInstancesCache {
+    /// Creates a new `FactorInstancesCache` with the given instances for the given `factor_source_id`.
+    #[allow(clippy::too_many_arguments)]
+    pub fn build_with_instances(
+        factor_source_id: FactorSourceIDFromHash,
+        account_veci_count: usize,
+        account_mfa_count: usize,
+        account_rola_count: usize,
+        identity_veci_count: usize,
+        identity_mfa_count: usize,
+        identity_rola_count: usize,
+    ) -> Self {
+        let sut = Self::default();
+        sut.add_instances(
+            factor_source_id,
+            account_veci_count,
+            account_mfa_count,
+            account_rola_count,
+            identity_veci_count,
+            identity_mfa_count,
+            identity_rola_count,
+        );
+        sut
+    }
+
+    /// Adds the given number of instances for the given `factor_source_id` to the cache.
+    #[allow(clippy::too_many_arguments)]
+    pub fn add_instances(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        account_veci_count: usize,
+        account_mfa_count: usize,
+        account_rola_count: usize,
+        identity_veci_count: usize,
+        identity_mfa_count: usize,
+        identity_rola_count: usize,
+    ) {
+        let av_factor_instances = (0..account_veci_count)
+            .map(|index| {
+                HierarchicalDeterministicFactorInstance::new_for_entity(
+                    factor_source_id,
+                    CAP26EntityKind::Account,
+                    Hardened::from_local_key_space_unsecurified(index as u32)
+                        .unwrap(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let am_factor_instances = (0..account_mfa_count)
+            .map(|index| {
+                HierarchicalDeterministicFactorInstance::new_for_entity(
+                    factor_source_id,
+                    CAP26EntityKind::Account,
+                    Hardened::from_local_key_space(
+                        index as u32,
+                        IsSecurified(true),
+                    )
+                    .unwrap(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let ar_factor_instances = (0..account_rola_count)
+            .map(|index| {
+                HierarchicalDeterministicFactorInstance::new_for_entity_with_key_kind_on_network(
+                    CAP26KeyKind::AuthenticationSigning,
+                    NetworkID::Mainnet,
+                    factor_source_id,
+                    CAP26EntityKind::Account,
+                    Hardened::from_local_key_space(
+                        index as u32,
+                        IsSecurified(true),
+                    )
+                    .unwrap(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let iv_factor_instances = (0..identity_veci_count)
+            .map(|index| {
+                HierarchicalDeterministicFactorInstance::new_for_entity(
+                    factor_source_id,
+                    CAP26EntityKind::Identity,
+                    Hardened::from_local_key_space_unsecurified(index as u32)
+                        .unwrap(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let im_factor_instances = (0..identity_mfa_count)
+            .map(|index| {
+                HierarchicalDeterministicFactorInstance::new_for_entity(
+                    factor_source_id,
+                    CAP26EntityKind::Identity,
+                    Hardened::from_local_key_space(
+                        index as u32,
+                        IsSecurified(true),
+                    )
+                    .unwrap(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let ir_factor_instances = (0..identity_rola_count)
+            .map(|index| {
+                HierarchicalDeterministicFactorInstance::new_for_entity_with_key_kind_on_network(
+                    CAP26KeyKind::AuthenticationSigning,
+                    NetworkID::Mainnet,
+                    factor_source_id,
+                    CAP26EntityKind::Identity,
+                    Hardened::from_local_key_space(
+                        index as u32,
+                        IsSecurified(true),
+                    )
+                        .unwrap(),
+                )
+            })
+            .collect::<Vec<_>>();
+
+        let instances: InstancesPerDerivationPresetPerFactorSource =
+            IndexMap::from_iter([
+                (
+                    DerivationPreset::AccountVeci,
+                    IndexMap::from_iter([(
+                        factor_source_id,
+                        FactorInstances::from_iter(av_factor_instances),
+                    )]),
+                ),
+                (
+                    DerivationPreset::AccountMfa,
+                    IndexMap::from_iter([(
+                        factor_source_id,
+                        FactorInstances::from_iter(am_factor_instances),
+                    )]),
+                ),
+                (
+                    DerivationPreset::AccountRola,
+                    IndexMap::from_iter([(
+                        factor_source_id,
+                        FactorInstances::from_iter(ar_factor_instances),
+                    )]),
+                ),
+                (
+                    DerivationPreset::IdentityVeci,
+                    IndexMap::from_iter([(
+                        factor_source_id,
+                        FactorInstances::from_iter(iv_factor_instances),
+                    )]),
+                ),
+                (
+                    DerivationPreset::IdentityMfa,
+                    IndexMap::from_iter([(
+                        factor_source_id,
+                        FactorInstances::from_iter(im_factor_instances),
+                    )]),
+                ),
+                (
+                    DerivationPreset::IdentityRola,
+                    IndexMap::from_iter([(
+                        factor_source_id,
+                        FactorInstances::from_iter(ir_factor_instances),
+                    )]),
+                ),
+            ]);
+
+        self.insert(&instances).unwrap();
     }
 }
