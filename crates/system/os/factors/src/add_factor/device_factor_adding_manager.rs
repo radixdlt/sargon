@@ -6,23 +6,12 @@ pub struct DeviceFactorAddingManager {
     factor_identification: RwLock<Option<FactorIdentification>>,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct FactorIdentification {
     mnemonic_with_passphrase: MnemonicWithPassphrase,
     factor_source: DeviceFactorSource,
     mnemonic_words: Vec<BIP39Word>,
     confirmation_indices: Vec<u8>,
-}
-
-impl std::hash::Hash for FactorIdentification {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.mnemonic_with_passphrase.hash(state);
-        self.factor_source.hash(state);
-        self.mnemonic_words.hash(state);
-        for index in &self.confirmation_indices {
-            index.hash(state);
-        }
-    }
 }
 
 impl PartialEq for DeviceFactorAddingManager {
@@ -74,8 +63,9 @@ impl FactorIdentification {
         let number_of_words = mnemonic_words.clone().len() as u8;
         let mnemonic_with_passphrase =
             MnemonicWithPassphrase::new(mnemonic.clone());
+        let is_main = false;
         let factor_source = DeviceFactorSource::babylon(
-            false,
+            is_main,
             &mnemonic_with_passphrase,
             &host_info,
         );
