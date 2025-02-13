@@ -124,9 +124,26 @@ impl OsShieldApplying for SargonOS {
 
         let cache = self.cache_snapshot().await;
 
+        let roles_factors = shield.matrix_of_factors.all_factors();
+
         // We iterate over every factor source to find out if we have enough keys in cache, and we need to perform spot check for it.
         for factor_source in shield.all_factors() {
-            // To calculate the QuantifiedDerivationPresets, we need to know how many ROLA keys we need.
+            // To calculate the QuantifiedDerivationPresets, we need to determine how many keys we need for each derivation preset.
+
+            // To determine the entities MFA keys, we check if this factor source is used in any role.
+            let account_mfa_count: usize;
+            let identity_mfa_count: usize;
+            if roles_factors.contains(factor_source) {
+                // This factor source is required to securify the entities.
+                account_mfa_count = account_addresses.len();
+                identity_mfa_count = persona_addresses.len();
+            } else {
+                // This factor source isn't required to securify the entities (it's only used for ROLA keys).
+                account_mfa_count = 0;
+                identity_mfa_count = 0;
+            }
+
+            // To determine the ROLA keys, we check if this factor source is used as authentication factor.
             let account_rola_count: usize;
             let identity_rola_count: usize;
             if shield.authentication_signing_factor != *factor_source {
@@ -168,7 +185,7 @@ impl OsShieldApplying for SargonOS {
             > = vec![
                 QuantifiedDerivationPreset::new(
                     DerivationPreset::AccountMfa,
-                    account_addresses.len(),
+                    account_mfa_count,
                 ),
                 QuantifiedDerivationPreset::new(
                     DerivationPreset::AccountRola,
@@ -176,7 +193,7 @@ impl OsShieldApplying for SargonOS {
                 ),
                 QuantifiedDerivationPreset::new(
                     DerivationPreset::IdentityMfa,
-                    persona_addresses.len(),
+                    identity_mfa_count,
                 ),
                 QuantifiedDerivationPreset::new(
                     DerivationPreset::IdentityRola,
@@ -1219,7 +1236,7 @@ mod tests {
         assert_eq!(result, expected);
 
         // Add keys for arculus on cache
-        cache.add_instances(arculus.id_from_hash(), 0, 3, 3, 0, 3, 3);
+        cache.add_instances(arculus.id_from_hash(), 0, 0, 2, 0, 0, 1);
         os.factor_instances_cache
             .set_cache(cache.serializable_snapshot())
             .await
@@ -1232,7 +1249,7 @@ mod tests {
         assert_eq!(result, expected);
     }
 
-    /// Creates and adds 2 Accounts to the OS
+    /// Creates and adds 2 Accounts & 1 Persona to the OS
     /// Returns the addresses of the created entities.
     async fn add_entities(
         os: &SargonOS,
