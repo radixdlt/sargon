@@ -40,9 +40,7 @@ impl OsTXStatusPolling for SargonOS {
         &self,
         intent_hash: TransactionIntentHash,
     ) -> Result<(TransactionStatus, Vec<u64>)> {
-        let network_id = self.current_network_id()?;
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let gateway_client = self.gateway_client()?;
         let mut delays: Vec<u64> = vec![];
         let mut delay_duration = POLLING_DELAY_INCREMENT_IN_SECONDS;
 

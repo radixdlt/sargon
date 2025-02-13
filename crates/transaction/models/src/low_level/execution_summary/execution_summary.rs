@@ -1,6 +1,5 @@
-use radix_rust::prelude::IndexMap;
-
 use crate::prelude::*;
+use radix_rust::prelude::IndexMap;
 
 pub(crate) fn to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
@@ -196,6 +195,57 @@ impl ExecutionSummary {
                     account_addresses: deleted_accounts,
                 });
         }
+    }
+
+    /// Responsible for identifying if the summary can be classified as a securify summary.
+    pub fn classify_securify_entity_if_present<F>(
+        &mut self,
+        get_provisional_security_structure: F,
+    ) -> Result<()>
+    where
+        F: Fn(
+            AddressOfAccountOrPersona,
+        ) -> Result<SecurityStructureOfFactorSources>,
+    {
+        // Only try to classify if RET analysis didn't yield any classification
+        if !self.detailed_classification.is_empty() {
+            return Ok(());
+        }
+
+        /////// TEMPORARY solution until RET classifies it properly
+        let entity_address_to_securify = if self
+            .reserved_instructions
+            .contains(&ReservedInstruction::AccountSecurify)
+        {
+            self.addresses_of_accounts_requiring_auth
+                .first()
+                .map(|address| AddressOfAccountOrPersona::from(*address))
+        } else if self
+            .reserved_instructions
+            .contains(&ReservedInstruction::IdentitySecurify)
+        {
+            self.addresses_of_identities_requiring_auth
+                .first()
+                .map(|address| AddressOfAccountOrPersona::from(*address))
+        } else {
+            None
+        };
+        ///// END of temporary code
+
+        if let Some(address) = entity_address_to_securify {
+            let security_structure =
+                get_provisional_security_structure(address)?;
+
+            self.detailed_classification.push(
+                DetailedManifestClass::SecurifyEntity {
+                    entity_address: address,
+                    provisional_security_structure_metadata: security_structure
+                        .metadata,
+                },
+            );
+        }
+
+        Ok(())
     }
 }
 
