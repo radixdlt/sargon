@@ -26,7 +26,7 @@ pub struct ExecutionSummary {
     /// Information on the global entities created in the transaction.
     pub new_entities: NewEntities,
 
-    /// The manifest classification if any.
+    /// The manifest classification if any. None means that the manifest is non-conforming.
     pub detailed_classification: Option<DetailedManifestClass>,
 
     /// List of newly created Non-Fungibles during this transaction.
