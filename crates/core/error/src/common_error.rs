@@ -890,6 +890,9 @@ pub enum CommonError {
 
     #[error("Named addresses are not supported")]
     NamedAddressesAreNotSupported = 10253,
+
+    #[error("Factor source already exists")]
+    FactorSourceAlreadyExists = 10254,
 }
 
 impl CommonError {
