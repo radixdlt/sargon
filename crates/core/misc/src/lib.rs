@@ -3,6 +3,7 @@ mod hidden_constructor;
 mod image_url_utils;
 mod instant;
 mod parse_url;
+mod immutable;
 mod requested_number_quantifier;
 mod requested_quantity;
 mod unsafe_id_stepper;
@@ -18,6 +19,7 @@ pub mod prelude {
     pub use crate::requested_quantity::*;
     pub use crate::unsafe_id_stepper::*;
     pub use crate::vector_image_type::*;
+    pub use crate::immutable::*;
 
     #[cfg(test)]
     pub(crate) use assert_json::prelude::*;

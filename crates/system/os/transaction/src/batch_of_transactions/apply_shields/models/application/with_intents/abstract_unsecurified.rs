@@ -13,6 +13,10 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
         E,
     >
 {
+    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
+        self.application.paying_account.clone()
+    }
+
     pub fn new(
         application: AbstractSecurityShieldApplicationForUnsecurifiedEntity<E>,
         transaction_intent: TransactionIntent,

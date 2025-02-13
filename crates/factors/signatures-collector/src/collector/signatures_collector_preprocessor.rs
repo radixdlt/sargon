@@ -34,19 +34,21 @@ impl<S: Signable> SignaturesCollectorPreprocessor<S> {
 
     pub(super) fn preprocess(
         self,
-        profile_factor_sources: IndexSet<FactorSource>,
+        factor_sources: IndexSet<FactorSource>,
         purpose: SigningPurpose,
     ) -> (Petitions<S>, IndexSet<FactorSourcesOfKind>) {
         let transactions = self.signables_with_entities;
+
         let mut petitions_for_all_transactions =
             IndexMap::<S::ID, PetitionForTransaction<S>>::new();
 
         // We care for only the factor sources which are HD based
-        let mut all_factor_sources_in_profile =
+        let mut hd_factor_sources =
             HashMap::<FactorSourceIDFromHash, FactorSource>::new();
-        profile_factor_sources.into_iter().for_each(|f| {
+
+        factor_sources.into_iter().for_each(|f| {
             if let Some(id) = f.factor_source_id().as_hash() {
-                all_factor_sources_in_profile.insert(*id, f);
+                hd_factor_sources.insert(*id, f);
             }
         });
 
@@ -66,7 +68,7 @@ impl<S: Signable> SignaturesCollectorPreprocessor<S> {
 
                 assert!(!factor_to_payloads.is_empty());
 
-                let factor_source = all_factor_sources_in_profile
+                let factor_source = hd_factor_sources
                     .get(id)
                     .expect("Should have all factor sources");
                 used_factor_sources.insert(factor_source.clone());

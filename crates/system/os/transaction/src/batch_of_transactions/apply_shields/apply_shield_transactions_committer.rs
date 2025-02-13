@@ -20,9 +20,10 @@ pub struct ApplyShieldTransactionsCommitterImpl {
 impl ApplyShieldTransactionsCommitterImpl {
     pub fn new(os: &SargonOS) -> Result<Self> {
         let builder = ApplyShieldTransactionsBuilderImpl::new(os)?;
+        let signer = ApplyShieldTransactionsSignerImpl::new(os)?;
         Ok(Self {
             builder: Arc::new(builder),
-            signer: Arc::new(ApplyShieldTransactionsSignerImpl::new(os)),
+            signer: Arc::new(signer),
             enqueuer: Arc::new(ApplyShieldTransactionsEnqueuerImpl::new(os)),
         })
     }

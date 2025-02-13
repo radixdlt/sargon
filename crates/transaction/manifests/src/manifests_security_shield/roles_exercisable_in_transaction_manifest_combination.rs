@@ -115,8 +115,21 @@ enum RoleInitiatingRecovery {
 }
 
 impl RolesExercisableInTransactionManifestCombination {
-    pub fn manifest_end_user_gets_to_preview() -> Self {
+    pub fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
+        match role_kind {
+            RoleKind::Primary => self.can_exercise_primary_role(),
+            RoleKind::Recovery => self.can_exercise_recovery_role(),
+            RoleKind::Confirmation => self.can_exercise_confirmation_role(),
+        }
+    }
+
+    /// "best" means most convenient to user, doing quick confirmation.
+    pub fn best() -> Self {
         Self::InitiateWithRecoveryCompleteWithConfirmation
+    }
+
+    pub fn manifest_end_user_gets_to_preview() -> Self {
+        Self::best()
     }
 
     pub fn all() -> IndexSet<Self> {
@@ -168,6 +181,26 @@ impl RolesExercisableInTransactionManifestCombination {
             | Self::InitiateWithRecoveryCompleteWithPrimary => true,
             Self::InitiateWithRecoveryCompleteWithConfirmation
             | Self::InitiateWithRecoveryDelayedCompletion => false,
+        }
+    }
+
+    pub fn can_exercise_recovery_role(&self) -> bool {
+        match self {
+            Self::InitiateWithRecoveryCompleteWithPrimary
+            | Self::InitiateWithRecoveryCompleteWithConfirmation
+            | Self::InitiateWithRecoveryDelayedCompletion => true,
+            Self::InitiateWithPrimaryCompleteWithConfirmation
+            | Self::InitiateWithPrimaryDelayedCompletion => false,
+        }
+    }
+
+    pub fn can_exercise_confirmation_role(&self) -> bool {
+        match self {
+            Self::InitiateWithPrimaryCompleteWithConfirmation
+            | Self::InitiateWithRecoveryCompleteWithConfirmation => true,
+            Self::InitiateWithRecoveryCompleteWithPrimary
+            | Self::InitiateWithRecoveryDelayedCompletion
+            | Self::InitiateWithPrimaryDelayedCompletion => false,
         }
     }
 
