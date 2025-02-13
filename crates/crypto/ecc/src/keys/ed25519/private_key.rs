@@ -13,7 +13,6 @@ impl Ed25519PrivateKey {
     /// derive hierarchical deterministic keys.
     pub fn generate() -> Self {
         Self::from_exactly32_bytes(Exactly32Bytes::generate())
-            .expect("Should be able to generate 32 bytes")
     }
 }
 
@@ -68,8 +67,14 @@ impl Ed25519PrivateKey {
         Self::from_bytes(bytes.as_slice())
     }
 
-    pub fn from_exactly32_bytes(bytes: Exactly32Bytes) -> Result<Self> {
-        Self::from_vec(bytes.to_vec())
+    pub fn from_exactly32_bytes(bytes: Exactly32Bytes) -> Self {
+        Self::from(bytes)
+    }
+}
+
+impl From<Exactly32Bytes> for Ed25519PrivateKey {
+    fn from(bytes: Exactly32Bytes) -> Self {
+        Self::from_vec(bytes.to_vec()).expect("Should always be able to generate a Ed25519PrivateKey from 32 bytes.")
     }
 }
 
@@ -294,7 +299,6 @@ mod tests {
             Ed25519PrivateKey::from_exactly32_bytes(
                 Exactly32Bytes::from_hex(hex).unwrap()
             )
-            .unwrap()
             .to_hex(),
             hex
         );
@@ -318,7 +322,7 @@ mod tests {
         let str =
             "0000000000000000000000000000000000000000000000000000000000000001";
         let hex32 = Exactly32Bytes::from_hex(str).unwrap();
-        let key = Ed25519PrivateKey::from_exactly32_bytes(hex32).unwrap();
+        let key = Ed25519PrivateKey::from_exactly32_bytes(hex32);
         assert_eq!(key.to_hex(), str);
     }
 

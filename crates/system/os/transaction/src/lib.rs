@@ -1,9 +1,11 @@
 #![feature(let_chains)]
 
+mod batch_of_transactions;
 mod pre_auth;
 mod tx;
 
 pub mod prelude {
+    pub use crate::batch_of_transactions::*;
     pub use crate::pre_auth::*;
     pub use crate::tx::*;
 
@@ -12,12 +14,14 @@ pub mod prelude {
     pub(crate) use manifests::prelude::*;
 
     pub use prelude::prelude::*;
+    pub(crate) use profile_logic::prelude::*;
     pub(crate) use radix_connect_models::prelude::*;
     pub(crate) use sargon_os::prelude::*;
-    pub(crate) use sargon_os_factors::OsSecurityStructuresQuerying;
+    pub(crate) use sargon_os_factors::prelude::*;
     pub(crate) use signatures_collector::prelude::*;
     pub(crate) use signing_traits::prelude::*;
 
+    pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;
 }
 

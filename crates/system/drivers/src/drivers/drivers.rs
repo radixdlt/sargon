@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-#[derive(Debug)]
 pub struct Drivers {
     pub networking: Arc<dyn NetworkingDriver>,
     pub secure_storage: Arc<dyn SecureStorageDriver>,

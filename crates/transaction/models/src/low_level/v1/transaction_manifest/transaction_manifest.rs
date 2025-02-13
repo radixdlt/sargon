@@ -105,6 +105,15 @@ pub fn manifest_string_from(
     })
 }
 
+impl UnvalidatedTransactionManifest {
+    pub fn manifest(
+        &self,
+        network_id: NetworkID,
+    ) -> Result<TransactionManifest> {
+        (self.clone(), network_id).try_into()
+    }
+}
+
 impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
     for TransactionManifest
 {

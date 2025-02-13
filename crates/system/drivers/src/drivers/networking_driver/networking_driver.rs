@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Trait for executing network requests, to be implemented by hosts, so that
 /// Sargon can make network requests with some HTTP client.
 #[async_trait::async_trait]
-pub trait NetworkingDriver: Send + Sync + std::fmt::Debug {
+pub trait NetworkingDriver: Send + Sync {
     /// Method invoked by Sargon Rust side, telling an implementing type to
     /// execute a `NetworkRequest` and pass the Result back to Sargon Rust side.
     ///

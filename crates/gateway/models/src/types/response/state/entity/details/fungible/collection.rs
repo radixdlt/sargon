@@ -23,12 +23,12 @@ impl FungibleResourcesCollection {
     pub fn new(
         total_count: impl Into<Option<u64>>,
         next_cursor: impl Into<Option<String>>,
-        items: Vec<FungibleResourcesCollectionItem>,
+        items: impl IntoIterator<Item = FungibleResourcesCollectionItem>,
     ) -> FungibleResourcesCollection {
         FungibleResourcesCollection {
             total_count: total_count.into(),
             next_cursor: next_cursor.into(),
-            items,
+            items: items.into_iter().collect(),
         }
     }
 }

@@ -10,41 +10,105 @@ impl GatewayClient {
         &self,
         address: AccountAddress,
     ) -> Result<Option<Decimal192>> {
-        let response: StateEntityDetailsResponse = self
-            .state_entity_details(StateEntityDetailsRequest::new(
-                vec![address.into()],
-                None,
-                None,
-            ))
+        let map = self
+            .xrd_balances_of_accounts(address.network_id(), vec![address])
+            .await?;
+        Ok(map.get(&address).cloned().flatten())
+    }
+
+    /// Fetches the XRD balance of each account `address`. Returns the
+    /// balance for each account (being `None` if it has no balance).
+    pub async fn xrd_balances_of_accounts(
+        &self,
+        network_id: NetworkID,
+        addresses: impl IntoIterator<Item = AccountAddress>,
+    ) -> Result<IndexMap<AccountAddress, Option<Decimal192>>> {
+        let map = self
+            .xrd_balances_of_access_controller_or_account(
+                network_id,
+                addresses
+                    .into_iter()
+                    .map(AddressOfAccessControllerOrAccount::from),
+            )
             .await?;
 
-        let Some(response_item) = response
-            .items
+        let map = map
             .into_iter()
-            .find(|x| x.address == address.into())
-        else {
-            return Ok(None);
-        };
+            .map(|(k, v)| {
+                (
+                    AccountAddress::try_from(k)
+                        .expect("should not have received other components"),
+                    v,
+                )
+            })
+            .collect();
 
-        let fungible_resources = response_item
-            .fungible_resources
-            .expect("Never None for Account");
+        Ok(map)
+    }
 
-        let xrd_address = ResourceAddress::xrd_on_network(address.network_id());
+    /// Fetched the XRD balance of the component - either AccountAddress or AccessControllerAddress.
+    pub async fn xrd_balances_of_access_controller_or_account(
+        &self,
+        network_id: NetworkID,
+        addresses: impl IntoIterator<Item = AddressOfAccessControllerOrAccount>,
+    ) -> Result<IndexMap<AddressOfAccessControllerOrAccount, Option<Decimal192>>>
+    {
+        let addresses = addresses.into_iter().collect::<IndexSet<_>>();
+        let target_address_len = addresses.len();
+        self.batch_fetch_chunking(
+            GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES,
+            addresses,
+            StateEntityDetailsRequest::addresses_only,
+            |req| self.state_entity_details(req),
+            |responses| {
+                let xrd_address = ResourceAddress::xrd_on_network(network_id);
 
-        let Some(xrd_resource_collection_item) = fungible_resources
-            .items
-            .into_iter()
-            .find(|x| x.resource_address() == xrd_address)
-        else {
-            return Ok(None);
-        };
+                let map = responses
+                    .into_iter()
+                    .flat_map(|response| {
+                        response
+                            .items
+                            .into_iter()
+                            .map(|response_item| {
+                                let owner = AddressOfAccessControllerOrAccount::try_from(
+                                    response_item.address,
+                                )
+                                .expect("address is valid");
 
-        let xrd_resource = xrd_resource_collection_item
-            .as_global()
-            .expect("Global is default");
+                                let Some(fungible_resources) =
+                                    response_item.fungible_resources
+                                else {
+                                    return Ok((owner, None));
+                                };
 
-        Ok(Some(xrd_resource.amount))
+                                if let Some(xrd_resource_collection_item) =
+                                    fungible_resources.items.into_iter().find(
+                                        |x| x.resource_address() == xrd_address,
+                                    )
+                                {
+                                    let xrd_resource =
+                                        xrd_resource_collection_item
+                                            .as_global()
+                                            .expect("Global is default");
+                                    Ok((owner, Some(xrd_resource.amount)))
+                                } else {
+                                    Ok((owner, None))
+                                }
+                            })
+                            .collect::<Vec<Result<_>>>()
+                    })
+                    .collect::<Result<IndexMap<_, _>>>()?;
+
+                debug_assert_eq!(
+                    map.len(),
+                    target_address_len,
+                    "Gateway did not respond with all requested addresses"
+                );
+
+                Ok(map)
+            },
+        )
+        .await
     }
 
     /// Fetched the XRD balance of account of `address`, returns `0` if
@@ -420,35 +484,31 @@ impl GatewayClient {
         &self,
         output: FetchResourcesOutput,
     ) -> Result<FetchTransferableResourcesOutput> {
-        let mut non_transferable_resources = Vec::new();
-
-        // Chunk the addresses to avoid exceeding the GW limit
-        let chunked_addresses = output
-            .resource_addresses()
-            .chunks(GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES as usize)
-            .map(|chunk| chunk.to_vec())
-            .collect::<Vec<Vec<_>>>();
-
-        // Loop over the chunks
-        for resource_addresses in chunked_addresses {
-            // Fetch the details
-            let addresses =
-                resource_addresses.into_iter().map(Address::from).collect();
-            let response = self
-                .state_entity_details(StateEntityDetailsRequest::new(
-                    addresses, None, None,
-                ))
-                .await?;
-
-            // Filter those that cannot be transferred and append them to the list
-            let cannot_be_transferred = response
-                .items
-                .into_iter()
-                .filter(|item| !item.can_be_transferred())
-                .filter_map(|item| item.address.as_resource().cloned())
-                .collect::<Vec<_>>();
-            non_transferable_resources.extend(cannot_be_transferred);
-        }
+        let non_transferable_resources = self
+            .batch_fetch_chunking(
+                GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES,
+                output.resource_addresses(),
+                StateEntityDetailsRequest::addresses_only,
+                |req| self.state_entity_details(req),
+                |responses| {
+                    // Filter those that cannot be transferred
+                    let non_transferable_resources = responses
+                        .into_iter()
+                        .flat_map(|response| {
+                            response
+                                .items
+                                .into_iter()
+                                .filter(|item| !item.can_be_transferred())
+                                .filter_map(|item| {
+                                    item.address.as_resource().cloned()
+                                })
+                                .collect_vec()
+                        })
+                        .collect_vec();
+                    Ok(non_transferable_resources)
+                },
+            )
+            .await?;
 
         // Filter out the fungible and non-fungible items that cannot be transferred
         let fungible = output

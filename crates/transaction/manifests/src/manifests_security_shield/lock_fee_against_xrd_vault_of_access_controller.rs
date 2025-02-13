@@ -37,9 +37,8 @@ pub trait TransactionManifestLockFeeAgainstXrdVaultOfAccessController {
     ) -> TransactionManifest {
         let mut builder = ManifestBuilder::new();
         let entity_applying_shield = entity_applying_shield.into();
-        let access_controller_address = entity_applying_shield
-            .securified_entity_control
-            .access_controller_address;
+        let access_controller_address =
+            entity_applying_shield.access_controller_address();
 
         // Lock fee against XRD vault of the access controller
         // put this instruction at index 0

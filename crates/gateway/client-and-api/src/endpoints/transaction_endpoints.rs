@@ -10,7 +10,7 @@ impl GatewayClient {
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/TransactionConstruction
     pub async fn transaction_construction(&self) -> Result<LedgerState> {
         self.post_empty(
-            "transaction/construction",
+            Self::PATH_TRANSACTION_CONSTRUCTION,
             |response: TransactionConstructionResponse| {
                 Ok(response.ledger_state)
             },
@@ -30,7 +30,8 @@ impl GatewayClient {
         &self,
         request: TransactionPreviewRequest,
     ) -> Result<TransactionPreviewResponse> {
-        self.post("transaction/preview", request, res_id).await
+        self.post(Self::PATH_TRANSACTION_PREVIEW, request, res_id)
+            .await
     }
 
     /// Previews V2 transaction against the network - aka "dry run" of transaction.
@@ -45,7 +46,8 @@ impl GatewayClient {
         &self,
         request: TransactionPreviewRequestV2,
     ) -> Result<TransactionPreviewResponseV2> {
-        self.post("transaction/preview-v2", request, res_id).await
+        self.post(Self::PATH_TRANSACTION_PREVIEW_V2, request, res_id)
+            .await
     }
 
     /// Submits a signed transaction payload to the network.
@@ -57,7 +59,8 @@ impl GatewayClient {
         &self,
         request: TransactionSubmitRequest,
     ) -> Result<TransactionSubmitResponse> {
-        self.post("transaction/submit", request, res_id).await
+        self.post(Self::PATH_TRANSACTION_SUBMIT, request, res_id)
+            .await
     }
 
     /// Observes the status of a transaction.
@@ -69,7 +72,8 @@ impl GatewayClient {
         &self,
         request: TransactionStatusRequest,
     ) -> Result<TransactionStatusResponse> {
-        self.post("transaction/status", request, res_id).await
+        self.post(Self::PATH_TRANSACTION_STATUS, request, res_id)
+            .await
     }
 
     /// Get Subintent Status
@@ -83,7 +87,7 @@ impl GatewayClient {
         &self,
         request: SubintentStatusRequest,
     ) -> Result<SubintentStatusResponse> {
-        self.post("transaction/subintent-status", request, res_id)
+        self.post(Self::PATH_TRANSACTION_SUBINTENT_STATUS, request, res_id)
             .await
     }
 }

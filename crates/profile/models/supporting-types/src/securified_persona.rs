@@ -35,6 +35,14 @@ impl TryFrom<AccountOrPersona> for SecurifiedPersona {
     }
 }
 
+impl TryFrom<Persona> for SecurifiedPersona {
+    type Error = CommonError;
+
+    fn try_from(value: Persona) -> Result<Self> {
+        Self::new(value)
+    }
+}
+
 impl TryFrom<AnySecurifiedEntity> for SecurifiedPersona {
     type Error = CommonError;
 

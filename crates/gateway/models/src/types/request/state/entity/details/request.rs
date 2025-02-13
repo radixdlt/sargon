@@ -38,6 +38,16 @@ impl StateEntityDetailsRequest {
         }
     }
 
+    pub fn addresses_only<A: Into<Address>>(
+        addresses: Vec<A>,
+    ) -> StateEntityDetailsRequest {
+        Self::new(
+            addresses.into_iter().map(Into::into).collect_vec(),
+            None,
+            None,
+        )
+    }
+
     pub fn address_ledger_state(
         address: Address,
         at_ledger_state: LedgerStateSelector,
