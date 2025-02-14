@@ -43,8 +43,9 @@ impl ApplyShieldTransactionsCommitter for ApplyShieldTransactionsCommitterImpl {
             .build_payload_to_sign(network_id, manifest_and_payer_tuples)
             .await?;
 
-        // Try to sign all applications - we will "the best" of the 5 manifests for securified entities
-        // This step **also notarized** the signed intents.
+        // Try to sign all applications - we will use  "the best" of
+        // the 5 manifests for securified entities
+        // This step **also notarizes** the signed intents.
         let signed_transactions = self
             .signer
             .sign_transaction_intents(payload_to_sign)

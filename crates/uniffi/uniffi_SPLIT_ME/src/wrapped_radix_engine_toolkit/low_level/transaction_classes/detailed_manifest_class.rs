@@ -14,11 +14,6 @@ pub enum DetailedManifestClass {
     /// will provide.
     General,
 
-    /// A general subintent manifest that has a number of arbitrary package and
-    /// component invocations. This manifest is guaranteed to be subintent since
-    /// we require that a yield to child is present in the manifest.
-    GeneralSubintent,
-
     /// A manifest of a 1-to-1 transfer to a one-to-many transfer of resources.
     Transfer {
         /// When `true`, then this is a one-to-one transfer and the wallet can
@@ -97,6 +92,17 @@ pub enum DetailedManifestClass {
     DeleteAccounts {
         /// The addresses of the accounts that are being deleted
         account_addresses: Vec<AccountAddress>,
+    },
+
+    /// A manifest that is presented when a provisional security structure is applied
+    /// to an entity
+    SecurifyEntity {
+        /// The entity address that is about to be securified
+        entity_address: AddressOfAccountOrPersona,
+
+        /// The provisional security structure metadata that is about to be applied
+        /// into the entity address
+        provisional_security_structure_metadata: SecurityStructureMetadata,
     },
 }
 

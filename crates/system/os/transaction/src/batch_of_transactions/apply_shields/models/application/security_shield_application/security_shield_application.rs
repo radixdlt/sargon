@@ -17,6 +17,15 @@ pub enum SecurityShieldApplication {
     ForSecurifiedEntity(SecurityShieldApplicationForSecurifiedEntity),
 }
 
+impl SecurityShieldApplication {
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            Self::ForUnsecurifiedEntity(a) => a.fee_tip_percentage(),
+            Self::ForSecurifiedEntity(a) => a.fee_tip_percentage(),
+        }
+    }
+}
+
 impl SecurityShieldApplicationForUnsecurifiedEntity {
     pub fn manifest(&self) -> &TransactionManifest {
         match self {
@@ -25,6 +34,17 @@ impl SecurityShieldApplicationForUnsecurifiedEntity {
             }
             SecurityShieldApplicationForUnsecurifiedEntity::Persona(p) => {
                 &p.modified_manifest
+            }
+        }
+    }
+
+    pub fn fee_tip_percentage(&self) -> Option<u16> {
+        match self {
+            SecurityShieldApplicationForUnsecurifiedEntity::Account(a) => {
+                a.fee_tip_percentage()
+            }
+            SecurityShieldApplicationForUnsecurifiedEntity::Persona(p) => {
+                p.fee_tip_percentage()
             }
         }
     }
@@ -45,3 +65,16 @@ pub type AbstractSecurityShieldApplicationForSecurifiedEntityWithManifest<E> =
         E,
         TransactionManifest,
     >;
+
+impl<Entity, Payload> HasFeeTipPercentage
+    for AbstractSecurityShieldApplicationForSecurifiedEntityWithPayload<
+        Entity,
+        Payload,
+    >
+where
+    Entity: HasFeeTipPercentage,
+{
+    fn fee_tip_percentage(&self) -> Option<u16> {
+        self.entity.fee_tip_percentage()
+    }
+}

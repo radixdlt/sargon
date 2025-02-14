@@ -86,10 +86,6 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
             .veci()
             .map(|fi| VirtualEntityCreatingInstance::new(fi, self.address()))
     }
-
-    pub fn xrd_vault_address(&self) -> VaultAddress {
-        self.securified_entity_control().xrd_vault_address()
-    }
 }
 
 #[cfg(test)]
@@ -99,14 +95,5 @@ mod tests {
     fn erased_address() {
         let entity = AnySecurifiedEntity::sample_account();
         assert_eq!(entity.address_erased(), entity.address());
-    }
-
-    #[test]
-    fn xrd_vault_address() {
-        let entity = AnySecurifiedEntity::sample_account();
-        assert_eq!(
-            entity.xrd_vault_address(),
-            entity.securified_entity_control.addresses.xrd_vault_address
-        );
     }
 }

@@ -4,6 +4,9 @@ bump_and_commit:
 bump:
 	./scripts/bump_no_commit.sh
 
+bump_to:
+	./scripts/bump_to.sh $(version)
+
 build_ios:
 	./scripts/ios/build-sargon.sh
 

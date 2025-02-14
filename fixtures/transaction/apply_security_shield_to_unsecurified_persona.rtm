@@ -1,0 +1,111 @@
+CALL_METHOD
+    Address("identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g")
+    "securify"
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1nfxxxxxxxxxxdntwnrxxxxxxxxx002876444928xxxxxxxxxdntwnr")
+    Decimal("1")
+    Bucket("bucket1")
+;
+CREATE_PROOF_FROM_BUCKET_OF_ALL
+    Bucket("bucket1")
+    Proof("proof1")
+;
+PUSH_TO_AUTH_ZONE
+    Proof("proof1")
+;
+SET_METADATA
+    Address("identity_rdx122yy9pkfdrkam4evxcwh235c4qc52wujkwnt52q7vqxefhnlen489g")
+    "owner_keys"
+    Enum<143u8>(
+        Array<Enum>(
+            Enum<1u8>(
+                Bytes("afc521181a0f006e6bb022520a01b974363f26c325457d9405f02a5f38")
+            )
+        )
+    )
+;
+DROP_AUTH_ZONE_PROOFS;
+ALLOCATE_GLOBAL_ADDRESS
+    Address("package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr")
+    "AccessController"
+    AddressReservation("reservation1")
+    NamedAddress("address1")
+;
+CREATE_ACCESS_CONTROLLER
+    Bucket("bucket1")
+    Tuple(
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            2u8,
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[cfbd7c71e3d2f3534321a044ca868db978519cea673db4167da98b1363]")
+                                ),
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2d3cf29a7ca292bf7a13d452cae62b9a1ed3661936ff41f82a81399d21]")
+                                )
+                            )
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>()
+                        )
+                    )
+                )
+            )
+        ),
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2d3cf29a7ca292bf7a13d452cae62b9a1ed3661936ff41f82a81399d21]")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ),
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2d3cf29a7ca292bf7a13d452cae62b9a1ed3661936ff41f82a81399d21]")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    Enum<1u8>(
+        20160u32
+    )
+    Enum<1u8>(
+        AddressReservation("reservation1")
+    )
+;

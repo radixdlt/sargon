@@ -138,7 +138,7 @@ mod tests {
                 .unwrap()
                 .transaction_signing
                 .clone(),
-            AddressesOfAccessController::sample_mainnet(),
+            AccessControllerAddress::sample_mainnet(),
             SecurityStructureOfFactorInstances::sample(),
         )
         .unwrap();

@@ -5,7 +5,6 @@ use sargon::DetailedManifestClassKind as InternalDetailedManifestClassKind;
 #[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
 pub enum DetailedManifestClassKind {
     General,
-    GeneralSubintent,
     Transfer,
     ValidatorClaim,
     ValidatorStake,
@@ -14,6 +13,7 @@ pub enum DetailedManifestClassKind {
     PoolContribution,
     PoolRedemption,
     DeleteAccounts,
+    SecurifyEntity,
 }
 
 delegate_display_debug_into!(

@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 use radix_common::prelude::ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE;
+use radix_common::prelude::IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE;
 
 impl GatewayClient {
     /// Fetched the XRD balance of account of `address`, returns `None` if
@@ -23,9 +24,11 @@ impl GatewayClient {
         addresses: impl IntoIterator<Item = AccountAddress>,
     ) -> Result<IndexMap<AccountAddress, Option<Decimal192>>> {
         let map = self
-            .xrd_balances_of_vault_or_account(
+            .xrd_balances_of_access_controller_or_account(
                 network_id,
-                addresses.into_iter().map(AddressOfVaultOrAccount::from),
+                addresses
+                    .into_iter()
+                    .map(AddressOfAccessControllerOrAccount::from),
             )
             .await?;
 
@@ -43,12 +46,13 @@ impl GatewayClient {
         Ok(map)
     }
 
-    /// Fetched the XRD balance of the component - either AccountAddress or VaultAddress
-    pub async fn xrd_balances_of_vault_or_account(
+    /// Fetched the XRD balance of the component - either AccountAddress or AccessControllerAddress.
+    pub async fn xrd_balances_of_access_controller_or_account(
         &self,
         network_id: NetworkID,
-        addresses: impl IntoIterator<Item = AddressOfVaultOrAccount>,
-    ) -> Result<IndexMap<AddressOfVaultOrAccount, Option<Decimal192>>> {
+        addresses: impl IntoIterator<Item = AddressOfAccessControllerOrAccount>,
+    ) -> Result<IndexMap<AddressOfAccessControllerOrAccount, Option<Decimal192>>>
+    {
         let addresses = addresses.into_iter().collect::<IndexSet<_>>();
         let target_address_len = addresses.len();
         self.batch_fetch_chunking(
@@ -66,14 +70,16 @@ impl GatewayClient {
                             .items
                             .into_iter()
                             .map(|response_item| {
-                                let owner = AddressOfVaultOrAccount::try_from(
+                                let owner = AddressOfAccessControllerOrAccount::try_from(
                                     response_item.address,
                                 )
                                 .expect("address is valid");
 
-                                let fungible_resources = response_item
-                                    .fungible_resources
-                                    .expect("Never None");
+                                let Some(fungible_resources) =
+                                    response_item.fungible_resources
+                                else {
+                                    return Ok((owner, None));
+                                };
 
                                 if let Some(xrd_resource_collection_item) =
                                     fungible_resources.items.into_iter().find(
@@ -116,6 +122,114 @@ impl GatewayClient {
             .map(|x| x.unwrap_or(Decimal192::zero()))
     }
 
+    /// Fetches the badge owner for each entity.
+    ///
+    /// Each entity is controlled by an owner badge NFT which can be constructed by its address.
+    /// By fetching this badge's location on ledger we can retrieve the owner of that badge.
+    /// For now the sargon cares about two kinds of owners:
+    /// - An account address as an owner:
+    ///   Means that the entity's badge owner is the entity itself. This entity is deleted.
+    /// - An access controller as an owner:
+    ///   Means that this entity is securified and is controlled ny that access controller.
+    pub async fn fetch_entities_badge_owners(
+        &self,
+        network_id: NetworkID,
+        entity_addresses: impl IntoIterator<Item = AddressOfAccountOrPersona>,
+    ) -> Result<HashMap<AddressOfAccountOrPersona, Option<Address>>> {
+        // Construct the owner badge resource address
+        let account_owner_badge_resource_address =
+            ResourceAddress::new_from_node_id(
+                SCRYPTO_ACCOUNT_OWNER_BADGE,
+                network_id,
+            )?;
+
+        // Construct the owner badge resource address
+        let identity_owner_badge_resource_address =
+            ResourceAddress::new_from_node_id(
+                SCRYPTO_IDENTITY_OWNER_BADGE,
+                network_id,
+            )?;
+
+        let fetch_ancestors = async |owner_badge: ResourceAddress,
+                                     addresses: Vec<
+            AddressOfAccountOrPersona,
+        >|
+               -> Result<
+            HashMap<AddressOfAccountOrPersona, Option<Address>>,
+        > {
+            // Break entities into chunks
+            let address_chunks = addresses
+                .into_iter()
+                .chunks(GATEWAY_CHUNK_NON_FUNGIBLES as usize)
+                .into_iter()
+                .map(|c| c.collect_vec())
+                .collect_vec();
+
+            let mut result =
+                HashMap::<AddressOfAccountOrPersona, Option<Address>>::new();
+            for chunk in address_chunks.into_iter() {
+                // Construct supposed badges for each account
+                let badges = chunk
+                    .into_iter()
+                    .map(|a| (NonFungibleLocalId::from(a), a))
+                    .collect::<HashMap<NonFungibleLocalId, AddressOfAccountOrPersona>>();
+
+                // Query the location of the badges
+                let non_fungible_ids_location = self
+                    .state_non_fungible_location(
+                        StateNonFungibleLocationRequest::new(
+                            owner_badge,
+                            badges.keys().cloned().collect_vec(),
+                            None,
+                        ),
+                    )
+                    .await?
+                    .non_fungible_ids;
+
+                // Extract for each badge the parent address entity (if exists)
+                non_fungible_ids_location.iter().for_each(|location| {
+                    let id = location.clone().non_fungible_id;
+                    let parent = location.owning_vault_global_ancestor_address;
+
+                    if let Some(entity_address) = badges.get(&id).cloned() {
+                        result.insert(entity_address, parent);
+                    }
+                });
+            }
+
+            Ok(result)
+        };
+
+        let all_addresses = entity_addresses.into_iter().collect_vec();
+        let mut ancestors =
+            HashMap::<AddressOfAccountOrPersona, Option<Address>>::new();
+
+        ancestors.extend(
+            fetch_ancestors(
+                account_owner_badge_resource_address,
+                all_addresses
+                    .clone()
+                    .into_iter()
+                    .filter(|a| a.is_account())
+                    .collect_vec(),
+            )
+            .await?,
+        );
+
+        ancestors.extend(
+            fetch_ancestors(
+                identity_owner_badge_resource_address,
+                all_addresses
+                    .into_iter()
+                    .filter(|a| a.is_identity())
+                    .collect_vec(),
+            )
+            .await?,
+        );
+
+        Ok(ancestors)
+    }
+
     /// Looks up on ledger whether this `account_address` is deleted, by looking up the NFTs
     /// it owns and checking if its owner badge is one of them.
     pub async fn check_accounts_are_deleted(
@@ -123,73 +237,34 @@ impl GatewayClient {
         network_id: NetworkID,
         account_addresses: impl IntoIterator<Item = AccountAddress>,
     ) -> Result<IndexMap<AccountAddress, bool>> {
-        // Construct the owner badge resource address
-        let owner_badge_resource_address = ResourceAddress::new_from_node_id(
-            SCRYPTO_ACCOUNT_OWNER_BADGE,
-            network_id,
-        )?;
-
-        // Break accounts into chunks
-        let account_address_chunks = account_addresses
-            .into_iter()
-            .chunks(GATEWAY_CHUNK_NON_FUNGIBLES as usize)
-            .into_iter()
-            .map(|c| c.collect_vec())
-            .collect_vec();
+        let requested_addresses = account_addresses.into_iter().collect_vec();
+        let global_ancestor_address_per_account = self
+            .fetch_entities_badge_owners(
+                network_id,
+                requested_addresses
+                    .clone()
+                    .iter()
+                    .map(|a| AddressOfAccountOrPersona::from(*a)),
+            )
+            .await?;
 
         let mut result = IndexMap::<AccountAddress, bool>::new();
+        requested_addresses.iter().for_each(|address| {
+            if let Some(ancestor_address) = global_ancestor_address_per_account
+                .get(&AddressOfAccountOrPersona::from(*address))
+                .cloned()
+                .unwrap_or(None)
+            {
+                let is_ancestor_account_address = ancestor_address
+                    .into_account()
+                    .map(|a| a == *address)
+                    .unwrap_or(false);
 
-        for chunk in account_address_chunks.into_iter() {
-            // Construct supposed badges for each account
-            let badges_of_account_addresses = chunk
-                .into_iter()
-                .map(|a| (NonFungibleLocalId::from(a), a))
-                .collect::<IndexMap<NonFungibleLocalId, AccountAddress>>();
-
-            // Query the location of the badges
-            let non_fungible_ids_location = self
-                .state_non_fungible_location(
-                    StateNonFungibleLocationRequest::new(
-                        owner_badge_resource_address,
-                        badges_of_account_addresses
-                            .keys()
-                            .cloned()
-                            .collect_vec(),
-                        None,
-                    ),
-                )
-                .await?
-                .non_fungible_ids;
-
-            // Extract for each badge the parent address entity (if exists)
-            let locations = non_fungible_ids_location
-                .iter()
-                .filter_map(|location| {
-                    let id = location.clone().non_fungible_id;
-                    let parent = location
-                        .owning_vault_global_ancestor_address
-                        .map(|a| a.as_account().cloned())
-                        .unwrap_or(None);
-
-                    parent.map(|account_address| (id, account_address))
-                })
-                .collect::<HashMap<NonFungibleLocalId, AccountAddress>>();
-
-            // Collect the chunk of addresses along with the information if the account is deleted
-            badges_of_account_addresses.iter().for_each(
-                |(badge, account_address)| {
-                    if let Some(location) = locations.get(badge) {
-                        // The account is deleted if the parent of the badge is the account address
-                        result.insert(
-                            *account_address,
-                            location == account_address,
-                        );
-                    } else {
-                        result.insert(*account_address, false);
-                    }
-                },
-            );
-        }
+                result.insert(*address, is_ancestor_account_address);
+            } else {
+                result.insert(*address, false);
+            }
+        });
 
         Ok(result)
     }

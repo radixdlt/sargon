@@ -67,14 +67,13 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let entity = input.entity_input.unsecurified_entity.clone().into();
 
         input.modifying_manifest(|manifest| {
-                let manifest = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
+                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
                     payer,
                     entity,
                     manifest,
                     None  // `None` means "use target Xrd balance"
-                );
+                )
 
-                Ok(manifest)
             })
     }
 
@@ -103,14 +102,12 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let entity = input.entity_input.clone().into();
 
         input.modifying_manifest(|manifest| {
-                let manifest = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
+                TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
                     payer,
                     entity,
                     manifest,
                     None  // `None` means "use target Xrd balance"
-                );
-
-                Ok(manifest)
+                )
             }).map(|modified| (modified, payer_info))
     }
 
@@ -119,16 +116,11 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         input: ApplicationInputForSecurifiedAccount,
         manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<ApplicationInputForSecurifiedAccount> {
-        if !manifest_variant.can_quick_confirm()
-            && !manifest_variant.can_exercise_primary_role()
-        {
+        if !manifest_variant.can_quick_confirm() {
             // If we cannot quick confirm the topping up of the XRD vault instructions
             // must not go into this manifest for initiate recovery, we should
             // include the top up in the Confirm Recovery Manifest happening later (
             // after time delay).
-            //
-            // If we can exercise the primary role, we can auth with Primary Role of
-            // old factors
             return Ok(input);
         }
 
@@ -149,7 +141,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let top_up_amount = input.estimated_xrd_fee;
         let payer = payer.entity.clone();
 
-        input.modifying_manifest(|manifest| {
+        input.try_modifying_manifest(|manifest| {
                 TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
                     payer,
                     entity,
@@ -191,7 +183,7 @@ impl ApplyShieldTransactionsManifestXrdVaultContributor
         let top_up_amount = input.estimated_xrd_fee;
         let payer = payer_info.account();
 
-        input.modifying_manifest(|manifest| {
+        input.try_modifying_manifest(|manifest| {
             TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
                 payer,
                 entity,

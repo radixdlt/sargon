@@ -400,15 +400,14 @@ mod tests {
         let mut sut = sut.into();
         let entity_state = sut.security_state();
         assert!(sut.is_securified());
-        let addresses_of_access_controller = entity_state
+        let access_controller_address = entity_state
             .clone()
             .as_securified()
             .unwrap()
-            .addresses
-            .clone();
+            .access_controller_address();
 
         let mut value = SecuredEntityControl::sample();
-        value.addresses = addresses_of_access_controller;
+        value.access_controller_address = access_controller_address;
         let other_securified = EntitySecurityState::Securified { value };
 
         let result = sut.set_security_state(other_securified);
