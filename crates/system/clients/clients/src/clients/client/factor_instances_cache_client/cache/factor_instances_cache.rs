@@ -560,14 +560,13 @@ impl FactorInstancesCache {
             QuantifiedDerivationPreset,
         >,
     ) -> bool {
-        let Ok(outcome) = self.get(
+        self.get(
             &IndexSet::just(factor_source_id),
             quantified_derivation_presets,
             network_id,
-        ) else {
-            return false;
-        };
-        outcome.is_satisfied()
+        )
+        .ok()
+        .map_or_else(|| false, |outcome| outcome.is_satisfied())
     }
 
     /// Queries if the cache is satisfied for creating an entity with a `factor_source_id`.

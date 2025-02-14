@@ -102,14 +102,17 @@ impl OsShieldApplying for SargonOS {
         let mut result: IndexSet<FactorSource> = IndexSet::new();
 
         // First we get the Accounts & Personas we are going to securify
-        let account_addresses: Vec<AccountAddress> = entity_addresses
-            .iter()
-            .filter_map(|a| a.as_account().cloned())
-            .collect();
-        let persona_addresses: Vec<IdentityAddress> = entity_addresses
-            .iter()
-            .filter_map(|a| a.as_identity().cloned())
-            .collect();
+        let (account_addresses, persona_addresses): (
+            Vec<AccountAddress>,
+            Vec<IdentityAddress>,
+        ) = entity_addresses.iter().partition_map(|a| match a {
+            AddressOfAccountOrPersona::Account(account) => {
+                Either::Left(*account)
+            }
+            AddressOfAccountOrPersona::Identity(identity) => {
+                Either::Right(*identity)
+            }
+        });
 
         let accounts: Accounts = self
             .accounts_on_current_network()?
@@ -154,9 +157,11 @@ impl OsShieldApplying for SargonOS {
             } else {
                 // The factor source is used as authentication factor.
                 // We will need to derive ROLA key for each entity that is either unsecurified, or securified with a different factor source.
-                account_rola_count = accounts
-                    .iter()
-                    .filter(|a| match &a.security_state {
+                fn filter(
+                    e: &impl HasSecurityState,
+                    factor_source: FactorSource,
+                ) -> bool {
+                    match e.security_state() {
                         EntitySecurityState::Unsecured { .. } => true,
                         EntitySecurityState::Securified { value: sec } => {
                             sec.security_structure
@@ -164,20 +169,17 @@ impl OsShieldApplying for SargonOS {
                                 .factor_source_id
                                 != factor_source.id_from_hash()
                         }
-                    })
+                    }
+                }
+
+                account_rola_count = accounts
+                    .iter()
+                    .filter(|a| filter(a, factor_source.clone()))
                     .count();
 
                 identity_rola_count = personas
                     .iter()
-                    .filter(|p| match &p.security_state {
-                        EntitySecurityState::Unsecured { .. } => true,
-                        EntitySecurityState::Securified { value: sec } => {
-                            sec.security_structure
-                                .authentication_signing_factor_instance
-                                .factor_source_id
-                                != factor_source.id_from_hash()
-                        }
-                    })
+                    .filter(|a| filter(a, factor_source.clone()))
                     .count();
             }
             let quantified_derivation_presets: IdentifiedVecOf<
