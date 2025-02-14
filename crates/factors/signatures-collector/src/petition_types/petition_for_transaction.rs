@@ -91,17 +91,26 @@ impl<S: Signable> PetitionForTransaction<S> {
             .flat_map(|x| x.all_signatures())
             .collect::<IndexSet<_>>();
 
-        let neglected_factors = for_entities
+        let flat_neglected_factors = for_entities
             .iter()
             .flat_map(|x| x.all_neglected_factor_sources())
             .collect::<IndexSet<NeglectedFactor>>();
 
-        PetitionTransactionOutcome::new(
-            transaction_valid,
-            self.signable.get_id(),
-            signatures,
-            neglected_factors,
-        )
+        let outcome =
+            PetitionTransactionOutcome::new(
+                transaction_valid,
+                self.signable.get_id(),
+                signatures,
+                for_entities
+                    .iter()
+                    .map(|v| (v.entity, v.all_neglected_factor_sources()))
+                    .collect::<IndexMap<
+                        AddressOfAccountOrPersona,
+                        IndexSet<NeglectedFactor>,
+                    >>(),
+            );
+        assert_eq!(flat_neglected_factors, outcome.neglected_factors());
+        outcome
     }
 
     pub(crate) fn has_tx_failed(&self) -> bool {

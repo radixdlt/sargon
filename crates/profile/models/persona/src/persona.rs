@@ -106,7 +106,7 @@ impl HasSecurityState for Persona {
     }
 }
 
-impl IsBaseEntity for Persona {
+impl IsBaseBaseEntity for Persona {
     type Address = IdentityAddress;
 
     fn address(&self) -> Self::Address {

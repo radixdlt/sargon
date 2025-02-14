@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct SignableWithEntities<S: Signable> {
+pub struct SignableWithEntities<S: Signable> {
     pub(crate) signable: S,
     id: S::ID,
     entities_requiring_auth: IndexSet<AccountOrPersona>,
@@ -16,7 +16,7 @@ impl<S: Signable> Identifiable for SignableWithEntities<S> {
 }
 
 impl<S: Signable> SignableWithEntities<S> {
-    pub(crate) fn with(
+    pub fn new(
         signable: S,
         entities_requiring_auth: impl IntoIterator<
             Item = impl Into<AccountOrPersona>,
@@ -43,7 +43,7 @@ impl<S: Signable> SignableWithEntities<S> {
     ) -> Result<Self> {
         let entities = signable.entities_requiring_signing(entity_querying)?;
 
-        Ok(Self::with(signable.clone(), entities))
+        Ok(Self::new(signable.clone(), entities))
     }
 }
 
@@ -77,6 +77,6 @@ impl<S: Signable + ProvidesSamplesByBuildingManifest> SignableWithEntities<S> {
             identity_addresses,
         );
 
-        Self::with(intent, all_entities)
+        Self::new(intent, all_entities)
     }
 }

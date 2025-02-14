@@ -4,15 +4,52 @@ use crate::prelude::*;
 /// transaction - either valid or invalid - and a
 /// set of collected signatures (might be empty) and
 /// a set of neglected factors (might be empty).
-#[derive(Clone, PartialEq, Eq)]
-pub(crate) struct PetitionTransactionOutcome<ID: SignableID> {
-    signable_id: ID,
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PetitionTransactionOutcome<ID: SignableID> {
+    pub signable_id: ID,
     pub(crate) transaction_valid: bool,
-    pub(crate) signatures: IndexSet<HDSignature<ID>>,
-    pub(crate) neglected_factors: IndexSet<NeglectedFactor>,
+    pub signatures: IndexSet<HDSignature<ID>>,
+    pub per_entity_neglected_factors:
+        IndexMap<AddressOfAccountOrPersona, IndexSet<NeglectedFactor>>,
+}
+
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for PetitionTransactionOutcome<ID>
+{
+    fn sample() -> Self {
+        Self::new(
+            false,
+            ID::sample(),
+            IndexSet::new(),
+            IndexMap::kv(
+                AddressOfAccountOrPersona::sample_account_mainnet(),
+                IndexSet::just(NeglectedFactor::sample()),
+            ),
+        )
+    }
+
+    fn sample_other() -> Self {
+        let signature = HDSignature::<ID>::sample_other();
+        Self::new(
+            true,
+            signature.payload_id().clone(),
+            IndexSet::just(signature),
+            IndexMap::kv(
+                AddressOfAccountOrPersona::sample_account_mainnet(),
+                IndexSet::just(NeglectedFactor::sample_other()),
+            ),
+        )
+    }
 }
 
 impl<ID: SignableID> PetitionTransactionOutcome<ID> {
+    pub fn neglected_factors(&self) -> IndexSet<NeglectedFactor> {
+        self.per_entity_neglected_factors
+            .values()
+            .flat_map(|neglected_factors| neglected_factors.iter().cloned())
+            .collect()
+    }
+
     /// # Panics
     /// Panics if the intent hash in any signatures does not
     /// match `intent_hash`
@@ -20,7 +57,10 @@ impl<ID: SignableID> PetitionTransactionOutcome<ID> {
         transaction_valid: bool,
         signable_id: ID,
         signatures: IndexSet<HDSignature<ID>>,
-        neglected_factors: IndexSet<NeglectedFactor>,
+        per_entity_neglected_factors: IndexMap<
+            AddressOfAccountOrPersona,
+            IndexSet<NeglectedFactor>,
+        >,
     ) -> Self {
         assert!(
             signatures.iter().all(|s| *s.payload_id() == signable_id),
@@ -30,7 +70,7 @@ impl<ID: SignableID> PetitionTransactionOutcome<ID> {
             signable_id,
             transaction_valid,
             signatures,
-            neglected_factors,
+            per_entity_neglected_factors,
         }
     }
 }
@@ -51,7 +91,7 @@ mod tests {
             true,
             TransactionIntentHash::sample(),
             IndexSet::just(HDSignature::sample_other()),
-            IndexSet::new(),
+            IndexMap::new(),
         );
     }
 }
