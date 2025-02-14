@@ -1087,8 +1087,7 @@ mod tests {
     }
 }
 
-// #[cfg(test)]
-
+#[cfg(debug_assertions)]
 impl FactorInstancesCache {
     /// Creates a new `FactorInstancesCache` with the given instances for the given `factor_source_id`.
     #[allow(clippy::too_many_arguments)]
