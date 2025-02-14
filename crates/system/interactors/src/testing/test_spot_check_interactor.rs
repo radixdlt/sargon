@@ -21,7 +21,7 @@ impl SpotCheckInteractor for TestSpotCheckInteractor {
                     .read()
                     .expect("Request count should not have been poisoned");
 
-                if request_count < count {
+                if request_count < count.0 {
                     Ok(SpotCheckResponse::Valid)
                 } else {
                     Err(error)
@@ -41,11 +41,21 @@ impl SpotCheckInteractor for TestSpotCheckInteractor {
 
 #[derive(Clone)]
 pub enum SpotCheckUser {
+    /// Spot check will fail with the provided error
     Failed(CommonError),
+
+    /// Spot check will succeed
     Succeeded,
-    SucceededFirstN(u32, CommonError),
+
+    /// The first n spot checks will succeed, the rest will fail with the provided error.
+    SucceededFirstN(SpotCheckSucceededCount, CommonError),
+
+    /// Spot check will be skipped
     Skipped,
 }
+
+#[derive(Clone)]
+pub struct SpotCheckSucceededCount(u32);
 
 impl TestSpotCheckInteractor {
     pub fn new(user: SpotCheckUser) -> Self {
@@ -67,7 +77,10 @@ impl TestSpotCheckInteractor {
         count: u32,
         common_error: CommonError,
     ) -> Self {
-        Self::new(SpotCheckUser::SucceededFirstN(count, common_error))
+        Self::new(SpotCheckUser::SucceededFirstN(
+            SpotCheckSucceededCount(count),
+            common_error,
+        ))
     }
 
     pub fn new_skipped() -> Self {

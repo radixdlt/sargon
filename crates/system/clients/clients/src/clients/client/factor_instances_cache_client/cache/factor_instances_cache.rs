@@ -570,7 +570,9 @@ impl FactorInstancesCache {
         outcome.is_satisfied()
     }
 
-    /// Queries if the cache is satisfied for creating an entity with the given `factor_source_id` & `entity_kind`
+    /// Queries if the cache is satisfied for creating an entity with a `factor_source_id`.
+    /// Uses `DerivationPreset::AccountVeci` / `IdentityVeci` depending on the
+    ///`entity_kind`.
     pub fn is_entity_creation_satisfied(
         &self,
         network_id: NetworkID,
@@ -581,9 +583,11 @@ impl FactorInstancesCache {
             EntityKind::Account => DerivationPreset::AccountVeci,
             EntityKind::Persona => DerivationPreset::IdentityVeci,
         };
-        let quantified_derivation_presets: IdentifiedVecOf<
-            QuantifiedDerivationPreset,
-        > = vec![QuantifiedDerivationPreset::new(derivation_preset, 1)].into();
+        let quantified_derivation_presets =
+            IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
+                derivation_preset,
+                1,
+            )]);
         self.is_satisfied(
             network_id,
             factor_source_id,
@@ -1009,23 +1013,42 @@ mod tests {
 
     #[test]
     fn is_satisfied() {
-        // Create a cache which has the following instances for factor source `fs`:
-        // - AccountVeci: 1
-        // - AccountMfa: 2
-        // - IdentityRola: 3
         let fs = FactorSourceIDFromHash::sample_at(0);
-        let sut = SUT::build_with_instances(fs, 1, 2, 0, 0, 0, 3);
 
-        // Test that cache is satisfied for Account entity creation
-        let result = sut.is_entity_creation_satisfied(
+        // Test that empty cache is not satisfied for Account entity creation
+        let sut = SUT::default();
+        let outcome = sut.is_entity_creation_satisfied(
             NetworkID::Mainnet,
             fs,
             EntityKind::Account,
         );
-        assert!(result);
+        assert!(!outcome);
+
+        // Create a cache which has the following instances for factor source `fs`:
+        // - AccountVeci: 1
+        // - AccountMfa: 2
+        // - IdentityVeci: 1
+        // - IdentityRola: 3
+        let sut = SUT::build_with_instances(fs, 1, 2, 0, 1, 0, 3);
+
+        // Test that cache is satisfied for Account entity creation
+        let outcome = sut.is_entity_creation_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            EntityKind::Account,
+        );
+        assert!(outcome);
+
+        // Test that cache is satisfied for Persona entity creation
+        let outcome = sut.is_entity_creation_satisfied(
+            NetworkID::Mainnet,
+            fs,
+            EntityKind::Persona,
+        );
+        assert!(outcome);
 
         // Test that cache is satisfied for 1 AccountVeci & 2 AccountMfa
-        let result = sut.is_satisfied(
+        let outcome = sut.is_satisfied(
             NetworkID::Mainnet,
             fs,
             &IdentifiedVecOf::from_iter([
@@ -1039,10 +1062,10 @@ mod tests {
                 ),
             ]),
         );
-        assert!(result);
+        assert!(outcome);
 
         // Test that cache is satisfied for 3 IdentityRola
-        let result = sut.is_satisfied(
+        let outcome = sut.is_satisfied(
             NetworkID::Mainnet,
             fs,
             &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
@@ -1050,10 +1073,10 @@ mod tests {
                 3,
             )]),
         );
-        assert!(result);
+        assert!(outcome);
 
         // Test that cache is not satisfied for 2 AccountVeci
-        let result = sut.is_satisfied(
+        let outcome = sut.is_satisfied(
             NetworkID::Mainnet,
             fs,
             &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
@@ -1061,10 +1084,10 @@ mod tests {
                 2,
             )]),
         );
-        assert!(!result);
+        assert!(!outcome);
 
         // Test that cache is not satisfied for 3 AccountMfa
-        let result = sut.is_satisfied(
+        let outcome = sut.is_satisfied(
             NetworkID::Mainnet,
             fs,
             &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
@@ -1072,18 +1095,18 @@ mod tests {
                 3,
             )]),
         );
-        assert!(!result);
+        assert!(!outcome);
 
-        // Test that cache is not satisfied for 1 IdentityVeci
-        let result = sut.is_satisfied(
+        // Test that cache is not satisfied for 2 IdentityVeci
+        let outcome = sut.is_satisfied(
             NetworkID::Mainnet,
             fs,
             &IdentifiedVecOf::from_iter([QuantifiedDerivationPreset::new(
                 DerivationPreset::IdentityVeci,
-                1,
+                2,
             )]),
         );
-        assert!(!result);
+        assert!(!outcome);
     }
 }
 
