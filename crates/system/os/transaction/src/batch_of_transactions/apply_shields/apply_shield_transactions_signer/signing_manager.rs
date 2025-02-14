@@ -79,7 +79,27 @@ impl From<SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent>
         Self::new(
             application_with_intent.paying_account(),
             application_with_intent.entity_applying_shield(),
-            application_with_intent.transaction_intent()
+            application_with_intent.transaction_intent(),
+        )
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct IntentVariantSignaturesPerRoleState(
+    IndexMap<RoleKind, IntentVariantSignaturesForRoleState>,
+);
+impl IntentVariantSignaturesPerRoleState {
+    fn new(variant: RolesExercisableInTransactionManifestCombination) -> Self {
+        Self::_new_with_roles(variant.exercisable_roles())
+    }
+    fn _new_with_roles(roles: impl IntoIterator<Item = RoleKind>) -> Self {
+        Self(
+            roles
+                .into_iter()
+                .map(|role| {
+                    (role, IntentVariantSignaturesForRoleState::new(role))
+                })
+                .collect::<IndexMap<_, _>>(),
         )
     }
 }
@@ -89,8 +109,21 @@ struct IntentVariantState {
     variant: RolesExercisableInTransactionManifestCombination,
     intent: TransactionIntent,
     /// The `role` of the values must match the key...
-    signatures_per_role:
-        IndexMap<RoleKind, IntentVariantSignaturesForRoleState>,
+    signatures_per_role: IntentVariantSignaturesPerRoleState,
+}
+impl IntentVariantState {
+    fn new(
+        intent: TransactionIntent,
+        variant: RolesExercisableInTransactionManifestCombination,
+    ) -> Self {
+        Self {
+            variant,
+            intent,
+            signatures_per_role: IntentVariantSignaturesPerRoleState::new(
+                variant,
+            ),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -98,24 +131,79 @@ struct IntentVariantSignaturesForRoleState {
     role: RoleKind,
     signatures: IndexSet<SignatureWithPublicKey>,
 }
+impl IntentVariantSignaturesForRoleState {
+    fn new(role: RoleKind) -> Self {
+        Self {
+            role,
+            signatures: IndexSet::new(),
+        }
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct SecurifiedIntentSetInternalState {
     account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
-    entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
+    entity_applying_shield: Immutable<AnySecurifiedEntity>,
     initiate_with_recovery_complete_with_primary: IntentVariantState,
     initiate_with_recovery_complete_with_confirmation: IntentVariantState,
     initiate_with_recovery_delayed_completion: IntentVariantState,
     initiate_with_primary_complete_with_confirmation: IntentVariantState,
     initiate_with_primary_delayed_completion: IntentVariantState,
 }
+impl SecurifiedIntentSetInternalState {
+    fn new(
+        account_paying_for_transaction: impl Into<
+            Immutable<ApplicationInputPayingAccount>,
+        >,
+        entity_applying_shield: impl Into<Immutable<AnySecurifiedEntity>>,
+        initiate_with_recovery_complete_with_primary: IntentVariantState,
+        initiate_with_recovery_complete_with_confirmation: IntentVariantState,
+        initiate_with_recovery_delayed_completion: IntentVariantState,
+        initiate_with_primary_complete_with_confirmation: IntentVariantState,
+        initiate_with_primary_delayed_completion: IntentVariantState,
+    ) -> Self {
+        Self {
+            account_paying_for_transaction: account_paying_for_transaction
+                .into(),
+            entity_applying_shield: entity_applying_shield.into(),
+            initiate_with_recovery_complete_with_primary,
+            initiate_with_recovery_complete_with_confirmation,
+            initiate_with_recovery_delayed_completion,
+            initiate_with_primary_complete_with_confirmation,
+            initiate_with_primary_delayed_completion,
+        }
+    }
+}
 impl From<SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents>
     for SecurifiedIntentSetInternalState
 {
     fn from(
-        _sec: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
+        shield_application: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
     ) -> Self {
-        todo!()
+        Self::new(
+            shield_application.paying_account(),
+            shield_application.entity_applying_shield(),
+            IntentVariantState::new(
+                shield_application.initiate_with_recovery_complete_with_primary(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary
+            ),
+            IntentVariantState::new(
+                shield_application.initiate_with_recovery_complete_with_confirmation(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation
+            ),
+            IntentVariantState::new(
+                shield_application.initiate_with_recovery_delayed_completion(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion
+            ),
+            IntentVariantState::new(
+                shield_application.initiate_with_primary_complete_with_confirmation(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation
+            ),
+            IntentVariantState::new(
+                shield_application.initiate_with_primary_delayed_completion(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion
+            ),
+        )
     }
 }
 

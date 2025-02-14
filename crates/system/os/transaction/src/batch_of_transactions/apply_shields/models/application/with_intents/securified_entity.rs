@@ -6,17 +6,88 @@ pub enum SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
     Persona(SecurityShieldApplicationTransactionIntentsForSecurifiedPersona),
 }
 
+pub type AbstractSecurityShieldApplicationTransactionIntentsForSecurifiedEntity<
+    Entity,
+> = AbstractSecurityShieldApplicationForSecurifiedEntityWithIntent<
+    SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<Entity>,
+>;
+
 pub type SecurityShieldApplicationTransactionIntentsForSecurifiedAccount =
-    AbstractSecurityShieldApplicationForSecurifiedEntityWithIntent<
-        SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<Account>,
+    AbstractSecurityShieldApplicationTransactionIntentsForSecurifiedEntity<
+        Account,
     >;
 
 pub type SecurityShieldApplicationTransactionIntentsForSecurifiedPersona =
-    AbstractSecurityShieldApplicationForSecurifiedEntityWithIntent<
-        SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<Persona>,
+    AbstractSecurityShieldApplicationTransactionIntentsForSecurifiedEntity<
+        Persona,
     >;
 
+impl<Entity: IsEntity>
+    AbstractSecurityShieldApplicationTransactionIntentsForSecurifiedEntity<
+        Entity,
+    >
+{
+    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
+        self.entity
+            .account_topping_up_xrd_vault_of_access_controller
+            .clone()
+    }
+
+    pub fn entity_applying_shield(&self) -> AnySecurifiedEntity {
+        AnySecurifiedEntity::new(self.entity.entity.entity.clone().into())
+            .expect("is Securified")
+    }
+
+}
+
+
+
 impl SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
+    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
+        match self {
+            Self::Account(a) => a.paying_account(),
+            Self::Persona(p) => p.paying_account(),
+        }
+    }
+
+    pub fn entity_applying_shield(&self) -> AnySecurifiedEntity {
+        match self {
+            Self::Account(a) => a.entity_applying_shield(),
+            Self::Persona(p) => p.entity_applying_shield(),
+        }
+    }
+
+    pub fn initiate_with_recovery_complete_with_primary(&self) -> TransactionIntent {
+        match self {
+            Self::Account(a) => a.initiate_with_recovery_complete_with_primary(),
+            Self::Persona(p) => p.initiate_with_recovery_complete_with_primary(),
+        }
+    }
+    pub fn initiate_with_recovery_complete_with_confirmation(&self) -> TransactionIntent {
+        match self {
+            Self::Account(a) => a.initiate_with_recovery_complete_with_confirmation(),
+            Self::Persona(p) => p.initiate_with_recovery_complete_with_confirmation(),
+        }
+    }
+    pub fn initiate_with_recovery_delayed_completion(&self) -> TransactionIntent {
+        match self {
+            Self::Account(a) => a.initiate_with_recovery_delayed_completion(),
+            Self::Persona(p) => p.initiate_with_recovery_delayed_completion(),
+        }
+    }
+    pub fn initiate_with_primary_complete_with_confirmation(&self) -> TransactionIntent {
+        match self {
+            Self::Account(a) => a.initiate_with_primary_complete_with_confirmation(),
+            Self::Persona(p) => p.initiate_with_primary_complete_with_confirmation(),
+        }
+    }
+    pub fn initiate_with_primary_delayed_completion(&self) -> TransactionIntent {
+        match self {
+            Self::Account(a) => a.initiate_with_primary_delayed_completion(),
+            Self::Persona(p) => p.initiate_with_primary_delayed_completion(),
+        }
+    }
+
     pub fn with_intents(
         without: SecurityShieldApplicationForSecurifiedEntity,
         initiate_with_recovery_complete_with_primary: TransactionIntent,
