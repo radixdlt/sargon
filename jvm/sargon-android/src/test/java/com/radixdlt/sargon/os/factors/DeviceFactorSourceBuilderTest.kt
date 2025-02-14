@@ -1,16 +1,10 @@
 package com.radixdlt.sargon.os.factors
 
 import com.radixdlt.sargon.Bios
-import com.radixdlt.sargon.Bip39Entropy
-import com.radixdlt.sargon.Bip39Passphrase
-import com.radixdlt.sargon.Bip39Seed
-import com.radixdlt.sargon.Bip39WordListTest
+import com.radixdlt.sargon.DeviceFactorSourceBuilder
 import com.radixdlt.sargon.Drivers
-import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.SargonOs
-import com.radixdlt.sargon.extensions.kind
-import com.radixdlt.sargon.extensions.name
 import com.radixdlt.sargon.os.driver.AndroidEntropyProviderDriver
 import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
 import com.radixdlt.sargon.os.driver.AndroidNetworkingDriver
@@ -29,7 +23,7 @@ import okhttp3.OkHttpClient
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class AddNewFactorManagerTest {
+class DeviceFactorSourceBuilderTest {
 
     private val okHttpClient = mockk<OkHttpClient>()
     private val eventBusDriver = AndroidEventBusDriver
@@ -41,15 +35,12 @@ class AddNewFactorManagerTest {
     @Test
     fun test() = runTest(testDispatcher) {
         val sargonOs = SargonOs.boot(bios(), hostInteractor)
-        var manager = sargonOs.makeDeviceFactorAddingManager()
+        var builder = DeviceFactorSourceBuilder()
         val words = MnemonicWithPassphrase.sample().mnemonic.words
 
-        manager.createFactorSourceFromMnemonicWords(words)
-        manager = manager.setFactorName("New Test Factor")
+        builder = builder.createMnemonicWithPassphraseFromWords(words)
 
-        assert(manager.getFactorSource().kind == FactorSourceKind.DEVICE)
-        assertEquals("New Test Factor", manager.getFactorSource().name)
-        assertEquals(manager.getMnemonicWords(), words)
+        assertEquals(builder.getMnemonicWithPassphrase().mnemonic.words, words)
     }
 
     private fun bios() = Bios(

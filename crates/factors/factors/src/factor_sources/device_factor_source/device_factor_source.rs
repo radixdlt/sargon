@@ -89,22 +89,22 @@ impl DeviceFactorSource {
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
         host_info: &HostInfo,
     ) -> Self {
-        let hint = DeviceFactorSourceHint::with_info(
-            host_info,
-            mnemonic_with_passphrase.mnemonic.word_count,
-        );
-        Self::babylon_with_hint(is_main, mnemonic_with_passphrase, hint)
-    }
-
-    pub fn babylon_with_hint(
-        is_main: bool,
-        mnemonic_with_passphrase: &MnemonicWithPassphrase,
-        hint: DeviceFactorSourceHint,
-    ) -> Self {
         let id = FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             FactorSourceKind::Device,
             mnemonic_with_passphrase,
         );
+        let hint = DeviceFactorSourceHint::with_info(
+            host_info,
+            mnemonic_with_passphrase.mnemonic.word_count,
+        );
+        Self::babylon_with_hint(is_main, id, hint)
+    }
+
+    pub fn babylon_with_hint(
+        is_main: bool,
+        id: FactorSourceIDFromHash,
+        hint: DeviceFactorSourceHint,
+    ) -> Self {
         Self::new(id, FactorSourceCommon::new_bdfs(is_main), hint)
     }
 

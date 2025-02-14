@@ -1,27 +1,36 @@
 use crate::prelude::*;
 
 #[async_trait::async_trait]
-pub trait OsFactorSourceAdder: Send + Sync {
+pub trait OsFactorSourceAdder {
     async fn is_factor_source_already_in_use(
         &self,
-        factor_source_id: FactorSourceID,
+        factor_source_kind: FactorSourceKind,
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Result<bool>;
 
     async fn add_new_factor_source(
         &self,
+        factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        name: DisplayName,
+        name: String,
     ) -> Result<()>;
 }
 
 #[async_trait::async_trait]
-impl OsFactorSourceAdder for Arc<SargonOS> {
+impl OsFactorSourceAdder for SargonOS {
     /// Accesses the active profile and checks if it already contains a factor source
     /// with the same `FactorSourceID`.
     async fn is_factor_source_already_in_use(
         &self,
-        factor_source_id: FactorSourceID,
+        factor_source_kind: FactorSourceKind,
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
     ) -> Result<bool> {
+        let factor_source_id = FactorSourceID::from(
+            FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+                factor_source_kind,
+                &mnemonic_with_passphrase,
+            ),
+        );
         self.profile_contains_factor_source(factor_source_id).await
     }
 
@@ -39,23 +48,17 @@ impl OsFactorSourceAdder for Arc<SargonOS> {
     /// of the active profile to secure storage.
     async fn add_new_factor_source(
         &self,
+        factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
-        name: DisplayName,
+        name: String,
     ) -> Result<()> {
-        let host_info = self.host.resolve_host_info().await;
-        let is_main = false;
-        let hint = DeviceFactorSourceHint::with_info_and_label(
-            &host_info,
-            mnemonic_with_passphrase.mnemonic.word_count,
-            name.value(),
-        );
-        let device_factor_source = DeviceFactorSource::babylon_with_hint(
-            is_main,
-            &mnemonic_with_passphrase,
-            hint,
-        );
-        let factor_source = FactorSource::from(device_factor_source);
-
+        let host_info = self.resolve_host_info().await;
+        let factor_source = FactorSource::with_details(
+            factor_source_kind,
+            mnemonic_with_passphrase.clone(),
+            name,
+            host_info,
+        )?;
         let id = factor_source.factor_source_id();
 
         let contains = self.profile_contains_factor_source(id).await?;
@@ -85,12 +88,14 @@ impl OsFactorSourceAdder for Arc<SargonOS> {
             return Err(e);
         }
 
-        self.secure_storage
-            .save_mnemonic_with_passphrase(
-                &mnemonic_with_passphrase,
-                &factor_source.id_from_hash(),
-            )
-            .await?;
+        if factor_source_kind == FactorSourceKind::Device {
+            self.secure_storage
+                .save_mnemonic_with_passphrase(
+                    &mnemonic_with_passphrase,
+                    &factor_source.id_from_hash(),
+                )
+                .await?;
+        }
 
         self.event_bus
             .emit(EventNotification::profile_modified(
