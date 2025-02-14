@@ -22,7 +22,58 @@ struct SigningManagerState {
     per_set_state: IndexMap<IntentSetID, IntentSetState>,
 }
 impl SigningManagerState {
-    fn update_with(&mut self, intent_with_signatures: IntentWithSignatures) {}
+    fn update_with_exercise_role_outcome(
+        &mut self,
+        outcome: ExerciseRoleOutcome,
+    ) {
+        self.update_with_entities_signed_for(outcome.entities_signed_for);
+
+        self.update_with_entities_not_signed_for(
+            outcome.entities_not_signed_for,
+        );
+    }
+
+    fn update_with_entities_signed_for(
+        &mut self,
+        entities_signed_for: EntitiesSignedFor,
+    ) {
+        entities_signed_for
+            .0
+            .into_iter()
+            .for_each(|entity_signed_for| {
+                self.update_with_intent_with_signatures(entity_signed_for);
+            })
+    }
+
+    fn update_with_entities_not_signed_for(
+        &mut self,
+        entities_not_signed_for: EntitiesNotSignedFor,
+    ) {
+        entities_not_signed_for.0.into_iter().for_each(
+            |entity_not_signed_for| {
+                self.update_with_entity_not_signed_for(entity_not_signed_for);
+            },
+        )
+    }
+
+    fn update_with_entity_not_signed_for(
+        &mut self,
+        not_signed: EntityNotSignedFor,
+    ) {
+        todo!("Neglected factor logic goes here? ")
+    }
+
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        let key = intent_with_signatures.part_of_intent_set;
+        let existing = self
+            .per_set_state
+            .get_mut(&key)
+            .expect("Should have created");
+        existing.update_with_intent_with_signatures(intent_with_signatures);
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -30,10 +81,49 @@ struct IntentSetState {
     intent_set_id: IntentSetID,
     internal_state: IntentSetInternalState,
 }
+impl IntentSetState {
+    fn new(
+        intent_set_id: IntentSetID,
+        shield_application: SecurityShieldApplicationWithTransactionIntents,
+    ) -> Self {
+        Self {
+            intent_set_id,
+            internal_state: IntentSetInternalState::from(shield_application),
+        }
+    }
+
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        assert_eq!(
+            self.intent_set_id,
+            intent_with_signatures.part_of_intent_set
+        );
+        self.internal_state
+            .update_with_intent_with_signatures(intent_with_signatures);
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum IntentSetInternalState {
     Unsecurified(UnsecurifiedIntentSetInternalState),
     Securified(SecurifiedIntentSetInternalState),
+}
+impl IntentSetInternalState {
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        match self {
+            Self::Unsecurified(unsec) => {
+                unsec.update_with_intent_with_signatures(intent_with_signatures)
+            }
+            Self::Securified(sec) => {
+                sec.update_with_intent_with_signatures(intent_with_signatures)
+            }
+        }
+    }
 }
 impl From<SecurityShieldApplicationWithTransactionIntents>
     for IntentSetInternalState
@@ -56,20 +146,40 @@ impl From<SecurityShieldApplicationWithTransactionIntents>
 struct UnsecurifiedIntentSetInternalState {
     account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
     entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
-    transaction_intent: TransactionIntent,
+    transaction_intent: Immutable<TransactionIntent>,
+
+    signatures: IntentVariantSignaturesForRoleState,
 }
 impl UnsecurifiedIntentSetInternalState {
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        assert_eq!(intent_with_signatures.intent, *self.transaction_intent);
+        assert_eq!(
+            intent_with_signatures.entity.address(),
+            self.entity_applying_shield.address()
+        );
+
+        self.signatures
+            .update_with_intent_with_signatures(intent_with_signatures);
+    }
     fn new(
-        account_paying_for_transaction: ApplicationInputPayingAccount,
-        entity_applying_shield: AnyUnsecurifiedEntity,
-        transaction_intent: TransactionIntent,
+        account_paying_for_transaction: impl Into<
+            Immutable<ApplicationInputPayingAccount>,
+        >,
+        entity_applying_shield: impl Into<Immutable<AnyUnsecurifiedEntity>>,
+        transaction_intent: impl Into<Immutable<TransactionIntent>>,
     ) -> Self {
         Self {
-            account_paying_for_transaction: Immutable::new(
-                account_paying_for_transaction,
+            account_paying_for_transaction: account_paying_for_transaction
+                .into(),
+            entity_applying_shield: entity_applying_shield.into(),
+            transaction_intent: transaction_intent.into(),
+            // For unsecurified entities we only have Primary role.
+            signatures: IntentVariantSignaturesForRoleState::new(
+                RoleKind::Primary,
             ),
-            entity_applying_shield: Immutable::new(entity_applying_shield),
-            transaction_intent,
         }
     }
 }
@@ -92,6 +202,19 @@ struct IntentVariantSignaturesPerRoleState(
     IndexMap<RoleKind, IntentVariantSignaturesForRoleState>,
 );
 impl IntentVariantSignaturesPerRoleState {
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        let state_for_role = self
+            .0
+            .get_mut(&intent_with_signatures.role_kind)
+            .expect("Should have created empty state for each role.");
+
+        state_for_role
+            .update_with_intent_with_signatures(intent_with_signatures);
+    }
+
     fn new(variant: RolesExercisableInTransactionManifestCombination) -> Self {
         Self::_new_with_roles(variant.exercisable_roles())
     }
@@ -109,21 +232,38 @@ impl IntentVariantSignaturesPerRoleState {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct IntentVariantState {
-    variant: RolesExercisableInTransactionManifestCombination,
-    intent: TransactionIntent,
+    intent: Immutable<TransactionIntent>,
+    variant: Immutable<RolesExercisableInTransactionManifestCombination>,
     /// The `role` of the values must match the key...
     signatures_per_role: IntentVariantSignaturesPerRoleState,
 }
+
 impl IntentVariantState {
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        assert_eq!(intent_with_signatures.intent, *self.intent);
+        let variant =
+            intent_with_signatures.variant.expect("Should have variant");
+        assert_eq!(variant, *self.variant);
+
+        self.signatures_per_role
+            .update_with_intent_with_signatures(intent_with_signatures)
+    }
     fn new(
-        intent: TransactionIntent,
-        variant: RolesExercisableInTransactionManifestCombination,
+        intent: impl Into<Immutable<TransactionIntent>>,
+        variant: impl Into<
+            Immutable<RolesExercisableInTransactionManifestCombination>,
+        >,
     ) -> Self {
+        let variant = variant.into();
+        let variant_ = *variant;
         Self {
             variant,
-            intent,
+            intent: intent.into(),
             signatures_per_role: IntentVariantSignaturesPerRoleState::new(
-                variant,
+                variant_,
             ),
         }
     }
@@ -132,13 +272,24 @@ impl IntentVariantState {
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct IntentVariantSignaturesForRoleState {
     role: RoleKind,
-    signatures: IndexSet<SignatureWithPublicKey>,
+    signatures_per_entity:
+        IndexMap<AddressOfAccountOrPersona, IndexSet<SignatureWithPublicKey>>,
 }
 impl IntentVariantSignaturesForRoleState {
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        assert_eq!(intent_with_signatures.role_kind, self.role);
+        self.signatures_per_entity.append_or_insert_to(
+            intent_with_signatures.entity.address(),
+            intent_with_signatures.signatures,
+        );
+    }
     fn new(role: RoleKind) -> Self {
         Self {
             role,
-            signatures: IndexSet::new(),
+            signatures_per_entity: IndexMap::new(),
         }
     }
 }
@@ -154,6 +305,45 @@ struct SecurifiedIntentSetInternalState {
     initiate_with_primary_delayed_completion: IntentVariantState,
 }
 impl SecurifiedIntentSetInternalState {
+    fn get_variant_state(
+        &mut self,
+        variant: RolesExercisableInTransactionManifestCombination,
+    ) -> &mut IntentVariantState {
+        match variant {
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary => {
+                &mut self.initiate_with_recovery_complete_with_primary
+            },
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation => {
+                &mut self.initiate_with_recovery_complete_with_confirmation
+            },
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion => {
+                &mut self.initiate_with_recovery_delayed_completion
+            },
+            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation => {
+                &mut self.initiate_with_primary_complete_with_confirmation
+            },
+            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion => {
+                &mut self.initiate_with_primary_delayed_completion
+            },
+        }
+    }
+
+    fn update_with_intent_with_signatures(
+        &mut self,
+        intent_with_signatures: IntentWithSignatures,
+    ) {
+        assert_eq!(
+            intent_with_signatures.entity.address(),
+            self.entity_applying_shield.address()
+        );
+        let variant = intent_with_signatures
+            .variant
+            .expect("Should have variant for securified");
+        let variant_state = self.get_variant_state(variant);
+        variant_state
+            .update_with_intent_with_signatures(intent_with_signatures);
+    }
+
     fn new(
         account_paying_for_transaction: impl Into<
             Immutable<ApplicationInputPayingAccount>,
@@ -207,18 +397,6 @@ impl From<SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents>
                 RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion
             ),
         )
-    }
-}
-
-impl IntentSetState {
-    fn new(
-        intent_set_id: IntentSetID,
-        shield_application: SecurityShieldApplicationWithTransactionIntents,
-    ) -> Self {
-        Self {
-            intent_set_id,
-            internal_state: IntentSetInternalState::from(shield_application),
-        }
     }
 }
 
@@ -313,9 +491,9 @@ impl SigningManager {
     async fn sign_intent_sets_with_role(
         &self,
         intent_sets: Vec<IntentSetToSign>,
-        role: RoleKind,
+        role_kind: RoleKind,
     ) -> Result<ExerciseRoleOutcome> {
-        let purpose = SigningPurpose::SignTX { role_kind: role };
+        let purpose = SigningPurpose::SignTX { role_kind };
 
         // TODO should probably move these lookup tables into fields of `SigningManager` and
         // change how we construct the SigningManager.
@@ -415,6 +593,7 @@ impl SigningManager {
                         .into_iter()
                         .map(|s| s.signature)
                         .collect(),
+                        role_kind,
                     manifest_variant,
                 )
             })
@@ -424,7 +603,7 @@ impl SigningManager {
             { unimplemented!("impl me") };
 
         Ok(ExerciseRoleOutcome::new(
-            role,
+            role_kind,
             entities_signed_for,
             entities_not_signed_for,
         ))
@@ -438,12 +617,7 @@ impl SigningManager {
     ) -> Result<()> {
         assert_eq!(recovery_outcome.role, RoleKind::Recovery);
         self.updating_state(|state| {
-            recovery_outcome.entities_signed_for.into_iter().for_each(
-                |entity_signed_for| {
-                    state.update_with(entity_signed_for);
-                },
-            );
-            Ok(())
+            state.update_with_exercise_role_outcome(recovery_outcome);
         })?;
         Ok(())
     }
@@ -455,7 +629,9 @@ impl SigningManager {
         confirmation_outcome: ExerciseRoleOutcome,
     ) -> Result<()> {
         assert_eq!(confirmation_outcome.role, RoleKind::Confirmation);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        self.updating_state(|state| {
+            state.update_with_exercise_role_outcome(confirmation_outcome);
+        })?;
         Ok(())
     }
 
@@ -466,7 +642,9 @@ impl SigningManager {
         primary_outcome: ExerciseRoleOutcome,
     ) -> Result<()> {
         assert_eq!(primary_outcome.role, RoleKind::Primary);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        self.updating_state(|state| {
+            state.update_with_exercise_role_outcome(primary_outcome);
+        })?;
         Ok(())
     }
 
@@ -477,14 +655,16 @@ impl SigningManager {
         fee_payers_outcome: ExerciseRoleOutcome,
     ) -> Result<()> {
         assert_eq!(fee_payers_outcome.role, RoleKind::Primary);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        self.updating_state(|state| {
+            state.update_with_exercise_role_outcome(fee_payers_outcome);
+        })?;
         Ok(())
     }
 
-    fn updating_state(
+    fn try_updating_state<R>(
         &self,
-        f: impl FnOnce(&mut SigningManagerState) -> Result<()>,
-    ) -> Result<()> {
+        f: impl FnOnce(&mut SigningManagerState) -> Result<R>,
+    ) -> Result<R> {
         let mut state_holder =
             self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
         if let Some(state) = state_holder.as_mut() {
@@ -492,6 +672,13 @@ impl SigningManager {
         } else {
             unreachable!("State should be Some");
         }
+    }
+
+    fn updating_state<R>(
+        &self,
+        f: impl FnOnce(&mut SigningManagerState) -> R,
+    ) -> Result<R> {
+        self.try_updating_state(|state| Ok(f(state)))
     }
 
     async fn sign_intents_with_recovery_role(&self) -> Result<()> {
@@ -617,7 +804,11 @@ pub(crate) struct IntentWithSignatures {
     /// None `intent` is the single intent of an IntentSet. If the intent
     /// is one of the many variants of an intentset then this variable must
     /// be `Some`.
+    ///
+    /// If Some() then its exercisable roles must "contain" `role_kind`.
     variant: Option<RolesExercisableInTransactionManifestCombination>,
+
+    role_kind: RoleKind,
 }
 impl IntentWithSignatures {
     pub(crate) fn new(
@@ -625,14 +816,19 @@ impl IntentWithSignatures {
         intent: TransactionIntent,
         entity: AccountOrPersona,
         signatures: IndexSet<SignatureWithPublicKey>,
+        role_kind: RoleKind,
         variant: Option<RolesExercisableInTransactionManifestCombination>,
     ) -> Self {
+        if let Some(variant) = variant.as_ref() {
+            assert!(variant.exercisable_roles().contains(&role_kind))
+        }
         Self {
             hidden: HiddenConstructor,
             part_of_intent_set,
             intent,
             entity,
             signatures,
+            role_kind,
             variant,
         }
     }
@@ -642,7 +838,42 @@ impl IntentWithSignatures {
 struct EntityNotSignedFor {
     intent: TransactionIntent,
     entity: AccountOrPersona,
+    role_kind: RoleKind,
     variant: Option<RolesExercisableInTransactionManifestCombination>,
+}
+impl EntityNotSignedFor {
+    fn new(
+        intent: TransactionIntent,
+        entity: AccountOrPersona,
+        role_kind: RoleKind,
+        variant: Option<RolesExercisableInTransactionManifestCombination>,
+    ) -> Self {
+        if let Some(variant) = variant.as_ref() {
+            assert!(variant.exercisable_roles().contains(&role_kind))
+        }
+        Self {
+            intent,
+            entity,
+            role_kind,
+            variant,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, derive_more::Deref)]
+struct EntitiesSignedFor(Vec<IntentWithSignatures>); // want IndexSet, but Item is not StdHash.
+impl From<Vec<IntentWithSignatures>> for EntitiesSignedFor {
+    fn from(v: Vec<IntentWithSignatures>) -> Self {
+        Self(v)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, derive_more::Deref)]
+struct EntitiesNotSignedFor(Vec<EntityNotSignedFor>); // want IndexSet, but Item is not StdHash.
+impl From<Vec<EntityNotSignedFor>> for EntitiesNotSignedFor {
+    fn from(v: Vec<EntityNotSignedFor>) -> Self {
+        Self(v)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -657,9 +888,9 @@ struct ExerciseRoleOutcome {
     /// if role is ROLE_PRIMARY_ROLE then variant cannot be
     /// RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation
     /// which does not "contain" Primary.
-    entities_signed_for: Vec<IntentWithSignatures>, // want IndexSet, but Item is not StdHash.
+    entities_signed_for: EntitiesSignedFor,
 
-    entities_not_signed_for: Vec<EntityNotSignedFor>, // want IndexSet, but Item is not StdHash.
+    entities_not_signed_for: EntitiesNotSignedFor,
 }
 
 impl ExerciseRoleOutcome {
@@ -686,6 +917,11 @@ impl ExerciseRoleOutcome {
             "Discrepancy! Mismatch beween Role and TransactionManifest variant"
         );
 
+        assert!(entities_signed_for.iter().all(|e| e.role_kind == role_kind));
+        assert!(entities_not_signed_for
+            .iter()
+            .all(|e| e.role_kind == role_kind));
+
         assert!(
             entities_not_signed_for
                 .iter()
@@ -711,8 +947,8 @@ impl ExerciseRoleOutcome {
         Self {
             hidden: HiddenConstructor,
             role: role_kind,
-            entities_signed_for,
-            entities_not_signed_for,
+            entities_signed_for: entities_signed_for.into(),
+            entities_not_signed_for: entities_not_signed_for.into(),
         }
     }
 }

@@ -37,10 +37,7 @@ impl<Entity: IsEntity>
         AnySecurifiedEntity::new(self.entity.entity.entity.clone().into())
             .expect("is Securified")
     }
-
 }
-
-
 
 impl SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
     pub fn paying_account(&self) -> ApplicationInputPayingAccount {
@@ -57,31 +54,53 @@ impl SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
         }
     }
 
-    pub fn initiate_with_recovery_complete_with_primary(&self) -> TransactionIntent {
+    pub fn initiate_with_recovery_complete_with_primary(
+        &self,
+    ) -> TransactionIntent {
         match self {
-            Self::Account(a) => a.initiate_with_recovery_complete_with_primary(),
-            Self::Persona(p) => p.initiate_with_recovery_complete_with_primary(),
+            Self::Account(a) => {
+                a.initiate_with_recovery_complete_with_primary()
+            }
+            Self::Persona(p) => {
+                p.initiate_with_recovery_complete_with_primary()
+            }
         }
     }
-    pub fn initiate_with_recovery_complete_with_confirmation(&self) -> TransactionIntent {
+    pub fn initiate_with_recovery_complete_with_confirmation(
+        &self,
+    ) -> TransactionIntent {
         match self {
-            Self::Account(a) => a.initiate_with_recovery_complete_with_confirmation(),
-            Self::Persona(p) => p.initiate_with_recovery_complete_with_confirmation(),
+            Self::Account(a) => {
+                a.initiate_with_recovery_complete_with_confirmation()
+            }
+            Self::Persona(p) => {
+                p.initiate_with_recovery_complete_with_confirmation()
+            }
         }
     }
-    pub fn initiate_with_recovery_delayed_completion(&self) -> TransactionIntent {
+    pub fn initiate_with_recovery_delayed_completion(
+        &self,
+    ) -> TransactionIntent {
         match self {
             Self::Account(a) => a.initiate_with_recovery_delayed_completion(),
             Self::Persona(p) => p.initiate_with_recovery_delayed_completion(),
         }
     }
-    pub fn initiate_with_primary_complete_with_confirmation(&self) -> TransactionIntent {
+    pub fn initiate_with_primary_complete_with_confirmation(
+        &self,
+    ) -> TransactionIntent {
         match self {
-            Self::Account(a) => a.initiate_with_primary_complete_with_confirmation(),
-            Self::Persona(p) => p.initiate_with_primary_complete_with_confirmation(),
+            Self::Account(a) => {
+                a.initiate_with_primary_complete_with_confirmation()
+            }
+            Self::Persona(p) => {
+                p.initiate_with_primary_complete_with_confirmation()
+            }
         }
     }
-    pub fn initiate_with_primary_delayed_completion(&self) -> TransactionIntent {
+    pub fn initiate_with_primary_delayed_completion(
+        &self,
+    ) -> TransactionIntent {
         match self {
             Self::Account(a) => a.initiate_with_primary_delayed_completion(),
             Self::Persona(p) => p.initiate_with_primary_delayed_completion(),
