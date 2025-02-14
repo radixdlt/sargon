@@ -97,6 +97,14 @@ impl DeviceFactorSource {
             host_info,
             mnemonic_with_passphrase.mnemonic.word_count,
         );
+        Self::babylon_with_hint(is_main, id, hint)
+    }
+
+    pub fn babylon_with_hint(
+        is_main: bool,
+        id: FactorSourceIDFromHash,
+        hint: DeviceFactorSourceHint,
+    ) -> Self {
         Self::new(id, FactorSourceCommon::new_bdfs(is_main), hint)
     }
 

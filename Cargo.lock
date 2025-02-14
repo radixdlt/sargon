@@ -3934,6 +3934,7 @@ dependencies = [
  "profile-logic",
  "radix-common",
  "radix-connect",
+ "rand",
  "sargon-os",
  "serde",
  "serde_json",

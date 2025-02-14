@@ -945,6 +945,12 @@ pub enum CommonError {
     EntityIsNotControlledByAnAccessControllerOnLedger {
         entity_bech32m_encoded_address: String,
     } = 10265,
+
+    #[error("Factor source name invalid")]
+    FactorSourceNameInvalid = 10266,
+
+    #[error("Factor source already exists")]
+    FactorSourceAlreadyExists = 10267,
 }
 
 impl CommonError {
