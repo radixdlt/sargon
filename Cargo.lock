@@ -3990,6 +3990,7 @@ dependencies = [
  "actix-rt",
  "async-std",
  "async-trait",
+ "core-collections",
  "derive_more",
  "entity-by-address",
  "enum-as-inner",

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+core-collections = { workspace = true }
 entity-by-address = { workspace = true }
 gateway-client-and-api = { workspace = true }
 manifests = { workspace = true }

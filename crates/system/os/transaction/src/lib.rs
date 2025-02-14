@@ -21,6 +21,7 @@ pub mod prelude {
     pub(crate) use sargon_os_factors::prelude::*;
     pub(crate) use signatures_collector::prelude::*;
     pub(crate) use signing_traits::prelude::*;
+    pub(crate) use core_collections::prelude::*;
 
     pub(crate) use enum_as_inner::EnumAsInner;
     pub(crate) use radix_engine_interface::prelude::MetadataValue as ScryptoMetadataValue;

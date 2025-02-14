@@ -21,6 +21,9 @@ pub struct SigningManager {
 struct SigningManagerState {
     per_set_state: IndexMap<IntentSetID, IntentSetState>,
 }
+impl SigningManagerState {
+    fn update_with(&mut self, intent_with_signatures: IntentWithSignatures) {}
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct IntentSetState {
@@ -314,6 +317,8 @@ impl SigningManager {
     ) -> Result<ExerciseRoleOutcome> {
         let purpose = SigningPurpose::SignTX { role_kind: role };
 
+        // TODO should probably move these lookup tables into fields of `SigningManager` and
+        // change how we construct the SigningManager.
         let mut lookup_address_to_entity =
             HashMap::<AddressOfAccountOrPersona, AccountOrPersona>::new();
         let mut lookup_txid_to_intent_set =
@@ -386,7 +391,7 @@ impl SigningManager {
                         .iter()
                         .all(|s| s.owned_factor_instance().owner
                             == owner_address),
-                    "SigningManager expects"
+                    "SigningManager expects a single entity to sign for per role."
                 );
 
                 let entity = lookup_address_to_entity
@@ -432,7 +437,14 @@ impl SigningManager {
         recovery_outcome: ExerciseRoleOutcome,
     ) -> Result<()> {
         assert_eq!(recovery_outcome.role, RoleKind::Recovery);
-        self.updating_state(|_s| Err(CommonError::Unknown))?;
+        self.updating_state(|state| {
+            recovery_outcome.entities_signed_for.into_iter().for_each(
+                |entity_signed_for| {
+                    state.update_with(entity_signed_for);
+                },
+            );
+            Ok(())
+        })?;
         Ok(())
     }
 
