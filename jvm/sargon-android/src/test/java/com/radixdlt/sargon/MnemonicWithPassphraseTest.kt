@@ -2,6 +2,7 @@ package com.radixdlt.sargon
 
 import com.radixdlt.sargon.extensions.compile
 import com.radixdlt.sargon.extensions.derivePublicKey
+import com.radixdlt.sargon.extensions.derivePublicKeys
 import com.radixdlt.sargon.extensions.factorSourceId
 import com.radixdlt.sargon.extensions.fromJson
 import com.radixdlt.sargon.extensions.hash
@@ -133,6 +134,14 @@ class MnemonicWithPassphraseTest {
         assertEquals(
             HierarchicalDeterministicPublicKey.sample(),
             MnemonicWithPassphrase.sample().derivePublicKey(DerivationPath.sample())
+        )
+    }
+
+    @Test
+    fun testDerivePublicKeysFactorInstances() {
+        assertEquals(
+            listOf(HierarchicalDeterministicFactorInstance.sample()),
+            MnemonicWithPassphrase.sample().derivePublicKeys(listOf(DerivationPath.sample()), FactorSourceIdFromHash.sample())
         )
     }
 

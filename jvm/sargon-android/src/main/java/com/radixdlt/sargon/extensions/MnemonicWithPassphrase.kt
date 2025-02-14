@@ -6,6 +6,7 @@ import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.FactorSourceIdFromHash
 import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.Hash
+import com.radixdlt.sargon.HierarchicalDeterministicFactorInstance
 import com.radixdlt.sargon.HierarchicalDeterministicPublicKey
 import com.radixdlt.sargon.Mnemonic
 import com.radixdlt.sargon.MnemonicWithPassphrase
@@ -64,6 +65,15 @@ fun MnemonicWithPassphrase.derivePublicKeys(
     mnemonicWithPassphrase = this,
     derivationPaths = paths
 )
+
+fun MnemonicWithPassphrase.derivePublicKeys(
+    paths: List<DerivationPath>,
+    factorSourceId: FactorSourceIdFromHash
+): List<HierarchicalDeterministicFactorInstance> {
+    return derivePublicKeys(paths).map {
+        HierarchicalDeterministicFactorInstance(factorSourceId, it)
+    }
+}
 
 fun MnemonicWithPassphrase.sign(
     hash: Hash,
