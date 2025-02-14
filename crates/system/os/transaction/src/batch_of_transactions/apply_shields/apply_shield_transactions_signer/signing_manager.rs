@@ -620,7 +620,7 @@ impl SignedIntentSet {
             let signatures = item
                 .signatures
                 .into_iter()
-                .map(|s| IntentSignature::from(s))
+                .map(IntentSignature::from)
                 .collect_vec();
 
             SignedIntent::new(intent, IntentSignatures::new(signatures))

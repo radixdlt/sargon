@@ -49,7 +49,7 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
         let signed_intents = signed_sets
             .into_iter()
             .map(|signed_set| signed_set.get_best_signed_intent())
-            .collect_vec();
+            .collect::<Result<Vec<SignedIntent>>>()?;
 
         // Notarize the signed intents
         let notarized_transactions = notary_manager.notarize(signed_intents)?;
