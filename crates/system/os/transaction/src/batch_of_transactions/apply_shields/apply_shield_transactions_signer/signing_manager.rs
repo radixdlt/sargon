@@ -599,8 +599,43 @@ impl SigningManager {
             })
             .collect_vec();
 
-        let entities_not_signed_for: Vec<EntityNotSignedFor> =
-            { unimplemented!("impl me") };
+        let entities_not_signed_for: Vec<EntityNotSignedFor> = outcome
+            .failed_transactions_outcomes()
+            .into_iter()
+            .map(|o| {
+                let txid = o.signable_id;
+                let intent = lookup_intent_by_txid.get(&txid).unwrap().clone();
+
+                let per_entity_neglected_factor_sources =
+                    o.per_entity_neglected_factors.clone();
+                assert_eq!(
+                    per_entity_neglected_factor_sources.len(),
+                    1,
+                    "Should have one entity"
+                ); // TODO add support for multiple entities
+                let (owner_address, neglected_factors) =
+                    per_entity_neglected_factor_sources
+                        .into_iter()
+                        .next()
+                        .expect("Should have one entity");
+
+                let entity = lookup_address_to_entity
+                    .get(&owner_address)
+                    .unwrap()
+                    .clone();
+
+                let manifest_variant =
+                    *lookup_txid_to_variant.get(&txid).unwrap();
+
+                EntityNotSignedFor::new(
+                    intent,
+                    entity,
+                    role_kind,
+                    neglected_factors,
+                    manifest_variant,
+                )
+            })
+            .collect_vec();
 
         Ok(ExerciseRoleOutcome::new(
             role_kind,
@@ -839,13 +874,16 @@ struct EntityNotSignedFor {
     intent: TransactionIntent,
     entity: AccountOrPersona,
     role_kind: RoleKind,
+    neglected_factor_sources: IndexSet<NeglectedFactor>,
     variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
+
 impl EntityNotSignedFor {
     fn new(
         intent: TransactionIntent,
         entity: AccountOrPersona,
         role_kind: RoleKind,
+        neglected_factor_sources: IndexSet<NeglectedFactor>,
         variant: Option<RolesExercisableInTransactionManifestCombination>,
     ) -> Self {
         if let Some(variant) = variant.as_ref() {
@@ -854,6 +892,7 @@ impl EntityNotSignedFor {
         Self {
             intent,
             entity,
+            neglected_factor_sources,
             role_kind,
             variant,
         }

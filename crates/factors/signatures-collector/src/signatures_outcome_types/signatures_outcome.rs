@@ -17,7 +17,7 @@ pub struct SignaturesOutcome<ID: SignableID> {
     /// since not enough signatures have been gathered.
     ///
     /// Potentially empty
-    failed_transactions: MaybeSignedTransactions<ID>,
+    failed_transactions: FailedTransactions<ID>,
 
     /// List of all neglected factor sources, either explicitly skipped by user or
     /// implicitly neglected due to failure.
@@ -30,7 +30,7 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
     /// either any transaction intent hash, or any signature.
     pub(crate) fn new(
         successful_transactions: MaybeSignedTransactions<ID>,
-        failed_transactions: MaybeSignedTransactions<ID>,
+        failed_transactions: FailedTransactions<ID>,
         neglected_factor_sources: impl IntoIterator<Item = NeglectedFactor>,
     ) -> Self {
         let neglected_factor_sources = neglected_factor_sources
@@ -43,12 +43,7 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
             .cloned()
             .collect::<IndexSet<_>>();
 
-        let failure_hashes = failed_transactions
-            .transactions
-            .keys()
-            .cloned()
-            .collect::<IndexSet<_>>();
-
+        let failure_hashes = failed_transactions.failure_hashes();
         let valid = successful_hashes
             .intersection(&failure_hashes)
             .collect_vec()
@@ -84,6 +79,12 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
 
     pub fn failed_transactions(&self) -> Vec<SignedTransaction<ID>> {
         self.failed_transactions.clone().transactions()
+    }
+
+    pub fn failed_transactions_outcomes(
+        &self,
+    ) -> Vec<PetitionTransactionOutcome<ID>> {
+        self.failed_transactions.clone().outcomes()
     }
 
     pub fn neglected_factor_sources(&self) -> IndexSet<NeglectedFactor> {
@@ -167,7 +168,7 @@ mod tests {
     fn new_panics_if_intent_hash_is_in_both_failed_and_success_collection() {
         SUT::new(
             MaybeSignedTransactions::sample(),
-            MaybeSignedTransactions::sample(),
+            FailedTransactions::sample(),
             [],
         );
     }
@@ -179,7 +180,7 @@ mod tests {
     fn new_panics_if_failed_tx_is_not_empty_but_neglected_is() {
         SUT::new(
             MaybeSignedTransactions::empty(),
-            MaybeSignedTransactions::sample(),
+            FailedTransactions::sample(),
             [],
         );
     }
