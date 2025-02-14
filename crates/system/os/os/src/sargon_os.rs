@@ -440,6 +440,7 @@ impl SargonOS {
         authorization_interactor: impl Into<
             Option<Arc<dyn AuthorizationInteractor>>,
         >,
+        spot_check_interactor: impl Into<Option<Arc<dyn SpotCheckInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Result<Arc<Self>> {
         let test_drivers =
@@ -461,11 +462,17 @@ impl SargonOS {
                 Arc::new(TestAuthorizationInteractor::stubborn_authorizing())
             });
 
+        let spot_check_interactor =
+            spot_check_interactor.into().unwrap_or_else(|| {
+                Arc::new(TestSpotCheckInteractor::new_succeeded())
+            });
+
         let os = Self::boot_with_clients_and_interactor(
             clients,
-            Interactors::new_with_derivation_and_authorization_interactor(
+            Interactors::new_with_derivation_authorization_and_spot_check_interactor(
                 keys_derivation_interactor,
                 authorization_interactor,
+                spot_check_interactor
             ),
         )
         .await;
@@ -495,13 +502,11 @@ impl SargonOS {
         derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
-        let authorization_interactor: Arc<dyn AuthorizationInteractor> =
-            Arc::new(TestAuthorizationInteractor::stubborn_authorizing());
-
         let req = Self::boot_test_with_bdfs_mnemonic_and_interactors(
             bdfs_mnemonic,
             derivation_interactor,
-            authorization_interactor,
+            None,
+            None,
             pre_derive_factor_instance_for_bdfs,
         );
 
@@ -519,7 +524,7 @@ impl SargonOS {
 
     pub async fn boot_test() -> Result<Arc<Self>> {
         Self::boot_test_with_bdfs_mnemonic_and_interactors(
-            None, None, None, true,
+            None, None, None, None, true,
         )
         .await
     }
@@ -555,6 +560,30 @@ impl SargonOS {
         )?;
 
         Ok(os)
+    }
+
+    pub async fn boot_test_empty_wallet_with_spot_check_interactor(
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
+    ) -> Arc<Self> {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                spot_check_interactor,
+            );
+        let os = actix_rt::time::timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            Self::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        // Create empty Wallet
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        os
     }
 }
 

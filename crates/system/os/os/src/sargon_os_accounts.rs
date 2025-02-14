@@ -301,6 +301,12 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+        self.spot_check_factor_source_before_entity_creation_if_necessary(
+            factor_source.clone(),
+            network_id,
+            EntityKind::Account,
+        )
+        .await?;
         debug!("Creating account.");
         let (account, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_account_with_factor_source_with_derivation_outcome(
@@ -1325,6 +1331,54 @@ mod tests {
                 AccountAdded
             ]
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_continues_when_user_skips_spot_check(
+    ) {
+        let os = SUT::boot_test_empty_wallet_with_spot_check_interactor(
+            Arc::new(TestSpotCheckInteractor::new_skipped()),
+        )
+        .await;
+
+        // Add Account and verify it was added
+        let account = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            os.profile().unwrap().networks[0].accounts,
+            Accounts::just(account)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_account_fails_when_spot_check_fails() {
+        let spot_check_error = CommonError::sample_other();
+        let os =
+            SUT::boot_test_empty_wallet_with_spot_check_interactor(Arc::new(
+                TestSpotCheckInteractor::new_failed(spot_check_error.clone()),
+            ))
+            .await;
+
+        // Attempt to add Account and check it fails with expected error
+        let error = os
+            .with_timeout(|x| {
+                x.create_and_save_new_account_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                )
+            })
+            .await
+            .expect_err("Expected error");
+
+        assert_eq!(error, spot_check_error,);
     }
 
     #[actix_rt::test]
