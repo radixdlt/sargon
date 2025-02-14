@@ -2,6 +2,7 @@ mod access_controller_address;
 mod account_address;
 mod address;
 mod address_format;
+mod address_of_access_controller_or_account;
 mod address_of_account_or_persona;
 
 #[macro_use]
@@ -28,6 +29,7 @@ pub use access_controller_address::*;
 pub use account_address::*;
 pub use address::*;
 pub use address_format::*;
+pub use address_of_access_controller_or_account::*;
 pub use address_of_account_or_persona::*;
 pub use component_address::*;
 pub use decl_address::*;

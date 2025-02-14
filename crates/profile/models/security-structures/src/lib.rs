@@ -17,7 +17,7 @@ pub mod prelude {
     pub use addresses::prelude::*;
     pub use cap26_models::prelude::*;
     pub use core_collections::prelude::{Just, JustKV};
-    pub use core_utils::prelude::*;
+
     pub use factors::prelude::*;
     pub use has_sample_values::prelude::*;
     pub use hierarchical_deterministic::prelude::*;

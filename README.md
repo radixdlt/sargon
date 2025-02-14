@@ -344,11 +344,16 @@ Install [cargo-workspaces](https://crates.io/crates/cargo-workspaces)
 make bump
 ```
 
+Or if you wanna use a specific version:
+```sh
+make bump_to version=1.2.0
+```
+
 ```sh
 make bump_and_commit
 ```
 
-To `patch` bump all crates
+To `patch` bump all crates. You can also manually set version using. See `cargo ws --help`.
 
 ## iOS
 

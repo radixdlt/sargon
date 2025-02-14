@@ -14,13 +14,6 @@ pub struct SecuredEntityControl {
     /// account recovery scan we might not know the veci
     pub veci: Option<HierarchicalDeterministicFactorInstance>,
 
-    /// The address of the access controller which controls this entity.
-    ///
-    /// Looking up the public key (hashes) set in the key-value store at
-    /// this address reveals the true factors (public keys) used to protect
-    /// this entity. It will be the same as the ones in `security_structure`
-    /// if we have not changed them locally, which we should not do unless
-    /// we are sure the Ledger corresponds to the values in `security_structure`.
     pub access_controller_address: AccessControllerAddress,
 
     /// The believed-to-be-current security structure of FactorInstances which
@@ -31,6 +24,12 @@ pub struct SecuredEntityControl {
     /// is about to change to
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
+}
+
+impl SecuredEntityControl {
+    pub fn access_controller_address(&self) -> AccessControllerAddress {
+        self.access_controller_address
+    }
 }
 
 impl HasProvisionalSecurifiedConfig for SecuredEntityControl {
@@ -202,8 +201,8 @@ mod tests {
                  }
                }
              },
-             "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
-             "securityStructure": {
+            "accessControllerAddress": "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a",
+            "securityStructure": {
                "securityStructureId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                "matrixOfFactors": {
                  "primaryRole": {

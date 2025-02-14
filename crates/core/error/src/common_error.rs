@@ -888,25 +888,69 @@ pub enum CommonError {
     #[error("Invalid NodeId length: {actual}, expected: {expected}")]
     InvalidNodeIdLength { expected: usize, actual: usize } = 10252,
 
+    #[error("No entity found with AccessController address {bad_value}")]
+    NoEntityFoundWithAccessControllerAddress { bad_value: String } = 10253,
+
+    #[error("Failed to cast Address to specific type '{expected_specific_type}', from value: '{got_value}'")]
+    FailedToMapAddressToSpecificType {
+        expected_specific_type: String,
+        got_value: String,
+    } = 10254,
+
+    #[error("Payer cannot be in batch of entities applying shield")]
+    PayerCannotBeInBatchOfEntitiesApplyingShield = 10255,
+
+    #[error("No XRD balance fetched for entity applying shield (or XRD Vault of AC), address {address}")]
+    NoXrdBalanceFetchedForEntityApplyingShieldOrItsVault { address: String } =
+        10256,
+
+    #[error("No XRD balance fetched for payer of application of shield, address_of_payer {address_of_payer}")]
+    NoXrdBalanceFetchedForPayerOfApplicationOfShield {
+        address_of_payer: String,
+    } = 10257,
+
+    #[error("Unable to contribute to AccessControllers Xrd Vault, insufficient balance of payer {payer}, vault of entity {vault_of_entity}, payer balance {payer_balance}, needed balance {needed_balance}")]
+    UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+        payer: String,
+        vault_of_entity: String,
+        payer_balance: String,
+        needed_balance: String,
+    } = 10258,
+
+    #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
+    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10259,
+
+    #[error("Unable to top up Xrd Vault, payer is entity applying shield: {payer_is_entity_applying_shield}, can exercise primary role: {can_exercise_primary_role} for entity owning AccessController: {entity_owning_access_controller}")]
+    UnableToTopUpXrdVault {
+        entity_owning_access_controller: String,
+        payer_is_entity_applying_shield: bool,
+        can_exercise_primary_role: bool,
+    } = 10260,
+
+    #[error("Unsecurified Personas require an account fee payer, but none was provided, for persona with address: {identity_address}")]
+    UnsecurifiedPersonasRequireAnAccountFeePayerButNoneWasProvided {
+        identity_address: String,
+    } = 10261,
+
     #[error("Named addresses are not supported")]
-    NamedAddressesAreNotSupported = 10253,
+    NamedAddressesAreNotSupported = 10262,
 
     #[error("Entity has no provisional security config set")]
-    EntityHasNoProvisionalSecurityConfigSet = 10254,
+    EntityHasNoProvisionalSecurityConfigSet = 10263,
 
     #[error("Entity's provisional config is wrong. It is expected to be in instances derived state.")]
-    ProvisionalConfigInWrongStateExpectedInstancesDerived = 10255,
+    ProvisionalConfigInWrongStateExpectedInstancesDerived = 10264,
 
     #[error("Entity {entity_bech32m_encoded_address} is not controller by access controller on ledger")]
     EntityIsNotControlledByAnAccessControllerOnLedger {
         entity_bech32m_encoded_address: String,
-    } = 10256,
+    } = 10265,
 
     #[error("Factor source name invalid")]
-    FactorSourceNameInvalid = 10257,
+    FactorSourceNameInvalid = 10266,
 
     #[error("Factor source already exists")]
-    FactorSourceAlreadyExists = 10258,
+    FactorSourceAlreadyExists = 10267,
 }
 
 impl CommonError {

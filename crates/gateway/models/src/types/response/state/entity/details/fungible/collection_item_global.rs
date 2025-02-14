@@ -20,11 +20,11 @@ pub struct FungibleResourcesCollectionItemGloballyAggregated {
 impl FungibleResourcesCollectionItemGloballyAggregated {
     pub fn new(
         resource_address: ResourceAddress,
-        amount: Decimal192,
-    ) -> FungibleResourcesCollectionItemGloballyAggregated {
-        FungibleResourcesCollectionItemGloballyAggregated {
+        amount: impl Into<Decimal192>,
+    ) -> Self {
+        Self {
             resource_address,
-            amount,
+            amount: amount.into(),
         }
     }
 }

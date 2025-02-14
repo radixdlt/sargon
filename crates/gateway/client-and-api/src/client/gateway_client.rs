@@ -8,7 +8,6 @@ use crate::prelude::*;
 /// fetch the XRD balance of an account address or submit a signed transaction.
 ///
 /// [docs]: https://radix-babylon-gateway-api.redoc.ly/
-#[derive(Debug)]
 pub struct GatewayClient {
     /// The HTTP client that actually executes the network requests.
     pub http_client: HttpClient,

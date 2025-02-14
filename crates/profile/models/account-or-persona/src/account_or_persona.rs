@@ -404,7 +404,7 @@ mod tests {
             .clone()
             .as_securified()
             .unwrap()
-            .access_controller_address;
+            .access_controller_address();
 
         let mut value = SecuredEntityControl::sample();
         value.access_controller_address = access_controller_address;

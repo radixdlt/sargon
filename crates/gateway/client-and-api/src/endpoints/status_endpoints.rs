@@ -9,6 +9,7 @@ impl GatewayClient {
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/GatewayStatus
     pub async fn gateway_status(&self) -> Result<GatewayStatusResponse> {
-        self.post_empty("status/gateway-status", res_id).await
+        self.post_empty(Self::PATH_STATUS_GATEWAY_STATUS, res_id)
+            .await
     }
 }

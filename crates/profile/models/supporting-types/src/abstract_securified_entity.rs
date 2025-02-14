@@ -21,6 +21,14 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
     }
 }
 
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
+    for AbstractSecurifiedEntity<E>
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity.address_erased()
+    }
+}
+
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsNetworkAware
     for AbstractSecurifiedEntity<E>
 {
@@ -41,6 +49,10 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsSecurifiedEntity
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     AbstractSecurifiedEntity<E>
 {
+    pub fn access_controller_address(&self) -> AccessControllerAddress {
+        self.securified_entity_control.access_controller_address()
+    }
+
     pub fn with_securified_entity_control(
         entity: E,
         securified_entity_control: SecuredEntityControl,
@@ -73,5 +85,15 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
         self.securified_entity_control()
             .veci()
             .map(|fi| VirtualEntityCreatingInstance::new(fi, self.address()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn erased_address() {
+        let entity = AnySecurifiedEntity::sample_account();
+        assert_eq!(entity.address_erased(), entity.address());
     }
 }

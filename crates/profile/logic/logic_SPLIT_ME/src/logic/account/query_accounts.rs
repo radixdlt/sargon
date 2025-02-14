@@ -1,5 +1,41 @@
 use crate::prelude::*;
 
+pub trait GetEntityAddressByAccessControllerAddress {
+    fn get_securified_entity_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<AnySecurifiedEntity>;
+}
+
+impl GetEntityAddressByAccessControllerAddress for Profile {
+    fn get_securified_entity_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<AnySecurifiedEntity> {
+        let network_id = address.network_id();
+        self.securified_personas_on_network(network_id)
+            .iter()
+            .find(|p| {
+                p.securified_entity_control.access_controller_address()
+                    == address
+            })
+            .map(AnySecurifiedEntity::from)
+            .or(self
+                .securified_accounts_on_network(network_id)
+                .iter()
+                .find(|a| {
+                    a.securified_entity_control.access_controller_address()
+                        == address
+                })
+                .map(AnySecurifiedEntity::from))
+            .ok_or_else(|| {
+                CommonError::NoEntityFoundWithAccessControllerAddress {
+                    bad_value: address.to_string(),
+                }
+            })
+    }
+}
+
 pub trait ProfileAccountsOnAllNetworksIncludingHidden {
     fn accounts_on_all_networks_including_hidden(&self) -> Accounts;
 }

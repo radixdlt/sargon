@@ -29,3 +29,36 @@ pub struct SecuredEntityControl {
     /// is about to change to
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
+
+delegate_debug_into!(SecuredEntityControl, InternalSecuredEntityControl);
+
+#[uniffi::export]
+pub fn new_secured_entity_control_sample() -> SecuredEntityControl {
+    InternalSecuredEntityControl::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_secured_entity_control_sample_other() -> SecuredEntityControl {
+    InternalSecuredEntityControl::sample_other().into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn secured_entity_control_samples() {
+        assert_eq!(
+            new_secured_entity_control_sample(),
+            new_secured_entity_control_sample()
+        );
+        assert_eq!(
+            new_secured_entity_control_sample_other(),
+            new_secured_entity_control_sample_other()
+        );
+        assert_ne!(
+            new_secured_entity_control_sample(),
+            new_secured_entity_control_sample_other()
+        );
+    }
+}

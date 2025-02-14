@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::prelude::*;
 
-#[derive(Debug)]
 pub struct Clients {
     pub host: HostInfoClient,
     pub secure_storage: SecureStorageClient,

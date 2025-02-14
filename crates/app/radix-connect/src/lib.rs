@@ -22,7 +22,7 @@ pub mod prelude {
     pub(crate) use addresses::prelude::*;
     pub(crate) use bytes::prelude::*;
     pub(crate) use core_misc::prelude::*;
-    pub(crate) use core_utils::prelude::*;
+
     pub(crate) use ecc::prelude::*;
     pub(crate) use entity_foundation::prelude::*;
     pub(crate) use hash::prelude::*;

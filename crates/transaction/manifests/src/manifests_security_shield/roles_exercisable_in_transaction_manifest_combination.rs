@@ -161,6 +161,16 @@ impl RolesExercisableInTransactionManifestCombination {
         }
     }
 
+    pub fn can_exercise_primary_role(&self) -> bool {
+        match self {
+            Self::InitiateWithPrimaryCompleteWithConfirmation
+            | Self::InitiateWithPrimaryDelayedCompletion
+            | Self::InitiateWithRecoveryCompleteWithPrimary => true,
+            Self::InitiateWithRecoveryCompleteWithConfirmation
+            | Self::InitiateWithRecoveryDelayedCompletion => false,
+        }
+    }
+
     fn role_initiating_recovery(&self) -> RoleInitiatingRecovery {
         match self {
             Self::InitiateWithPrimaryCompleteWithConfirmation
@@ -175,7 +185,7 @@ impl RolesExercisableInTransactionManifestCombination {
         }
     }
 
-    fn can_quick_confirm(&self) -> bool {
+    pub fn can_quick_confirm(&self) -> bool {
         match self {
             Self::InitiateWithPrimaryCompleteWithConfirmation
             | Self::InitiateWithRecoveryCompleteWithConfirmation
@@ -241,22 +251,5 @@ impl RolesExercisableInTransactionManifestCombination {
             // can call this method after the time has elapsed.
             None
         }
-    }
-}
-
-pub trait TransactionManifestExplicitlyReferencesPrimaryRole {
-    fn explicitly_references_primary_role(&self) -> bool;
-}
-impl TransactionManifestExplicitlyReferencesPrimaryRole
-    for TransactionManifest
-{
-    fn explicitly_references_primary_role(&self) -> bool {
-        let has = |identifier: &str| -> bool {
-            self.instructions()
-                .iter()
-                .any(|instruction| matches!(instruction, ScryptoInstruction::CallMethod(method) if method.method_name == identifier))
-        };
-
-        has(SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT)
     }
 }

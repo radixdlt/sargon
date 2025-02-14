@@ -23,11 +23,11 @@ pub struct StateEntityDetailsResponse {
 impl StateEntityDetailsResponse {
     pub fn new(
         ledger_state: impl Into<Option<LedgerState>>,
-        items: Vec<StateEntityDetailsResponseItem>,
+        items: impl IntoIterator<Item = StateEntityDetailsResponseItem>,
     ) -> Self {
         Self {
             ledger_state: ledger_state.into(),
-            items,
+            items: items.into_iter().collect(),
         }
     }
 }

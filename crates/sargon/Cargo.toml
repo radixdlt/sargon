@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.140"
+version = "1.2.1"
 edition = "2021"
 
 resolver = "2" # features enabled in integration test
@@ -44,8 +44,8 @@ sub-systems = { workspace = true }
 interactors = { workspace = true }
 key-derivation-traits = { workspace = true }
 signing-traits = { workspace = true }
-sargon-os = { path = "../system/os/os" }
-sargon-os-transaction = { path = "../system/os/transaction" }
+sargon-os = { workspace = true }
+sargon-os-transaction = { workspace = true }
 sargon-os-accounts = { workspace = true }
 sargon-os-derive-public-keys = { workspace = true }
 sargon-os-factors = { workspace = true }

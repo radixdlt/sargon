@@ -542,6 +542,34 @@ impl SargonOS {
             SpotCheckResponse::Skipped => Ok(false),
         }
     }
+
+    /// If necessary, performs a spot check on the factor source before creating an entity.
+    ///
+    /// We only perform the spot check when we have enough keys in the cache to create the entity without deriving anymore.
+    pub async fn spot_check_factor_source_before_entity_creation_if_necessary(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        entity_kind: EntityKind,
+    ) -> Result<()> {
+        let cache = self.cache_snapshot().await;
+        let should_spot_check = !cache.is_entity_creation_satisfied(
+            network_id,
+            factor_source.id_from_hash(),
+            entity_kind,
+        );
+        if should_spot_check {
+            debug!("Spot checking the factor source...");
+            let response = self
+                .spot_check_interactor()
+                .spot_check(factor_source, false)
+                .await?;
+            debug!("Spot check response: {:?}", response);
+        } else {
+            debug!("No need to spot check the factor source.");
+        }
+        Ok(())
+    }
 }
 
 #[cfg(debug_assertions)]

@@ -12,6 +12,15 @@ use crate::prelude::*;
 const XRD_TO_AC_VAULT_FIRST_TOP_UP: ScryptoDecimal192 =
     ScryptoDecimal192::ONE_HUNDRED;
 
+pub fn xrd_amount_for_initial_xrd_contribution_of_vault_of_access_controller(
+) -> Decimal192 {
+    XRD_TO_AC_VAULT_FIRST_TOP_UP.into()
+}
+
+pub fn xrd_target_for_access_controller() -> Decimal192 {
+    XRD_TO_AC_VAULT_FIRST_TOP_UP.into()
+}
+
 pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
     /// A method modifying manifests which applies security shield. We
     /// The `manifest` which applies the security shield could not include
@@ -33,34 +42,37 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
     /// We allow to pass amount so that we can top of with more or less based on
     /// token balance of `payer` and current balance of the access controller (when
     /// we use this method for securified entities.)
-    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_account_paid_by_account(
+    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
         payer: impl Into<Account>,
         // TODO: remove `unsecurified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
         unsecurified_entity_applying_shield: AnyUnsecurifiedEntity,
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
     ) -> TransactionManifest {
-        assert!(!manifest.explicitly_references_primary_role(), "Unexpectedly classified manifest as updating of shield of securified entity, but it is not.");
         Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
             payer,
             unsecurified_entity_applying_shield.entity,
             manifest,
             top_up_amount,
+            true, false
         ).expect("Should never fail")
     }
 
-    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_account_paid_by_account(
+    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
         payer: impl Into<Account>,
         // TODO: remove `securified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
         securified_entity_applying_shield: impl Into<AnySecurifiedEntity>,
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
+        manifest_variant: RolesExercisableInTransactionManifestCombination,
     ) -> Result<TransactionManifest> {
         Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
             payer,
             securified_entity_applying_shield.into().entity,
             manifest,
             top_up_amount,
+            manifest_variant.can_exercise_primary_role(),
+            manifest_variant.can_quick_confirm(),
         )
     }
 
@@ -70,6 +82,8 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         entity_applying_shield: AccountOrPersona,
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
+        can_exercise_primary_role: bool,
+        can_quick_confirm: bool,
     ) -> Result<TransactionManifest> {
         let payer = payer.into();
         let address_of_paying_account = payer.address();
@@ -82,16 +96,23 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             let payer_is_entity_applying_shield =
                 entity_applying_shield.address() == payer.address().into();
             if payer_is_entity_applying_shield {
-                let cannot_exercise_primary_role =
-                    !manifest.explicitly_references_primary_role();
-                let is_unable_to_top_up_xrd_vault =
-                    payer_is_entity_applying_shield
-                        && cannot_exercise_primary_role;
+                // If user can quick confirm they can sign with NEW factors. If manifest
+                // is not quick confirming and user has access to primary she can use old factors
+                // and exercise the primary role.
+                let is_unable_to_top_up_xrd_vault = !(can_exercise_primary_role
+                    || can_quick_confirm)
+                    && payer_is_entity_applying_shield;
                 if is_unable_to_top_up_xrd_vault {
                     // The payer is the entity applying the shield, but the manifest is not classified as
                     // to be able to exercise the primary role. Thus we will not be able to
                     // top up the XRD vault of the access controller.
-                    return Err(CommonError::Unknown); // TODO: Add error
+                    return Err(CommonError::UnableToTopUpXrdVault {
+                        entity_owning_access_controller: entity_applying_shield
+                            .address()
+                            .to_string(),
+                        payer_is_entity_applying_shield,
+                        can_exercise_primary_role,
+                    });
                 }
             }
         }
@@ -102,7 +123,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             match entity_applying_shield.security_state() {
                 EntitySecurityState::Securified { value: sec } => {
                     ManifestGlobalAddress::Static(
-                        sec.access_controller_address.scrypto(),
+                        sec.access_controller_address().scrypto(),
                     )
                 }
                 EntitySecurityState::Unsecured { .. } => {
@@ -118,7 +139,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             match payer.security_state() {
                 EntitySecurityState::Securified { value: sec } => {
                     Some(ManifestGlobalAddress::Static(
-                        sec.access_controller_address.scrypto(),
+                        sec.access_controller_address().scrypto(),
                     ))
                 }
                 EntitySecurityState::Unsecured { .. } => {

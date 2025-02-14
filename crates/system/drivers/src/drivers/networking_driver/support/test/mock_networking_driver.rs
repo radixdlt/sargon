@@ -1,12 +1,13 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::prelude::*;
 use std::sync::Mutex;
 
 /// A mocked network antenna, useful for testing.
-#[derive(Debug)]
 pub struct MockNetworkingDriver {
     hard_coded_responses: Mutex<Vec<MockNetworkingDriverResponse>>,
+    // `MockNetworkingDriver` will try to use a hard_coded_response first, and if it doesn't have one, it will use the lazy_responder.
+    lazy_responder: Option<MockNetworkingDriverLazyResponder>,
     spy: fn(NetworkRequest, u64) -> (),
     count: Mutex<u64>,
 }
@@ -41,6 +42,7 @@ impl MockNetworkingDriver {
         hard_coded_status: u16,
         hard_coded_bodies: Vec<BagOfBytes>,
         spy: fn(NetworkRequest, u64) -> (),
+        lazy_responder: impl Into<Option<MockNetworkingDriverLazyResponder>>,
     ) -> Self {
         let responses = hard_coded_bodies
             .into_iter()
@@ -53,6 +55,7 @@ impl MockNetworkingDriver {
             hard_coded_responses: Mutex::new(responses),
             spy,
             count: Mutex::new(0),
+            lazy_responder: lazy_responder.into(),
         }
     }
 
@@ -61,7 +64,7 @@ impl MockNetworkingDriver {
         body: impl Into<BagOfBytes>,
         spy: fn(NetworkRequest, u64) -> (),
     ) -> Self {
-        Self::_new(status, vec![body.into()], spy)
+        Self::_new(status, vec![body.into()], spy, None)
     }
 
     pub fn with_spy_multiple_bodies(
@@ -69,7 +72,7 @@ impl MockNetworkingDriver {
         bodies: Vec<BagOfBytes>,
         spy: fn(NetworkRequest, u64) -> (),
     ) -> Self {
-        Self::_new(status, bodies, spy)
+        Self::_new(status, bodies, spy, None)
     }
 
     pub fn new(status: u16, body: impl Into<BagOfBytes>) -> Self {
@@ -94,6 +97,7 @@ impl MockNetworkingDriver {
             hard_coded_responses: Mutex::new(responses),
             spy,
             count: Mutex::new(0),
+            lazy_responder: None,
         }
     }
 
@@ -119,7 +123,82 @@ impl MockNetworkingDriver {
             .map(BagOfBytes::from)
             .collect();
 
-        Self::_new(200, bodies, |_, _| {})
+        Self::_new(200, bodies, |_, _| {}, None)
+    }
+
+    pub fn with_lazy_responses(
+        provide_lazy: impl Fn(NetworkRequest, u64) -> NetworkResponse
+            + Send
+            + Sync
+            + 'static,
+    ) -> Self {
+        Self::_new(
+            200,
+            vec![],
+            |_, _| {},
+            MockNetworkingDriverLazyResponder::new_with_responses(provide_lazy),
+        )
+    }
+
+    /// N.B. the inverse of Serialize/Deserialize!
+    pub fn with_lazy_response<Req, Resp>(
+        provide_lazy: impl Fn(Req, u64) -> Resp + Send + Sync + 'static,
+    ) -> Self
+    where
+        Resp: Serialize,
+        Req: for<'a> Deserialize<'a>,
+    {
+        Self::_new(
+            200,
+            vec![],
+            |_, _| {},
+            MockNetworkingDriverLazyResponder::new_with_response(provide_lazy),
+        )
+    }
+}
+
+pub struct MockNetworkingDriverLazyResponder {
+    provide_response_for: Arc<
+        dyn Fn(NetworkRequest, u64) -> NetworkResponse + Send + Sync + 'static,
+    >,
+}
+
+impl MockNetworkingDriverLazyResponder {
+    fn new_with_responses(
+        provide: impl Fn(NetworkRequest, u64) -> NetworkResponse
+            + Send
+            + Sync
+            + 'static,
+    ) -> Self {
+        Self {
+            provide_response_for: Arc::new(provide),
+        }
+    }
+    /// N.B. the inverse of Serialize/Deserialize!
+    fn new_with_response<Req, Resp>(
+        provide: impl Fn(Req, u64) -> Resp + Send + Sync + 'static,
+    ) -> Self
+    where
+        Resp: Serialize,
+        Req: for<'a> Deserialize<'a>,
+    {
+        Self::new_with_responses(move |req, count| {
+            println!("🔮MOCK DRIVER got req: {:?}", req);
+            let s = String::from_utf8_lossy(&req.body);
+            println!("🔮MOCK DRIVER RAW json: {:?}", s);
+            let req: Req = serde_json::from_slice(&req.body).unwrap();
+            let resp: Resp = provide(req, count);
+            let resp_body = serde_json::to_vec(&resp).unwrap();
+            NetworkResponse::new(200, resp_body)
+        })
+    }
+
+    fn provide_response_for(
+        &self,
+        request: NetworkRequest,
+        count: u64,
+    ) -> NetworkResponse {
+        (self.provide_response_for)(request, count)
     }
 }
 
@@ -130,17 +209,22 @@ impl NetworkingDriver for MockNetworkingDriver {
         request: NetworkRequest,
     ) -> Result<NetworkResponse> {
         let mut count = self.count.lock().unwrap();
-        (self.spy)(request, *count);
-        *count += 1;
+        (self.spy)(request.clone(), *count);
         let mut responses = self.hard_coded_responses.lock().unwrap();
-        if responses.is_empty() {
-            Err(CommonError::Unknown)
+        let res = if responses.is_empty() {
+            if let Some(lazy_responder) = self.lazy_responder.as_ref() {
+                Ok(lazy_responder.provide_response_for(request.clone(), *count))
+            } else {
+                Err(CommonError::Unknown)
+            }
         } else {
             let response = responses.remove(0);
             Ok(NetworkResponse {
                 status_code: response.status,
                 body: response.body,
             })
-        }
+        };
+        *count += 1;
+        res
     }
 }
