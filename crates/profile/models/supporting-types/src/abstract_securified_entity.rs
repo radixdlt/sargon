@@ -1,9 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
-pub struct AbstractSecurifiedEntity<
-    E: IsBaseEntity + std::hash::Hash + Eq + Clone,
-> {
+pub struct AbstractSecurifiedEntity<E: IsBaseEntity> {
     #[allow(dead_code)]
     #[doc(hidden)]
     #[debug(skip)]
@@ -12,43 +10,33 @@ pub struct AbstractSecurifiedEntity<
     pub securified_entity_control: SecuredEntityControl,
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
-    for AbstractSecurifiedEntity<E>
-{
+impl<E: IsBaseEntity> Identifiable for AbstractSecurifiedEntity<E> {
     type ID = AddressOfAccountOrPersona;
     fn id(&self) -> Self::ID {
         self.entity.address().into()
     }
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
-    for AbstractSecurifiedEntity<E>
-{
+impl<E: IsBaseEntity> HasEntityAddress for AbstractSecurifiedEntity<E> {
     fn address_erased(&self) -> AddressOfAccountOrPersona {
         self.entity.address_erased()
     }
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsNetworkAware
-    for AbstractSecurifiedEntity<E>
-{
+impl<E: IsBaseEntity> IsNetworkAware for AbstractSecurifiedEntity<E> {
     fn network_id(&self) -> NetworkID {
         self.entity.network_id()
     }
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> IsSecurifiedEntity
-    for AbstractSecurifiedEntity<E>
-{
+impl<E: IsBaseEntity> IsSecurifiedEntity for AbstractSecurifiedEntity<E> {
     fn securified_entity_control(&self) -> SecuredEntityControl {
         self.securified_entity_control.clone()
     }
     type BaseEntity = E;
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
-    AbstractSecurifiedEntity<E>
-{
+impl<E: IsBaseEntity> AbstractSecurifiedEntity<E> {
     pub fn access_controller_address(&self) -> AccessControllerAddress {
         self.securified_entity_control.access_controller_address()
     }

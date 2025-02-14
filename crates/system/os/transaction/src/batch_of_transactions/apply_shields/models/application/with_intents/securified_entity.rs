@@ -6,32 +6,15 @@ pub enum SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
     Persona(SecurityShieldApplicationTransactionIntentsForSecurifiedPersona),
 }
 
-impl SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
-    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
-        match self {
-            Self::Account(a) => a.paying_account(),
-            Self::Persona(p) => p.paying_account(),
-        }
-    }
-}
-
 pub type SecurityShieldApplicationTransactionIntentsForSecurifiedAccount =
-    SecurityShieldApplicationTransactionIntentsForSecurifiedEntityWithPayingAccount<Account>;
+    AbstractSecurityShieldApplicationForSecurifiedEntityWithIntent<
+        SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<Account>,
+    >;
 
 pub type SecurityShieldApplicationTransactionIntentsForSecurifiedPersona =
-SecurityShieldApplicationTransactionIntentsForSecurifiedEntityWithPayingAccount<Persona>;
-
-pub type SecurityShieldApplicationTransactionIntentsForSecurifiedEntityWithPayingAccount<
-    E,
-> = AbstractSecurityShieldApplicationForSecurifiedEntityWithIntent<
-    SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<E>,
->;
-
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> SecurityShieldApplicationTransactionIntentsForSecurifiedEntityWithPayingAccount<E> {
-    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
-        self.entity.account_topping_up_xrd_vault_of_access_controller.clone()
-      }
-}
+    AbstractSecurityShieldApplicationForSecurifiedEntityWithIntent<
+        SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<Persona>,
+    >;
 
 impl SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents {
     pub fn with_intents(

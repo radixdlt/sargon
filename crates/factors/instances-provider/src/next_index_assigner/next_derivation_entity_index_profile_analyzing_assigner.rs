@@ -145,7 +145,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     /// By "controlled by" we mean having a MatrixOfFactorInstances which has that
     /// factor in **any role** in its MatrixOfFactorInstances.
     fn max_entity_mfa<
-        E: IsBaseEntity
+        E: IsBaseBaseEntity
             + std::hash::Hash
             + Eq
             + Clone
@@ -217,7 +217,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
     }
 
     fn max_entity_rola<
-        E: IsBaseEntity
+        E: IsBaseBaseEntity
             + std::hash::Hash
             + Eq
             + Clone

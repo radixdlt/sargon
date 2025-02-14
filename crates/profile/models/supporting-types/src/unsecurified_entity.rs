@@ -3,43 +3,27 @@ use crate::prelude::*;
 /// An unsecurified entity
 
 #[derive(Clone, PartialEq, Eq, Hash, derive_more::Debug)]
-pub struct AbstractUnsecurifiedEntity<
-    E: IsBaseEntity + std::hash::Hash + Eq + Clone,
-> where
-    E::Address: Into<AddressOfAccountOrPersona>,
-{
+pub struct AbstractUnsecurifiedEntity<E: IsBaseEntity> {
     pub entity: E,
     pub unsecured_entity_control: UnsecuredEntityControl,
     veci: VirtualEntityCreatingInstance,
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
-    for AbstractUnsecurifiedEntity<E>
-where
-    E::Address: Into<AddressOfAccountOrPersona>,
-{
+impl<E: IsBaseEntity> HasEntityAddress for AbstractUnsecurifiedEntity<E> {
     fn address_erased(&self) -> AddressOfAccountOrPersona {
         self.entity.address_erased()
     }
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
-    for AbstractUnsecurifiedEntity<E>
-where
-    E::Address: Into<AddressOfAccountOrPersona>,
-{
+impl<E: IsBaseEntity> Identifiable for AbstractUnsecurifiedEntity<E> {
     type ID = AddressOfAccountOrPersona;
     fn id(&self) -> Self::ID {
         self.entity.address().into()
     }
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
-    AbstractUnsecurifiedEntity<E>
-where
-    E::Address: Into<AddressOfAccountOrPersona>,
-{
+impl<E: IsBaseEntity> AbstractUnsecurifiedEntity<E> {
     pub fn with_unsecured_entity_control(
         entity: E,
         unsecured_entity_control: UnsecuredEntityControl,

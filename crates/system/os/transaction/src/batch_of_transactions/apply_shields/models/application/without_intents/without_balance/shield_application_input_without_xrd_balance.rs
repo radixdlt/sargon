@@ -85,7 +85,7 @@ impl ApplicationInputForUnsecurifiedEntityWithoutXrdBalance {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<
-    E: IsBaseEntity + std::hash::Hash + Eq + Clone,
+    E: IsEntity,
 > {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
@@ -96,7 +96,7 @@ pub struct AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<
 pub type ApplicationInputForUnsecurifiedAccountWithoutXrdBalance =
     AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<Account>;
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
+impl<E: IsEntity>
     AbstractApplicationInputForUnsecurifiedEntityWithoutXrdBalance<E>
 {
     pub fn new(
@@ -183,7 +183,7 @@ impl ApplicationInputForSecurifiedEntityWithoutXrdBalance {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ApplicationInputForSecurifiedSpecificEntityWithoutXrdBalance<T>
 where
-    T: IsBaseEntity + std::hash::Hash + Eq + Clone,
+    T: IsEntity,
 {
     pub reviewed_manifest: TransactionManifest,
     pub estimated_xrd_fee: Decimal,
@@ -192,7 +192,7 @@ where
     fee_tip_percentage: Option<u16>,
 }
 
-impl<T: IsBaseEntity + std::hash::Hash + Eq + Clone>
+impl<T: IsEntity>
     ApplicationInputForSecurifiedSpecificEntityWithoutXrdBalance<T>
 {
     pub fn new(

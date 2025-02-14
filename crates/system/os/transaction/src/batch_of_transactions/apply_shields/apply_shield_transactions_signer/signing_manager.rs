@@ -55,13 +55,32 @@ struct UnsecurifiedIntentSetInternalState {
     entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
     transaction_intent: TransactionIntent,
 }
+impl UnsecurifiedIntentSetInternalState {
+    fn new(
+        account_paying_for_transaction: ApplicationInputPayingAccount,
+        entity_applying_shield: AnyUnsecurifiedEntity,
+        transaction_intent: TransactionIntent,
+    ) -> Self {
+        Self {
+            account_paying_for_transaction: Immutable::new(
+                account_paying_for_transaction,
+            ),
+            entity_applying_shield: Immutable::new(entity_applying_shield),
+            transaction_intent,
+        }
+    }
+}
 impl From<SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent>
     for UnsecurifiedIntentSetInternalState
 {
     fn from(
-        _sec: SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent,
+        application_with_intent: SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent,
     ) -> Self {
-        todo!()
+        Self::new(
+            application_with_intent.paying_account(),
+            application_with_intent.entity_applying_shield(),
+            application_with_intent.transaction_intent()
+        )
     }
 }
 
@@ -78,15 +97,6 @@ struct IntentVariantState {
 struct IntentVariantSignaturesForRoleState {
     role: RoleKind,
     signatures: IndexSet<SignatureWithPublicKey>,
-}
-
-struct SigningInstanceContext {
-    intent_set_id: IntentSetID,
-    role: RoleKind,
-}
-struct SigningInstanceSubcontext {
-    context: SigningInstanceContext,
-    variant: RolesExercisableInTransactionManifestCombination,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

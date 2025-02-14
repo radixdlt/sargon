@@ -4,14 +4,14 @@ pub trait HasEntityAddress {
     fn address_erased(&self) -> AddressOfAccountOrPersona;
 }
 
-impl<T: IsBaseEntity> HasEntityAddress for T {
+impl<T: IsBaseBaseEntity> HasEntityAddress for T {
     fn address_erased(&self) -> AddressOfAccountOrPersona {
         self.address().into()
     }
 }
 
 /// A trait bridging AccountOrPersona, Account and Persona.
-pub trait IsBaseEntity:
+pub trait IsBaseBaseEntity:
     HasEntityKindObjectSafe + IsNetworkAware + HasSecurityState
 {
     type Address: IsBaseEntityAddress
@@ -40,6 +40,17 @@ pub trait IsBaseEntity:
     }
 }
 
+pub trait IsBaseEntity:
+    IsBaseBaseEntity + std::hash::Hash + Eq + Clone
+where
+    Self::Address: Into<AddressOfAccountOrPersona>,
+{
+}
+impl<T: IsBaseBaseEntity + std::hash::Hash + Eq + Clone> IsBaseEntity for T where
+    Self::Address: Into<AddressOfAccountOrPersona>
+{
+}
+
 impl<T: HasSecurityState> HasProvisionalSecurifiedConfig for T {
     fn get_provisional(&self) -> Option<ProvisionalSecurifiedConfig> {
         self.security_state().get_provisional()
@@ -59,7 +70,7 @@ impl<T: HasSecurityState> HasProvisionalSecurifiedConfig for T {
 
 /// A trait bridging Account and Persona.
 pub trait IsEntityWithoutConcreteTypes:
-    IsBaseEntity
+    IsBaseBaseEntity
     + HasEntityKind
     + Identifiable
     + std::hash::Hash

@@ -86,7 +86,7 @@ impl IsNetworkAware for AccountOrPersona {
     }
 }
 
-impl IsBaseEntity for AccountOrPersona {
+impl IsBaseBaseEntity for AccountOrPersona {
     type Address = AddressOfAccountOrPersona;
 
     fn address(&self) -> Self::Address {

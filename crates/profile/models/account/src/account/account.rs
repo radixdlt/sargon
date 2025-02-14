@@ -124,7 +124,7 @@ impl IsNetworkAware for Account {
     }
 }
 
-impl IsBaseEntity for Account {
+impl IsBaseBaseEntity for Account {
     type Address = AccountAddress;
 
     fn address(&self) -> Self::Address {
