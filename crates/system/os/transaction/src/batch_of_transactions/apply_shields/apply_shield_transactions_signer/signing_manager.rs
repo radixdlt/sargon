@@ -82,6 +82,10 @@ struct IntentSetState {
     internal_state: IntentSetInternalState,
 }
 impl IntentSetState {
+    fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
+        self.internal_state.can_exercise_role(role_kind)
+    }
+
     fn new(
         intent_set_id: IntentSetID,
         shield_application: SecurityShieldApplicationWithTransactionIntents,
@@ -108,6 +112,12 @@ enum IntentSetInternalState {
     Securified(SecurifiedIntentSetInternalState),
 }
 impl IntentSetInternalState {
+    fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
+        match self {
+            Self::Unsecurified(_) => role_kind == RoleKind::Primary,
+            Self::Securified(_) => true, // For securified we have all 5 variants
+        }
+    }
     fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntiitySignedFor,
@@ -148,6 +158,10 @@ struct UnsecurifiedIntentSetInternalState {
     signatures: IntentVariantSignaturesForRoleState,
 }
 impl UnsecurifiedIntentSetInternalState {
+    fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
+        todo!()
+    }
+
     fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntiitySignedFor,
@@ -303,6 +317,26 @@ struct SecurifiedIntentSetInternalState {
     initiate_with_primary_delayed_completion: IntentVariantState,
 }
 impl SecurifiedIntentSetInternalState {
+    fn _all_intent_variant_states(&self) -> Vec<&IntentVariantState> {
+        vec![
+            &self.initiate_with_recovery_complete_with_primary,
+            &self.initiate_with_recovery_complete_with_confirmation,
+            &self.initiate_with_recovery_delayed_completion,
+            &self.initiate_with_primary_complete_with_confirmation,
+            &self.initiate_with_primary_delayed_completion,
+        ]
+    }
+
+    fn variants_for_role(
+        &self,
+        role_kind: RoleKind,
+    ) -> Vec<&IntentVariantState> {
+        self._all_intent_variant_states()
+            .into_iter()
+            .filter(|v| v.variant.exercisable_roles().contains(&role_kind))
+            .collect()
+    }
+
     fn get_variant_state(
         &mut self,
         variant: RolesExercisableInTransactionManifestCombination,
@@ -519,7 +553,8 @@ impl SigningManager {
 
                         // Insert TXID into the lookup so we can group the signatures
                         // of each intent by IntentSetID.
-                        lookup_txid_to_intent_set.insert(txid.clone(), set.id);
+                        lookup_txid_to_intent_set
+                            .insert(txid.clone(), set.intent_set_id);
 
                         lookup_txid_to_variant
                             .insert(txid.clone(), variant.variant);
@@ -608,13 +643,13 @@ impl SigningManager {
                 assert_eq!(
                     per_entity_neglected_factor_sources.len(),
                     1,
-                    "Should have one entity"
+                    "Should have exactly one entity"
                 ); // TODO add support for multiple entities
                 let (owner_address, neglected_factors) =
                     per_entity_neglected_factor_sources
                         .into_iter()
                         .next()
-                        .expect("Should have one entity");
+                        .expect("Already validate to have at least entity");
 
                 let entity = lookup_address_to_entity
                     .get(&owner_address)
@@ -709,8 +744,41 @@ impl SigningManager {
         self.try_updating_state(|state| Ok(f(state)))
     }
 
+    fn get_intent_sets_to_sign_for_with_role_of_kind(
+        &self,
+        role_kind: RoleKind,
+    ) -> Vec<IntentSetToSign> {
+        let state = self.state.read().unwrap();
+        let state = state.as_ref().unwrap();
+        state
+            .per_set_state
+            .values()
+            .filter_map(|s| IntentSetToSign::maybe_from(s, role_kind))
+            .collect_vec()
+    }
+
+    fn get_intent_sets_to_sign_for_with_recovery_role(
+        &self,
+    ) -> Vec<IntentSetToSign> {
+        self.get_intent_sets_to_sign_for_with_role_of_kind(RoleKind::Recovery)
+    }
+
+    fn get_intent_sets_to_sign_for_with_confirmation_role(
+        &self,
+    ) -> Vec<IntentSetToSign> {
+        self.get_intent_sets_to_sign_for_with_role_of_kind(
+            RoleKind::Confirmation,
+        )
+    }
+
+    fn get_intent_sets_to_sign_for_with_primary_role(
+        &self,
+    ) -> Vec<IntentSetToSign> {
+        self.get_intent_sets_to_sign_for_with_role_of_kind(RoleKind::Primary)
+    }
+
     async fn sign_intents_with_recovery_role(&self) -> Result<()> {
-        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
+        let intent_sets = self.get_intent_sets_to_sign_for_with_recovery_role();
         let outcome = self
             .sign_intent_sets_with_role(intent_sets, RoleKind::Recovery)
             .await?;
@@ -718,7 +786,8 @@ impl SigningManager {
     }
 
     async fn sign_intents_with_confirmation_role(&self) -> Result<()> {
-        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
+        let intent_sets =
+            self.get_intent_sets_to_sign_for_with_confirmation_role();
         let outcome = self
             .sign_intent_sets_with_role(intent_sets, RoleKind::Confirmation)
             .await?;
@@ -726,7 +795,7 @@ impl SigningManager {
     }
 
     async fn sign_intents_with_primary_role(&self) -> Result<()> {
-        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
+        let intent_sets = self.get_intent_sets_to_sign_for_with_primary_role();
         let outcome = self
             .sign_intent_sets_with_role(intent_sets, RoleKind::Primary)
             .await?;
@@ -781,9 +850,11 @@ struct IntentSetToSign {
     #[debug(skip)]
     hidden: HiddenConstructor,
 
+    role_kind: RoleKind,
+
     // An ID generated for the purpose of being able to identify which "set" a
     // TransactionIntent belongs to.
-    id: IntentSetID,
+    intent_set_id: IntentSetID,
 
     /// Will be a single one for unsecurified entities
     variants: Vec<IntentVariant>,
@@ -793,10 +864,53 @@ struct IntentSetToSign {
     entity: AccountOrPersona, // TODO: Generalization - in future change to support multiple entities
 }
 impl IntentSetToSign {
-    pub fn new(variants: Vec<IntentVariant>, entity: AccountOrPersona) -> Self {
+    pub fn maybe_from(
+        intent_set_state: &IntentSetState,
+        role_kind: RoleKind,
+    ) -> Option<Self> {
+        if !intent_set_state.can_exercise_role(role_kind) {
+            return None;
+        }
+
+        match &intent_set_state.internal_state {
+            IntentSetInternalState::Securified(sec) => Some(Self::new(
+                intent_set_state.intent_set_id,
+                role_kind,
+                sec.variants_for_role(role_kind)
+                    .into_iter()
+                    .map(|variant: &IntentVariantState| {
+                        IntentVariant::new(
+                            *variant.variant,
+                            (*variant.intent).clone(),
+                        )
+                    })
+                    .collect_vec(),
+                sec.entity_applying_shield.entity.clone(),
+            )),
+            IntentSetInternalState::Unsecurified(unsec) => {
+                assert_eq!(role_kind, RoleKind::Primary);
+                Some(Self::new(
+                    intent_set_state.intent_set_id,
+                    role_kind,
+                    vec![IntentVariant::new(
+                        None,
+                        (*unsec.transaction_intent).clone(),
+                    )],
+                    unsec.entity_applying_shield.entity.clone(),
+                ))
+            }
+        }
+    }
+    pub fn new(
+        intent_set_id: IntentSetID,
+        role_kind: RoleKind,
+        variants: Vec<IntentVariant>,
+        entity: AccountOrPersona,
+    ) -> Self {
         Self {
             hidden: HiddenConstructor,
-            id: IntentSetID::new(),
+            role_kind,
+            intent_set_id,
             variants,
             entity,
         }
@@ -807,6 +921,17 @@ impl IntentSetToSign {
 struct IntentVariant {
     variant: Option<RolesExercisableInTransactionManifestCombination>,
     intent: TransactionIntent,
+}
+impl IntentVariant {
+    pub fn new(
+        variant: impl Into<Option<RolesExercisableInTransactionManifestCombination>>,
+        intent: TransactionIntent,
+    ) -> Self {
+        Self {
+            variant: variant.into(),
+            intent,
+        }
+    }
 }
 
 // =================
