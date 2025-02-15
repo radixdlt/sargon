@@ -287,6 +287,12 @@ impl SargonOS {
         name: DisplayName,
         persona_data: Option<PersonaData>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
+        self.spot_check_factor_source_before_entity_creation_if_necessary(
+            factor_source.clone(),
+            network_id,
+            EntityKind::Persona,
+        )
+        .await?;
         debug!("Creating persona.");
         let (mut persona, instances_in_cache_consumer, derivation_outcome) = self
             .create_unsaved_persona_with_factor_source_with_derivation_outcome(
@@ -1290,6 +1296,56 @@ mod tests {
             os.persona_by_address(IdentityAddress::sample_mainnet()),
             Err(CommonError::UnknownPersona)
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_persona_continues_when_user_skips_spot_check(
+    ) {
+        let os = SUT::boot_test_empty_wallet_with_spot_check_interactor(
+            Arc::new(TestSpotCheckInteractor::new_skipped()),
+        )
+        .await;
+
+        // Add Persona and verify it was added
+        let persona = os
+            .with_timeout(|x| {
+                x.create_and_save_new_persona_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                    None,
+                )
+            })
+            .await
+            .unwrap();
+
+        assert_eq!(
+            os.profile().unwrap().networks[0].personas,
+            Personas::just(persona)
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_create_and_save_new_persona_fails_when_spot_check_fails() {
+        let spot_check_error = CommonError::sample_other();
+        let os =
+            SUT::boot_test_empty_wallet_with_spot_check_interactor(Arc::new(
+                TestSpotCheckInteractor::new_failed(spot_check_error.clone()),
+            ))
+            .await;
+
+        // Attempt to add Persona and check it fails with expected error
+        let error = os
+            .with_timeout(|x| {
+                x.create_and_save_new_persona_with_main_bdfs(
+                    NetworkID::Mainnet,
+                    DisplayName::sample(),
+                    None,
+                )
+            })
+            .await
+            .expect_err("Expected error");
+
+        assert_eq!(error, spot_check_error);
     }
 
     #[actix_rt::test]

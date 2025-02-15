@@ -23,6 +23,18 @@ pub trait OsShieldApplying {
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<EntitiesOnNetwork>;
 
+    async fn _get_factor_sources_from_security_structure_that_require_spot_check(
+        &self,
+        shield: &SecurityStructureOfFactorSources,
+        entity_addresses: IndexSet<AddressOfAccountOrPersona>,
+        network_id: NetworkID,
+    ) -> Result<IndexSet<FactorSource>>;
+
+    async fn _perform_spot_check_on_factor_sources(
+        &self,
+        factor_sources: IndexSet<FactorSource>,
+    ) -> Result<()>;
+
     async fn _provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
         &self,
         security_structure_of_factor_sources: SecurityStructureOfFactorSources, // Aka "shield"
@@ -68,12 +80,152 @@ impl OsShieldApplying for SargonOS {
         entity_addresses: IndexSet<AddressOfAccountOrPersona>,
     ) -> Result<EntitiesOnNetwork> {
         let network = self.current_network_id()?;
+        let factor_sources = self._get_factor_sources_from_security_structure_that_require_spot_check(shield, entity_addresses.clone(), network).await?;
+        self._perform_spot_check_on_factor_sources(factor_sources)
+            .await?;
         self._apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
             shield,
             entity_addresses,
         )
         .await
         .and_then(|(entities, _)| EntitiesOnNetwork::new(network, entities))
+    }
+
+    async fn _get_factor_sources_from_security_structure_that_require_spot_check(
+        &self,
+        shield: &SecurityStructureOfFactorSources,
+        entity_addresses: IndexSet<AddressOfAccountOrPersona>,
+        network_id: NetworkID,
+    ) -> Result<IndexSet<FactorSource>> {
+        // We only want to perform spot check on Factor Sources for which we won't need to derive public keys.
+        // This is, Factor Sources that have enough keys in cache to securify the required entities.
+        let mut result: IndexSet<FactorSource> = IndexSet::new();
+
+        // First we get the Accounts & Personas we are going to securify
+        let (account_addresses, persona_addresses): (
+            Vec<AccountAddress>,
+            Vec<IdentityAddress>,
+        ) = entity_addresses.iter().partition_map(|a| match a {
+            AddressOfAccountOrPersona::Account(account) => {
+                Either::Left(*account)
+            }
+            AddressOfAccountOrPersona::Identity(identity) => {
+                Either::Right(*identity)
+            }
+        });
+
+        let accounts: Accounts = self
+            .accounts_on_current_network()?
+            .iter()
+            .filter(|a| account_addresses.contains(&a.address))
+            .collect();
+        let personas: Personas = self
+            .personas_on_current_network()?
+            .iter()
+            .filter(|i| persona_addresses.contains(&i.address))
+            .collect();
+
+        let cache = self.cache_snapshot().await;
+
+        let roles_factors = shield.matrix_of_factors.all_factors();
+
+        // We iterate over every factor source to find out if we have enough keys in cache, and we need to perform spot check for it.
+        for factor_source in shield.all_factors() {
+            // To calculate the QuantifiedDerivationPresets, we need to determine how many keys we need for each derivation preset.
+
+            // To determine the entities MFA keys, we check if this factor source is used in any role.
+            let account_mfa_count: usize;
+            let identity_mfa_count: usize;
+            if roles_factors.contains(factor_source) {
+                // This factor source is required to securify the entities.
+                account_mfa_count = account_addresses.len();
+                identity_mfa_count = persona_addresses.len();
+            } else {
+                // This factor source isn't required to securify the entities (it's only used for ROLA keys).
+                account_mfa_count = 0;
+                identity_mfa_count = 0;
+            }
+
+            // To determine the ROLA keys, we check if this factor source is used as authentication factor.
+            let account_rola_count: usize;
+            let identity_rola_count: usize;
+            if shield.authentication_signing_factor != *factor_source {
+                // The factor source isn't used as the shield's authentication signing factor.
+                // There are no `AccountRola` or `IdentityRola` derivations keys needed.
+                account_rola_count = 0;
+                identity_rola_count = 0;
+            } else {
+                // The factor source is used as authentication factor.
+                // We will need to derive ROLA key for each entity that is either unsecurified, or securified with a different factor source.
+                fn filter(
+                    e: &impl HasSecurityState,
+                    factor_source: FactorSource,
+                ) -> bool {
+                    match e.security_state() {
+                        EntitySecurityState::Unsecured { .. } => true,
+                        EntitySecurityState::Securified { value: sec } => {
+                            sec.security_structure
+                                .authentication_signing_factor_instance
+                                .factor_source_id
+                                != factor_source.id_from_hash()
+                        }
+                    }
+                }
+
+                account_rola_count = accounts
+                    .iter()
+                    .filter(|a| filter(a, factor_source.clone()))
+                    .count();
+
+                identity_rola_count = personas
+                    .iter()
+                    .filter(|a| filter(a, factor_source.clone()))
+                    .count();
+            }
+            let quantified_derivation_presets: IdentifiedVecOf<
+                QuantifiedDerivationPreset,
+            > = vec![
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::AccountMfa,
+                    account_mfa_count,
+                ),
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::AccountRola,
+                    account_rola_count,
+                ),
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::IdentityMfa,
+                    identity_mfa_count,
+                ),
+                QuantifiedDerivationPreset::new(
+                    DerivationPreset::IdentityRola,
+                    identity_rola_count,
+                ),
+            ]
+            .into();
+
+            // If cache is satisfied, we won't need to derive public keys so we perform spot check
+            if cache.is_satisfied(
+                network_id,
+                factor_source.id_from_hash(),
+                &quantified_derivation_presets,
+            ) {
+                result.insert(factor_source.clone());
+            }
+        }
+
+        Ok(result)
+    }
+
+    async fn _perform_spot_check_on_factor_sources(
+        &self,
+        factor_sources: IndexSet<FactorSource>,
+    ) -> Result<()> {
+        let interactor = self.spot_check_interactor();
+        for factor_source in factor_sources {
+            let _ = interactor.spot_check(factor_source.clone(), true).await?;
+        }
+        Ok(())
     }
 
     async fn _apply_security_structure_of_factor_sources_to_entities_with_diagnostics(
@@ -415,8 +567,8 @@ pub(crate) async fn add_unsafe_shield_with_matrix_with_fixed_metadata(
     os: &SargonOS,
     fixed_metadata: impl Into<Option<SecurityStructureMetadata>>,
 ) -> Result<SecurityStructureOfFactorSourceIDs> {
-    let bdsf = os.main_bdfs()?;
-    let mut shield_of_ids = unsafe_shield_with_bdfs(&bdsf.into());
+    let bdfs = os.main_bdfs()?;
+    let mut shield_of_ids = unsafe_shield_with_bdfs(&bdfs.into());
     if let Some(fixed_metadata) = fixed_metadata.into() {
         shield_of_ids.metadata = fixed_metadata;
     }
@@ -440,6 +592,7 @@ pub(crate) async fn add_unsafe_shield(
 }
 
 #[cfg(test)]
+#[allow(non_snake_case)]
 mod tests {
 
     use super::*;
@@ -919,5 +1072,381 @@ mod tests {
             result.err().unwrap(),
             CommonError::CannotSecurifyEntityHasProvisionalSecurityConfig
         );
+    }
+
+    #[actix_rt::test]
+    async fn test_apply_security_shield_continues_when_user_skips_spot_check() {
+        // ARRANGE
+        let (os, shield_id, account, persona) = {
+            let os =
+                SargonOS::boot_test_empty_wallet_with_spot_check_interactor(
+                    Arc::new(TestSpotCheckInteractor::new_skipped()),
+                )
+                .await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let account = os
+                .create_and_save_new_account_with_main_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+            let persona = os
+                .create_and_save_new_persona_with_main_bdfs(
+                    network,
+                    DisplayName::sample_other(),
+                    None,
+                )
+                .await
+                .unwrap();
+            (os, shield_id, account, persona)
+        };
+
+        // ACT
+        let (account_provisional, persona_provisional) = {
+            os.apply_security_shield_with_id_to_entities(
+                shield_id,
+                [
+                    AddressOfAccountOrPersona::from(account.address()),
+                    AddressOfAccountOrPersona::from(persona.address()),
+                ]
+                .iter()
+                .cloned()
+                .collect(),
+            )
+            .await
+            .unwrap();
+            let account = os.account_by_address(account.address()).unwrap();
+            let persona = os.persona_by_address(persona.address()).unwrap();
+            let account_provisional = account
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            let persona_provisional = persona
+                .get_provisional()
+                .and_then(|p| p.as_factor_instances_derived().cloned())
+                .unwrap();
+            (account_provisional, persona_provisional)
+        };
+
+        // ASSERT
+        assert_eq!(account_provisional.security_structure_id, shield_id);
+        assert_eq!(persona_provisional.security_structure_id, shield_id);
+    }
+
+    #[actix_rt::test]
+    async fn test_apply_security_shield_fails_when_spot_check_fails() {
+        // ARRANGE
+        let spot_check_error = CommonError::sample();
+        let (os, shield_id, account) = {
+            let os =
+                SargonOS::boot_test_empty_wallet_with_spot_check_interactor(
+                    Arc::new(TestSpotCheckInteractor::new_succeeded_first_n(
+                        1, // Spot check for creating account must succeed
+                        spot_check_error.clone(),
+                    )),
+                )
+                .await;
+            let shield_id = add_unsafe_shield(&os).await.unwrap();
+            let network = NetworkID::Mainnet;
+            let account = os
+                .create_and_save_new_account_with_main_bdfs(
+                    network,
+                    DisplayName::sample(),
+                )
+                .await
+                .unwrap();
+            (os, shield_id, account)
+        };
+
+        // ACT
+        let error = os
+            .apply_security_shield_with_id_to_entities(
+                shield_id,
+                [AddressOfAccountOrPersona::from(account.address())]
+                    .iter()
+                    .cloned()
+                    .collect(),
+            )
+            .await
+            .expect_err("Expected an error");
+
+        // ASSERT
+        assert_eq!(error, spot_check_error);
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__instances_in_cache_for_all() {
+        let (os, shield, entity_addresses, device, ledger, arculus) =
+            set_up_spot_check_test().await;
+
+        // Verify that spot check is performed for all Factor Sources (we have keys for all on cache)
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        let expected: IndexSet<FactorSource> = IndexSet::from_iter([
+            device.clone(),
+            ledger.clone(),
+            arculus.clone(),
+        ]);
+        assert_eq!(result, expected);
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__instances_for_none() {
+        let (os, shield, entity_addresses, _, _, _) =
+            set_up_spot_check_test().await;
+
+        // Clear the cache and verify we don't perform spot check for any Factor Source (derivation of keys on both is required)
+        os.factor_instances_cache.clear().await.unwrap();
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__instances_for_one_role_factor_only() {
+        let (os, shield, entity_addresses, _, ledger, _) =
+            set_up_spot_check_test().await;
+
+        // Set cache to only have keys for `ledger`
+        let cache = FactorInstancesCache::build_with_instances(
+            ledger.id_from_hash(),
+            0,
+            2,
+            0,
+            0,
+            1,
+            0,
+        );
+        os.factor_instances_cache
+            .set_cache(cache.serializable_snapshot())
+            .await
+            .unwrap();
+
+        // Verify that spot check is performed for only the ledger Factor Source (we have keys for it on cache, but not for device or arculus)
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        let expected: IndexSet<FactorSource> =
+            IndexSet::from_iter([ledger.clone()]);
+        assert_eq!(result, expected);
+
+        // Set similar cache but with one less key, verify spot check isn't performed since we need to derive 1 `AccountMfa` instance
+        let cache = FactorInstancesCache::build_with_instances(
+            ledger.id_from_hash(),
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+        );
+        os.factor_instances_cache
+            .set_cache(cache.serializable_snapshot())
+            .await
+            .unwrap();
+
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn spot_check__instances_for_rola_factor_only() {
+        let (os, shield, entity_addresses, _, _, arculus) =
+            set_up_spot_check_test().await;
+
+        // Set cache to have only 1 `AccountRola` key for `arculus`
+        let cache = FactorInstancesCache::build_with_instances(
+            arculus.id_from_hash(),
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+        );
+        os.factor_instances_cache
+            .set_cache(cache.serializable_snapshot())
+            .await
+            .unwrap();
+
+        // Verify we don't perform spot check for any Factor Source (we need 1 more `AccountRola` key for Arculus).
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        assert!(result.is_empty());
+
+        // Update one of the accounts and set is as securified with the Arculus as `authentication_signing_factor_instance`
+        security_first_account(&os, arculus.id_from_hash())
+            .await
+            .unwrap();
+
+        // Perform the same check again and verify spot check is performed for Arculus, since we only need 1 `AccountRola` key
+        let result = os._get_factor_sources_from_security_structure_that_require_spot_check(&shield, entity_addresses.clone(), NetworkID::Mainnet).await.unwrap();
+        assert_eq!(result, IndexSet::just(arculus));
+    }
+
+    /// Sets up SargonOS with 3 factor sources: `device`, `ledger` and `arculus`
+    /// Creates a Shield that uses `device` and `ledger` for P, R and C roles, and `arculus` for ROLA.
+    /// Finally, add 2 Accounts & 1 Persona to the Profile
+    async fn set_up_spot_check_test() -> (
+        Arc<SargonOS>,
+        SecurityStructureOfFactorSources,
+        IndexSet<AddressOfAccountOrPersona>,
+        FactorSource,
+        FactorSource,
+        FactorSource,
+    ) {
+        // Set up OS with 3 factor sources:
+        // - `device`: a BDFS with keys in cache
+        // - `ledger`: a ledger with keys in cache
+        // - `arculus`: an arculusCard with keys in cache
+        let os = SargonOS::fast_boot().await;
+        let device: FactorSource = os.main_bdfs().unwrap().into();
+        let ledger = FactorSource::sample_ledger();
+        let arculus = FactorSource::sample_arculus();
+
+        os.add_factor_source(ledger.clone()).await.unwrap(); // This pre-derives keys for Ledger as well
+        os.add_factor_source(arculus.clone()).await.unwrap(); // This pre-derives keys for Arculus as well
+
+        // Set up a shield that requires all factor sources:
+        // `device` & `ledger` are used on P, R and C roles
+        // `arculus` is used for ROLA
+        let shield = add_sample_shield(
+            &os,
+            device.factor_source_id(),
+            ledger.factor_source_id(),
+            arculus.factor_source_id(),
+        )
+        .await;
+
+        // Add 2 Accounts & 1 Persona to the Profile
+        let entity_addresses = add_entities(&os).await;
+
+        (os, shield, entity_addresses, device, ledger, arculus)
+    }
+
+    /// Creates and adds 2 Accounts & 1 Persona to the OS
+    /// Returns the addresses of the created entities.
+    async fn add_entities(
+        os: &SargonOS,
+    ) -> IndexSet<AddressOfAccountOrPersona> {
+        let account1: AddressOfAccountOrPersona = os
+            .create_and_save_new_account_with_main_bdfs(
+                NetworkID::Mainnet,
+                DisplayName::sample(),
+            )
+            .await
+            .unwrap()
+            .address
+            .into();
+
+        let account2: AddressOfAccountOrPersona = os
+            .create_and_save_new_account_with_main_bdfs(
+                NetworkID::Mainnet,
+                DisplayName::sample_other(),
+            )
+            .await
+            .unwrap()
+            .address
+            .into();
+
+        let persona: AddressOfAccountOrPersona = os
+            .create_and_save_new_persona_with_main_bdfs(
+                NetworkID::Mainnet,
+                DisplayName::sample_other(),
+                None,
+            )
+            .await
+            .unwrap()
+            .address
+            .into();
+
+        IndexSet::from_iter([account1, account2, persona])
+    }
+
+    /// Creates and adds a sample shield with the given device, ledger and arculus factor source ids.
+    /// It uses the device and ledger for the primary, recovery and confirmation roles, and arculus as ROLA signing factor.
+    async fn add_sample_shield(
+        os: &Arc<SargonOS>,
+        device_id: FactorSourceID,
+        ledger_id: FactorSourceID,
+        arculus_id: FactorSourceID,
+    ) -> SecurityStructureOfFactorSources {
+        let matrix = unsafe {
+            MatrixOfFactorSourceIds::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    Threshold::zero(),
+                    [device_id, ledger_id],
+                    [],
+                ),
+                RecoveryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    Threshold::zero(),
+                    [],
+                    [device_id],
+                ),
+                ConfirmationRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    Threshold::zero(),
+                    [],
+                    [ledger_id],
+                ),
+                TimePeriod::with_days(14),
+            )
+        };
+        // Create SEC of FSIds and add it
+        let sec = SecurityStructureOfFactorSourceIds::new(
+            DisplayName::new("Invalid Shield").unwrap(),
+            matrix,
+            arculus_id,
+        );
+        os.add_security_structure_of_factor_source_ids(&sec)
+            .await
+            .unwrap();
+
+        // Get Shield
+        let shield = os
+            .security_structure_of_factor_sources_from_security_structure_id(
+                sec.id(),
+            )
+            .unwrap();
+
+        shield
+    }
+
+    /// Fetches the first Account on Profile and updates it to be securified with an instance of the
+    /// given `factor_source_id` as authentication signing factor
+    async fn security_first_account(
+        os: &SargonOS,
+        factor_source_id: FactorSourceIDFromHash,
+    ) -> Result<()> {
+        let accounts = os.accounts_on_current_network()?;
+        let account = accounts.first().unwrap();
+        let authentication_siging_instance = HierarchicalDeterministicFactorInstance::new_for_entity_with_key_kind_on_network(
+            CAP26KeyKind::AuthenticationSigning,
+            NetworkID::Mainnet,
+            factor_source_id,
+            CAP26EntityKind::Account,
+            Hardened::from_local_key_space(
+                10u32,
+                IsSecurified(true),
+            )
+                .unwrap(),
+        );
+        let control = SecuredEntityControl::new(
+            account
+                .security_state()
+                .as_unsecured()
+                .unwrap()
+                .transaction_signing
+                .clone(),
+            AccessControllerAddress::sample_mainnet(),
+            SecurityStructureOfFactorInstances::new(
+                SecurityStructureID::sample(),
+                MatrixOfFactorInstances::sample(),
+                authentication_siging_instance,
+            )?,
+        )?;
+
+        let mut securified_account = account.clone();
+        securified_account.set_security_state(
+            EntitySecurityState::Securified { value: control },
+        )?;
+
+        os.update_account(securified_account.clone()).await
     }
 }

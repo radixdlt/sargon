@@ -35,6 +35,13 @@ final class MnemonicWithPassphraseTests: Test<MnemonicWithPassphrase> {
 		XCTAssertEqual(SUT.sample.derivePublicKeys(paths: [DerivationPath.sample]), [HierarchicalDeterministicPublicKey.sample])
 	}
 
+	func test_derive_public_keys_factor_instances() {
+		XCTAssertEqual(
+			SUT.sample.derivePublicKeys(paths: [DerivationPath.sample], factorSourceId: FactorSourceIDFromHash.sample),
+			[HierarchicalDeterministicFactorInstance.sample]
+		)
+	}
+
 	func test_validate() {
 		XCTAssertTrue(SUT.sample.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
 		XCTAssertFalse(SUT.sampleOther.validate(publicKeys: [HierarchicalDeterministicPublicKey.sample]))
