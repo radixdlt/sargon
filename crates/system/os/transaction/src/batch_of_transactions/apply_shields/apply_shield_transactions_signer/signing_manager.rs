@@ -1,3 +1,5 @@
+use std::sync::RwLockReadGuard;
+
 use crate::prelude::*;
 
 /// Implementation of complex signing flow laid out in this
@@ -14,7 +16,7 @@ pub struct SigningManager {
     /// We start with `None` in ctor, and set it to `Some` in `sign_intent_sets`.
     /// We wanna init this SigninManager only with dependencies and not until
     /// later when we call `sign_intent_sets` we can set the state.
-    state: RwLock<Option<SigningManagerState>>,
+    state: RwLock<SigningManagerState>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -112,6 +114,21 @@ enum IntentSetInternalState {
     Securified(SecurifiedIntentSetInternalState),
 }
 impl IntentSetInternalState {
+    fn paying_account(&self) -> Account {
+        match self {
+            Self::Unsecurified(unsec) => unsec.paying_account(),
+            Self::Securified(sec) => sec.paying_account(),
+        }
+    }
+
+
+    fn transaction_intent_hashes(&self) -> IndexSet<TransactionIntentHash> {
+        match self {
+            Self::Unsecurified(unsec) => IndexSet::just(unsec.transaction_intent_hash()),
+            Self::Securified(sec) => sec.transaction_intent_hashes(), 
+        }
+    }
+
     fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
         match self {
             Self::Unsecurified(_) => role_kind == RoleKind::Primary,
@@ -158,8 +175,11 @@ struct UnsecurifiedIntentSetInternalState {
     signatures: IntentVariantSignaturesForRoleState,
 }
 impl UnsecurifiedIntentSetInternalState {
-    fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
-        todo!()
+    fn paying_account(&self) -> Account {
+        self.account_paying_for_transaction.account()
+    }
+    fn transaction_intent_hash(&self) -> TransactionIntentHash {
+        self.transaction_intent.transaction_intent_hash()
     }
 
     fn update_with_intent_with_signatures(
@@ -317,6 +337,14 @@ struct SecurifiedIntentSetInternalState {
     initiate_with_primary_delayed_completion: IntentVariantState,
 }
 impl SecurifiedIntentSetInternalState {
+    fn paying_account(&self) -> Account {
+        self.account_paying_for_transaction.account()
+    }
+
+    fn transaction_intent_hashes(&self) -> IndexSet<TransactionIntentHash> {
+        self._all_intent_variant_states().iter().map(|v| v.intent.transaction_intent_hash()).collect()
+    }
+
     fn _all_intent_variant_states(&self) -> Vec<&IntentVariantState> {
         vec![
             &self.initiate_with_recovery_complete_with_primary,
@@ -464,11 +492,15 @@ impl SigningManager {
     pub fn new(
         factor_sources_in_profile: IndexSet<FactorSource>,
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+        intent_sets: impl IntoIterator<
+            Item = SecurityShieldApplicationWithTransactionIntents,
+        >,
     ) -> Self {
+        let state = SigningManagerState::new(intent_sets);
         Self {
             factor_sources_in_profile,
             interactor,
-            state: RwLock::new(None),
+            state: RwLock::new(state),
         }
     }
 
@@ -485,18 +517,7 @@ impl SigningManager {
     /// using Recovery role, then Confirmation role, then Primary role for
     /// the entities applying the shield, and lastly we sign for the fee payers
     /// using Primary role.
-    pub async fn sign_intent_sets(
-        &self,
-        intent_sets: impl IntoIterator<
-            Item = SecurityShieldApplicationWithTransactionIntents,
-        >,
-    ) -> Result<SigningManagerOutcome> {
-        // Init the state
-        self.state
-            .write()
-            .unwrap()
-            .replace(SigningManagerState::new(intent_sets));
-
+    pub async fn sign_intent_sets(&self) -> Result<SigningManagerOutcome> {
         // Start with Recovery role
         self.sign_intents_with_recovery_role().await?;
 
@@ -506,11 +527,17 @@ impl SigningManager {
         // Then we sign for the Primary role
         self.sign_intents_with_primary_role().await?;
 
-        // Lastly we sign for the fee payers using Primary role
-        self.sign_for_fee_payers().await?;
+        // Try to get the intermediary outcome
+        // We have not signed for with all entities
+        // applying the shield.
+        let signed_for_with_entities_applying_shield =
+            self.intermediary_outcome()?;
+        // Get the best ones
+        let best_signed_intent = signed_for_with_entities_applying_shield
+            .get_best_signed_intents()?;
 
-        // Try to get the outcome
-        self.outcome()
+        // Sign with fee payer
+        self.sign_for_fee_payers(best_signed_intent).await
     }
 }
 
@@ -711,30 +738,12 @@ impl SigningManager {
         Ok(())
     }
 
-    /// # Panics
-    /// Panics if fee_payers_outcome.role != RoleKind::Primary (we are spending XRD)
-    fn handle_fee_payers_outcome(
-        &self,
-        fee_payers_outcome: ExerciseRoleOutcome,
-    ) -> Result<()> {
-        assert_eq!(fee_payers_outcome.role, RoleKind::Primary);
-        self.updating_state(|state| {
-            state.update_with_exercise_role_outcome(fee_payers_outcome);
-        })?;
-        Ok(())
-    }
-
     fn try_updating_state<R>(
         &self,
         f: impl FnOnce(&mut SigningManagerState) -> Result<R>,
     ) -> Result<R> {
-        let mut state_holder =
-            self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
-        if let Some(state) = state_holder.as_mut() {
-            f(state)
-        } else {
-            unreachable!("State should be Some");
-        }
+        let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
+        f(&mut state)
     }
 
     fn updating_state<R>(
@@ -744,12 +753,15 @@ impl SigningManager {
         self.try_updating_state(|state| Ok(f(state)))
     }
 
+    fn _get_state(&self) -> RwLockReadGuard<'_, SigningManagerState> {
+        self.state.read().unwrap()
+    }
+
     fn get_intent_sets_to_sign_for_with_role_of_kind(
         &self,
         role_kind: RoleKind,
     ) -> Vec<IntentSetToSign> {
-        let state = self.state.read().unwrap();
-        let state = state.as_ref().unwrap();
+        let state = self._get_state();
         state
             .per_set_state
             .values()
@@ -802,22 +814,64 @@ impl SigningManager {
         self.handle_primary_outcome(outcome)
     }
 
-    async fn sign_for_fee_payers(&self) -> Result<()> {
-        let intent_sets: Vec<IntentSetToSign> = vec![]; // TODO: Get intent_sets from state
+    async fn sign_for_fee_payers(
+        &self,
+        signed_intents: Vec<SignedIntentWithContext>,
+    ) -> Result<SigningManagerOutcome> {
+        let role_kind = RoleKind::Primary;
+        let payer_by_tx_id = |intent_set_id: IntentSetID,
+        txid: TransactionIntentHash|
+        -> Result<Account> {
+             let state = self._get_state();
+            let s = state.per_set_state.get(&intent_set_id).unwrap();
+            let txids = s.internal_state.transaction_intent_hashes();
+            assert!(txids.contains(&txid));
+            Ok(s.internal_state.paying_account())
+        };
 
-        // We are goign to spend the fee paying accouts XRD
-        // so we use Primary role
-        let role = RoleKind::Primary;
+        // We are NOT signing intent SETs but we piggy back
+        // on the existing code above, and inlay a single intent into a set
+        // to be able to use the same code.
+        let intent_sets = signed_intents
+            .iter()
+            .map(|si| {
+                let intent_set_id = si.context.intent_set_id;
+                let txid = si.signed_intent.intent.transaction_intent_hash();
+                let entity = payer_by_tx_id(intent_set_id, txid)?;
+                Ok(IntentSetToSign::single_intent(
+                    IntentSetID::new(),
+                    role_kind,
+                    IntentVariant::new(None, si.signed_intent.intent.clone()),
+                    entity.into(),
+                ))
+            })
+            .collect::<Result<Vec<IntentSetToSign>>>()?;
 
-        let outcome =
-            self.sign_intent_sets_with_role(intent_sets, role).await?;
+let mut signed_intents = signed_intents.into_iter().map(|si| {
+    (si.context, si.signed_intent)
 
-        self.handle_fee_payers_outcome(outcome)
+}).collect::<IndexMap<EntitySigningContext, SignedIntent>>();
+
+        let exercise_role_outcome = self
+            .sign_intent_sets_with_role(intent_sets, RoleKind::Primary)
+            .await?;
+
+            assert!(exercise_role_outcome.entities_not_signed_for.is_empty());
+         
+            let signed_with_payers = exercise_role_outcome.entities_signed_for;
+            signed_with_payers.0.into_iter().for_each(|signed_with_payer| {
+                let intent_set_id = signed_with_payer.context.intent_set_id;
+                let mut signed_intent = signed_intents
+                    .get_mut(&signed_with_payer.context)
+                    .expect("Should have signed intent");
+                signed_intent.add_fee_payer_signatures(signed_with_payer.signatures());
+            });
     }
 
-    fn outcome(&self) -> Result<SigningManagerOutcome> {
+    fn intermediary_outcome(
+        &self,
+    ) -> Result<SigningManagerIntermediaryOutcome> {
         let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
-        let _state = state.take().ok_or(CommonError::Unknown)?; // TODO specific error variant
         todo!()
     }
 }
@@ -889,18 +943,28 @@ impl IntentSetToSign {
             )),
             IntentSetInternalState::Unsecurified(unsec) => {
                 assert_eq!(role_kind, RoleKind::Primary);
-                Some(Self::new(
+                Some(Self::single_intent(
                     intent_set_state.intent_set_id,
                     role_kind,
-                    vec![IntentVariant::new(
+                    IntentVariant::new(
                         None,
                         (*unsec.transaction_intent).clone(),
-                    )],
+                    ),
                     unsec.entity_applying_shield.entity.clone(),
                 ))
             }
         }
     }
+
+    pub fn single_intent(
+        intent_set_id: IntentSetID,
+        role_kind: RoleKind,
+        variant: IntentVariant,
+        entity: AccountOrPersona,
+    ) -> Self {
+        Self::new(intent_set_id, role_kind, vec![variant], entity)
+    }
+
     pub fn new(
         intent_set_id: IntentSetID,
         role_kind: RoleKind,
@@ -1112,11 +1176,11 @@ pub struct SignedIntentSet {
     intents: Vec<EntiitySignedFor>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
 }
 impl SignedIntentSet {
-    pub fn get_best_signed_intent(self) -> Result<SignedIntent> {
+    pub fn get_best_signed_intent(self) -> Result<SignedIntentWithContext> {
         let first =
             self.intents.first().ok_or(CommonError::Unknown).cloned()?; // TODO specific error variant
 
-        let from = |item: EntiitySignedFor| -> Result<SignedIntent> {
+        let from = |item: EntiitySignedFor| -> Result<SignedIntentWithContext> {
             let intent = item.intent.clone();
             let signatures = item
                 .signatures()
@@ -1124,7 +1188,13 @@ impl SignedIntentSet {
                 .map(IntentSignature::from)
                 .collect_vec();
 
-            SignedIntent::new(intent, IntentSignatures::new(signatures))
+            let signed_intent =
+                SignedIntent::new(intent, IntentSignatures::new(signatures))?;
+
+            Ok(SignedIntentWithContext {
+                signed_intent,
+                context: item.context,
+            })
         };
 
         if self.intents.len() == 1 {
@@ -1161,15 +1231,36 @@ impl HasTransactionVariantRating
     }
 }
 
-pub struct SigningManagerOutcome {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SigningManagerOutcome(pub Vec<SignedIntent>);
+
+struct SigningManagerIntermediaryOutcome {
     successfully_signed_intent_sets: Vec<SignedIntentSet>,
     failed_intent_sets: Vec<SignedIntentSet>,
 }
-impl SigningManagerOutcome {
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SignedIntentWithContext {
+    pub signed_intent: SignedIntent,
+    pub context: EntitySigningContext,
+}
+
+
+impl SigningManagerIntermediaryOutcome {
+    fn get_best_signed_intents(self) -> Result<Vec<SignedIntentWithContext>> {
+        // TODO: Implement support for handling of failed transactions, i.e. submit the successful ones even if some failed and do SOMETHING with the failed ones
+        let signed_sets = self.validate_all_intent_sets_signed()?;
+
+        // We are not going to submit multiple manifest variants for each "manifest set",
+        // we only want the "best one" for each set.
+        signed_sets
+            .into_iter()
+            .map(|signed_set| signed_set.get_best_signed_intent())
+            .collect::<Result<Vec<_>>>()
+    }
+
     // TODO: Implement support for handling of failed transactions, i.e. submit the successful ones even if some failed and do SOMETHING with the failed ones
-    pub fn validate_all_intent_sets_signed(
-        self,
-    ) -> Result<Vec<SignedIntentSet>> {
+    fn validate_all_intent_sets_signed(self) -> Result<Vec<SignedIntentSet>> {
         if self.failed_intent_sets.is_empty() {
             Ok(self.successfully_signed_intent_sets)
         } else {
