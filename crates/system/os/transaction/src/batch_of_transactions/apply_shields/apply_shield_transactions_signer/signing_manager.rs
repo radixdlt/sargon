@@ -65,9 +65,9 @@ impl SigningManagerState {
 
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
-        let key = intent_with_signatures.part_of_intent_set;
+        let key = intent_with_signatures.intent_set_id();
         let existing = self
             .per_set_state
             .get_mut(&key)
@@ -94,12 +94,9 @@ impl IntentSetState {
 
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
-        assert_eq!(
-            self.intent_set_id,
-            intent_with_signatures.part_of_intent_set
-        );
+        assert_eq!(self.intent_set_id, intent_with_signatures.intent_set_id());
         self.internal_state
             .update_with_intent_with_signatures(intent_with_signatures);
     }
@@ -113,7 +110,7 @@ enum IntentSetInternalState {
 impl IntentSetInternalState {
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
         match self {
             Self::Unsecurified(unsec) => {
@@ -153,7 +150,7 @@ struct UnsecurifiedIntentSetInternalState {
 impl UnsecurifiedIntentSetInternalState {
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
         assert_eq!(intent_with_signatures.intent, *self.transaction_intent);
         assert_eq!(
@@ -204,11 +201,11 @@ struct IntentVariantSignaturesPerRoleState(
 impl IntentVariantSignaturesPerRoleState {
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
         let state_for_role = self
             .0
-            .get_mut(&intent_with_signatures.role_kind)
+            .get_mut(&intent_with_signatures.role_kind())
             .expect("Should have created empty state for each role.");
 
         state_for_role
@@ -241,11 +238,12 @@ struct IntentVariantState {
 impl IntentVariantState {
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
         assert_eq!(intent_with_signatures.intent, *self.intent);
-        let variant =
-            intent_with_signatures.variant.expect("Should have variant");
+        let variant = intent_with_signatures
+            .variant()
+            .expect("Should have variant");
         assert_eq!(variant, *self.variant);
 
         self.signatures_per_role
@@ -278,12 +276,12 @@ struct IntentVariantSignaturesForRoleState {
 impl IntentVariantSignaturesForRoleState {
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
-        assert_eq!(intent_with_signatures.role_kind, self.role);
+        assert_eq!(intent_with_signatures.role_kind(), self.role);
         self.signatures_per_entity.append_or_insert_to(
             intent_with_signatures.entity.address(),
-            intent_with_signatures.signatures,
+            intent_with_signatures.signatures(),
         );
     }
     fn new(role: RoleKind) -> Self {
@@ -330,14 +328,14 @@ impl SecurifiedIntentSetInternalState {
 
     fn update_with_intent_with_signatures(
         &mut self,
-        intent_with_signatures: IntentWithSignatures,
+        intent_with_signatures: EntiitySignedFor,
     ) {
         assert_eq!(
             intent_with_signatures.entity.address(),
             self.entity_applying_shield.address()
         );
         let variant = intent_with_signatures
-            .variant
+            .variant()
             .expect("Should have variant for securified");
         let variant_state = self.get_variant_state(variant);
         variant_state
@@ -550,9 +548,17 @@ impl SigningManager {
         // be aborted by user
         let outcome = collector.collect_signatures().await?;
 
-        // TODO: Split `outcome` into `entities_signed_for` and `entities_not_signed_for`
+        let get_context =
+            |txid: TransactionIntentHash| -> EntitySigningContext {
+                let intent_set_id =
+                    *lookup_txid_to_intent_set.get(&txid).unwrap();
 
-        let entities_signed_for: Vec<IntentWithSignatures> = outcome
+                let variant = *lookup_txid_to_variant.get(&txid).unwrap();
+
+                EntitySigningContext::new(intent_set_id, role_kind, variant)
+            };
+
+        let entities_signed_for: Vec<EntiitySignedFor> = outcome
             .successful_transactions()
             .into_iter()
             .map(|signed_tx| {
@@ -576,25 +582,16 @@ impl SigningManager {
                     .get(&owner_address)
                     .unwrap()
                     .clone();
-
-                let intent_set_id =
-                    *lookup_txid_to_intent_set.get(&txid).unwrap();
-
-                let manifest_variant =
-                    *lookup_txid_to_variant.get(&txid).unwrap();
-
                 let intent = lookup_intent_by_txid.get(&txid).unwrap().clone();
 
-                IntentWithSignatures::new(
-                    intent_set_id,
+                EntiitySignedFor::new(
+                    get_context(txid),
                     intent,
                     entity,
                     signatures_with_inputs
                         .into_iter()
                         .map(|s| s.signature)
                         .collect(),
-                        role_kind,
-                    manifest_variant,
                 )
             })
             .collect_vec();
@@ -624,15 +621,11 @@ impl SigningManager {
                     .unwrap()
                     .clone();
 
-                let manifest_variant =
-                    *lookup_txid_to_variant.get(&txid).unwrap();
-
                 EntityNotSignedFor::new(
+                    get_context(txid),
                     intent,
                     entity,
-                    role_kind,
                     neglected_factors,
-                    manifest_variant,
                 )
             })
             .collect_vec();
@@ -821,36 +814,14 @@ struct IntentVariant {
 // =================
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
-pub(crate) struct IntentWithSignatures {
-    #[allow(dead_code)]
-    #[doc(hidden)]
-    #[debug(skip)]
-    hidden: HiddenConstructor,
-
-    intent: TransactionIntent,
-
-    part_of_intent_set: IntentSetID,
-
-    /// Must match the owner inside `signatures.map(|s| s.input.owned_factor_instance.owner`
-    entity: AccountOrPersona,
-
-    signatures: IndexSet<SignatureWithPublicKey>,
-
-    /// None `intent` is the single intent of an IntentSet. If the intent
-    /// is one of the many variants of an intentset then this variable must
-    /// be `Some`.
-    ///
-    /// If Some() then its exercisable roles must "contain" `role_kind`.
-    variant: Option<RolesExercisableInTransactionManifestCombination>,
-
-    role_kind: RoleKind,
+pub struct EntitySigningContext {
+    pub intent_set_id: IntentSetID,
+    pub role_kind: RoleKind,
+    pub variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
-impl IntentWithSignatures {
-    pub(crate) fn new(
-        part_of_intent_set: IntentSetID,
-        intent: TransactionIntent,
-        entity: AccountOrPersona,
-        signatures: IndexSet<SignatureWithPublicKey>,
+impl EntitySigningContext {
+    pub fn new(
+        intent_set_id: IntentSetID,
         role_kind: RoleKind,
         variant: Option<RolesExercisableInTransactionManifestCombination>,
     ) -> Self {
@@ -858,51 +829,69 @@ impl IntentWithSignatures {
             assert!(variant.exercisable_roles().contains(&role_kind))
         }
         Self {
-            hidden: HiddenConstructor,
-            part_of_intent_set,
-            intent,
-            entity,
-            signatures,
+            intent_set_id,
             role_kind,
             variant,
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-struct EntityNotSignedFor {
-    intent: TransactionIntent,
-    entity: AccountOrPersona,
-    role_kind: RoleKind,
-    neglected_factor_sources: IndexSet<NeglectedFactor>,
-    variant: Option<RolesExercisableInTransactionManifestCombination>,
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+pub struct EnititySigningOutcome<Outcome> {
+    pub context: EntitySigningContext,
+    pub intent: TransactionIntent,
+    pub entity: AccountOrPersona,
+    outcome: Outcome,
+}
+
+impl<Outcome> EnititySigningOutcome<Outcome> {
+    pub fn variant(
+        &self,
+    ) -> Option<RolesExercisableInTransactionManifestCombination> {
+        self.context.variant
+    }
+    pub fn role_kind(&self) -> RoleKind {
+        self.context.role_kind
+    }
+    pub fn intent_set_id(&self) -> IntentSetID {
+        self.context.intent_set_id
+    }
+    pub(crate) fn new(
+        context: EntitySigningContext,
+        intent: TransactionIntent,
+        entity: AccountOrPersona,
+        outcome: Outcome,
+    ) -> Self {
+        Self {
+            context,
+            intent,
+            entity,
+            outcome,
+        }
+    }
+}
+
+pub type EntityNotSignedFor = EnititySigningOutcome<IndexSet<NeglectedFactor>>;
+
+pub type EntiitySignedFor =
+    EnititySigningOutcome<IndexSet<SignatureWithPublicKey>>;
+
+impl EntiitySignedFor {
+    pub fn signatures(&self) -> IndexSet<SignatureWithPublicKey> {
+        self.outcome.clone()
+    }
 }
 
 impl EntityNotSignedFor {
-    fn new(
-        intent: TransactionIntent,
-        entity: AccountOrPersona,
-        role_kind: RoleKind,
-        neglected_factor_sources: IndexSet<NeglectedFactor>,
-        variant: Option<RolesExercisableInTransactionManifestCombination>,
-    ) -> Self {
-        if let Some(variant) = variant.as_ref() {
-            assert!(variant.exercisable_roles().contains(&role_kind))
-        }
-        Self {
-            intent,
-            entity,
-            neglected_factor_sources,
-            role_kind,
-            variant,
-        }
+    pub fn neglected_factor_sources(&self) -> IndexSet<NeglectedFactor> {
+        self.outcome.clone()
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, derive_more::Deref)]
-struct EntitiesSignedFor(Vec<IntentWithSignatures>); // want IndexSet, but Item is not StdHash.
-impl From<Vec<IntentWithSignatures>> for EntitiesSignedFor {
-    fn from(v: Vec<IntentWithSignatures>) -> Self {
+struct EntitiesSignedFor(Vec<EntiitySignedFor>); // want IndexSet, but Item is not StdHash.
+impl From<Vec<EntiitySignedFor>> for EntitiesSignedFor {
+    fn from(v: Vec<EntiitySignedFor>) -> Self {
         Self(v)
     }
 }
@@ -945,26 +934,28 @@ impl ExerciseRoleOutcome {
     /// Panics if there is a discrepancy between the entities_signed_for variant and `role_kind``.
     pub fn new(
         role_kind: RoleKind,
-        entities_signed_for: Vec<IntentWithSignatures>,
+        entities_signed_for: Vec<EntiitySignedFor>,
         entities_not_signed_for: Vec<EntityNotSignedFor>,
     ) -> Self {
         assert!(
             entities_signed_for
                 .iter()
-                .filter_map(|e| e.variant)
+                .filter_map(|e| e.variant())
                 .all(|v| v.can_exercise_role(role_kind)),
             "Discrepancy! Mismatch beween Role and TransactionManifest variant"
         );
 
-        assert!(entities_signed_for.iter().all(|e| e.role_kind == role_kind));
+        assert!(entities_signed_for
+            .iter()
+            .all(|e| e.role_kind() == role_kind));
         assert!(entities_not_signed_for
             .iter()
-            .all(|e| e.role_kind == role_kind));
+            .all(|e| e.role_kind() == role_kind));
 
         assert!(
             entities_not_signed_for
                 .iter()
-                .filter_map(|e| e.variant)
+                .filter_map(|e| e.variant())
                 .all(|v| v.can_exercise_role(role_kind)),
             "Discrepancy! Mismatch beween Role and TransactionManifest variant"
         );
@@ -993,17 +984,17 @@ impl ExerciseRoleOutcome {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignedIntentSet {
-    intents: Vec<IntentWithSignatures>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
+    intents: Vec<EntiitySignedFor>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
 }
 impl SignedIntentSet {
     pub fn get_best_signed_intent(self) -> Result<SignedIntent> {
         let first =
             self.intents.first().ok_or(CommonError::Unknown).cloned()?; // TODO specific error variant
 
-        let from = |item: IntentWithSignatures| -> Result<SignedIntent> {
+        let from = |item: EntiitySignedFor| -> Result<SignedIntent> {
             let intent = item.intent.clone();
             let signatures = item
-                .signatures
+                .signatures()
                 .into_iter()
                 .map(IntentSignature::from)
                 .collect_vec();
@@ -1014,12 +1005,12 @@ impl SignedIntentSet {
         if self.intents.len() == 1 {
             from(first)
         } else {
-            assert!(self.intents.iter().all(|i| i.variant.is_some()));
+            assert!(self.intents.iter().all(|i| i.variant().is_some()));
 
             let rated_by_tx_variant = self
                 .intents
                 .into_iter()
-                .sorted_by_key(|i| i.variant.unwrap().rating())
+                .sorted_by_key(|i| i.variant().unwrap().rating())
                 .collect_vec();
             let best = rated_by_tx_variant.first().unwrap().clone();
             from(best)
