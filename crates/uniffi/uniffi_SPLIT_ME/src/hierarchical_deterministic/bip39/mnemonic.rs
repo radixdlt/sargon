@@ -1,7 +1,9 @@
 use crate::prelude::*;
 use sargon::Mnemonic as InternalMnemonic;
 
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+)]
 pub struct Mnemonic {
     pub words: Vec<BIP39Word>,
 

@@ -245,9 +245,7 @@ mod tests {
         ));
         // Verify that the mnemonic is not saved to secure storage
         assert!(matches!(
-            os.secure_storage
-                .load_mnemonic(fsid_from_hash.clone())
-                .await,
+            os.secure_storage.load_mnemonic(fsid_from_hash).await,
             Err(CommonError::UnableToLoadMnemonicFromSecureStorage { .. })
         ));
         // Verify that the factor source is not added to the profile
@@ -262,60 +260,91 @@ mod tests {
 
     #[actix_rt::test]
     async fn add_new_device_factor_source_success() {
-        let event_bus_driver = RustEventBusDriver::new();
-        let clients = Clients::new(Bios::new(Drivers::with_event_bus(
-            event_bus_driver.clone(),
-        )));
-        let interactors = Interactors::new_from_clients(&clients);
+        let test = async |factor_source_kind: FactorSourceKind,
+                          mwp: MnemonicWithPassphrase,
+                          load_mnemonic_from_storage_result: Result<
+            MnemonicWithPassphrase,
+        >| {
+            let event_bus_driver = RustEventBusDriver::new();
+            let clients = Clients::new(Bios::new(Drivers::with_event_bus(
+                event_bus_driver.clone(),
+            )));
+            let interactors = Interactors::new_from_clients(&clients);
 
-        let mwp = MnemonicWithPassphrase::sample();
-        let mwp_to_add = MnemonicWithPassphrase::sample_other();
-        let fsid_from_hash =
-            FactorSourceIDFromHash::new_for_device(&mwp_to_add);
-        let fsid = FactorSourceID::from(fsid_from_hash);
+            let fsid_from_hash =
+                FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+                    factor_source_kind,
+                    &mwp,
+                );
+            let fsid = FactorSourceID::from(fsid_from_hash);
 
-        let os =
-            SUT::boot_with_clients_and_interactor(clients, interactors).await;
-        os.new_wallet_with_mnemonic(Some(mwp.clone()), false)
+            let os =
+                SUT::boot_with_clients_and_interactor(clients, interactors)
+                    .await;
+            os.new_wallet_with_mnemonic(
+                Some(MnemonicWithPassphrase::sample_device()),
+                false,
+            )
             .await
             .unwrap();
 
-        // Clear recorded events
-        event_bus_driver.clear_recorded();
+            // Clear recorded events
+            event_bus_driver.clear_recorded();
 
-        let _ = os
-            .with_timeout(|x| {
+            os.with_timeout(|x| {
                 x.add_new_factor_source(
-                    FactorSourceKind::Device,
-                    MnemonicWithPassphrase::sample_other(),
-                    "New device".to_owned(),
+                    factor_source_kind,
+                    mwp.clone(),
+                    "New".to_owned(),
                 )
             })
             .await
             .unwrap();
 
-        // Verify that the mnemonic is saved to secure storage
-        pretty_assertions::assert_eq!(
-            os.secure_storage
-                .load_mnemonic(fsid_from_hash.clone())
-                .await,
-            Ok(mwp_to_add)
-        );
-        // Verify that the factor source is added to the profile
-        assert!(os
-            .profile()
-            .unwrap()
-            .factor_sources
-            .iter()
-            .any(|fs| fs.factor_source_id() == fsid));
+            // Verify that the mnemonic is saved to secure storage
+            pretty_assertions::assert_eq!(
+                os.secure_storage.load_mnemonic(fsid_from_hash).await,
+                load_mnemonic_from_storage_result
+            );
+            // Verify that the factor source is added to the profile
+            assert!(os
+                .profile()
+                .unwrap()
+                .factor_sources
+                .iter()
+                .any(|fs| fs.factor_source_id() == fsid));
 
-        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourceAdded`
-        let events = event_bus_driver.recorded();
-        assert_eq!(events.len(), 2);
-        assert!(events.iter().any(|e| e.event == Event::ProfileSaved));
-        assert!(events.iter().any(|e| e.event
-            == Event::ProfileModified {
-                change: EventProfileModified::FactorSourceAdded { id: fsid }
-            }));
+            // Verify 2 events are emitted: `ProfileSaved` and `FactorSourceAdded`
+            let events = event_bus_driver.recorded();
+            assert_eq!(events.len(), 2);
+            assert!(events.iter().any(|e| e.event == Event::ProfileSaved));
+            assert!(events.iter().any(|e| e.event
+                == Event::ProfileModified {
+                    change: EventProfileModified::FactorSourceAdded {
+                        id: fsid
+                    }
+                }));
+        };
+
+        test(
+            FactorSourceKind::Device,
+            MnemonicWithPassphrase::sample_device_other(),
+            Ok(MnemonicWithPassphrase::sample_device_other()),
+        )
+        .await;
+        test(
+            FactorSourceKind::Password,
+            MnemonicWithPassphrase::sample_password(),
+            Err(CommonError::UnableToLoadMnemonicFromSecureStorage {
+                bad_value: "password:181ab662e19fac3ad9f08d5c673b286d4a5ed9cd3762356dc9831dc42427c1b9".to_owned(),
+            }),
+        ).await;
+        test(
+            FactorSourceKind::OffDeviceMnemonic,
+            MnemonicWithPassphrase::sample_off_device(),
+            Err(CommonError::UnableToLoadMnemonicFromSecureStorage {
+                bad_value: "offDeviceMnemonic:820122c9573768ab572b0c9fa492a45b7b451a2740291b3da908ad423d10e410".to_owned(),
+            }),
+        ).await
     }
 }

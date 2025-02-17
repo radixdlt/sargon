@@ -946,8 +946,11 @@ pub enum CommonError {
         entity_bech32m_encoded_address: String,
     } = 10265,
 
+    #[error("Invalid mnemonic words")]
+    InvalidMnemonicWords { indices_in_mnemonic: Vec<usize> } = 10266,
+
     #[error("Factor source already exists")]
-    FactorSourceAlreadyExists = 10266,
+    FactorSourceAlreadyExists = 10267,
 }
 
 impl CommonError {

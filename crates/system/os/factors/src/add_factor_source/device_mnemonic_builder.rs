@@ -15,8 +15,12 @@ pub enum DeviceMnemonicBuildResult {
     Confirmed {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     },
+    /// The number of words to confirm was incorrect
+    ConfirmationWordCountMismatch,
     /// The mnemonic words were unconfirmed
-    Unconfirmed { words: HashMap<usize, String> },
+    Unconfirmed {
+        indices_in_mnemonic: IndexSet<usize>,
+    },
 }
 
 impl Default for DeviceMnemonicBuilder {
@@ -103,9 +107,30 @@ impl DeviceMnemonicBuilder {
     /// Creates a new mnemonic from given `words`
     pub fn create_mnemonic_with_passphrase_from_words(
         &self,
-        words: Vec<BIP39Word>,
+        words: Vec<String>,
     ) -> Result<&Self> {
-        let mnemonic = Mnemonic::from_words(words)?;
+        let (bip39_words, invalid_words): (Vec<_>, Vec<_>) = words
+            .iter()
+            .enumerate()
+            .map(|(index, w)| (index, BIP39Word::english(w)))
+            .partition(|(_, word)| word.is_ok());
+
+        let mnemonic_indices_of_invalid_words = invalid_words
+            .into_iter()
+            .map(|(index, _)| index)
+            .collect::<Vec<_>>();
+
+        if !mnemonic_indices_of_invalid_words.is_empty() {
+            return Err(CommonError::InvalidMnemonicWords {
+                indices_in_mnemonic: mnemonic_indices_of_invalid_words,
+            });
+        }
+
+        let bip39_words = bip39_words
+            .into_iter()
+            .map(|(_, word)| word.unwrap())
+            .collect::<Vec<BIP39Word>>();
+        let mnemonic = Mnemonic::from_words(bip39_words)?;
         self.set_mnemonic_with_passphrase(mnemonic);
         Ok(self)
     }
@@ -162,29 +187,27 @@ impl DeviceMnemonicBuilder {
         if words_to_confirm.len()
             != Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM
         {
-            return DeviceMnemonicBuildResult::Unconfirmed {
-                words: words_to_confirm.clone(),
-            };
+            return DeviceMnemonicBuildResult::ConfirmationWordCountMismatch;
         }
 
-        let unconfirmed_words = words_to_confirm
+        let unconfirmed_indices_in_mnemonic = words_to_confirm
             .iter()
             .filter_map(|(&index, word)| {
                 if !self.is_word_at_index_correct(word, index) {
-                    Some((index, word.clone()))
+                    Some(index)
                 } else {
                     None
                 }
             })
-            .collect::<HashMap<_, _>>();
+            .collect::<IndexSet<_>>();
 
-        if unconfirmed_words.is_empty() {
+        if unconfirmed_indices_in_mnemonic.is_empty() {
             DeviceMnemonicBuildResult::Confirmed {
                 mnemonic_with_passphrase: self.get_mnemonic_with_passphrase(),
             }
         } else {
             DeviceMnemonicBuildResult::Unconfirmed {
-                words: unconfirmed_words,
+                indices_in_mnemonic: unconfirmed_indices_in_mnemonic,
             }
         }
     }
@@ -206,6 +229,7 @@ impl DeviceMnemonicBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use radix_common::prelude::indexset;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = DeviceMnemonicBuilder;
@@ -248,6 +272,30 @@ mod tests {
     }
 
     #[test]
+    fn create_mnemonic_with_passphrase_from_words_error() {
+        let sut = SUT::default();
+
+        let result = sut.create_mnemonic_with_passphrase_from_words(vec![
+            "abandon".to_owned(),
+            "device".to_owned(),
+            "word1".to_owned(),
+            "word2".to_owned(),
+            "word3".to_owned(),
+            "sign".to_owned(),
+        ]);
+
+        pretty_assertions::assert_eq!(
+            result,
+            Err(CommonError::InvalidMnemonicWords {
+                indices_in_mnemonic: vec![2, 3, 4]
+                    .into_iter()
+                    .collect::<Vec<_>>()
+            })
+        );
+        assert!(sut.mnemonic_with_passphrase.read().unwrap().is_none());
+    }
+
+    #[test]
     fn create_mnemonic_with_passphrase_from_words() {
         let sut = SUT::default();
         let mnemonic = Mnemonic::sample();
@@ -255,8 +303,14 @@ mod tests {
             sut.mnemonic_with_passphrase.read().unwrap().clone(),
             None
         );
-        sut.create_mnemonic_with_passphrase_from_words(mnemonic.words)
-            .unwrap();
+        sut.create_mnemonic_with_passphrase_from_words(
+            mnemonic
+                .words
+                .iter()
+                .map(|w| w.word.clone())
+                .collect::<Vec<_>>(),
+        )
+        .unwrap();
         assert!(sut.mnemonic_with_passphrase.read().unwrap().is_some());
     }
 
@@ -277,29 +331,48 @@ mod tests {
     }
 
     #[test]
-    fn build_with_not_enough_words() {
+    #[should_panic(
+        expected = "Mnemonic with passphrase should be created first"
+    )]
+    fn factor_source_id_panics_if_mnemonic_not_created() {
+        let sut = SUT::default();
+        let _ = sut.factor_source_id();
+    }
+
+    #[test]
+    fn factor_source_id() {
         let sut = SUT::sample();
-        let words_to_confirm: HashMap<usize, String> =
-            vec![(0, "abandon".into()), (1, "about".into())]
+        let fsid = sut.factor_source_id();
+        pretty_assertions::assert_eq!(
+            fsid,
+            FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
+                &MnemonicWithPassphrase::sample()
+            ))
+        );
+    }
+
+    #[test]
+    fn build_with_words_to_confirm_count_mismatch() {
+        let sut = SUT::sample();
+        let words_to_confirm =
+            vec![(0, "abandon".to_owned()), (1, "about".to_owned())]
                 .into_iter()
                 .collect::<HashMap<_, _>>();
 
         pretty_assertions::assert_eq!(
             sut.build(&words_to_confirm),
-            DeviceMnemonicBuildResult::Unconfirmed {
-                words: words_to_confirm
-            }
+            DeviceMnemonicBuildResult::ConfirmationWordCountMismatch
         );
     }
 
     #[test]
     fn build_with_all_valid_but_incorrect_words() {
         let sut = SUT::sample();
-        let words_to_confirm: HashMap<usize, String> = vec![
-            (0, "abandon".into()),
-            (1, "about".into()),
-            (2, "device".into()),
-            (3, "sample".into()),
+        let words_to_confirm = vec![
+            (0, "abandon".to_owned()),
+            (1, "about".to_owned()),
+            (2, "device".to_owned()),
+            (3, "sample".to_owned()),
         ]
         .into_iter()
         .collect::<HashMap<_, _>>();
@@ -307,7 +380,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             sut.build(&words_to_confirm),
             DeviceMnemonicBuildResult::Unconfirmed {
-                words: words_to_confirm
+                indices_in_mnemonic: indexset![0, 1, 2, 3]
             }
         );
     }
@@ -315,11 +388,11 @@ mod tests {
     #[test]
     fn build_unconfirmed() {
         let sut = SUT::sample();
-        let words_to_confirm: HashMap<usize, String> = vec![
-            (0, "device".into()),
-            (1, "phone".into()),
-            (7, "sign".into()),
-            (13, "invalid word".into()),
+        let words_to_confirm = vec![
+            (0, "device".to_owned()),
+            (1, "phone".to_owned()),
+            (7, "sign".to_owned()),
+            (13, "invalid word".to_owned()),
         ]
         .into_iter()
         .collect::<HashMap<_, _>>();
@@ -327,9 +400,7 @@ mod tests {
         pretty_assertions::assert_eq!(
             sut.build(&words_to_confirm),
             DeviceMnemonicBuildResult::Unconfirmed {
-                words: vec![(7, "sign".into()), (13, "invalid word".into()),]
-                    .into_iter()
-                    .collect()
+                indices_in_mnemonic: indexset![7, 13]
             }
         );
     }
@@ -337,14 +408,14 @@ mod tests {
     #[test]
     fn build_confirmed() {
         let sut = SUT::sample();
-        let words_to_confirm: HashMap<usize, String> = vec![
-            (0, "device".into()),
-            (1, "phone".into()),
-            (2, "sign".into()),
-            (3, "source".into()),
+        let words_to_confirm = vec![
+            (0, "device".to_owned()),
+            (1, "phone".to_owned()),
+            (2, "sign".to_owned()),
+            (3, "source".to_owned()),
         ]
         .into_iter()
-        .collect();
+        .collect::<HashMap<_, _>>();
 
         let result = sut.build(&words_to_confirm);
 

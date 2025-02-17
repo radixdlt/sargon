@@ -3,7 +3,9 @@ use sargon::MnemonicWithPassphrase as InternalMnemonicWithPassphrase;
 
 /// A BIP39 Mnemonic and BIP39 passphrase - aka "25th word" tuple,
 /// from which we can derive a HD Root used for derivation.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+#[derive(
+    Debug, Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record,
+)]
 pub struct MnemonicWithPassphrase {
     pub mnemonic: Mnemonic,
     pub passphrase: BIP39Passphrase,
