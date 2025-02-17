@@ -189,7 +189,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
             .collect::<IndexSet<_>>()
     }
 
-    /// Returrns the aggregate of all signatures from both lists, either threshold or override.
+    /// Returns the aggregate of all signatures from both lists, either threshold or override.
     pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.access_both_list_then_form_union(|f| f.all_signatures())
     }

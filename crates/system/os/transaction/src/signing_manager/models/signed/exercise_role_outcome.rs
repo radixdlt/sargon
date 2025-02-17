@@ -30,7 +30,7 @@ impl ExerciseRoleOutcome {
                 .iter()
                 .filter_map(|e| e.variant())
                 .all(|v| v.can_exercise_role(role_kind)),
-            "Discrepancy! Mismatch beween Role and TransactionManifest variant"
+            "Discrepancy! Mismatch between Role and TransactionManifest variant"
         );
 
         assert!(entities_signed_for
@@ -45,7 +45,7 @@ impl ExerciseRoleOutcome {
                 .iter()
                 .filter_map(|e| e.variant())
                 .all(|v| v.can_exercise_role(role_kind)),
-            "Discrepancy! Mismatch beween Role and TransactionManifest variant"
+            "Discrepancy! Mismatch between Role and TransactionManifest variant"
         );
 
         assert!(
