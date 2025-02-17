@@ -1,0 +1,17 @@
+[package]
+name = "interaction-queue"
+version = "1.2.1"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+prelude = { workspace = true }
+core-utils = { workspace = true }
+transaction-models = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+actix-rt = { workspace = true }
+serde = { workspace = true }

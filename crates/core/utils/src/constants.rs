@@ -34,6 +34,12 @@ pub const MINUTES_PER_DAY: u32 = 24 * 60;
 /// Number of days per week.
 pub const DAYS_PER_WEEK: u16 = 7;
 
+/// The minimum delay, in seconds, between two consecutive interaction queue items from the same batch.
+pub const INTERACTION_QUEUE_BATCH_MIN_DELAY: u16 = 10;
+
+/// The maximum delay, in seconds, between two consecutive interaction queue items from the same batch.
+pub const INTERACTION_QUEUE_BATCH_MAX_DELAY: u16 = 60;
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -10,6 +10,8 @@ pub use crate::prelude::*;
     PartialOrd,
     derive_more::Display,
     derive_more::Debug,
+    Serialize,
+    Deserialize,
 )]
 pub struct Instant {
     pub seconds_since_unix_epoch: i64,
