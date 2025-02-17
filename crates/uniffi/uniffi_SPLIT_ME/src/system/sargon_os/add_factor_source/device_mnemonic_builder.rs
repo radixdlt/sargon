@@ -47,7 +47,7 @@ impl DeviceMnemonicBuilder {
     #[uniffi::constructor]
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
-            wrapped: Arc::new(InternalDeviceMnemonicBuilder::new()),
+            wrapped: Arc::new(InternalDeviceMnemonicBuilder::default()),
         })
     }
 }
@@ -101,18 +101,8 @@ impl DeviceMnemonicBuilder {
         })
     }
 
-    pub fn build(
-        self: Arc<Self>,
-        words_to_confirm: HashMap<u8, String>,
-    ) -> DeviceMnemonicBuildResult {
-        self.wrapped
-            .build(
-                &words_to_confirm
-                    .into_iter()
-                    .map(|(k, v)| (k as usize, v))
-                    .collect::<HashMap<_, _>>(),
-            )
-            .into()
+    pub fn factor_source_id(self: Arc<Self>) -> FactorSourceID {
+        self.get(|builder| builder.factor_source_id().into())
     }
 }
 
@@ -136,5 +126,22 @@ impl DeviceMnemonicBuilder {
                 )
                 .into_result()
         })
+    }
+}
+
+#[uniffi::export]
+impl DeviceMnemonicBuilder {
+    pub fn build(
+        self: Arc<Self>,
+        words_to_confirm: HashMap<u8, String>,
+    ) -> DeviceMnemonicBuildResult {
+        self.wrapped
+            .build(
+                &words_to_confirm
+                    .into_iter()
+                    .map(|(k, v)| (k as usize, v))
+                    .collect::<HashMap<_, _>>(),
+            )
+            .into()
     }
 }

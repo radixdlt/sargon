@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use core_utils::prelude::error;
 use host_info::prelude::HostInfo;
 use short_string::prelude::DisplayName;
 use std::cmp::Ordering;
@@ -164,10 +163,7 @@ impl FactorSource {
         name: String,
         host_info: HostInfo,
     ) -> Result<Self> {
-        let display_name = DisplayName::new(name).map_err(|e| {
-            error!("Invalid DisplayName {:?}", e);
-            CommonError::FactorSourceNameInvalid
-        })?;
+        let display_name = DisplayName::new(name)?;
         let id_from_hash =
             FactorSourceIDFromHash::from_mnemonic_with_passphrase(
                 factor_source_kind,

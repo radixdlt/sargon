@@ -58,7 +58,7 @@ impl HasSampleValues for DeviceMnemonicBuilder {
 }
 
 impl DeviceMnemonicBuilder {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             mnemonic_with_passphrase: RwLock::new(None),
         }
@@ -238,7 +238,7 @@ mod tests {
 
     #[test]
     fn create_new_mnemonic_with_passphrase() {
-        let sut = SUT::new();
+        let sut = SUT::default();
         pretty_assertions::assert_eq!(
             sut.mnemonic_with_passphrase.read().unwrap().clone(),
             None
@@ -249,7 +249,7 @@ mod tests {
 
     #[test]
     fn create_mnemonic_with_passphrase_from_words() {
-        let sut = SUT::new();
+        let sut = SUT::default();
         let mnemonic = Mnemonic::sample();
         pretty_assertions::assert_eq!(
             sut.mnemonic_with_passphrase.read().unwrap().clone(),

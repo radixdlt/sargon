@@ -65,6 +65,15 @@ impl OsFactorSourceAdder for SargonOS {
         })
         .await?;
 
+        if factor_source_kind == FactorSourceKind::Device {
+            self.secure_storage
+                .save_mnemonic_with_passphrase(
+                    &mnemonic_with_passphrase,
+                    &factor_source.id_from_hash(),
+                )
+                .await?;
+        }
+
         if let Err(e) = self
             .pre_derive_and_fill_cache_with_instances_for_factor_source(
                 factor_source.clone(),
@@ -76,17 +85,11 @@ impl OsFactorSourceAdder for SargonOS {
                 Ok(())
             })
             .await?;
+            self.secure_storage
+                .delete_mnemonic(&factor_source.id_from_hash())
+                .await?;
 
             return Err(e);
-        }
-
-        if factor_source_kind == FactorSourceKind::Device {
-            self.secure_storage
-                .save_mnemonic_with_passphrase(
-                    &mnemonic_with_passphrase,
-                    &factor_source.id_from_hash(),
-                )
-                .await?;
         }
 
         self.event_bus
@@ -102,7 +105,6 @@ impl OsFactorSourceAdder for SargonOS {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use error::prelude::CommonError::ProfileStateNotLoaded;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -114,10 +116,11 @@ mod tests {
             let mwp = MnemonicWithPassphrase::sample();
             let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
-            let is_already_in_use =
-                os.is_factor_source_already_in_use(fsid).await;
+            let result = os
+                .with_timeout(|x| x.is_factor_source_already_in_use(fsid))
+                .await;
 
-            pretty_assertions::assert_eq!(is_already_in_use, expected_result);
+            pretty_assertions::assert_eq!(result, expected_result);
         };
 
         test(FactorSourceID::sample(), Ok(true)).await;
@@ -133,9 +136,186 @@ mod tests {
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
         let result = os
-            .is_factor_source_already_in_use(FactorSourceID::sample())
+            .with_timeout(|x| {
+                x.is_factor_source_already_in_use(FactorSourceID::sample())
+            })
             .await;
 
-        assert!(matches!(result, Err(ProfileStateNotLoaded { .. })));
+        assert!(matches!(
+            result,
+            Err(CommonError::ProfileStateNotLoaded { .. })
+        ));
+    }
+
+    #[actix_rt::test]
+    async fn add_new_factor_source_empty_name_error() {
+        let mwp = MnemonicWithPassphrase::sample();
+        let os = SUT::fast_boot_bdfs(mwp.clone()).await;
+
+        let result = os
+            .with_timeout(|x| {
+                x.add_new_factor_source(
+                    FactorSourceKind::Device,
+                    mwp.clone(),
+                    "".to_owned(),
+                )
+            })
+            .await;
+
+        assert!(matches!(result, Err(CommonError::InvalidDisplayNameEmpty)))
+    }
+
+    #[actix_rt::test]
+    async fn add_new_factor_source_access_profile_error() {
+        let bios = Bios::new(Drivers::test());
+        let clients = Clients::new(bios);
+        let interactors = Interactors::new_from_clients(&clients);
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
+        let mwp = MnemonicWithPassphrase::sample();
+
+        let result = os
+            .with_timeout(|x| {
+                x.add_new_factor_source(
+                    FactorSourceKind::Device,
+                    mwp.clone(),
+                    "New device".to_owned(),
+                )
+            })
+            .await;
+
+        assert!(matches!(
+            result,
+            Err(CommonError::ProfileStateNotLoaded { .. })
+        ))
+    }
+
+    #[actix_rt::test]
+    async fn add_new_factor_source_already_exists_error() {
+        let mwp = MnemonicWithPassphrase::sample();
+        let os = SUT::fast_boot_bdfs(mwp.clone()).await;
+
+        let result = os
+            .with_timeout(|x| {
+                x.add_new_factor_source(
+                    FactorSourceKind::Device,
+                    mwp.clone(),
+                    "New device".to_owned(),
+                )
+            })
+            .await;
+
+        assert!(matches!(
+            result,
+            Err(CommonError::FactorSourceAlreadyExists)
+        ))
+    }
+
+    #[actix_rt::test]
+    async fn add_new_factor_source_pre_derive_instances_error() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let derivation_interactor = Arc::new(TestDerivationInteractor::fail());
+        let interactors =
+            Interactors::new_with_derivation_interactor(derivation_interactor);
+
+        let mwp = MnemonicWithPassphrase::sample();
+        let mwp_to_add = MnemonicWithPassphrase::sample_other();
+        let fsid_from_hash =
+            FactorSourceIDFromHash::new_for_device(&mwp_to_add);
+
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
+        os.new_wallet_with_mnemonic(Some(mwp.clone()), false)
+            .await
+            .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.add_new_factor_source(
+                    FactorSourceKind::Device,
+                    mwp_to_add.clone(),
+                    "New device".to_owned(),
+                )
+            })
+            .await;
+
+        assert!(matches!(
+            result,
+            Err(CommonError::TooFewFactorInstancesDerived)
+        ));
+        // Verify that the mnemonic is not saved to secure storage
+        assert!(matches!(
+            os.secure_storage
+                .load_mnemonic(fsid_from_hash.clone())
+                .await,
+            Err(CommonError::UnableToLoadMnemonicFromSecureStorage { .. })
+        ));
+        // Verify that the factor source is not added to the profile
+        assert!(!os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .iter()
+            .any(|fs| fs.factor_source_id()
+                == FactorSourceID::from(fsid_from_hash)));
+    }
+
+    #[actix_rt::test]
+    async fn add_new_device_factor_source_success() {
+        let event_bus_driver = RustEventBusDriver::new();
+        let clients = Clients::new(Bios::new(Drivers::with_event_bus(
+            event_bus_driver.clone(),
+        )));
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let mwp = MnemonicWithPassphrase::sample();
+        let mwp_to_add = MnemonicWithPassphrase::sample_other();
+        let fsid_from_hash =
+            FactorSourceIDFromHash::new_for_device(&mwp_to_add);
+        let fsid = FactorSourceID::from(fsid_from_hash);
+
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
+        os.new_wallet_with_mnemonic(Some(mwp.clone()), false)
+            .await
+            .unwrap();
+
+        // Clear recorded events
+        event_bus_driver.clear_recorded();
+
+        let _ = os
+            .with_timeout(|x| {
+                x.add_new_factor_source(
+                    FactorSourceKind::Device,
+                    MnemonicWithPassphrase::sample_other(),
+                    "New device".to_owned(),
+                )
+            })
+            .await
+            .unwrap();
+
+        // Verify that the mnemonic is saved to secure storage
+        pretty_assertions::assert_eq!(
+            os.secure_storage
+                .load_mnemonic(fsid_from_hash.clone())
+                .await,
+            Ok(mwp_to_add)
+        );
+        // Verify that the factor source is added to the profile
+        assert!(os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .iter()
+            .any(|fs| fs.factor_source_id() == fsid));
+
+        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourceAdded`
+        let events = event_bus_driver.recorded();
+        assert_eq!(events.len(), 2);
+        assert!(events.iter().any(|e| e.event == Event::ProfileSaved));
+        assert!(events.iter().any(|e| e.event
+            == Event::ProfileModified {
+                change: EventProfileModified::FactorSourceAdded { id: fsid }
+            }));
     }
 }
