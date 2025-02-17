@@ -109,12 +109,24 @@ pub enum OrderOfInstructionSettingRolaKey {
     MustSetInFutureTxForConfirmRecovery,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-enum RoleInitiatingRecovery {
+/// The role which initiated the recovery proposal.
+#[derive(Clone, Debug, PartialEq, Eq, StdHash)]
+pub enum RoleInitiatingRecovery {
+    /// Recovery was initiated using the `Primary` role.
     Primary,
+    /// Recovery was initiated using the `Recovery` role.
     Recovery,
 }
 
+impl From<RolesExercisableInTransactionManifestCombination>
+    for RoleInitiatingRecovery
+{
+    fn from(
+        roles_combination: RolesExercisableInTransactionManifestCombination,
+    ) -> Self {
+        roles_combination.role_initiating_recovery()
+    }
+}
 impl RolesExercisableInTransactionManifestCombination {
     pub fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
         self.exercisable_roles().contains(&role_kind)

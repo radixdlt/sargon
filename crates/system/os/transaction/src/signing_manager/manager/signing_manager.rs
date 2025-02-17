@@ -1,14 +1,15 @@
-
 use crate::prelude::*;
+
+use super::signing_manager_dependencies::SigningManagerDependencies;
 
 /// Implementation of complex signing flow laid out in this
 /// [whimsical diagram][flow].
 ///
 /// [flow]: https://whimsical.com/wallet-sargon-signing-flow-QFvU2NAVXFiX1VgNBuvj5g
+#[derive(derive_more::Deref)]
 pub(crate) struct SigningManager {
-    /// FactorSources in Profile
-    pub(super) factor_sources_in_profile: IndexSet<FactorSource>,
-    pub(super) interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    #[deref]
+    pub(super) dependencies: Immutable<SigningManagerDependencies>,
 
     /// The internal state of the SigningManager
     ///
@@ -150,8 +151,13 @@ impl SigningManager {
     pub(super) fn intermediary_outcome(
         &self,
     ) -> Result<SigningManagerIntermediaryOutcome> {
-        let mut state = self.state.write().map_err(|_| CommonError::Unknown)?; // TODO specific error variant
-        todo!()
+        let successfully_signed_intent_sets: Vec<SignedIntentSet> = vec![];
+        let failed_intent_sets: Vec<SignedIntentSet> = vec![];
+        todo!();
+        Ok(SigningManagerIntermediaryOutcome::new(
+            successfully_signed_intent_sets,
+            failed_intent_sets,
+        ))
     }
 }
 

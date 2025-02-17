@@ -11,6 +11,8 @@ pub trait ApplyShieldTransactionsSigner: Send + Sync {
 pub struct ApplyShieldTransactionsSignerImpl {
     factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    saver_of_intents_to_confirm_after_delay:
+        Arc<dyn SaverOfIntentsToConfirmAfterDelay>,
 }
 
 impl ApplyShieldTransactionsSignerImpl {
@@ -18,6 +20,8 @@ impl ApplyShieldTransactionsSignerImpl {
         os.profile().map(|profile| Self {
             factor_sources_in_profile: profile.factor_sources(),
             interactor: os.sign_transactions_interactor(),
+            saver_of_intents_to_confirm_after_delay: os
+                .saver_of_intents_to_confirm_after_delay(),
         })
     }
 }
@@ -29,9 +33,11 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
         &self,
         payload_to_sign: ApplySecurityShieldPayloadToSign,
     ) -> Result<ApplySecurityShieldSignedPayload> {
+        // Prepare the signing manager
         let signing_manager = SigningManager::new(
             self.factor_sources_in_profile.clone(),
             self.interactor.clone(),
+            self.saver_of_intents_to_confirm_after_delay.clone(),
             payload_to_sign.applications_with_intents,
         );
         // Prepare the notary manager

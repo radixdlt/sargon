@@ -4,6 +4,17 @@ use crate::prelude::*;
 
 // === Non-pub Get ===
 impl SigningManager {
+    pub(super) fn get_intents_to_confirm_after_delay(
+        &self,
+        best_signed_intent: &[SignedIntentWithContext],
+    ) -> Result<IndexSet<IntentVariantToConfirmAfterDelay>> {
+        best_signed_intent
+            .iter()
+            .filter_map(|s| s.as_confirm_after_delay_variant())
+            .collect::<Result<IndexSet<IntentVariantToConfirmAfterDelay>>>()
+    }
+}
+impl SigningManager {
     pub(super) fn _get_state(
         &self,
     ) -> RwLockReadGuard<'_, SigningManagerState> {

@@ -3852,6 +3852,7 @@ dependencies = [
  "interactors",
  "key-derivation-traits",
  "log",
+ "manifests",
  "prelude",
  "pretty_assertions",
  "profile",

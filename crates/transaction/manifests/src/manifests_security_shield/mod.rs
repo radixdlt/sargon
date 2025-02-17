@@ -1,5 +1,6 @@
 mod access_controller_factors_and_time_input;
 mod confirm_timed_recovery;
+mod intent_variant_to_confirm_after_delay;
 mod lock_fee_against_xrd_vault_of_access_controller;
 mod manifests_securify_shield_securified_entity;
 mod manifests_securify_shield_unsecurified_entity;
@@ -10,6 +11,7 @@ mod transaction_manifest_unsecurified_entity_owner_badge_into_bucket_putting;
 
 pub use access_controller_factors_and_time_input::*;
 pub use confirm_timed_recovery::*;
+pub use intent_variant_to_confirm_after_delay::*;
 pub use lock_fee_against_xrd_vault_of_access_controller::*;
 pub use manifests_securify_shield_securified_entity::*;
 pub use manifests_securify_shield_unsecurified_entity::*;

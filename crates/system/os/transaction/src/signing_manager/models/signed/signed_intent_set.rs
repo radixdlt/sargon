@@ -19,6 +19,7 @@ impl SignedIntentSet {
             Ok(SignedIntentWithContext {
                 signed_intent,
                 context: item.context,
+                entity_applying_shield: item.entity,
             })
         };
 

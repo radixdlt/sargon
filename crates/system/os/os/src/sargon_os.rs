@@ -297,6 +297,12 @@ impl SargonOS {
             as Arc<dyn SignInteractor<TransactionIntent>>
     }
 
+    pub fn saver_of_intents_to_confirm_after_delay(
+        &self,
+    ) -> Arc<dyn SaverOfIntentsToConfirmAfterDelay> {
+        todo!("implement")
+    }
+
     pub fn sign_subintents_interactor(
         &self,
     ) -> Arc<dyn SignInteractor<Subintent>> {

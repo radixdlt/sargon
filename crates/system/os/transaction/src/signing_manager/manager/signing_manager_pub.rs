@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+use super::signing_manager_dependencies::SigningManagerDependencies;
+
 // ==============
 // === PUBLIC ===
 // ==============
@@ -7,14 +9,21 @@ impl SigningManager {
     pub(crate) fn new(
         factor_sources_in_profile: IndexSet<FactorSource>,
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+        saver_of_intents_to_confirm_after_delay: Arc<
+            dyn SaverOfIntentsToConfirmAfterDelay,
+        >,
         intent_sets: impl IntoIterator<
             Item = SecurityShieldApplicationWithTransactionIntents,
         >,
     ) -> Self {
         let state = SigningManagerState::new(intent_sets);
         Self {
-            factor_sources_in_profile,
-            interactor,
+            dependencies: SigningManagerDependencies::new(
+                factor_sources_in_profile,
+                interactor,
+                saver_of_intents_to_confirm_after_delay,
+            )
+            .into(),
             state: RwLock::new(state),
         }
     }
@@ -53,6 +62,13 @@ impl SigningManager {
         // intents we are not going to submit.
         let best_signed_intent = signed_for_with_entities_applying_shield
             .get_best_signed_intents()?;
+
+        let intents_to_confirm_after_delay =
+            self.get_intents_to_confirm_after_delay(&best_signed_intent)?;
+
+        self.saver_of_intents_to_confirm_after_delay
+            .save_intents_to_confirm_after_delay(intents_to_confirm_after_delay)
+            .await?;
 
         // Sign with fee payer - we only need to sign the best ones with
         // the fee payer.

@@ -6,6 +6,17 @@ pub(crate) struct SigningManagerIntermediaryOutcome {
 }
 
 impl SigningManagerIntermediaryOutcome {
+    pub(crate) fn new(
+        successfully_signed_intent_sets: impl IntoIterator<Item = SignedIntentSet>,
+        failed_intent_sets: impl IntoIterator<Item = SignedIntentSet>,
+    ) -> Self {
+        Self {
+            successfully_signed_intent_sets: successfully_signed_intent_sets
+                .into_iter()
+                .collect(),
+            failed_intent_sets: failed_intent_sets.into_iter().collect(),
+        }
+    }
     pub(crate) fn get_best_signed_intents(
         self,
     ) -> Result<Vec<SignedIntentWithContext>> {
