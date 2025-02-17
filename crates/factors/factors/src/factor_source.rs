@@ -205,9 +205,14 @@ impl FactorSource {
                     hint,
                 )))
             }
-            _ => Err(CommonError::InvalidFactorSourceKind {
-                bad_value: factor_source_kind.to_string(),
-            }),
+            FactorSourceKind::LedgerHQHardwareWallet
+            | FactorSourceKind::ArculusCard
+            | FactorSourceKind::SecurityQuestions
+            | FactorSourceKind::TrustedContact => {
+                Err(CommonError::InvalidFactorSourceKind {
+                    bad_value: factor_source_kind.to_string(),
+                })
+            }
         }
     }
 }
