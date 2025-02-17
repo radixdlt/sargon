@@ -1,12 +1,14 @@
 use crate::prelude::*;
 
-struct SigningManagerIntermediaryOutcome {
+pub(crate) struct SigningManagerIntermediaryOutcome {
     successfully_signed_intent_sets: Vec<SignedIntentSet>,
     failed_intent_sets: Vec<SignedIntentSet>,
 }
 
 impl SigningManagerIntermediaryOutcome {
-    fn get_best_signed_intents(self) -> Result<Vec<SignedIntentWithContext>> {
+    pub(crate) fn get_best_signed_intents(
+        self,
+    ) -> Result<Vec<SignedIntentWithContext>> {
         // TODO: Implement support for handling of failed transactions, i.e. submit the successful ones even if some failed and do SOMETHING with the failed ones
         let signed_sets = self.validate_all_intent_sets_signed()?;
 

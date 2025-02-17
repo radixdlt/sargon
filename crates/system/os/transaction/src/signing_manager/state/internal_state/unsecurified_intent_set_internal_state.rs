@@ -1,22 +1,24 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct UnsecurifiedIntentSetInternalState {
+pub(crate) struct UnsecurifiedIntentSetInternalState {
     account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
-    entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
-    transaction_intent: Immutable<TransactionIntent>,
+    pub(crate) entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
+    pub(crate) transaction_intent: Immutable<TransactionIntent>,
 
     signatures: IntentVariantSignaturesForRoleState,
 }
+
 impl UnsecurifiedIntentSetInternalState {
-    fn paying_account(&self) -> Account {
+    pub(crate) fn paying_account(&self) -> Account {
         self.account_paying_for_transaction.account()
     }
-    fn transaction_intent_hash(&self) -> TransactionIntentHash {
+
+    pub(crate) fn transaction_intent_hash(&self) -> TransactionIntentHash {
         self.transaction_intent.transaction_intent_hash()
     }
 
-    fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {

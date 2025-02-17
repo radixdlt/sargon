@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct IntentVariantSignaturesForRoleState {
+pub(crate) struct IntentVariantSignaturesForRoleState {
     role: RoleKind,
     signatures_per_entity:
         IndexMap<AddressOfAccountOrPersona, IndexSet<SignatureWithPublicKey>>,
 }
 impl IntentVariantSignaturesForRoleState {
-    fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
@@ -21,7 +21,8 @@ impl IntentVariantSignaturesForRoleState {
                 .collect_vec(),
         );
     }
-    fn new(role: RoleKind) -> Self {
+
+    pub(crate) fn new(role: RoleKind) -> Self {
         Self {
             role,
             signatures_per_entity: IndexMap::new(),

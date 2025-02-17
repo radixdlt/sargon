@@ -1,21 +1,24 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct SecurifiedIntentSetInternalState {
+pub(crate) struct SecurifiedIntentSetInternalState {
     account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
-    entity_applying_shield: Immutable<AnySecurifiedEntity>,
+    pub(crate) entity_applying_shield: Immutable<AnySecurifiedEntity>,
     initiate_with_recovery_complete_with_primary: IntentVariantState,
     initiate_with_recovery_complete_with_confirmation: IntentVariantState,
     initiate_with_recovery_delayed_completion: IntentVariantState,
     initiate_with_primary_complete_with_confirmation: IntentVariantState,
     initiate_with_primary_delayed_completion: IntentVariantState,
 }
+
 impl SecurifiedIntentSetInternalState {
-    fn paying_account(&self) -> Account {
+    pub(crate) fn paying_account(&self) -> Account {
         self.account_paying_for_transaction.account()
     }
 
-    fn transaction_intent_hashes(&self) -> IndexSet<TransactionIntentHash> {
+    pub(crate) fn transaction_intent_hashes(
+        &self,
+    ) -> IndexSet<TransactionIntentHash> {
         self._all_intent_variant_states()
             .iter()
             .map(|v| v.intent.transaction_intent_hash())
@@ -32,7 +35,7 @@ impl SecurifiedIntentSetInternalState {
         ]
     }
 
-    fn variants_for_role(
+    pub(crate) fn variants_for_role(
         &self,
         role_kind: RoleKind,
     ) -> Vec<&IntentVariantState> {
@@ -65,7 +68,7 @@ impl SecurifiedIntentSetInternalState {
         }
     }
 
-    fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-trait AddFeePayerSignatures {
+pub(crate) trait AddFeePayerSignatures {
     fn add_fee_payer_signatures(
         &mut self,
         signatures: IndexSet<IntentSignature>,

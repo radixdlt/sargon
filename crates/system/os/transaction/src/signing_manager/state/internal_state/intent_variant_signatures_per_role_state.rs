@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct IntentVariantSignaturesPerRoleState(
+pub(crate) struct IntentVariantSignaturesPerRoleState(
     IndexMap<RoleKind, IntentVariantSignaturesForRoleState>,
 );
+
 impl IntentVariantSignaturesPerRoleState {
-    fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
@@ -18,7 +19,9 @@ impl IntentVariantSignaturesPerRoleState {
             .update_with_intent_with_signatures(intent_with_signatures);
     }
 
-    fn new(variant: RolesExercisableInTransactionManifestCombination) -> Self {
+    pub(crate) fn new(
+        variant: RolesExercisableInTransactionManifestCombination,
+    ) -> Self {
         Self::_new_with_roles(variant.exercisable_roles())
     }
     fn _new_with_roles(roles: impl IntoIterator<Item = RoleKind>) -> Self {

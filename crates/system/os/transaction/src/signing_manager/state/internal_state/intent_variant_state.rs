@@ -1,15 +1,16 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct IntentVariantState {
-    intent: Immutable<TransactionIntent>,
-    variant: Immutable<RolesExercisableInTransactionManifestCombination>,
+pub(crate) struct IntentVariantState {
+    pub(crate) intent: Immutable<TransactionIntent>,
+    pub(crate) variant:
+        Immutable<RolesExercisableInTransactionManifestCombination>,
     /// The `role` of the values must match the key...
     signatures_per_role: IntentVariantSignaturesPerRoleState,
 }
 
 impl IntentVariantState {
-    fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
@@ -22,7 +23,8 @@ impl IntentVariantState {
         self.signatures_per_role
             .update_with_intent_with_signatures(intent_with_signatures)
     }
-    fn new(
+
+    pub(crate) fn new(
         intent: impl Into<Immutable<TransactionIntent>>,
         variant: impl Into<
             Immutable<RolesExercisableInTransactionManifestCombination>,

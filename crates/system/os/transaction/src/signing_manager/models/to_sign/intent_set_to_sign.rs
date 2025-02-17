@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// A "set" of TransactionIntents to sign, and entities to sign for.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
-struct IntentSetToSign {
+pub(crate) struct IntentSetToSign {
     #[allow(dead_code)]
     #[doc(hidden)]
     #[debug(skip)]
@@ -12,15 +12,16 @@ struct IntentSetToSign {
 
     // An ID generated for the purpose of being able to identify which "set" a
     // TransactionIntent belongs to.
-    intent_set_id: IntentSetID,
+    pub(crate) intent_set_id: IntentSetID,
 
     /// Will be a single one for unsecurified entities
-    variants: Vec<IntentVariant>,
+    pub(crate) variants: Vec<IntentVariant>,
 
     /// For shield applying manifests this Vec contains a single entity, either
     /// the entity applying the shield or the fee payer
-    entity: AccountOrPersona, // TODO: Generalization - in future change to support multiple entities
+    pub(crate) entity: AccountOrPersona, // TODO: Generalization - in future change to support multiple entities
 }
+
 impl IntentSetToSign {
     pub fn maybe_from(
         intent_set_state: &IntentSetState,

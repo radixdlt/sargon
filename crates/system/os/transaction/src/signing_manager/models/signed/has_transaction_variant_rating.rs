@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-trait HasTransactionVariantRating {
+pub(crate) trait HasTransactionVariantRating {
     /// `0` means best
     fn rating(&self) -> u8;
 }

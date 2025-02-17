@@ -1,11 +1,12 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct SigningManagerState {
-    per_set_state: IndexMap<IntentSetID, IntentSetState>,
+pub(crate) struct SigningManagerState {
+    pub(crate) per_set_state: IndexMap<IntentSetID, IntentSetState>,
 }
+
 impl SigningManagerState {
-    fn update_with_exercise_role_outcome(
+    pub(crate) fn update_with_exercise_role_outcome(
         &mut self,
         outcome: ExerciseRoleOutcome,
     ) {
@@ -16,7 +17,7 @@ impl SigningManagerState {
         );
     }
 
-    fn update_with_entities_signed_for(
+    pub(crate) fn update_with_entities_signed_for(
         &mut self,
         entities_signed_for: EntitiesSignedFor,
     ) {
@@ -28,7 +29,7 @@ impl SigningManagerState {
             })
     }
 
-    fn update_with_entities_not_signed_for(
+    pub(crate) fn update_with_entities_not_signed_for(
         &mut self,
         entities_not_signed_for: EntitiesNotSignedFor,
     ) {
@@ -60,7 +61,7 @@ impl SigningManagerState {
 }
 
 impl SigningManagerState {
-    fn new(
+    pub(crate) fn new(
         intent_sets: impl IntoIterator<
             Item = SecurityShieldApplicationWithTransactionIntents,
         >,

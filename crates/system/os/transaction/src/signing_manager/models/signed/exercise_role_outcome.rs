@@ -1,20 +1,20 @@
 use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-struct ExerciseRoleOutcome {
+pub(crate) struct ExerciseRoleOutcome {
     #[allow(dead_code)]
     #[doc(hidden)]
     hidden: HiddenConstructor,
 
-    role: RoleKind,
+    pub(crate) role: RoleKind,
 
     /// The `entities_signed_for.filter_map(|e| e.variant)` must "contain" `role`, e.g.
     /// if role is ROLE_PRIMARY_ROLE then variant cannot be
     /// RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation
     /// which does not "contain" Primary.
-    entities_signed_for: EntitiesSignedFor,
+    pub(crate) entities_signed_for: EntitiesSignedFor,
 
-    entities_not_signed_for: EntitiesNotSignedFor,
+    pub(crate) entities_not_signed_for: EntitiesNotSignedFor,
 }
 
 impl ExerciseRoleOutcome {

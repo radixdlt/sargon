@@ -1,17 +1,17 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-struct IntentSetState {
-    intent_set_id: IntentSetID,
-    internal_state: IntentSetInternalState,
+pub(crate) struct IntentSetState {
+    pub(crate) intent_set_id: IntentSetID,
+    pub(crate) internal_state: IntentSetInternalState,
 }
 
 impl IntentSetState {
-    fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
+    pub(crate) fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
         self.internal_state.can_exercise_role(role_kind)
     }
 
-    fn new(
+    pub(crate) fn new(
         intent_set_id: IntentSetID,
         shield_application: SecurityShieldApplicationWithTransactionIntents,
     ) -> Self {
@@ -21,7 +21,7 @@ impl IntentSetState {
         }
     }
 
-    fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, StdHash, derive_more::Debug)]
-pub struct EntitySigningOutcome<Outcome> {
+pub(crate) struct EntitySigningOutcome<Outcome> {
     pub context: EntitySigningContext,
     pub intent: TransactionIntent,
     pub entity: AccountOrPersona,

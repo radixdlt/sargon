@@ -6,7 +6,7 @@ use crate::prelude::*;
 /// [whimsical diagram][flow].
 ///
 /// [flow]: https://whimsical.com/wallet-sargon-signing-flow-QFvU2NAVXFiX1VgNBuvj5g
-pub struct SigningManager {
+pub(crate) struct SigningManager {
     /// FactorSources in Profile
     factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,

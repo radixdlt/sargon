@@ -2,19 +2,21 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[allow(clippy::large_enum_variant)]
-enum IntentSetInternalState {
+pub(crate) enum IntentSetInternalState {
     Unsecurified(UnsecurifiedIntentSetInternalState),
     Securified(SecurifiedIntentSetInternalState),
 }
 impl IntentSetInternalState {
-    fn paying_account(&self) -> Account {
+    pub(crate) fn paying_account(&self) -> Account {
         match self {
             Self::Unsecurified(unsec) => unsec.paying_account(),
             Self::Securified(sec) => sec.paying_account(),
         }
     }
 
-    fn transaction_intent_hashes(&self) -> IndexSet<TransactionIntentHash> {
+    pub(crate) fn transaction_intent_hashes(
+        &self,
+    ) -> IndexSet<TransactionIntentHash> {
         match self {
             Self::Unsecurified(unsec) => {
                 IndexSet::just(unsec.transaction_intent_hash())
@@ -23,13 +25,14 @@ impl IntentSetInternalState {
         }
     }
 
-    fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
+    pub(crate) fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
         match self {
             Self::Unsecurified(_) => role_kind == RoleKind::Primary,
             Self::Securified(_) => true, // For securified we have all 5 variants
         }
     }
-    fn update_with_intent_with_signatures(
+
+    pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {

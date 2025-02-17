@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SignedIntentSet {
+pub(crate) struct SignedIntentSet {
     intents: Vec<EntitySignedFor>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
 }
 impl SignedIntentSet {

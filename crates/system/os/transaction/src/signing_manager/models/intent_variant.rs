@@ -1,9 +1,10 @@
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-struct IntentVariant {
-    variant: Option<RolesExercisableInTransactionManifestCombination>,
-    intent: TransactionIntent,
+pub(crate) struct IntentVariant {
+    pub(crate) variant:
+        Option<RolesExercisableInTransactionManifestCombination>,
+    pub(crate) intent: TransactionIntent,
 }
 impl IntentVariant {
     pub fn new(
