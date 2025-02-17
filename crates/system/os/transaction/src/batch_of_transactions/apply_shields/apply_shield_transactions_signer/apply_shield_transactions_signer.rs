@@ -9,20 +9,16 @@ pub trait ApplyShieldTransactionsSigner: Send + Sync {
 }
 
 pub struct ApplyShieldTransactionsSignerImpl {
-
     factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
 }
 
 impl ApplyShieldTransactionsSignerImpl {
     pub fn new(os: &SargonOS) -> Result<Self> {
-        os.profile()
-            .map(|profile| {
-                Self {
-                    factor_sources_in_profile: profile.factor_sources(),
-                    interactor: os.sign_transactions_interactor(),
-                }
-            })
+        os.profile().map(|profile| Self {
+            factor_sources_in_profile: profile.factor_sources(),
+            interactor: os.sign_transactions_interactor(),
+        })
     }
 }
 
@@ -42,9 +38,7 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
         let notary_manager = NotaryManager::new(payload_to_sign.notary_keys);
 
         // Kick off the complex signing process using 4 passes to the signatures collector.
-        let outcome = signing_manager
-            .sign_intent_sets()
-            .await?;
+        let outcome = signing_manager.sign_intent_sets().await?;
 
         // TODO: Implement support for handling of failed transactions, i.e. submit the successful ones even if some failed and do SOMETHING with the failed ones
         let signed_intents = outcome.0;

@@ -7,16 +7,6 @@ pub struct SignedIntent {
     pub intent: TransactionIntent,
     pub intent_signatures: IntentSignatures,
 }
-impl SignedIntent {
-    fn add_fee_payer_signatures(
-        &mut self,
-        signatures: IndexSet<SignatureWithPublicKey>,
-    ) {
-        let mut existing_signatures = self.intent_signatures.signatures;
-        existing_signatures.extend(signatures);
-        self.intent_signatures = IntentSignatures::new(existing_signatures);
-    }
-}
 
 impl IntoIterator for SignedIntent {
     type Item = SignatureWithPublicKey;

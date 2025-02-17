@@ -109,6 +109,7 @@ impl IntentSetState {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[allow(clippy::large_enum_variant)]
 enum IntentSetInternalState {
     Unsecurified(UnsecurifiedIntentSetInternalState),
     Securified(SecurifiedIntentSetInternalState),
@@ -121,11 +122,12 @@ impl IntentSetInternalState {
         }
     }
 
-
     fn transaction_intent_hashes(&self) -> IndexSet<TransactionIntentHash> {
         match self {
-            Self::Unsecurified(unsec) => IndexSet::just(unsec.transaction_intent_hash()),
-            Self::Securified(sec) => sec.transaction_intent_hashes(), 
+            Self::Unsecurified(unsec) => {
+                IndexSet::just(unsec.transaction_intent_hash())
+            }
+            Self::Securified(sec) => sec.transaction_intent_hashes(),
         }
     }
 
@@ -315,7 +317,11 @@ impl IntentVariantSignaturesForRoleState {
         assert_eq!(intent_with_signatures.role_kind(), self.role);
         self.signatures_per_entity.append_or_insert_to(
             intent_with_signatures.entity.address(),
-            intent_with_signatures.signatures(),
+            intent_with_signatures
+                .intent_signatures()
+                .into_iter()
+                .map(|s| s.0)
+                .collect_vec(),
         );
     }
     fn new(role: RoleKind) -> Self {
@@ -342,7 +348,10 @@ impl SecurifiedIntentSetInternalState {
     }
 
     fn transaction_intent_hashes(&self) -> IndexSet<TransactionIntentHash> {
-        self._all_intent_variant_states().iter().map(|v| v.intent.transaction_intent_hash()).collect()
+        self._all_intent_variant_states()
+            .iter()
+            .map(|v| v.intent.transaction_intent_hash())
+            .collect()
     }
 
     fn _all_intent_variant_states(&self) -> Vec<&IntentVariantState> {
@@ -820,9 +829,9 @@ impl SigningManager {
     ) -> Result<SigningManagerOutcome> {
         let role_kind = RoleKind::Primary;
         let payer_by_tx_id = |intent_set_id: IntentSetID,
-        txid: TransactionIntentHash|
-        -> Result<Account> {
-             let state = self._get_state();
+                              txid: TransactionIntentHash|
+         -> Result<Account> {
+            let state = self._get_state();
             let s = state.per_set_state.get(&intent_set_id).unwrap();
             let txids = s.internal_state.transaction_intent_hashes();
             assert!(txids.contains(&txid));
@@ -847,25 +856,33 @@ impl SigningManager {
             })
             .collect::<Result<Vec<IntentSetToSign>>>()?;
 
-let mut signed_intents = signed_intents.into_iter().map(|si| {
-    (si.context, si.signed_intent)
-
-}).collect::<IndexMap<EntitySigningContext, SignedIntent>>();
+        let mut signed_intents = signed_intents
+            .into_iter()
+            .map(|si| (si.context, si.signed_intent))
+            .collect::<IndexMap<EntitySigningContext, SignedIntent>>();
 
         let exercise_role_outcome = self
             .sign_intent_sets_with_role(intent_sets, RoleKind::Primary)
             .await?;
 
-            assert!(exercise_role_outcome.entities_not_signed_for.is_empty());
-         
-            let signed_with_payers = exercise_role_outcome.entities_signed_for;
-            signed_with_payers.0.into_iter().for_each(|signed_with_payer| {
-                let intent_set_id = signed_with_payer.context.intent_set_id;
-                let mut signed_intent = signed_intents
+        assert!(exercise_role_outcome.entities_not_signed_for.is_empty());
+
+        let signed_with_payers = exercise_role_outcome.entities_signed_for;
+        signed_with_payers
+            .0
+            .into_iter()
+            .for_each(|signed_with_payer| {
+                let signed_intent = signed_intents
                     .get_mut(&signed_with_payer.context)
                     .expect("Should have signed intent");
-                signed_intent.add_fee_payer_signatures(signed_with_payer.signatures());
+                signed_intent.add_fee_payer_signatures(
+                    signed_with_payer.intent_signatures(),
+                );
             });
+
+        Ok(SigningManagerOutcome(
+            signed_intents.values().cloned().collect_vec(),
+        ))
     }
 
     fn intermediary_outcome(
@@ -1001,8 +1018,25 @@ impl IntentVariant {
 // =================
 // ==== SIGNED =====
 // =================
+trait AddFeePayerSignatures {
+    fn add_fee_payer_signatures(
+        &mut self,
+        signatures: IndexSet<IntentSignature>,
+    );
+}
 
-#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+impl AddFeePayerSignatures for SignedIntent {
+    fn add_fee_payer_signatures(
+        &mut self,
+        signatures: IndexSet<IntentSignature>,
+    ) {
+        let mut existing_signatures = self.intent_signatures.signatures.clone();
+        existing_signatures.extend(signatures.into_iter().collect_vec());
+        self.intent_signatures = IntentSignatures::new(existing_signatures);
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, StdHash, derive_more::Debug)]
 pub struct EntitySigningContext {
     pub intent_set_id: IntentSetID,
     pub role_kind: RoleKind,
@@ -1025,7 +1059,7 @@ impl EntitySigningContext {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+#[derive(Clone, PartialEq, Eq, StdHash, derive_more::Debug)]
 pub struct EnititySigningOutcome<Outcome> {
     pub context: EntitySigningContext,
     pub intent: TransactionIntent,
@@ -1066,8 +1100,12 @@ pub type EntiitySignedFor =
     EnititySigningOutcome<IndexSet<SignatureWithPublicKey>>;
 
 impl EntiitySignedFor {
-    pub fn signatures(&self) -> IndexSet<SignatureWithPublicKey> {
-        self.outcome.clone()
+    pub fn intent_signatures(&self) -> IndexSet<IntentSignature> {
+        self.outcome
+            .clone()
+            .into_iter()
+            .map(IntentSignature::from)
+            .collect::<IndexSet<_>>()
     }
 }
 
@@ -1182,11 +1220,7 @@ impl SignedIntentSet {
 
         let from = |item: EntiitySignedFor| -> Result<SignedIntentWithContext> {
             let intent = item.intent.clone();
-            let signatures = item
-                .signatures()
-                .into_iter()
-                .map(IntentSignature::from)
-                .collect_vec();
+            let signatures = item.intent_signatures();
 
             let signed_intent =
                 SignedIntent::new(intent, IntentSignatures::new(signatures))?;
@@ -1244,7 +1278,6 @@ pub struct SignedIntentWithContext {
     pub signed_intent: SignedIntent,
     pub context: EntitySigningContext,
 }
-
 
 impl SigningManagerIntermediaryOutcome {
     fn get_best_signed_intents(self) -> Result<Vec<SignedIntentWithContext>> {
