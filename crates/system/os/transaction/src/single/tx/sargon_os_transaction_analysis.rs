@@ -21,14 +21,6 @@ pub trait OsAnalyseTxPreview {
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview>;
-
-    async fn analyse_pre_auth_preview(
-        &self,
-        instructions: String,
-        blobs: Blobs,
-        nonce: Nonce,
-        notary_public_key: PublicKey,
-    ) -> Result<PreAuthToReview>;
 }
 
 #[async_trait::async_trait]
@@ -71,61 +63,6 @@ impl OsAnalyseTxPreview for SargonOS {
             transaction_manifest,
             execution_summary,
         })
-    }
-
-    /// Performs initial transaction analysis for a given raw manifest, including:
-    /// 1. Creating the SubintentManifest.
-    /// 2. Validating if the manifest is open or enclosed.
-    /// 3. If open, the manifest with its summary is returned.
-    /// 4. If enclosed, it extracts the transaction signers and then transaction preview GW request is executed.
-    /// 3. The execution summary is created with the manifest and receipt.
-    ///
-    ///     Maps relevant errors to ensure proper handling by the hosts.
-    async fn analyse_pre_auth_preview(
-        &self,
-        instructions: String,
-        blobs: Blobs,
-        nonce: Nonce,
-        notary_public_key: PublicKey,
-    ) -> Result<PreAuthToReview> {
-        let network_id = self.current_network_id()?;
-        let subintent_manifest = SubintentManifest::new(
-            instructions,
-            network_id,
-            blobs.clone(),
-            ChildSubintentSpecifiers::default(),
-        )?;
-
-        let summary = subintent_manifest.validated_summary(
-            network_id,
-            false, // PreAuth transaction cannot be sent by the Host itself
-        )?;
-
-        let pre_auth_to_review = match subintent_manifest.as_enclosed_scrypto()
-        {
-            Some(manifest) => {
-                let execution_summary = self
-                    .get_execution_summary(
-                        network_id,
-                        manifest,
-                        nonce,
-                        notary_public_key,
-                        false,
-                    )
-                    .await?;
-
-                PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
-                    manifest: subintent_manifest,
-                    summary: execution_summary,
-                })
-            }
-            None => PreAuthToReview::Open(PreAuthOpenManifest {
-                manifest: subintent_manifest,
-                summary,
-            }),
-        };
-
-        Ok(pre_auth_to_review)
     }
 }
 
@@ -373,8 +310,9 @@ pub struct PreviewResponseReceipts {
 }
 
 #[cfg(test)]
-mod transaction_preview_analysis_tests {
+mod tests {
     use super::*;
+    use crate::single::support::*;
     use radix_engine_toolkit_common::receipt::{
         FeeSummary as RETFeeSummary, LockedFees as RETLockedFees,
         StateUpdatesSummary as RETStateUpdatesSummary,
@@ -426,7 +364,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn failed_preview_response_unknown_error() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -469,7 +407,7 @@ mod transaction_preview_analysis_tests {
     #[actix_rt::test]
     async fn failed_preview_response_deposit_rules_error() {
         let mut responses: Vec<BagOfBytes> = vec![];
-        let mut first_call_responses = prepare_responses(
+        let mut first_call_responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -489,7 +427,7 @@ mod transaction_preview_analysis_tests {
                 },
             },
         );
-        let mut second_call_responses = prepare_responses(
+        let mut second_call_responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -550,7 +488,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn missing_radix_engine_toolkit_receipt_error() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -594,7 +532,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn execution_summary_parse_error() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -667,7 +605,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn success() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -743,7 +681,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn signer_entities_not_found() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -824,19 +762,14 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn analyse_open_enclosed_auth_preview() {
-        let responses = vec![
-            to_bag_of_bytes(
-                TransactionConstructionResponse {
-                    ledger_state: LedgerState {
-                        network: "".to_string(),
-                        state_version: 0,
-                        proposer_round_timestamp: "".to_string(),
-                        epoch: 0,
-                        round: 0,
-                    }
-                }
-            ),
-            to_bag_of_bytes(
+        let responses = prepare_preview_response_v2(
+            LedgerState {
+                network: "".to_string(),
+                state_version: 0,
+                proposer_round_timestamp: "".to_string(),
+                epoch: 0,
+                round: 0,
+            },
             TransactionPreviewResponseV2 {
                 at_ledger_state_version: 0,
                 receipt: Some(TransactionReceipt {
@@ -864,7 +797,7 @@ mod transaction_preview_analysis_tests {
                 }),
                 logs: None,
             }
-        )];
+        );
         let os =
             prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
                 .await;
@@ -922,7 +855,7 @@ mod transaction_preview_analysis_tests {
             .unwrap()
             .0;
 
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -995,7 +928,7 @@ mod transaction_preview_analysis_tests {
             .unwrap()
             .0;
 
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -1059,28 +992,6 @@ mod transaction_preview_analysis_tests {
         );
     }
 
-    async fn prepare_os(
-        mock_networking_driver: MockNetworkingDriver,
-    ) -> Arc<SargonOS> {
-        let req = SUT::boot_test_with_networking_driver(Arc::new(
-            mock_networking_driver,
-        ));
-        let os =
-            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
-                .await
-                .unwrap()
-                .unwrap();
-
-        os.update_profile_with(|profile| {
-            profile.networks.insert(ProfileNetwork::sample_mainnet());
-            profile.factor_sources.insert(FactorSource::sample());
-            Ok(())
-        })
-        .await
-        .unwrap();
-        os
-    }
-
     fn prepare_manifest_with_account_entity() -> TransactionManifest {
         let account = Account::sample_mainnet();
         TransactionManifest::set_owner_keys_hashes(
@@ -1088,22 +999,5 @@ mod transaction_preview_analysis_tests {
             vec![PublicKeyHash::sample()],
         )
         .modify_add_lock_fee(&account.address, Some(Decimal192::zero()))
-    }
-
-    fn prepare_responses(
-        ledger_state: LedgerState,
-        preview_response: TransactionPreviewResponse,
-    ) -> Vec<BagOfBytes> {
-        vec![
-            to_bag_of_bytes(TransactionConstructionResponse { ledger_state }),
-            to_bag_of_bytes(preview_response),
-        ]
-    }
-
-    fn to_bag_of_bytes<T>(value: T) -> BagOfBytes
-    where
-        T: Serialize,
-    {
-        BagOfBytes::from(serde_json::to_vec(&value).unwrap())
     }
 }
