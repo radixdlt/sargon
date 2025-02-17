@@ -79,12 +79,52 @@ impl DeviceMnemonicBuilder {
 // ==== GET / READ ====
 // ====================
 impl DeviceMnemonicBuilder {
+    /// Returns the `mnemonic_with_passphrase` if it was previously created or panics.
+    fn get_mnemonic_with_passphrase(&self) -> MnemonicWithPassphrase {
+        self.mnemonic_with_passphrase
+            .read()
+            .unwrap()
+            .clone()
+            .expect("Mnemonic with passphrase should be created first")
+    }
+}
+
+// ====================
+// ===== MUTATION =====
+// ====================
+impl DeviceMnemonicBuilder {
+    /// Generates a new mnemonic
+    pub fn create_new_mnemonic_with_passphrase(&self) -> &Self {
+        let mnemonic = Mnemonic::generate_new();
+        self.set_mnemonic_with_passphrase(mnemonic);
+        self
+    }
+
+    /// Creates a new mnemonic from given `words`
+    pub fn create_mnemonic_with_passphrase_from_words(
+        &self,
+        words: Vec<BIP39Word>,
+    ) -> Result<&Self> {
+        let mnemonic = Mnemonic::from_words(words)?;
+        self.set_mnemonic_with_passphrase(mnemonic);
+        Ok(self)
+    }
+
+    fn set_mnemonic_with_passphrase(&self, mnemonic: Mnemonic) {
+        *self.mnemonic_with_passphrase.write().unwrap() =
+            Some(MnemonicWithPassphrase::new(mnemonic));
+    }
+}
+
+impl DeviceMnemonicBuilder {
     const NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM_EXCL_CHECKSUM:
         usize = 3;
     const NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM: usize =
         Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM_EXCL_CHECKSUM
             + 1;
 
+    /// Get a set of words indices within `MnemonicWithPassphrase` to be confirmed.
+    /// Always includes the last mnemonic word index.
     pub fn get_indices_in_mnemonic_of_words_to_confirm(
         &self,
     ) -> IndexSet<usize> {
@@ -102,6 +142,14 @@ impl DeviceMnemonicBuilder {
             .into_iter()
             .sorted()
             .collect::<IndexSet<_>>()
+    }
+
+    /// Returns the `FactorSourceID` from the mnemonic with passphrase
+    /// Panics if the mnemonic with passphrase wasn't yet created
+    pub fn factor_source_id(&self) -> FactorSourceID {
+        FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
+            &self.get_mnemonic_with_passphrase(),
+        ))
     }
 
     /// Verifies if the `words_to_confirm` contains the expected number of words.
@@ -152,41 +200,6 @@ impl DeviceMnemonicBuilder {
             .words
             .get(index_in_mnemonic)
             .is_some_and(|w| w.word == word.as_ref())
-    }
-
-    fn get_mnemonic_with_passphrase(&self) -> MnemonicWithPassphrase {
-        self.mnemonic_with_passphrase
-            .read()
-            .unwrap()
-            .clone()
-            .expect("Mnemonic with passphrase should be created first")
-    }
-}
-
-// ====================
-// ===== MUTATION =====
-// ====================
-impl DeviceMnemonicBuilder {
-    /// Generates a new mnemonic
-    pub fn create_new_mnemonic_with_passphrase(&self) -> &Self {
-        let mnemonic = Mnemonic::generate_new();
-        self.set_mnemonic_with_passphrase(mnemonic);
-        self
-    }
-
-    /// Creates a new mnemonic from given `words`
-    pub fn create_mnemonic_with_passphrase_from_words(
-        &self,
-        words: Vec<BIP39Word>,
-    ) -> Result<&Self> {
-        let mnemonic = Mnemonic::from_words(words)?;
-        self.set_mnemonic_with_passphrase(mnemonic);
-        Ok(self)
-    }
-
-    fn set_mnemonic_with_passphrase(&self, mnemonic: Mnemonic) {
-        *self.mnemonic_with_passphrase.write().unwrap() =
-            Some(MnemonicWithPassphrase::new(mnemonic));
     }
 }
 

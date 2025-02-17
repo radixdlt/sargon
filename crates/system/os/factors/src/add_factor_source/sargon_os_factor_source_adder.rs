@@ -4,8 +4,7 @@ use crate::prelude::*;
 pub trait OsFactorSourceAdder {
     async fn is_factor_source_already_in_use(
         &self,
-        factor_source_kind: FactorSourceKind,
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        factor_source_id: FactorSourceID,
     ) -> Result<bool>;
 
     async fn add_new_factor_source(
@@ -22,15 +21,8 @@ impl OsFactorSourceAdder for SargonOS {
     /// with the same `FactorSourceID`.
     async fn is_factor_source_already_in_use(
         &self,
-        factor_source_kind: FactorSourceKind,
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        factor_source_id: FactorSourceID,
     ) -> Result<bool> {
-        let factor_source_id = FactorSourceID::from(
-            FactorSourceIDFromHash::from_mnemonic_with_passphrase(
-                factor_source_kind,
-                &mnemonic_with_passphrase,
-            ),
-        );
         self.profile_contains_factor_source(factor_source_id).await
     }
 
@@ -104,5 +96,46 @@ impl OsFactorSourceAdder for SargonOS {
             .await;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use error::prelude::CommonError::ProfileStateNotLoaded;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn is_factor_source_already_in_use() {
+        let test = async |fsid: FactorSourceID,
+                          expected_result: Result<bool>| {
+            let mwp = MnemonicWithPassphrase::sample();
+            let os = SUT::fast_boot_bdfs(mwp.clone()).await;
+
+            let is_already_in_use =
+                os.is_factor_source_already_in_use(fsid).await;
+
+            pretty_assertions::assert_eq!(is_already_in_use, expected_result);
+        };
+
+        test(FactorSourceID::sample(), Ok(true)).await;
+        test(FactorSourceID::sample_other(), Ok(false)).await;
+    }
+
+    #[actix_rt::test]
+    async fn is_factor_source_already_in_use_error() {
+        let bios = Bios::new(Drivers::test());
+        let clients = Clients::new(bios);
+        let interactors = Interactors::new_from_clients(&clients);
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
+
+        let result = os
+            .is_factor_source_already_in_use(FactorSourceID::sample())
+            .await;
+
+        assert!(matches!(result, Err(ProfileStateNotLoaded { .. })));
     }
 }
