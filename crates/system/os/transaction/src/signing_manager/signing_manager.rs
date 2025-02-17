@@ -88,54 +88,13 @@ impl SigningManager {
     ) -> Result<ExerciseRoleOutcome> {
         let purpose = SigningPurpose::SignTX { role_kind };
 
-        // TODO should probably move these lookup tables into fields of `SigningManager` and
-        // change how we construct the SigningManager.
-        let mut lookup_address_to_entity =
-            HashMap::<AddressOfAccountOrPersona, AccountOrPersona>::new();
-        let mut lookup_txid_to_intent_set =
-            HashMap::<TransactionIntentHash, IntentSetID>::new();
-        let mut lookup_txid_to_variant = HashMap::<
-            TransactionIntentHash,
-            Option<RolesExercisableInTransactionManifestCombination>,
-        >::new();
-        let mut lookup_intent_by_txid =
-            HashMap::<TransactionIntentHash, TransactionIntent>::new();
-
-        let transactions_with_petitions = intent_sets
-            .into_iter()
-            .flat_map(|set| {
-                set.variants
-                    .iter()
-                    .map(|variant| {
-                        let tx = variant.intent.clone();
-                        let txid = tx.transaction_intent_hash();
-
-                        lookup_intent_by_txid.insert(txid.clone(), tx.clone());
-
-                        // Insert TXID into the lookup so we can group the signatures
-                        // of each intent by IntentSetID.
-                        lookup_txid_to_intent_set
-                            .insert(txid.clone(), set.intent_set_id);
-
-                        lookup_txid_to_variant
-                            .insert(txid.clone(), variant.variant);
-
-                        let entity_requiring_auth = set.entity.clone();
-                        lookup_address_to_entity.insert(
-                            entity_requiring_auth.address(),
-                            entity_requiring_auth.clone(),
-                        );
-
-                        SignableWithEntities::new(tx, [entity_requiring_auth])
-                    })
-                    .collect_vec()
-            })
-            .collect::<IdentifiedVecOf<_>>();
+        let adapter =
+            ManagerCollectorEphemeralAdapter::new(role_kind, intent_sets);
 
         let collector = SignaturesCollector::with(
             SigningFinishEarlyStrategy::default(),
             self.factor_sources_in_profile.clone(),
-            transactions_with_petitions,
+            adapter.transactions_with_petitions(),
             self.interactor.clone(),
             purpose,
         );
@@ -144,93 +103,8 @@ impl SigningManager {
         // be aborted by user
         let outcome = collector.collect_signatures().await?;
 
-        let get_context =
-            |txid: TransactionIntentHash| -> EntitySigningContext {
-                let intent_set_id =
-                    *lookup_txid_to_intent_set.get(&txid).unwrap();
-
-                let variant = *lookup_txid_to_variant.get(&txid).unwrap();
-
-                EntitySigningContext::new(intent_set_id, role_kind, variant)
-            };
-
-        let entities_signed_for: Vec<EntitySignedFor> = outcome
-            .successful_transactions()
-            .into_iter()
-            .map(|signed_tx| {
-                let txid = signed_tx.signable_id;
-                let signatures_with_inputs = signed_tx.signatures;
-                assert!(!signatures_with_inputs.is_empty(), "cannot be empty");
-                let owner_address = signatures_with_inputs
-                    .first()
-                    .unwrap()
-                    .owned_factor_instance()
-                    .owner;
-                assert!(
-                    signatures_with_inputs
-                        .iter()
-                        .all(|s| s.owned_factor_instance().owner
-                            == owner_address),
-                    "SigningManager expects a single entity to sign for per role."
-                );
-
-                let entity = lookup_address_to_entity
-                    .get(&owner_address)
-                    .unwrap()
-                    .clone();
-                let intent = lookup_intent_by_txid.get(&txid).unwrap().clone();
-
-                EntitySignedFor::new(
-                    get_context(txid),
-                    intent,
-                    entity,
-                    signatures_with_inputs
-                        .into_iter()
-                        .map(|s| s.signature)
-                        .collect(),
-                )
-            })
-            .collect_vec();
-
-        let entities_not_signed_for: Vec<EntityNotSignedFor> = outcome
-            .failed_transactions_outcomes()
-            .into_iter()
-            .map(|o| {
-                let txid = o.signable_id;
-                let intent = lookup_intent_by_txid.get(&txid).unwrap().clone();
-
-                let per_entity_neglected_factor_sources =
-                    o.per_entity_neglected_factors.clone();
-                assert_eq!(
-                    per_entity_neglected_factor_sources.len(),
-                    1,
-                    "Should have exactly one entity"
-                ); // TODO add support for multiple entities
-                let (owner_address, neglected_factors) =
-                    per_entity_neglected_factor_sources
-                        .into_iter()
-                        .next()
-                        .expect("Already validate to have at least entity");
-
-                let entity = lookup_address_to_entity
-                    .get(&owner_address)
-                    .unwrap()
-                    .clone();
-
-                EntityNotSignedFor::new(
-                    get_context(txid),
-                    intent,
-                    entity,
-                    neglected_factors,
-                )
-            })
-            .collect_vec();
-
-        Ok(ExerciseRoleOutcome::new(
-            role_kind,
-            entities_signed_for,
-            entities_not_signed_for,
-        ))
+        // Map output of SignaturesCollector to models our internal state can use
+        adapter.exercise_role_outcome(outcome)
     }
 
     /// # Panics
