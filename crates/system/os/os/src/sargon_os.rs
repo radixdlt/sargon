@@ -143,8 +143,6 @@ impl SargonOS {
         Ok(())
     }
 
-    // only for debug for now, need integration work in hosts before enabling this for prod
-    #[cfg(debug_assertions)]
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
