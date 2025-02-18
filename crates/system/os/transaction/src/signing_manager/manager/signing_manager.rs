@@ -154,8 +154,9 @@ impl SigningManager {
         let successfully_signed_intent_sets: Vec<SignedIntentSet> =
             self.get_signed_intent_sets()?;
 
+        // TODO: need this?
         let failed_intent_sets: Vec<SignedIntentSet> = vec![];
-        todo!();
+
         Ok(SigningManagerIntermediaryOutcome::new(
             successfully_signed_intent_sets,
             failed_intent_sets,

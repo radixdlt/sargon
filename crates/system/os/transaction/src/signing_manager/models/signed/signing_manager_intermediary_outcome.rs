@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 pub(crate) struct SigningManagerIntermediaryOutcome {
     successfully_signed_intent_sets: Vec<SignedIntentSet>,
+    // TODO: need this?
     failed_intent_sets: Vec<SignedIntentSet>,
 }
 
