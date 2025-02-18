@@ -27,14 +27,26 @@ impl TransactionIntent {
             .filter_map(|a| IdentityAddress::try_from(a).ok())
             .collect::<HashSet<_>>();
 
-        if HashSet::from_iter(summary.addresses_of_accounts_requiring_auth)
-            != account_addresses
+        if HashSet::from_iter(
+            summary.addresses_of_accounts_requiring_auth.clone(),
+        ) != account_addresses
         {
+            println!("🔮🔮🔮Account addresses: {:?}", account_addresses);
+            println!(
+                "summary.addresses_of_accounts_requiring_auth: {:?}",
+                summary.addresses_of_accounts_requiring_auth
+            );
             return Err(CommonError::Unknown); // TODO: Add error
         }
-        if HashSet::from_iter(summary.addresses_of_personas_requiring_auth)
-            != identity_addresses
+        if HashSet::from_iter(
+            summary.addresses_of_personas_requiring_auth.clone(),
+        ) != identity_addresses
         {
+            println!("🔮🔮🔮Persona addresses: {:?}", identity_addresses);
+            println!(
+                "summary.addresses_of_personas_requiring_auth: {:?}",
+                summary.addresses_of_personas_requiring_auth
+            );
             return Err(CommonError::Unknown); // TODO: Add error
         }
         Ok(())

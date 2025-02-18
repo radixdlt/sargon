@@ -171,11 +171,16 @@ impl SecurifiedIntentSetInternalState {
         };
 
         self_._all_intent_variant_states().iter().for_each(|v| {
-    v.intent.validate_required_signers_are([
-        self_.entity_applying_shield.address(),
-        self_.account_paying_for_transaction.account_address().into(),
-    ]).expect("Discrepancy! invalid manifest (payer, entity) combo - missing signers.")
-});
+            v.intent
+                .validate_required_signers_are([
+                    self_.entity_applying_shield.address(),
+                    self_
+                        .account_paying_for_transaction
+                        .account_address()
+                        .into(),
+                ])
+                .expect("Discrepancy! invalid manifest (payer, entity) combo")
+        });
 
         self_
     }
