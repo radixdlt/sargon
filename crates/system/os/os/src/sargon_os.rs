@@ -299,8 +299,9 @@ impl SargonOS {
 
     pub fn saver_of_intents_to_confirm_after_delay(
         &self,
-    ) -> Arc<dyn SaverOfIntentsToConfirmAfterDelay> {
-        todo!("implement")
+    ) -> SaveIntentsToConfirmAfterDelayClient {
+        // This client (all) is stateless
+        self.clients.save_intents_to_confirm_after_delay.clone()
     }
 
     pub fn sign_subintents_interactor(

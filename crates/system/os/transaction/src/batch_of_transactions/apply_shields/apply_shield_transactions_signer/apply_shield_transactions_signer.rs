@@ -12,7 +12,7 @@ pub struct ApplyShieldTransactionsSignerImpl {
     factor_sources_in_profile: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
     saver_of_intents_to_confirm_after_delay:
-        Arc<dyn SaverOfIntentsToConfirmAfterDelay>,
+        SaveIntentsToConfirmAfterDelayClient,
 }
 
 impl ApplyShieldTransactionsSignerImpl {

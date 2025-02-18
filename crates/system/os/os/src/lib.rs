@@ -12,7 +12,6 @@ mod sargon_os_gateway;
 mod sargon_os_gateway_client;
 mod sargon_os_personas;
 mod sargon_os_profile;
-mod saver_of_intents_to_confirm_after_delay;
 mod testing_interactors;
 
 pub mod prelude {
@@ -26,7 +25,6 @@ pub mod prelude {
     pub use crate::sargon_os_gateway_client::*;
     pub use crate::sargon_os_personas::*;
     pub use crate::sargon_os_profile::*;
-    pub use crate::saver_of_intents_to_confirm_after_delay::*;
     pub use crate::testing_interactors::*;
 
     pub(crate) use build_info::prelude::*;

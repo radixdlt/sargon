@@ -12,6 +12,7 @@ profile = { workspace = true }
 factors-supporting-types = { workspace = true }
 profile-supporting-types = { workspace = true }
 drivers = { workspace = true }
+manifests = { workspace = true }
 http-client = { workspace = true }
 gateway-client-and-api = { workspace = true }
 hierarchical-deterministic = { workspace = true }
