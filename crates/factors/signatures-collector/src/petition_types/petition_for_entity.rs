@@ -83,7 +83,6 @@ impl<ID: SignableID> PetitionForEntity<ID> {
                             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                                 (value.security_structure.matrix_of_factors, role_kind)
                             ).unwrap();
-
                     Self::new_securified(
                         payload_id,
                         entity.address(),

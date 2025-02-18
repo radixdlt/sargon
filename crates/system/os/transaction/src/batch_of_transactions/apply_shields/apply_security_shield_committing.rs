@@ -69,13 +69,13 @@ mod tests {
                 .unwrap();
         let bdfs = os.main_bdfs().unwrap();
         let ledger = FactorSource::sample_at(1);
-        let arculus = FactorSource::sample_at(3);
         let password = FactorSource::sample_at(5);
         let off_device_mnemonic = FactorSource::sample_at(7);
-        os.add_factor_source(ledger.clone()).await.unwrap();
-        os.add_factor_source(arculus.clone()).await.unwrap();
-        os.add_factor_source(password.clone()).await.unwrap();
-        os.add_factor_source(off_device_mnemonic.clone())
+
+        for fs in FactorSource::sample_all().into_iter() {
+            os.add_factor_source(fs).await.unwrap();
+        }
+        os.set_main_factor_source(bdfs.factor_source_id())
             .await
             .unwrap();
 
