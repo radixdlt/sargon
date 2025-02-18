@@ -15,10 +15,10 @@ impl IntentVariantState {
         intent_with_signatures: EntitySignedFor,
     ) {
         assert_eq!(intent_with_signatures.intent, *self.intent);
-        let variant = intent_with_signatures
-            .variant()
-            .expect("Should have variant");
-        assert_eq!(variant, *self.variant);
+
+        assert!(self
+            .variant
+            .can_exercise_role(intent_with_signatures.role_kind()));
 
         self.signatures_per_role
             .update_with_intent_with_signatures(intent_with_signatures)

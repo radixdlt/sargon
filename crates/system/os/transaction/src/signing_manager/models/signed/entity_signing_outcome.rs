@@ -9,11 +9,6 @@ pub(crate) struct EntitySigningOutcome<Outcome> {
 }
 
 impl<Outcome> EntitySigningOutcome<Outcome> {
-    pub fn variant(
-        &self,
-    ) -> Option<RolesExercisableInTransactionManifestCombination> {
-        self.context.variant
-    }
     pub fn role_kind(&self) -> RoleKind {
         self.context.role_kind
     }

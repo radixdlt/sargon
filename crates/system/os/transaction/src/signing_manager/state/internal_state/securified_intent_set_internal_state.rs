@@ -13,7 +13,9 @@ pub(crate) struct SecurifiedIntentSetInternalState {
 }
 
 impl SecurifiedIntentSetInternalState {
-    pub(crate) fn get_signed_intents(&self) -> Result<Vec<EntitySignedFor>> {
+    pub(crate) fn get_signed_intents(
+        &self,
+    ) -> Result<Vec<EntitySignedForWithVariant>> {
         todo!()
     }
 
@@ -81,13 +83,17 @@ impl SecurifiedIntentSetInternalState {
             intent_with_signatures.entity.address(),
             self.entity_applying_shield.address()
         );
-        todo!("THIS IS WRONG we are not exercising a variant, we are exercising a role, so EntitySignedFor input here ought not to contain variant. and we should update MULTIPLE variants for a role");
-        let variant = intent_with_signatures
-            .variant()
-            .expect("Should have variant for securified");
-        let variant_state = self.get_variant_state(variant);
-        variant_state
-            .update_with_intent_with_signatures(intent_with_signatures);
+
+        RolesExercisableInTransactionManifestCombination::variants_for_role(
+            intent_with_signatures.role_kind(),
+        )
+        .into_iter()
+        .for_each(|variant| {
+            let variant_state = self.get_variant_state(variant);
+            variant_state.update_with_intent_with_signatures(
+                intent_with_signatures.clone(),
+            );
+        });
     }
 
     fn new(

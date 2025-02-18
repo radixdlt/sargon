@@ -7,9 +7,13 @@ pub(crate) enum IntentSetInternalState {
     Securified(SecurifiedIntentSetInternalState),
 }
 impl IntentSetInternalState {
-    pub(crate) fn get_signed_intents(&self) -> Result<Vec<EntitySignedFor>> {
+    pub(crate) fn get_signed_intents(
+        &self,
+    ) -> Result<Vec<EntitySignedForWithVariant>> {
         match self {
-            Self::Unsecurified(unsec) => unsec.get_signatures().map(|sig| vec![sig]),
+            Self::Unsecurified(unsec) => {
+                unsec.get_signatures().map(|sig| vec![sig])
+            }
             Self::Securified(sec) => sec.get_signed_intents(),
         }
     }
@@ -57,7 +61,10 @@ impl From<(SecurityShieldApplicationWithTransactionIntents, IntentSetID)>
     for IntentSetInternalState
 {
     fn from(
-        (shield_application, intent_set_id): (SecurityShieldApplicationWithTransactionIntents, IntentSetID),
+        (shield_application, intent_set_id): (
+            SecurityShieldApplicationWithTransactionIntents,
+            IntentSetID,
+        ),
     ) -> Self {
         match shield_application {
             SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(sec) => {

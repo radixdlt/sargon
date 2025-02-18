@@ -5,13 +5,14 @@ pub(crate) struct SignedIntentWithContext {
     pub signed_intent: SignedIntent,
     pub entity_applying_shield: AccountOrPersona,
     pub context: EntitySigningContext,
+    pub variant: Option<RolesExercisableInTransactionManifestCombination>,
 }
 
 impl SignedIntentWithContext {
     pub(crate) fn as_confirm_after_delay_variant(
         &self,
     ) -> Option<Result<IntentVariantToConfirmAfterDelay>> {
-        let Some(variant) = self.context.variant else {
+        let Some(variant) = self.variant else {
             return None;
         };
 

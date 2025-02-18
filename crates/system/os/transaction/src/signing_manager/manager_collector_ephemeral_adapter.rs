@@ -88,9 +88,7 @@ impl ManagerCollectorEphemeralAdapter {
     fn get_context(&self, txid: TransactionIntentHash) -> EntitySigningContext {
         let intent_set_id = *self.lookup_txid_to_intent_set.get(&txid).unwrap();
 
-        let variant = *self.lookup_txid_to_variant.get(&txid).unwrap();
-
-        EntitySigningContext::new(intent_set_id, *self.role_kind, variant)
+        EntitySigningContext::new(intent_set_id, *self.role_kind)
     }
 
     pub(crate) fn exercise_role_outcome(

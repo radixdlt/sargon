@@ -128,6 +128,12 @@ impl From<RolesExercisableInTransactionManifestCombination>
     }
 }
 impl RolesExercisableInTransactionManifestCombination {
+    pub fn variants_for_role(role_kind: RoleKind) -> IndexSet<Self> {
+        Self::all()
+            .into_iter()
+            .filter(|v| v.can_exercise_role(role_kind))
+            .collect()
+    }
     pub fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
         self.exercisable_roles().contains(&role_kind)
     }

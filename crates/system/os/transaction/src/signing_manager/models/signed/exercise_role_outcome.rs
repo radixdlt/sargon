@@ -25,28 +25,12 @@ impl ExerciseRoleOutcome {
         entities_signed_for: Vec<EntitySignedFor>,
         entities_not_signed_for: Vec<EntityNotSignedFor>,
     ) -> Self {
-        assert!(
-            entities_signed_for
-                .iter()
-                .filter_map(|e| e.variant())
-                .all(|v| v.can_exercise_role(role_kind)),
-            "Discrepancy! Mismatch between Role and TransactionManifest variant"
-        );
-
         assert!(entities_signed_for
             .iter()
             .all(|e| e.role_kind() == role_kind));
         assert!(entities_not_signed_for
             .iter()
             .all(|e| e.role_kind() == role_kind));
-
-        assert!(
-            entities_not_signed_for
-                .iter()
-                .filter_map(|e| e.variant())
-                .all(|v| v.can_exercise_role(role_kind)),
-            "Discrepancy! Mismatch between Role and TransactionManifest variant"
-        );
 
         assert!(
             entities_signed_for

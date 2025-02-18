@@ -22,7 +22,10 @@ impl IntentSetState {
     ) -> Self {
         Self {
             intent_set_id,
-            internal_state: IntentSetInternalState::from((shield_application, intent_set_id)),
+            internal_state: IntentSetInternalState::from((
+                shield_application,
+                intent_set_id,
+            )),
         }
     }
 

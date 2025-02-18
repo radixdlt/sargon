@@ -27,7 +27,7 @@ impl UnsecurifiedIntentSetInternalState {
         None
     }
 
-    pub(crate) fn get_signatures(&self) -> Result<EntitySignedFor> {
+    pub(crate) fn get_signatures(&self) -> Result<EntitySignedForWithVariant> {
         let entity = self.entity_applying_shield.entity.clone();
         self.transaction_intent.validate_required_signers_are([
             entity.address(),
@@ -41,16 +41,18 @@ impl UnsecurifiedIntentSetInternalState {
             .ok_or(CommonError::Unknown)
             .cloned()?; // TODO better error
 
-        Ok(EntitySignedFor::new(
-            EntitySigningContext::new(
-                *self.intent_set_id,
-                self.role_kind(),
-                self.variant(),
+        Ok(EntitySignedForWithVariant {
+            entity_signed_for: EntitySignedFor::new(
+                EntitySigningContext::new(
+                    *self.intent_set_id,
+                    self.role_kind(),
+                ),
+                (*self.transaction_intent).clone(),
+                entity,
+                outcome,
             ),
-            (*self.transaction_intent).clone(),
-            entity,
-            outcome,
-        ))
+            variant: None,
+        })
     }
 
     pub(crate) fn paying_account(&self) -> Account {
