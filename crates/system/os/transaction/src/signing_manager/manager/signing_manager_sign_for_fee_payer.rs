@@ -23,7 +23,7 @@ impl SigningManager {
         let intent_sets = signed_intents
             .iter()
             .map(|si| {
-                let intent_set_id = si.context.intent_set_id;
+                let intent_set_id = si.intent_set_id();
                 let txid = si.signed_intent.intent.transaction_intent_hash();
                 let entity = payer_by_tx_id(intent_set_id, txid)?;
                 Ok(IntentSetToSign::single_intent(
@@ -37,8 +37,8 @@ impl SigningManager {
 
         let mut signed_intents = signed_intents
             .into_iter()
-            .map(|si| (si.context, si.signed_intent))
-            .collect::<IndexMap<EntitySigningContext, SignedIntent>>();
+            .map(|si| (si.intent_set_id(), si.signed_intent))
+            .collect::<IndexMap<IntentSetID, SignedIntent>>();
 
         let exercise_role_outcome = self
             .sign_intent_sets_with_role(intent_sets, RoleKind::Primary)
@@ -52,7 +52,7 @@ impl SigningManager {
             .into_iter()
             .for_each(|signed_with_payer| {
                 let signed_intent = signed_intents
-                    .get_mut(&signed_with_payer.context)
+                    .get_mut(&signed_with_payer.intent_set_id())
                     .expect("Should have signed intent");
                 signed_intent.add_fee_payer_signatures(
                     signed_with_payer.intent_signatures(),

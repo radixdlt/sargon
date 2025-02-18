@@ -12,11 +12,61 @@ pub(crate) struct SecurifiedIntentSetInternalState {
     initiate_with_primary_delayed_completion: IntentVariantState,
 }
 
+impl TryFrom<(IntentSetID, IntentVariantState, AnySecurifiedEntity)>
+    for EntitySignedForWithVariant
+{
+    type Error = CommonError;
+    fn try_from(
+        value: (IntentSetID, IntentVariantState, AnySecurifiedEntity),
+    ) -> Result<Self> {
+        let (intent_set_id, intent_variant_state, entity) = value;
+        let signer = entity.entity.address();
+        let variant = *intent_variant_state.variant;
+        let signatures_per_role = intent_variant_state.signatures_per_role.0.into_iter().map(|(role, sigs)| {
+            let sigs_per_entity = sigs.signatures_non_empty_map_with_non_empty_values()?;
+            assert_eq!(sigs_per_entity.len(), 1, "expected only one entity to have sign - we have not signed with payer yet.");
+            let sigs = sigs_per_entity.get(&signer).ok_or(CommonError::Unknown)?.clone();
+            Ok((role, sigs))
+        }).collect::<Result<IndexMap<RoleKind, IndexSet<_>>>>()?;
+
+        let relevant_roles = variant.exercisable_roles();
+        let mut signatures = IndexSet::new();
+        for role in relevant_roles {
+            let sigs =
+                signatures_per_role.get(&role).ok_or(CommonError::Unknown)?; // TODO specific error variant
+
+            if sigs.is_empty() {
+                return Err(CommonError::Unknown); // TODO specific error variant
+            }
+            signatures.extend(sigs.clone());
+        }
+
+        Ok(EntitySignedForWithVariant::new(
+            intent_set_id,
+            (*intent_variant_state.intent).clone(),
+            entity.entity,
+            signatures,
+            Some(*intent_variant_state.variant),
+        ))
+    }
+}
+
 impl SecurifiedIntentSetInternalState {
     pub(crate) fn get_signed_intents(
         &self,
     ) -> Result<Vec<EntitySignedForWithVariant>> {
-        todo!()
+        Ok(self
+            ._all_intent_variant_states()
+            .into_iter()
+            .map(|v| {
+                (
+                    *self.intent_set_id,
+                    v.clone(),
+                    (*self.entity_applying_shield).clone(),
+                )
+            })
+            .map(EntitySignedForWithVariant::try_from)
+            .collect::<Result<Vec<_>>>()?)
     }
 
     pub(crate) fn paying_account(&self) -> Account {
@@ -108,7 +158,7 @@ impl SecurifiedIntentSetInternalState {
         initiate_with_primary_complete_with_confirmation: IntentVariantState,
         initiate_with_primary_delayed_completion: IntentVariantState,
     ) -> Self {
-        Self {
+        let self_ = Self {
             intent_set_id: intent_set_id.into(),
             account_paying_for_transaction: account_paying_for_transaction
                 .into(),
@@ -118,7 +168,16 @@ impl SecurifiedIntentSetInternalState {
             initiate_with_recovery_delayed_completion,
             initiate_with_primary_complete_with_confirmation,
             initiate_with_primary_delayed_completion,
-        }
+        };
+
+        self_._all_intent_variant_states().iter().for_each(|v| {
+    v.intent.validate_required_signers_are([
+        self_.entity_applying_shield.address(),
+        self_.account_paying_for_transaction.account_address().into(),
+    ]).expect("Discrepancy! invalid manifest (payer, entity) combo - missing signers.")
+});
+
+        self_
     }
 }
 impl

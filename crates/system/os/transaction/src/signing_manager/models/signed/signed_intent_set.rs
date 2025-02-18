@@ -2,8 +2,38 @@ use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 pub(crate) struct EntitySignedForWithVariant {
-    pub entity_signed_for: EntitySignedFor,
-    pub variant: Option<RolesExercisableInTransactionManifestCombination>,
+    intent_set_id: IntentSetID,
+    pub(crate) intent: TransactionIntent,
+    pub(crate) entity: AccountOrPersona,
+    pub(crate) signatures: IndexSet<SignatureWithPublicKey>,
+    pub(crate) variant:
+        Option<RolesExercisableInTransactionManifestCombination>,
+}
+impl EntitySignedForWithVariant {
+    pub(crate) fn intent_signatures(&self) -> Vec<IntentSignature> {
+        self.signatures
+            .iter()
+            .map(|s| IntentSignature::from(s.clone()))
+            .collect()
+    }
+    pub(crate) fn new(
+        intent_set_id: IntentSetID,
+        intent: TransactionIntent,
+        entity: AccountOrPersona,
+        signatures: IndexSet<SignatureWithPublicKey>,
+        variant: Option<RolesExercisableInTransactionManifestCombination>,
+    ) -> Self {
+        Self {
+            intent_set_id,
+            intent,
+            entity,
+            signatures,
+            variant,
+        }
+    }
+    pub(crate) fn intent_set_id(&self) -> IntentSetID {
+        self.intent_set_id
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -19,9 +49,7 @@ impl SignedIntentSet {
         intents: Vec<EntitySignedForWithVariant>,
     ) -> Self {
         assert!(
-            intents
-                .iter()
-                .all(|i| i.entity_signed_for.intent_set_id() == intent_set_id),
+            intents.iter().all(|i| i.intent_set_id() == intent_set_id),
             "Discrepancy between intent set ID and intent set ID of intents"
         );
         Self {
@@ -35,19 +63,18 @@ impl SignedIntentSet {
             self.intents.first().ok_or(CommonError::Unknown).cloned()?; // TODO specific error variant
 
         let from = |with_variant: EntitySignedForWithVariant| -> Result<SignedIntentWithContext> {
-            let item = with_variant.entity_signed_for;
-            let intent = item.intent.clone();
-            let signatures = item.intent_signatures();
+            let intent = with_variant.intent.clone();
+            let signatures = with_variant.intent_signatures();
 
             let signed_intent =
                 SignedIntent::new(intent, IntentSignatures::new(signatures))?;
 
-            Ok(SignedIntentWithContext {
+            Ok(SignedIntentWithContext::new(
+                with_variant.intent_set_id(),
                 signed_intent,
-                context: item.context,
-                entity_applying_shield: item.entity,
-                variant: with_variant.variant,
-            })
+                with_variant.entity,
+                with_variant.variant,
+            ))
         };
 
         if self.intents.len() == 1 {
