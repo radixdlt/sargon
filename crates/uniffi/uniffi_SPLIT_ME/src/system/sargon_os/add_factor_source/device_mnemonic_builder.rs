@@ -93,6 +93,13 @@ impl DeviceMnemonicBuilder {
 // ====================
 #[uniffi::export]
 impl DeviceMnemonicBuilder {
+    /// Returns the words of the mnemonic with passphrase.
+    pub fn get_words(self: Arc<Self>) -> Vec<BIP39Word> {
+        self.get(|builder| {
+            builder.get_words().into_iter().map(Into::into).collect()
+        })
+    }
+
     /// Get a set of words indices within `MnemonicWithPassphrase` to be confirmed.
     /// Always includes the last mnemonic word index.
     pub fn get_indices_in_mnemonic_of_words_to_confirm(
@@ -109,8 +116,8 @@ impl DeviceMnemonicBuilder {
 
     /// Returns the `FactorSourceID` from the mnemonic with passphrase
     /// Panics if the mnemonic with passphrase wasn't yet created
-    pub fn factor_source_id(self: Arc<Self>) -> FactorSourceID {
-        self.get(|builder| builder.factor_source_id().into())
+    pub fn get_factor_source_id(self: Arc<Self>) -> FactorSourceID {
+        self.get(|builder| builder.get_factor_source_id().into())
     }
 }
 
@@ -166,7 +173,9 @@ mod tests {
 
     #[test]
     fn build() {
-        let mnemonic_words = sargon::Mnemonic::sample_device()
+        let mnemonic = sargon::Mnemonic::sample_device();
+        let mnemonic_words = mnemonic
+            .clone()
             .words
             .iter()
             .map(|w| w.word.clone())
@@ -176,11 +185,21 @@ mod tests {
             .create_mnemonic_with_passphrase_from_words(mnemonic_words.clone()) // Override the previously created mnemonic and create a new one from words
             .unwrap();
 
+        pretty_assertions::assert_eq!(
+            sut.clone().get_words(),
+            mnemonic
+                .words
+                .into_iter()
+                .map(|w| w.clone().into())
+                .collect::<Vec<_>>()
+        );
+
+        pretty_assertions::assert_eq!(
+            sut.clone().get_factor_source_id(),
+            FactorSourceID::sample_device()
+        );
+
         let indices = sut.clone().get_indices_in_mnemonic_of_words_to_confirm();
-
-        let fsid = sut.clone().factor_source_id();
-
-        pretty_assertions::assert_eq!(fsid, FactorSourceID::sample_device());
 
         let r0 = sut.clone().build(
             vec![(0, "device".to_owned())]

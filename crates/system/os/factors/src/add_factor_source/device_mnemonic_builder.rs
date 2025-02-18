@@ -83,6 +83,11 @@ impl DeviceMnemonicBuilder {
 // ==== GET / READ ====
 // ====================
 impl DeviceMnemonicBuilder {
+    /// Returns the words of the mnemonic with passphrase.
+    pub fn get_words(&self) -> Vec<BIP39Word> {
+        self.get_mnemonic_with_passphrase().mnemonic.words
+    }
+
     /// Returns the `mnemonic_with_passphrase` if it was previously created or panics.
     fn get_mnemonic_with_passphrase(&self) -> MnemonicWithPassphrase {
         self.mnemonic_with_passphrase
@@ -171,7 +176,7 @@ impl DeviceMnemonicBuilder {
 
     /// Returns the `FactorSourceID` from the mnemonic with passphrase
     /// Panics if the mnemonic with passphrase wasn't yet created
-    pub fn factor_source_id(&self) -> FactorSourceID {
+    pub fn get_factor_source_id(&self) -> FactorSourceID {
         FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
             &self.get_mnemonic_with_passphrase(),
         ))
@@ -334,20 +339,30 @@ mod tests {
     #[should_panic(
         expected = "Mnemonic with passphrase should be created first"
     )]
-    fn factor_source_id_panics_if_mnemonic_not_created() {
+    fn get_factor_source_id_panics_if_mnemonic_not_created() {
         let sut = SUT::default();
-        let _ = sut.factor_source_id();
+        let _ = sut.get_factor_source_id();
     }
 
     #[test]
-    fn factor_source_id() {
+    fn get_factor_source_id() {
         let sut = SUT::sample();
-        let fsid = sut.factor_source_id();
+        let fsid = sut.get_factor_source_id();
         pretty_assertions::assert_eq!(
             fsid,
             FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
                 &MnemonicWithPassphrase::sample()
             ))
+        );
+    }
+
+    #[test]
+    fn get_words() {
+        let sut = SUT::sample();
+        let words = sut.get_words();
+        pretty_assertions::assert_eq!(
+            words,
+            MnemonicWithPassphrase::sample().mnemonic.words
         );
     }
 
