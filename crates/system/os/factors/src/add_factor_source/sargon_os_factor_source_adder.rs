@@ -259,7 +259,57 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn add_new_device_factor_source_success() {
+    async fn add_new_factor_source_not_supported_kind_error() {
+        let test = async |factor_source_kind: FactorSourceKind,
+                          mwp: MnemonicWithPassphrase| {
+            let clients = Clients::new(Bios::new(Drivers::test()));
+            let interactors = Interactors::new_from_clients(&clients);
+
+            let os =
+                SUT::boot_with_clients_and_interactor(clients, interactors)
+                    .await;
+            os.new_wallet_with_mnemonic(
+                Some(MnemonicWithPassphrase::sample_device()),
+                false,
+            )
+            .await
+            .unwrap();
+
+            let result = os
+                .with_timeout(|x| {
+                    x.add_new_factor_source(
+                        factor_source_kind,
+                        mwp.clone(),
+                        "Not supported fs".to_owned(),
+                    )
+                })
+                .await;
+
+            assert!(matches!(
+                result,
+                Err(CommonError::InvalidFactorSourceKind { .. })
+            ));
+        };
+
+        test(
+            FactorSourceKind::LedgerHQHardwareWallet,
+            MnemonicWithPassphrase::sample_ledger(),
+        )
+        .await;
+        test(
+            FactorSourceKind::ArculusCard,
+            MnemonicWithPassphrase::sample_arculus(),
+        )
+        .await;
+        test(
+            FactorSourceKind::SecurityQuestions,
+            MnemonicWithPassphrase::sample_security_questions(),
+        )
+        .await;
+    }
+
+    #[actix_rt::test]
+    async fn add_new_factor_source_success() {
         let test = async |factor_source_kind: FactorSourceKind,
                           mwp: MnemonicWithPassphrase,
                           load_mnemonic_from_storage_result: Result<
