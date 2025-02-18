@@ -7,6 +7,11 @@ pub(crate) struct IntentSetState {
 }
 
 impl IntentSetState {
+    pub(crate) fn get_signed_intent_set(&self) -> Result<SignedIntentSet> {
+        let signed = self.internal_state.get_signed_intents()?;
+        Ok(SignedIntentSet::new(self.intent_set_id, signed))
+    }
+
     pub(crate) fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
         self.internal_state.can_exercise_role(role_kind)
     }
@@ -17,7 +22,7 @@ impl IntentSetState {
     ) -> Self {
         Self {
             intent_set_id,
-            internal_state: IntentSetInternalState::from(shield_application),
+            internal_state: IntentSetInternalState::from((shield_application, intent_set_id)),
         }
     }
 

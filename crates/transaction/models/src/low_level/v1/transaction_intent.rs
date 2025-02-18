@@ -9,6 +9,38 @@ pub struct TransactionIntent {
     pub message: Message,
 }
 
+impl TransactionIntent {
+    pub fn validate_required_signers_are(
+        &self,
+        addresses: impl IntoIterator<Item = AddressOfAccountOrPersona>,
+    ) -> Result<()> {
+        let summary = self.manifest_summary()?;
+        let addresses = addresses.into_iter().collect::<Vec<_>>();
+        let account_addresses = addresses
+            .clone()
+            .into_iter()
+            .filter_map(|a| AccountAddress::try_from(a).ok())
+            .collect::<HashSet<_>>();
+        let identity_addresses = addresses
+            .clone()
+            .into_iter()
+            .filter_map(|a| IdentityAddress::try_from(a).ok())
+            .collect::<HashSet<_>>();
+
+        if HashSet::from_iter(summary.addresses_of_accounts_requiring_auth)
+            != account_addresses
+        {
+            return Err(CommonError::Unknown); // TODO: Add error
+        }
+        if HashSet::from_iter(summary.addresses_of_personas_requiring_auth)
+            != identity_addresses
+        {
+            return Err(CommonError::Unknown); // TODO: Add error
+        }
+        Ok(())
+    }
+}
+
 impl From<SignedIntent> for TransactionIntent {
     fn from(val: SignedIntent) -> Self {
         val.intent

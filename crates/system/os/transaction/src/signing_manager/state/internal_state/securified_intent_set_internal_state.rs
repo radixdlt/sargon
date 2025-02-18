@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SecurifiedIntentSetInternalState {
+    intent_set_id: Immutable<IntentSetID>,
     account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
     pub(crate) entity_applying_shield: Immutable<AnySecurifiedEntity>,
     initiate_with_recovery_complete_with_primary: IntentVariantState,
@@ -12,6 +13,10 @@ pub(crate) struct SecurifiedIntentSetInternalState {
 }
 
 impl SecurifiedIntentSetInternalState {
+    pub(crate) fn get_signed_intents(&self) -> Result<Vec<EntitySignedFor>> {
+        todo!()
+    }
+
     pub(crate) fn paying_account(&self) -> Account {
         self.account_paying_for_transaction.account()
     }
@@ -76,6 +81,7 @@ impl SecurifiedIntentSetInternalState {
             intent_with_signatures.entity.address(),
             self.entity_applying_shield.address()
         );
+        todo!("THIS IS WRONG we are not exercising a variant, we are exercising a role, so EntitySignedFor input here ought not to contain variant. and we should update MULTIPLE variants for a role");
         let variant = intent_with_signatures
             .variant()
             .expect("Should have variant for securified");
@@ -85,6 +91,7 @@ impl SecurifiedIntentSetInternalState {
     }
 
     fn new(
+        intent_set_id: impl Into<Immutable<IntentSetID>>,
         account_paying_for_transaction: impl Into<
             Immutable<ApplicationInputPayingAccount>,
         >,
@@ -96,6 +103,7 @@ impl SecurifiedIntentSetInternalState {
         initiate_with_primary_delayed_completion: IntentVariantState,
     ) -> Self {
         Self {
+            intent_set_id: intent_set_id.into(),
             account_paying_for_transaction: account_paying_for_transaction
                 .into(),
             entity_applying_shield: entity_applying_shield.into(),
@@ -107,13 +115,20 @@ impl SecurifiedIntentSetInternalState {
         }
     }
 }
-impl From<SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents>
-    for SecurifiedIntentSetInternalState
+impl
+    From<(
+        SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
+        IntentSetID,
+    )> for SecurifiedIntentSetInternalState
 {
     fn from(
-        shield_application: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
+        (shield_application, intent_set_id): (
+            SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
+            IntentSetID,
+        ),
     ) -> Self {
         Self::new(
+            intent_set_id,
             shield_application.paying_account(),
             shield_application.entity_applying_shield(),
             IntentVariantState::new(

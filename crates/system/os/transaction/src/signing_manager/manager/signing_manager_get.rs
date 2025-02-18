@@ -14,6 +14,7 @@ impl SigningManager {
             .collect::<Result<IndexSet<IntentVariantToConfirmAfterDelay>>>()
     }
 }
+
 impl SigningManager {
     pub(super) fn _get_state(
         &self,
@@ -51,5 +52,16 @@ impl SigningManager {
         &self,
     ) -> Vec<IntentSetToSign> {
         self.get_intent_sets_to_sign_for_with_role_of_kind(RoleKind::Primary)
+    }
+
+    pub(super) fn get_signed_intent_sets(
+        &self,
+    ) -> Result<Vec<SignedIntentSet>> {
+        let state = self._get_state();
+        state
+            .per_set_state
+            .iter()
+            .map(|(_, s)| s.get_signed_intent_set())
+            .collect::<Result<Vec<SignedIntentSet>>>()
     }
 }

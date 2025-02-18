@@ -2,9 +2,26 @@ use crate::prelude::*;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct SignedIntentSet {
+    intent_set_id: IntentSetID,
     intents: Vec<EntitySignedFor>, // Want IndexSet but TransactionIntent is not `std::hash::Hash`
 }
 impl SignedIntentSet {
+    /// # Panics
+    /// Panics if any `intent: EntitySignedFor`'s intent set ID is not equal to `intent_set_id`
+    pub(crate) fn new(
+        intent_set_id: IntentSetID,
+        intents: Vec<EntitySignedFor>,
+    ) -> Self {
+        assert!(
+            intents.iter().all(|i| i.intent_set_id() == intent_set_id),
+            "Discrepancy between intent set ID and intent set ID of intents"
+        );
+        Self {
+            intent_set_id,
+            intents,
+        }
+    }
+
     pub fn get_best_signed_intent(self) -> Result<SignedIntentWithContext> {
         let first =
             self.intents.first().ok_or(CommonError::Unknown).cloned()?; // TODO specific error variant

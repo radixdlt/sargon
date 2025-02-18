@@ -6,7 +6,7 @@ pub(crate) struct IntentVariantState {
     pub(crate) variant:
         Immutable<RolesExercisableInTransactionManifestCombination>,
     /// The `role` of the values must match the key...
-    signatures_per_role: IntentVariantSignaturesPerRoleState,
+    pub(crate) signatures_per_role: IntentVariantSignaturesPerRoleState,
 }
 
 impl IntentVariantState {

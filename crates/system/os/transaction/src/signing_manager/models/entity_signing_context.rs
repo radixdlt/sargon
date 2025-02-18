@@ -10,8 +10,9 @@ impl EntitySigningContext {
     pub fn new(
         intent_set_id: IntentSetID,
         role_kind: RoleKind,
-        variant: Option<RolesExercisableInTransactionManifestCombination>,
+        variant: impl Into<Option<RolesExercisableInTransactionManifestCombination>>,
     ) -> Self {
+        let variant = variant.into();
         if let Some(variant) = variant.as_ref() {
             assert!(variant.exercisable_roles().contains(&role_kind))
         }

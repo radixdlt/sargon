@@ -151,7 +151,9 @@ impl SigningManager {
     pub(super) fn intermediary_outcome(
         &self,
     ) -> Result<SigningManagerIntermediaryOutcome> {
-        let successfully_signed_intent_sets: Vec<SignedIntentSet> = vec![];
+        let successfully_signed_intent_sets: Vec<SignedIntentSet> =
+            self.get_signed_intent_sets()?;
+
         let failed_intent_sets: Vec<SignedIntentSet> = vec![];
         todo!();
         Ok(SigningManagerIntermediaryOutcome::new(
