@@ -8,7 +8,8 @@ pub enum InteractionQueueItemStatus {
     Queued,
 
     /// The interaction is the next in line within a batch to be processed.
-    Next,
+    /// The associated `Instant` is the time when the interaction should be processed.
+    Next(Timestamp),
 
     /// The interaction is currently being processed.
     InProgress,
@@ -36,7 +37,7 @@ impl InteractionQueueItemStatus {
             InteractionQueueItemStatus::Failure(_) => 0,
             InteractionQueueItemStatus::Success => 1,
             InteractionQueueItemStatus::InProgress => 2,
-            InteractionQueueItemStatus::Next => 3,
+            InteractionQueueItemStatus::Next(_) => 3,
             InteractionQueueItemStatus::Queued => 4,
         }
     }
