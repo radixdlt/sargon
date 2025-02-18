@@ -45,7 +45,7 @@ impl InteractionsQueueManager {
 // Internal methods (called by other places inside Sargon)
 impl InteractionsQueueManager {
     pub fn add_interaction(&self, item: InteractionQueueItem) {
-        // Adds interaction to `queue.items` and process it
+        // Calls `process_interaction(item)`
         // Call observer to notify of updated queue
     }
 
@@ -58,9 +58,12 @@ impl InteractionsQueueManager {
 // Private methods
 impl InteractionsQueueManager {
     fn poll_status(&self) {
-        // Poll the status of every interaction that is `InProgress`
+        // Poll the status of every interaction that is `InProgress`.
         // For each of them that has finished and has a `batchId` set, handle the next interaction of its batch.
         // Call observer to notify of updated queue
+
+        // Also, loop over the batches and call `batch.get_first_if_ready()` for each of them.
+        // If they return an interaction, call `process_interaction()` with it.
     }
 
     fn process_interaction(&self, item: InteractionQueueItem) {
