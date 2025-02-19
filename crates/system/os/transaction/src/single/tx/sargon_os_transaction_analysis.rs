@@ -999,5 +999,6 @@ mod tests {
             vec![PublicKeyHash::sample()],
         )
         .modify_add_lock_fee(&account.address, Some(Decimal192::zero()))
+        .unwrap()
     }
 }
