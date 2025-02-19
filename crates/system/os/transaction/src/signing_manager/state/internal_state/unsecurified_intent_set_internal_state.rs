@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 pub(crate) struct UnsecurifiedIntentSetInternalState {
     /// N.B. this is silly in the context of UnsecurifiedIntentSetInternalState since
     /// for Unsecurified entities we only have Primary role. But for sake of consistency
@@ -8,8 +8,13 @@ pub(crate) struct UnsecurifiedIntentSetInternalState {
     /// and states of SigningManager require this field in the case of Securified entities.
     pub(crate) intent_set_id: Immutable<IntentSetID>,
 
+    #[debug("{}", (*account_paying_for_transaction).account_address())]
     account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
+
+    #[debug("{}", entity_applying_shield.address())]
     pub(crate) entity_applying_shield: Immutable<AnyUnsecurifiedEntity>,
+
+    #[debug("TxIntent omitted")]
     pub(crate) transaction_intent: Immutable<TransactionIntent>,
 
     signatures: IntentVariantSignaturesForRoleState,
@@ -56,9 +61,11 @@ impl UnsecurifiedIntentSetInternalState {
             intent_with_signatures.entity.address(),
             self.entity_applying_shield.address()
         );
-
+        println!("🦄Updating UnsecurifiedIntentSetInternalState state is: {:#?}", self);
+        println!("🦄Updating UnsecurifiedIntentSetInternalState with signatures: {:#?}", intent_with_signatures);
         self.signatures
-            .update_with_intent_with_signatures(intent_with_signatures);
+        .update_with_intent_with_signatures(intent_with_signatures);
+        println!("🦄Updating UnsecurifiedIntentSetInternalState after update: {:#?}", self);
     }
     fn new(
         intent_set_id: impl Into<Immutable<IntentSetID>>,

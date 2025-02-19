@@ -52,8 +52,13 @@ impl SigningManager {
             .into_iter()
             .for_each(|signed_with_payer| {
                 let signed_intent = signed_intents
-                    .get_mut(&signed_with_payer.intent_set_id())
-                    .expect("Should have signed intent");
+                    .get_mut(&signed_with_payer.intent_set_id());
+                if signed_intent.is_none() {
+                    println!("🎃 signed_intents did not contain value for intent-set-id: '{:?}'", signed_with_payer.intent_set_id());
+                    panic!("incorrect impl")
+                }
+                let signed_intent = signed_intent.unwrap();
+
                 signed_intent.add_fee_payer_signatures(
                     signed_with_payer.intent_signatures(),
                 );

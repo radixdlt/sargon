@@ -43,12 +43,15 @@ impl SigningManager {
         &self,
     ) -> Result<SigningManagerOutcome> {
         // Start with Recovery role
+        println!("🛡️ Signing with Recovery");
         self.sign_intents_with_recovery_role().await?;
-
+        
         // Then we sign for the Confirmation role
+        println!("🛡️ Signing with Confirmation");
         self.sign_intents_with_confirmation_role().await?;
-
+        
         // Then we sign for the Primary role
+        println!("🛡️ Signing with Primary");
         self.sign_intents_with_primary_role().await?;
 
         // Try to get the intermediary outcome - containing many variants

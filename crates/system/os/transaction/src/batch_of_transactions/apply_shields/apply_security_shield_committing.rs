@@ -81,16 +81,6 @@ mod tests {
             if fs.factor_source_id() == bdfs.factor_source_id() {
                 continue;
             }
-            // println!("🔮 fs: {:?}", fs.factor_source_id());
-            // if let Some(mwp) =
-            //     fs.id_from_hash().maybe_sample_associated_mnemonic()
-            // {
-            //     println!("🔮 saving MWP for: {:?}", fs.factor_source_id());
-            //     os.secure_storage
-            //         .save_mnemonic_with_passphrase(&mwp, &fs.id_from_hash())
-            //         .await
-            //         .unwrap()
-            // }
             os.add_factor_source(fs).await.unwrap();
         }
         os.set_main_factor_source(bdfs.factor_source_id())

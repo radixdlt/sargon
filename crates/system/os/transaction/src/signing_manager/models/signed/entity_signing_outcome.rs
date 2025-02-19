@@ -3,7 +3,11 @@ use crate::prelude::*;
 #[derive(Clone, PartialEq, Eq, StdHash, derive_more::Debug)]
 pub(crate) struct EntitySigningOutcome<Outcome> {
     pub context: EntitySigningContext,
+
+    #[debug("TxIntent omitted")]
     pub intent: TransactionIntent,
+
+    #[debug("{}", entity.address())]
     pub entity: AccountOrPersona,
     outcome: Outcome,
 }

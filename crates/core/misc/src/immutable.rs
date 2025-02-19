@@ -7,7 +7,6 @@ use std::ops::Deref;
 #[derive(
     Clone,
     Default,
-    Debug,
     PartialEq,
     Eq,
     PartialOrd,
@@ -15,11 +14,16 @@ use std::ops::Deref;
     Hash,
     Serialize,
     Deserialize,
+    derive_more::Debug,
 )]
+#[debug(bound(T: std::fmt::Debug))]
+#[debug("{:?}", self.value)]
 #[serde(transparent)]
+
 pub struct Immutable<T> {
     value: T,
 }
+
 
 impl<T> From<T> for Immutable<T> {
     fn from(value: T) -> Self {
