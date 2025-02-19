@@ -1,27 +1,9 @@
 use crate::prelude::*;
 
-use radix_engine_interface::blueprints::account::ACCOUNT_LOCK_FEE_IDENT;
-
-pub trait InspectInstruction {
-    fn is_lock_fee(&self) -> bool;
-    fn is_assert_worktop_contains(&self) -> bool;
-}
-
-impl InspectInstruction for ScryptoInstruction {
-    fn is_lock_fee(&self) -> bool {
-        match self {
-            ScryptoInstruction::CallMethod(call_method) => {
-                call_method.method_name == ACCOUNT_LOCK_FEE_IDENT
-            }
-            _ => false,
-        }
-    }
-
-    // FIXME: this will be simpler once we get EnumAsInner on `ScryptoInstruction`
-    fn is_assert_worktop_contains(&self) -> bool {
-        matches!(self, ScryptoInstruction::AssertWorktopContains(_))
-    }
-}
+use crate::modify::manifest_abstractions::{
+    IntoInstruction, IntoManifest, IntoManifestBuilder,
+};
+use radix_engine_interface::blueprints::access_controller::ACCESS_CONTROLLER_CREATE_PROOF_IDENT;
 
 /// Used by development, in production we SHOULD use the fee given by analyzing
 /// the manifest.
@@ -29,12 +11,12 @@ fn default_fee() -> Decimal192 {
     Decimal192::from(25)
 }
 
-/// Creates a single manifest Instruction using the `ScryptoManifestBuilder`,
+/// Creates a single manifest Instruction using the `ScryptoTransactionManifestBuilder`,
 ///
 /// # Panics
 /// You MUST NOT chain calls to the manifest builder, only call a single method
 /// on it, thus creating just a single instruction.
-fn single<F>(by: F) -> ScryptoInstruction
+fn single_instruction<F>(by: F) -> ScryptoInstruction
 where
     F: Fn(
         ScryptoTransactionManifestBuilder,
@@ -52,58 +34,142 @@ where
     instruction[0].clone()
 }
 
-pub trait TransactionManifestModifying: Sized {
-    fn modify_add_guarantees<I>(
-        self,
-        guarantees: I,
-    ) -> Result<TransactionManifest>
-    where
-        I: IntoIterator<Item = TransactionGuarantee>;
+/// Creates a single manifest Instruction using the `ScryptoSubintentManifestV2Builder`,
+///
+/// # Panics
+/// You MUST NOT chain calls to the manifest builder, only call a single method
+/// on it, thus creating just a single instruction.
+fn single_instruction_v2<F>(by: F) -> ScryptoInstructionV2
+where
+    F: Fn(
+        ScryptoTransactionManifestV2Builder,
+    ) -> ScryptoTransactionManifestV2Builder,
+{
+    let instruction = by(ScryptoTransactionManifestV2Builder::new_v2())
+        .build()
+        .instructions;
 
-    fn modify_add_guarantees_vec(
-        self,
-        guarantees: Vec<TransactionGuarantee>,
-    ) -> Result<TransactionManifest> {
-        self.modify_add_guarantees(guarantees)
+    // This might be a silly assertion since it seems that ScryptoManifestBuilder
+    // in fact always adds just a single instruction
+    if instruction.len() != 1 {
+        panic!("Expected single instruction. You MUST NOT chain calls with the manifest builder.")
     }
-
-    fn modify_add_lock_fee(
-        self,
-        address_of_fee_payer: &AccountAddress,
-        fee: impl Into<Option<Decimal192>>,
-    ) -> Self {
-        let fee = fee.into().unwrap_or(default_fee());
-        let instruction = single(|b| b.lock_fee(address_of_fee_payer, fee));
-        self.prepend_instruction(instruction)
-    }
-
-    fn prepend_instruction(self, instruction: ScryptoInstruction) -> Self {
-        self.insert_instruction(InstructionPosition::First, instruction)
-    }
-
-    fn insert_instruction(
-        self,
-        position: InstructionPosition,
-        instruction: ScryptoInstruction,
-    ) -> Self;
+    instruction[0].clone()
 }
 
-impl TransactionManifestModifying for TransactionManifest {
-    /// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
-    /// term for `assert_worktop_contains`.
-    fn modify_add_guarantees<I>(
+pub(crate) struct LockFeeData {
+    fee_payer_address: AccountAddress,
+    fee: Option<Decimal192>,
+}
+
+impl LockFeeData {
+    pub(crate) fn new_with_fee(
+        fee_payer_address: AccountAddress,
+        fee: Decimal192,
+    ) -> Self {
+        Self {
+            fee_payer_address,
+            fee: Some(fee),
+        }
+    }
+
+    pub(crate) fn new_with_fee_payer(
+        fee_payer_address: AccountAddress,
+    ) -> Self {
+        Self {
+            fee_payer_address,
+            fee: None,
+        }
+    }
+}
+
+pub(crate) trait ModifiableManifest<B, M, I>
+where
+    B: IntoManifestBuilder<M, I>,
+    M: IntoManifest<I>,
+    I: IntoInstruction + Clone,
+    Self: Sized,
+{
+    fn manifest(&self) -> M;
+
+    fn insert_guarantee_assertion_at_position(
+        &self,
+        position: InstructionPosition,
+        guarantee: TransactionGuarantee,
+    ) -> Result<Self>;
+
+    /// Modifies the current manifest to add `lock_fee` instruction. Also adds all the proofs
+    /// provided in `entities_with_access_controllers` by prepending the `create_proof` method at
+    /// the top.
+    ///
+    /// Beware that if the fee payer is controlled by an `AccessControllerAddress` provided by
+    /// `entities_with_access_controllers` then that `create_proof` instruction will be placed just
+    /// before the `lock_fee` instruction.
+    fn modify_add_proofs_and_lock_fee(
         self,
-        guarantees: I,
-    ) -> Result<TransactionManifest>
+        lock_fee_data: Option<LockFeeData>,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
+    ) -> Result<M> {
+        let mut access_controllers = entities_with_access_controllers
+            .iter()
+            .map(|(_, ac)| *ac)
+            .collect::<IndexSet<_>>();
+
+        let mut builder = B::new_with_instructions([]);
+
+        if let Some(lock_fee_data) = lock_fee_data {
+            let lock_fee_entity_address = AddressOfAccountOrPersona::Account(
+                lock_fee_data.fee_payer_address,
+            );
+
+            let fee = lock_fee_data.fee.unwrap_or(default_fee());
+            if let Some(access_controller_of_fee_payer) =
+                entities_with_access_controllers.get(&lock_fee_entity_address)
+            {
+                access_controllers.shift_remove(access_controller_of_fee_payer);
+
+                // Add proof for lock fee payer, who happens to be securified.
+                builder = builder.call_method(
+                    ScryptoGlobalAddress::from(*access_controller_of_fee_payer),
+                    ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
+                    (),
+                );
+            }
+
+            // Add lock fee
+            builder = builder.lock_fee(&lock_fee_data.fee_payer_address, fee)
+        }
+
+        // Put the remaining proofs of the Access Controller addresses
+        for access_controller in access_controllers {
+            builder = builder.call_method(
+                ScryptoGlobalAddress::from(access_controller),
+                ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
+                (),
+            );
+        }
+
+        builder = builder.extend_builder_with_manifest(self.manifest());
+
+        builder.build(self.manifest().network_id())
+    }
+
+    // Modifies `manifest` by inserting transaction "guarantees", which is the wallet
+    // term for `assert_worktop_contains`.
+    fn modify_add_guarantees<G>(self, guarantees: G) -> Result<M>
     where
-        I: IntoIterator<Item = TransactionGuarantee>,
+        G: IntoIterator<Item = TransactionGuarantee>,
     {
         let guarantees = guarantees.into_iter().collect_vec();
         if guarantees.is_empty() {
-            return Ok(self);
+            return Ok(self.manifest());
         };
 
-        let instruction_count = self.instructions().len() as u64;
+        let instructions = self.manifest().instructions();
+        let instruction_count = instructions.len() as u64;
 
         if let Some(oob) = guarantees
             .clone()
@@ -119,65 +185,106 @@ impl TransactionManifestModifying for TransactionManifest {
         // Will be increased with each added guarantee to account for the
         // difference in indexes from the initial manifest.
         let mut offset = 0;
-
-        let first = self.instructions().first().unwrap();
-        if first.is_lock_fee() {
+        if instructions.iter().any(|i| i.is_lock_fee()) {
             offset = 1;
         }
 
-        let mut manifest = self;
+        let mut modifiable_manifest = self;
 
         for guarantee in guarantees {
-            let rounded_amount = guarantee.rounded_amount();
-
-            let guarantee_instruction = single(|b| {
-                b.assert_worktop_contains(
-                    &guarantee.resource_address,
-                    rounded_amount,
-                )
-            });
-
-            manifest = manifest.insert_instruction(
-                InstructionPosition::At(guarantee.instruction_index + offset),
-                guarantee_instruction,
-            );
+            modifiable_manifest = modifiable_manifest
+                .insert_guarantee_assertion_at_position(
+                    InstructionPosition(guarantee.instruction_index + offset),
+                    guarantee,
+                )?;
 
             offset.add_assign(1);
         }
 
-        Ok(manifest)
+        Ok(modifiable_manifest.manifest())
+    }
+}
+
+impl
+    ModifiableManifest<
+        ScryptoTransactionManifestBuilder,
+        TransactionManifest,
+        ScryptoInstruction,
+    > for TransactionManifest
+{
+    fn manifest(&self) -> TransactionManifest {
+        self.clone()
     }
 
-    fn insert_instruction(
-        self,
+    fn insert_guarantee_assertion_at_position(
+        &self,
         position: InstructionPosition,
-        instruction: ScryptoInstruction,
-    ) -> Self {
+        guarantee: TransactionGuarantee,
+    ) -> Result<Self> {
+        let rounded_amount = guarantee.rounded_amount();
+
+        let instruction = single_instruction(|b| {
+            b.assert_worktop_contains(
+                &guarantee.resource_address,
+                rounded_amount,
+            )
+        });
+
         let mut instructions = self.instructions().clone();
+        instructions.insert(position.0 as usize, instruction);
 
-        match position {
-            InstructionPosition::First => instructions.insert(0, instruction),
-            InstructionPosition::At(index) => {
-                instructions.insert(index as usize, instruction)
-            }
-        };
+        let instructions =
+            Instructions::try_from((instructions.as_ref(), self.network_id()))?;
 
-        let instructions = Instructions::try_from((
-            instructions.as_ref(),
-            self.network_id(),
-        )).expect("Should not have changed depth of SBOR value, thus inserting an instruction should never fail.");
-
-        TransactionManifest::with_instructions_and_blobs(
+        Ok(TransactionManifest::with_instructions_and_blobs(
             instructions,
             self.blobs().clone(),
-        )
+        ))
     }
 }
 
-pub enum InstructionPosition {
-    First,
-    At(u64),
+impl
+    ModifiableManifest<
+        ScryptoSubintentManifestV2Builder,
+        SubintentManifest,
+        ScryptoInstructionV2,
+    > for SubintentManifest
+{
+    fn manifest(&self) -> SubintentManifest {
+        self.clone()
+    }
+
+    fn insert_guarantee_assertion_at_position(
+        &self,
+        position: InstructionPosition,
+        guarantee: TransactionGuarantee,
+    ) -> Result<Self> {
+        let rounded_amount = guarantee.rounded_amount();
+
+        let instruction = single_instruction_v2(|b| {
+            b.assert_worktop_contains(
+                &guarantee.resource_address,
+                rounded_amount,
+            )
+        });
+
+        let mut instructions = self.instructions().clone();
+        instructions.insert(position.0 as usize, instruction);
+
+        let instructions = InstructionsV2::try_from((
+            instructions.as_ref(),
+            self.network_id(),
+        ))?;
+
+        Ok(SubintentManifest::with_instructions_and_blobs_and_children(
+            instructions,
+            self.blobs().clone(),
+            self.children().clone(),
+        ))
+    }
 }
+
+pub(crate) struct InstructionPosition(u64);
 
 #[cfg(test)]
 mod tests {
@@ -262,7 +369,17 @@ CALL_METHOD
         expected = "Expected single instruction. You MUST NOT chain calls with the manifest builder."
     )]
     fn single_when_more_than_one_panic() {
-        _ = single(|b| b.drop_all_proofs().drop_auth_zone_proofs())
+        _ = single_instruction(|b| b.drop_all_proofs().drop_auth_zone_proofs())
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Expected single instruction. You MUST NOT chain calls with the manifest builder."
+    )]
+    fn single_v2_when_more_than_one_panic() {
+        _ = single_instruction_v2(|b| {
+            b.drop_all_proofs().drop_auth_zone_proofs()
+        })
     }
 
     #[test]
@@ -298,7 +415,7 @@ CALL_METHOD
             manifest.modify_add_lock_fee(
                 &"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264".parse().unwrap(),
             Some(42.into())
-            ),
+            ).unwrap(),
             r#"
         CALL_METHOD
             Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
@@ -334,7 +451,7 @@ CALL_METHOD
         manifest.modify_add_lock_fee(
             &"account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264".parse().unwrap(),
             None,
-        ),
+        ).unwrap(),
         r#"
         CALL_METHOD
             Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
@@ -597,6 +714,122 @@ CALL_METHOD
                 index: 5,
                 count: 4
             })
+        );
+    }
+
+    #[test]
+    fn test_modify_add_proofs_and_lock_fee_when_no_proofs_provided() {
+        let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
+
+        manifest_eq(
+            manifest.modify_add_proofs_and_lock_fee(
+                Some(LockFeeData::new_with_fee_payer(
+                    AccountAddress::try_from_bech32(
+                        "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+                    ).unwrap()
+                )),
+                radix_rust::indexmap!()
+            ).unwrap(),
+            r#"
+        CALL_METHOD
+            Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
+            "lock_fee"
+            Decimal("25")
+        ;
+        CALL_METHOD
+            Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
+            "withdraw"
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
+            "try_deposit_or_abort"
+            Bucket("bucket1")
+            Enum<0u8>()
+        ;
+        "#,
+        );
+    }
+
+    #[test]
+    fn test_modify_add_proofs_and_lock_fee_when_proofs_provided() {
+        let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
+
+        // This account will lock the fee, but is also securified...
+        let account_address = AccountAddress::try_from_bech32(
+            "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+        ).unwrap();
+        // ...by this access controller
+        let acc1 = AccessControllerAddress::try_from_bech32(
+            "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a"
+        ).unwrap();
+
+        let acc2 = AccessControllerAddress::try_from_bech32(
+            "accesscontroller_rdx1cw68j9ca4fye09mz3hshp4qydjnxhsahm68hvmz9cjhftcz9gnn375"
+        ).unwrap();
+        let acc3 = AccessControllerAddress::try_from_bech32(
+            "accesscontroller_rdx1cwdxqrwpx9hrng5e6l6qfyhp9wfem03ls9z9kvutqpmfk665pqa3y5"
+        ).unwrap();
+
+        manifest_eq(
+            manifest
+                .modify_add_proofs_and_lock_fee(
+                    Some(LockFeeData::new_with_fee_payer(account_address)),
+                    IndexMap::from([
+                        (
+                            AddressOfAccountOrPersona::Account(account_address),
+                            acc1,
+                        ),
+                        (AddressOfAccountOrPersona::sample_mainnet(), acc2),
+                        (
+                            AddressOfAccountOrPersona::sample_mainnet_other(),
+                            acc3,
+                        ),
+                    ]),
+                )
+                .unwrap(),
+            r#"
+        CALL_METHOD
+            Address("accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a")
+            "create_proof"
+        ;
+        CALL_METHOD
+            Address("account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264")
+            "lock_fee"
+            Decimal("25")
+        ;
+        CALL_METHOD
+            Address("accesscontroller_rdx1cw68j9ca4fye09mz3hshp4qydjnxhsahm68hvmz9cjhftcz9gnn375")
+            "create_proof"
+        ;
+        CALL_METHOD
+            Address("accesscontroller_rdx1cwdxqrwpx9hrng5e6l6qfyhp9wfem03ls9z9kvutqpmfk665pqa3y5")
+            "create_proof"
+        ;
+        CALL_METHOD
+            Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
+            "withdraw"
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+        ;
+        TAKE_FROM_WORKTOP
+            Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+            Decimal("1337")
+            Bucket("bucket1")
+        ;
+        CALL_METHOD
+            Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
+            "try_deposit_or_abort"
+            Bucket("bucket1")
+            Enum<0u8>()
+        ;
+        "#,
         );
     }
 }

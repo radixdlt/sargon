@@ -6,6 +6,7 @@ use sargon::TransactionManifest as InternalTransactionManifest;
 use sargon::{
     // manifests crate
     ManifestForAccountLockerClaim as _,
+    SubintentManifestModifying as _,
     TransactionManifestAssetTransfers as _,
     TransactionManifestFaucet as _,
     TransactionManifestMetadataSetting as _,
@@ -142,31 +143,65 @@ pub fn manifest_third_party_deposit_update(
     .into()
 }
 
+/// Modifies the transaction manifest applying the following instructions
+/// - adds lock fee instruction on `address_of_fee_payer` with `fee` amount
+/// - attaches `AccessControllerAddress` proofs for `entities_with_access_controllers`, if
+///   the entity locking fee is controller by one access controller, then the `create_proof`
+///   for that entity is applied before `lock_fee`
+/// - adds guarantee assertions in specific indices described in `guarantees`. Those indices
+///   will be offset by `1` if lock fee instruction is added. Remember that those indices
+///   are received from `transaction/preview` were `lock_fee` is not present.
 #[uniffi::export]
-pub fn modify_manifest_lock_fee(
+pub fn modify_transaction_manifest(
     manifest: TransactionManifest,
     address_of_fee_payer: &AccountAddress,
-    fee: Option<Decimal192>,
-) -> TransactionManifest {
-    manifest
-        .into_internal()
-        .modify_add_lock_fee(
-            &address_of_fee_payer.into_internal(),
-            fee.map(Into::into),
-        )
-        .into()
-}
-
-/// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
-/// term for `assert_worktop_contains`.
-#[uniffi::export]
-pub fn modify_manifest_add_guarantees(
-    manifest: TransactionManifest,
+    fee: Decimal192,
+    entities_with_access_controllers: HashMap<
+        AddressOfAccountOrPersona,
+        AccessControllerAddress,
+    >,
     guarantees: Vec<TransactionGuarantee>,
 ) -> Result<TransactionManifest> {
     manifest
         .into_internal()
-        .modify_add_guarantees_vec(guarantees.into_internal())
+        .modify(
+            &address_of_fee_payer.into_internal(),
+            fee.into_internal(),
+            entities_with_access_controllers
+                .into_iter()
+                .map(|(entity, ac)| {
+                    (entity.into_internal(), ac.into_internal())
+                })
+                .collect::<IndexMap<_, _>>(),
+            guarantees.iter().map(|g| g.into_internal()),
+        )
+        .into_result()
+}
+
+/// Modifies the subintent manifest applying the following instructions
+/// - attaches `AccessControllerAddress` proofs for `entities_with_access_controllers`,
+/// - adds guarantee assertions in specific indices described in `guarantees`. Remember that
+///   those indices are received from `transaction/preview` were `lock_fee` is not present.
+#[uniffi::export]
+pub fn modify_subintent_manifest(
+    manifest: SubintentManifest,
+    entities_with_access_controllers: HashMap<
+        AddressOfAccountOrPersona,
+        AccessControllerAddress,
+    >,
+    guarantees: Vec<TransactionGuarantee>,
+) -> Result<SubintentManifest> {
+    manifest
+        .into_internal()
+        .modify(
+            entities_with_access_controllers
+                .into_iter()
+                .map(|(entity, ac)| {
+                    (entity.into_internal(), ac.into_internal())
+                })
+                .collect::<IndexMap<_, _>>(),
+            guarantees.iter().map(|g| g.into_internal()),
+        )
         .into_result()
 }
 

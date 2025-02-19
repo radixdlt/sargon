@@ -138,12 +138,16 @@ impl SubintentManifest {
 }
 
 impl SubintentManifest {
-    pub(crate) fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
+    pub fn instructions(&self) -> &Vec<ScryptoInstructionV2> {
         self.instructions.instructions()
     }
 
     pub fn blobs(&self) -> &Blobs {
         &self.blobs
+    }
+
+    pub fn children(&self) -> &ChildSubintentSpecifiers {
+        &self.children
     }
 
     pub fn manifest_string(&self) -> String {
