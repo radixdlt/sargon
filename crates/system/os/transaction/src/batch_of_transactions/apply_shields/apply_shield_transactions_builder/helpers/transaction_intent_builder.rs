@@ -70,7 +70,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
             Ed25519PrivateKey,
         > = IndexMap::new();
 
-        // Builds a TransactionIntent for a given manifest, nonce and notary private key.
+        // Builds a TransactionIntent for a given manifest, intent_discriminator and notary private key.
         // by forming a header with the fetched epoch.
         let mut build_intent = |manifest: &TransactionManifest,
                                 fee_tip_percentage: Option<u16>,
@@ -82,7 +82,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
             // InitiateWithRecoveryCompleteWithPrimary and 
             // InitiateWithRecoveryCompleteWithConfirmation.
             // we must ensure those manifest will have different TXID.
-            let intent_discriminator = Nonce::random();
+            let intent_discriminator = IntentDisciminator32::random();
             
             let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(
                 notary_private_key_bytes,

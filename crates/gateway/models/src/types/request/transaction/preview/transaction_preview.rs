@@ -30,7 +30,8 @@ pub struct TransactionPreviewRequest {
     pub tip_percentage: u16,
 
     /** A decimal-string-encoded integer between `0` and `2^32 - 1`, used to ensure the transaction intent is unique. */
-    pub nonce: u32,
+    #[serde(rename = "nonce")]
+    pub intent_discriminator: u32,
 
     /** A list of public keys to be used as transaction signers */
     pub signer_public_keys: Vec<GWPublicKey>,
@@ -47,7 +48,7 @@ impl TransactionPreviewRequest {
         start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: Option<PublicKey>,
-        nonce: Nonce,
+        intent_discriminator: IntentDisciminator32,
     ) -> Self {
         let signer_public_keys = signer_public_keys
             .into_iter()
@@ -72,7 +73,7 @@ impl TransactionPreviewRequest {
             notary_public_key: notary_public_key.map(GWPublicKey::from),
             notary_is_signatory: signer_public_keys.is_empty(),
             tip_percentage: 0,
-            nonce: nonce.into(),
+            intent_discriminator: intent_discriminator.into(),
             signer_public_keys,
             flags: TransactionPreviewRequestFlags::default(),
             opt_ins: TransactionPreviewRequestOptIns::default(),
@@ -100,7 +101,7 @@ mod tests {
                 intent.header.start_epoch_inclusive,
                 keys.clone(),
                 Some(intent.header.notary_public_key),
-                intent.header.nonce,
+                intent.header.intent_discriminator,
             );
             assert_eq!(sut.flags, flags);
             assert_eq!(
@@ -132,7 +133,7 @@ mod tests {
                 GWPublicKey::from(header.notary_public_key)
             );
             assert_eq!(sut.tip_percentage, header.tip_percentage);
-            assert_eq!(Nonce::from(sut.nonce), header.nonce);
+            assert_eq!(IntentDisciminator32::from(sut.intent_discriminator), header.intent_discriminator);
         };
         do_test(TransactionIntent::sample());
         do_test(TransactionIntent::sample_other());

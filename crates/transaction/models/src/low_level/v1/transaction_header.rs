@@ -3,12 +3,12 @@ use core_misc::decl_bool_type;
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, derive_more::Display)]
-#[display("{} nonce: {}", network_id, nonce)]
+#[display("{} intent_discriminator: {}", network_id, intent_discriminator)]
 pub struct TransactionHeader {
     pub network_id: NetworkID,
     pub start_epoch_inclusive: Epoch,
     pub end_epoch_exclusive: Epoch,
-    pub nonce: Nonce,
+    pub intent_discriminator: IntentDisciminator32,
     pub notary_public_key: PublicKey,
     pub notary_is_signatory: NotaryIsSignatory,
     pub tip_percentage: u16,
@@ -25,7 +25,7 @@ impl TransactionHeader {
         network_id: NetworkID,
         start_epoch_inclusive: impl Into<Epoch>,
         end_epoch_exclusive: impl Into<Epoch>,
-        nonce: impl Into<Nonce>,
+        intent_discriminator: impl Into<IntentDisciminator32>,
         notary_public_key: impl Into<PublicKey>,
         notary_is_signatory: impl Into<NotaryIsSignatory>,
         tip_percentage: u16,
@@ -40,7 +40,7 @@ impl TransactionHeader {
             network_id,
             start_epoch_inclusive,
             end_epoch_exclusive,
-            nonce: nonce.into(),
+            intent_discriminator: intent_discriminator.into(),
             notary_public_key: notary_public_key.into(),
             notary_is_signatory: notary_is_signatory.into(),
             tip_percentage,
@@ -54,7 +54,7 @@ impl From<TransactionHeader> for ScryptoTransactionHeader {
             network_id: value.network_id.into(),
             start_epoch_inclusive: value.start_epoch_inclusive.into(),
             end_epoch_exclusive: value.end_epoch_exclusive.into(),
-            nonce: value.nonce.into(),
+            intent_discriminator: value.intent_discriminator.into(),
             notary_public_key: value.notary_public_key.into(),
             notary_is_signatory: value.notary_is_signatory.0,
             tip_percentage: value.tip_percentage,
@@ -73,7 +73,7 @@ impl TryFrom<ScryptoTransactionHeader> for TransactionHeader {
             network_id,
             start_epoch_inclusive: value.start_epoch_inclusive.into(),
             end_epoch_exclusive: value.end_epoch_exclusive.into(),
-            nonce: value.nonce.into(),
+            intent_discriminator: value.intent_discriminator.into(),
             notary_public_key,
             notary_is_signatory: NotaryIsSignatory(value.notary_is_signatory),
             tip_percentage: value.tip_percentage,

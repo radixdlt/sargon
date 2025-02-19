@@ -56,7 +56,7 @@ impl GatewayClient {
             intent.header.start_epoch_inclusive,
             signer_public_keys,
             Some(intent.header.notary_public_key),
-            intent.header.nonce,
+            intent.header.intent_discriminator,
         );
         self.transaction_preview(request)
             .await

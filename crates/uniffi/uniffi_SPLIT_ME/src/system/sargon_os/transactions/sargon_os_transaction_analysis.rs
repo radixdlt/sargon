@@ -15,7 +15,7 @@ impl SargonOS {
         instructions: String,
         blobs: Blobs,
         are_instructions_originating_from_host: bool,
-        nonce: Nonce,
+        intent_discriminator: IntentDisciminator32,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview> {
         self.wrapped
@@ -23,7 +23,7 @@ impl SargonOS {
                 instructions,
                 blobs.into_internal(),
                 are_instructions_originating_from_host,
-                nonce.into_internal(),
+                intent_discriminator.into_internal(),
                 notary_public_key.into_internal(),
             )
             .await
@@ -42,14 +42,14 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        nonce: Nonce,
+        intent_discriminator: IntentDisciminator32,
         notary_public_key: PublicKey,
     ) -> Result<PreAuthToReview> {
         self.wrapped
             .analyse_pre_auth_preview(
                 instructions,
                 blobs.into_internal(),
-                nonce.into_internal(),
+                intent_discriminator.into_internal(),
                 notary_public_key.into_internal(),
             )
             .await
