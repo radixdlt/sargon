@@ -27,7 +27,7 @@ impl SigningManager {
                 let txid = si.signed_intent.intent.transaction_intent_hash();
                 let entity = payer_by_tx_id(intent_set_id, txid)?;
                 Ok(IntentSetToSign::single_intent(
-                    IntentSetID::new(),
+                    intent_set_id,
                     role_kind,
                     IntentVariant::new(None, si.signed_intent.intent.clone()),
                     entity.into(),
