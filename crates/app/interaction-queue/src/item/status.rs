@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use std::cmp::Ordering;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// An enum describing the status of an item in the interaction queue.
 pub enum InteractionQueueItemStatus {
     /// The interaction is queued within a batch and waiting to be processed.
@@ -43,7 +43,7 @@ impl InteractionQueueItemStatus {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// An enum describing the failure status of an item in the interaction queue.
 pub enum InteractionQueueItemFailureStatus {
     /// For Transactions only. Can be retried.
@@ -54,4 +54,33 @@ pub enum InteractionQueueItemFailureStatus {
 
     /// For Transactions & PreAuthorizations. Cannot be retried.
     TimedOut,
+}
+
+impl From<TransactionStatusResponsePayloadStatus>
+    for InteractionQueueItemStatus
+{
+    fn from(value: TransactionStatusResponsePayloadStatus) -> Self {
+        match value {
+            TransactionStatusResponsePayloadStatus::Unknown |
+            TransactionStatusResponsePayloadStatus::Pending |
+            TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown => {
+                Self::InProgress
+            }
+            TransactionStatusResponsePayloadStatus::CommittedSuccess => {
+                Self::Success
+            }
+            TransactionStatusResponsePayloadStatus::CommittedFailure => {
+                // TODO: Review failure type
+                Self::Failure(InteractionQueueItemFailureStatus::TimedOut)
+            }
+            TransactionStatusResponsePayloadStatus::PermanentlyRejected => {
+                // TODO: Review failure type
+                Self::Failure(InteractionQueueItemFailureStatus::Rejected)
+            }
+            TransactionStatusResponsePayloadStatus::TemporarilyRejected => {
+                // TODO: Review failure type
+                Self::Failure(InteractionQueueItemFailureStatus::Failed)
+            }
+        }
+    }
 }

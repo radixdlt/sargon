@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// A Transaction item that is part of the interaction queue.
 pub struct TransactionQueueItem {
     /// The identifier of the transaction.

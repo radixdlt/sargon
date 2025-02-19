@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub struct InteractionsQueue {
     /// Interactions that were already dispatched.
     /// Their status will always be `InProgress`, `Success` or `Failure`.
-    pub items: Vec<InteractionQueueItem>,
+    pub items: IndexSet<InteractionQueueItem>,
 
     /// Batches of interactions that are waiting to be dispatched.
     pub batches: Vec<InteractionQueueBatch>,
@@ -14,7 +14,7 @@ pub struct InteractionsQueue {
 impl InteractionsQueue {
     pub fn new() -> Self {
         Self {
-            items: Vec::new(),
+            items: IndexSet::new(),
             batches: Vec::new(),
         }
     }
@@ -34,5 +34,17 @@ impl InteractionsQueue {
 
         all_items.sort_by_key(|item| item.status.clone());
         all_items
+    }
+
+    /// Removes every successful interaction from `items`, and clears `batches` that have no remaining interactions.
+    pub fn removing_stale(&mut self) {
+        self.items
+            .retain(|item| item.status != InteractionQueueItemStatus::Success);
+        self.batches.retain(|batch| !batch.interactions.is_empty());
+    }
+
+    /// Replace an interaction in the queue with an updated version of it.
+    pub fn replace_interaction(&mut self, interaction: InteractionQueueItem) {
+        self.items.replace(interaction);
     }
 }
