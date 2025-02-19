@@ -44,7 +44,7 @@ mod tests {
     fn display() {
         assert_eq!(
             format!("{}", SUT::sample()),
-            SUT::sample().bech32_encoded_tx_id
+            SUT::sample().bech32_encoded_tx_id.to_string()
         );
         pretty_assertions::assert_eq!(format!("{}", SUT::sample()), "subtxid_rdx1frcm6zzyfd08z0deu9x24sh64eccxeux4j2dv3dsqeuh9qsz4y6sy6hgte");
         pretty_assertions::assert_eq!(format!("{}", SUT::sample_other()), "subtxid_sim1v7wlh0dpd5lev6w6s4f2kev562cygmgrm9kqw6swe8w92r4yr7ksuk9pw5");

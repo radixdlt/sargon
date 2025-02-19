@@ -11,13 +11,6 @@ pub(crate) struct ManagerCollectorEphemeralAdapter {
     lookup_txid_to_intent_set:
         Immutable<HashMap<EntityInTxCompoundKey, IntentSetID>>,
 
-    lookup_txid_to_variant: Immutable<
-        HashMap<
-            TransactionIntentHash,
-            Option<RolesExercisableInTransactionManifestCombination>,
-        >,
-    >,
-
     lookup_intent_by_txid:
         Immutable<HashMap<EntityInTxCompoundKey, TransactionIntent>>,
 
@@ -53,10 +46,7 @@ impl ManagerCollectorEphemeralAdapter {
             HashMap::<AddressOfAccountOrPersona, AccountOrPersona>::new();
         let mut lookup_txid_to_intent_set =
             HashMap::<EntityInTxCompoundKey, IntentSetID>::new();
-        let mut lookup_txid_to_variant = HashMap::<
-            TransactionIntentHash,
-            Option<RolesExercisableInTransactionManifestCombination>,
-        >::new();
+
         let mut lookup_intent_by_txid =
             HashMap::<EntityInTxCompoundKey, TransactionIntent>::new();
 
@@ -78,16 +68,16 @@ impl ManagerCollectorEphemeralAdapter {
 
                         // Insert TXID into the lookup so we can group the signatures
                         // of each intent by IntentSetID.
+                        println!("🤔 will insert? intent_set_id: {:?} for key: {:?}, variant: {:?}", set.intent_set_id, compound_key, variant.variant.unwrap());
+                        println!("🇺🇦 manifest\n{}", variant.intent.manifest_string());
                         let existed = lookup_txid_to_intent_set
                             .insert(compound_key, set.intent_set_id);
                         assert_eq!(
                             existed, None,
                             "Duplicate TXID for IntentSetID"
                         );
-
-                        let existed = lookup_txid_to_variant
-                            .insert(txid.clone(), variant.variant);
-                        assert_eq!(existed, None, "Duplicate TXID for Variant");
+                        
+                        println!("🌈 inserting intent_set_id: {:?} for key: {:?}, variant: {:?}", set.intent_set_id, compound_key, variant.variant.unwrap());
 
                         let existed = lookup_intent_by_txid
                             .insert(compound_key, tx.clone());
@@ -109,7 +99,6 @@ impl ManagerCollectorEphemeralAdapter {
             transactions_with_petitions: transactions_with_petitions.into(),
             lookup_address_to_entity: lookup_address_to_entity.into(),
             lookup_txid_to_intent_set: lookup_txid_to_intent_set.into(),
-            lookup_txid_to_variant: lookup_txid_to_variant.into(),
             lookup_intent_by_txid: lookup_intent_by_txid.into(),
         }
     }

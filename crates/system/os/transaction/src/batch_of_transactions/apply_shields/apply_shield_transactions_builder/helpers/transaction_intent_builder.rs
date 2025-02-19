@@ -74,9 +74,16 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
         // by forming a header with the fetched epoch.
         let mut build_intent = |manifest: &TransactionManifest,
                                 fee_tip_percentage: Option<u16>,
-                                nonce: Nonce,
                                 notary_private_key_bytes: Exactly32Bytes|
          -> Result<TransactionIntent> {
+            // We want and MUST use different IntentDiscriminators, since it is 
+            // otherwise possible for two manifest variants to have the same 
+            // TransactionIntentHash (TXID) - at least for weak shields, specifically 
+            // InitiateWithRecoveryCompleteWithPrimary and 
+            // InitiateWithRecoveryCompleteWithConfirmation.
+            // we must ensure those manifest will have different TXID.
+            let intent_discriminator = Nonce::random();
+            
             let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(
                 notary_private_key_bytes,
             );
@@ -85,7 +92,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                 network_id,
                 start_epoch_inclusive,
                 end_epoch_exclusive,
-                nonce,
+                intent_discriminator,
                 notary_public_key,
                 NotaryIsSignatory(false),
                 fee_tip_percentage.unwrap_or(0),
@@ -109,19 +116,16 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
 
         // Map each `SecurityShieldApplication` to a `SecurityShieldApplicationWithTransactionIntents`
         let with_intents = manifests_with_entities_with_xrd_balance.into_iter().map(|shield_application| {
-            // We tactically use the same nonce for all variants of the TransactionIntents
-            // for securified entities - ensuring that we cannot accidentally submit
-            // two variants of the same application.
-            let nonce =  Nonce::random();
+          
             // We can use the same notary private key for all variants since they
             // are in fact the same application
             let notary_private_key_bytes = Exactly32Bytes::generate();
             match shield_application {
+
                 SecurityShieldApplication::ForUnsecurifiedEntity(unsec) => {
                     let intent = build_intent(
                         unsec.manifest(),
                         unsec.fee_tip_percentage(),
-                        nonce,
                         notary_private_key_bytes,
                     )?;
                     let with_intent = SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::with_intent(unsec, intent);
@@ -135,35 +139,30 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                         let initiate_with_recovery_complete_with_primary = build_intent(
                             sec.initiate_with_recovery_complete_with_primary(),
                             fee_tip_percentage,
-                            nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_recovery_complete_with_confirmation = build_intent(
                             sec.initiate_with_recovery_complete_with_confirmation(),
                             fee_tip_percentage,
-                            nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_recovery_delayed_completion = build_intent(
                             sec.initiate_with_recovery_delayed_completion(),
                             fee_tip_percentage,
-                            nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_primary_complete_with_confirmation = build_intent(
                             sec.initiate_with_primary_complete_with_confirmation(),
                             fee_tip_percentage,
-                            nonce,
                             notary_private_key_bytes
                         )?;
 
                         let initiate_with_primary_delayed_completion = build_intent(
                             sec.initiate_with_primary_delayed_completion(),
                             fee_tip_percentage,
-                            nonce,
                             notary_private_key_bytes
                         )?;
 

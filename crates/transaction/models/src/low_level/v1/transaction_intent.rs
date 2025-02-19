@@ -211,6 +211,19 @@ mod tests {
     type SUT = TransactionIntent;
 
     #[test]
+    fn txid_depends_on_nonce_in_header() {
+        let sut_0 = SUT::sample();
+        let mut sut_1 = sut_0.clone();
+        sut_1.header.nonce = Nonce::random();
+        assert_ne!(sut_0.header.nonce, sut_1.header.nonce);
+        assert_ne!(sut_0, sut_1);
+        assert_ne!(
+            sut_0.transaction_intent_hash(),
+            sut_1.transaction_intent_hash()
+        );
+    }
+
+    #[test]
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
