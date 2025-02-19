@@ -5025,6 +5025,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_with",
+ "short-string",
  "strum 0.26.3",
  "transaction-foundation",
 ]

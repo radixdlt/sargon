@@ -4,22 +4,44 @@ use crate::prelude::*;
 /// to the state of a SigningManager.
 pub(crate) struct ManagerCollectorEphemeralAdapter {
     role_kind: Immutable<RoleKind>,
+
     lookup_address_to_entity:
         Immutable<HashMap<AddressOfAccountOrPersona, AccountOrPersona>>,
+
     lookup_txid_to_intent_set:
-        Immutable<HashMap<TransactionIntentHash, IntentSetID>>,
+        Immutable<HashMap<EntityInTxCompoundKey, IntentSetID>>,
+
     lookup_txid_to_variant: Immutable<
         HashMap<
             TransactionIntentHash,
             Option<RolesExercisableInTransactionManifestCombination>,
         >,
     >,
+
     lookup_intent_by_txid:
-        Immutable<HashMap<TransactionIntentHash, TransactionIntent>>,
+        Immutable<HashMap<EntityInTxCompoundKey, TransactionIntent>>,
 
     transactions_with_petitions:
         Immutable<IdentifiedVecOf<SignableWithEntities<TransactionIntent>>>,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, StdHash)]
+pub struct CompoundKey<Left, Right>
+where
+    Left: StdHash,
+    Right: StdHash,
+{
+    pub left: Left,
+    pub right: Right,
+}
+impl<Left: StdHash, Right: StdHash> CompoundKey<Left, Right> {
+    pub fn new(left: Left, right: Right) -> Self {
+        Self { left, right }
+    }
+}
+pub type EntityInTxCompoundKey =
+    CompoundKey<AddressOfAccountOrPersona, TransactionIntentHash>;
+
 impl ManagerCollectorEphemeralAdapter {
     pub(crate) fn new(
         role_kind: RoleKind,
@@ -30,13 +52,13 @@ impl ManagerCollectorEphemeralAdapter {
         let mut lookup_address_to_entity =
             HashMap::<AddressOfAccountOrPersona, AccountOrPersona>::new();
         let mut lookup_txid_to_intent_set =
-            HashMap::<TransactionIntentHash, IntentSetID>::new();
+            HashMap::<EntityInTxCompoundKey, IntentSetID>::new();
         let mut lookup_txid_to_variant = HashMap::<
             TransactionIntentHash,
             Option<RolesExercisableInTransactionManifestCombination>,
         >::new();
         let mut lookup_intent_by_txid =
-            HashMap::<TransactionIntentHash, TransactionIntent>::new();
+            HashMap::<EntityInTxCompoundKey, TransactionIntent>::new();
 
         let transactions_with_petitions = intent_sets
             .into_iter()
@@ -47,17 +69,30 @@ impl ManagerCollectorEphemeralAdapter {
                         let tx = variant.intent.clone();
                         let txid = tx.transaction_intent_hash();
 
-                        lookup_intent_by_txid.insert(txid.clone(), tx.clone());
+                        let entity_requiring_auth = set.entity.clone();
+
+                        let compound_key = EntityInTxCompoundKey::new(
+                            entity_requiring_auth.address(),
+                            txid.clone(),
+                        );
 
                         // Insert TXID into the lookup so we can group the signatures
                         // of each intent by IntentSetID.
-                        lookup_txid_to_intent_set
-                            .insert(txid.clone(), set.intent_set_id);
+                        let existed = lookup_txid_to_intent_set
+                            .insert(compound_key, set.intent_set_id);
+                        assert_eq!(
+                            existed, None,
+                            "Duplicate TXID for IntentSetID"
+                        );
 
-                        lookup_txid_to_variant
+                        let existed = lookup_txid_to_variant
                             .insert(txid.clone(), variant.variant);
+                        assert_eq!(existed, None, "Duplicate TXID for Variant");
 
-                        let entity_requiring_auth = set.entity.clone();
+                        let existed = lookup_intent_by_txid
+                            .insert(compound_key, tx.clone());
+                        assert_eq!(existed, None, "Duplicate Intent for TXID");
+
                         lookup_address_to_entity.insert(
                             entity_requiring_auth.address(),
                             entity_requiring_auth.clone(),
@@ -85,8 +120,14 @@ impl ManagerCollectorEphemeralAdapter {
         (*self.transactions_with_petitions).clone()
     }
 
-    fn get_context(&self, txid: TransactionIntentHash) -> EntitySigningContext {
-        let intent_set_id = *self.lookup_txid_to_intent_set.get(&txid).unwrap();
+    fn get_context(
+        &self,
+        txid: TransactionIntentHash,
+        entity: AddressOfAccountOrPersona,
+    ) -> EntitySigningContext {
+        let compound_key = EntityInTxCompoundKey::new(entity, txid);
+        let intent_set_id =
+            *self.lookup_txid_to_intent_set.get(&compound_key).unwrap();
 
         EntitySigningContext::new(intent_set_id, *self.role_kind)
     }
@@ -119,10 +160,11 @@ impl ManagerCollectorEphemeralAdapter {
                     .get(&owner_address)
                     .unwrap()
                     .clone();
-                let intent = self.lookup_intent_by_txid.get(&txid).unwrap().clone();
+                let compound_key = EntityInTxCompoundKey::new(owner_address, txid.clone());
+                let intent = self.lookup_intent_by_txid.get(&compound_key).unwrap().clone();
 
                 EntitySignedFor::new(
-                    self.get_context(txid),
+                    self.get_context(txid, owner_address),
                     intent,
                     entity,
                     signatures_with_inputs
@@ -139,8 +181,6 @@ impl ManagerCollectorEphemeralAdapter {
                 .into_iter()
                 .map(|o| {
                     let txid = o.signable_id;
-                    let intent =
-                        self.lookup_intent_by_txid.get(&txid).unwrap().clone();
 
                     let per_entity_neglected_factor_sources =
                         o.per_entity_neglected_factors.clone();
@@ -161,8 +201,16 @@ impl ManagerCollectorEphemeralAdapter {
                         .unwrap()
                         .clone();
 
+                    let compound_key =
+                        EntityInTxCompoundKey::new(owner_address, txid.clone());
+                    let intent = self
+                        .lookup_intent_by_txid
+                        .get(&compound_key)
+                        .unwrap()
+                        .clone();
+
                     EntityNotSignedFor::new(
-                        self.get_context(txid),
+                        self.get_context(txid, owner_address),
                         intent,
                         entity,
                         neglected_factors,

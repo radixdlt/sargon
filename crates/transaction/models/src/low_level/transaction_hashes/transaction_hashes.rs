@@ -20,7 +20,7 @@ macro_rules! decl_tx_hash {
             #[doc = $expr]
         )*
         #[derive(
-            Clone, PartialEq, Eq, Hash, SerializeDisplay, DeserializeFromStr, derive_more::Display, derive_more::Debug,
+            Clone, Copy, PartialEq, Eq, Hash, SerializeDisplay, DeserializeFromStr, derive_more::Display, derive_more::Debug,
         )]
         #[display("{}", self.bech32_encoded_tx_id)]
         #[debug("{}", self.bech32_encoded_tx_id)]
@@ -30,7 +30,7 @@ macro_rules! decl_tx_hash {
             /// the hash of the intent
             pub hash: Hash,
             /// Bech32 encoded TX id
-            pub bech32_encoded_tx_id: String,
+            pub bech32_encoded_tx_id: short_string::prelude::ShortString,
         }
 
 
@@ -49,7 +49,7 @@ macro_rules! decl_tx_hash {
                 Self {
                     network_id,
                     hash: scrypto_hash.into(),
-                    bech32_encoded_tx_id,
+                    bech32_encoded_tx_id: short_string::prelude::ShortString::new(bech32_encoded_tx_id).expect("Bech32 encoded tx id should not be longer than 255 chars"),
                 }
             }
             pub fn new(hash: Hash, network_id: NetworkID) -> Self {

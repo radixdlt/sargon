@@ -14,6 +14,7 @@ addresses = { workspace = true }
 hash = { workspace = true }
 bytes = { workspace = true }
 ecc = { workspace = true }
+short-string = { workspace = true }
 numeric = { workspace = true }
 has-sample-values = { workspace = true }
 metadata = { workspace = true }
@@ -21,7 +22,7 @@ network = { workspace = true }
 core-utils = { workspace = true }
 transaction-foundation = { workspace = true }
 core-collections = { workspace = true }
-core-misc = { workspace = true }                  # Instant
+core-misc = { workspace = true }                   # Instant
 profile-security-structures = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
