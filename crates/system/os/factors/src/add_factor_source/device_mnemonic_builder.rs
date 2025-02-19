@@ -159,9 +159,12 @@ impl DeviceMnemonicBuilder {
     ) -> IndexSet<usize> {
         let max_index_in_mnemonic =
             self.get_mnemonic_with_passphrase().mnemonic.words.len() - 1;
-        let mut indices_in_mnemonic_of_words_to_confirm = generate_bytes::<1000>()
+
+        let mut indices_in_mnemonic_of_words_to_confirm = generate_bytes::<100>()
             .into_iter()
             .map(|b| (b as usize) % max_index_in_mnemonic)
+            .collect::<IndexSet<_>>()
+            .into_iter()
             .take(Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM_EXCL_CHECKSUM)
             .collect::<IndexSet<_>>();
 
