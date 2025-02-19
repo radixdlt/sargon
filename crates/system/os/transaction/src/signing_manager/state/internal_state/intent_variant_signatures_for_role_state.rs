@@ -1,7 +1,8 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
 pub(crate) struct IntentVariantSignaturesForRoleState {
+    #[debug(skip)]
     role: RoleKind,
     signatures_per_entity:
         IndexMap<AddressOfAccountOrPersona, IndexSet<SignatureWithPublicKey>>,

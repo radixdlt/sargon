@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, derive_more::Debug)]
+#[debug("{:?}", self.0)]
 pub(crate) struct IntentVariantSignaturesPerRoleState(
     pub(crate) IndexMap<RoleKind, IntentVariantSignaturesForRoleState>,
 );
