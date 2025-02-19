@@ -10,8 +10,7 @@ pub struct DeviceMnemonicBuilder {
     wrapped: Arc<InternalDeviceMnemonicBuilder>,
 }
 
-/// The result of the `DeviceMnemonicBuilder` representing the `build` function outcome,
-/// before being able to use the underlying `MnemonicWithPassphrase`.
+/// The result of the `build` function from `DeviceMnemonicBuilder`.
 #[derive(Debug, PartialEq, uniffi::Enum)]
 pub enum DeviceMnemonicBuildResult {
     /// The mnemonic words were confirmed
@@ -127,8 +126,8 @@ impl DeviceMnemonicBuilder {
 #[uniffi::export]
 impl DeviceMnemonicBuilder {
     /// Generates a new mnemonic
-    pub fn create_new_mnemonic_with_passphrase(self: Arc<Self>) -> Arc<Self> {
-        self.set(|builder| builder.create_new_mnemonic_with_passphrase())
+    pub fn generate_new_mnemonic_with_passphrase(self: Arc<Self>) -> Arc<Self> {
+        self.set(|builder| builder.generate_new_mnemonic_with_passphrase())
     }
 
     /// Creates a new mnemonic from given `words`
@@ -181,7 +180,7 @@ mod tests {
             .map(|w| w.word.clone())
             .collect::<Vec<_>>();
         let sut = SUT::new()
-            .create_new_mnemonic_with_passphrase()
+            .generate_new_mnemonic_with_passphrase()
             .create_mnemonic_with_passphrase_from_words(mnemonic_words.clone()) // Override the previously created mnemonic and create a new one from words
             .unwrap();
 

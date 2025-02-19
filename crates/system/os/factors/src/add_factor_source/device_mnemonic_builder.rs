@@ -7,8 +7,7 @@ pub struct DeviceMnemonicBuilder {
     mnemonic_with_passphrase: RwLock<Option<MnemonicWithPassphrase>>,
 }
 
-/// The result of the `DeviceMnemonicBuilder` representing the `build` function outcome,
-/// before being able to use the underlying `MnemonicWithPassphrase`.
+/// The result of the `build` function from `DeviceMnemonicBuilder`.
 #[derive(Debug, PartialEq)]
 pub enum DeviceMnemonicBuildResult {
     /// The mnemonic words were confirmed
@@ -103,7 +102,7 @@ impl DeviceMnemonicBuilder {
 // ====================
 impl DeviceMnemonicBuilder {
     /// Generates a new mnemonic
-    pub fn create_new_mnemonic_with_passphrase(&self) -> &Self {
+    pub fn generate_new_mnemonic_with_passphrase(&self) -> &Self {
         let mnemonic = Mnemonic::generate_new();
         self.set_mnemonic_with_passphrase(mnemonic);
         self
@@ -266,13 +265,13 @@ mod tests {
     }
 
     #[test]
-    fn create_new_mnemonic_with_passphrase() {
+    fn generate_new_mnemonic_with_passphrase() {
         let sut = SUT::default();
         pretty_assertions::assert_eq!(
             sut.mnemonic_with_passphrase.read().unwrap().clone(),
             None
         );
-        sut.create_new_mnemonic_with_passphrase();
+        sut.generate_new_mnemonic_with_passphrase();
         assert!(sut.mnemonic_with_passphrase.read().unwrap().is_some());
     }
 
