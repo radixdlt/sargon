@@ -46,8 +46,7 @@ impl SigningManager {
 
         assert!(exercise_role_outcome.entities_not_signed_for.is_empty());
 
-        let signed_with_payers = exercise_role_outcome.entities_signed_for;
-        signed_with_payers
+        exercise_role_outcome.entities_signed_for
             .0
             .into_iter()
             .for_each(|signed_with_payer| {

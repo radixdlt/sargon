@@ -45,11 +45,11 @@ impl SigningManager {
         // Start with Recovery role
         println!("🛡️ Signing with Recovery");
         self.sign_intents_with_recovery_role().await?;
-        
+
         // Then we sign for the Confirmation role
         println!("🛡️ Signing with Confirmation");
         self.sign_intents_with_confirmation_role().await?;
-        
+
         // Then we sign for the Primary role
         println!("🛡️ Signing with Primary");
         self.sign_intents_with_primary_role().await?;
@@ -63,6 +63,14 @@ impl SigningManager {
         // intents we are not going to submit.
         let best_signed_intent = signed_for_with_entities_applying_shield
             .get_best_signed_intents()?;
+
+        println!(
+            "🍭 best signed - set id: {:?}",
+            best_signed_intent
+                .iter()
+                .map(|si| si.intent_set_id())
+                .collect_vec()
+        );
 
         let intents_to_confirm_after_delay =
             self.get_intents_to_confirm_after_delay(&best_signed_intent)?;

@@ -10,6 +10,14 @@ impl SigningManagerState {
         &mut self,
         outcome: ExerciseRoleOutcome,
     ) {
+        println!(
+            "🐌 outcome.entities_signed_for - SetIDs: {:?}",
+            outcome
+                .entities_signed_for
+                .iter()
+                .map(|e| e.context.intent_set_id)
+                .collect_vec()
+        );
         self.update_with_each_entity_signed_for(outcome.entities_signed_for);
 
         self.update_with_entities_not_signed_for(
