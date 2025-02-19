@@ -76,14 +76,14 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                                 fee_tip_percentage: Option<u16>,
                                 notary_private_key_bytes: Exactly32Bytes|
          -> Result<TransactionIntent> {
-            // We want and MUST use different IntentDiscriminators, since it is 
-            // otherwise possible for two manifest variants to have the same 
-            // TransactionIntentHash (TXID) - at least for weak shields, specifically 
-            // InitiateWithRecoveryCompleteWithPrimary and 
+            // We want and MUST use different IntentDiscriminators, since it is
+            // otherwise possible for two manifest variants to have the same
+            // TransactionIntentHash (TXID) - at least for weak shields, specifically
+            // InitiateWithRecoveryCompleteWithPrimary and
             // InitiateWithRecoveryCompleteWithConfirmation.
             // we must ensure those manifest will have different TXID.
             let intent_discriminator = IntentDisciminator32::random();
-            
+
             let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(
                 notary_private_key_bytes,
             );
@@ -116,7 +116,6 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
 
         // Map each `SecurityShieldApplication` to a `SecurityShieldApplicationWithTransactionIntents`
         let with_intents = manifests_with_entities_with_xrd_balance.into_iter().map(|shield_application| {
-          
             // We can use the same notary private key for all variants since they
             // are in fact the same application
             let notary_private_key_bytes = Exactly32Bytes::generate();

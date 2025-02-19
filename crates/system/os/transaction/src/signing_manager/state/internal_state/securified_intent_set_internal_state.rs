@@ -102,7 +102,7 @@ impl SecurifiedIntentSetInternalState {
             .collect()
     }
 
-    fn get_variant_state(
+    fn get_variant_state_by_variant(
         &mut self,
         variant: RolesExercisableInTransactionManifestCombination,
     ) -> &mut IntentVariantState {
@@ -125,7 +125,21 @@ impl SecurifiedIntentSetInternalState {
         }
     }
 
-    pub(crate) fn update_with_intent_with_signatures(
+    fn get_variant_state_by_txid(
+        &mut self,
+        txid: TransactionIntentHash,
+    ) -> &mut IntentVariantState {
+        let variant = self
+            ._all_intent_variant_states()
+            .into_iter()
+            .find(|s| s.intent.transaction_intent_hash() == txid)
+            .expect("Discrepancy! txid not found in any variant")
+            .variant
+            .clone();
+        self.get_variant_state_by_variant(*variant)
+    }
+
+    pub(crate) fn update_with_entity_signed_for(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
@@ -133,17 +147,27 @@ impl SecurifiedIntentSetInternalState {
             intent_with_signatures.entity.address(),
             self.entity_applying_shield.address()
         );
+        assert_eq!(
+            intent_with_signatures.context.intent_set_id,
+            *self.intent_set_id
+        );
 
-        RolesExercisableInTransactionManifestCombination::variants_for_role(
-            intent_with_signatures.role_kind(),
-        )
-        .into_iter()
-        .for_each(|variant| {
-            let variant_state = self.get_variant_state(variant);
-            variant_state.update_with_intent_with_signatures(
-                intent_with_signatures.clone(),
-            );
-        });
+        let mut variant_state = self.get_variant_state_by_txid(
+            intent_with_signatures.intent.transaction_intent_hash(),
+        );
+
+        variant_state
+            .update_with_entity_signed_for(intent_with_signatures.clone());
+        // RolesExercisableInTransactionManifestCombination::variants_for_role(
+        //     intent_with_signatures.role_kind(),
+        // )
+        // .into_iter()
+        // .for_each(|variant| {
+        //     let variant_state = self.get_variant_state(variant);
+        //     variant_state.update_with_intent_with_signatures(
+        //         intent_with_signatures.clone(),
+        //     );
+        // });
     }
 
     fn new(

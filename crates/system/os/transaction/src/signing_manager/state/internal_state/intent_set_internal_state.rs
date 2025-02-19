@@ -43,7 +43,7 @@ impl IntentSetInternalState {
         }
     }
 
-    pub(crate) fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_entity_signed_for(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
@@ -52,7 +52,7 @@ impl IntentSetInternalState {
                 unsec.update_with_intent_with_signatures(intent_with_signatures)
             }
             Self::Securified(sec) => {
-                sec.update_with_intent_with_signatures(intent_with_signatures)
+                sec.update_with_entity_signed_for(intent_with_signatures)
             }
         }
     }

@@ -133,7 +133,10 @@ mod tests {
                 GWPublicKey::from(header.notary_public_key)
             );
             assert_eq!(sut.tip_percentage, header.tip_percentage);
-            assert_eq!(IntentDisciminator32::from(sut.intent_discriminator), header.intent_discriminator);
+            assert_eq!(
+                IntentDisciminator32::from(sut.intent_discriminator),
+                header.intent_discriminator
+            );
         };
         do_test(TransactionIntent::sample());
         do_test(TransactionIntent::sample_other());

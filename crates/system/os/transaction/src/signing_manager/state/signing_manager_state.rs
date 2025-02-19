@@ -10,14 +10,14 @@ impl SigningManagerState {
         &mut self,
         outcome: ExerciseRoleOutcome,
     ) {
-        self.update_with_entities_signed_for(outcome.entities_signed_for);
+        self.update_with_each_entity_signed_for(outcome.entities_signed_for);
 
         self.update_with_entities_not_signed_for(
             outcome.entities_not_signed_for,
         );
     }
 
-    pub(crate) fn update_with_entities_signed_for(
+    pub(crate) fn update_with_each_entity_signed_for(
         &mut self,
         entities_signed_for: EntitiesSignedFor,
     ) {
@@ -25,7 +25,7 @@ impl SigningManagerState {
             .0
             .into_iter()
             .for_each(|entity_signed_for| {
-                self.update_with_intent_with_signatures(entity_signed_for);
+                self.update_with_entity_signed_for(entity_signed_for);
             })
     }
 
@@ -47,7 +47,7 @@ impl SigningManagerState {
         todo!("Neglected factor logic goes here? ")
     }
 
-    fn update_with_intent_with_signatures(
+    fn update_with_entity_signed_for(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
@@ -56,7 +56,7 @@ impl SigningManagerState {
             .per_set_state
             .get_mut(&key)
             .expect("Should have created");
-        existing.update_with_intent_with_signatures(intent_with_signatures);
+        existing.update_with_entity_signed_for(intent_with_signatures);
     }
 }
 

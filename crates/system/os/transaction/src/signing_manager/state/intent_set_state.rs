@@ -29,12 +29,12 @@ impl IntentSetState {
         }
     }
 
-    pub(crate) fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_entity_signed_for(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
         assert_eq!(self.intent_set_id, intent_with_signatures.intent_set_id());
         self.internal_state
-            .update_with_intent_with_signatures(intent_with_signatures);
+            .update_with_entity_signed_for(intent_with_signatures);
     }
 }

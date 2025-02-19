@@ -541,6 +541,15 @@ impl SargonOS {
     pub async fn boot_test_with_networking_driver(
         networking: Arc<dyn NetworkingDriver>,
     ) -> Result<Arc<Self>> {
+        Self::boot_test_with_networking_driver_and_bdfs(networking, None).await
+    }
+
+    /// Boot the SargonOS with a mocked networking driver.
+    /// This is useful for testing the SargonOS without needing to connect to the internet.
+    pub async fn boot_test_with_networking_driver_and_bdfs(
+        networking: Arc<dyn NetworkingDriver>,
+        bdfs_mnemonic: Option<MnemonicWithPassphrase>,
+    ) -> Result<Arc<Self>> {
         let drivers = Drivers::with_networking(networking);
         let bios = Bios::new(drivers);
         let mut clients = Clients::new(bios);
@@ -551,7 +560,8 @@ impl SargonOS {
         let os =
             Self::boot_with_clients_and_interactor(clients, interactors).await;
 
-        let (mut profile, bdfs) = os.create_new_profile_with_bdfs(None).await?;
+        let (mut profile, bdfs) =
+            os.create_new_profile_with_bdfs(bdfs_mnemonic).await?;
 
         // Append Stokenet network since initial profile has no network
         profile

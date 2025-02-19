@@ -63,16 +63,34 @@ mod tests {
         let mock_networking_driver =
             MockNetworkingDriver::everyones_rich(network_id);
 
-        let os =
-            SargonOS::boot_test_with_networking_driver(mock_networking_driver)
-                .await
-                .unwrap();
+        let bdfs_mnemonic = MnemonicWithPassphrase::sample_device();
+        let os = SargonOS::boot_test_with_networking_driver_and_bdfs(
+            mock_networking_driver,
+            Some(bdfs_mnemonic),
+        )
+        .await
+        .unwrap();
+
         let bdfs = os.main_bdfs().unwrap();
+        println!("🔮 bdfs: {:?}", bdfs.factor_source_id());
         let ledger = FactorSource::sample_at(1);
         let password = FactorSource::sample_at(5);
         let off_device_mnemonic = FactorSource::sample_at(7);
 
         for fs in FactorSource::sample_all().into_iter() {
+            if fs.factor_source_id() == bdfs.factor_source_id() {
+                continue;
+            }
+            // println!("🔮 fs: {:?}", fs.factor_source_id());
+            // if let Some(mwp) =
+            //     fs.id_from_hash().maybe_sample_associated_mnemonic()
+            // {
+            //     println!("🔮 saving MWP for: {:?}", fs.factor_source_id());
+            //     os.secure_storage
+            //         .save_mnemonic_with_passphrase(&mwp, &fs.id_from_hash())
+            //         .await
+            //         .unwrap()
+            // }
             os.add_factor_source(fs).await.unwrap();
         }
         os.set_main_factor_source(bdfs.factor_source_id())

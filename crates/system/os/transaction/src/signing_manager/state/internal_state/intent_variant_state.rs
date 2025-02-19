@@ -10,15 +10,14 @@ pub(crate) struct IntentVariantState {
 }
 
 impl IntentVariantState {
-    pub(crate) fn update_with_intent_with_signatures(
+    pub(crate) fn update_with_entity_signed_for(
         &mut self,
         intent_with_signatures: EntitySignedFor,
     ) {
-        assert_eq!(intent_with_signatures.intent, *self.intent);
-
         assert!(self
             .variant
             .can_exercise_role(intent_with_signatures.role_kind()));
+        assert_eq!(intent_with_signatures.intent, *self.intent);
 
         self.signatures_per_role
             .update_with_intent_with_signatures(intent_with_signatures)
