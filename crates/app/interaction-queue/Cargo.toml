@@ -8,10 +8,14 @@ edition = "2021"
 prelude = { workspace = true }
 core-utils = { workspace = true }
 transaction-models = { workspace = true }
+gateway-client-and-api = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None
 
 # === EXTERNAL DEPENDENCIES ===
 actix-rt = { workspace = true }
+async-trait = { workspace = true }
 serde = { workspace = true }
+async-std = { workspace = true }
+futures = { workspace = true }

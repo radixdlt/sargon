@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
 /// An item that is part of the interaction queue.
 pub struct InteractionQueueItem {
     /// The identifier of this item.

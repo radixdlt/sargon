@@ -40,6 +40,9 @@ pub const INTERACTION_QUEUE_BATCH_MIN_DELAY: u64 = 10;
 /// The maximum delay, in seconds, between two consecutive interaction queue items from the same batch.
 pub const INTERACTION_QUEUE_BATCH_MAX_DELAY: u64 = 60;
 
+/// The delay among polling requests made by the Interaction
+pub const INTERACTION_QUEUE_POLLING_INTERVAL: u64 = 3;
+
 #[cfg(test)]
 mod tests {
     use super::*;
