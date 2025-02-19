@@ -18,70 +18,47 @@ CALL_METHOD
     Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
     "initiate_recovery_as_primary"
     Tuple(
-        Tuple(
-            Enum<2u8>(
-                Enum<1u8>(
-                    Array<Enum>(
-                        Enum<0u8>(
-                            Enum<2u8>(
-                                2u8,
-                                Array<Enum>(
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
-                                    ),
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
-                                    )
-                                )
-                            )
-                        ),
-                        Enum<0u8>(
-                            Enum<4u8>(
-                                Array<Enum>()
-                            )
-                        )
-                    )
-                )
-            ),
-            Enum<2u8>(
-                Enum<1u8>(
-                    Array<Enum>(
-                        Enum<0u8>(
-                            Enum<2u8>(
-                                0u8,
-                                Array<Enum>()
-                            )
-                        ),
-                        Enum<0u8>(
-                            Enum<4u8>(
-                                Array<Enum>(
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
-                                    ),
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
-                                    )
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            2u8,
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
+                                ),
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
                                 )
                             )
                         )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>()
+                        )
                     )
                 )
-            ),
-            Enum<2u8>(
-                Enum<1u8>(
-                    Array<Enum>(
-                        Enum<0u8>(
-                            Enum<2u8>(
-                                0u8,
-                                Array<Enum>()
-                            )
-                        ),
-                        Enum<0u8>(
-                            Enum<4u8>(
-                                Array<Enum>(
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[31262cc8dc5e9a49d1fe0ea8e60a17ef36d1ea857db94cca3e1e2a52dd]")
-                                    )
+            )
+        ),
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
+                                ),
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
                                 )
                             )
                         )
@@ -89,79 +66,77 @@ CALL_METHOD
                 )
             )
         ),
-        Enum<1u8>(
-            20160u32
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[31262cc8dc5e9a49d1fe0ea8e60a17ef36d1ea857db94cca3e1e2a52dd]")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         )
+    )
+    Enum<1u8>(
+        20160u32
     )
 ;
 CALL_METHOD
     Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
     "quick_confirm_primary_role_recovery_proposal"
     Tuple(
-        Tuple(
-            Enum<2u8>(
-                Enum<1u8>(
-                    Array<Enum>(
-                        Enum<0u8>(
-                            Enum<2u8>(
-                                2u8,
-                                Array<Enum>(
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
-                                    ),
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
-                                    )
-                                )
-                            )
-                        ),
-                        Enum<0u8>(
-                            Enum<4u8>(
-                                Array<Enum>()
-                            )
-                        )
-                    )
-                )
-            ),
-            Enum<2u8>(
-                Enum<1u8>(
-                    Array<Enum>(
-                        Enum<0u8>(
-                            Enum<2u8>(
-                                0u8,
-                                Array<Enum>()
-                            )
-                        ),
-                        Enum<0u8>(
-                            Enum<4u8>(
-                                Array<Enum>(
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
-                                    ),
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
-                                    )
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            2u8,
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
+                                ),
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
                                 )
                             )
                         )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>()
+                        )
                     )
                 )
-            ),
-            Enum<2u8>(
-                Enum<1u8>(
-                    Array<Enum>(
-                        Enum<0u8>(
-                            Enum<2u8>(
-                                0u8,
-                                Array<Enum>()
-                            )
-                        ),
-                        Enum<0u8>(
-                            Enum<4u8>(
-                                Array<Enum>(
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[31262cc8dc5e9a49d1fe0ea8e60a17ef36d1ea857db94cca3e1e2a52dd]")
-                                    )
+            )
+        ),
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
+                                ),
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
                                 )
                             )
                         )
@@ -169,9 +144,30 @@ CALL_METHOD
                 )
             )
         ),
-        Enum<1u8>(
-            20160u32
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[31262cc8dc5e9a49d1fe0ea8e60a17ef36d1ea857db94cca3e1e2a52dd]")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
         )
+    )
+    Enum<1u8>(
+        20160u32
     )
 ;
 CALL_METHOD
