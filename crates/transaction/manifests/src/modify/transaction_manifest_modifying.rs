@@ -10,6 +10,14 @@ pub trait TransactionManifestModifying {
         fee: impl Into<Option<Decimal192>>,
     ) -> Result<TransactionManifest>;
 
+    fn modify_add_proofs(
+        self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
+    ) -> Result<TransactionManifest>;
+
     /// Modifies the transaction manifest applying the following instructions
     /// - adds lock fee instruction on `address_of_fee_payer` with `fee` amount
     /// - attaches `AccessControllerAddress` proofs for `entities_with_access_controllers`, if
@@ -44,6 +52,19 @@ impl TransactionManifestModifying for TransactionManifest {
             .unwrap_or(LockFeeData::new_with_fee_payer(*address_of_fee_payer));
 
         self.modify_add_proofs_and_lock_fee(Some(lock_fee_data), indexmap!())
+    }
+
+    fn modify_add_proofs(
+        self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
+    ) -> Result<TransactionManifest> {
+        self.modify_add_proofs_and_lock_fee(
+            None,
+            entities_with_access_controllers,
+        )
     }
 
     fn modify<G>(

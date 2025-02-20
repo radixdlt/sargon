@@ -1,9 +1,7 @@
 use crate::prelude::*;
 
 /// Describes a manifest that can be dynamically analyzed
-pub trait DynamicallyAnalyzableManifest {
-    fn network_id(&self) -> NetworkID;
-
+pub trait DynamicallyAnalyzableManifest: StaticallyAnalyzableManifest {
     /// Perform the ret analysis
     fn ret_dynamically_analyze(
         &self,
@@ -43,10 +41,6 @@ pub trait DynamicallyAnalyzableManifest {
 }
 
 impl DynamicallyAnalyzableManifest for TransactionManifest {
-    fn network_id(&self) -> NetworkID {
-        self.network_id()
-    }
-
     fn ret_dynamically_analyze(
         &self,
         receipt: ScryptoRuntimeToolkitTransactionReceipt,
@@ -56,10 +50,6 @@ impl DynamicallyAnalyzableManifest for TransactionManifest {
 }
 
 impl DynamicallyAnalyzableManifest for TransactionManifestV2 {
-    fn network_id(&self) -> NetworkID {
-        self.network_id()
-    }
-
     fn ret_dynamically_analyze(
         &self,
         receipt: ScryptoRuntimeToolkitTransactionReceipt,

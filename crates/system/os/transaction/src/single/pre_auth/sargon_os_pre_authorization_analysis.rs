@@ -44,7 +44,6 @@ impl OsAnalysePreAuthPreview for SargonOS {
             Some(manifest) => {
                 let execution_summary = self
                     .get_execution_summary(
-                        network_id,
                         manifest,
                         nonce,
                         notary_public_key,
