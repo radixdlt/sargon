@@ -57,8 +57,13 @@ mod tests {
 
     use super::*;
 
-    #[actix_rt::test]
-    async fn test() {
+    async fn do_test(
+        act_and_assert: impl Fn(
+            Arc<SargonOS>,
+            NetworkID,
+            Vec<ManifestWithPayerByAddress>,
+        ) -> Pin<Box<dyn Future<Output = ()>>>,
+    ) {
         let network_id = NetworkID::Mainnet;
         let mock_networking_driver =
             MockNetworkingDriver::everyones_rich(network_id);
@@ -263,12 +268,14 @@ mod tests {
 
         assert_eq!(manifest_and_payer_tuples.len(), manifests.len());
 
-        {
-            // ~~~ TEST OF `SigningManager` ~~~
-            // code inside scope does not mutate the variables
-            // outside of the scope (just clones),
-            // we piggyback on the setup of accounts, personas, factors etc
-            struct Interactor;
+        act_and_assert(os, network_id, manifest_and_payer_tuples).await;
+    }
+
+    #[actix_rt::test]
+    async fn test_signing_manager() {
+        do_test(|os, network_id, manifest_and_payer_tuples| {
+            Box::pin(async move {
+                struct Interactor;
             #[async_trait::async_trait]
             impl SignInteractor<TransactionIntent> for Interactor {
                 async fn sign(
@@ -307,16 +314,25 @@ mod tests {
             );
             let outcome = signing_manager.sign_intent_sets().await.unwrap();
             assert_eq!(outcome.0.len(), manifest_and_payer_tuples.len());
-        }
+            })
+        })
+        .await
+    }
 
-        let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
-
-        let txids = committer
-            .commit(network_id, manifest_and_payer_tuples)
-            .await
-            .unwrap();
-
-        assert_eq!(txids.len(), addresses.len());
+    #[actix_rt::test]
+    async fn test_commiter() {
+        do_test(|os, network_id, manifest_and_payer_tuples| {
+            Box::pin(async move {
+                let committer =
+                    ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+                let txids = committer
+                    .commit(network_id, manifest_and_payer_tuples.clone())
+                    .await
+                    .unwrap();
+                assert_eq!(txids.len(), manifest_and_payer_tuples.len());
+            })
+        })
+        .await
     }
 
     #[actix_rt::test]
