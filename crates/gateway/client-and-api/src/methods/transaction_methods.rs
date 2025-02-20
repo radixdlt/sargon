@@ -20,13 +20,25 @@ impl GatewayClient {
             .intent()
             .transaction_intent_hash();
         let request = TransactionSubmitRequest::new(notarized_transaction);
+        self.submit_transaction(request, transaction_intent_hash)
+            .await
+    }
+
+    /// Submits a signed transaction payload to the network.
+    ///
+    /// Returns `Ok(IntentHash)` if the transaction was submitted and not a duplicate.
+    pub async fn submit_transaction(
+        &self,
+        request: TransactionSubmitRequest,
+        intent_hash: TransactionIntentHash,
+    ) -> Result<TransactionIntentHash> {
         self.transaction_submit(request).await.and_then(|r| {
             if r.duplicate {
                 Err(CommonError::GatewaySubmitDuplicateTX {
-                    intent_hash: transaction_intent_hash.to_string(),
+                    intent_hash: intent_hash.to_string(),
                 })
             } else {
-                Ok(transaction_intent_hash)
+                Ok(intent_hash)
             }
         })
     }
