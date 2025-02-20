@@ -17,8 +17,6 @@ pub enum DeviceMnemonicBuildOutcome {
     Confirmed {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     },
-    /// The number of words to confirm was incorrect
-    ConfirmationWordCountMismatch,
     /// The mnemonic words were unconfirmed
     Unconfirmed { indices_in_mnemonic: Vec<u8> },
 }
@@ -31,7 +29,6 @@ impl From<InternalDeviceMnemonicBuildOutcome> for DeviceMnemonicBuildOutcome {
             } => DeviceMnemonicBuildOutcome::Confirmed {
                 mnemonic_with_passphrase: mnemonic_with_passphrase.into(),
             },
-            InternalDeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch => DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch,
             InternalDeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic,
             } => DeviceMnemonicBuildOutcome::Unconfirmed {

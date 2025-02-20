@@ -14,8 +14,6 @@ pub enum DeviceMnemonicBuildOutcome {
     Confirmed {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     },
-    /// The number of words to confirm was incorrect
-    ConfirmationWordCountMismatch,
     /// The mnemonic words were unconfirmed
     Unconfirmed {
         indices_in_mnemonic: IndexSet<usize>,
@@ -194,7 +192,7 @@ impl DeviceMnemonicBuilder {
         if words_to_confirm.len()
             != Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM
         {
-            return DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch;
+            panic!("Words to confirm count mismatch");
         }
 
         let unconfirmed_indices_in_mnemonic = words_to_confirm
@@ -369,6 +367,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "Words to confirm count mismatch")]
     fn build_with_words_to_confirm_count_mismatch() {
         let sut = SUT::sample();
         let words_to_confirm =
@@ -376,10 +375,7 @@ mod tests {
                 .into_iter()
                 .collect::<HashMap<_, _>>();
 
-        pretty_assertions::assert_eq!(
-            sut.build(&words_to_confirm),
-            DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch
-        );
+        sut.build(&words_to_confirm);
     }
 
     #[test]
