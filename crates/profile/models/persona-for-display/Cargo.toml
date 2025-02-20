@@ -1,0 +1,20 @@
+[package]
+name = "persona-for-display"
+version = "1.2.1"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+prelude = { workspace = true }
+addresses = { workspace = true }
+short-string = { workspace = true }
+identified-vec-of = { workspace = true }
+network = { workspace = true }
+has-sample-values = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+# None
+
+# === EXTERNAL DEPENDENCIES ===
+derive_more = { workspace = true }
+serde = { workspace = true }

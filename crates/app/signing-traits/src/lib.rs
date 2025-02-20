@@ -21,6 +21,7 @@ pub mod prelude {
     pub(crate) use entity_by_address::prelude::*;
     pub(crate) use prelude::prelude::*;
 
+    pub(crate) use entity_for_display::prelude::*;
     pub(crate) use hash::prelude::*;
     pub(crate) use metadata::prelude::*;
     pub(crate) use profile_account::prelude::*;

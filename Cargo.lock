@@ -1243,6 +1243,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "entity-for-display"
+version = "1.2.1"
+dependencies = [
+ "account-for-display",
+ "addresses",
+ "derive_more",
+ "entity-foundation",
+ "has-sample-values",
+ "identified-vec-of",
+ "network",
+ "persona-for-display",
+ "prelude",
+ "serde",
+ "short-string",
+]
+
+[[package]]
 name = "entity-foundation"
 version = "1.2.1"
 dependencies = [
@@ -2822,6 +2839,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
 
 [[package]]
+name = "persona-for-display"
+version = "1.2.1"
+dependencies = [
+ "addresses",
+ "derive_more",
+ "has-sample-values",
+ "identified-vec-of",
+ "network",
+ "prelude",
+ "serde",
+ "short-string",
+]
+
+[[package]]
 name = "pin-project-lite"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3131,6 +3162,7 @@ dependencies = [
  "hierarchical-deterministic",
  "host-info",
  "once_cell",
+ "persona-for-display",
  "prelude",
  "profile-base-entity",
  "profile-persona-data",
@@ -4503,6 +4535,7 @@ dependencies = [
  "derive_more",
  "ecc",
  "entity-by-address",
+ "entity-for-display",
  "enum-as-inner",
  "error",
  "hash",
@@ -4513,6 +4546,7 @@ dependencies = [
  "profile-account",
  "profile-account-or-persona",
  "profile-persona",
+ "profile-security-structures",
  "radix-connect-models",
  "radix-engine-interface",
  "radix-transactions",

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// A minimal version of an [`Account`] meant for
+/// A minimal version of an [`Persona`] meant for
 /// display purposes within wallet
 #[derive(
     Serialize,
@@ -14,57 +14,44 @@ use crate::prelude::*;
     derive_more::Display,
 )]
 #[display("{display_name} | {address}")]
-pub struct AccountForDisplay {
-    pub address: AccountAddress,
+pub struct PersonaForDisplay {
+    pub address: IdentityAddress,
 
     #[serde(rename = "label")]
     pub display_name: DisplayName,
-
-    #[serde(rename = "appearanceID")]
-    pub appearance_id: AppearanceID,
 }
 
-impl AccountForDisplay {
+impl PersonaForDisplay {
     pub fn new(
-        address: impl Into<AccountAddress>,
+        address: impl Into<IdentityAddress>,
         display_name: impl Into<DisplayName>,
-        appearance_id: impl Into<AppearanceID>,
     ) -> Self {
         Self {
             address: address.into(),
             display_name: display_name.into(),
-            appearance_id: appearance_id.into(),
         }
     }
 }
 
-impl HasSampleValues for AccountForDisplay {
+impl HasSampleValues for PersonaForDisplay {
     fn sample() -> Self {
-        Self::new(
-            AccountAddress::sample(),
-            DisplayName::sample(),
-            AppearanceID::sample(),
-        )
+        Self::new(IdentityAddress::sample(), DisplayName::sample())
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            AccountAddress::sample_other(),
-            DisplayName::sample_other(),
-            AppearanceID::sample_other(),
-        )
+        Self::new(IdentityAddress::sample_other(), DisplayName::sample_other())
     }
 }
 
-impl Identifiable for AccountForDisplay {
-    type ID = AccountAddress;
+impl Identifiable for PersonaForDisplay {
+    type ID = IdentityAddress;
 
     fn id(&self) -> Self::ID {
         self.address
     }
 }
 
-impl IsNetworkAware for AccountForDisplay {
+impl IsNetworkAware for PersonaForDisplay {
     fn network_id(&self) -> NetworkID {
         self.address.network_id()
     }
@@ -75,7 +62,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AccountForDisplay;
+    type SUT = PersonaForDisplay;
 
     #[test]
     fn equality() {

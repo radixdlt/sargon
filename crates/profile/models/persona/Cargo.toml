@@ -13,6 +13,7 @@ addresses = { workspace = true }
 host-info = { workspace = true }
 core-misc = { workspace = true }
 cap26-models = { workspace = true }
+persona-for-display = { workspace = true }
 profile-base-entity = { workspace = true }
 profile-persona-data = { workspace = true }
 profile-security-structures = { workspace = true }

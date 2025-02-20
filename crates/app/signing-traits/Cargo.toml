@@ -15,9 +15,11 @@ hash = { workspace = true }
 radix-connect-models = { workspace = true }
 transaction-models = { workspace = true }
 entity-by-address = { workspace = true }
+entity-for-display = { workspace = true }
 profile-account-or-persona = { workspace = true }
 profile-persona = { workspace = true }
 profile-account = { workspace = true }
+profile-security-structures = { workspace = true }
 metadata = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
