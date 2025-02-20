@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use crate::prelude::*;
 
 use super::{
@@ -25,19 +27,25 @@ pub struct SignaturesCollector<S: Signable> {
     state: RwLock<SignaturesCollectorState<S>>,
 }
 
-pub struct NoCrossRoleSkipOutcomeAnalyzer<ID: SignableID>;
-impl NoCrossRoleSkipOutcomeAnalyzer {
-    pub fn new() -> Arc<dyn CrossRoleSkipOutcomeAnalyzer<ID>> {
-        Arc::new(Self)
+pub struct NoCrossRoleSkipOutcomeAnalyzer<S: Signable> {
+    phantom: PhantomData<S>,
+}
+impl<S: Signable> NoCrossRoleSkipOutcomeAnalyzer<S> {
+    pub fn new() -> Arc<NoCrossRoleSkipOutcomeAnalyzer<S>> {
+        Arc::new(NoCrossRoleSkipOutcomeAnalyzer::<S> {
+            phantom: PhantomData::<S>,
+        })
     }
 }
-impl CrossRoleSkipOutcomeAnalyzer for NoCrossRoleSkipOutcomeAnalyzer {
+impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S::ID>
+    for NoCrossRoleSkipOutcomeAnalyzer<S::ID>
+{
     fn invalid_transaction_if_neglected_factors(
         &self,
-        signable: ID,
+        signable: S::ID,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-        petitions: Vec<&PetitionForEntity<ID>>,
-    ) -> Option<InvalidTransactionIfNeglected<ID>> {
+        petitions: Vec<PetitionForEntity<S::ID>>,
+    ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
         None
     }
 }
@@ -55,7 +63,7 @@ impl<S: Signable> SignaturesCollector<S> {
             finish_early_strategy,
             transactions,
             interactor,
-            NoCrossRoleSkipOutcomeAnalyzer::new(),
+            NoCrossRoleSkipOutcomeAnalyzer::<S>::new(),
             proto_profile,
             purpose,
         )
@@ -451,7 +459,7 @@ impl<S: Signable> SignaturesCollector<S> {
                 "SignaturesCollectorState lock should not have been poisoned.",
             )
             .invalid_transactions_if_neglected_factors(
-                self.cross_role_skip_outcome_analyzer,
+                cross_role_skip_outcome_analyzer,
                 factor_source_ids,
             )
     }

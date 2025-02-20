@@ -6,7 +6,7 @@ pub trait CrossRoleSkipOutcomeAnalyzer<ID: SignableID> {
         &self,
         signable: ID,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-        petitions: Vec<&PetitionForEntity<ID>>,
+        petitions: Vec<PetitionForEntity<ID>>,
     ) -> Option<InvalidTransactionIfNeglected<ID>>;
 }
 
@@ -226,7 +226,7 @@ impl<S: Signable> PetitionForTransaction<S> {
                 "PetitionForTransaction lock should not have been poisoned.",
             )
             .iter()
-            .map(|(_, petition)| petition)
+            .map(|(_, petition)| petition.clone())
             .collect_vec();
 
         cross_role_skip_outcome_analyzer
