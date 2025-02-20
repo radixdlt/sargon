@@ -98,7 +98,10 @@ impl SigningManager {
             ManagerCollectorEphemeralAdapter::new(role_kind, intent_sets);
 
         let collector = SignaturesCollector::with(
-            SigningFinishEarlyStrategy::new(WhenAllTransactionsAreValid::r#continue(), WhenSomeTransactionIsInvalid::r#continue()),
+            SigningFinishEarlyStrategy::new(
+                WhenAllTransactionsAreValid::r#continue(),
+                WhenSomeTransactionIsInvalid::r#continue(),
+            ),
             self.factor_sources_in_profile.clone(),
             adapter.transactions_with_petitions(),
             self.interactor.clone(),

@@ -8,10 +8,10 @@ pub(crate) struct SecurifiedIntentSetInternalState {
 
     #[debug("{}", (*account_paying_for_transaction).account_address())]
     account_paying_for_transaction: Immutable<ApplicationInputPayingAccount>,
-    
+
     #[debug("{}", (*entity_applying_shield).address())]
     pub(crate) entity_applying_shield: Immutable<AnySecurifiedEntity>,
-    
+
     initiate_with_recovery_complete_with_primary: IntentVariantState,
     initiate_with_recovery_complete_with_confirmation: IntentVariantState,
     initiate_with_recovery_delayed_completion: IntentVariantState,
@@ -159,19 +159,16 @@ impl SecurifiedIntentSetInternalState {
             *self.intent_set_id
         );
 
+        // println!("👻 Updating SecurifiedIntentSetInternalState state is: {:#?}", self);
+        // println!("👻 Updating SecurifiedIntentSetInternalState with signatures: {:#?}", intent_with_signatures);
 
-        println!("👻 Updating SecurifiedIntentSetInternalState state is: {:#?}", self);
-        println!("👻 Updating SecurifiedIntentSetInternalState with signatures: {:#?}", intent_with_signatures);
-
-        
         let variant_state = self.get_variant_state_by_txid(
             intent_with_signatures.intent.transaction_intent_hash(),
         );
-        
+
         variant_state
-        .update_with_entity_signed_for(intent_with_signatures.clone());
-        println!("👻 Updating SecurifiedIntentSetInternalState after update: {:#?}", self);
- 
+            .update_with_entity_signed_for(intent_with_signatures.clone());
+        // println!("👻 Updating SecurifiedIntentSetInternalState after update: {:#?}", self);
     }
 
     fn new(

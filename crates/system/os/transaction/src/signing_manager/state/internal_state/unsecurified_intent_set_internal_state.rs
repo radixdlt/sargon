@@ -61,11 +61,12 @@ impl UnsecurifiedIntentSetInternalState {
             intent_with_signatures.entity.address(),
             self.entity_applying_shield.address()
         );
-        println!("🦄Updating UnsecurifiedIntentSetInternalState state is: {:#?}", self);
-        println!("🦄Updating UnsecurifiedIntentSetInternalState with signatures: {:#?}", intent_with_signatures);
+        // println!("🦄Updating UnsecurifiedIntentSetInternalState state is: {:#?}", self);
+        // println!("🦄Updating UnsecurifiedIntentSetInternalState with signatures: {:#?}", intent_with_signatures);
         self.signatures
-        .update_with_intent_with_signatures(intent_with_signatures);
-        println!("🦄Updating UnsecurifiedIntentSetInternalState after update: {:#?}", self);
+            .update_with_intent_with_signatures(intent_with_signatures);
+
+        // println!("🦄Updating UnsecurifiedIntentSetInternalState after update: {:#?}", self);
     }
     fn new(
         intent_set_id: impl Into<Immutable<IntentSetID>>,

@@ -24,7 +24,6 @@ pub struct Immutable<T> {
     value: T,
 }
 
-
 impl<T> From<T> for Immutable<T> {
     fn from(value: T) -> Self {
         Immutable::new(value)

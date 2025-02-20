@@ -8,7 +8,7 @@ pub(crate) struct IntentVariantState {
     pub(crate) variant:
         Immutable<RolesExercisableInTransactionManifestCombination>,
 
-        /// The `role` of the values must match the key...
+    /// The `role` of the values must match the key...
     pub(crate) signatures_per_role: IntentVariantSignaturesPerRoleState,
 }
 
