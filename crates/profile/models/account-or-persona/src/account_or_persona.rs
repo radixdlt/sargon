@@ -1,3 +1,7 @@
+use account_for_display::AccountForDisplay;
+use entity_for_display::EntityForDisplay;
+use persona_for_display::PersonaForDisplay;
+
 use crate::prelude::*;
 
 /// Either an `Account` or a `Persona`.
@@ -10,6 +14,19 @@ pub enum AccountOrPersona {
 
     /// A `Persona`
     PersonaEntity(Persona),
+}
+
+impl From<AccountOrPersona> for EntityForDisplay {
+    fn from(value: AccountOrPersona) -> Self {
+        match value {
+            AccountOrPersona::AccountEntity(account) => {
+                EntityForDisplay::Account(AccountForDisplay::from(account))
+            }
+            AccountOrPersona::PersonaEntity(persona) => {
+                EntityForDisplay::Persona(PersonaForDisplay::from(persona))
+            }
+        }
+    }
 }
 
 impl HasEntityKindObjectSafe for AccountOrPersona {

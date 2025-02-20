@@ -208,12 +208,14 @@ impl<S: Signable> Petitions<S> {
 
     pub(crate) fn invalid_transactions_if_neglected_factors(
         &self,
+        cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
         self.each_petition(
             factor_source_ids.clone(),
             |p| {
                 p.invalid_transaction_if_neglected_factors(
+                    cross_role_skip_outcome_analyzer.clone(),
                     factor_source_ids.clone(),
                 )
             },

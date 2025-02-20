@@ -1234,8 +1234,11 @@ dependencies = [
 name = "entity-by-address"
 version = "1.2.1"
 dependencies = [
+ "account-for-display",
  "addresses",
+ "entity-for-display",
  "error",
+ "persona-for-display",
  "prelude",
  "profile-account",
  "profile-account-or-persona",
@@ -3045,10 +3048,13 @@ dependencies = [
 name = "profile-account-or-persona"
 version = "1.2.1"
 dependencies = [
+ "account-for-display",
  "cap26-models",
  "derive_more",
+ "entity-for-display",
  "enum-as-inner",
  "hierarchical-deterministic",
+ "persona-for-display",
  "prelude",
  "profile-account",
  "profile-base-entity",
@@ -4545,6 +4551,7 @@ dependencies = [
  "pretty_assertions",
  "profile-account",
  "profile-account-or-persona",
+ "profile-logic",
  "profile-persona",
  "profile-security-structures",
  "radix-connect-models",

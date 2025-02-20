@@ -5,12 +5,15 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-prelude = { workspace = true }
-profile-base-entity = { workspace = true }
-profile-account = { workspace = true }
-profile-persona = { workspace = true }
-hierarchical-deterministic = { workspace = true }
+account-for-display = { workspace = true }
 cap26-models = { workspace = true }
+entity-for-display = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+persona-for-display = { workspace = true }
+prelude = { workspace = true }
+profile-account = { workspace = true }
+profile-base-entity = { workspace = true }
+profile-persona = { workspace = true }
 profile-security-structures = { workspace = true }
 
 

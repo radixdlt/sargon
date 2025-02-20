@@ -25,12 +25,51 @@ pub struct SignaturesCollector<S: Signable> {
     state: RwLock<SignaturesCollectorState<S>>,
 }
 
+pub struct NoCrossRoleSkipOutcomeAnalyzer<ID: SignableID>;
+impl NoCrossRoleSkipOutcomeAnalyzer {
+    pub fn new() -> Arc<dyn CrossRoleSkipOutcomeAnalyzer<ID>> {
+        Arc::new(Self)
+    }
+}
+impl CrossRoleSkipOutcomeAnalyzer for NoCrossRoleSkipOutcomeAnalyzer {
+    fn invalid_transaction_if_neglected_factors(
+        &self,
+        signable: ID,
+        skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+        petitions: Vec<&PetitionForEntity<ID>>,
+    ) -> Option<InvalidTransactionIfNeglected<ID>> {
+        None
+    }
+}
+
 // === PUBLIC ===
 impl<S: Signable> SignaturesCollector<S> {
     pub fn new<P: GetEntityByAddress + HasFactorSources>(
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
+        proto_profile: &P,
+        purpose: SigningPurpose,
+    ) -> Result<Self> {
+        Self::with_cross_role_skip_outcome_analyzer(
+            finish_early_strategy,
+            transactions,
+            interactor,
+            NoCrossRoleSkipOutcomeAnalyzer::new(),
+            proto_profile,
+            purpose,
+        )
+    }
+
+    pub fn with_cross_role_skip_outcome_analyzer<
+        P: GetEntityByAddress + HasFactorSources,
+    >(
+        finish_early_strategy: SigningFinishEarlyStrategy,
+        transactions: impl IntoIterator<Item = S>,
+        interactor: Arc<dyn SignInteractor<S>>,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+        >,
         proto_profile: &P,
         purpose: SigningPurpose,
     ) -> Result<Self> {
@@ -53,6 +92,9 @@ impl<S: Signable> SignaturesCollector<S> {
         factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
         interactor: Arc<dyn SignInteractor<S>>,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+        >,
         purpose: SigningPurpose,
     ) -> Self {
         debug!("Init SignaturesCollector");
@@ -65,6 +107,7 @@ impl<S: Signable> SignaturesCollector<S> {
         let dependencies = SignaturesCollectorDependencies::new(
             finish_early_strategy,
             interactor,
+            cross_role_skip_outcome_analyzer,
             factors,
         );
         let state = SignaturesCollectorState::new(petitions);
@@ -93,6 +136,9 @@ impl<S: Signable> SignaturesCollector<S> {
         all_factor_sources_in_profile: IndexSet<FactorSource>,
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+        >,
         purpose: SigningPurpose,
         extract_signers: F,
     ) -> Result<Self>
@@ -110,6 +156,7 @@ impl<S: Signable> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             interactor,
+            cross_role_skip_outcome_analyzer,
             purpose,
         );
 
@@ -387,6 +434,9 @@ impl<S: Signable> SignaturesCollector<S> {
 
     fn invalid_transactions_if_neglected_factor_sources(
         &self,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+        >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
         self.state
@@ -397,7 +447,10 @@ impl<S: Signable> SignaturesCollector<S> {
             .expect(
                 "SignaturesCollectorState lock should not have been poisoned.",
             )
-            .invalid_transactions_if_neglected_factors(factor_source_ids)
+            .invalid_transactions_if_neglected_factors(
+                self.cross_role_skip_outcome_analyzer,
+                factor_source_ids,
+            )
     }
 
     fn process_batch_response(&self, response: SignResponse<S::ID>) {

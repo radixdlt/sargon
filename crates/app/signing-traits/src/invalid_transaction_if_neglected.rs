@@ -1,3 +1,4 @@
+use profile_logic::ShieldForDisplay;
 use profile_security_structures::prelude::TimePeriod;
 
 use crate::prelude::*;
@@ -6,28 +7,78 @@ use crate::prelude::*;
 /// confirming recovery is possible.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub struct DelayedConfirmationForEntity {
-    pub entity: EntityForDisplay,
+    pub entity_for_display: EntityForDisplay,
     pub delay: TimePeriod,
+    pub shield_for_display: ShieldForDisplay,
 }
 
 impl DelayedConfirmationForEntity {
-    pub fn new(entity: EntityForDisplay, delay: TimePeriod) -> Self {
-        Self { entity, delay }
+    pub fn new(
+        entity_for_display: EntityForDisplay,
+        delay: TimePeriod,
+        shield_for_display: ShieldForDisplay,
+    ) -> Self {
+        Self {
+            entity_for_display,
+            delay,
+            shield_for_display,
+        }
     }
 }
 impl HasSampleValues for DelayedConfirmationForEntity {
     fn sample() -> Self {
-        Self::new(EntityForDisplay::sample(), TimePeriod::sample())
+        Self::new(
+            EntityForDisplay::sample(),
+            TimePeriod::sample(),
+            ShieldForDisplay::sample(),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::new(EntityForDisplay::sample_other(), TimePeriod::sample_other())
+        Self::new(
+            EntityForDisplay::sample_other(),
+            TimePeriod::sample_other(),
+            ShieldForDisplay::sample_other(),
+        )
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
+pub struct InvalidTransactionForEntity {
+    /// The entity in the transaction which would fail.
+    pub entity_for_display: EntityForDisplay,
+    /// None for transactions which are not shield applications
+    /// Some for transactions which are shield applications.
+    pub shield_for_display: Option<ShieldForDisplay>,
+}
+
+impl InvalidTransactionForEntity {
+    pub fn new(
+        entity_for_display: EntityForDisplay,
+        shield_for_display: impl Into<Option<ShieldForDisplay>>,
+    ) -> Self {
+        Self {
+            entity_for_display,
+            shield_for_display: shield_for_display.into(),
+        }
+    }
+}
+impl HasSampleValues for InvalidTransactionForEntity {
+    fn sample() -> Self {
+        Self::new(EntityForDisplay::sample(), ShieldForDisplay::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::new(EntityForDisplay::sample_other(), None)
     }
 }
 
 /// A list of entities which would fail in a transaction if we would
 /// neglect certain factor source, either by user explicitly skipping
 /// it or if implicitly neglected due to failure.
+///
+/// And a list of entities which would require delayed confirmation
+/// - i.e. quick confirmation is not possible.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub struct InvalidTransactionIfNeglected<ID: SignableID> {
     /// The intent hash of the transaction which would be invalid if a
@@ -47,7 +98,7 @@ pub struct InvalidTransactionIfNeglected<ID: SignableID> {
     /// which **are** applications of security shields and with
     /// the state of being unable to make the transaction valid -
     /// e.g. neither Primary nor Recovery role possible to exercise.
-    pub entities_which_would_fail_auth: Vec<EntityForDisplay>,
+    pub entities_which_would_fail_auth: Vec<InvalidTransactionForEntity>,
 }
 
 impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
@@ -64,7 +115,9 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
         entities_which_would_require_delayed_confirmation: impl IntoIterator<
             Item = DelayedConfirmationForEntity,
         >,
-        entities_which_would_fail_auth: impl IntoIterator<Item = EntityForDisplay>,
+        entities_which_would_fail_auth: impl IntoIterator<
+            Item = InvalidTransactionForEntity,
+        >,
     ) -> Self {
         let entities_which_would_require_delayed_confirmation =
             entities_which_would_require_delayed_confirmation
@@ -99,10 +152,10 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
             "entities_which_would_fail_auth must not contain duplicates."
         );
 
-        assert!(entities_which_would_fail_auth.is_disjoint(
+        assert!(entities_which_would_fail_auth.iter().map(|e| e.entity_for_display).collect::<IndexSet<_>().is_disjoint(
             &entities_which_would_require_delayed_confirmation
                 .iter()
-                .map(|d| d.entity)
+                .map(|d| d.entity_for_display)
                 .collect::<IndexSet<_>>()
         ),);
 
@@ -118,7 +171,9 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
         }
     }
 
-    pub fn entities_which_would_fail_auth(&self) -> IndexSet<EntityForDisplay> {
+    pub fn entities_which_would_fail_auth(
+        &self,
+    ) -> IndexSet<InvalidTransactionForEntity> {
         IndexSet::from_iter(self.entities_which_would_fail_auth.clone())
     }
 
@@ -139,7 +194,7 @@ impl<ID: SignableID + HasSampleValues> HasSampleValues
         Self::new(
             ID::sample(),
             [DelayedConfirmationForEntity::sample_other()],
-            [EntityForDisplay::sample()],
+            [InvalidTransactionForEntity::sample()],
         )
     }
 
@@ -147,7 +202,7 @@ impl<ID: SignableID + HasSampleValues> HasSampleValues
         Self::new(
             ID::sample_other(),
             [DelayedConfirmationForEntity::sample_other()],
-            [EntityForDisplay::sample_other()],
+            [InvalidTransactionForEntity::sample_other()],
         )
     }
 }
@@ -174,14 +229,19 @@ mod tests {
         SUT::new(
             TransactionIntentHash::sample(),
             [],
-            [EntityForDisplay::sample(), EntityForDisplay::sample()],
+            [
+                InvalidTransactionForEntity::sample(),
+                InvalidTransactionForEntity::sample(),
+            ],
         );
     }
 
     #[test]
     fn new() {
-        let would_fail =
-            [EntityForDisplay::sample(), EntityForDisplay::sample_other()];
+        let would_fail = [
+            InvalidTransactionForEntity::sample(),
+            InvalidTransactionForEntity::sample_other(),
+        ];
         let no_quick = [DelayedConfirmationForEntity::sample()];
         let sut = SUT::new(TransactionIntentHash::sample(), no_quick, entities);
         assert_eq!(

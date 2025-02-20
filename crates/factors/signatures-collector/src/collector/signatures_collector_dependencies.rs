@@ -18,17 +18,21 @@ pub(super) struct SignaturesCollectorDependencies<S: Signable> {
     /// computer and thus unable to make a connection between the Radix Wallet
     /// and a Ledger device.
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
+
+    pub(super) cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>
 }
 
 impl<S: Signable> SignaturesCollectorDependencies<S> {
     pub(crate) fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
         interactor: Arc<dyn SignInteractor<S>>,
+        cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
     ) -> Self {
         Self {
             finish_early_strategy,
             interactor,
+            cross_role_skip_outcome_analyzer,
             factors_of_kind,
         }
     }

@@ -9,6 +9,9 @@ prelude = { workspace = true }
 error = { workspace = true }
 addresses = { workspace = true }
 profile-account = { workspace = true }
+account-for-display = { workspace = true }
+entity-for-display = { workspace = true }
+persona-for-display = { workspace = true }
 profile-account-or-persona = { workspace = true }
 profile-persona = { workspace = true }
 

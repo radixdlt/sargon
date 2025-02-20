@@ -18,6 +18,7 @@ entity-by-address = { workspace = true }
 entity-for-display = { workspace = true }
 profile-account-or-persona = { workspace = true }
 profile-persona = { workspace = true }
+profile-logic = { workspace = true }
 profile-account = { workspace = true }
 profile-security-structures = { workspace = true }
 metadata = { workspace = true }
