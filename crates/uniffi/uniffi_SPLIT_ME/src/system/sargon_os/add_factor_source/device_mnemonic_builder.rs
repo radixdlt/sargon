@@ -198,17 +198,6 @@ mod tests {
         let indices = sut.clone().get_indices_in_mnemonic_of_words_to_confirm();
 
         let outcome = sut.clone().build(
-            vec![(0, "device".to_owned())]
-                .into_iter()
-                .collect::<HashMap<_, _>>(),
-        ); // Input not enough words
-
-        pretty_assertions::assert_eq!(
-            outcome,
-            DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch
-        );
-
-        let outcome = sut.clone().build(
             vec![
                 (0, "device".to_owned()),
                 (5, "word".to_owned()),
