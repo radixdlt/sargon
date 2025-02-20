@@ -71,7 +71,6 @@ impl From<Persona> for PersonaForDisplay {
     }
 }
 
-
 impl Deref for Persona {
     type Target = BaseEntity<IdentityAddress>;
 

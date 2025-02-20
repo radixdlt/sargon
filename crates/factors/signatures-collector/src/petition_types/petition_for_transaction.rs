@@ -3,11 +3,10 @@ use std::ops::Deref;
 use crate::prelude::*;
 pub trait CrossRoleSkipOutcomeAnalyzer<ID: SignableID> {
     fn invalid_transaction_if_neglected_factors(
-        &self, 
+        &self,
         signable: ID,
-        skipped_factor_source_ids: 
-        IndexSet<FactorSourceIDFromHash>, 
-        petitions: Vec<&PetitionForEntity<ID>>
+        skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+        petitions: Vec<&PetitionForEntity<ID>>,
     ) -> Option<InvalidTransactionIfNeglected<ID>>;
 }
 
@@ -19,8 +18,6 @@ pub struct PetitionForTransaction<S: Signable> {
     /// Transaction to sign
     pub(crate) signable: S,
 
-    cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>,
-
     pub for_entities:
         RwLock<HashMap<AddressOfAccountOrPersona, PetitionForEntity<S::ID>>>,
 }
@@ -29,7 +26,6 @@ impl<S: Signable> Clone for PetitionForTransaction<S> {
     fn clone(&self) -> Self {
         Self {
             signable: self.signable.clone(),
-            cross_role_skip_outcome_analyzer:, cross_role_skip_outcome_analyzer.clone(),
             for_entities: RwLock::new(
                 self.for_entities
                     .read()
@@ -61,7 +57,6 @@ impl<S: Signable> Eq for PetitionForTransaction<S> {}
 impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn new(
         signable: S,
-        cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>,
         for_entities: HashMap<
             AddressOfAccountOrPersona,
             PetitionForEntity<S::ID>,
@@ -69,7 +64,6 @@ impl<S: Signable> PetitionForTransaction<S> {
     ) -> Self {
         Self {
             signable,
-            cross_role_skip_outcome_analyzer,
             for_entities: RwLock::new(for_entities),
         }
     }
@@ -215,7 +209,9 @@ impl<S: Signable> PetitionForTransaction<S> {
 
     pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
-        cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+        >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
         if self.has_tx_failed() {
@@ -223,17 +219,22 @@ impl<S: Signable> PetitionForTransaction<S> {
             return None;
         }
 
-
         let petitions = self
             .for_entities
             .read()
             .expect(
                 "PetitionForTransaction lock should not have been poisoned.",
             )
-            .iter().map(|(_, petition)| petition)
-                       .collect_vec();
+            .iter()
+            .map(|(_, petition)| petition)
+            .collect_vec();
 
-        cross_role_skip_outcome_analyzer.invalid_transaction_if_neglected_factors(self.signable.get_id(), factor_source_ids, petitions)
+        cross_role_skip_outcome_analyzer
+            .invalid_transaction_if_neglected_factors(
+                self.signable.get_id(),
+                factor_source_ids,
+                petitions,
+            )
     }
 
     pub(crate) fn should_neglect_factors_due_to_irrelevant(

@@ -78,6 +78,7 @@ impl<S: Signable> SignaturesCollector<S> {
             proto_profile.factor_sources(),
             transactions,
             interactor,
+            cross_role_skip_outcome_analyzer,
             purpose,
             |i| {
                 SignableWithEntities::extracting_from_profile(&i, proto_profile)
@@ -381,9 +382,10 @@ impl<S: Signable> SignaturesCollector<S> {
         }
 
         let invalid_transactions_if_neglected = self
-            .invalid_transactions_if_neglected_factor_sources(IndexSet::just(
-                *factor_source_id,
-            ))
+            .invalid_transactions_if_neglected_factor_sources(
+                self.dependencies.cross_role_skip_outcome_analyzer.clone(),
+                IndexSet::just(*factor_source_id),
+            )
             .into_iter()
             .collect::<IndexSet<_>>();
 
@@ -415,6 +417,7 @@ impl<S: Signable> SignaturesCollector<S> {
 
         let invalid_transactions_if_neglected = self
             .invalid_transactions_if_neglected_factor_sources(
+                self.dependencies.cross_role_skip_outcome_analyzer.clone(),
                 factor_source_ids.clone(),
             );
 

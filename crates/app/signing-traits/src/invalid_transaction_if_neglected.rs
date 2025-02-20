@@ -152,12 +152,16 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
             "entities_which_would_fail_auth must not contain duplicates."
         );
 
-        assert!(entities_which_would_fail_auth.iter().map(|e| e.entity_for_display).collect::<IndexSet<_>().is_disjoint(
-            &entities_which_would_require_delayed_confirmation
-                .iter()
-                .map(|d| d.entity_for_display)
-                .collect::<IndexSet<_>>()
-        ),);
+        assert!(entities_which_would_fail_auth
+            .iter()
+            .map(|e| e.entity_for_display)
+            .collect::<IndexSet<_>>()
+            .is_disjoint(
+                &entities_which_would_require_delayed_confirmation
+                    .iter()
+                    .map(|d| d.entity_for_display)
+                    .collect::<IndexSet<_>>()
+            ),);
 
         Self {
             signable_id,
@@ -218,7 +222,7 @@ mod tests {
         expected = "'entities_which_would_fail_auth' must not be empty, this type is not useful if it is empty."
     )]
     fn panics_if_empty() {
-        SUT::new(TransactionIntentHash::sample(), IndexSet::new());
+        SUT::new(TransactionIntentHash::sample(), [], []);
     }
 
     #[test]

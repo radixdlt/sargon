@@ -102,7 +102,6 @@ impl<S: Signable> SignaturesCollectorPreprocessor<S> {
 
             let petition_of_tx = PetitionForTransaction::new(
                 transaction.signable.clone(),
-                
                 petitions_for_entities,
             );
 

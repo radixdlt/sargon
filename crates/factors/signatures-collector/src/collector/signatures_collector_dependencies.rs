@@ -19,14 +19,17 @@ pub(super) struct SignaturesCollectorDependencies<S: Signable> {
     /// and a Ledger device.
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
 
-    pub(super) cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>
+    pub(super) cross_role_skip_outcome_analyzer:
+        Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>,
 }
 
 impl<S: Signable> SignaturesCollectorDependencies<S> {
     pub(crate) fn new(
         finish_early_strategy: SigningFinishEarlyStrategy,
         interactor: Arc<dyn SignInteractor<S>>,
-        cross_role_skip_outcome_analyzer: Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+        >,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
     ) -> Self {
         Self {

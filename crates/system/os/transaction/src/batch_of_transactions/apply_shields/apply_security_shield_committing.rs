@@ -283,13 +283,12 @@ mod tests {
                         request: SignRequest<TransactionIntent>,
                     ) -> Result<SignResponse<TransactionIntentHash>>
                     {
-                        TestSignInteractor::new(SimulatedUser::prudent_no_fail())   
+                        TestSignInteractor::new(SimulatedUser::prudent_no_fail())
                             .sign(request)
                             .await
                     }
                 }
                 let interactor = Arc::new(Interactor);
-            
                 let profile = os.profile().unwrap();
                 let tx_builder =    ApplyShieldTransactionsBuilderImpl::with(
                     profile.clone(),
@@ -303,7 +302,6 @@ mod tests {
                     .await
                     .unwrap()
                     .applications_with_intents;
-                
                 let signing_manager = SigningManager::new(
                     profile.factor_sources(),
                     interactor,
