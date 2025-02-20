@@ -19,3 +19,39 @@ pub struct PreAuthorizationQueueItem {
     // It is currently used when dismissing the `PollPreAuthorizationStatus` on iOS, to identify the interaction that must be dismissed.
     //pub interaction_id: WalletInteractionId,
 }
+
+impl PreAuthorizationQueueItem {
+    pub fn new(
+        subintent_id: SubintentHash,
+        transaction_id: Option<TransactionIntentHash>,
+        dapp_name: String,
+        expiration_timestamp: Instant,
+    ) -> Self {
+        Self {
+            subintent_id,
+            transaction_id,
+            dapp_name,
+            expiration_timestamp,
+        }
+    }
+}
+
+impl HasSampleValues for PreAuthorizationQueueItem {
+    fn sample() -> Self {
+        Self::new(
+            SubintentHash::sample(),
+            None,
+            "DApp Name".to_string(),
+            Instant::sample(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        Self::new(
+            SubintentHash::sample_other(),
+            Some(TransactionIntentHash::sample_other()),
+            "Other DApp Name".to_string(),
+            Instant::sample_other(),
+        )
+    }
+}

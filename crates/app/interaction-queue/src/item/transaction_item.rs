@@ -30,3 +30,13 @@ impl From<NotarizedTransaction> for TransactionQueueItem {
         )
     }
 }
+
+impl HasSampleValues for TransactionQueueItem {
+    fn sample() -> Self {
+        NotarizedTransaction::sample().into()
+    }
+
+    fn sample_other() -> Self {
+        NotarizedTransaction::sample_other().into()
+    }
+}

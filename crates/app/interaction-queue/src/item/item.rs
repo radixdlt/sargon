@@ -6,10 +6,6 @@ pub struct InteractionQueueItem {
     /// The identifier of this item.
     pub id: Uuid,
 
-    /// If set, this item belongs to a batch with the corresponding identifier.
-    /// This means that when completed, it should trigger the dispatch of next item such batch.
-    pub batch_id: Uuid,
-
     /// The status of this item.
     pub status: InteractionQueueItemStatus,
 
@@ -21,4 +17,36 @@ pub struct InteractionQueueItem {
 
     /// The kind of this item
     pub kind: InteractionQueueItemKind,
+}
+
+impl InteractionQueueItem {
+    pub fn new(
+        id: Uuid,
+        status: InteractionQueueItemStatus,
+        is_from_browser: bool,
+        summary: InteractionQueueItemSummary,
+        kind: InteractionQueueItemKind,
+    ) -> Self {
+        Self {
+            id,
+            status,
+            is_from_browser,
+            summary,
+            kind,
+        }
+    }
+
+    pub fn new_in_progress(
+        id: Uuid,
+        is_from_browser: bool,
+        kind: InteractionQueueItemKind,
+    ) -> Self {
+        Self::new(
+            id,
+            InteractionQueueItemStatus::InProgress,
+            is_from_browser,
+            InteractionQueueItemSummary::new(),
+            kind,
+        )
+    }
 }
