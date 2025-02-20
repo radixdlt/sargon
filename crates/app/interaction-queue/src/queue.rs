@@ -43,6 +43,12 @@ impl InteractionsQueue {
         self.batches.retain(|batch| !batch.interactions.is_empty());
     }
 
+    /// Adds as interaction to the queue.
+    pub fn add_interaction(&mut self, interaction: InteractionQueueItem) {
+        assert_eq!(interaction.status, InteractionQueueItemStatus::InProgress);
+        self.items.insert(interaction);
+    }
+
     /// Replace an interaction in the queue with an updated version of it.
     pub fn replace_interaction(&mut self, interaction: InteractionQueueItem) {
         self.items.replace(interaction);

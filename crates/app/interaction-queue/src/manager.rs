@@ -123,16 +123,21 @@ impl InteractionsQueueManager {
     /// Checks the status of every interaction that is currently `InProgress`.
     /// Every interaction which has finished will be updated in the queue.
     async fn check_in_progress_interactions_status(&mut self) {
-        let items =  self.queue.items
+        let items = self
+            .queue
+            .items
             .iter()
-            .filter(|item| item.status == InteractionQueueItemStatus::InProgress)
+            .filter(|item| {
+                item.status == InteractionQueueItemStatus::InProgress
+            })
             .cloned()
             .collect::<Vec<_>>();
 
         // Note: Once Gateway supports checking the status of multiple interactions at the same time,
         // this loop will be replaced with one single call to the Gateway.
         for item in items {
-            let updated_item = self.check_in_progress_interaction_status(item).await;
+            let updated_item =
+                self.check_in_progress_interaction_status(item).await;
             if let Some(updated_item) = updated_item {
                 self.queue.replace_interaction(updated_item.clone());
             }
@@ -176,9 +181,7 @@ impl InteractionsQueueManager {
                             None
                         }
                     }
-                    None => {
-                        None
-                    }
+                    None => None,
                 }
             }
             InteractionQueueItemKind::PreAuthorization(_) => {
@@ -190,19 +193,43 @@ impl InteractionsQueueManager {
     /// Loop over the batches and call `batch.get_first_if_ready()` for each of them.
     /// If they return an interaction, call `process_interaction()` with it.
     /// Call observer to notify of updated queue.
-    async fn check_batch_ready_interactions(&self) {}
+    async fn check_batch_ready_interactions(&mut self) {
+        let mut ready_interactions = Vec::new();
 
-    async fn poll_status(&self) {
-        // Poll the status of every interaction that is `InProgress`.
-        // For each of them that has finished and has a `batchId` set, handle the next interaction of its batch.
-        // Call observer to notify of updated queue
+        for batch in self.queue.batches.iter_mut() {
+            if let Some(interaction) = batch.get_first_if_ready() {
+                ready_interactions.push(interaction);
+            }
+        }
 
-        // Also, loop over the batches and call `batch.get_first_if_ready()` for each of them.
-        // If they return an interaction, call `process_interaction()` with it.
+        for interaction in ready_interactions {
+            self.process_interaction(interaction).await;
+        }
+
+        self.handle_queue_update().await;
     }
 
-    fn process_interaction(&self, _item: InteractionQueueItem) {
+    async fn process_interaction(&mut self, item: InteractionQueueItem) {
         // Set interaction status to `InProgress`
-        // If it is a Transaction, submit it to network.
+        let mut item = item.clone();
+        item.status = InteractionQueueItemStatus::InProgress;
+
+        // Append it to the queue
+        self.queue.add_interaction(item.clone());
+
+        match item.kind {
+            InteractionQueueItemKind::Transaction(transaction) => {
+                // If it is a Transaction, submit it to network.
+                let request = TransactionSubmitRequest {
+                    notarized_transaction_hex: transaction
+                        .notarized_transaction_hex,
+                };
+                let _ = self
+                    .gateway_client
+                    .submit_transaction(request, transaction.transaction_id)
+                    .await;
+            }
+            InteractionQueueItemKind::PreAuthorization(_) => {}
+        }
     }
 }
