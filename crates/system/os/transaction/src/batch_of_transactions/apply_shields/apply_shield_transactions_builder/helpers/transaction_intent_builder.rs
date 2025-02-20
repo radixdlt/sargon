@@ -82,7 +82,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
             // InitiateWithRecoveryCompleteWithPrimary and
             // InitiateWithRecoveryCompleteWithConfirmation.
             // we must ensure those manifest will have different TXID.
-            let intent_discriminator = IntentDisciminator32::random();
+            let intent_discriminator = IntentDiscriminator32::random();
 
             let notary_private_key = Ed25519PrivateKey::from_exactly32_bytes(
                 notary_private_key_bytes,

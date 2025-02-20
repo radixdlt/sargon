@@ -6,7 +6,7 @@ pub struct TransactionHeader {
     pub network_id: NetworkID,
     pub start_epoch_inclusive: Epoch,
     pub end_epoch_exclusive: Epoch,
-    pub intent_discriminator: IntentDisciminator32,
+    pub intent_discriminator: IntentDiscriminator32,
     pub notary_public_key: PublicKey,
     pub notary_is_signatory: bool,
     pub tip_percentage: u16,

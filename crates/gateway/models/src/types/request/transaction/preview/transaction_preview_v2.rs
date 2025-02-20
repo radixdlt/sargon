@@ -67,7 +67,7 @@ impl TransactionPreviewRequestV2 {
         start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: PublicKey,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         network_id: NetworkID,
     ) -> Result<Self> {
         let signer_public_keys = signer_public_keys

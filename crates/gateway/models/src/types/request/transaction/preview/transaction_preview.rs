@@ -48,7 +48,7 @@ impl TransactionPreviewRequest {
         start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: Option<PublicKey>,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
     ) -> Self {
         let signer_public_keys = signer_public_keys
             .into_iter()
@@ -134,7 +134,7 @@ mod tests {
             );
             assert_eq!(sut.tip_percentage, header.tip_percentage);
             assert_eq!(
-                IntentDisciminator32::from(sut.intent_discriminator),
+                IntentDiscriminator32::from(sut.intent_discriminator),
                 header.intent_discriminator
             );
         };

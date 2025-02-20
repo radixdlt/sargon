@@ -18,7 +18,7 @@ pub trait OsAnalyseTxPreview {
         instructions: String,
         blobs: Blobs,
         are_instructions_originating_from_host: bool,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview>;
 
@@ -26,7 +26,7 @@ pub trait OsAnalyseTxPreview {
         &self,
         instructions: String,
         blobs: Blobs,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
     ) -> Result<PreAuthToReview>;
 }
@@ -44,7 +44,7 @@ impl OsAnalyseTxPreview for SargonOS {
         instructions: String,
         blobs: Blobs,
         are_instructions_originating_from_host: bool,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview> {
         let network_id = self.current_network_id()?;
@@ -85,7 +85,7 @@ impl OsAnalyseTxPreview for SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
     ) -> Result<PreAuthToReview> {
         let network_id = self.current_network_id()?;
@@ -135,7 +135,7 @@ pub trait OsExecutionSummary {
         &self,
         network_id: NetworkID,
         manifest: T,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary>;
@@ -164,7 +164,7 @@ impl OsExecutionSummary for SargonOS {
         &self,
         network_id: NetworkID,
         manifest: T,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
@@ -306,7 +306,7 @@ pub trait PreviewableManifest:
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
     ) -> Result<PreviewResponseReceipts>;
 }
 
@@ -319,7 +319,7 @@ impl PreviewableManifest for ScryptoTransactionManifestV2 {
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
     ) -> Result<PreviewResponseReceipts> {
         let request = TransactionPreviewRequestV2::new_transaction_analysis(
             self.clone(),
@@ -348,7 +348,7 @@ impl PreviewableManifest for TransactionManifest {
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
     ) -> Result<PreviewResponseReceipts> {
         let request = TransactionPreviewRequest::new_transaction_analysis(
             self.clone(),
@@ -393,7 +393,7 @@ mod transaction_preview_analysis_tests {
                 "instructions".to_string(),
                 Blobs::sample(),
                 false,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -413,7 +413,7 @@ mod transaction_preview_analysis_tests {
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -453,7 +453,7 @@ mod transaction_preview_analysis_tests {
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -522,7 +522,7 @@ mod transaction_preview_analysis_tests {
                 manifest.instructions_string(),
                 Blobs::sample(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -537,7 +537,7 @@ mod transaction_preview_analysis_tests {
                 manifest.instructions_string(),
                 Blobs::sample(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -581,7 +581,7 @@ mod transaction_preview_analysis_tests {
                 manifest.instructions_string(),
                 Blobs::sample(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -625,7 +625,7 @@ mod transaction_preview_analysis_tests {
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -647,7 +647,7 @@ mod transaction_preview_analysis_tests {
                 prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 false,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -714,7 +714,7 @@ mod transaction_preview_analysis_tests {
                 manifest.instructions_string(),
                 Blobs::default(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -774,7 +774,7 @@ mod transaction_preview_analysis_tests {
                 TransactionManifest::sample().instructions_string(),
                 Blobs::sample(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await;
@@ -807,7 +807,7 @@ mod transaction_preview_analysis_tests {
             .analyse_pre_auth_preview(
                 subintent_manifest.manifest_string(),
                 Blobs::default(),
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await
@@ -885,7 +885,7 @@ mod transaction_preview_analysis_tests {
             .analyse_pre_auth_preview(
                 subintent_manifest.manifest_string(),
                 Blobs::default(),
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await
@@ -967,7 +967,7 @@ mod transaction_preview_analysis_tests {
                     .to_owned(),
                 Blobs::default(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await
@@ -1040,7 +1040,7 @@ mod transaction_preview_analysis_tests {
                     .to_owned(),
                 Blobs::default(),
                 true,
-                IntentDisciminator32::sample(),
+                IntentDiscriminator32::sample(),
                 PublicKey::sample(),
             )
             .await

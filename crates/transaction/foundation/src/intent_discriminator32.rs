@@ -13,21 +13,21 @@ pub use crate::prelude::*;
 )]
 #[display("{}", self.0)]
 #[debug("{}", self.0)]
-pub struct IntentDisciminator32(pub u32);
+pub struct IntentDiscriminator32(pub u32);
 
-impl From<u32> for IntentDisciminator32 {
+impl From<u32> for IntentDiscriminator32 {
     fn from(value: u32) -> Self {
         Self(value)
     }
 }
 
-impl From<IntentDisciminator32> for u32 {
-    fn from(value: IntentDisciminator32) -> Self {
+impl From<IntentDiscriminator32> for u32 {
+    fn from(value: IntentDiscriminator32) -> Self {
         value.0
     }
 }
 
-impl IntentDisciminator32 {
+impl IntentDiscriminator32 {
     pub fn random() -> Self {
         let value = u32::from_be_bytes(
             generate_bytes::<4>()
@@ -40,7 +40,7 @@ impl IntentDisciminator32 {
     }
 }
 
-impl HasSampleValues for IntentDisciminator32 {
+impl HasSampleValues for IntentDiscriminator32 {
     fn sample() -> Self {
         Self(123456789)
     }
@@ -55,7 +55,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = IntentDisciminator32;
+    type SUT = IntentDiscriminator32;
 
     #[test]
     fn equality() {
@@ -71,7 +71,7 @@ mod tests {
     #[test]
     fn from_u32() {
         let test =
-            |u: u32| assert_eq!(u32::from(IntentDisciminator32::from(u)), u);
+            |u: u32| assert_eq!(u32::from(IntentDiscriminator32::from(u)), u);
         test(0);
         test(1);
         test(2);
@@ -92,8 +92,8 @@ mod tests {
     fn to_u32() {
         let test = |u: u32| {
             assert_eq!(
-                u32::from(IntentDisciminator32::from(u32::from(
-                    IntentDisciminator32::from(u)
+                u32::from(IntentDiscriminator32::from(u32::from(
+                    IntentDiscriminator32::from(u)
                 ))),
                 u
             )

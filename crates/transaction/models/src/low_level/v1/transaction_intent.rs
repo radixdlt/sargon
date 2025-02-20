@@ -214,7 +214,7 @@ mod tests {
     fn txid_depends_on_nonce_in_header() {
         let sut_0 = SUT::sample();
         let mut sut_1 = sut_0.clone();
-        sut_1.header.intent_discriminator = IntentDisciminator32::random();
+        sut_1.header.intent_discriminator = IntentDiscriminator32::random();
         assert_ne!(
             sut_0.header.intent_discriminator,
             sut_1.header.intent_discriminator

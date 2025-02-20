@@ -15,7 +15,7 @@ impl SargonOS {
         instructions: String,
         blobs: Blobs,
         are_instructions_originating_from_host: bool,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview> {
         self.wrapped
@@ -42,7 +42,7 @@ impl SargonOS {
         &self,
         instructions: String,
         blobs: Blobs,
-        intent_discriminator: IntentDisciminator32,
+        intent_discriminator: IntentDiscriminator32,
         notary_public_key: PublicKey,
     ) -> Result<PreAuthToReview> {
         self.wrapped
