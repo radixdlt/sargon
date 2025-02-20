@@ -49,7 +49,10 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
         let estimated_xrd_fee = input.estimated_xrd_fee;
         let payer = input.paying_account.account_address();
         input.try_modifying_manifest(|m| {
-            m.modify_add_lock_fee(&payer, estimated_xrd_fee)
+            m.modify_add_lock_fee_and_proofs(
+                LockFeeData::new_with_fee(payer, estimated_xrd_fee),
+                IndexMap::new(),
+            )
         })
     }
 
@@ -60,7 +63,10 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
         let payer = input.payer();
         let estimated_xrd_fee = input.estimated_xrd_fee;
         input.try_modifying_manifest(|m| {
-            m.modify_add_lock_fee(&payer.address, estimated_xrd_fee)
+            m.modify_add_lock_fee_and_proofs(
+                LockFeeData::new_with_fee(payer.address, estimated_xrd_fee),
+                IndexMap::new(),
+            )
         })
     }
 

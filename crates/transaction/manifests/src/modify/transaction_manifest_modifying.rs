@@ -1,92 +1,50 @@
 use crate::prelude::*;
-use radix_common::prelude::indexmap::indexmap;
 
-pub trait TransactionManifestModifying {
-    /// Modifies the transaction manifest applying the lock fee instruction on
-    /// `address_of_fee_payer` with `fee` amount
-    fn modify_add_lock_fee(
-        self,
-        address_of_fee_payer: &AccountAddress,
-        fee: impl Into<Option<Decimal192>>,
-    ) -> Result<TransactionManifest>;
-
-    fn modify_add_proofs(
-        self,
-        entities_with_access_controllers: IndexMap<
-            AddressOfAccountOrPersona,
-            AccessControllerAddress,
-        >,
-    ) -> Result<TransactionManifest>;
-
-    /// Modifies the transaction manifest applying the following instructions
-    /// - adds lock fee instruction on `address_of_fee_payer` with `fee` amount
-    /// - attaches `AccessControllerAddress` proofs for `entities_with_access_controllers`, if
-    ///   the entity locking fee is controller by one access controller, then the `create_proof`
-    ///   for that entity is applied before `lock_fee`
-    /// - adds guarantee assertions in specific indices described in `guarantees`. Those indices
-    ///   will be offset by `1` if lock fee instruction is added. Remember that those indices
-    ///   are received from `transaction/preview` were `lock_fee` is not present.
-    fn modify<G>(
-        self,
-        address_of_fee_payer: &AccountAddress,
-        fee: Decimal192,
-        entities_with_access_controllers: IndexMap<
-            AddressOfAccountOrPersona,
-            AccessControllerAddress,
-        >,
-        guarantees: G,
-    ) -> Result<TransactionManifest>
-    where
-        G: IntoIterator<Item = TransactionGuarantee>;
+impl ModifyingManifest<TransactionManifest, ScryptoInstruction>
+    for TransactionManifest
+{
+    fn modifying_manifest(&self) -> TransactionManifest {
+        self.clone()
+    }
 }
 
-impl TransactionManifestModifying for TransactionManifest {
-    fn modify_add_lock_fee(
+impl AddingGuaranteesModifyingManifest<TransactionManifest, ScryptoInstruction>
+    for TransactionManifest
+{
+    fn insert_guarantee_assertion_at_position(
         self,
-        address_of_fee_payer: &AccountAddress,
-        fee: impl Into<Option<Decimal192>>,
-    ) -> Result<TransactionManifest> {
-        let lock_fee_data = fee
-            .into()
-            .map(|fee| LockFeeData::new_with_fee(*address_of_fee_payer, fee))
-            .unwrap_or(LockFeeData::new_with_fee_payer(*address_of_fee_payer));
+        position: InstructionPosition,
+        guarantee: TransactionGuarantee,
+    ) -> Result<Self> {
+        let rounded_amount = guarantee.rounded_amount();
 
-        self.modify_add_proofs_and_lock_fee(Some(lock_fee_data), indexmap!())
+        let instruction = single_instruction(|b| {
+            b.assert_worktop_contains(
+                &guarantee.resource_address,
+                rounded_amount,
+            )
+        });
+
+        let mut instructions = self.instructions().clone();
+        instructions.insert(position.0 as usize, instruction);
+
+        let instructions =
+            Instructions::try_from((instructions.as_ref(), self.network_id()))?;
+
+        Ok(TransactionManifest::with_instructions_and_blobs(
+            instructions,
+            self.blobs().clone(),
+        ))
     }
+}
 
-    fn modify_add_proofs(
-        self,
-        entities_with_access_controllers: IndexMap<
-            AddressOfAccountOrPersona,
-            AccessControllerAddress,
-        >,
-    ) -> Result<TransactionManifest> {
-        self.modify_add_proofs_and_lock_fee(
-            None,
-            entities_with_access_controllers,
-        )
-    }
-
-    fn modify<G>(
-        self,
-        address_of_fee_payer: &AccountAddress,
-        fee: Decimal192,
-        entities_with_access_controllers: IndexMap<
-            AddressOfAccountOrPersona,
-            AccessControllerAddress,
-        >,
-        guarantees: G,
-    ) -> Result<TransactionManifest>
-    where
-        G: IntoIterator<Item = TransactionGuarantee>,
-    {
-        let modified = self.modify_add_proofs_and_lock_fee(
-            Some(LockFeeData::new_with_fee(*address_of_fee_payer, fee)),
-            entities_with_access_controllers,
-        )?;
-
-        modified.modify_add_guarantees(guarantees)
-    }
+impl
+    AddingLockFeeAndProofsModifyingManifest<
+        TransactionManifest,
+        ScryptoTransactionManifestBuilder,
+        ScryptoInstruction,
+    > for TransactionManifest
+{
 }
 
 #[cfg(test)]
@@ -99,7 +57,9 @@ mod test {
         let fee_payer = AccountAddress::sample_mainnet();
 
         manifest_eq(
-            manifest.modify_add_lock_fee(&fee_payer, None).unwrap(),
+            manifest
+                .modify_add_lock_fee_and_proofs(&fee_payer, None)
+                .unwrap(),
             r#"
             CALL_METHOD
                 Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
@@ -134,7 +94,7 @@ mod test {
 
         manifest_eq(
             manifest
-                .modify_add_lock_fee(&fee_payer, Decimal192::five())
+                .modify_add_lock_fee_and_proofs(&fee_payer, Decimal192::five())
                 .unwrap(),
             r#"
             CALL_METHOD
