@@ -83,6 +83,7 @@ mod tests {
             }
             os.add_factor_source(fs).await.unwrap();
         }
+
         os.set_main_factor_source(bdfs.factor_source_id())
             .await
             .unwrap();
@@ -262,31 +263,50 @@ mod tests {
 
         assert_eq!(manifest_and_payer_tuples.len(), manifests.len());
 
-        struct Interactor;
-        #[async_trait::async_trait]
-        impl SignInteractor<TransactionIntent> for Interactor {
-            async fn sign(
-                &self,
-                request: SignRequest<TransactionIntent>,
-            ) -> Result<SignResponse<TransactionIntentHash>> {
-                unimplemented!()
-            }
-        }
-    
         {
+            // ~~~ TEST OF `SigningManager` ~~~
+            // code inside scope does not mutate the variables
+            // outside of the scope (just clones),
+            // we piggyback on the setup of accounts, personas, factors etc
+            struct Interactor;
+            #[async_trait::async_trait]
+            impl SignInteractor<TransactionIntent> for Interactor {
+                async fn sign(
+                    &self,
+                    request: SignRequest<TransactionIntent>,
+                ) -> Result<SignResponse<TransactionIntentHash>>
+                {
+                    TestSignInteractor::new(SimulatedUser::prudent_no_fail())
+                        .sign(request)
+                        .await
+                }
+            }
             let interactor = Arc::new(Interactor);
 
-            let network_id = NetworkID::Mainnet;
-            let profile = Profile::sample();
-            let tx_builder = ApplyShieldTransactionsBuilderImpl::with(profile, MockNetworkingDriver::everyones_rich(network_id));
-            tx_builder.build_payload_to_sign(network_id, manifest_and_payer_tuples)
-    
-            let sut = SUT::new(
-                IndexSet::from_iter([]), 
-                interactor, 
-                SaveIntentsToConfirmAfterDelayClient::new(EphemeralUnsafeStorage::new()), 
-            applications,
+            let profile = os.profile().unwrap();
+            let tx_builder = ApplyShieldTransactionsBuilderImpl::with(
+                profile.clone(),
+                MockNetworkingDriver::everyones_rich(network_id),
             );
+            let applications = tx_builder
+                .build_payload_to_sign(
+                    network_id,
+                    manifest_and_payer_tuples.clone(),
+                )
+                .await
+                .unwrap()
+                .applications_with_intents;
+
+            let signing_manager = SigningManager::new(
+                profile.factor_sources(),
+                interactor,
+                SaveIntentsToConfirmAfterDelayClient::new(
+                    EphemeralUnsafeStorage::new(),
+                ),
+                applications,
+            );
+            let outcome = signing_manager.sign_intent_sets().await.unwrap();
+            assert_eq!(outcome.0.len(), manifest_and_payer_tuples.len());
         }
 
         let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();

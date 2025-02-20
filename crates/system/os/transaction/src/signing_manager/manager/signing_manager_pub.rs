@@ -7,7 +7,7 @@ use super::signing_manager_dependencies::SigningManagerDependencies;
 // ==============
 impl SigningManager {
     pub(crate) fn new(
-        factor_sources_in_profile: IndexSet<FactorSource>,
+        factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
         sign_interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         saver_of_intents_to_confirm_after_delay: SaveIntentsToConfirmAfterDelayClient,
         intent_sets: impl IntoIterator<
@@ -64,13 +64,13 @@ impl SigningManager {
         let best_signed_intent = signed_for_with_entities_applying_shield
             .get_best_signed_intents()?;
 
-        println!(
-            "🍭 best signed - set id: {:?}",
-            best_signed_intent
-                .iter()
-                .map(|si| si.intent_set_id())
-                .collect_vec()
-        );
+        // println!(
+        //     "🍭 best signed - set id: {:?}",
+        //     best_signed_intent
+        //         .iter()
+        //         .map(|si| si.intent_set_id())
+        //         .collect_vec()
+        // );
 
         let intents_to_confirm_after_delay =
             self.get_intents_to_confirm_after_delay(&best_signed_intent)?;

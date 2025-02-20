@@ -1,3 +1,5 @@
+use core::panic;
+
 use crate::prelude::*;
 
 pub(crate) struct SignaturesCollectorPreprocessor<S: Signable> {
@@ -68,9 +70,10 @@ impl<S: Signable> SignaturesCollectorPreprocessor<S> {
 
                 assert!(!factor_to_payloads.is_empty());
 
-                let factor_source = hd_factor_sources
-                    .get(id)
-                    .expect("Should have all factor sources");
+                let factor_source =
+                    hd_factor_sources.get(id).unwrap_or_else(|| {
+                        panic!("Factor source with ID: {} not found", id)
+                    });
                 used_factor_sources.insert(factor_source.clone());
 
                 assert!(!used_factor_sources.is_empty());

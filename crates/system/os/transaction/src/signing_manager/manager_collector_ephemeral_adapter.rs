@@ -143,7 +143,7 @@ impl ManagerCollectorEphemeralAdapter {
                 let intent = self.lookup_intent_by_txid.get(&txid).unwrap().clone();
 
                 let context = self.get_context(txid);
-                println!("🔮 IntentSetID {:?}, role_kind: {:?}, variant: {:?}, txid: {:?}", context.intent_set_id, context.role_kind, self.lookup_txid_to_variant.get(&txid).unwrap(), txid);
+                // println!("🔮 IntentSetID {:?}, role_kind: {:?}, variant: {:?}, txid: {:?}", context.intent_set_id, context.role_kind, self.lookup_txid_to_variant.get(&txid).unwrap(), txid);
                 EntitySignedFor::new(
                     context,
                     intent,
