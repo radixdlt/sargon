@@ -49,7 +49,6 @@ impl OsAnalyseTxPreview for SargonOS {
         // Get the execution summary
         let execution_summary = self
             .get_execution_summary(
-                network_id,
                 transaction_manifest.clone(),
                 nonce,
                 notary_public_key,
@@ -68,7 +67,6 @@ impl OsAnalyseTxPreview for SargonOS {
 pub trait OsExecutionSummary {
     async fn get_execution_summary<T: PreviewableManifest + Send + Sync>(
         &self,
-        network_id: NetworkID,
         manifest: T,
         nonce: Nonce,
         notary_public_key: PublicKey,
@@ -96,7 +94,6 @@ pub trait OsExecutionSummary {
 impl OsExecutionSummary for SargonOS {
     async fn get_execution_summary<T: PreviewableManifest + Send + Sync>(
         &self,
-        network_id: NetworkID,
         manifest: T,
         nonce: Nonce,
         notary_public_key: PublicKey,
@@ -105,14 +102,14 @@ impl OsExecutionSummary for SargonOS {
         let signer_public_keys =
             self.extract_signer_public_keys(manifest.summary()?)?;
 
-        let gateway_client = self.gateway_client_with(network_id);
+        let gateway_client = self.gateway_client_with(manifest.network_id());
 
         let epoch = gateway_client.current_epoch().await?;
 
         let receipts = manifest
             .fetch_preview(
+                IndexMap::new(),
                 &gateway_client,
-                network_id,
                 epoch,
                 signer_public_keys,
                 notary_public_key,
@@ -229,12 +226,15 @@ impl OsExecutionSummary for SargonOS {
 
 #[async_trait::async_trait]
 pub trait PreviewableManifest:
-    DynamicallyAnalyzableManifest + StaticallyAnalyzableManifest + Send + Sync
+    DynamicallyAnalyzableManifest + Send + Sync
 {
     async fn fetch_preview(
         &self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
         gateway_client: &GatewayClient,
-        network_id: NetworkID,
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
@@ -246,20 +246,26 @@ pub trait PreviewableManifest:
 impl PreviewableManifest for TransactionManifestV2 {
     async fn fetch_preview(
         &self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
         gateway_client: &GatewayClient,
-        network_id: NetworkID,
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
     ) -> Result<PreviewResponseReceipts> {
+        let modified_with_proofs = self
+            .clone()
+            .modify_add_proofs(entities_with_access_controllers)?;
+
         let request = TransactionPreviewRequestV2::new_transaction_analysis(
-            self.scrypto_manifest(),
+            modified_with_proofs,
             start_epoch_inclusive,
             signer_public_keys,
             notary_public_key,
             nonce,
-            network_id,
         )?;
 
         let response = gateway_client.transaction_preview_v2(request).await?;
@@ -275,15 +281,22 @@ impl PreviewableManifest for TransactionManifestV2 {
 impl PreviewableManifest for TransactionManifest {
     async fn fetch_preview(
         &self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
         gateway_client: &GatewayClient,
-        _network_id: NetworkID,
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
     ) -> Result<PreviewResponseReceipts> {
+        let modified_with_proofs = self
+            .clone()
+            .modify_add_proofs(entities_with_access_controllers)?;
+
         let request = TransactionPreviewRequest::new_transaction_analysis(
-            self.clone(),
+            modified_with_proofs,
             start_epoch_inclusive,
             signer_public_keys,
             Some(notary_public_key),

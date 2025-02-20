@@ -37,6 +37,16 @@ impl IntoManifest<ScryptoInstructionV2> for SubintentManifest {
     }
 }
 
+impl IntoManifest<ScryptoInstructionV2> for TransactionManifestV2 {
+    fn network_id(&self) -> NetworkID {
+        self.network_id()
+    }
+
+    fn instructions(&self) -> Vec<ScryptoInstructionV2> {
+        self.instructions.instructions.clone()
+    }
+}
+
 /// Common representation of an Instruction included in any `IntoManifest`.
 pub(crate) trait IntoInstruction: Sized {
     fn is_lock_fee(&self) -> bool;
@@ -175,6 +185,51 @@ impl IntoManifestBuilder<SubintentManifest, ScryptoInstructionV2>
         let scrypto_manifest = self.build();
 
         SubintentManifest::try_from((scrypto_manifest, network_id))
+    }
+
+    fn call_method(
+        self,
+        address: impl ReferencedManifestGlobalAddress,
+        method_name: impl Into<String>,
+        arguments: impl ScryptoResolvableArguments,
+    ) -> Self {
+        self.call_method(address, method_name, arguments)
+    }
+
+    fn lock_fee(
+        self,
+        account_address: impl ReferencedManifestComponentAddress,
+        amount: impl Resolve<ScryptoDecimal192>,
+    ) -> Self {
+        self.lock_fee(account_address, amount)
+    }
+}
+
+impl IntoManifestBuilder<TransactionManifestV2, ScryptoInstructionV2>
+    for ScryptoTransactionManifestV2Builder
+{
+    fn extend_builder_with_instructions(
+        self,
+        instructions: impl IntoIterator<Item = ScryptoInstructionV2>,
+    ) -> Self {
+        instructions.into_iter().fold(self, |builder, instruction| {
+            builder.add_instruction_advanced(instruction).0
+        })
+    }
+
+    fn new_with_instructions(
+        instructions: impl IntoIterator<Item = ScryptoInstructionV2>,
+    ) -> Self {
+        Self::extend_builder_with_instructions(
+            ScryptoTransactionManifestV2Builder::new_v2(),
+            instructions,
+        )
+    }
+
+    fn build(self, network_id: NetworkID) -> Result<TransactionManifestV2> {
+        let scrypto_manifest = self.build();
+
+        TransactionManifestV2::try_from((scrypto_manifest, network_id))
     }
 
     fn call_method(

@@ -284,6 +284,26 @@ impl
     }
 }
 
+impl
+    ModifiableManifest<
+        ScryptoTransactionManifestV2Builder,
+        TransactionManifestV2,
+        ScryptoInstructionV2,
+    > for TransactionManifestV2
+{
+    fn manifest(&self) -> TransactionManifestV2 {
+        self.clone()
+    }
+
+    fn insert_guarantee_assertion_at_position(
+        &self,
+        _position: InstructionPosition,
+        _guarantee: TransactionGuarantee,
+    ) -> Result<Self> {
+        panic!("Should not happen")
+    }
+}
+
 pub(crate) struct InstructionPosition(u64);
 
 #[cfg(test)]
