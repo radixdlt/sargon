@@ -1,10 +1,7 @@
 use crate::prelude::*;
+use async_std::sync::Mutex;
 use async_std::task;
-use std::{
-    sync::{Arc, Mutex},
-    thread,
-    time::Duration,
-};
+use std::{thread, time::Duration};
 
 pub struct InteractionsQueueManager {
     /// The queue of interactions.
@@ -42,7 +39,7 @@ impl InteractionsQueueManager {
     pub async fn bootstrap(self: Arc<Self>) -> Result<()> {
         // Load queue from local storage.
         if let Some(queue) = self.storage.load_queue().await? {
-            let mut locked_queue = self.queue.lock().unwrap();
+            let mut locked_queue = self.queue.lock().await;
             *locked_queue = queue;
 
             // Remove stale data from queue.
@@ -54,14 +51,14 @@ impl InteractionsQueueManager {
 
         // Monitor the status of interactions in the queue.
         let self_clone = self.clone();
-        thread::spawn(move || {
-            task::block_on(self_clone.monitor_interactions_status());
+        async_std::task::spawn(async move {
+            self_clone.monitor_interactions_status().await;
         });
 
         // Monitor the batches in the queue.
         let self_clone = self.clone();
-        thread::spawn(move || {
-            task::block_on(self_clone.monitor_batches());
+        async_std::task::spawn(async move {
+            self_clone.monitor_batches().await;
         });
 
         Ok(())
@@ -88,7 +85,7 @@ impl InteractionsQueueManager {
     }
 
     pub async fn add_batch(&self, _batch: InteractionQueueBatch) {
-        self.queue.lock().unwrap().add_batch(_batch);
+        self.queue.lock().await.add_batch(_batch);
         self.handle_queue_update().await;
     }
 }
@@ -98,7 +95,7 @@ impl InteractionsQueueManager {
     /// Notifies the observer about the updated queue and saves it to the local storage.
     // Note: we probably want this method to not await until the storage is saved
     async fn handle_queue_update(&self) {
-        let queue = self.queue.lock().unwrap();
+        let queue = self.queue.lock().await;
         self.observer.handle_update(queue.sorted_items());
         let _ = self.storage.save_queue(queue.clone()).await;
     }
@@ -134,7 +131,7 @@ impl InteractionsQueueManager {
     /// Checks the status of every interaction that is currently `InProgress`.
     /// Every interaction which has finished will be updated in the queue.
     async fn check_in_progress_interactions_status(&self) {
-        let mut queue = self.queue.lock().unwrap();
+        let mut queue = self.queue.lock().await;
         let items: Vec<_> = queue
             .items
             .iter()
@@ -199,7 +196,7 @@ impl InteractionsQueueManager {
     /// If they return an interaction, call `process_interaction()` with it.
     /// Call observer to notify of updated queue.
     async fn check_batch_ready_interactions(&self) {
-        let mut queue = self.queue.lock().unwrap();
+        let mut queue = self.queue.lock().await;
         let ready_interactions: Vec<_> = queue
             .batches
             .iter_mut()
@@ -221,7 +218,7 @@ impl InteractionsQueueManager {
         let mut item = item.clone();
         item.status = InteractionQueueItemStatus::InProgress;
 
-        self.queue.lock().unwrap().add_interaction(item.clone());
+        self.queue.lock().await.add_interaction(item.clone());
 
         if let InteractionQueueItemKind::Transaction(transaction) = item.kind {
             let request = TransactionSubmitRequest {
@@ -297,18 +294,21 @@ mod tests {
     #[async_trait::async_trait]
     impl InteractionsQueueObserver for MockObserver {
         fn handle_update(&self, queue: Vec<InteractionQueueItem>) {
-            *self.handlded_queue.lock().unwrap() = queue;
+            // TODO: Implement
         }
     }
 
     #[actix_rt::test]
     async fn add_interaction() {
-        let sut = create_and_bootstap(vec![
+        let sut = create_and_bootstrap(vec![
             // Req1: TX is submitted successfully
             submit_transaction_response(),
             // Req2: Status endpoint indicates that the TX was committed
-            transaction_status_response(TransactionStatusResponsePayloadStatus::CommittedSuccess),
-        ]).await;
+            transaction_status_response(
+                TransactionStatusResponsePayloadStatus::CommittedSuccess,
+            ),
+        ])
+        .await;
 
         // Add the interaction to the queue
         let interaction = InteractionQueueItem::new_in_progress(
@@ -317,26 +317,25 @@ mod tests {
         );
         sut.add_interaction(interaction).await;
 
-        {
-            // Verify that the queue now has 1 item whose status is `InProgress`
-            let queue = sut.queue.lock().unwrap();
-            assert_eq!(queue.items.len(), 1);
-            assert_eq!(queue.items[0].status, InteractionQueueItemStatus::InProgress);
-        }
-
+        // Verify that the queue now has 1 item whose status is `InProgress`
+        let queue = sut.queue.lock().await;
+        assert_eq!(queue.items.len(), 1);
+        assert_eq!(
+            queue.items[0].status,
+            InteractionQueueItemStatus::InProgress
+        );
 
         // Wait a bit for the manager to check its status
         async_std::task::sleep(Duration::from_millis(100)).await;
 
-        {
-            // Verify that the queue now has the item set to `Success`
-            let queue = sut.queue.lock().unwrap();
-            assert_eq!(queue.items[0].status, InteractionQueueItemStatus::Success);
-        }
+        // Verify that the queue now has the item set to `Success`
+        let queue = sut.queue.lock().await;
+        assert_eq!(queue.items[0].status, InteractionQueueItemStatus::Success);
     }
 
-
-    async fn create_and_bootstap(responses: Vec<MockNetworkingDriverResponse>) -> Arc<SUT> {
+    async fn create_and_bootstrap(
+        responses: Vec<MockNetworkingDriverResponse>,
+    ) -> Arc<SUT> {
         let observer = Arc::new(MockObserver::new());
         let storage = Arc::new(MockStorage::new_empty());
         let mock_networking_driver =
@@ -354,13 +353,13 @@ mod tests {
     // Mock Responses
 
     fn submit_transaction_response() -> MockNetworkingDriverResponse {
-        let response = TransactionSubmitResponse {
-            duplicate: false,
-        };
+        let response = TransactionSubmitResponse { duplicate: false };
         MockNetworkingDriverResponse::new_success(response)
     }
 
-    fn transaction_status_response(status: TransactionStatusResponsePayloadStatus) -> MockNetworkingDriverResponse {
+    fn transaction_status_response(
+        status: TransactionStatusResponsePayloadStatus,
+    ) -> MockNetworkingDriverResponse {
         let response = match status {
             TransactionStatusResponsePayloadStatus::Unknown => TransactionStatusResponse::sample_unknown(),
             TransactionStatusResponsePayloadStatus::Pending => TransactionStatusResponse::sample_pending(),
