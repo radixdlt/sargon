@@ -7,7 +7,7 @@ pub trait OsFactorSourceAdder {
         factor_source_id: FactorSourceID,
     ) -> Result<bool>;
 
-    async fn add_new_factor_source(
+    async fn add_new_mnemonic_factor_source(
         &self,
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
@@ -38,7 +38,7 @@ impl OsFactorSourceAdder for SargonOS {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    async fn add_new_factor_source(
+    async fn add_new_mnemonic_factor_source(
         &self,
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
@@ -68,18 +68,20 @@ impl OsFactorSourceAdder for SargonOS {
                 .await?
         }
 
-        self.update_profile_with(|p| {
-            p.factor_sources.append(factor_source.clone());
-            Ok(())
-        })
-        .await?;
+        let setup_result = {
+            self.update_profile_with(|p| {
+                p.factor_sources.append(factor_source.clone());
+                Ok(())
+            })
+            .await?;
 
-        if let Err(e) = self
-            .pre_derive_and_fill_cache_with_instances_for_factor_source(
+            self.pre_derive_and_fill_cache_with_instances_for_factor_source(
                 factor_source.clone(),
             )
             .await
-        {
+        };
+
+        if let Err(e) = setup_result {
             self.update_profile_with(|p| {
                 p.factor_sources.remove_id(&id);
                 Ok(())
@@ -157,7 +159,7 @@ mod tests {
 
         let result = os
             .with_timeout(|x| {
-                x.add_new_factor_source(
+                x.add_new_mnemonic_factor_source(
                     FactorSourceKind::Device,
                     mwp.clone(),
                     "".to_owned(),
@@ -179,7 +181,7 @@ mod tests {
 
         let result = os
             .with_timeout(|x| {
-                x.add_new_factor_source(
+                x.add_new_mnemonic_factor_source(
                     FactorSourceKind::Device,
                     mwp.clone(),
                     "New device".to_owned(),
@@ -200,7 +202,7 @@ mod tests {
 
         let result = os
             .with_timeout(|x| {
-                x.add_new_factor_source(
+                x.add_new_mnemonic_factor_source(
                     FactorSourceKind::Device,
                     mwp.clone(),
                     "New device".to_owned(),
@@ -239,7 +241,7 @@ mod tests {
 
                 let result = os
                     .with_timeout(|x| {
-                        x.add_new_factor_source(
+                        x.add_new_mnemonic_factor_source(
                             factor_source_kind,
                             mwp_to_add.clone(),
                             "New".to_owned(),
@@ -304,7 +306,7 @@ mod tests {
 
             let result = os
                 .with_timeout(|x| {
-                    x.add_new_factor_source(
+                    x.add_new_mnemonic_factor_source(
                         factor_source_kind,
                         mwp.clone(),
                         "Not supported fs".to_owned(),
@@ -369,7 +371,7 @@ mod tests {
             event_bus_driver.clear_recorded();
 
             os.with_timeout(|x| {
-                x.add_new_factor_source(
+                x.add_new_mnemonic_factor_source(
                     factor_source_kind,
                     mwp.clone(),
                     "New".to_owned(),

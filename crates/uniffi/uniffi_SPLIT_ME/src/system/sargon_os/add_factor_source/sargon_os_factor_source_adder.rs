@@ -13,14 +13,14 @@ impl SargonOS {
             .into_result()
     }
 
-    async fn add_new_factor_source(
+    async fn add_new_mnemonic_factor_source(
         &self,
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         name: String,
     ) -> Result<()> {
         self.wrapped
-            .add_new_factor_source(
+            .add_new_mnemonic_factor_source(
                 factor_source_kind.into_internal(),
                 mnemonic_with_passphrase.into_internal(),
                 name,
