@@ -499,7 +499,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -525,7 +525,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d0.factor_source_id()),
         );
@@ -550,7 +550,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -578,7 +578,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
 
         let invalid = sut
             .invalid_transaction_if_neglected_factors(IndexSet::just(
@@ -608,7 +608,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
 
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d1.factor_source_id()),
@@ -666,7 +666,7 @@ mod tests {
         );
         let sut = SUT::from_entity_with_role_kind(
             entity.clone(),
-            intent_hash.clone(),
+            intent_hash,
             RoleKind::Primary,
         );
 
@@ -693,7 +693,7 @@ mod tests {
         let signature = unsafe {
             HDSignature::produced_signing_with_input(
             HDSignatureInput::new(
-                sut.payload_id.clone(),
+                sut.payload_id,
                 OwnedFactorInstance::new(
                     sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(

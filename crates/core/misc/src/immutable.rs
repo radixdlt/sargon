@@ -19,7 +19,6 @@ use std::ops::Deref;
 #[debug(bound(T: std::fmt::Debug))]
 #[debug("{:?}", self.value)]
 #[serde(transparent)]
-
 pub struct Immutable<T> {
     value: T,
 }

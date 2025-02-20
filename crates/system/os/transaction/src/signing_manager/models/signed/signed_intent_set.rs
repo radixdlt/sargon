@@ -13,7 +13,7 @@ impl EntitySignedForWithVariant {
     pub(crate) fn intent_signatures(&self) -> Vec<IntentSignature> {
         self.signatures
             .iter()
-            .map(|s| IntentSignature::from(s.clone()))
+            .map(|s| IntentSignature::from(*s))
             .collect()
     }
     pub(crate) fn new(

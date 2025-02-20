@@ -54,7 +54,7 @@ impl OsTXStatusPolling for SargonOS {
             let sleep_duration = Duration::from_secs(delay_duration);
 
             let response = match gateway_client
-                .get_transaction_status(intent_hash.clone())
+                .get_transaction_status(intent_hash)
                 .await
             {
                 Ok(response) => response,

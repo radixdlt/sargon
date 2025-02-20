@@ -1,5 +1,3 @@
-use derive_more::derive;
-
 use crate::prelude::*;
 
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
@@ -62,8 +60,7 @@ impl SecurifiedIntentSetInternalState {
     pub(crate) fn get_signed_intents(
         &self,
     ) -> Result<Vec<EntitySignedForWithVariant>> {
-        Ok(self
-            ._all_intent_variant_states()
+        self._all_intent_variant_states()
             .into_iter()
             .map(|v| {
                 (
@@ -73,7 +70,7 @@ impl SecurifiedIntentSetInternalState {
                 )
             })
             .map(EntitySignedForWithVariant::try_from)
-            .collect::<Result<Vec<_>>>()?)
+            .collect::<Result<Vec<_>>>()
     }
 
     pub(crate) fn paying_account(&self) -> Account {

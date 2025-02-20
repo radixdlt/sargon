@@ -400,7 +400,7 @@ mod tests {
             _ => panic!(),
         };
         let petition = PetitionForEntity::new_securified(
-            intent_hash.clone(),
+            intent_hash,
             AddressOfAccountOrPersona::from(account.address),
             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                 (matrix, RoleKind::Primary),

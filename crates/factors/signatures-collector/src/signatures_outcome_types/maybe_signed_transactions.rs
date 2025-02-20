@@ -279,7 +279,7 @@ mod tests {
         let mut sut = SUT::sample();
         let tx = TransactionIntentHash::sample();
         let input = HDSignatureInput::new(
-            tx.clone(),
+            tx,
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
@@ -329,7 +329,7 @@ mod tests {
         let mut sut = SUT::empty();
         let factor_instance = OwnedFactorInstance::sample();
         let tx = TransactionIntentHash::sample();
-        let input = HDSignatureInput::new(tx.clone(), factor_instance.clone());
+        let input = HDSignatureInput::new(tx, factor_instance.clone());
         let sig_a = HDSignature {
             input: input.clone(),
             signature: SignatureWithPublicKey::sample(),
