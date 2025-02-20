@@ -126,18 +126,18 @@ impl DeviceMnemonicBuilder {
 #[uniffi::export]
 impl DeviceMnemonicBuilder {
     /// Generates a new mnemonic
-    pub fn generate_new_mnemonic_with_passphrase(self: Arc<Self>) -> Arc<Self> {
-        self.set(|builder| builder.generate_new_mnemonic_with_passphrase())
+    pub fn generate_new_mnemonic(self: Arc<Self>) -> Arc<Self> {
+        self.set(|builder| builder.generate_new_mnemonic())
     }
 
     /// Creates a new mnemonic from given `words`
-    pub fn create_mnemonic_with_passphrase_from_words(
+    pub fn create_mnemonic_from_words(
         self: Arc<Self>,
         words: Vec<String>,
     ) -> Result<Arc<Self>> {
         self.set_from_result(|builder| {
             builder
-                .create_mnemonic_with_passphrase_from_words(words.clone())
+                .create_mnemonic_from_words(words.clone())
                 .into_result()
         })
     }
@@ -180,8 +180,8 @@ mod tests {
             .map(|w| w.word.clone())
             .collect::<Vec<_>>();
         let sut = SUT::new()
-            .generate_new_mnemonic_with_passphrase()
-            .create_mnemonic_with_passphrase_from_words(mnemonic_words.clone()) // Override the previously created mnemonic and create a new one from words
+            .generate_new_mnemonic()
+            .create_mnemonic_from_words(mnemonic_words.clone()) // Override the previously created mnemonic and create a new one from words
             .unwrap();
 
         pretty_assertions::assert_eq!(
@@ -200,18 +200,18 @@ mod tests {
 
         let indices = sut.clone().get_indices_in_mnemonic_of_words_to_confirm();
 
-        let r0 = sut.clone().build(
+        let outcome = sut.clone().build(
             vec![(0, "device".to_owned())]
                 .into_iter()
                 .collect::<HashMap<_, _>>(),
         ); // Input not enough words
 
         pretty_assertions::assert_eq!(
-            r0,
+            outcome,
             DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch
         );
 
-        let r1 = sut.clone().build(
+        let outcome = sut.clone().build(
             vec![
                 (0, "device".to_owned()),
                 (5, "word".to_owned()),
@@ -223,13 +223,13 @@ mod tests {
         ); // Input the incorrect words
 
         pretty_assertions::assert_eq!(
-            r1,
+            outcome,
             DeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic: vec![5, 11, 17]
             }
         );
 
-        let r2 = sut.build(
+        let outcome = sut.build(
             indices
                 .into_iter()
                 .map(|i| (i, mnemonic_words[i as usize].clone()))
@@ -237,7 +237,7 @@ mod tests {
         ); // Confirm the words based on previously generated indices
 
         pretty_assertions::assert_eq!(
-            r2,
+            outcome,
             DeviceMnemonicBuildOutcome::Confirmed {
                 mnemonic_with_passphrase:
                     sargon::MnemonicWithPassphrase::sample_device().into(),

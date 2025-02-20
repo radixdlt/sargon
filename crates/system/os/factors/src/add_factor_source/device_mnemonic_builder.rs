@@ -102,14 +102,14 @@ impl DeviceMnemonicBuilder {
 // ====================
 impl DeviceMnemonicBuilder {
     /// Generates a new mnemonic
-    pub fn generate_new_mnemonic_with_passphrase(&self) -> &Self {
+    pub fn generate_new_mnemonic(&self) -> &Self {
         let mnemonic = Mnemonic::generate_new();
         self.set_mnemonic_with_passphrase(mnemonic);
         self
     }
 
     /// Creates a new mnemonic from given `words`
-    pub fn create_mnemonic_with_passphrase_from_words(
+    pub fn create_mnemonic_from_words(
         &self,
         words: Vec<String>,
     ) -> Result<&Self> {
@@ -274,7 +274,7 @@ mod tests {
             sut.mnemonic_with_passphrase.read().unwrap().clone(),
             None
         );
-        sut.generate_new_mnemonic_with_passphrase();
+        sut.generate_new_mnemonic();
         assert!(sut.mnemonic_with_passphrase.read().unwrap().is_some());
     }
 
@@ -282,7 +282,7 @@ mod tests {
     fn create_mnemonic_with_passphrase_from_words_error() {
         let sut = SUT::default();
 
-        let result = sut.create_mnemonic_with_passphrase_from_words(vec![
+        let result = sut.create_mnemonic_from_words(vec![
             "abandon".to_owned(),
             "device".to_owned(),
             "word1".to_owned(),
@@ -310,7 +310,7 @@ mod tests {
             sut.mnemonic_with_passphrase.read().unwrap().clone(),
             None
         );
-        sut.create_mnemonic_with_passphrase_from_words(
+        sut.create_mnemonic_from_words(
             mnemonic
                 .words
                 .iter()
