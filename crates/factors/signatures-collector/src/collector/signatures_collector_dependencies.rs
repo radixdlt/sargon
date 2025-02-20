@@ -20,7 +20,7 @@ pub(super) struct SignaturesCollectorDependencies<S: Signable> {
     pub(super) factors_of_kind: IndexSet<FactorSourcesOfKind>,
 
     pub(super) cross_role_skip_outcome_analyzer:
-        Arc<dyn CrossRoleSkipOutcomeAnalyzer<S::ID>>,
+        Arc<dyn CrossRoleSkipOutcomeAnalyzer<S>>,
 }
 
 impl<S: Signable> SignaturesCollectorDependencies<S> {
@@ -28,7 +28,7 @@ impl<S: Signable> SignaturesCollectorDependencies<S> {
         finish_early_strategy: SigningFinishEarlyStrategy,
         interactor: Arc<dyn SignInteractor<S>>,
         cross_role_skip_outcome_analyzer: Arc<
-            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         factors_of_kind: IndexSet<FactorSourcesOfKind>,
     ) -> Self {

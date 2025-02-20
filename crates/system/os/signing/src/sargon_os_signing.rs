@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait OsSigning {
-    async fn sign<S: Signable>(
+    async fn sign<S: Signable + 'static>(
         &self,
         signable: S,
         sign_interactor: Arc<dyn SignInteractor<S>>,
@@ -70,7 +70,7 @@ impl OsSigning for SargonOS {
         .await
     }
 
-    async fn sign<S: Signable>(
+    async fn sign<S: Signable + 'static>(
         &self,
         signable: S,
         sign_interactor: Arc<dyn SignInteractor<S>>,
@@ -82,6 +82,7 @@ impl OsSigning for SargonOS {
             SigningFinishEarlyStrategy::default(),
             vec![signable.clone()],
             sign_interactor,
+            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::<S>::new()),
             profile,
             purpose,
         )?;

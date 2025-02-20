@@ -1,13 +1,15 @@
 use std::ops::Deref;
 
 use crate::prelude::*;
-pub trait CrossRoleSkipOutcomeAnalyzer<ID: SignableID> {
+
+#[async_trait::async_trait]
+pub trait CrossRoleSkipOutcomeAnalyzer<S: Signable>: Send + Sync {
     fn invalid_transaction_if_neglected_factors(
         &self,
-        signable: ID,
+        signable: S::ID,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-        petitions: Vec<PetitionForEntity<ID>>,
-    ) -> Option<InvalidTransactionIfNeglected<ID>>;
+        petitions: Vec<PetitionForEntity<S::ID>>,
+    ) -> Option<InvalidTransactionIfNeglected<S::ID>>;
 }
 
 /// Petition of signatures for a transaction.
@@ -210,7 +212,7 @@ impl<S: Signable> PetitionForTransaction<S> {
     pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
         cross_role_skip_outcome_analyzer: Arc<
-            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<InvalidTransactionIfNeglected<S::ID>> {

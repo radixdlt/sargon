@@ -27,18 +27,19 @@ pub struct SignaturesCollector<S: Signable> {
     state: RwLock<SignaturesCollectorState<S>>,
 }
 
-pub struct NoCrossRoleSkipOutcomeAnalyzer<S: Signable> {
+pub struct NoCrossRoleSkipOutcomeAnalyzer<S> {
     phantom: PhantomData<S>,
 }
-impl<S: Signable> NoCrossRoleSkipOutcomeAnalyzer<S> {
-    pub fn new() -> Arc<NoCrossRoleSkipOutcomeAnalyzer<S>> {
-        Arc::new(NoCrossRoleSkipOutcomeAnalyzer::<S> {
+impl<S> NoCrossRoleSkipOutcomeAnalyzer<S> {
+    pub fn new() -> Self {
+        Self {
             phantom: PhantomData::<S>,
-        })
+        }
     }
 }
-impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S::ID>
-    for NoCrossRoleSkipOutcomeAnalyzer<S::ID>
+#[async_trait::async_trait]
+impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S>
+    for NoCrossRoleSkipOutcomeAnalyzer<S>
 {
     fn invalid_transaction_if_neglected_factors(
         &self,
@@ -56,27 +57,8 @@ impl<S: Signable> SignaturesCollector<S> {
         finish_early_strategy: SigningFinishEarlyStrategy,
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
-        proto_profile: &P,
-        purpose: SigningPurpose,
-    ) -> Result<Self> {
-        Self::with_cross_role_skip_outcome_analyzer(
-            finish_early_strategy,
-            transactions,
-            interactor,
-            NoCrossRoleSkipOutcomeAnalyzer::<S>::new(),
-            proto_profile,
-            purpose,
-        )
-    }
-
-    pub fn with_cross_role_skip_outcome_analyzer<
-        P: GetEntityByAddress + HasFactorSources,
-    >(
-        finish_early_strategy: SigningFinishEarlyStrategy,
-        transactions: impl IntoIterator<Item = S>,
-        interactor: Arc<dyn SignInteractor<S>>,
         cross_role_skip_outcome_analyzer: Arc<
-            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         proto_profile: &P,
         purpose: SigningPurpose,
@@ -102,7 +84,7 @@ impl<S: Signable> SignaturesCollector<S> {
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
         interactor: Arc<dyn SignInteractor<S>>,
         cross_role_skip_outcome_analyzer: Arc<
-            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         purpose: SigningPurpose,
     ) -> Self {
@@ -146,7 +128,7 @@ impl<S: Signable> SignaturesCollector<S> {
         transactions: impl IntoIterator<Item = S>,
         interactor: Arc<dyn SignInteractor<S>>,
         cross_role_skip_outcome_analyzer: Arc<
-            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         purpose: SigningPurpose,
         extract_signers: F,
@@ -446,7 +428,7 @@ impl<S: Signable> SignaturesCollector<S> {
     fn invalid_transactions_if_neglected_factor_sources(
         &self,
         cross_role_skip_outcome_analyzer: Arc<
-            dyn CrossRoleSkipOutcomeAnalyzer<S::ID>,
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {

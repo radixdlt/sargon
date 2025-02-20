@@ -247,10 +247,10 @@ mod tests {
             InvalidTransactionForEntity::sample_other(),
         ];
         let no_quick = [DelayedConfirmationForEntity::sample()];
-        let sut = SUT::new(TransactionIntentHash::sample(), no_quick, entities);
+        let sut = SUT::new(TransactionIntentHash::sample(), no_quick.clone(), would_fail.clone());
         assert_eq!(
             sut.entities_which_would_fail_auth(),
-            IndexSet::<_>::from_iter(entities.into_iter())
+            IndexSet::<_>::from_iter(would_fail.into_iter())
         );
 
         assert_eq!(
