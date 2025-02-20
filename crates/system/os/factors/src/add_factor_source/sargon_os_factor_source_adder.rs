@@ -45,7 +45,7 @@ impl OsFactorSourceAdder for SargonOS {
         name: String,
     ) -> Result<()> {
         let host_info = self.resolve_host_info().await;
-        let factor_source = FactorSource::with_details(
+        let factor_source = FactorSource::with_mwp(
             factor_source_kind,
             mnemonic_with_passphrase.clone(),
             name,
@@ -59,20 +59,20 @@ impl OsFactorSourceAdder for SargonOS {
             return Err(CommonError::FactorSourceAlreadyExists);
         }
 
-        self.update_profile_with(|p| {
-            p.factor_sources.append(factor_source.clone());
-            Ok(())
-        })
-        .await?;
-
         if factor_source_kind == FactorSourceKind::Device {
             self.secure_storage
                 .save_mnemonic_with_passphrase(
                     &mnemonic_with_passphrase,
                     &factor_source.id_from_hash(),
                 )
-                .await?;
+                .await?
         }
+
+        self.update_profile_with(|p| {
+            p.factor_sources.append(factor_source.clone());
+            Ok(())
+        })
+        .await?;
 
         if let Err(e) = self
             .pre_derive_and_fill_cache_with_instances_for_factor_source(
@@ -85,9 +85,12 @@ impl OsFactorSourceAdder for SargonOS {
                 Ok(())
             })
             .await?;
-            self.secure_storage
-                .delete_mnemonic(&factor_source.id_from_hash())
-                .await?;
+
+            if factor_source_kind == FactorSourceKind::Device {
+                self.secure_storage
+                    .delete_mnemonic(&factor_source.id_from_hash())
+                    .await?;
+            }
 
             return Err(e);
         }
@@ -213,49 +216,73 @@ mod tests {
 
     #[actix_rt::test]
     async fn add_new_factor_source_pre_derive_instances_error() {
-        let clients = Clients::new(Bios::new(Drivers::test()));
-        let derivation_interactor = Arc::new(TestDerivationInteractor::fail());
-        let interactors =
-            Interactors::new_with_derivation_interactor(derivation_interactor);
+        let test =
+            async |factor_source_kind: FactorSourceKind,
+                   mwp_to_add: MnemonicWithPassphrase| {
+                let clients = Clients::new(Bios::new(Drivers::test()));
+                let derivation_interactor =
+                    Arc::new(TestDerivationInteractor::fail());
+                let interactors = Interactors::new_with_derivation_interactor(
+                    derivation_interactor,
+                );
 
-        let mwp = MnemonicWithPassphrase::sample();
-        let mwp_to_add = MnemonicWithPassphrase::sample_other();
-        let fsid_from_hash =
-            FactorSourceIDFromHash::new_for_device(&mwp_to_add);
+                let mwp = MnemonicWithPassphrase::sample();
+                let fsid_from_hash =
+                    FactorSourceIDFromHash::new_for_device(&mwp_to_add);
 
-        let os =
-            SUT::boot_with_clients_and_interactor(clients, interactors).await;
-        os.new_wallet_with_mnemonic(Some(mwp.clone()), false)
-            .await
-            .unwrap();
+                let os =
+                    SUT::boot_with_clients_and_interactor(clients, interactors)
+                        .await;
+                os.new_wallet_with_mnemonic(Some(mwp.clone()), false)
+                    .await
+                    .unwrap();
 
-        let result = os
-            .with_timeout(|x| {
-                x.add_new_factor_source(
-                    FactorSourceKind::Device,
-                    mwp_to_add.clone(),
-                    "New device".to_owned(),
-                )
-            })
-            .await;
+                let result = os
+                    .with_timeout(|x| {
+                        x.add_new_factor_source(
+                            factor_source_kind,
+                            mwp_to_add.clone(),
+                            "New".to_owned(),
+                        )
+                    })
+                    .await;
 
-        assert!(matches!(
-            result,
-            Err(CommonError::TooFewFactorInstancesDerived)
-        ));
-        // Verify that the mnemonic is not saved to secure storage
-        assert!(matches!(
-            os.secure_storage.load_mnemonic(fsid_from_hash).await,
-            Err(CommonError::UnableToLoadMnemonicFromSecureStorage { .. })
-        ));
-        // Verify that the factor source is not added to the profile
-        assert!(!os
-            .profile()
-            .unwrap()
-            .factor_sources
-            .iter()
-            .any(|fs| fs.factor_source_id()
-                == FactorSourceID::from(fsid_from_hash)));
+                assert!(matches!(
+                    result,
+                    Err(CommonError::TooFewFactorInstancesDerived)
+                ));
+                // Verify that the mnemonic is not saved to secure storage
+                assert!(matches!(
+                    os.secure_storage.load_mnemonic(fsid_from_hash).await,
+                    Err(
+                        CommonError::UnableToLoadMnemonicFromSecureStorage { .. }
+                    )
+                ));
+                // Verify that the factor source is not added to the profile
+                assert!(!os
+                    .profile()
+                    .unwrap()
+                    .factor_sources
+                    .iter()
+                    .any(|fs| fs.factor_source_id()
+                        == FactorSourceID::from(fsid_from_hash)));
+            };
+
+        test(
+            FactorSourceKind::Device,
+            MnemonicWithPassphrase::sample_other(),
+        )
+        .await;
+        test(
+            FactorSourceKind::Password,
+            MnemonicWithPassphrase::sample_password(),
+        )
+        .await;
+        test(
+            FactorSourceKind::OffDeviceMnemonic,
+            MnemonicWithPassphrase::sample_off_device(),
+        )
+        .await
     }
 
     #[actix_rt::test]

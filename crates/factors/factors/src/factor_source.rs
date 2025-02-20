@@ -157,7 +157,7 @@ impl FactorSource {
 }
 
 impl FactorSource {
-    pub fn with_details(
+    pub fn with_mwp(
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         name: String,
