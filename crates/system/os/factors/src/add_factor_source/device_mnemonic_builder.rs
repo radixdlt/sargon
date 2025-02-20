@@ -7,9 +7,9 @@ pub struct DeviceMnemonicBuilder {
     mnemonic_with_passphrase: RwLock<Option<MnemonicWithPassphrase>>,
 }
 
-/// The result of the `build` function from `DeviceMnemonicBuilder`.
+/// The outcome of the `build` function from `DeviceMnemonicBuilder`.
 #[derive(Debug, PartialEq)]
-pub enum DeviceMnemonicBuildResult {
+pub enum DeviceMnemonicBuildOutcome {
     /// The mnemonic words were confirmed
     Confirmed {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
@@ -190,11 +190,11 @@ impl DeviceMnemonicBuilder {
     pub fn build(
         &self,
         words_to_confirm: &HashMap<usize, String>,
-    ) -> DeviceMnemonicBuildResult {
+    ) -> DeviceMnemonicBuildOutcome {
         if words_to_confirm.len()
             != Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM
         {
-            return DeviceMnemonicBuildResult::ConfirmationWordCountMismatch;
+            return DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch;
         }
 
         let unconfirmed_indices_in_mnemonic = words_to_confirm
@@ -209,11 +209,11 @@ impl DeviceMnemonicBuilder {
             .collect::<IndexSet<_>>();
 
         if unconfirmed_indices_in_mnemonic.is_empty() {
-            DeviceMnemonicBuildResult::Confirmed {
+            DeviceMnemonicBuildOutcome::Confirmed {
                 mnemonic_with_passphrase: self.get_mnemonic_with_passphrase(),
             }
         } else {
-            DeviceMnemonicBuildResult::Unconfirmed {
+            DeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic: unconfirmed_indices_in_mnemonic,
             }
         }
@@ -378,7 +378,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             sut.build(&words_to_confirm),
-            DeviceMnemonicBuildResult::ConfirmationWordCountMismatch
+            DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch
         );
     }
 
@@ -396,7 +396,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             sut.build(&words_to_confirm),
-            DeviceMnemonicBuildResult::Unconfirmed {
+            DeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic: indexset![0, 1, 2, 3]
             }
         );
@@ -416,7 +416,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             sut.build(&words_to_confirm),
-            DeviceMnemonicBuildResult::Unconfirmed {
+            DeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic: indexset![7, 13]
             }
         );
@@ -438,7 +438,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             result,
-            DeviceMnemonicBuildResult::Confirmed {
+            DeviceMnemonicBuildOutcome::Confirmed {
                 mnemonic_with_passphrase: MnemonicWithPassphrase::sample()
             }
         );

@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::DeviceMnemonicBuildResult as InternalDeviceMnemonicBuildResult;
+use sargon::DeviceMnemonicBuildOutcome as InternalDeviceMnemonicBuildOutcome;
 use sargon::DeviceMnemonicBuilder as InternalDeviceMnemonicBuilder;
 
 /// A builder of `MnemonicWithPassphrase` required for a new `DeviceFactorSource` creation.
@@ -10,9 +10,9 @@ pub struct DeviceMnemonicBuilder {
     wrapped: Arc<InternalDeviceMnemonicBuilder>,
 }
 
-/// The result of the `build` function from `DeviceMnemonicBuilder`.
+/// The outcome of the `build` function from `DeviceMnemonicBuilder`.
 #[derive(Debug, PartialEq, uniffi::Enum)]
-pub enum DeviceMnemonicBuildResult {
+pub enum DeviceMnemonicBuildOutcome {
     /// The mnemonic words were confirmed
     Confirmed {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
@@ -23,18 +23,18 @@ pub enum DeviceMnemonicBuildResult {
     Unconfirmed { indices_in_mnemonic: Vec<u8> },
 }
 
-impl From<InternalDeviceMnemonicBuildResult> for DeviceMnemonicBuildResult {
-    fn from(value: InternalDeviceMnemonicBuildResult) -> Self {
+impl From<InternalDeviceMnemonicBuildOutcome> for DeviceMnemonicBuildOutcome {
+    fn from(value: InternalDeviceMnemonicBuildOutcome) -> Self {
         match value {
-            InternalDeviceMnemonicBuildResult::Confirmed {
+            InternalDeviceMnemonicBuildOutcome::Confirmed {
                 mnemonic_with_passphrase,
-            } => DeviceMnemonicBuildResult::Confirmed {
+            } => DeviceMnemonicBuildOutcome::Confirmed {
                 mnemonic_with_passphrase: mnemonic_with_passphrase.into(),
             },
-            InternalDeviceMnemonicBuildResult::ConfirmationWordCountMismatch => DeviceMnemonicBuildResult::ConfirmationWordCountMismatch,
-            InternalDeviceMnemonicBuildResult::Unconfirmed {
+            InternalDeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch => DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch,
+            InternalDeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic,
-            } => DeviceMnemonicBuildResult::Unconfirmed {
+            } => DeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic: indices_in_mnemonic
                     .into_iter()
                     .map(|i| i as u8)
@@ -151,7 +151,7 @@ impl DeviceMnemonicBuilder {
     pub fn build(
         self: Arc<Self>,
         words_to_confirm: HashMap<u8, String>,
-    ) -> DeviceMnemonicBuildResult {
+    ) -> DeviceMnemonicBuildOutcome {
         self.wrapped
             .build(
                 &words_to_confirm
@@ -208,7 +208,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             r0,
-            DeviceMnemonicBuildResult::ConfirmationWordCountMismatch
+            DeviceMnemonicBuildOutcome::ConfirmationWordCountMismatch
         );
 
         let r1 = sut.clone().build(
@@ -224,7 +224,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             r1,
-            DeviceMnemonicBuildResult::Unconfirmed {
+            DeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic: vec![5, 11, 17]
             }
         );
@@ -238,7 +238,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             r2,
-            DeviceMnemonicBuildResult::Confirmed {
+            DeviceMnemonicBuildOutcome::Confirmed {
                 mnemonic_with_passphrase:
                     sargon::MnemonicWithPassphrase::sample_device().into(),
             }
