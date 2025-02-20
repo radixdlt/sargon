@@ -8,7 +8,7 @@ pub struct SaveIntentsToConfirmAfterDelayClient {
     driver: Arc<dyn UnsafeStorageDriver>,
 }
 impl SaveIntentsToConfirmAfterDelayClient {
-    pub(crate) fn new(driver: Arc<dyn UnsafeStorageDriver>) -> Self {
+    pub fn new(driver: Arc<dyn UnsafeStorageDriver>) -> Self {
         Self { driver }
     }
 }

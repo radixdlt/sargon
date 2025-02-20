@@ -262,6 +262,33 @@ mod tests {
 
         assert_eq!(manifest_and_payer_tuples.len(), manifests.len());
 
+        struct Interactor;
+        #[async_trait::async_trait]
+        impl SignInteractor<TransactionIntent> for Interactor {
+            async fn sign(
+                &self,
+                request: SignRequest<TransactionIntent>,
+            ) -> Result<SignResponse<TransactionIntentHash>> {
+                unimplemented!()
+            }
+        }
+    
+        {
+            let interactor = Arc::new(Interactor);
+
+            let network_id = NetworkID::Mainnet;
+            let profile = Profile::sample();
+            let tx_builder = ApplyShieldTransactionsBuilderImpl::with(profile, MockNetworkingDriver::everyones_rich(network_id));
+            tx_builder.build_payload_to_sign(network_id, manifest_and_payer_tuples)
+    
+            let sut = SUT::new(
+                IndexSet::from_iter([]), 
+                interactor, 
+                SaveIntentsToConfirmAfterDelayClient::new(EphemeralUnsafeStorage::new()), 
+            applications,
+            );
+        }
+
         let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
 
         let txids = committer
