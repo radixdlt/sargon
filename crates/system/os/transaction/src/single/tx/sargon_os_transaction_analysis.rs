@@ -43,10 +43,8 @@ impl OsAnalyseTxPreview for SargonOS {
         let transaction_manifest =
             TransactionManifest::new(instructions, network_id, blobs)?;
 
-        transaction_manifest.validate_instructions(
-            network_id,
-            are_instructions_originating_from_host,
-        )?;
+        transaction_manifest
+            .validate_instructions(are_instructions_originating_from_host)?;
 
         // Get the execution summary
         let execution_summary = self
@@ -86,7 +84,6 @@ pub trait OsExecutionSummary {
         &self,
         manifest: &dyn DynamicallyAnalyzableManifest,
         receipts: PreviewResponseReceipts,
-        network_id: NetworkID,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary>;
 
@@ -106,7 +103,7 @@ impl OsExecutionSummary for SargonOS {
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
         let signer_public_keys =
-            self.extract_signer_public_keys(manifest.summary(network_id)?)?;
+            self.extract_signer_public_keys(manifest.summary()?)?;
 
         let gateway_client = self.gateway_client_with(network_id);
 
@@ -126,7 +123,6 @@ impl OsExecutionSummary for SargonOS {
         self.extract_execution_summary(
             &manifest,
             receipts,
-            network_id,
             are_instructions_originating_from_host,
         )
     }
@@ -155,7 +151,6 @@ impl OsExecutionSummary for SargonOS {
         &self,
         manifest: &dyn DynamicallyAnalyzableManifest,
         receipts: PreviewResponseReceipts,
-        network_id: NetworkID,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
         let receipt = receipts
@@ -171,7 +166,7 @@ impl OsExecutionSummary for SargonOS {
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
         let mut execution_summary =
-            manifest.execution_summary(engine_toolkit_receipt, network_id)?;
+            manifest.execution_summary(engine_toolkit_receipt)?;
 
         let reserved_manifest_class = execution_summary
             .detailed_classification
@@ -248,7 +243,7 @@ pub trait PreviewableManifest:
 }
 
 #[async_trait::async_trait]
-impl PreviewableManifest for ScryptoTransactionManifestV2 {
+impl PreviewableManifest for TransactionManifestV2 {
     async fn fetch_preview(
         &self,
         gateway_client: &GatewayClient,
@@ -259,7 +254,7 @@ impl PreviewableManifest for ScryptoTransactionManifestV2 {
         nonce: Nonce,
     ) -> Result<PreviewResponseReceipts> {
         let request = TransactionPreviewRequestV2::new_transaction_analysis(
-            self.clone(),
+            self.scrypto_manifest(),
             start_epoch_inclusive,
             signer_public_keys,
             notary_public_key,

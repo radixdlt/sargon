@@ -1,6 +1,5 @@
 mod child_subintent_specifier;
 mod child_subintent_specifiers;
-mod execution_summary_v2;
 mod instructions_v2;
 mod subintent_manifest;
 mod transaction_manifest_v2;

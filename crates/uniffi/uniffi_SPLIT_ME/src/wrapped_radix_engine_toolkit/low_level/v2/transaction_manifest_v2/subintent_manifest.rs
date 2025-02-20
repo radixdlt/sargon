@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use manifests::StaticallyAnalyzableManifest;
 use sargon::SubintentManifest as InternalSubintentManifest;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
@@ -49,7 +50,9 @@ pub fn subintent_manifest_string(manifest: &SubintentManifest) -> String {
 pub fn subintent_manifest_summary(
     manifest: &SubintentManifest,
 ) -> ManifestSummary {
-    manifest.into_internal().summary().unwrap().into()
+    let internal_manifest = manifest.into_internal();
+
+    internal_manifest.summary().unwrap().into()
 }
 
 #[uniffi::export]

@@ -19,6 +19,12 @@ impl FeeLocks {
     }
 }
 
+impl Default for FeeLocks {
+    fn default() -> Self {
+        Self::new(0, 0)
+    }
+}
+
 impl From<ScryptoFeeLocks> for FeeLocks {
     fn from(value: ScryptoFeeLocks) -> Self {
         Self::new(value.lock, value.contingent_lock)

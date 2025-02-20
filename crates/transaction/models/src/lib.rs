@@ -135,11 +135,6 @@ pub mod prelude {
         },
     };
 
-    pub(crate) use radix_engine_toolkit_common::receipt::{
-        RuntimeToolkitTransactionReceipt as ScryptoRuntimeToolkitTransactionReceipt,
-        SerializableToolkitTransactionReceipt as ScryptoSerializableToolkitTransactionReceipt,
-    };
-
     pub(crate) use radix_transactions::{
         manifest::{
             compile as scrypto_compile,

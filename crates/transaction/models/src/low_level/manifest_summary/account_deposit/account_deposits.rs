@@ -19,7 +19,7 @@ impl AccountDeposits {
     }
 }
 
-#[cfg(test)]
+#[cfg(debug_assertions)]
 impl AccountDeposits {
     pub fn new_for_test(
         specified_resources: Vec<SimpleResourceBounds>,

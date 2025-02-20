@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use manifests::StaticallyAnalyzableManifest;
 
 impl Signable for Subintent {
     type ID = SubintentHash;

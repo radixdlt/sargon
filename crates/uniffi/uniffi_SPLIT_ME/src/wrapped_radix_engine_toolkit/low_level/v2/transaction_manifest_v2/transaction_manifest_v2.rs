@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use manifests::StaticallyAnalyzableManifest;
 use sargon::TransactionManifestV2 as InternalTransactionManifestV2;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
