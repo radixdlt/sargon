@@ -37,12 +37,10 @@ impl OsAnalysePreAuthPreview for SargonOS {
         )?;
 
         let summary = subintent_manifest.validated_summary(
-            network_id,
             false, // PreAuth transaction cannot be sent by the Host itself
         )?;
 
-        let pre_auth_to_review = match subintent_manifest.as_enclosed_scrypto()
-        {
+        let pre_auth_to_review = match subintent_manifest.as_enclosed() {
             Some(manifest) => {
                 let execution_summary = self
                     .get_execution_summary(
@@ -79,9 +77,6 @@ mod tests {
         StateUpdatesSummary as RETStateUpdatesSummary,
     };
     use sargon_os_factors::prelude::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = SargonOS;
 
     #[actix_rt::test]
     async fn analyse_open_pre_auth_preview() {
