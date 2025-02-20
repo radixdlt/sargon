@@ -47,8 +47,11 @@ impl InteractionsQueueManager {
         // Notify observer and save the queue to local storage.
         self.handle_queue_update().await;
 
-        // Set up timer to perform the corresponding checks every 3 seconds
-        self.set_polling_timer().await;
+        // Monitor the status of interactions in the queue.
+        task::spawn(self.monitor_interactions_status());
+
+        // Monitor the batches in the queue.
+        task::spawn(self.monitor_batches());
 
         Ok(())
     }
@@ -90,22 +93,31 @@ impl InteractionsQueueManager {
         let _ = self.storage.save_queue(self.queue.clone()).await;
     }
 
-    /// Sets up a timer to perform the corresponding checks every 3 seconds. These are:
-    /// - Poll the status of every interaction that is `InProgress`.
-    /// - Check if any batch has an interaction ready to be processed.
-    async fn set_polling_timer(&mut self) {
-        #[cfg(test)]
-        let sleep_duration =
-            Duration::from_millis(INTERACTION_QUEUE_POLLING_INTERVAL); // make it faster for tests
-        #[cfg(not(test))]
-        let sleep_duration =
-            Duration::from_secs(INTERACTION_QUEUE_POLLING_INTERVAL);
-
+    /// Monitors the status of interactions in the queue.
+    /// Every 3 seconds, it will check the status of every interaction that is currently `InProgress`,
+    /// and those that have finished have its status updated in the queue.
+    async fn monitor_interactions_status(&mut self) {
         loop {
-            task::spawn(self.check_in_progress_interactions_status());
-            // task::spawn(self.check_batch_ready_interactions());
-            task::sleep(sleep_duration).await;
+            self.check_in_progress_interactions_status().await;
+            task::sleep(self.get_sleep_duration()).await;
         }
+    }
+
+    /// Monitor the batches in the queue, processing the interactions that are ready to be processed.
+    async fn monitor_batches(&mut self) {
+        loop {
+            self.check_batch_ready_interactions().await;
+            task::sleep(self.get_sleep_duration()).await;
+        }
+    }
+
+    fn get_sleep_duration(&self) -> Duration {
+        #[cfg(test)]
+        let result = Duration::from_millis(INTERACTION_QUEUE_POLLING_INTERVAL); // make it faster for tests
+        #[cfg(not(test))]
+        let result = Duration::from_secs(INTERACTION_QUEUE_POLLING_INTERVAL);
+
+        result
     }
 
     /// Checks the status of every interaction that is currently `InProgress`.
@@ -117,6 +129,8 @@ impl InteractionsQueueManager {
             .cloned()
             .collect::<Vec<_>>();
 
+        // Note: Once Gateway supports checking the status of multiple interactions at the same time,
+        // this loop will be replaced with one single call to the Gateway.
         for item in items {
             let updated_item = self.check_in_progress_interaction_status(item).await;
             if let Some(updated_item) = updated_item {
