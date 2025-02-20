@@ -9,3 +9,13 @@ pub enum InteractionQueueItemKind {
     /// A Pre-Authorization item.
     PreAuthorization(PreAuthorizationQueueItem),
 }
+
+impl HasSampleValues for InteractionQueueItemKind {
+    fn sample() -> Self {
+        Self::Transaction(TransactionQueueItem::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::PreAuthorization(PreAuthorizationQueueItem::sample_other())
+    }
+}
