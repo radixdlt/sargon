@@ -53,4 +53,9 @@ impl InteractionsQueue {
     pub fn replace_interaction(&mut self, interaction: InteractionQueueItem) {
         self.items.replace(interaction);
     }
+
+    /// Adds a new batch to the queue.
+    pub fn add_batch(&mut self, batch: InteractionQueueBatch) {
+        self.batches.push(batch);
+    }
 }
