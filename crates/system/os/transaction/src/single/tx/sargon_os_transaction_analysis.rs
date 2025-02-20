@@ -75,8 +75,13 @@ pub trait OsExecutionSummary {
 
     fn extract_signer_public_keys(
         &self,
-        manifest_summary: ManifestSummary,
+        manifest_summary: &ManifestSummary,
     ) -> Result<IndexSet<PublicKey>>;
+
+    fn extract_proofs(
+        &self,
+        manifest_summary: &ManifestSummary,
+    ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>;
 
     fn extract_execution_summary(
         &self,
@@ -99,8 +104,10 @@ impl OsExecutionSummary for SargonOS {
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
-        let signer_public_keys =
-            self.extract_signer_public_keys(manifest.summary()?)?;
+        let summary = manifest.summary()?;
+
+        let signer_public_keys = self.extract_signer_public_keys(&summary)?;
+        let proofs = self.extract_proofs(&summary)?;
 
         let gateway_client = self.gateway_client_with(manifest.network_id());
 
@@ -108,7 +115,7 @@ impl OsExecutionSummary for SargonOS {
 
         let receipts = manifest
             .fetch_preview(
-                IndexMap::new(),
+                proofs,
                 &gateway_client,
                 epoch,
                 signer_public_keys,
@@ -126,7 +133,7 @@ impl OsExecutionSummary for SargonOS {
 
     fn extract_signer_public_keys(
         &self,
-        manifest_summary: ManifestSummary,
+        manifest_summary: &ManifestSummary,
     ) -> Result<IndexSet<PublicKey>> {
         // Extracting the entities requiring auth to check if the notary is signatory
         let profile = self.profile()?;
@@ -142,6 +149,37 @@ impl OsExecutionSummary for SargonOS {
         .iter()
         .map(|i| i.public_key.public_key)
         .collect::<IndexSet<PublicKey>>())
+    }
+
+    fn extract_proofs(
+        &self,
+        manifest_summary: &ManifestSummary,
+    ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>
+    {
+        let entities = manifest_summary
+            .addresses_of_accounts_requiring_auth
+            .iter()
+            .map(|a| self.entity_by_address((*a).into()))
+            .chain(
+                manifest_summary
+                    .addresses_of_personas_requiring_auth
+                    .iter()
+                    .map(|i| self.entity_by_address((*i).into())),
+            )
+            .collect::<Result<Vec<_>>>()?;
+
+        let mut proofs = IndexMap::<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >::new();
+
+        entities.iter().for_each(|e| {
+            if let Some(control) = e.security_state().as_securified() {
+                proofs.insert(e.address(), control.access_controller_address);
+            }
+        });
+
+        Ok(proofs)
     }
 
     fn extract_execution_summary(
@@ -256,9 +294,8 @@ impl PreviewableManifest for TransactionManifestV2 {
         notary_public_key: PublicKey,
         nonce: Nonce,
     ) -> Result<PreviewResponseReceipts> {
-        let modified_with_proofs = self
-            .clone()
-            .modify_add_proofs(entities_with_access_controllers)?;
+        let modified_with_proofs =
+            self.modify_add_proofs(entities_with_access_controllers)?;
 
         let request = TransactionPreviewRequestV2::new_transaction_analysis(
             modified_with_proofs,
@@ -291,9 +328,8 @@ impl PreviewableManifest for TransactionManifest {
         notary_public_key: PublicKey,
         nonce: Nonce,
     ) -> Result<PreviewResponseReceipts> {
-        let modified_with_proofs = self
-            .clone()
-            .modify_add_proofs(entities_with_access_controllers)?;
+        let modified_with_proofs =
+            self.modify_add_proofs(entities_with_access_controllers)?;
 
         let request = TransactionPreviewRequest::new_transaction_analysis(
             modified_with_proofs,
@@ -1006,7 +1042,10 @@ mod tests {
             &account.address.into(),
             vec![PublicKeyHash::sample()],
         )
-        .modify_add_lock_fee(&account.address, Some(Decimal192::zero()))
+        .modify_add_lock_fee_and_proofs(
+            LockFeeData::new_with_fee(account.address(), Decimal192::zero()),
+            IndexMap::new(),
+        )
         .unwrap()
     }
 }

@@ -8,7 +8,7 @@ use radix_transactions::builder::{
 
 /// Common representation of any Manifest like `TransactionManifest` or `SubintentManifest`
 /// consumed or modified by the host.
-pub(crate) trait IntoManifest<I>: Sized
+pub trait IntoManifest<I>: Sized
 where
     I: IntoInstruction + Clone,
 {
@@ -48,7 +48,7 @@ impl IntoManifest<ScryptoInstructionV2> for TransactionManifestV2 {
 }
 
 /// Common representation of an Instruction included in any `IntoManifest`.
-pub(crate) trait IntoInstruction: Sized {
+pub trait IntoInstruction: Sized {
     fn is_lock_fee(&self) -> bool;
 }
 
@@ -75,7 +75,7 @@ impl IntoInstruction for ScryptoInstructionV2 {
 }
 
 /// Common representation of a manifest builder
-pub(crate) trait IntoManifestBuilder<M, I>: Sized
+pub trait IntoManifestBuilder<M, I>: Sized
 where
     M: IntoManifest<I>,
     I: IntoInstruction + Clone,
