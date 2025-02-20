@@ -307,7 +307,7 @@ mod tests {
                 let signing_manager = SigningManager::new(
                     profile.factor_sources(),
                     interactor,
-                    SaveIntentsToConfirmAfterDelayClient:   :new(
+                    SaveIntentsToConfirmAfterDelayClient::new(
                         EphemeralUnsafeStorage::new(),
                     ),
                     applications,
