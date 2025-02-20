@@ -235,3 +235,141 @@ impl InteractionsQueueManager {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = InteractionsQueueManager;
+
+    struct MockStorage {
+        stubbed_save_queue_result: Result<()>,
+        stubbed_load_queue_result: Result<Option<InteractionsQueue>>,
+    }
+
+    impl MockStorage {
+        fn new_empty() -> Self {
+            Self {
+                stubbed_save_queue_result: Ok(()),
+                stubbed_load_queue_result: Ok(None),
+            }
+        }
+
+        fn new_with_queue(queue: InteractionsQueue) -> Self {
+            Self {
+                stubbed_save_queue_result: Ok(()),
+                stubbed_load_queue_result: Ok(Some(queue)),
+            }
+        }
+
+        fn new_with_error() -> Self {
+            Self {
+                stubbed_save_queue_result: Err(CommonError::Unknown),
+                stubbed_load_queue_result: Err(CommonError::Unknown),
+            }
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl InteractionsQueueStorage for MockStorage {
+        async fn save_queue(&self, _queue: InteractionsQueue) -> Result<()> {
+            self.stubbed_save_queue_result.clone()
+        }
+
+        async fn load_queue(&self) -> Result<Option<InteractionsQueue>> {
+            self.stubbed_load_queue_result.clone()
+        }
+    }
+
+    struct MockObserver {
+        handlded_queue: Arc<Mutex<Vec<InteractionQueueItem>>>,
+    }
+
+    impl MockObserver {
+        fn new() -> Self {
+            Self {
+                handlded_queue: Arc::new(Mutex::new(Vec::new())),
+            }
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl InteractionsQueueObserver for MockObserver {
+        fn handle_update(&self, queue: Vec<InteractionQueueItem>) {
+            *self.handlded_queue.lock().unwrap() = queue;
+        }
+    }
+
+    #[actix_rt::test]
+    async fn add_interaction() {
+        let sut = create_and_bootstap(vec![
+            // Req1: TX is submitted successfully
+            submit_transaction_response(),
+            // Req2: Status endpoint indicates that the TX was committed
+            transaction_status_response(TransactionStatusResponsePayloadStatus::CommittedSuccess),
+        ]).await;
+
+        // Add the interaction to the queue
+        let interaction = InteractionQueueItem::new_in_progress(
+            false,
+            InteractionQueueItemKind::sample(),
+        );
+        sut.add_interaction(interaction).await;
+
+        {
+            // Verify that the queue now has 1 item whose status is `InProgress`
+            let queue = sut.queue.lock().unwrap();
+            assert_eq!(queue.items.len(), 1);
+            assert_eq!(queue.items[0].status, InteractionQueueItemStatus::InProgress);
+        }
+
+
+        // Wait a bit for the manager to check its status
+        async_std::task::sleep(Duration::from_millis(100)).await;
+
+        {
+            // Verify that the queue now has the item set to `Success`
+            let queue = sut.queue.lock().unwrap();
+            assert_eq!(queue.items[0].status, InteractionQueueItemStatus::Success);
+        }
+    }
+
+
+    async fn create_and_bootstap(responses: Vec<MockNetworkingDriverResponse>) -> Arc<SUT> {
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let mock_networking_driver =
+            MockNetworkingDriver::new_with_responses(responses);
+        let gateway_client = GatewayClient::new(
+            Arc::new(mock_networking_driver),
+            NetworkID::Stokenet,
+        );
+        let sut = SUT::new(observer, storage, gateway_client);
+
+        let _ = sut.clone().bootstrap().await;
+        sut
+    }
+
+    // Mock Responses
+
+    fn submit_transaction_response() -> MockNetworkingDriverResponse {
+        let response = TransactionSubmitResponse {
+            duplicate: false,
+        };
+        MockNetworkingDriverResponse::new_success(response)
+    }
+
+    fn transaction_status_response(status: TransactionStatusResponsePayloadStatus) -> MockNetworkingDriverResponse {
+        let response = match status {
+            TransactionStatusResponsePayloadStatus::Unknown => TransactionStatusResponse::sample_unknown(),
+            TransactionStatusResponsePayloadStatus::Pending => TransactionStatusResponse::sample_pending(),
+            TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown => TransactionStatusResponse::sample_commit_pending_outcome_unknown(),
+            TransactionStatusResponsePayloadStatus::CommittedSuccess => TransactionStatusResponse::sample_committed_success(),
+            TransactionStatusResponsePayloadStatus::CommittedFailure => TransactionStatusResponse::sample_committed_failure(None),
+            TransactionStatusResponsePayloadStatus::PermanentlyRejected => TransactionStatusResponse::sample_permanently_rejected(None),
+            TransactionStatusResponsePayloadStatus::TemporarilyRejected => TransactionStatusResponse::sample_temporarily_rejected(),
+        };
+        MockNetworkingDriverResponse::new_success(response)
+    }
+}

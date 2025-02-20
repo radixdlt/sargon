@@ -37,12 +37,11 @@ impl InteractionQueueItem {
     }
 
     pub fn new_in_progress(
-        id: Uuid,
         is_from_browser: bool,
         kind: InteractionQueueItemKind,
     ) -> Self {
         Self::new(
-            id,
+            Uuid::new_v4(),
             InteractionQueueItemStatus::InProgress,
             is_from_browser,
             InteractionQueueItemSummary::new(),
