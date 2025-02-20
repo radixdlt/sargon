@@ -16,6 +16,6 @@ impl HasSampleValues for InteractionQueueItemKind {
     }
 
     fn sample_other() -> Self {
-        Self::PreAuthorization(PreAuthorizationQueueItem::sample_other())
+        Self::PreAuthorization(PreAuthorizationQueueItem::sample())
     }
 }
