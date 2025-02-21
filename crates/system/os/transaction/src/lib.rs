@@ -1,10 +1,10 @@
 #![feature(let_chains)]
 
-mod batch;
+mod batch_of_transactions;
 mod single;
 
 pub mod prelude {
-    pub use crate::batch::*;
+    pub use crate::batch_of_transactions::*;
     pub use crate::single::*;
 
     pub(crate) use entity_by_address::prelude::*;
