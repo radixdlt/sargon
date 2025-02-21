@@ -1,11 +1,11 @@
 use crate::prelude::*;
-use async_std::sync::Mutex;
+use async_std::sync::RwLock;
 use async_std::task;
-use std::{thread, time::Duration};
+use std::time::Duration;
 
 pub struct InteractionsQueueManager {
     /// The queue of interactions.
-    queue: Mutex<InteractionsQueue>,
+    queue: RwLock<InteractionsQueue>,
 
     /// Observer to handle updates to the interactions queue.
     observer: Arc<dyn InteractionsQueueObserver>,
@@ -24,7 +24,7 @@ impl InteractionsQueueManager {
         gateway_client: GatewayClient,
     ) -> Arc<Self> {
         Arc::new(Self {
-            queue: Mutex::new(InteractionsQueue::new()),
+            queue: RwLock::new(InteractionsQueue::new()),
             observer,
             storage,
             gateway_client,
@@ -39,11 +39,13 @@ impl InteractionsQueueManager {
     pub async fn bootstrap(self: Arc<Self>) -> Result<()> {
         // Load queue from local storage.
         if let Some(queue) = self.storage.load_queue().await? {
-            let mut locked_queue = self.queue.lock().await;
+            let mut locked_queue = self.queue.write().await;
             *locked_queue = queue;
 
             // Remove stale data from queue.
             locked_queue.removing_stale();
+
+            drop(locked_queue);
         }
 
         // Notify observer and save the queue to local storage.
@@ -84,8 +86,8 @@ impl InteractionsQueueManager {
         self.handle_queue_update().await;
     }
 
-    pub async fn add_batch(&self, _batch: InteractionQueueBatch) {
-        self.queue.lock().await.add_batch(_batch);
+    pub async fn add_batch(&self, batch: InteractionQueueBatch) {
+        self.queue.write().await.add_batch(batch);
         self.handle_queue_update().await;
     }
 }
@@ -95,8 +97,12 @@ impl InteractionsQueueManager {
     /// Notifies the observer about the updated queue and saves it to the local storage.
     // Note: we probably want this method to not await until the storage is saved
     async fn handle_queue_update(&self) {
-        let queue = self.queue.lock().await;
-        self.observer.handle_update(queue.sorted_items());
+        {
+            let queue = self.queue.read().await;
+            self.observer.handle_update(queue.sorted_items());
+        }
+
+        let mut queue = self.queue.write().await;
         let _ = self.storage.save_queue(queue.clone()).await;
     }
 
@@ -131,7 +137,7 @@ impl InteractionsQueueManager {
     /// Checks the status of every interaction that is currently `InProgress`.
     /// Every interaction which has finished will be updated in the queue.
     async fn check_in_progress_interactions_status(&self) {
-        let mut queue = self.queue.lock().await;
+        let queue = self.queue.read().await;
         let items: Vec<_> = queue
             .items
             .iter()
@@ -140,16 +146,25 @@ impl InteractionsQueueManager {
             })
             .cloned()
             .collect();
+        drop(queue);
 
         // Note: Once Gateway supports checking the status of multiple interactions at the same time,
         // this loop will be replaced with one single call to the Gateway.
         // Related discussion: https://rdxworks.slack.com/archives/C071XGF4G6M/p1740041597061639
+        let mut updated: Vec<InteractionQueueItem> = Vec::new();
         for item in items {
             if let Some(updated_item) = self.get_interaction_status(item).await
             {
-                queue.replace_interaction(updated_item);
+                updated.push(updated_item);
+                //queue.replace_interaction(updated_item);
             }
         }
+
+        let mut queue = self.queue.write().await;
+        for item in updated {
+            queue.replace_interaction(item);
+        }
+        drop(queue);
 
         self.handle_queue_update().await;
     }
@@ -196,12 +211,13 @@ impl InteractionsQueueManager {
     /// If they return an interaction, call `process_interaction()` with it.
     /// Call observer to notify of updated queue.
     async fn check_batch_ready_interactions(&self) {
-        let mut queue = self.queue.lock().await;
+        let mut queue = self.queue.write().await;
         let ready_interactions: Vec<_> = queue
             .batches
             .iter_mut()
             .filter_map(|batch| batch.get_first_if_ready())
             .collect();
+        drop(queue);
 
         for interaction in ready_interactions {
             self.enqueue_and_process_interaction(interaction).await;
@@ -218,7 +234,7 @@ impl InteractionsQueueManager {
         let mut item = item.clone();
         item.status = InteractionQueueItemStatus::InProgress;
 
-        self.queue.lock().await.add_interaction(item.clone());
+        self.queue.write().await.add_interaction(item.clone());
 
         if let InteractionQueueItemKind::Transaction(transaction) = item.kind {
             let request = TransactionSubmitRequest {
@@ -280,13 +296,13 @@ mod tests {
     }
 
     struct MockObserver {
-        handlded_queue: Arc<Mutex<Vec<InteractionQueueItem>>>,
+        handlded_queue: Arc<RwLock<Vec<InteractionQueueItem>>>,
     }
 
     impl MockObserver {
         fn new() -> Self {
             Self {
-                handlded_queue: Arc::new(Mutex::new(Vec::new())),
+                handlded_queue: Arc::new(RwLock::new(Vec::new())),
             }
         }
     }
@@ -318,18 +334,19 @@ mod tests {
         sut.add_interaction(interaction).await;
 
         // Verify that the queue now has 1 item whose status is `InProgress`
-        let queue = sut.queue.lock().await;
+        let queue = sut.queue.read().await;
         assert_eq!(queue.items.len(), 1);
         assert_eq!(
             queue.items[0].status,
             InteractionQueueItemStatus::InProgress
         );
+        drop(queue);
 
         // Wait a bit for the manager to check its status
         async_std::task::sleep(Duration::from_millis(100)).await;
 
         // Verify that the queue now has the item set to `Success`
-        let queue = sut.queue.lock().await;
+        let queue = sut.queue.read().await;
         assert_eq!(queue.items[0].status, InteractionQueueItemStatus::Success);
     }
 
