@@ -249,7 +249,7 @@ impl InteractionsQueueManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Mutex;
+    use test_support::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = InteractionsQueueManager;
@@ -308,13 +308,41 @@ mod tests {
             .with_status(InteractionQueueItemStatus::Success)]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
     }
+    
+}
 
-    // ---- TESTS SUPPORT ----
 
-    // Verifications
+#[cfg(test)]
+mod test_support {
+    use super::*;
+    use std::sync::Mutex;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = InteractionsQueueManager;
+
+    // Helper methods
+
+    /// Creates a new instance of the SUT whose `GatewayClient` returns the given responses and
+    /// bootstraps it.
+    pub(crate) async fn create_and_bootstrap(
+        responses: Vec<MockNetworkingDriverResponse>,
+        observer: Arc<dyn InteractionsQueueObserver>,
+        storage: Arc<dyn InteractionsQueueStorage>,
+    ) -> Arc<SUT> {
+        let mock_networking_driver =
+            MockNetworkingDriver::new_with_responses(responses);
+        let gateway_client = GatewayClient::new(
+            Arc::new(mock_networking_driver),
+            NetworkID::Stokenet,
+        );
+        let sut = SUT::new(observer, storage, gateway_client);
+
+        let _ = sut.clone().bootstrap().await;
+        sut
+    }
 
     /// Verifies that a queue with the given interactions has been notified to the observer and saved in the storage.
-    fn verify_queue_update(
+    pub(crate) fn verify_queue_update(
         observer: Arc<MockObserver>,
         storage: Arc<MockStorage>,
         expected_queue: InteractionsQueue,
@@ -328,16 +356,38 @@ mod tests {
         assert_eq!(saved_queue, expected_queue);
     }
 
+    // Mock Responses
+
+    pub(crate) fn submit_transaction_response() -> MockNetworkingDriverResponse {
+        let response = TransactionSubmitResponse { duplicate: false };
+        MockNetworkingDriverResponse::new_success(response)
+    }
+
+    pub(crate) fn transaction_status_response(
+        status: TransactionStatusResponsePayloadStatus,
+    ) -> MockNetworkingDriverResponse {
+        let response = match status {
+            TransactionStatusResponsePayloadStatus::Unknown => TransactionStatusResponse::sample_unknown(),
+            TransactionStatusResponsePayloadStatus::Pending => TransactionStatusResponse::sample_pending(),
+            TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown => TransactionStatusResponse::sample_commit_pending_outcome_unknown(),
+            TransactionStatusResponsePayloadStatus::CommittedSuccess => TransactionStatusResponse::sample_committed_success(),
+            TransactionStatusResponsePayloadStatus::CommittedFailure => TransactionStatusResponse::sample_committed_failure(None),
+            TransactionStatusResponsePayloadStatus::PermanentlyRejected => TransactionStatusResponse::sample_permanently_rejected(None),
+            TransactionStatusResponsePayloadStatus::TemporarilyRejected => TransactionStatusResponse::sample_temporarily_rejected(),
+        };
+        MockNetworkingDriverResponse::new_success(response)
+    }
+
     // Mock implementations
 
-    struct MockStorage {
+    pub(crate) struct MockStorage {
         saved_queue: Arc<Mutex<InteractionsQueue>>,
         stubbed_save_queue_result: Result<()>,
         stubbed_load_queue_result: Result<Option<InteractionsQueue>>,
     }
 
     impl MockStorage {
-        fn new_empty() -> Self {
+        pub(crate) fn new_empty() -> Self {
             Self {
                 saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
                 stubbed_save_queue_result: Ok(()),
@@ -345,7 +395,7 @@ mod tests {
             }
         }
 
-        fn new_with_queue(queue: InteractionsQueue) -> Self {
+        pub(crate) fn new_with_queue(queue: InteractionsQueue) -> Self {
             Self {
                 saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
                 stubbed_save_queue_result: Ok(()),
@@ -353,7 +403,7 @@ mod tests {
             }
         }
 
-        fn new_with_error() -> Self {
+        pub(crate) fn new_with_error() -> Self {
             Self {
                 saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
                 stubbed_save_queue_result: Err(CommonError::Unknown),
@@ -374,12 +424,12 @@ mod tests {
         }
     }
 
-    struct MockObserver {
+    pub(crate) struct MockObserver {
         updated_queue: Arc<Mutex<Vec<InteractionQueueItem>>>,
     }
 
     impl MockObserver {
-        fn new() -> Self {
+        pub(crate) fn new() -> Self {
             Self {
                 updated_queue: Arc::new(Mutex::new(Vec::new())),
             }
@@ -391,48 +441,5 @@ mod tests {
         fn handle_update(&self, queue: Vec<InteractionQueueItem>) {
             *self.updated_queue.lock().unwrap() = queue;
         }
-    }
-
-    // Helper methods
-
-    /// Creates a new instance of the SUT whose `GatewayClient` returns the given responses and
-    /// bootstraps it.
-    async fn create_and_bootstrap(
-        responses: Vec<MockNetworkingDriverResponse>,
-        observer: Arc<dyn InteractionsQueueObserver>,
-        storage: Arc<dyn InteractionsQueueStorage>,
-    ) -> Arc<SUT> {
-        let mock_networking_driver =
-            MockNetworkingDriver::new_with_responses(responses);
-        let gateway_client = GatewayClient::new(
-            Arc::new(mock_networking_driver),
-            NetworkID::Stokenet,
-        );
-        let sut = SUT::new(observer, storage, gateway_client);
-
-        let _ = sut.clone().bootstrap().await;
-        sut
-    }
-
-    // Mock Responses
-
-    fn submit_transaction_response() -> MockNetworkingDriverResponse {
-        let response = TransactionSubmitResponse { duplicate: false };
-        MockNetworkingDriverResponse::new_success(response)
-    }
-
-    fn transaction_status_response(
-        status: TransactionStatusResponsePayloadStatus,
-    ) -> MockNetworkingDriverResponse {
-        let response = match status {
-            TransactionStatusResponsePayloadStatus::Unknown => TransactionStatusResponse::sample_unknown(),
-            TransactionStatusResponsePayloadStatus::Pending => TransactionStatusResponse::sample_pending(),
-            TransactionStatusResponsePayloadStatus::CommitPendingOutcomeUnknown => TransactionStatusResponse::sample_commit_pending_outcome_unknown(),
-            TransactionStatusResponsePayloadStatus::CommittedSuccess => TransactionStatusResponse::sample_committed_success(),
-            TransactionStatusResponsePayloadStatus::CommittedFailure => TransactionStatusResponse::sample_committed_failure(None),
-            TransactionStatusResponsePayloadStatus::PermanentlyRejected => TransactionStatusResponse::sample_permanently_rejected(None),
-            TransactionStatusResponsePayloadStatus::TemporarilyRejected => TransactionStatusResponse::sample_temporarily_rejected(),
-        };
-        MockNetworkingDriverResponse::new_success(response)
     }
 }
