@@ -56,6 +56,19 @@ impl IntentSetInternalState {
             }
         }
     }
+    pub(crate) fn update_with_entity_not_signed_for(
+        &mut self,
+        not_signed: EntityNotSignedFor,
+    ) {
+        match self {
+            Self::Unsecurified(unsec) => {
+                unsec.update_with_entity_not_signed_for(not_signed)
+            }
+            Self::Securified(sec) => {
+                sec.update_with_entity_not_signed_for(not_signed)
+            }
+        }
+    }
 }
 impl From<(SecurityShieldApplicationWithTransactionIntents, IntentSetID)>
     for IntentSetInternalState

@@ -52,6 +52,14 @@ impl UnsecurifiedIntentSetInternalState {
         self.transaction_intent.transaction_intent_hash()
     }
 
+    pub(crate) fn update_with_entity_not_signed_for(
+        &mut self,
+        not_signed: EntityNotSignedFor,
+    ) {
+        self.signatures
+            .update_with_entity_not_signed_for(not_signed);
+    }
+
     pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,

@@ -143,6 +143,27 @@ impl SecurifiedIntentSetInternalState {
         self.get_variant_state_by_variant(*variant)
     }
 
+    pub(crate) fn update_with_entity_not_signed_for(
+        &mut self,
+        not_signed: EntityNotSignedFor,
+    ) {
+        assert_eq!(
+            not_signed.entity.address(),
+            self.entity_applying_shield.address()
+        );
+        assert_eq!(
+            not_signed.context.intent_set_id,
+            *self.intent_set_id
+        );
+
+        let variant_state = self.get_variant_state_by_txid(
+            not_signed.intent.transaction_intent_hash(),
+        );
+
+        variant_state
+            .update_with_entity_not_signed_for(not_signed.clone());
+    }
+
     pub(crate) fn update_with_entity_signed_for(
         &mut self,
         intent_with_signatures: EntitySignedFor,

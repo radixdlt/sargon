@@ -175,7 +175,7 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
                 petitions,
             );
         };
-
+ 
         /*
         struct DelayedConfirmationForEntity {
             entity_for_display: EntityForDisplay,

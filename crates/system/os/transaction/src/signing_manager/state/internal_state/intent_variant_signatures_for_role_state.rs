@@ -26,6 +26,14 @@ impl IntentVariantSignaturesForRoleState {
         Ok(self.signatures_per_entity.clone())
     }
 
+    pub(crate) fn update_with_entity_not_signed_for(
+        &mut self,
+        not_signed: EntityNotSignedFor,
+    ) {
+        assert_eq!(not_signed.role_kind(), self.role);
+        todo!("Implement");
+    }
+
     pub(crate) fn update_with_intent_with_signatures(
         &mut self,
         intent_with_signatures: EntitySignedFor,

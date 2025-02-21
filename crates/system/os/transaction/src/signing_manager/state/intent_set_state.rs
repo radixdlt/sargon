@@ -37,4 +37,14 @@ impl IntentSetState {
         self.internal_state
             .update_with_entity_signed_for(intent_with_signatures);
     }
+
+
+        pub(crate) fn update_with_entity_not_signed_for(
+            &mut self,
+            not_signed: EntityNotSignedFor,
+        ) {
+            assert_eq!(self.intent_set_id, not_signed.intent_set_id());
+            self.internal_state
+                .update_with_entity_not_signed_for(not_signed);
+        }
 }

@@ -53,7 +53,12 @@ impl SigningManagerState {
         &mut self,
         not_signed: EntityNotSignedFor,
     ) {
-        todo!("Neglected factor logic goes here? ")
+        let key = not_signed.intent_set_id();
+        let existing = self
+            .per_set_state
+            .get_mut(&key)
+            .expect("Should have created");
+        existing.update_with_entity_not_signed_for(not_signed);
     }
 
     fn update_with_entity_signed_for(
