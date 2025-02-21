@@ -65,9 +65,11 @@ impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S>
         Some(InvalidTransactionIfNeglected::new(
             signable_id,
             [],
-            entities.map(|e| {
+            entities.into_iter().map(|e| {
                 InvalidTransactionForEntity::new(
-                    self.get_entity_by_address.get_entity_by_address(e),
+                    self.get_entity_by_address
+                        .entity_for_display_by_address(e)
+                        .expect("Should have had entity"),
                     None,
                 )
             }),
@@ -667,26 +669,38 @@ mod tests {
 
             #[actix_rt::test]
             async fn prudent_user_single_tx_two_accounts_same_factor_source() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        Account::sample_unsecurified_mainnet(
-                            "A0",
-                            HierarchicalDeterministicFactorInstance::new_for_entity(
-                                FactorSourceIDFromHash::sample_at(0),
-                                CAP26EntityKind::Account,
-                                Hardened::from_local_key_space(U31::ZERO, IsSecurified(false)).unwrap(),
-                            ),
+                let entities = vec![
+                    Account::sample_unsecurified_mainnet(
+                        "A0",
+                        HierarchicalDeterministicFactorInstance::new_for_entity(
+                            FactorSourceIDFromHash::sample_at(0),
+                            CAP26EntityKind::Account,
+                            Hardened::from_local_key_space(
+                                U31::ZERO,
+                                IsSecurified(false),
+                            )
+                            .unwrap(),
                         ),
-                        Account::sample_unsecurified_mainnet(
-                            "A1",
-                            HierarchicalDeterministicFactorInstance::new_for_entity(
-                                FactorSourceIDFromHash::sample_at(0),
-                                CAP26EntityKind::Account,
-                                Hardened::from_local_key_space(U31::ONE, IsSecurified(false)).unwrap(),
-                            ),
+                    ),
+                    Account::sample_unsecurified_mainnet(
+                        "A1",
+                        HierarchicalDeterministicFactorInstance::new_for_entity(
+                            FactorSourceIDFromHash::sample_at(0),
+                            CAP26EntityKind::Account,
+                            Hardened::from_local_key_space(
+                                U31::ONE,
+                                IsSecurified(false),
+                            )
+                            .unwrap(),
                         ),
-                    ])
-                ]);
+                    ),
+                ];
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::new(entities.clone(), [], [])),
+                    [SignableWithEntities::<TransactionIntent>::sample(
+                        entities,
+                    )],
+                );
 
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
@@ -725,12 +739,14 @@ mod tests {
             #[actix_rt::test]
             async fn prudent_user_single_tx_two_accounts_different_factor_sources(
             ) {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        Account::sample_at(0),
-                        Account::sample_at(1),
-                    ]),
-                ]);
+                let entities =
+                    vec![Account::sample_at(0), Account::sample_at(1)];
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::new(entities.clone(), [], [])),
+                    [SignableWithEntities::<TransactionIntent>::sample(
+                        entities,
+                    )],
+                );
 
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
@@ -807,11 +823,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e0<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(0),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(0);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -825,7 +843,10 @@ mod tests {
                 let tx = SignableWithEntities::<TransactionIntent>::sample([
                     sample.clone(),
                 ]);
-                let collector = SignaturesCollector::test_prudent([tx.clone()]);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([sample.clone()])),
+                    [tx.clone()],
+                );
                 let signature = &collector
                     .collect_signatures()
                     .await
@@ -864,7 +885,10 @@ mod tests {
                 let tx = SignableWithEntities::<TransactionIntent>::sample([
                     entity.clone(),
                 ]);
-                let collector = SignaturesCollector::test_prudent([tx.clone()]);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [tx.clone()],
+                );
                 let signature = &collector
                     .collect_signatures()
                     .await
@@ -883,7 +907,10 @@ mod tests {
                 let tx = SignableWithEntities::<TransactionIntent>::sample([
                     entity.clone(),
                 ]);
-                let collector = SignaturesCollector::test_prudent([tx.clone()]);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [tx.clone()],
+                );
                 let signature = &collector
                     .collect_signatures()
                     .await
@@ -904,11 +931,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e1<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(1),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(1);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -916,11 +945,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e2<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(2),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(2);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -928,11 +959,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e3<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(3),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(3);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity.clone(),
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -940,11 +973,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e4<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(4),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(4);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -952,11 +987,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e5<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(5),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(5);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -964,11 +1001,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e6<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(6),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(6);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -976,11 +1015,13 @@ mod tests {
             }
 
             async fn prudent_user_single_tx_e7<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_prudent([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(7),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(7);
+                let collector = SignaturesCollector::test_prudent(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -991,12 +1032,14 @@ mod tests {
             async fn lazy_sign_minimum_user_single_tx_e0<
                 E: IsEntity + 'static,
             >() {
+                let entity = sample_at::<E>(0);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(0),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1006,12 +1049,14 @@ mod tests {
             async fn lazy_sign_minimum_user_single_tx_e1<
                 E: IsEntity + 'static,
             >() {
+                let entity = sample_at::<E>(1);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(1),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1021,12 +1066,14 @@ mod tests {
             async fn lazy_sign_minimum_user_single_tx_e2<
                 E: IsEntity + 'static,
             >() {
+                let entity = sample_at::<E>(2);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(2),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1034,12 +1081,14 @@ mod tests {
             }
 
             async fn lazy_sign_minimum_user_e3<E: IsEntity + 'static>() {
+                let entity = sample_at::<E>(3);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(3),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1047,12 +1096,14 @@ mod tests {
             }
 
             async fn lazy_sign_minimum_user_e4<E: IsEntity + 'static>() {
+                let entity = sample_at::<E>(4);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(4),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1060,12 +1111,14 @@ mod tests {
             }
 
             async fn lazy_sign_minimum_user_e5<E: IsEntity + 'static>() {
+                let entity = sample_at::<E>(5);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(5),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1073,12 +1126,14 @@ mod tests {
             }
 
             async fn lazy_sign_minimum_user_e6<E: IsEntity + 'static>() {
+                let entity = sample_at::<E>(6);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(6),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1087,12 +1142,14 @@ mod tests {
             }
 
             async fn lazy_sign_minimum_user_e7<E: IsEntity + 'static>() {
+                let entity = sample_at::<E>(7);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_at::<E>(7),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1105,11 +1162,12 @@ mod tests {
             >() {
                 let entity = sample_at::<E>(5);
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
                             entity.clone(),
-                        ]),
-                    ]);
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1134,33 +1192,34 @@ mod tests {
             async fn lazy_sign_minimum_all_known_factors_used_as_override_factors_signed_with_device_for_entity<
                 E: IsEntity + 'static,
             >() {
+                let entity = sample_securified_mainnet::<E>(
+                    "Alice",
+                    0,
+                    if E::entity_kind() == CAP26EntityKind::Identity {
+                        HierarchicalDeterministicFactorInstance::sample_fii10()
+                    } else {
+                        HierarchicalDeterministicFactorInstance::sample_fia10()
+                    },
+                    || {
+                        GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
+                        RoleKind::Primary, [], 0,
+                        FactorSource::sample_all().into_iter().map(|f| {
+                            HierarchicalDeterministicFactorInstance::new_for_entity(
+                                *f.factor_source_id().as_hash().unwrap(),
+                                 E::entity_kind(),
+                                Hardened::from_local_key_space(U31::ZERO, IsSecurified(true)).unwrap(),
+                            )
+                        }),
+                    ).unwrap()
+                    },
+                );
                 let collector =
-                    SignaturesCollector::test_lazy_sign_minimum_no_failures([
-                        SignableWithEntities::<TransactionIntent>::sample([
-                            sample_securified_mainnet::<E>(
-                                "Alice",
-                                0,
-                                if E::entity_kind() == CAP26EntityKind::Identity
-                                {
-                                    HierarchicalDeterministicFactorInstance::sample_fii10()
-                                } else {
-                                    HierarchicalDeterministicFactorInstance::sample_fia10()
-                                },
-                                || {
-                                    GeneralRoleWithHierarchicalDeterministicFactorInstances::with_factors_and_role(
-                                    RoleKind::Primary, [], 0,
-                                    FactorSource::sample_all().into_iter().map(|f| {
-                                        HierarchicalDeterministicFactorInstance::new_for_entity(
-                                            *f.factor_source_id().as_hash().unwrap(),
-                                             E::entity_kind(),
-                                            Hardened::from_local_key_space(U31::ZERO, IsSecurified(true)).unwrap(),
-                                        )
-                                    }),
-                                ).unwrap()
-                                },
-                            ),
-                        ]),
-                    ]);
+                    SignaturesCollector::test_lazy_sign_minimum_no_failures(
+                        Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                        [SignableWithEntities::<TransactionIntent>::sample([
+                            entity,
+                        ])],
+                    );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1182,11 +1241,13 @@ mod tests {
             async fn lazy_always_skip_user_single_tx_e0<
                 E: IsEntity + 'static,
             >() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(0),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(0);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1196,9 +1257,11 @@ mod tests {
             async fn fail_get_neglected_e0<E: IsEntity + 'static>() {
                 let failing =
                     IndexSet::<_>::just(FactorSourceIDFromHash::sample_at(0));
+                let entity = sample_at::<E>(0);
                 let collector = SignaturesCollector::test_prudent_with_failures(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
                     [SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(0),
+                        entity,
                     ])],
                     SimulatedFailures::with_simulated_failures(failing.clone()),
                 );
@@ -1211,11 +1274,13 @@ mod tests {
             async fn lazy_always_skip_user_single_tx_e1<
                 E: IsEntity + 'static,
             >() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(1),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(1);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1225,11 +1290,13 @@ mod tests {
             async fn lazy_always_skip_user_single_tx_e2<
                 E: IsEntity + 'static,
             >() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(2),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(2);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1237,11 +1304,13 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e3<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(3),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(3);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1249,11 +1318,13 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e4<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(4),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(4);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1261,11 +1332,13 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e5<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(5),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(5);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1273,11 +1346,13 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e6<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(6),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(6);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1285,11 +1360,13 @@ mod tests {
             }
 
             async fn lazy_always_skip_user_e7<E: IsEntity + 'static>() {
-                let collector = SignaturesCollector::test_lazy_always_skip([
-                    SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(7),
-                    ]),
-                ]);
+                let entity = sample_at::<E>(7);
+                let collector = SignaturesCollector::test_lazy_always_skip(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
+                    [SignableWithEntities::<TransactionIntent>::sample([
+                        entity,
+                    ])],
+                );
                 let outcome = collector.collect_signatures().await.unwrap();
                 assert!(!outcome.successful());
                 let signatures = outcome.all_signatures();
@@ -1297,9 +1374,11 @@ mod tests {
             }
 
             async fn failure_e0<E: IsEntity + 'static>() {
+                let entity = sample_at::<E>(0);
                 let collector = SignaturesCollector::test_prudent_with_failures(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
                     [SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(0),
+                        entity,
                     ])],
                     SimulatedFailures::with_simulated_failures([
                         FactorSourceIDFromHash::sample_at(0),
@@ -1320,11 +1399,13 @@ mod tests {
             }
 
             async fn failure_e5<E: IsEntity + 'static>() {
+                let entity = sample_at::<E>(5);
                 let collector = SignaturesCollector::new_test(
                     SigningFinishEarlyStrategy::r#continue(),
                     FactorSource::sample_all(),
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
                     [SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(5),
+                        entity,
                     ])],
                     SimulatedUser::prudent_with_failures(
                         SimulatedFailures::with_simulated_failures([
@@ -1351,9 +1432,11 @@ mod tests {
             async fn building_can_succeed_even_if_one_factor_source_fails_assert_ids_of_successful_tx_e4<
                 E: IsEntity + 'static,
             >() {
+                let entity = sample_at::<E>(4);
                 let collector = SignaturesCollector::test_prudent_with_failures(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
                     [SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(4),
+                        entity,
                     ])],
                     SimulatedFailures::with_simulated_failures([
                         FactorSourceIDFromHash::sample_at(3),
@@ -1377,9 +1460,11 @@ mod tests {
             async fn building_can_succeed_even_if_one_factor_source_fails_assert_ids_of_failed_tx_e4<
                 E: IsEntity + 'static,
             >() {
+                let entity = sample_at::<E>(4);
                 let collector = SignaturesCollector::test_prudent_with_failures(
+                    Arc::new(ProtoProfile::with_entities([entity.clone()])),
                     [SignableWithEntities::<TransactionIntent>::sample([
-                        sample_at::<E>(4),
+                        entity,
                     ])],
                     SimulatedFailures::with_simulated_failures([
                         FactorSourceIDFromHash::sample_at(3),

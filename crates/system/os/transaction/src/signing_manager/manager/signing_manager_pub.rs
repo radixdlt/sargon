@@ -8,6 +8,7 @@ use super::signing_manager_dependencies::SigningManagerDependencies;
 impl SigningManager {
     pub(crate) fn new(
         factor_sources_in_profile: impl IntoIterator<Item = FactorSource>,
+        get_entities_by_address: Arc<dyn GetEntityByAddress>,
         sign_interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         saver_of_intents_to_confirm_after_delay: SaveIntentsToConfirmAfterDelayClient,
         intent_sets: impl IntoIterator<
@@ -18,6 +19,7 @@ impl SigningManager {
         Self {
             dependencies: SigningManagerDependencies::new(
                 factor_sources_in_profile,
+                get_entities_by_address,
                 sign_interactor,
                 saver_of_intents_to_confirm_after_delay,
             )

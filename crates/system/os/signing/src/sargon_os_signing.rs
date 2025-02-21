@@ -82,7 +82,9 @@ impl OsSigning for SargonOS {
             SigningFinishEarlyStrategy::default(),
             vec![signable.clone()],
             sign_interactor,
-            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::<S>::new()),
+            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::<S>::new(Arc::new(
+                profile.clone(),
+            ))),
             profile,
             purpose,
         )?;

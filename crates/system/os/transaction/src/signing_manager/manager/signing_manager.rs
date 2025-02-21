@@ -105,7 +105,9 @@ impl SigningManager {
             self.factor_sources_in_profile.clone(),
             adapter.transactions_with_petitions(),
             self.interactor.clone(),
-            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::new()),
+            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::new(
+                self.get_entities_by_address.clone(),
+            )),
             purpose,
         );
 

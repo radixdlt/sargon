@@ -44,14 +44,20 @@ pub trait ProfilePersonaByAddress {
 }
 
 pub trait GetEntityByAddress:
-    ProfileAccountByAddress + ProfileEntityByAddress + ProfilePersonaByAddress
+    ProfileAccountByAddress
+    + ProfileEntityByAddress
+    + ProfilePersonaByAddress
+    + Send
+    + Sync
 {
 }
 
 impl<
         T: ProfileAccountByAddress
             + ProfileEntityByAddress
-            + ProfilePersonaByAddress,
+            + ProfilePersonaByAddress
+            + Send
+            + Sync,
     > GetEntityByAddress for T
 {
 }

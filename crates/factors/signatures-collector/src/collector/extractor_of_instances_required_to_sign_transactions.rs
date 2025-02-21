@@ -39,7 +39,7 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
     }
 }
 
-#[cfg(test)]
+#[cfg(debug_assertions)]
 #[derive(Debug, Default)]
 pub(crate) struct ProtoProfile {
     pub(crate) accounts: Vec<Account>,
@@ -47,9 +47,9 @@ pub(crate) struct ProtoProfile {
     pub(crate) factor_sources: Vec<FactorSource>,
 }
 
-#[cfg(test)]
+#[cfg(debug_assertions)]
 impl ProtoProfile {
-    pub(crate) fn new(
+    pub fn new(
         accounts: impl IntoIterator<Item = Account>,
         personas: impl IntoIterator<Item = Persona>,
         factor_sources: impl IntoIterator<Item = FactorSource>,
@@ -60,9 +60,25 @@ impl ProtoProfile {
             factor_sources: factor_sources.into_iter().collect(),
         }
     }
+    pub fn with_entities(
+        entities: impl IntoIterator<Item = AccountOrPersona>,
+    ) -> Self {
+        let entities = entities.into_iter().collect_vec();
+        let accounts = entities
+            .iter()
+            .filter_map(|e| e.as_account_entity())
+            .cloned()
+            .collect_vec();
+        let personas = entities
+            .iter()
+            .filter_map(|e| e.as_persona_entity())
+            .cloned()
+            .collect_vec();
+        Self::new(accounts, personas, [])
+    }
 }
 
-#[cfg(test)]
+#[cfg(debug_assertions)]
 impl ProfileAccountByAddress for ProtoProfile {
     fn account_by_address(&self, address: AccountAddress) -> Result<Account> {
         self.accounts
@@ -72,7 +88,7 @@ impl ProfileAccountByAddress for ProtoProfile {
             .ok_or(CommonError::UnknownAccount)
     }
 }
-#[cfg(test)]
+#[cfg(debug_assertions)]
 impl ProfilePersonaByAddress for ProtoProfile {
     fn persona_by_address(&self, address: IdentityAddress) -> Result<Persona> {
         self.personas
@@ -82,7 +98,7 @@ impl ProfilePersonaByAddress for ProtoProfile {
             .ok_or(CommonError::UnknownPersona)
     }
 }
-#[cfg(test)]
+#[cfg(debug_assertions)]
 impl ProfileEntityByAddress for ProtoProfile {
     fn entity_by_address(
         &self,
@@ -103,7 +119,7 @@ impl ProfileEntityByAddress for ProtoProfile {
         Err(CommonError::Unknown)
     }
 }
-#[cfg(test)]
+#[cfg(debug_assertions)]
 impl HasFactorSources for ProtoProfile {
     fn factor_sources(&self) -> IndexSet<FactorSource> {
         self.factor_sources.iter().cloned().collect()
