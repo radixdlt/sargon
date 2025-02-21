@@ -22,6 +22,20 @@ pub struct InteractionQueueBatch {
 }
 
 impl InteractionQueueBatch {
+    pub fn new(
+        id: Uuid,
+        interactions: impl IntoIterator<Item = InteractionQueueItem>,
+        original_interactions: impl IntoIterator<Item = Uuid>,
+    ) -> Self {
+        Self {
+            id,
+            interactions: Vec::from_iter(interactions),
+            original_interactions: Vec::from_iter(original_interactions),
+        }
+    }
+}
+
+impl InteractionQueueBatch {
     /// Returns the estimated amount of time in seconds before this batch is fully processed.
     pub fn estimated_remaining_seconds(&self) -> usize {
         let average = ((INTERACTION_QUEUE_BATCH_MIN_DELAY

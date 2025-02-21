@@ -255,6 +255,58 @@ mod tests {
     type SUT = InteractionsQueueManager;
 
     #[actix_rt::test]
+    async fn bootstrap_loads_empty_queue() {
+        // Test the case the queue loaded from storage is empty.
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let _ = create_and_bootstrap(vec![], observer.clone(), storage.clone())
+            .await;
+
+        // Verify empty queue update
+        let expected_queue = InteractionsQueue::with_items(vec![]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
+    async fn bootstrap_loads_queue_with_stale_data() {
+        // Test the case the queue loaded from storage has some stale data
+
+        // Set up the Queue with 4 interactions and 2 batches
+        let interaction_in_progress =
+            InteractionQueueItem::sample_in_progress();
+        let interaction_suceess = InteractionQueueItem::sample_success();
+        let interaction_failed = InteractionQueueItem::sample_failed();
+
+        let batch_empty = InteractionQueueBatch::empty();
+        let batch_non_empty = InteractionQueueBatch::with_items([
+            InteractionQueueItem::sample_queued(),
+        ]);
+
+        let stored_queue = InteractionsQueue::with_items_and_batches(
+            [
+                interaction_in_progress.clone(),
+                interaction_suceess.clone(),
+                interaction_failed.clone(),
+            ],
+            [batch_empty.clone(), batch_non_empty.clone()],
+        );
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_with_queue(stored_queue));
+        let _ = create_and_bootstrap(vec![], observer.clone(), storage.clone())
+            .await;
+
+        // Verify queue update doesn't contain stale data
+        // This is, the success interaction and the empty batch were removed
+        let expected_queue = InteractionsQueue::with_items_and_batches(
+            [interaction_in_progress, interaction_failed],
+            [batch_non_empty],
+        );
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
     async fn add_interaction_and_react_to_status_updates() {
         // Test the case an interaction is added to the queue, and after the first check its status is updated.
 
@@ -275,10 +327,7 @@ mod tests {
         .await;
 
         // Add the interaction to the queue
-        let interaction = InteractionQueueItem::new_in_progress(
-            false,
-            InteractionQueueItemKind::sample(),
-        );
+        let interaction = InteractionQueueItem::sample_queued();
         sut.add_interaction(interaction.clone()).await;
 
         // Verify that the queue now has 1 item whose status is `InProgress`
@@ -308,9 +357,7 @@ mod tests {
             .with_status(InteractionQueueItemStatus::Success)]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
     }
-    
 }
-
 
 #[cfg(test)]
 mod test_support {
@@ -358,7 +405,8 @@ mod test_support {
 
     // Mock Responses
 
-    pub(crate) fn submit_transaction_response() -> MockNetworkingDriverResponse {
+    pub(crate) fn submit_transaction_response() -> MockNetworkingDriverResponse
+    {
         let response = TransactionSubmitResponse { duplicate: false };
         MockNetworkingDriverResponse::new_success(response)
     }
