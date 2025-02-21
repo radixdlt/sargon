@@ -294,12 +294,11 @@ mod integration_tests {
                 NetworkID::Mainnet,
             );
             manifest = manifest
-                .modify_add_lock_fee_and_proofs(
-                    LockFeeData::new_with_fee(
+                .modify_add_lock_fee(
+                    LockFeeData::new_with_unsecurified_fee_payer(
                         AccountAddress::sample_stokenet(),
                         Decimal192::one(),
                     ),
-                    IndexMap::new(),
                 )
                 .unwrap();
             let manifest_summary = manifest.summary().unwrap();
@@ -360,10 +359,10 @@ mod integration_tests {
                 &persona.address.into(),
                 vec![PublicKeyHash::sample()],
             )
-            .modify_add_lock_fee_and_proofs(
-                LockFeeData::new_with_fee(account.address, Decimal192::one()),
-                IndexMap::new(),
-            )
+            .modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+                account.address,
+                Decimal192::one(),
+            ))
             .unwrap();
             let manifest_summary = manifest.summary().unwrap();
 
