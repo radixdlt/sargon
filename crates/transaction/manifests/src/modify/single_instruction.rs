@@ -45,3 +45,26 @@ where
     }
     instruction[0].clone()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(
+        expected = "Expected single instruction. You MUST NOT chain calls with the manifest builder."
+    )]
+    fn single_instruction_when_more_than_one_panic() {
+        _ = single_instruction(|b| b.drop_all_proofs().drop_auth_zone_proofs())
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Expected single instruction. You MUST NOT chain calls with the manifest builder."
+    )]
+    fn single_instruction_v2_when_more_than_one_panic() {
+        _ = single_instruction_v2(|b| {
+            b.drop_all_proofs().drop_auth_zone_proofs()
+        })
+    }
+}
