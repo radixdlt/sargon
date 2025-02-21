@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os-factors"
-version = "1.2.1"
+version = "1.2.2"
 edition = "2021"
 
 [dependencies]
@@ -33,6 +33,7 @@ log = { workspace = true }
 paste = { workspace = true }
 preinterpret = { workspace = true }
 pretty_assertions = { workspace = true }
+rand = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
