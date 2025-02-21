@@ -4,6 +4,7 @@ mod manager;
 mod observer;
 mod queue;
 mod storage;
+mod test_helpers;
 
 pub mod prelude {
     pub use crate::batch::*;

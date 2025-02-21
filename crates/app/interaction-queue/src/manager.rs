@@ -249,78 +249,29 @@ impl InteractionsQueueManager {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = InteractionsQueueManager;
 
-    struct MockStorage {
-        stubbed_save_queue_result: Result<()>,
-        stubbed_load_queue_result: Result<Option<InteractionsQueue>>,
-    }
-
-    impl MockStorage {
-        fn new_empty() -> Self {
-            Self {
-                stubbed_save_queue_result: Ok(()),
-                stubbed_load_queue_result: Ok(None),
-            }
-        }
-
-        fn new_with_queue(queue: InteractionsQueue) -> Self {
-            Self {
-                stubbed_save_queue_result: Ok(()),
-                stubbed_load_queue_result: Ok(Some(queue)),
-            }
-        }
-
-        fn new_with_error() -> Self {
-            Self {
-                stubbed_save_queue_result: Err(CommonError::Unknown),
-                stubbed_load_queue_result: Err(CommonError::Unknown),
-            }
-        }
-    }
-
-    #[async_trait::async_trait]
-    impl InteractionsQueueStorage for MockStorage {
-        async fn save_queue(&self, _queue: InteractionsQueue) -> Result<()> {
-            self.stubbed_save_queue_result.clone()
-        }
-
-        async fn load_queue(&self) -> Result<Option<InteractionsQueue>> {
-            self.stubbed_load_queue_result.clone()
-        }
-    }
-
-    struct MockObserver {
-        handlded_queue: Arc<RwLock<Vec<InteractionQueueItem>>>,
-    }
-
-    impl MockObserver {
-        fn new() -> Self {
-            Self {
-                handlded_queue: Arc::new(RwLock::new(Vec::new())),
-            }
-        }
-    }
-
-    #[async_trait::async_trait]
-    impl InteractionsQueueObserver for MockObserver {
-        fn handle_update(&self, queue: Vec<InteractionQueueItem>) {
-            // TODO: Implement
-        }
-    }
-
     #[actix_rt::test]
-    async fn add_interaction() {
-        let sut = create_and_bootstrap(vec![
-            // Req1: TX is submitted successfully
-            submit_transaction_response(),
-            // Req2: Status endpoint indicates that the TX was committed
-            transaction_status_response(
-                TransactionStatusResponsePayloadStatus::CommittedSuccess,
-            ),
-        ])
+    async fn add_interaction_and_react_to_status_updates() {
+        // Test the case an interaction is added to the queue, and after the first check its status is updated.
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let sut = create_and_bootstrap(
+            vec![
+                // Req1: TX is submitted successfully
+                submit_transaction_response(),
+                // Req2: Status endpoint indicates that the TX was committed
+                transaction_status_response(
+                    TransactionStatusResponsePayloadStatus::CommittedSuccess,
+                ),
+            ],
+            observer.clone(),
+            storage.clone(),
+        )
         .await;
 
         // Add the interaction to the queue
@@ -328,7 +279,7 @@ mod tests {
             false,
             InteractionQueueItemKind::sample(),
         );
-        sut.add_interaction(interaction).await;
+        sut.add_interaction(interaction.clone()).await;
 
         // Verify that the queue now has 1 item whose status is `InProgress`
         let queue = sut.queue.read().await;
@@ -339,19 +290,118 @@ mod tests {
         );
         drop(queue);
 
-        // Wait a bit for the manager to check its status
-        async_std::task::sleep(Duration::from_millis(100)).await;
+        // Verify queue update
+        let expected_queue =
+            InteractionsQueue::with_items(vec![interaction.clone()]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
 
-        // Verify that the queue now has the item set to `Success`
+        // Wait a bit for the manager to check its status
+        async_std::task::sleep(Duration::from_millis(10)).await;
+
+        // Verify that the queue has updated the item status to `Success`
         let queue = sut.queue.read().await;
         assert_eq!(queue.items[0].status, InteractionQueueItemStatus::Success);
+
+        // Verify new queue update
+        let expected_queue = InteractionsQueue::with_items(vec![interaction
+            .clone()
+            .with_status(InteractionQueueItemStatus::Success)]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
     }
 
+    // ---- TESTS SUPPORT ----
+
+    // Verifications
+
+    /// Verifies that a queue with the given interactions has been notified to the observer and saved in the storage.
+    fn verify_queue_update(
+        observer: Arc<MockObserver>,
+        storage: Arc<MockStorage>,
+        expected_queue: InteractionsQueue,
+    ) {
+        // Verify that the observer has been notified with the corresponding interactions
+        let observers_queue = observer.updated_queue.lock().unwrap().clone();
+        assert_eq!(observers_queue, expected_queue.clone().sorted_items());
+
+        // Verify that queue is saved in storage
+        let saved_queue = storage.saved_queue.lock().unwrap().clone();
+        assert_eq!(saved_queue, expected_queue);
+    }
+
+    // Mock implementations
+
+    struct MockStorage {
+        saved_queue: Arc<Mutex<InteractionsQueue>>,
+        stubbed_save_queue_result: Result<()>,
+        stubbed_load_queue_result: Result<Option<InteractionsQueue>>,
+    }
+
+    impl MockStorage {
+        fn new_empty() -> Self {
+            Self {
+                saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
+                stubbed_save_queue_result: Ok(()),
+                stubbed_load_queue_result: Ok(None),
+            }
+        }
+
+        fn new_with_queue(queue: InteractionsQueue) -> Self {
+            Self {
+                saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
+                stubbed_save_queue_result: Ok(()),
+                stubbed_load_queue_result: Ok(Some(queue)),
+            }
+        }
+
+        fn new_with_error() -> Self {
+            Self {
+                saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
+                stubbed_save_queue_result: Err(CommonError::Unknown),
+                stubbed_load_queue_result: Err(CommonError::Unknown),
+            }
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl InteractionsQueueStorage for MockStorage {
+        async fn save_queue(&self, queue: InteractionsQueue) -> Result<()> {
+            *self.saved_queue.lock().unwrap() = queue;
+            self.stubbed_save_queue_result.clone()
+        }
+
+        async fn load_queue(&self) -> Result<Option<InteractionsQueue>> {
+            self.stubbed_load_queue_result.clone()
+        }
+    }
+
+    struct MockObserver {
+        updated_queue: Arc<Mutex<Vec<InteractionQueueItem>>>,
+    }
+
+    impl MockObserver {
+        fn new() -> Self {
+            Self {
+                updated_queue: Arc::new(Mutex::new(Vec::new())),
+            }
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl InteractionsQueueObserver for MockObserver {
+        fn handle_update(&self, queue: Vec<InteractionQueueItem>) {
+            *self.updated_queue.lock().unwrap() = queue;
+        }
+    }
+
+    // Helper methods
+
+    /// Creates a new instance of the SUT whose `GatewayClient` returns the given responses and
+    /// bootstraps it.
     async fn create_and_bootstrap(
         responses: Vec<MockNetworkingDriverResponse>,
+        observer: Arc<dyn InteractionsQueueObserver>,
+        storage: Arc<dyn InteractionsQueueStorage>,
     ) -> Arc<SUT> {
-        let observer = Arc::new(MockObserver::new());
-        let storage = Arc::new(MockStorage::new_empty());
         let mock_networking_driver =
             MockNetworkingDriver::new_with_responses(responses);
         let gateway_client = GatewayClient::new(
