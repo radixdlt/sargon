@@ -83,6 +83,29 @@ impl SigningManager {
     }
 }
 
+struct CrossRoleSkipOutcomeAnalyzerForManager {
+    signing_manager_state_snapshot: SigningManagerState,
+}
+impl CrossRoleSkipOutcomeAnalyzerForManager {
+    fn new(signing_manager_state_snapshot: SigningManagerState) -> Arc<Self> {
+        Arc::new(Self {
+            signing_manager_state_snapshot,
+        })
+    }
+}
+impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
+    for CrossRoleSkipOutcomeAnalyzerForManager
+{
+    fn invalid_transaction_if_neglected_factors(
+        &self,
+        signable_id: TransactionIntentHash,
+        skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+        petitions: Vec<PetitionForEntity<TransactionIntentHash>>,
+    ) -> Option<InvalidTransactionIfNeglected<TransactionIntentHash>> {
+        None
+    }
+}
+
 // Shared Sign Code
 impl SigningManager {
     /// # Throws
@@ -105,9 +128,9 @@ impl SigningManager {
             self.factor_sources_in_profile.clone(),
             adapter.transactions_with_petitions(),
             self.interactor.clone(),
-            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::new(
-                self.get_entities_by_address.clone(),
-            )),
+            CrossRoleSkipOutcomeAnalyzerForManager::new(
+                (*self._get_state()).clone(),
+            ),
             purpose,
         );
 
