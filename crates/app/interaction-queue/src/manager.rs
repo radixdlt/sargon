@@ -44,8 +44,6 @@ impl InteractionsQueueManager {
 
             // Remove stale data from queue.
             locked_queue.removing_stale();
-
-            drop(locked_queue);
         }
 
         // Notify observer and save the queue to local storage.
@@ -156,7 +154,6 @@ impl InteractionsQueueManager {
             if let Some(updated_item) = self.get_interaction_status(item).await
             {
                 updated.push(updated_item);
-                //queue.replace_interaction(updated_item);
             }
         }
 
