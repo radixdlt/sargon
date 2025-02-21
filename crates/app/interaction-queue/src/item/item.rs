@@ -1,6 +1,7 @@
 use crate::prelude::*;
+use std::hash::{Hash, Hasher};
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Serialize, Deserialize, Clone, Eq)]
 /// An item that is part of the interaction queue.
 pub struct InteractionQueueItem {
     /// The identifier of this item.
@@ -47,5 +48,17 @@ impl InteractionQueueItem {
             InteractionQueueItemSummary::new(),
             kind,
         )
+    }
+}
+
+impl PartialEq for InteractionQueueItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Hash for InteractionQueueItem {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
     }
 }
