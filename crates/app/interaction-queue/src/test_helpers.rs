@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::time::Duration;
 
 // Helper methods used in Tests
 
@@ -44,6 +45,18 @@ impl InteractionQueueBatch {
             items.into_iter().map(|i| i.id),
         )
     }
+
+    pub fn dropping_first(&self) -> Self {
+        let mut interactions = self.interactions.clone();
+        interactions.remove(0);
+        if let Some(first) = interactions.get_mut(0) {
+            // Note: this will need to be updated when the duration is actually random
+            first.status = InteractionQueueItemStatus::Next(
+                Timestamp::now_utc().add(Duration::from_secs(35)),
+            );
+        }
+        Self::new(self.id, interactions, self.original_interactions.clone())
+    }
 }
 
 #[cfg(test)]
@@ -51,6 +64,11 @@ impl InteractionQueueItem {
     pub fn sample_queued() -> Self {
         Self::sample_status(InteractionQueueItemStatus::Queued)
     }
+
+    pub fn sample_next(timestamp: Timestamp) -> Self {
+        Self::sample_status(InteractionQueueItemStatus::Next(timestamp))
+    }
+
     pub fn sample_in_progress() -> Self {
         Self::sample_status(InteractionQueueItemStatus::InProgress)
     }
