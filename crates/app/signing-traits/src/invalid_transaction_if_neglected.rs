@@ -129,8 +129,6 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
                 .into_iter()
                 .collect::<IndexSet<_>>();
 
-        assert!(!entities_which_would_require_delayed_confirmation.is_empty(), "'entities_which_would_require_delayed_confirmation' must not be empty, this type is not useful if it is empty.");
-
         assert_eq!(
             entities_which_would_require_delayed_confirmation.len(),
             len,
@@ -247,7 +245,11 @@ mod tests {
             InvalidTransactionForEntity::sample_other(),
         ];
         let no_quick = [DelayedConfirmationForEntity::sample()];
-        let sut = SUT::new(TransactionIntentHash::sample(), no_quick.clone(), would_fail.clone());
+        let sut = SUT::new(
+            TransactionIntentHash::sample(),
+            no_quick.clone(),
+            would_fail.clone(),
+        );
         assert_eq!(
             sut.entities_which_would_fail_auth(),
             IndexSet::<_>::from_iter(would_fail.into_iter())
