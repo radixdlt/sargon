@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use manifests::StaticallyAnalyzableManifest;
 use sargon::TransactionManifest as InternalTransactionManifest;
 
 #[derive(Clone, PartialEq, Eq, uniffi::Record)]
@@ -81,7 +82,8 @@ pub fn transaction_manifest_instructions_string(
 pub fn transaction_manifest_summary(
     manifest: &TransactionManifest,
 ) -> ManifestSummary {
-    manifest.into_internal().summary().unwrap().into()
+    let internal_manifest = manifest.into_internal();
+    internal_manifest.summary().unwrap().into()
 }
 
 #[uniffi::export]

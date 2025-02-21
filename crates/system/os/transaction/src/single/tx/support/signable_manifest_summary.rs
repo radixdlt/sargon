@@ -134,7 +134,11 @@ mod tests {
             &persona.address.into(),
             vec![PublicKeyHash::sample()],
         )
-        .modify_add_lock_fee(&account.address, Some(Decimal192::one()));
+        .modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+            account.address,
+            Decimal192::one(),
+        ))
+        .unwrap();
         let summary = manifest.summary().unwrap();
         let signable = SUT::new(summary.clone());
 

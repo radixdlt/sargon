@@ -48,8 +48,11 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
     ) -> Result<ApplicationInputForUnsecurifiedAccount> {
         let estimated_xrd_fee = input.estimated_xrd_fee;
         let payer = input.paying_account.account_address();
-        input.modifying_manifest(|m| {
-            m.modify_add_lock_fee(&payer, estimated_xrd_fee)
+        input.try_modifying_manifest(|m| {
+            m.modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+                payer,
+                estimated_xrd_fee,
+            ))
         })
     }
 
@@ -59,8 +62,11 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
     ) -> Result<ApplicationInputForUnsecurifiedPersona> {
         let payer = input.payer();
         let estimated_xrd_fee = input.estimated_xrd_fee;
-        input.modifying_manifest(|m| {
-            m.modify_add_lock_fee(&payer.address, estimated_xrd_fee)
+        input.try_modifying_manifest(|m| {
+            m.modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+                payer.address,
+                estimated_xrd_fee,
+            ))
         })
     }
 

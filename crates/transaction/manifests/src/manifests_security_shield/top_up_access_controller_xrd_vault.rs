@@ -5,7 +5,6 @@ use radix_engine_interface::blueprints::access_controller::{
     ACCESS_CONTROLLER_CONTRIBUTE_RECOVERY_FEE_IDENT as SCRYPTO_ACCESS_CONTROLLER_CONTRIBUTE_RECOVERY_FEE_IDENT,
     ACCESS_CONTROLLER_CREATE_PROOF_IDENT as SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
 };
-use radix_transactions::prelude::ManifestBuilder;
 
 use crate::prelude::*;
 
@@ -117,7 +116,8 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             }
         }
 
-        let mut builder = ManifestBuilder::with_manifest(manifest);
+        let mut builder =
+            ScryptoTransactionManifestBuilder::new_with_manifest(manifest);
 
         let address_of_access_controller_to_top_up =
             match entity_applying_shield.security_state() {
