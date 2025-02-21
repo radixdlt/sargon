@@ -319,7 +319,7 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_commiter() {
+    async fn test_committer() {
         do_test(|os, network_id, manifest_and_payer_tuples| {
             Box::pin(async move {
                 let committer =
