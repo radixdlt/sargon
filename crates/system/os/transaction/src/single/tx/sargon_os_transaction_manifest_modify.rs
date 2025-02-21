@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-pub trait SargonOsTransactionModify {
+pub trait SargonOsTransactionManifestModify {
     fn modify_transaction_manifest<G>(
         &self,
         manifest: TransactionManifest,
@@ -12,7 +12,7 @@ pub trait SargonOsTransactionModify {
         G: IntoIterator<Item = TransactionGuarantee>;
 }
 
-impl SargonOsTransactionModify for SargonOS {
+impl SargonOsTransactionManifestModify for SargonOS {
     fn modify_transaction_manifest<G>(
         &self,
         manifest: TransactionManifest,
@@ -88,6 +88,7 @@ impl SargonOsTransactionModify for SargonOS {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::single::support::prepare_xrd_transfer_transaction;
 
     type SUT = SargonOS;
 
@@ -424,29 +425,6 @@ mod tests {
             ;
             "#,
         )
-    }
-
-    fn prepare_xrd_transfer_transaction(
-        from: AccountAddress,
-        to: AccountAddress,
-    ) -> TransactionManifest {
-        let transfers = PerAssetTransfers::new(
-            from,
-            [PerAssetTransfersOfFungibleResource::new(
-                PerAssetFungibleResource::new(
-                    ResourceAddress::xrd_on_network(NetworkID::Mainnet),
-                    18u8,
-                ),
-                [PerAssetFungibleTransfer::new(
-                    AccountOrAddressOf::AddressOfExternalAccount { value: to },
-                    false,
-                    Decimal192::five(),
-                )],
-            )],
-            [],
-        );
-
-        TransactionManifest::per_asset_transfers(transfers)
     }
 
     fn guarantee(index: u64) -> TransactionGuarantee {

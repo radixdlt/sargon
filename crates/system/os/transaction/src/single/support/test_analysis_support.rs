@@ -21,6 +21,35 @@ pub(crate) async fn prepare_os(
     os
 }
 
+pub(crate) async fn prepare_os_with_entities(
+    accounts: impl IntoIterator<Item = Account>,
+    personas: impl IntoIterator<Item = Persona>,
+) -> Arc<SargonOS> {
+    let req = SargonOS::boot_test();
+    let os = actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+        .await
+        .unwrap()
+        .unwrap();
+
+    let accounts = accounts.into_iter().collect_vec();
+    let personas = personas.into_iter().collect_vec();
+
+    os.update_profile_with(|profile| {
+        profile.networks.insert(ProfileNetwork::new(
+            NetworkID::Mainnet,
+            accounts.clone(),
+            personas.clone(),
+            AuthorizedDapps::default(),
+            ResourcePreferences::default(),
+        ));
+        profile.factor_sources.extend(FactorSource::sample_all());
+        Ok(())
+    })
+    .await
+    .unwrap();
+    os
+}
+
 pub(crate) fn prepare_preview_response(
     ledger_state: LedgerState,
     preview_response: TransactionPreviewResponse,
@@ -46,4 +75,27 @@ where
     T: Serialize,
 {
     BagOfBytes::from(serde_json::to_vec(&value).unwrap())
+}
+
+pub(crate) fn prepare_xrd_transfer_transaction(
+    from: AccountAddress,
+    to: AccountAddress,
+) -> TransactionManifest {
+    let transfers = PerAssetTransfers::new(
+        from,
+        [PerAssetTransfersOfFungibleResource::new(
+            PerAssetFungibleResource::new(
+                ResourceAddress::xrd_on_network(NetworkID::Mainnet),
+                18u8,
+            ),
+            [PerAssetFungibleTransfer::new(
+                AccountOrAddressOf::AddressOfExternalAccount { value: to },
+                false,
+                Decimal192::five(),
+            )],
+        )],
+        [],
+    );
+
+    TransactionManifest::per_asset_transfers(transfers)
 }
