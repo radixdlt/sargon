@@ -53,6 +53,23 @@ impl HasFactorSources for Profile {
     }
 }
 
+impl ProfileShieldMetadataById for Profile {
+    fn shield_metadata_by_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureMetadata> {
+        self.app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .iter()
+            .find(|s| s.id() == shield_id)
+            .map(|s| s.metadata.clone())
+            .ok_or(CommonError::UnknownSecurityStructureID {
+                id: shield_id.to_string(),
+            })
+    }
+}
+
 impl ProfileAccountByAddress for Profile {
     /// Looks up the account by account address, returns Err if the account is
     /// unknown, will return a hidden, or tombstoned account if queried for.

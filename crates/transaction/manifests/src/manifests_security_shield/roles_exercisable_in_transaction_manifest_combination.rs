@@ -16,6 +16,7 @@ use radix_engine_interface::blueprints::access_controller::{
     ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT,
     ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
 };
+use radix_rust::indexset;
 
 /// A "selector" of which combination of Roles we can exercise with used
 /// to build different flavours of TransactionManifest for the Security Shield
@@ -108,15 +109,62 @@ pub enum OrderOfInstructionSettingRolaKey {
     MustSetInFutureTxForConfirmRecovery,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-enum RoleInitiatingRecovery {
+/// The role which initiated the recovery proposal.
+#[derive(Clone, Debug, PartialEq, Eq, StdHash)]
+pub enum RoleInitiatingRecovery {
+    /// Recovery was initiated using the `Primary` role.
     Primary,
+    /// Recovery was initiated using the `Recovery` role.
     Recovery,
 }
 
+impl From<RolesExercisableInTransactionManifestCombination>
+    for RoleInitiatingRecovery
+{
+    fn from(
+        roles_combination: RolesExercisableInTransactionManifestCombination,
+    ) -> Self {
+        roles_combination.role_initiating_recovery()
+    }
+}
 impl RolesExercisableInTransactionManifestCombination {
-    pub fn manifest_end_user_gets_to_preview() -> Self {
+    pub fn variants_for_role(role_kind: RoleKind) -> IndexSet<Self> {
+        Self::all()
+            .into_iter()
+            .filter(|v| v.can_exercise_role(role_kind))
+            .collect()
+    }
+    pub fn can_exercise_role(&self, role_kind: RoleKind) -> bool {
+        self.exercisable_roles().contains(&role_kind)
+    }
+
+    pub fn exercisable_roles(&self) -> IndexSet<RoleKind> {
+        match self {
+            Self::InitiateWithPrimaryCompleteWithConfirmation => {
+                indexset![RoleKind::Primary, RoleKind::Confirmation]
+            }
+            Self::InitiateWithRecoveryCompleteWithPrimary => {
+                indexset![RoleKind::Recovery, RoleKind::Primary]
+            }
+            Self::InitiateWithRecoveryCompleteWithConfirmation => {
+                indexset![RoleKind::Recovery, RoleKind::Confirmation]
+            }
+            Self::InitiateWithRecoveryDelayedCompletion => {
+                indexset![RoleKind::Recovery]
+            }
+            Self::InitiateWithPrimaryDelayedCompletion => {
+                indexset![RoleKind::Primary]
+            }
+        }
+    }
+
+    /// "best" means most convenient to user, doing quick confirmation.
+    pub fn best() -> Self {
         Self::InitiateWithRecoveryCompleteWithConfirmation
+    }
+
+    pub fn manifest_end_user_gets_to_preview() -> Self {
+        Self::best()
     }
 
     pub fn all() -> IndexSet<Self> {
@@ -162,13 +210,15 @@ impl RolesExercisableInTransactionManifestCombination {
     }
 
     pub fn can_exercise_primary_role(&self) -> bool {
-        match self {
-            Self::InitiateWithPrimaryCompleteWithConfirmation
-            | Self::InitiateWithPrimaryDelayedCompletion
-            | Self::InitiateWithRecoveryCompleteWithPrimary => true,
-            Self::InitiateWithRecoveryCompleteWithConfirmation
-            | Self::InitiateWithRecoveryDelayedCompletion => false,
-        }
+        self.can_exercise_role(RoleKind::Primary)
+    }
+
+    pub fn can_exercise_recovery_role(&self) -> bool {
+        self.can_exercise_role(RoleKind::Recovery)
+    }
+
+    pub fn can_exercise_confirmation_role(&self) -> bool {
+        self.can_exercise_role(RoleKind::Confirmation)
     }
 
     fn role_initiating_recovery(&self) -> RoleInitiatingRecovery {

@@ -5,13 +5,16 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
+core-collections = { workspace = true }
 entity-by-address = { workspace = true }
+entity-for-display = { workspace = true }
 gateway-client-and-api = { workspace = true }
 manifests = { workspace = true }
 prelude = { workspace = true }
 profile = { workspace = true }
 profile-account-or-persona = { workspace = true }
 profile-logic = { workspace = true }
+profile-supporting-types = { workspace = true }
 radix-connect-models = { workspace = true }
 sargon-os = { workspace = true }
 sargon-os-factors = { workspace = true }

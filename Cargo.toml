@@ -57,8 +57,10 @@ members = [
     "crates/profile/models/account",
     "crates/profile/models/app-preferences",
     "crates/profile/models/base-entity",
+    "crates/profile/models/entity-for-display",
     "crates/profile/models/gateway",
     "crates/profile/models/persona-data",
+    "crates/profile/models/persona-for-display",
     "crates/profile/models/persona",
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
@@ -150,8 +152,10 @@ default-members = [
     "crates/profile/models/account",
     "crates/profile/models/app-preferences",
     "crates/profile/models/base-entity",
+    "crates/profile/models/entity-for-display",
     "crates/profile/models/gateway",
     "crates/profile/models/persona-data",
+    "crates/profile/models/persona-for-display",
     "crates/profile/models/persona",
     "crates/profile/models/profile_SPLIT_ME",
     "crates/profile/models/security-structures",
@@ -252,19 +256,21 @@ gateway-client-and-api = { path = "crates/gateway/client-and-api" }
 gateway-models = { path = "crates/gateway/models" }
 
 # === PROFILE ===
-profile-logic = { path = "crates/profile/logic/logic_SPLIT_ME" }
 account-for-display = { path = "crates/profile/models/account-for-display" }
-profile-account-or-persona = { path = "crates/profile/models/account-or-persona" }
+entity-by-address = { path = "crates/profile/traits/entity-by-address" }
+entity-for-display = { path = "crates/profile/models/entity-for-display" }
+persona-for-display = { path = "crates/profile/models/persona-for-display" }
+profile = { path = "crates/profile/models/profile_SPLIT_ME" }
 profile-account = { path = "crates/profile/models/account" }
+profile-account-or-persona = { path = "crates/profile/models/account-or-persona" }
 profile-app-preferences = { path = "crates/profile/models/app-preferences" }
 profile-base-entity = { path = "crates/profile/models/base-entity" }
 profile-gateway = { path = "crates/profile/models/gateway" }
-profile-persona-data = { path = "crates/profile/models/persona-data" }
+profile-logic = { path = "crates/profile/logic/logic_SPLIT_ME" }
 profile-persona = { path = "crates/profile/models/persona" }
-profile = { path = "crates/profile/models/profile_SPLIT_ME" }
+profile-persona-data = { path = "crates/profile/models/persona-data" }
 profile-security-structures = { path = "crates/profile/models/security-structures" }
 profile-supporting-types = { path = "crates/profile/models/supporting-types" }
-entity-by-address = { path = "crates/profile/traits/entity-by-address" }
 
 # === SARGON - Umbrella crate ===
 sargon = { path = "crates/sargon" }

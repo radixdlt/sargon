@@ -15,6 +15,13 @@ pub struct SecurityStructureMetadata {
     pub flags: SecurityStructureFlags,
 }
 
+pub trait ProfileShieldMetadataById {
+    fn shield_metadata_by_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureMetadata>;
+}
+
 impl Identifiable for SecurityStructureMetadata {
     type ID = SecurityStructureID;
 

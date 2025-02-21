@@ -164,20 +164,41 @@ impl Account {
         let role = make_role();
         assert_eq!(role.get_role_kind(), RoleKind::Primary, "If this tests fails you can update the code below to not be hardcoded to set the primary role...");
         let matrix = unsafe {
+            // This is a completely super weak shield.
+            let threshold_factors = role
+                .get_threshold_factors()
+                .into_iter()
+                .map(FactorInstance::from)
+                .collect_vec();
+            let mut recovery_and_confirmation_override =
+                threshold_factors.clone();
+
+            let primary_override_factors = role
+                .get_override_factors()
+                .into_iter()
+                .map(FactorInstance::from)
+                .collect_vec();
+            if recovery_and_confirmation_override.is_empty() {
+                recovery_and_confirmation_override =
+                    primary_override_factors.clone();
+            }
+
             MatrixOfFactorInstances::unbuilt_with_roles_and_days(
                 PrimaryRoleWithFactorInstances::with_factors(
                     role.get_threshold(),
-                    role.get_threshold_factors()
-                        .into_iter()
-                        .map(FactorInstance::from)
-                        .collect_vec(),
-                    role.get_override_factors()
-                        .into_iter()
-                        .map(FactorInstance::from)
-                        .collect_vec(),
+                    threshold_factors,
+                    primary_override_factors,
                 ),
-                RecoveryRoleWithFactorInstances::empty(),
-                ConfirmationRoleWithFactorInstances::empty(),
+                RecoveryRoleWithFactorInstances::with_factors(
+                    0,
+                    [],
+                    recovery_and_confirmation_override.clone(),
+                ),
+                ConfirmationRoleWithFactorInstances::with_factors(
+                    0,
+                    [],
+                    recovery_and_confirmation_override.clone(),
+                ),
                 TimePeriod::with_days(237),
             )
         };

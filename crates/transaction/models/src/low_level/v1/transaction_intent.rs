@@ -9,6 +9,38 @@ pub struct TransactionIntent {
     pub message: Message,
 }
 
+impl TransactionIntent {
+    pub fn validate_required_signers_are(
+        &self,
+        addresses: impl IntoIterator<Item = AddressOfAccountOrPersona>,
+    ) -> Result<()> {
+        let summary = self.manifest_summary()?;
+        let addresses = addresses.into_iter().collect::<Vec<_>>();
+        let account_addresses = addresses
+            .clone()
+            .into_iter()
+            .filter_map(|a| AccountAddress::try_from(a).ok())
+            .collect::<HashSet<_>>();
+        let identity_addresses = addresses
+            .clone()
+            .into_iter()
+            .filter_map(|a| IdentityAddress::try_from(a).ok())
+            .collect::<HashSet<_>>();
+
+        if !account_addresses.is_superset(&HashSet::from_iter(
+            summary.addresses_of_accounts_requiring_auth.clone(),
+        )) {
+            return Err(CommonError::Unknown); // TODO: Add error
+        }
+        if !identity_addresses.is_superset(&HashSet::from_iter(
+            summary.addresses_of_personas_requiring_auth.clone(),
+        )) {
+            return Err(CommonError::Unknown); // TODO: Add error
+        }
+        Ok(())
+    }
+}
+
 impl From<SignedIntent> for TransactionIntent {
     fn from(val: SignedIntent) -> Self {
         val.intent
@@ -177,6 +209,22 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionIntent;
+
+    #[test]
+    fn txid_depends_on_nonce_in_header() {
+        let sut_0 = SUT::sample();
+        let mut sut_1 = sut_0.clone();
+        sut_1.header.intent_discriminator = IntentDiscriminator32::random();
+        assert_ne!(
+            sut_0.header.intent_discriminator,
+            sut_1.header.intent_discriminator
+        );
+        assert_ne!(sut_0, sut_1);
+        assert_ne!(
+            sut_0.transaction_intent_hash(),
+            sut_1.transaction_intent_hash()
+        );
+    }
 
     #[test]
     fn equality() {

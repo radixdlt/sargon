@@ -2,6 +2,16 @@ use std::ops::Deref;
 
 use crate::prelude::*;
 
+#[async_trait::async_trait]
+pub trait CrossRoleSkipOutcomeAnalyzer<S: Signable>: Send + Sync {
+    fn invalid_transaction_if_neglected_factors(
+        &self,
+        signable_id: S::ID,
+        skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+        petitions: Vec<PetitionForEntity<S::ID>>,
+    ) -> Option<InvalidTransactionIfNeglected<S::ID>>;
+}
+
 /// Petition of signatures for a transaction.
 /// Essentially a wrapper around `Iterator<Item = PetitionForEntity>`.
 #[derive(derive_more::Debug)]
@@ -91,17 +101,26 @@ impl<S: Signable> PetitionForTransaction<S> {
             .flat_map(|x| x.all_signatures())
             .collect::<IndexSet<_>>();
 
-        let neglected_factors = for_entities
+        let flat_neglected_factors = for_entities
             .iter()
             .flat_map(|x| x.all_neglected_factor_sources())
             .collect::<IndexSet<NeglectedFactor>>();
 
-        PetitionTransactionOutcome::new(
-            transaction_valid,
-            self.signable.get_id(),
-            signatures,
-            neglected_factors,
-        )
+        let outcome =
+            PetitionTransactionOutcome::new(
+                transaction_valid,
+                self.signable.get_id(),
+                signatures,
+                for_entities
+                    .iter()
+                    .map(|v| (v.entity, v.all_neglected_factor_sources()))
+                    .collect::<IndexMap<
+                        AddressOfAccountOrPersona,
+                        IndexSet<NeglectedFactor>,
+                    >>(),
+            );
+        assert_eq!(flat_neglected_factors, outcome.neglected_factors());
+        outcome
     }
 
     pub(crate) fn has_tx_failed(&self) -> bool {
@@ -192,34 +211,32 @@ impl<S: Signable> PetitionForTransaction<S> {
 
     pub(crate) fn invalid_transaction_if_neglected_factors(
         &self,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
+        >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
         if self.has_tx_failed() {
             // No need to display already failed tx.
             return None;
         }
-        let entities = self
+
+        let petitions = self
             .for_entities
             .read()
             .expect(
                 "PetitionForTransaction lock should not have been poisoned.",
             )
             .iter()
-            .filter_map(|(_, petition)| {
-                petition.invalid_transaction_if_neglected_factors(
-                    factor_source_ids.clone(),
-                )
-            })
+            .map(|(_, petition)| petition.clone())
             .collect_vec();
 
-        if entities.is_empty() {
-            return None;
-        }
-
-        Some(InvalidTransactionIfNeglected::new(
-            self.signable.get_id(),
-            entities,
-        ))
+        cross_role_skip_outcome_analyzer
+            .invalid_transaction_if_neglected_factors(
+                self.signable.get_id(),
+                factor_source_ids,
+                petitions,
+            )
     }
 
     pub(crate) fn should_neglect_factors_due_to_irrelevant(
@@ -391,7 +408,7 @@ mod tests {
             _ => panic!(),
         };
         let petition = PetitionForEntity::new_securified(
-            intent_hash.clone(),
+            intent_hash,
             AddressOfAccountOrPersona::from(account.address),
             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                 (matrix, RoleKind::Primary),

@@ -57,25 +57,39 @@ mod tests {
 
     use super::*;
 
-    #[actix_rt::test]
-    async fn test() {
+    async fn do_test(
+        act_and_assert: impl Fn(
+            Arc<SargonOS>,
+            NetworkID,
+            Vec<ManifestWithPayerByAddress>,
+        ) -> Pin<Box<dyn Future<Output = ()>>>,
+    ) {
         let network_id = NetworkID::Mainnet;
         let mock_networking_driver =
             MockNetworkingDriver::everyones_rich(network_id);
 
-        let os =
-            SargonOS::boot_test_with_networking_driver(mock_networking_driver)
-                .await
-                .unwrap();
+        let bdfs_mnemonic = MnemonicWithPassphrase::sample_device();
+        let os = SargonOS::boot_test_with_networking_driver_and_bdfs(
+            mock_networking_driver,
+            Some(bdfs_mnemonic),
+        )
+        .await
+        .unwrap();
+
         let bdfs = os.main_bdfs().unwrap();
+        println!("🔮 bdfs: {:?}", bdfs.factor_source_id());
         let ledger = FactorSource::sample_at(1);
-        let arculus = FactorSource::sample_at(3);
         let password = FactorSource::sample_at(5);
         let off_device_mnemonic = FactorSource::sample_at(7);
-        os.add_factor_source(ledger.clone()).await.unwrap();
-        os.add_factor_source(arculus.clone()).await.unwrap();
-        os.add_factor_source(password.clone()).await.unwrap();
-        os.add_factor_source(off_device_mnemonic.clone())
+
+        for fs in FactorSource::sample_all().into_iter() {
+            if fs.factor_source_id() == bdfs.factor_source_id() {
+                continue;
+            }
+            os.add_factor_source(fs).await.unwrap();
+        }
+
+        os.set_main_factor_source(bdfs.factor_source_id())
             .await
             .unwrap();
 
@@ -254,14 +268,69 @@ mod tests {
 
         assert_eq!(manifest_and_payer_tuples.len(), manifests.len());
 
-        let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+        act_and_assert(os, network_id, manifest_and_payer_tuples).await;
+    }
 
-        let txids = committer
-            .commit(network_id, manifest_and_payer_tuples)
-            .await
-            .unwrap();
+    #[actix_rt::test]
+    async fn test_signing_manager() {
+        do_test(|os, network_id, manifest_and_payer_tuples| {
+            Box::pin(async move {
+                struct Interactor;
+                #[async_trait::async_trait]
+                impl SignInteractor<TransactionIntent> for Interactor {
+                    async fn sign(
+                        &self,
+                        request: SignRequest<TransactionIntent>,
+                    ) -> Result<SignResponse<TransactionIntentHash>>
+                    {
+                        TestSignInteractor::new(SimulatedUser::prudent_no_fail())
+                            .sign(request)
+                            .await
+                    }
+                }
+                let interactor = Arc::new(Interactor);
+                let profile = os.profile().unwrap();
+                let tx_builder =    ApplyShieldTransactionsBuilderImpl::with(
+                    profile.clone(),
+                    MockNetworkingDriver::everyones_rich(network_id),
+                );
+                let applications = tx_builder
+                    .build_payload_to_sign(
+                        network_id,
+                        manifest_and_payer_tuples.clone(),
+                    )
+                    .await
+                    .unwrap()
+                    .applications_with_intents;
+                let signing_manager = SigningManager::new(
+                    Arc::new(profile.clone()),
+                    interactor,
+                    SaveIntentsToConfirmAfterDelayClient::new(
+                        EphemeralUnsafeStorage::new(),
+                    ),
+                    applications,
+                );
+                let outcome = signing_manager.sign_intent_sets().await. unwrap();
+                assert_eq!(outcome.0.len(), manifest_and_payer_tuples.len());
+            })
+        })
+        .await
+    }
 
-        assert_eq!(txids.len(), addresses.len());
+    #[actix_rt::test]
+    async fn test_committer() {
+        do_test(|os, network_id, manifest_and_payer_tuples| {
+            Box::pin(async move {
+                let committer =
+                    ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+                let txids = committer
+                    .commit(network_id, manifest_and_payer_tuples.clone())
+                    .await
+                    .unwrap();
+                assert_eq!(txids.len(), manifest_and_payer_tuples.len());
+            })
+        })
+        .await
     }
 
     #[actix_rt::test]
