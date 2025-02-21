@@ -51,7 +51,6 @@ where
             FactorSourceIDFromHash::sample_ledger(),
             IndexSet::from_iter(vec![
                 TransactionSignRequestInput::<S>::sample(),
-                TransactionSignRequestInput::<S>::sample_other(),
             ]),
             IndexSet::just(
                 InvalidTransactionIfNeglected::<S::ID>::sample_other(),

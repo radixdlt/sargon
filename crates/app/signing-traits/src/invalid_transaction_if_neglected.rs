@@ -150,16 +150,18 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
             "entities_which_would_fail_auth must not contain duplicates."
         );
 
-        assert!(entities_which_would_fail_auth
+        let a = entities_which_would_fail_auth
             .iter()
             .map(|e| e.entity_for_display)
-            .collect::<IndexSet<_>>()
-            .is_disjoint(
-                &entities_which_would_require_delayed_confirmation
-                    .iter()
-                    .map(|d| d.entity_for_display)
-                    .collect::<IndexSet<_>>()
-            ),);
+            .collect::<IndexSet<_>>();
+        let b = entities_which_would_require_delayed_confirmation
+            .iter()
+            .map(|d| d.entity_for_display)
+            .collect::<IndexSet<_>>();
+        let intersection = a.intersection(&b).collect_vec();
+        if !intersection.is_empty() {
+            panic!("Entities found both in entities_which_would_fail_auth and entities_which_would_require_delayed_confirmation - this is invalid and can be considered a programmer error. Shared entities: {:?}", intersection);
+        }
 
         Self {
             signable_id,
@@ -195,8 +197,8 @@ impl<ID: SignableID + HasSampleValues> HasSampleValues
     fn sample() -> Self {
         Self::new(
             ID::sample(),
-            [DelayedConfirmationForEntity::sample_other()],
-            [InvalidTransactionForEntity::sample()],
+            [DelayedConfirmationForEntity::sample()],
+            [InvalidTransactionForEntity::sample_other()],
         )
     }
 
@@ -204,7 +206,7 @@ impl<ID: SignableID + HasSampleValues> HasSampleValues
         Self::new(
             ID::sample_other(),
             [DelayedConfirmationForEntity::sample_other()],
-            [InvalidTransactionForEntity::sample_other()],
+            [InvalidTransactionForEntity::sample()],
         )
     }
 }
@@ -214,6 +216,20 @@ mod tests {
     use super::*;
     #[allow(clippy::upper_case_acronyms)]
     type SUT = InvalidTransactionIfNeglected<TransactionIntentHash>;
+
+
+    #[test]
+    fn equality() {
+        assert_eq!(SUT::sample(), SUT::sample());
+        assert_eq!(SUT::sample_other(), SUT::sample_other());
+    }
+
+
+    #[test]
+    fn inequality() {
+        assert_ne!(SUT::sample(), SUT::sample_other());
+    }
+
 
     #[test]
     #[should_panic(

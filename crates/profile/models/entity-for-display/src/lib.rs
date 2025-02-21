@@ -4,10 +4,7 @@ pub mod prelude {
     pub use crate::entity_for_display::*;
 
     pub(crate) use account_for_display::prelude::*;
-    pub(crate) use addresses::{
-        AccountAddress, AddressOfAccountOrPersona, IdentityAddress,
-    };
-    pub(crate) use entity_foundation::prelude::AppearanceID;
+    pub(crate) use addresses::AddressOfAccountOrPersona;
     pub(crate) use has_sample_values::prelude::HasSampleValues;
     pub(crate) use identified_vec_of::prelude::Identifiable;
     pub(crate) use network::prelude::{IsNetworkAware, NetworkID};
