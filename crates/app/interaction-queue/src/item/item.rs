@@ -36,19 +36,6 @@ impl InteractionQueueItem {
             kind,
         }
     }
-
-    pub fn new_in_progress(
-        is_from_browser: bool,
-        kind: InteractionQueueItemKind,
-    ) -> Self {
-        Self::new(
-            Uuid::new_v4(),
-            InteractionQueueItemStatus::InProgress,
-            is_from_browser,
-            InteractionQueueItemSummary::new(),
-            kind,
-        )
-    }
 }
 
 impl PartialEq for InteractionQueueItem {

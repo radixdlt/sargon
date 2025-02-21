@@ -18,7 +18,9 @@ impl InteractionsQueue {
             batches: Vec::new(),
         }
     }
+}
 
+impl InteractionsQueue {
     /// Returns every interaction in the queue, sorted by its status.
     pub fn sorted_items(&self) -> Vec<InteractionQueueItem> {
         let mut all_items: Vec<InteractionQueueItem> = self
