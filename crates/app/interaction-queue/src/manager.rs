@@ -251,9 +251,6 @@ mod tests {
     use super::*;
     use test_support::*;
 
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = InteractionsQueueManager;
-
     #[actix_rt::test]
     async fn bootstrap_loads_empty_queue() {
         // Test the case the queue loaded from storage is empty.
@@ -307,6 +304,20 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn bootstrap_fails_to_load_queue() {
+        // Test the case the queue fails to load from storage.
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_with_error());
+        let _ = create_and_bootstrap(vec![], observer.clone(), storage.clone())
+            .await;
+
+        // Verify empty queue update
+        let expected_queue = InteractionsQueue::with_items(vec![]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
     async fn add_interaction_and_react_to_status_updates() {
         // Test the case an interaction is added to the queue, and after the first check its status is updated.
 
@@ -355,6 +366,70 @@ mod tests {
         let expected_queue = InteractionsQueue::with_items(vec![interaction
             .clone()
             .with_status(InteractionQueueItemStatus::Success)]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
+    async fn add_batch_and_react_when_next_interaction_is_ready() {
+        // Test the case a batch (with three interactions) is added to the queue, and how the manager
+        // reacts when the first interaction is ready to be processed.
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let sut =
+            create_and_bootstrap(vec![], observer.clone(), storage.clone())
+                .await;
+
+        // Set up the batch with 3 interactions
+        let in_half_a_second =
+            Timestamp::now_utc() + Duration::from_millis(500);
+        let interaction_1 = InteractionQueueItem::sample_next(in_half_a_second);
+        let interaction_2 = InteractionQueueItem::sample_queued();
+        let interaction_3 = InteractionQueueItem::sample_queued();
+        let batch = InteractionQueueBatch::with_items([
+            interaction_1.clone(),
+            interaction_2.clone(),
+            interaction_3.clone(),
+        ]);
+        sut.add_batch(batch.clone()).await;
+
+        // Verify that the queue now has the given batch and no interactions
+        let queue = sut.queue.read().await;
+        assert!(queue.items.is_empty());
+        assert_eq!(queue.batches, vec![batch.clone()]);
+        drop(queue);
+
+        // Verify queue update
+        let expected_queue =
+            InteractionsQueue::with_batches(vec![batch.clone()]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+
+        // Wait a bit for the manager to check its status
+        async_std::task::sleep(Duration::from_millis(600)).await;
+
+        // Verify that the queue has now one interaction `InProgress` and that it was removed from the batch
+        let queue = sut.queue.read().await;
+        assert_eq!(
+            queue.items[0].status,
+            InteractionQueueItemStatus::InProgress
+        );
+        assert_eq!(
+            queue.batches[0].interactions,
+            vec![
+                interaction_2.with_status(InteractionQueueItemStatus::Next(
+                    Timestamp::now_utc().add(Duration::from_secs(35))
+                )),
+                interaction_3.clone()
+            ]
+        );
+
+        // Verify new queue update
+        let expected_queue =
+            InteractionsQueue::with_items_and_batches(
+                [interaction_1
+                    .with_status(InteractionQueueItemStatus::InProgress)],
+                [batch.dropping_first()],
+            );
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
     }
 }
