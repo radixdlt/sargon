@@ -16,7 +16,9 @@ impl<S: Signable + 'static> SignaturesCollector<S> {
             all_factor_sources_in_profile,
             transactions,
             interactor,
-            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::new(get_entity_by_address)),
+            Arc::new(NoCrossRoleSkipOutcomeAnalyzer::new(
+                get_entity_by_address,
+            )),
             purpose,
         )
     }
