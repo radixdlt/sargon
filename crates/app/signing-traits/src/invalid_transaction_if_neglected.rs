@@ -240,10 +240,7 @@ mod tests {
 
     #[test]
     fn new() {
-        let would_fail = [
-            InvalidTransactionForEntity::sample(),
-            InvalidTransactionForEntity::sample_other(),
-        ];
+        let would_fail = [InvalidTransactionForEntity::sample_other()];
         let no_quick = [DelayedConfirmationForEntity::sample()];
         let sut = SUT::new(
             TransactionIntentHash::sample(),

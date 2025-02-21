@@ -59,3 +59,18 @@ where
         )
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn per_factor_source_input_sample() {
+        let sample = PerFactorSourceInput::<TransactionIntent>::sample();
+        let sample_other =
+            PerFactorSourceInput::<TransactionIntent>::sample_other();
+        assert_eq!(sample, sample);
+        assert_eq!(sample_other, sample_other);
+        assert_ne!(sample, sample_other);
+    }
+}
