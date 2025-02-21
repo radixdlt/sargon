@@ -29,11 +29,13 @@ pub struct SignaturesCollector<S: Signable> {
 
 pub struct NoCrossRoleSkipOutcomeAnalyzer<S> {
     phantom: PhantomData<S>,
+    get_entity_by_address: Arc<dyn GetEntityByAddress>,
 }
 impl<S> NoCrossRoleSkipOutcomeAnalyzer<S> {
-    pub fn new() -> Self {
+    pub fn new(get_entity_by_address: Arc<dyn GetEntityByAddress>) -> Self {
         Self {
             phantom: PhantomData::<S>,
+            get_entity_by_address,
         }
     }
 }
@@ -43,11 +45,33 @@ impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S>
 {
     fn invalid_transaction_if_neglected_factors(
         &self,
-        signable: S::ID,
+        signable_id: S::ID,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         petitions: Vec<PetitionForEntity<S::ID>>,
     ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
-        None
+        let entities = petitions
+            .iter()
+            .filter_map(|petition| {
+                petition.invalid_transaction_if_neglected_factors(
+                    skipped_factor_source_ids.clone(),
+                )
+            })
+            .collect_vec();
+
+        if entities.is_empty() {
+            return None;
+        }
+
+        Some(InvalidTransactionIfNeglected::new(
+            signable_id,
+            [],
+            entities.map(|e| {
+                InvalidTransactionForEntity::new(
+                    self.get_entity_by_address.get_entity_by_address(e),
+                    None,
+                )
+            }),
+        ))
     }
 }
 

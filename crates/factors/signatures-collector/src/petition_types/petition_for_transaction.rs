@@ -6,7 +6,7 @@ use crate::prelude::*;
 pub trait CrossRoleSkipOutcomeAnalyzer<S: Signable>: Send + Sync {
     fn invalid_transaction_if_neglected_factors(
         &self,
-        signable: S::ID,
+        signable_id: S::ID,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         petitions: Vec<PetitionForEntity<S::ID>>,
     ) -> Option<InvalidTransactionIfNeglected<S::ID>>;
