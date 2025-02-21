@@ -303,7 +303,6 @@ mod tests {
                     .unwrap()
                     .applications_with_intents;
                 let signing_manager = SigningManager::new(
-                    profile.factor_sources(),
                     Arc::new(profile.clone()),
                     interactor,
                     SaveIntentsToConfirmAfterDelayClient::new(
