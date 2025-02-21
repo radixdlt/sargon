@@ -37,12 +37,6 @@ impl<ID: SignableID> MaybeSignedTransactions<ID> {
         Self::new(IndexMap::new())
     }
 
-    /// Returns whether or not this `MaybeSignedTransactions` contains
-    /// any transactions.
-    pub(crate) fn is_empty(&self) -> bool {
-        self.transactions.is_empty()
-    }
-
     pub(crate) fn transactions(&self) -> Vec<SignedTransaction<ID>> {
         self.transactions
             .clone()

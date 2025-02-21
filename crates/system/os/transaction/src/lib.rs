@@ -8,7 +8,7 @@ mod tx;
 pub mod prelude {
     pub use crate::batch_of_transactions::*;
     pub use crate::pre_auth::*;
-    pub use crate::signing_manager::*;
+    pub(crate) use crate::signing_manager::*;
     pub use crate::tx::*;
 
     pub(crate) use entity_by_address::prelude::*;

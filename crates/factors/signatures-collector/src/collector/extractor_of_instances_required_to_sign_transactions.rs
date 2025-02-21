@@ -41,6 +41,7 @@ impl ExtractorOfInstancesRequiredToSignTransactions {
 
 #[cfg(debug_assertions)]
 #[derive(Debug, Default)]
+#[allow(dead_code)]
 pub(crate) struct ProtoProfile {
     pub(crate) accounts: Vec<Account>,
     pub(crate) personas: Vec<Persona>,
@@ -48,6 +49,7 @@ pub(crate) struct ProtoProfile {
 }
 
 #[cfg(debug_assertions)]
+#[allow(dead_code)]
 impl ProtoProfile {
     pub fn new(
         accounts: impl IntoIterator<Item = Account>,
