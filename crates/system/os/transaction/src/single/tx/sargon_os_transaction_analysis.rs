@@ -753,7 +753,7 @@ mod tests {
 
         let result = os
             .analyse_transaction_preview(
-                TransactionManifest::sample().instructions_string(),
+                prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 true,
                 Nonce::sample(),
@@ -1042,10 +1042,10 @@ mod tests {
             &account.address.into(),
             vec![PublicKeyHash::sample()],
         )
-        .modify_add_lock_fee_and_proofs(
-            LockFeeData::new_with_fee(account.address(), Decimal192::zero()),
-            IndexMap::new(),
-        )
+        .modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+            account.address(),
+            Decimal192::zero(),
+        ))
         .unwrap()
     }
 }

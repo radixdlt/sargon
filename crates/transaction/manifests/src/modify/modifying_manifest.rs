@@ -76,23 +76,41 @@ fn default_fee() -> Decimal192 {
 
 pub struct LockFeeData {
     pub fee_payer_address: AccountAddress,
+    pub access_controller_address: Option<AccessControllerAddress>,
     fee: Option<Decimal192>,
 }
 
 impl LockFeeData {
-    pub fn new_with_fee(
+    pub fn new_with_unsecurified_fee_payer(
         fee_payer_address: AccountAddress,
         fee: Decimal192,
     ) -> Self {
         Self {
             fee_payer_address,
+            access_controller_address: None,
             fee: Some(fee),
         }
     }
 
-    pub fn new_with_fee_payer(fee_payer_address: AccountAddress) -> Self {
+    pub fn new_with_securified_fee_payer(
+        fee_payer_address: AccountAddress,
+        access_controller_address: AccessControllerAddress,
+        fee: Decimal192,
+    ) -> Self {
         Self {
             fee_payer_address,
+            access_controller_address: Some(access_controller_address),
+            fee: Some(fee),
+        }
+    }
+
+    #[cfg(test)]
+    pub fn new_with_unsecurified_fee_payer_no_fee(
+        fee_payer_address: AccountAddress,
+    ) -> Self {
+        Self {
+            fee_payer_address,
+            access_controller_address: None,
             fee: None,
         }
     }
@@ -122,6 +140,13 @@ where
         )
     }
 
+    fn modify_add_lock_fee(&self, lock_fee_data: LockFeeData) -> Result<M> {
+        self.modify_add_lock_fee_and_proofs(
+            Some(lock_fee_data),
+            IndexMap::new(),
+        )
+    }
+
     fn modify_add_lock_fee_and_proofs(
         &self,
         lock_fee_data: impl Into<Option<LockFeeData>>,
@@ -138,18 +163,15 @@ where
         let mut builder = B::new_with_instructions([]);
 
         if let Some(lock_fee_data) = lock_fee_data.into() {
-            let lock_fee_entity_address = AddressOfAccountOrPersona::Account(
-                lock_fee_data.fee_payer_address,
-            );
-
             if let Some(access_controller_of_fee_payer) =
-                entities_with_access_controllers.get(&lock_fee_entity_address)
+                lock_fee_data.access_controller_address
             {
-                access_controllers.shift_remove(access_controller_of_fee_payer);
+                access_controllers
+                    .shift_remove(&access_controller_of_fee_payer);
 
                 // Add proof for lock fee payer, who happens to be securified.
                 builder = builder.call_method(
-                    ScryptoGlobalAddress::from(*access_controller_of_fee_payer),
+                    ScryptoGlobalAddress::from(access_controller_of_fee_payer),
                     ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
                     (),
                 );

@@ -28,6 +28,16 @@ impl TransactionGuarantee {
             resource_divisibility: resource_divisibility.into(),
         }
     }
+
+    pub fn offset_instruction_index_by(&self, offset: u64) -> Self {
+        Self::new(
+            self.amount,
+            self.percentage,
+            self.instruction_index + offset,
+            self.resource_address,
+            self.resource_divisibility,
+        )
+    }
 }
 
 impl TransactionGuarantee {
