@@ -89,6 +89,7 @@ struct CrossRoleSkipOutcomeAnalyzerForManager {
     pub(super) proto_profile: Arc<dyn IsProtoProfile>,
     pub(super) signing_manager_state_snapshot: SigningManagerState,
 }
+
 impl CrossRoleSkipOutcomeAnalyzerForManager {
     fn new(
         proto_profile: Arc<dyn IsProtoProfile>,
@@ -99,6 +100,7 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
             signing_manager_state_snapshot,
         })
     }
+
     fn for_display_by_address(
         &self,
         entity_address: AddressOfAccountOrPersona,
@@ -113,6 +115,46 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
         let entity_for_display = EntityForDisplay::from(entity);
         Ok((entity_for_display, shield_metadata))
     }
+
+    fn no_cross_role(
+        &self,
+        signable_id: TransactionIntentHash,
+        skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+        petitions: Vec<PetitionForEntity<TransactionIntentHash>>,
+    ) -> Option<InvalidTransactionIfNeglected<TransactionIntentHash>> {
+        let invalid_for_display = petitions
+            .into_iter()
+            .filter_map(|p| {
+                p.invalid_transaction_if_neglected_factors(
+                    skipped_factor_source_ids.clone(),
+                )
+            })
+            .map(|e| self.for_display_by_address(e))
+            .collect::<Result<Vec<_>>>()
+            .ok();
+
+        let Some(invalid_for_display) = invalid_for_display else {
+            return None;
+        };
+
+        if invalid_for_display.is_empty() {
+            return None;
+        }
+
+        Some(InvalidTransactionIfNeglected {
+            signable_id,
+            entities_which_would_require_delayed_confirmation: vec![],
+            entities_which_would_fail_auth: invalid_for_display
+                .into_iter()
+                .map(|(entity_for_display, shield_metadata)| {
+                    InvalidTransactionForEntity::new(
+                        entity_for_display,
+                        shield_metadata,
+                    )
+                })
+                .collect(),
+        })
+    }
 }
 impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
     for CrossRoleSkipOutcomeAnalyzerForManager
@@ -126,9 +168,12 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
         let Some(current_role) =
             self.signing_manager_state_snapshot.current_role
         else {
-            // // Signing with Fee payers
-            // petitions.into_iter().map(|p| p.)
-            return None;
+            // Signing with Fee payers
+            return self.no_cross_role(
+                signable_id,
+                skipped_factor_source_ids,
+                petitions,
+            );
         };
 
         /*
