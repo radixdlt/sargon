@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use radix_engine_interface::blueprints::account::ACCOUNT_LOCK_FEE_IDENT;
 use radix_rust::Resolve;
 use radix_transactions::builder::{
     ReferencedManifestComponentAddress, ReferencedManifestGlobalAddress,
@@ -48,31 +47,11 @@ impl IntoManifest<ScryptoInstructionV2> for TransactionManifestV2 {
 }
 
 /// Common representation of an Instruction included in any `IntoManifest`.
-pub trait IntoInstruction: Sized {
-    fn is_lock_fee(&self) -> bool;
-}
+pub trait IntoInstruction: Sized {}
 
-impl IntoInstruction for ScryptoInstruction {
-    fn is_lock_fee(&self) -> bool {
-        match self {
-            ScryptoInstruction::CallMethod(call_method) => {
-                call_method.method_name == ACCOUNT_LOCK_FEE_IDENT
-            }
-            _ => false,
-        }
-    }
-}
+impl IntoInstruction for ScryptoInstruction {}
 
-impl IntoInstruction for ScryptoInstructionV2 {
-    fn is_lock_fee(&self) -> bool {
-        match self {
-            ScryptoInstructionV2::CallMethod(call_method) => {
-                call_method.method_name == ACCOUNT_LOCK_FEE_IDENT
-            }
-            _ => false,
-        }
-    }
-}
+impl IntoInstruction for ScryptoInstructionV2 {}
 
 /// Common representation of a manifest builder
 pub trait IntoManifestBuilder<M, I>: Sized
