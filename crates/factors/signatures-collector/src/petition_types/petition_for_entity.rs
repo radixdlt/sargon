@@ -233,7 +233,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Returns this petitions entity if the transaction would be invalid if the given factor sources
     /// would be neglected.
-    pub(crate) fn invalid_transaction_if_neglected_factors(
+    pub fn invalid_transaction_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<AddressOfAccountOrPersona> {

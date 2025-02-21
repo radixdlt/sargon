@@ -9,8 +9,7 @@ pub trait ApplyShieldTransactionsSigner: Send + Sync {
 }
 
 pub struct ApplyShieldTransactionsSignerImpl {
-    factor_sources_in_profile: IndexSet<FactorSource>,
-    get_entities_by_address: Arc<dyn GetEntityByAddress>,
+    proto_profile: Arc<dyn IsProtoProfile>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
     saver_of_intents_to_confirm_after_delay:
         SaveIntentsToConfirmAfterDelayClient,
@@ -19,9 +18,8 @@ pub struct ApplyShieldTransactionsSignerImpl {
 impl ApplyShieldTransactionsSignerImpl {
     pub fn new(os: &SargonOS) -> Result<Self> {
         os.profile().map(|profile| Self {
-            factor_sources_in_profile: profile.factor_sources(),
+            proto_profile: Arc::new(profile),
             interactor: os.sign_transactions_interactor(),
-            get_entities_by_address: Arc::new(profile),
             saver_of_intents_to_confirm_after_delay: os
                 .saver_of_intents_to_confirm_after_delay(),
         })
@@ -37,8 +35,7 @@ impl ApplyShieldTransactionsSigner for ApplyShieldTransactionsSignerImpl {
     ) -> Result<ApplySecurityShieldSignedPayload> {
         // Prepare the signing manager
         let signing_manager = SigningManager::new(
-            self.factor_sources_in_profile.clone(),
-            self.get_entities_by_address.clone(),
+            self.proto_profile.clone(),
             self.interactor.clone(),
             self.saver_of_intents_to_confirm_after_delay.clone(),
             payload_to_sign.applications_with_intents,

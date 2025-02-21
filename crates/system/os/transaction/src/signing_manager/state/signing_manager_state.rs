@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct SigningManagerState {
+    pub(crate) current_role: Option<RoleKind>, // None at start and when signing for fee payers.
     pub(crate) per_set_state: IndexMap<IntentSetID, IntentSetState>,
 }
 
@@ -75,6 +76,7 @@ impl SigningManagerState {
         >,
     ) -> Self {
         Self {
+            current_role: None, // we start with Recovery
             per_set_state: intent_sets
                 .into_iter()
                 .map(|shield_application| {

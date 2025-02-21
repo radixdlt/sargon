@@ -1,4 +1,4 @@
-use profile_logic::ShieldForDisplay;
+use profile_logic::{SecurityStructureMetadata, ShieldForDisplay};
 use profile_security_structures::prelude::TimePeriod;
 
 use crate::prelude::*;
@@ -9,19 +9,19 @@ use crate::prelude::*;
 pub struct DelayedConfirmationForEntity {
     pub entity_for_display: EntityForDisplay,
     pub delay: TimePeriod,
-    pub shield_for_display: ShieldForDisplay,
+    pub shield_metadata: SecurityStructureMetadata,
 }
 
 impl DelayedConfirmationForEntity {
     pub fn new(
         entity_for_display: EntityForDisplay,
         delay: TimePeriod,
-        shield_for_display: ShieldForDisplay,
+        shield_metadata: SecurityStructureMetadata,
     ) -> Self {
         Self {
             entity_for_display,
             delay,
-            shield_for_display,
+            shield_metadata,
         }
     }
 }
@@ -30,7 +30,7 @@ impl HasSampleValues for DelayedConfirmationForEntity {
         Self::new(
             EntityForDisplay::sample(),
             TimePeriod::sample(),
-            ShieldForDisplay::sample(),
+            SecurityStructureMetadata::sample(),
         )
     }
 
@@ -38,7 +38,7 @@ impl HasSampleValues for DelayedConfirmationForEntity {
         Self::new(
             EntityForDisplay::sample_other(),
             TimePeriod::sample_other(),
-            ShieldForDisplay::sample_other(),
+            SecurityStructureMetadata::sample_other(),
         )
     }
 }
@@ -49,23 +49,26 @@ pub struct InvalidTransactionForEntity {
     pub entity_for_display: EntityForDisplay,
     /// None for transactions which are not shield applications
     /// Some for transactions which are shield applications.
-    pub shield_for_display: Option<ShieldForDisplay>,
+    pub shield_metadata: Option<SecurityStructureMetadata>,
 }
 
 impl InvalidTransactionForEntity {
     pub fn new(
         entity_for_display: EntityForDisplay,
-        shield_for_display: impl Into<Option<ShieldForDisplay>>,
+        shield_metadata: impl Into<Option<SecurityStructureMetadata>>,
     ) -> Self {
         Self {
             entity_for_display,
-            shield_for_display: shield_for_display.into(),
+            shield_metadata: shield_metadata.into(),
         }
     }
 }
 impl HasSampleValues for InvalidTransactionForEntity {
     fn sample() -> Self {
-        Self::new(EntityForDisplay::sample(), ShieldForDisplay::sample())
+        Self::new(
+            EntityForDisplay::sample(),
+            SecurityStructureMetadata::sample(),
+        )
     }
 
     fn sample_other() -> Self {
@@ -217,19 +220,16 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = InvalidTransactionIfNeglected<TransactionIntentHash>;
 
-
     #[test]
     fn equality() {
         assert_eq!(SUT::sample(), SUT::sample());
         assert_eq!(SUT::sample_other(), SUT::sample_other());
     }
 
-
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
     }
-
 
     #[test]
     #[should_panic(

@@ -1,3 +1,5 @@
+use entity_for_display::EntityForDisplay;
+
 use crate::prelude::*;
 
 use super::signing_manager_dependencies::SigningManagerDependencies;
@@ -84,13 +86,32 @@ impl SigningManager {
 }
 
 struct CrossRoleSkipOutcomeAnalyzerForManager {
-    signing_manager_state_snapshot: SigningManagerState,
+    pub(super) proto_profile: Arc<dyn IsProtoProfile>,
+    pub(super) signing_manager_state_snapshot: SigningManagerState,
 }
 impl CrossRoleSkipOutcomeAnalyzerForManager {
-    fn new(signing_manager_state_snapshot: SigningManagerState) -> Arc<Self> {
+    fn new(
+        proto_profile: Arc<dyn IsProtoProfile>,
+        signing_manager_state_snapshot: SigningManagerState,
+    ) -> Arc<Self> {
         Arc::new(Self {
+            proto_profile,
             signing_manager_state_snapshot,
         })
+    }
+    fn for_display_by_address(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<(EntityForDisplay, Option<SecurityStructureMetadata>)> {
+        let entity = self.proto_profile.entity_by_address(entity_address)?;
+        let provisional_security_config = entity.get_provisional();
+        let security_structure_of_factor_instances = provisional_security_config.map(|config| config.as_factor_instances_derived().cloned().ok_or(CommonError::ProvisionalConfigInWrongStateExpectedInstancesDerived)).transpose()?;
+        let shield_id = security_structure_of_factor_instances.map(|s| s.id());
+        let shield_metadata = shield_id
+            .map(|id| self.proto_profile.shield_metadata_by_id(id))
+            .transpose()?;
+        let entity_for_display = EntityForDisplay::from(entity);
+        Ok((entity_for_display, shield_metadata))
     }
 }
 impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
@@ -102,7 +123,44 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         petitions: Vec<PetitionForEntity<TransactionIntentHash>>,
     ) -> Option<InvalidTransactionIfNeglected<TransactionIntentHash>> {
-        None
+        let Some(current_role) =
+            self.signing_manager_state_snapshot.current_role
+        else {
+            // // Signing with Fee payers
+            // petitions.into_iter().map(|p| p.)
+            return None;
+        };
+
+        /*
+        struct DelayedConfirmationForEntity {
+            entity_for_display: EntityForDisplay,
+            delay: TimePeriod,
+            shield_for_display: ShieldForDisplay,
+        }
+        */
+
+        /*
+        struct InvalidTransactionForEntity {
+            entity_for_display: EntityForDisplay,
+            shield_for_display: Option<ShieldForDisplay>,
+        }
+        */
+        let entities_which_would_require_delayed_confirmation: Vec<
+            DelayedConfirmationForEntity,
+        > = vec![];
+        let entities_which_would_fail_auth: Vec<InvalidTransactionForEntity> =
+            vec![];
+        if entities_which_would_fail_auth.is_empty()
+            && entities_which_would_require_delayed_confirmation.is_empty()
+        {
+            return None;
+        }
+
+        Some(InvalidTransactionIfNeglected {
+            signable_id,
+            entities_which_would_require_delayed_confirmation,
+            entities_which_would_fail_auth,
+        })
     }
 }
 
@@ -125,10 +183,11 @@ impl SigningManager {
                 WhenAllTransactionsAreValid::r#continue(),
                 WhenSomeTransactionIsInvalid::r#continue(),
             ),
-            self.factor_sources_in_profile.clone(),
+            self.proto_profile.factor_sources(),
             adapter.transactions_with_petitions(),
             self.interactor.clone(),
             CrossRoleSkipOutcomeAnalyzerForManager::new(
+                self.dependencies.proto_profile.clone(),
                 (*self._get_state()).clone(),
             ),
             purpose,
@@ -147,10 +206,13 @@ impl SigningManager {
     /// Signs all relevant Intents of all relevant IntentSets
     /// with the Recovery role.
     pub(super) async fn sign_intents_with_recovery_role(&self) -> Result<()> {
+        let role = RoleKind::Recovery;
+        self.updating_state(|state| {
+            state.current_role = Some(role);
+        })?;
         let intent_sets = self.get_intent_sets_to_sign_for_with_recovery_role();
-        let outcome = self
-            .sign_intent_sets_with_role(intent_sets, RoleKind::Recovery)
-            .await?;
+        let outcome =
+            self.sign_intent_sets_with_role(intent_sets, role).await?;
         self.handle_recovery_outcome(outcome)
     }
 
@@ -159,22 +221,33 @@ impl SigningManager {
     pub(super) async fn sign_intents_with_confirmation_role(
         &self,
     ) -> Result<()> {
+        let role = RoleKind::Confirmation;
+        self.updating_state(|state| {
+            state.current_role = Some(role);
+        })?;
         let intent_sets =
             self.get_intent_sets_to_sign_for_with_confirmation_role();
-        let outcome = self
-            .sign_intent_sets_with_role(intent_sets, RoleKind::Confirmation)
-            .await?;
+        let outcome =
+            self.sign_intent_sets_with_role(intent_sets, role).await?;
         self.handle_confirmation_outcome(outcome)
     }
 
     /// Signs all relevant Intents of all relevant IntentSets
     /// with the Primary role.
     pub(super) async fn sign_intents_with_primary_role(&self) -> Result<()> {
+        let role = RoleKind::Primary;
+        self.updating_state(|state| {
+            state.current_role = Some(role);
+        })?;
         let intent_sets = self.get_intent_sets_to_sign_for_with_primary_role();
-        let outcome = self
-            .sign_intent_sets_with_role(intent_sets, RoleKind::Primary)
-            .await?;
-        self.handle_primary_outcome(outcome)
+        let outcome =
+            self.sign_intent_sets_with_role(intent_sets, role).await?;
+        self.handle_primary_outcome(outcome)?;
+
+        // Clear current role before signing with fee payers.
+        self.updating_state(|state| state.current_role = None)?;
+
+        Ok(())
     }
 
     pub(super) fn intermediary_outcome(

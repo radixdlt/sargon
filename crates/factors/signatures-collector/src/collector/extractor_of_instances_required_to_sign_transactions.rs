@@ -1,3 +1,8 @@
+use profile_security_structures::prelude::{
+    ProfileShieldMetadataById, SecurityStructureID, SecurityStructureMetadata,
+    SecurityStructureOfFactorSourceIds,
+};
+
 use crate::prelude::*;
 
 /// Utility to extract factor instances required to sign transactions.
@@ -46,22 +51,44 @@ pub(crate) struct ProtoProfile {
     pub(crate) accounts: Vec<Account>,
     pub(crate) personas: Vec<Persona>,
     pub(crate) factor_sources: Vec<FactorSource>,
+    pub(crate) shields: Vec<SecurityStructureOfFactorSourceIds>,
+}
+
+pub trait IsProtoProfile:
+    GetEntityByAddress + HasFactorSources + ProfileShieldMetadataById
+{
+}
+
+impl<T: GetEntityByAddress + HasFactorSources + ProfileShieldMetadataById>
+    IsProtoProfile for T
+{
 }
 
 #[cfg(debug_assertions)]
 #[allow(dead_code)]
 impl ProtoProfile {
-    pub fn new(
+    pub fn with_shields(
         accounts: impl IntoIterator<Item = Account>,
         personas: impl IntoIterator<Item = Persona>,
         factor_sources: impl IntoIterator<Item = FactorSource>,
+        shields: impl IntoIterator<Item = SecurityStructureOfFactorSourceIds>,
     ) -> Self {
         Self {
             accounts: accounts.into_iter().collect(),
             personas: personas.into_iter().collect(),
             factor_sources: factor_sources.into_iter().collect(),
+            shields: shields.into_iter().collect(),
         }
     }
+
+    pub fn new(
+        accounts: impl IntoIterator<Item = Account>,
+        personas: impl IntoIterator<Item = Persona>,
+        factor_sources: impl IntoIterator<Item = FactorSource>,
+    ) -> Self {
+        Self::with_shields(accounts, personas, factor_sources, [])
+    }
+
     pub fn with_entities(
         entities: impl IntoIterator<Item = AccountOrPersona>,
     ) -> Self {
@@ -77,6 +104,22 @@ impl ProtoProfile {
             .cloned()
             .collect_vec();
         Self::new(accounts, personas, [])
+    }
+}
+
+#[cfg(debug_assertions)]
+impl ProfileShieldMetadataById for ProtoProfile {
+    fn shield_metadata_by_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureMetadata> {
+        self.shields
+            .iter()
+            .find(|s| s.id() == shield_id)
+            .map(|s| s.metadata.clone())
+            .ok_or(CommonError::UnknownSecurityStructureID {
+                id: shield_id.to_string(),
+            })
     }
 }
 
