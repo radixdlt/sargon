@@ -1,4 +1,4 @@
-use profile_logic::{SecurityStructureMetadata, ShieldForDisplay};
+use profile_logic::SecurityStructureMetadata;
 use profile_security_structures::prelude::TimePeriod;
 
 use crate::prelude::*;
