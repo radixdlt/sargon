@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 pub trait SargonOsTransactionManifestModify {
-    fn modify_transaction_manifest<G>(
+    fn modify_transaction_manifest_with_fee_payer<G>(
         &self,
         manifest: TransactionManifest,
         fee_payer_address: AccountAddress,
@@ -10,10 +10,18 @@ pub trait SargonOsTransactionManifestModify {
     ) -> Result<TransactionManifest>
     where
         G: IntoIterator<Item = TransactionGuarantee>;
+
+    fn modify_transaction_manifest_without_fee_payer<G>(
+        &self,
+        manifest: TransactionManifest,
+        guarantees: G,
+    ) -> Result<TransactionManifest>
+    where
+        G: IntoIterator<Item = TransactionGuarantee>;
 }
 
 impl SargonOsTransactionManifestModify for SargonOS {
-    fn modify_transaction_manifest<G>(
+    fn modify_transaction_manifest_with_fee_payer<G>(
         &self,
         manifest: TransactionManifest,
         fee_payer_address: AccountAddress,
@@ -83,6 +91,28 @@ impl SargonOsTransactionManifestModify for SargonOS {
             |g| g.offset_instruction_index_by(guarantees_instructions_offset),
         ))
     }
+
+    fn modify_transaction_manifest_without_fee_payer<G>(
+        &self,
+        manifest: TransactionManifest,
+        guarantees: G,
+    ) -> Result<TransactionManifest>
+    where
+        G: IntoIterator<Item = TransactionGuarantee>,
+    {
+        let summary = manifest.summary()?;
+        let proofs_for_entities_requiring_auth =
+            self.extract_proofs(&summary)?;
+
+        // Add the potential `create_proof`s
+        let modified_manifest = manifest.modify_add_lock_fee_and_proofs(
+            None,
+            proofs_for_entities_requiring_auth,
+        )?;
+
+        // Then add the guarantees
+        modified_manifest.modify_add_guarantees(guarantees)
+    }
 }
 
 #[cfg(test)]
@@ -101,7 +131,7 @@ mod tests {
 
         let modified = os
             .await
-            .modify_transaction_manifest(
+            .modify_transaction_manifest_with_fee_payer(
                 manifest,
                 account.address(),
                 Decimal192::five(),
@@ -156,7 +186,7 @@ mod tests {
 
         let modified = os
             .await
-            .modify_transaction_manifest(
+            .modify_transaction_manifest_with_fee_payer(
                 manifest,
                 fee_payer.address(),
                 Decimal192::five(),
@@ -239,7 +269,7 @@ mod tests {
                 .await;
 
         let modified = os
-            .modify_transaction_manifest(
+            .modify_transaction_manifest_with_fee_payer(
                 manifest,
                 fee_payer.address(),
                 Decimal192::five(),
@@ -302,7 +332,7 @@ mod tests {
                 .await;
 
         let modified = os
-            .modify_transaction_manifest(
+            .modify_transaction_manifest_with_fee_payer(
                 manifest,
                 fee_payer.address(),
                 Decimal192::five(),
@@ -374,7 +404,7 @@ mod tests {
         .await;
 
         let modified = os
-            .modify_transaction_manifest(
+            .modify_transaction_manifest_with_fee_payer(
                 manifest,
                 fee_payer.address(),
                 Decimal192::five(),
@@ -395,6 +425,65 @@ mod tests {
                 "lock_fee"
                 Decimal("5")
             ;
+            CALL_METHOD
+                Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
+                "create_proof"
+            ;
+            CALL_METHOD
+                Address("accesscontroller_rdx1cdgcthvtzcny04t5dnuc0wq5n8hx90eytn6luhmfm5g52rm6wvsnfk")
+                "create_proof"
+            ;
+            CALL_METHOD
+                Address("account_rdx12xq83qxwf09eqquqfdj8rv004attq5tgxejkn59rwu588jprdy0xcg")
+                "withdraw"
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("5")
+            ;
+            ASSERT_WORKTOP_CONTAINS
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("1339")
+            ;
+            TAKE_FROM_WORKTOP
+                Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+                Decimal("5")
+                Bucket("bucket1")
+            ;
+            CALL_METHOD
+                Address("account_rdx12xzamzckyera2arvlxrms9yeae3t7fzu7hl976waz9zs7752sljdkf")
+                "deposit"
+                Bucket("bucket1")
+            ;
+            "#,
+        )
+    }
+
+    #[actix_rt::test]
+    async fn test_modify_without_fee_payer() {
+        let withdrawing_account = Account::sample_at(2);
+        // This account requires auth due to deposit instruction
+        let depositing_account = Account::sample_at(3);
+
+        let manifest = prepare_xrd_transfer_transaction(
+            withdrawing_account.address(),
+            depositing_account.address(),
+        );
+        let os = prepare_os(
+            [withdrawing_account.clone(), depositing_account.clone()],
+            [],
+        )
+        .await;
+
+        let modified = os
+            .modify_transaction_manifest_without_fee_payer(
+                manifest,
+                [guarantee(3)],
+            )
+            .unwrap();
+
+        // The modified manifest should shift the guarantee instruction by 1
+        manifest_eq(
+            modified,
+            r#"
             CALL_METHOD
                 Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
                 "create_proof"
