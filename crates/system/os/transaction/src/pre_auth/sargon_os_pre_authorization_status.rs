@@ -68,9 +68,7 @@ impl OSPollPreAuthorizationStatusWithDelays for SargonOS {
             // Check the subintent status and default to `Unknown` if the request fails.
             let (subintent_status, transaction_intent_hash) =
                 match gateway_client
-                    .subintent_status(SubintentStatusRequest::new(
-                        intent_hash.to_string(),
-                    ))
+                    .get_pre_authorization_status(intent_hash.clone())
                     .await
                 {
                     Ok(response) => (

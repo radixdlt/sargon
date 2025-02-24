@@ -193,35 +193,51 @@ impl InteractionQueueManager {
         interaction: InteractionQueueItem,
     ) -> Option<InteractionQueueItem> {
         let mut updated_interaction = interaction.clone();
-        match interaction.kind {
+        let status = match interaction.kind {
             InteractionQueueItemKind::Transaction(tx) => {
-                let response = match self
-                    .gateway_client
-                    .get_transaction_status(tx.transaction_id)
-                    .await
-                {
-                    Ok(response) => response,
-                    Err(_) => return None,
-                };
-
-                if let Some(payload_status) = response
-                    .known_payloads
-                    .first()
-                    .and_then(|payload| payload.payload_status.clone())
-                {
-                    let status =
-                        InteractionQueueItemStatus::from(payload_status);
-                    if status != InteractionQueueItemStatus::InProgress {
-                        updated_interaction.status = status;
-                        return Some(updated_interaction);
-                    }
-                }
-                None
+                self.get_transaction_status(tx).await?
             }
-            InteractionQueueItemKind::PreAuthorization(_) => {
-                panic!("Not implemented yet");
+            InteractionQueueItemKind::PreAuthorization(preAuthorization) => {
+                self.get_pre_authorization_status(preAuthorization).await?
             }
+        };
+        if status != InteractionQueueItemStatus::InProgress {
+            updated_interaction.status = status;
+            Some(updated_interaction)
+        } else {
+            None
         }
+    }
+
+    /// Returns the `InteractionQueueItemStatus` of a given `Transaction`
+    async fn get_transaction_status(
+        &self,
+        transaction: TransactionQueueItem,
+    ) -> Option<InteractionQueueItemStatus> {
+        let response = self
+            .gateway_client
+            .get_transaction_status(transaction.transaction_id)
+            .await
+            .ok()?;
+
+        let payload_status =
+            response.known_payloads.first()?.payload_status.clone()?;
+
+        Some(InteractionQueueItemStatus::from(payload_status))
+    }
+
+    /// Returns the `InteractionQueueItemStatus` of a given `PreAuthorization`
+    async fn get_pre_authorization_status(
+        &self,
+        pre_authorization: PreAuthorizationQueueItem,
+    ) -> Option<InteractionQueueItemStatus> {
+        let response = self
+            .gateway_client
+            .get_pre_authorization_status(pre_authorization.subintent_id)
+            .await
+            .ok()?;
+
+        Some(InteractionQueueItemStatus::from(response.subintent_status))
     }
 
     /// Loop over the batches and call `batch.get_first_if_ready()` for each of them.
@@ -345,7 +361,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn add_interaction_and_react_to_status_updates() {
-        // Test the case an interaction is added to the queue, and after the first check its status is updated.
+        // Test the case a Transaction is added to the queue, and after the first check its status is updated.
 
         let observer = Arc::new(MockObserver::new());
         let storage = Arc::new(MockStorage::new_empty());
@@ -383,6 +399,62 @@ mod tests {
 
         // Wait a bit for the manager to check its status
         async_std::task::sleep(Duration::from_millis(10)).await;
+
+        // Verify that the queue has updated the item status to `Success`
+        let queue = sut.queue.read().await;
+        assert_eq!(queue.items[0].status, InteractionQueueItemStatus::Success);
+
+        // Verify new queue update
+        let expected_queue = InteractionQueue::with_items(vec![interaction
+            .clone()
+            .with_status(InteractionQueueItemStatus::Success)]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
+    async fn add_pre_authorization_and_react_to_status_updates() {
+        // Test the case a PreAuthorization is added to the queue, and after two checks the status is updated
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let sut = create_and_bootstrap(
+            vec![
+                // Req1: TX is submitted successfully
+                submit_transaction_response(),
+                // Req2: Status endpoint indicates that the PreAuthorization is unknown
+                pre_authorization_status_response(SubintentStatus::Unknown),
+                // Req3: Status endpoint indicates that the PreAuthorization was committed successfully
+                pre_authorization_status_response(
+                    SubintentStatus::CommittedSuccess,
+                ),
+            ],
+            observer.clone(),
+            storage.clone(),
+        )
+        .await;
+
+        // Add the interaction to the queue
+        let interaction = InteractionQueueItem::sample_pre_authorization(
+            InteractionQueueItemStatus::Queued,
+        );
+        sut.add_interaction(interaction.clone()).await;
+
+        // Verify that the queue now has 1 item whose status is `InProgress`
+        let queue = sut.queue.read().await;
+        assert_eq!(queue.items.len(), 1);
+        assert_eq!(
+            queue.items[0].status,
+            InteractionQueueItemStatus::InProgress
+        );
+        drop(queue);
+
+        // Verify queue update
+        let expected_queue =
+            InteractionQueue::with_items(vec![interaction.clone()]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+
+        // Wait a bit for the manager to check its status twice
+        async_std::task::sleep(Duration::from_millis(20)).await;
 
         // Verify that the queue has updated the item status to `Success`
         let queue = sut.queue.read().await;
@@ -645,6 +717,20 @@ mod test_support {
             TransactionStatusResponsePayloadStatus::CommittedFailure => TransactionStatusResponse::sample_committed_failure(None),
             TransactionStatusResponsePayloadStatus::PermanentlyRejected => TransactionStatusResponse::sample_permanently_rejected(None),
             TransactionStatusResponsePayloadStatus::TemporarilyRejected => TransactionStatusResponse::sample_temporarily_rejected(),
+        };
+        MockNetworkingDriverResponse::new_success(response)
+    }
+
+    pub(crate) fn pre_authorization_status_response(
+        status: SubintentStatus,
+    ) -> MockNetworkingDriverResponse {
+        let response = match status {
+            SubintentStatus::Unknown => {
+                SubintentStatusResponse::sample_unknown()
+            }
+            SubintentStatus::CommittedSuccess => {
+                SubintentStatusResponse::sample_committed_success()
+            }
         };
         MockNetworkingDriverResponse::new_success(response)
     }

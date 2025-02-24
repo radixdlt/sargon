@@ -62,7 +62,7 @@ impl InteractionQueueBatch {
 #[cfg(test)]
 impl InteractionQueueItem {
     pub fn sample_queued() -> Self {
-        Self::sample_status(InteractionQueueItemStatus::Queued)
+        Self::sample_transaction(InteractionQueueItemStatus::Queued)
     }
 
     pub fn sample_next() -> Self {
@@ -72,30 +72,42 @@ impl InteractionQueueItem {
     pub fn sample_next_in(milliseconds: u64) -> Self {
         let timestamp =
             Timestamp::now_utc().add(Duration::from_millis(milliseconds));
-        Self::sample_status(InteractionQueueItemStatus::Next(timestamp))
+        Self::sample_transaction(InteractionQueueItemStatus::Next(timestamp))
     }
 
     pub fn sample_in_progress() -> Self {
-        Self::sample_status(InteractionQueueItemStatus::InProgress)
+        Self::sample_transaction(InteractionQueueItemStatus::InProgress)
     }
 
     pub fn sample_success() -> Self {
-        Self::sample_status(InteractionQueueItemStatus::Success)
+        Self::sample_transaction(InteractionQueueItemStatus::Success)
     }
 
     pub fn sample_failed() -> Self {
-        Self::sample_status(InteractionQueueItemStatus::Failure(
+        Self::sample_transaction(InteractionQueueItemStatus::Failure(
             InteractionQueueItemFailureStatus::Failed,
         ))
     }
 
-    pub fn sample_status(status: InteractionQueueItemStatus) -> Self {
+    pub fn sample_transaction(status: InteractionQueueItemStatus) -> Self {
         Self::new(
             Uuid::new_v4(),
             status,
             false,
             InteractionQueueItemSummary::new(),
             InteractionQueueItemKind::sample(),
+        )
+    }
+
+    pub fn sample_pre_authorization(
+        status: InteractionQueueItemStatus,
+    ) -> Self {
+        Self::new(
+            Uuid::new_v4(),
+            status,
+            false,
+            InteractionQueueItemSummary::new(),
+            InteractionQueueItemKind::sample_other(),
         )
     }
 

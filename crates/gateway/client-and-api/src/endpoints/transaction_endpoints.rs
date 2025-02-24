@@ -63,7 +63,7 @@ impl GatewayClient {
             .await
     }
 
-    /// Observes the status of a transaction.
+    /// Get the status of a transaction.
     ///
     /// See [the Gateway API docs for details][doc].
     ///
