@@ -125,6 +125,9 @@ pub enum CommonError {
     FailedToFindNetworkIdFromBech32mString {
         bech32m_encoded_address: String,
     },
+    InvalidMnemonicWords {
+        indices_in_mnemonic: Vec<u8>,
+    },
 }
 
 #[uniffi::export]
@@ -371,6 +374,14 @@ impl CommonError {
             } => InternalCommonError::FailedToFindNetworkIdFromBech32mString {
                 bech32m_encoded_address: bech32m_encoded_address.clone(),
             },
+            InvalidMnemonicWords {
+                indices_in_mnemonic,
+            } => InternalCommonError::InvalidMnemonicWords {
+                indices_in_mnemonic: indices_in_mnemonic
+                    .iter()
+                    .map(|i| *i as usize)
+                    .collect::<Vec<_>>(),
+            },
             _ => InternalCommonError::Unknown,
         }
     }
@@ -537,6 +548,14 @@ impl From<InternalCommonError> for CommonError {
                 bech32m_encoded_address,
             } => FailedToFindNetworkIdFromBech32mString {
                 bech32m_encoded_address: bech32m_encoded_address.clone(),
+            },
+            InternalCommonError::InvalidMnemonicWords {
+                indices_in_mnemonic,
+            } => InvalidMnemonicWords {
+                indices_in_mnemonic: indices_in_mnemonic
+                    .into_iter()
+                    .map(|i| i as u8)
+                    .collect::<Vec<_>>(),
             },
             _ => Self::erased(value),
         }

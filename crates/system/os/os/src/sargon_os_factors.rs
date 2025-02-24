@@ -72,7 +72,7 @@ impl SargonOS {
     ) -> Result<bool> {
         let id = factor_source.factor_source_id();
 
-        let contains = self.factor_source_ids()?.contains(&id);
+        let contains = self.profile_contains_factor_source(id).await?;
 
         if contains {
             return Ok(false);
@@ -231,6 +231,14 @@ impl SargonOS {
             .try_access_profile_with(|p| p.device_factor_source_by_id(id))?;
         self.load_private_device_factor_source(&device_factor_source)
             .await
+    }
+
+    /// Accesses the active profile and checks if it contains a factor source with the given `id`.
+    pub async fn profile_contains_factor_source(
+        &self,
+        id: FactorSourceID,
+    ) -> Result<bool> {
+        Ok(self.factor_source_ids()?.contains(&id))
     }
 }
 

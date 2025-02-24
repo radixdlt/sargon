@@ -143,8 +143,6 @@ impl SargonOS {
         Ok(())
     }
 
-    // only for debug for now, need integration work in hosts before enabling this for prod
-    #[cfg(debug_assertions)]
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
@@ -180,7 +178,7 @@ impl SargonOS {
         let imported_id = profile.id();
         debug!("Importing profile, id: {}", imported_id);
         let mut profile = profile.clone();
-        self.claim_profile(&mut profile).await?;
+        self.claim_profile(&mut profile).await;
         self.secure_storage.save_profile(&profile).await?;
         self.profile_state_holder
             .replace_profile_state_with(ProfileState::Loaded(profile))?;
