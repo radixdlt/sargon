@@ -35,13 +35,16 @@ impl IntentVariantSignaturesForRoleState {
         Ok(self.signatures_per_entity.clone())
     }
 
-
-    pub(crate) fn has_exercised_role_for_all_entities(&self, role_kind: RoleKind) -> bool {
+    pub(crate) fn has_exercised_role_for_all_entities(
+        &self,
+        role_kind: RoleKind,
+    ) -> bool {
         if role_kind != *self.role {
             return false;
         }
         // TODO: is this enough?
-        self.signatures_non_empty_map_with_non_empty_values().is_ok()
+        self.signatures_non_empty_map_with_non_empty_values()
+            .is_ok()
     }
 
     fn set_intent_else_assert(&mut self, intent: &TransactionIntent) {

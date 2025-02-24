@@ -7,6 +7,13 @@ pub(crate) struct SigningManagerState {
 }
 
 impl SigningManagerState {
+    // TODO: Hmm should this be `IndexMap<IntentSetID, AccountOrPersona>` or something?
+    pub(crate) fn entities_not_signed_for_at_all(
+        &self,
+    ) -> IndexSet<AccountOrPersona> {
+        todo!()
+    }
+
     pub(crate) fn update_with_exercise_role_outcome(
         &mut self,
         outcome: ExerciseRoleOutcome,

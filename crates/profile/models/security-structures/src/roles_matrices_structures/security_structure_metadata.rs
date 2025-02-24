@@ -15,11 +15,18 @@ pub struct SecurityStructureMetadata {
     pub flags: SecurityStructureFlags,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct ExtendedSecurityStructureMetadata {
+    pub metadata: SecurityStructureMetadata,
+    pub time_until_delayed_confirmation_is_callable: TimePeriod,
+}
+
 pub trait ProfileShieldMetadataById {
     fn shield_metadata_by_id(
         &self,
         shield_id: SecurityStructureID,
-    ) -> Result<SecurityStructureMetadata>;
+    ) -> Result<ExtendedSecurityStructureMetadata>;
 }
 
 impl Identifiable for SecurityStructureMetadata {

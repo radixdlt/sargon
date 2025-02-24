@@ -9,7 +9,7 @@ pub trait CrossRoleSkipOutcomeAnalyzer<S: Signable>: Send + Sync {
         signable_id: S::ID,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         petitions: Vec<PetitionForEntity<S::ID>>,
-    ) -> Option<InvalidTransactionIfNeglected<S::ID>>;
+    ) -> Result<Option<InvalidTransactionIfNeglected<S::ID>>>;
 }
 
 /// Petition of signatures for a transaction.
@@ -215,10 +215,10 @@ impl<S: Signable> PetitionForTransaction<S> {
             dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
+    ) -> Result<Option<InvalidTransactionIfNeglected<S::ID>>> {
         if self.has_tx_failed() {
             // No need to display already failed tx.
-            return None;
+            return Ok(None);
         }
 
         let petitions = self

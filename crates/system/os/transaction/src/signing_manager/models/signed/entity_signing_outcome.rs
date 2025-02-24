@@ -13,11 +13,10 @@ pub(crate) struct EntitySigningOutcome<Outcome> {
 }
 
 impl<Outcome> EntitySigningOutcome<Outcome> {
-    
     pub fn role_kind(&self) -> RoleKind {
         self.context.role_kind
     }
-    
+
     pub fn intent_set_id(&self) -> IntentSetID {
         self.context.intent_set_id
     }

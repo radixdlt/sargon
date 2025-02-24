@@ -5,10 +5,18 @@ use crate::prelude::*;
 
 /// An entity ready for display and the delay required to wait until
 /// confirming recovery is possible.
+///
+/// Only relevant for Securified entities.
 #[derive(Clone, Debug, PartialEq, Eq, std::hash::Hash)]
 pub struct DelayedConfirmationForEntity {
     pub entity_for_display: EntityForDisplay,
+
+    /// N.B. this value is read out from the **committed** shield, not
+    /// the shield which is being applied.
     pub delay: TimePeriod,
+
+    /// N.B. this is the metadata of the **provisional** shield, not the
+    /// committed shield.
     pub shield_metadata: SecurityStructureMetadata,
 }
 

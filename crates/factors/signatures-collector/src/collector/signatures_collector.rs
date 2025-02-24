@@ -48,7 +48,7 @@ impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S>
         signable_id: S::ID,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         petitions: Vec<PetitionForEntity<S::ID>>,
-    ) -> Option<InvalidTransactionIfNeglected<S::ID>> {
+    ) -> Result<Option<InvalidTransactionIfNeglected<S::ID>>> {
         let entities = petitions
             .iter()
             .filter_map(|petition| {
@@ -59,10 +59,10 @@ impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S>
             .collect_vec();
 
         if entities.is_empty() {
-            return None;
+            return Ok(None);
         }
 
-        Some(InvalidTransactionIfNeglected::new(
+        Ok(Some(InvalidTransactionIfNeglected::new(
             signable_id,
             [],
             entities.into_iter().map(|e| {
@@ -73,7 +73,7 @@ impl<S: Signable> CrossRoleSkipOutcomeAnalyzer<S>
                     None,
                 )
             }),
-        ))
+        )))
     }
 }
 
@@ -289,7 +289,7 @@ impl<S: Signable> SignaturesCollector<S> {
         factor_sources_of_kind: &FactorSourcesOfKind,
     ) -> Result<()> {
         debug!("Creating poly request for interactor");
-        let request = self.request_for_poly_sign(factor_sources_of_kind);
+        let request = self.request_for_poly_sign(factor_sources_of_kind)?;
 
         let invalid_transactions =
             request.invalid_transactions_if_all_factors_neglected();
@@ -321,10 +321,12 @@ impl<S: Signable> SignaturesCollector<S> {
                     "Signature Collector only works with HD FactorSources.",
                 );
 
-            if let Some(request) = self.request_for_mono_sign(
+            let maybe_request = self.request_for_mono_sign(
                 factor_sources_of_kind.kind,
                 &factor_source_id,
-            ) {
+            )?;
+
+            if let Some(request) = maybe_request {
                 let invalid_transactions = request
                     .invalid_transactions_if_factor_neglected(
                         &factor_source_id,
@@ -391,19 +393,17 @@ impl<S: Signable> SignaturesCollector<S> {
         &self,
         factor_source_kind: FactorSourceKind,
         factor_source_id: &FactorSourceIDFromHash,
-    ) -> Option<SignRequest<S>> {
+    ) -> Result<Option<SignRequest<S>>> {
         let per_transaction = self.per_transaction_input(factor_source_id);
         if per_transaction.is_empty() {
-            return None;
+            return Ok(None);
         }
 
         let invalid_transactions_if_neglected = self
             .invalid_transactions_if_neglected_factor_sources(
                 self.dependencies.cross_role_skip_outcome_analyzer.clone(),
                 IndexSet::just(*factor_source_id),
-            )
-            .into_iter()
-            .collect::<IndexSet<_>>();
+            )?;
 
         let per_factor_source_input = PerFactorSourceInput::new(
             *factor_source_id,
@@ -411,16 +411,16 @@ impl<S: Signable> SignaturesCollector<S> {
             invalid_transactions_if_neglected,
         );
 
-        Some(SignRequest::new(
+        Ok(Some(SignRequest::new(
             factor_source_kind,
             IndexMap::just((*factor_source_id, per_factor_source_input)),
-        ))
+        )))
     }
 
     fn request_for_poly_sign(
         &self,
         factor_sources_of_kind: &FactorSourcesOfKind,
-    ) -> SignRequest<S> {
+    ) -> Result<SignRequest<S>> {
         let factor_source_ids = factor_sources_of_kind
             .factor_sources()
             .iter()
@@ -435,7 +435,7 @@ impl<S: Signable> SignaturesCollector<S> {
             .invalid_transactions_if_neglected_factor_sources(
                 self.dependencies.cross_role_skip_outcome_analyzer.clone(),
                 factor_source_ids.clone(),
-            );
+            )?;
 
         let per_factor_source = factor_source_ids.iter().map(|id| {
             let per_transaction = self.per_transaction_input(id);
@@ -448,7 +448,10 @@ impl<S: Signable> SignaturesCollector<S> {
         }).collect::<IndexMap<FactorSourceIDFromHash, PerFactorSourceInput<S>>>();
 
         // Prepare the request for the interactor
-        SignRequest::new(factor_sources_of_kind.kind, per_factor_source)
+        Ok(SignRequest::new(
+            factor_sources_of_kind.kind,
+            per_factor_source,
+        ))
     }
 
     fn invalid_transactions_if_neglected_factor_sources(
@@ -457,7 +460,7 @@ impl<S: Signable> SignaturesCollector<S> {
             dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
+    ) -> Result<IndexSet<InvalidTransactionIfNeglected<S::ID>>> {
         self.state
             .read()
             .expect("SignaturesCollector lock should not have been poisoned.")

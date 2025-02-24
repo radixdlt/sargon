@@ -195,6 +195,7 @@ impl SecurifiedIntentSetInternalState {
         // println!("👻 Updating SecurifiedIntentSetInternalState after update: {:#?}", self);
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn new(
         intent_set_id: impl Into<Immutable<IntentSetID>>,
         account_paying_for_transaction: impl Into<

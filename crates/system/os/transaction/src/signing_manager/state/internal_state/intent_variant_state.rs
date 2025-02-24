@@ -24,10 +24,13 @@ impl IntentVariantState {
             .update_with_entity_not_signed_for(not_signed)
     }
 
-
-    pub(crate) fn has_exercised_role_for_all_entities(&self, role_kind: RoleKind) -> bool {
-        self.signatures_per_role.has_exercised_role_for_all_entities(role_kind)
-     }
+    pub(crate) fn has_exercised_role_for_all_entities(
+        &self,
+        role_kind: RoleKind,
+    ) -> bool {
+        self.signatures_per_role
+            .has_exercised_role_for_all_entities(role_kind)
+    }
 
     pub(crate) fn update_with_entity_signed_for(
         &mut self,

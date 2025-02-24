@@ -28,9 +28,7 @@ impl SignedIntentWithContext {
     pub(crate) fn as_confirm_after_delay_variant(
         &self,
     ) -> Option<Result<IntentVariantToConfirmAfterDelay>> {
-        let Some(variant) = self.variant else {
-            return None;
-        };
+        let variant = self.variant?;
 
         if variant.can_quick_confirm() {
             None

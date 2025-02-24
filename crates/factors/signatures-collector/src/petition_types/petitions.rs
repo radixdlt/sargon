@@ -181,12 +181,12 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    pub(crate) fn each_petition<T, U>(
+    pub(crate) fn try_each_petition<T, U>(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         each: impl Fn(&PetitionForTransaction<S>) -> T,
-        combine: impl Fn(Vec<T>) -> U,
-    ) -> U {
+        combine: impl Fn(Vec<T>) -> Result<U>,
+    ) -> Result<U> {
         let for_each = factor_source_ids
             .clone()
             .iter()
@@ -206,14 +206,26 @@ impl<S: Signable> Petitions<S> {
         combine(for_each)
     }
 
+    pub(crate) fn each_petition<T, U>(
+        &self,
+        factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+        each: impl Fn(&PetitionForTransaction<S>) -> T,
+        combine: impl Fn(Vec<T>) -> U,
+    ) -> U {
+        self.try_each_petition(factor_source_ids, each, |x| {
+            Ok(combine(x))
+        })
+        .expect("Should not have failed. You should switch to `try_each_petition` if you expect failures.")
+    }
+
     pub(crate) fn invalid_transactions_if_neglected_factors(
         &self,
         cross_role_skip_outcome_analyzer: Arc<
             dyn CrossRoleSkipOutcomeAnalyzer<S>,
         >,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
-        self.each_petition(
+    ) -> Result<IndexSet<InvalidTransactionIfNeglected<S::ID>>> {
+        let vecs = self.try_each_petition(
             factor_source_ids.clone(),
             |p| {
                 p.invalid_transaction_if_neglected_factors(
@@ -221,8 +233,9 @@ impl<S: Signable> Petitions<S> {
                     factor_source_ids.clone(),
                 )
             },
-            |i| i.into_iter().flatten().collect(),
-        )
+            |i| i.into_iter().collect::<Result<Vec<_>>>(),
+        )?;
+        Ok(vecs.into_iter().flatten().collect::<IndexSet<_>>())
     }
 
     pub(crate) fn should_neglect_factors_due_to_irrelevant(

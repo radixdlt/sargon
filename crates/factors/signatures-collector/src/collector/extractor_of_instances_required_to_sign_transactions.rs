@@ -1,6 +1,6 @@
 use profile_security_structures::prelude::{
-    ProfileShieldMetadataById, SecurityStructureID, SecurityStructureMetadata,
-    SecurityStructureOfFactorSourceIds,
+    ExtendedSecurityStructureMetadata, ProfileShieldMetadataById,
+    SecurityStructureID, SecurityStructureOfFactorSourceIds,
 };
 
 use crate::prelude::*;
@@ -112,11 +112,16 @@ impl ProfileShieldMetadataById for ProtoProfile {
     fn shield_metadata_by_id(
         &self,
         shield_id: SecurityStructureID,
-    ) -> Result<SecurityStructureMetadata> {
+    ) -> Result<ExtendedSecurityStructureMetadata> {
         self.shields
             .iter()
             .find(|s| s.id() == shield_id)
-            .map(|s| s.metadata.clone())
+            .map(|s| ExtendedSecurityStructureMetadata {
+                metadata: s.metadata.clone(),
+                time_until_delayed_confirmation_is_callable: s
+                    .matrix_of_factors
+                    .time_until_delayed_confirmation_is_callable,
+            })
             .ok_or(CommonError::UnknownSecurityStructureID {
                 id: shield_id.to_string(),
             })

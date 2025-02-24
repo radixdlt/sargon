@@ -1,4 +1,3 @@
-use async_std::task::current;
 use entity_for_display::EntityForDisplay;
 
 use crate::prelude::*;
@@ -91,6 +90,22 @@ struct CrossRoleSkipOutcomeAnalyzerForManager {
     pub(super) signing_manager_state_snapshot: SigningManagerState,
 }
 
+/// This is a very special struct which is used by SigningManager
+/// and mixes data from possibly two different shields!
+/// The `time_until_delayed_confirmation_is_callable` is from the
+/// **committed** shield, if any, else None, but the `metadata` is
+/// from the provisional
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[serde(rename_all = "camelCase")]
+pub struct PotentiallyMixedSecurityStructureMetadata {
+    /// Read out from the provisional config!
+    pub metadata: SecurityStructureMetadata,
+
+    /// Read of from the committed shield, if any.
+    /// None if the entity was unsecurified
+    pub time_until_delayed_confirmation_is_callable: Option<TimePeriod>,
+}
+
 impl CrossRoleSkipOutcomeAnalyzerForManager {
     fn new(
         proto_profile: Arc<dyn IsProtoProfile>,
@@ -102,19 +117,67 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
         })
     }
 
+    /// N.B. We read
     fn for_display_by_address(
         &self,
         entity_address: AddressOfAccountOrPersona,
-    ) -> Result<(EntityForDisplay, Option<SecurityStructureMetadata>)> {
+    ) -> Result<(
+        EntityForDisplay,
+        Option<PotentiallyMixedSecurityStructureMetadata>,
+    )> {
         let entity = self.proto_profile.entity_by_address(entity_address)?;
-        let provisional_security_config = entity.get_provisional();
-        let security_structure_of_factor_instances = provisional_security_config.map(|config| config.as_factor_instances_derived().cloned().ok_or(CommonError::ProvisionalConfigInWrongStateExpectedInstancesDerived)).transpose()?;
-        let shield_id = security_structure_of_factor_instances.map(|s| s.id());
-        let shield_metadata = shield_id
-            .map(|id| self.proto_profile.shield_metadata_by_id(id))
-            .transpose()?;
+
+        let id_of_committed_shield: Option<SecurityStructureID> = {
+            match entity.security_state() {
+                EntitySecurityState::Securified { value } => {
+                    Some(value.security_structure.id())
+                }
+                EntitySecurityState::Unsecured { .. } => None,
+            }
+        };
+
+        let id_of_provisional = {
+            let provisional_security_config = entity.get_provisional();
+
+            let security_structure_of_factor_instances = provisional_security_config
+                .map(|config| config
+                    .as_factor_instances_derived()
+                    .cloned()
+                    .ok_or(CommonError::ProvisionalConfigInWrongStateExpectedInstancesDerived)
+                )
+                .transpose()?;
+
+            security_structure_of_factor_instances.map(|s| s.id())
+        };
+
+        let potentially_mixed_security_structure_metadata: Option<_> =
+            || -> Result<Option<PotentiallyMixedSecurityStructureMetadata>> {
+                let Some(id_of_provisional) = id_of_provisional else {
+                    // Hmm what if `id_of_committed_shield` is None? we dont care about
+                    // that?
+                    return Ok(None);
+                };
+                let provisional = self
+                    .proto_profile
+                    .shield_metadata_by_id(id_of_provisional)?;
+
+                let committed = id_of_committed_shield
+                    .map(|id| self.proto_profile.shield_metadata_by_id(id))
+                    .transpose()?;
+
+                Ok(Some(PotentiallyMixedSecurityStructureMetadata {
+                    metadata: provisional.metadata,
+                    time_until_delayed_confirmation_is_callable: committed
+                        .map(|c| c.time_until_delayed_confirmation_is_callable),
+                }))
+            }()?;
+
         let entity_for_display = EntityForDisplay::from(entity);
-        Ok((entity_for_display, shield_metadata))
+
+        Ok((
+            entity_for_display,
+            potentially_mixed_security_structure_metadata,
+        ))
     }
 
     fn no_cross_role(
@@ -122,7 +185,8 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
         signable_id: TransactionIntentHash,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         petitions: Vec<PetitionForEntity<TransactionIntentHash>>,
-    ) -> Option<InvalidTransactionIfNeglected<TransactionIntentHash>> {
+    ) -> Result<Option<InvalidTransactionIfNeglected<TransactionIntentHash>>>
+    {
         let invalid_for_display = petitions
             .into_iter()
             .filter_map(|p| {
@@ -131,18 +195,13 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
                 )
             })
             .map(|e| self.for_display_by_address(e))
-            .collect::<Result<Vec<_>>>()
-            .ok();
-
-        let Some(invalid_for_display) = invalid_for_display else {
-            return None;
-        };
+            .collect::<Result<Vec<_>>>()?;
 
         if invalid_for_display.is_empty() {
-            return None;
+            return Ok(None);
         }
 
-        Some(InvalidTransactionIfNeglected {
+        Ok(Some(InvalidTransactionIfNeglected {
             signable_id,
             entities_which_would_require_delayed_confirmation: vec![],
             entities_which_would_fail_auth: invalid_for_display
@@ -150,13 +209,14 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
                 .map(|(entity_for_display, shield_metadata)| {
                     InvalidTransactionForEntity::new(
                         entity_for_display,
-                        shield_metadata,
+                        shield_metadata.map(|s| s.metadata),
                     )
                 })
                 .collect(),
-        })
+        }))
     }
 }
+
 impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
     for CrossRoleSkipOutcomeAnalyzerForManager
 {
@@ -181,7 +241,8 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
         signable_id: TransactionIntentHash,
         skipped_factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         petitions: Vec<PetitionForEntity<TransactionIntentHash>>,
-    ) -> Option<InvalidTransactionIfNeglected<TransactionIntentHash>> {
+    ) -> Result<Option<InvalidTransactionIfNeglected<TransactionIntentHash>>>
+    {
         let Some(current_role) =
             self.signing_manager_state_snapshot.current_role
         else {
@@ -193,46 +254,64 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
             );
         };
 
-        if current_role == RoleKind::Recovery {
-            // We can always try Confirmation+Primary role for
-            // secuirfied entities, so we don't need to check
-            // for that here.
-            // And for unsecurified entities we can only use
-            // Primary role, which we have not gotten to yet,
-            // since Primary is the last role we are exercising.
-            return None;
-        }
-
-        /*
-        struct DelayedConfirmationForEntity {
-            entity_for_display: EntityForDisplay,
-            delay: TimePeriod,
-            shield_for_display: ShieldForDisplay,
-        }
-        */
-
-        /*
-        struct InvalidTransactionForEntity {
-            entity_for_display: EntityForDisplay,
-            shield_for_display: Option<ShieldForDisplay>,
-        }
-        */
-        let entities_which_would_require_delayed_confirmation: Vec<
+        let mut entities_which_would_require_delayed_confirmation: Vec<
             DelayedConfirmationForEntity,
         > = vec![];
+
+        match current_role {
+            RoleKind::Recovery => {
+                // We can always try Confirmation+Primary role for
+                // secuirfied entities, so we don't need to check
+                // for that here.
+                // And for unsecurified entities we can only use
+                // Primary role, which we have not gotten to yet,
+                // since Primary is the last role we are exercising.
+                return Ok(None);
+            }
+            RoleKind::Confirmation => {
+                let entities_not_signed_for_with_recovery = self
+                    .signing_manager_state_snapshot
+                    .entities_not_signed_for_at_all();
+
+                let new = entities_not_signed_for_with_recovery
+                    .into_iter()
+                    .filter(|e| e.is_securified()) // we only care about securified entities - unsecurified entities can only exercise Primary
+                    .map(|e| {
+                        let (entity_for_display, shields_info) =
+                            self.for_display_by_address(e.address())?;
+                        let shields_info =
+                            shields_info.ok_or(CommonError::Unknown)?; // TODO specific error
+                        let delayed = DelayedConfirmationForEntity::new(
+                            entity_for_display,
+                            shields_info
+                                .time_until_delayed_confirmation_is_callable
+                                .ok_or(CommonError::Unknown)?, // TODO specific error
+                            shields_info.metadata,
+                        );
+                        Ok(delayed)
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+
+                entities_which_would_require_delayed_confirmation.extend(new)
+            }
+            RoleKind::Primary => {
+                todo!("impl me")
+            }
+        }
+
         let entities_which_would_fail_auth: Vec<InvalidTransactionForEntity> =
             vec![];
         if entities_which_would_fail_auth.is_empty()
             && entities_which_would_require_delayed_confirmation.is_empty()
         {
-            return None;
+            return Ok(None);
         }
 
-        Some(InvalidTransactionIfNeglected {
+        Ok(Some(InvalidTransactionIfNeglected {
             signable_id,
             entities_which_would_require_delayed_confirmation,
             entities_which_would_fail_auth,
-        })
+        }))
     }
 }
 
@@ -345,18 +424,5 @@ impl SigningManager {
             successfully_signed_intent_sets,
             failed_intent_sets,
         ))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = SigningManager;
-
-    #[actix_rt::test]
-    async fn test() {
-        // let sut = SUT::new(profile, interactor)
     }
 }
