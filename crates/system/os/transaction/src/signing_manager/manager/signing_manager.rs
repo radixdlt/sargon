@@ -277,10 +277,6 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
             );
         };
 
-        let mut entities_which_would_require_delayed_confirmation: Vec<
-            DelayedConfirmationForEntity,
-        > = vec![];
-
         match current_role {
             RoleKind::Recovery => {
                 // We can always try Confirmation+Primary role for
@@ -296,34 +292,30 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
                     .signing_manager_state_snapshot
                     .entities_not_signed_for_at_all();
 
-                let new = entities_not_signed_for_with_recovery
-                    .into_iter()
-                    // we only care about securified entities - unsecurified entities can only
-                    // exercise Primary, and we have not come to Primary role yet.
-                    .filter(|e| e.is_securified())
-                    .map(|e| self.delayed_confirmation_for_entity(e.address()))
-                    .collect::<Result<Vec<DelayedConfirmationForEntity>>>()?;
+                let entities_which_would_require_delayed_confirmation =
+                    entities_not_signed_for_with_recovery
+                        .into_iter()
+                        // we only care about securified entities - unsecurified entities can only
+                        // exercise Primary, and we have not come to Primary role yet.
+                        .filter(|e| e.is_securified())
+                        .map(|e| {
+                            self.delayed_confirmation_for_entity(e.address())
+                        })
+                        .collect::<Result<Vec<DelayedConfirmationForEntity>>>(
+                        )?;
 
-                entities_which_would_require_delayed_confirmation.extend(new)
+                Ok(Some(InvalidTransactionIfNeglected::new(
+                    signable_id,
+                    entities_which_would_require_delayed_confirmation,
+                    // entities_which_would_fail_auth is empty since we can still
+                    // try Primary role.
+                    [],
+                )))
             }
             RoleKind::Primary => {
                 todo!("impl me")
             }
         }
-
-        let entities_which_would_fail_auth: Vec<InvalidTransactionForEntity> =
-            vec![];
-        if entities_which_would_fail_auth.is_empty()
-            && entities_which_would_require_delayed_confirmation.is_empty()
-        {
-            return Ok(None);
-        }
-
-        Ok(Some(InvalidTransactionIfNeglected {
-            signable_id,
-            entities_which_would_require_delayed_confirmation,
-            entities_which_would_fail_auth,
-        }))
     }
 }
 
