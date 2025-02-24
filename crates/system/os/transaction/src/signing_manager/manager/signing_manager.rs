@@ -175,7 +175,7 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
                 petitions,
             );
         };
- 
+
         /*
         struct DelayedConfirmationForEntity {
             entity_for_display: EntityForDisplay,
@@ -279,12 +279,22 @@ impl SigningManager {
 
     /// Signs all relevant Intents of all relevant IntentSets
     /// with the Primary role.
-    pub(super) async fn sign_intents_with_primary_role(&self) -> Result<()> {
+    ///
+    /// Might not be needed at all to sign with the primary role - since
+    /// if user has exercised Recovery and Confirmation roles for all entities
+    /// then we are done and can proceed to the next step (signing with fee payers).
+    pub(super) async fn sign_intents_with_primary_role_if_needed(
+        &self,
+    ) -> Result<()> {
+        if self.is_meaningless_to_exercise_primary() {
+            return Ok(());
+        }
         let role = RoleKind::Primary;
         self.updating_state(|state| {
             state.current_role = Some(role);
         })?;
         let intent_sets = self.get_intent_sets_to_sign_for_with_primary_role();
+
         let outcome =
             self.sign_intent_sets_with_role(intent_sets, role).await?;
         self.handle_primary_outcome(outcome)?;

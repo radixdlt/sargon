@@ -50,9 +50,11 @@ impl SigningManager {
         println!("🛡️ Signing with Confirmation");
         self.sign_intents_with_confirmation_role().await?;
 
-        // Then we sign for the Primary role
-        println!("🛡️ Signing with Primary");
-        self.sign_intents_with_primary_role().await?;
+        // Then we sign for the Primary role, might not be needed. It is ALWAYS
+        // needed if any of the entities we are signing for is unsecurified though,
+        // since unsecurified entities only have Primary Role.
+        println!("🛡️ Signing with Primary if needed");
+        self.sign_intents_with_primary_role_if_needed().await?;
 
         // Try to get the intermediary outcome - containing many variants
         // per IntentSet.

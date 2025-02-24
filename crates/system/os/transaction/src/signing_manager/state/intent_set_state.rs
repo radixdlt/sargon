@@ -16,6 +16,13 @@ impl IntentSetState {
         self.internal_state.can_exercise_role(role_kind)
     }
 
+    pub(crate) fn has_exercised_recovery_and_confirmation_role_for_all_entities(
+        &self,
+    ) -> bool {
+        self.internal_state
+            .has_exercised_recovery_and_confirmation_role_for_all_entities()
+    }
+
     pub(crate) fn new(
         intent_set_id: IntentSetID,
         shield_application: SecurityShieldApplicationWithTransactionIntents,
@@ -38,13 +45,12 @@ impl IntentSetState {
             .update_with_entity_signed_for(intent_with_signatures);
     }
 
-
-        pub(crate) fn update_with_entity_not_signed_for(
-            &mut self,
-            not_signed: EntityNotSignedFor,
-        ) {
-            assert_eq!(self.intent_set_id, not_signed.intent_set_id());
-            self.internal_state
-                .update_with_entity_not_signed_for(not_signed);
-        }
+    pub(crate) fn update_with_entity_not_signed_for(
+        &mut self,
+        not_signed: EntityNotSignedFor,
+    ) {
+        assert_eq!(self.intent_set_id, not_signed.intent_set_id());
+        self.internal_state
+            .update_with_entity_not_signed_for(not_signed);
+    }
 }

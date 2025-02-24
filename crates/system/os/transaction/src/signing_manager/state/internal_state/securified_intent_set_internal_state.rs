@@ -86,6 +86,16 @@ impl SecurifiedIntentSetInternalState {
             .collect()
     }
 
+    // We only need one variant to have **both** exericesd Recovery and Confirmation role.
+    pub(crate) fn has_exercised_recovery_and_confirmation_role_for_all_entities(
+        &self,
+    ) -> bool {
+        self._all_intent_variant_states().iter().any(|v| {
+            v.has_exercised_role_for_all_entities(RoleKind::Recovery)
+                && v.has_exercised_role_for_all_entities(RoleKind::Confirmation)
+        })
+    }
+
     fn _all_intent_variant_states(&self) -> Vec<&IntentVariantState> {
         vec![
             &self.initiate_with_recovery_complete_with_primary,
@@ -151,17 +161,13 @@ impl SecurifiedIntentSetInternalState {
             not_signed.entity.address(),
             self.entity_applying_shield.address()
         );
-        assert_eq!(
-            not_signed.context.intent_set_id,
-            *self.intent_set_id
-        );
+        assert_eq!(not_signed.context.intent_set_id, *self.intent_set_id);
 
         let variant_state = self.get_variant_state_by_txid(
             not_signed.intent.transaction_intent_hash(),
         );
 
-        variant_state
-            .update_with_entity_not_signed_for(not_signed.clone());
+        variant_state.update_with_entity_not_signed_for(not_signed.clone());
     }
 
     pub(crate) fn update_with_entity_signed_for(

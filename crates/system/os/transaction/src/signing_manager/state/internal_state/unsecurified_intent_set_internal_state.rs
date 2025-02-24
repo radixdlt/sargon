@@ -44,6 +44,11 @@ impl UnsecurifiedIntentSetInternalState {
         ))
     }
 
+    /// Unsecurified entities only have primary role
+    pub(crate) fn has_exercised_primary_role_for_all_entities(&self) -> bool {
+       self.signatures.has_exercised_role_for_all_entities(RoleKind::Primary)
+    }
+
     pub(crate) fn paying_account(&self) -> Account {
         self.account_paying_for_transaction.account()
     }

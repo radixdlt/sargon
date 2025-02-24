@@ -18,6 +18,21 @@ impl IntentSetInternalState {
         }
     }
 
+    /// will return `False` if Self is `Unsecurified`, since unsecured entities only have primary role
+    pub(crate) fn has_exercised_recovery_and_confirmation_role_for_all_entities(
+        &self,
+    ) -> bool {
+        match self {
+            Self::Unsecurified(_) => {
+                // Unsecurified entities only have primary role
+                false
+            }
+            Self::Securified(sec) => sec
+                .has_exercised_recovery_and_confirmation_role_for_all_entities(
+                ),
+        }
+    }
+
     pub(crate) fn paying_account(&self) -> Account {
         match self {
             Self::Unsecurified(unsec) => unsec.paying_account(),

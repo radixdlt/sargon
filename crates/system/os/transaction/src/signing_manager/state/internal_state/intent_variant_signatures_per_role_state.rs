@@ -32,6 +32,17 @@ impl IntentVariantSignaturesPerRoleState {
             .update_with_intent_with_signatures(intent_with_signatures);
     }
 
+    pub(crate) fn has_exercised_role_for_all_entities(
+        &self,
+        role_kind: RoleKind,
+    ) -> bool {
+        if let Some(value) = self.0.get(&role_kind) {
+            value.has_exercised_role_for_all_entities(role_kind)
+        } else {
+            false
+        }
+    }
+
     pub(crate) fn new(
         variant: RolesExercisableInTransactionManifestCombination,
     ) -> Self {
