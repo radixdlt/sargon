@@ -18,7 +18,7 @@ impl SargonOS {
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         name: String,
-    ) -> Result<()> {
+    ) -> Result<FactorSourceID> {
         self.wrapped
             .add_new_mnemonic_factor_source(
                 factor_source_kind.into_internal(),
