@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 /// A struct representing all the interactions that were dispatched, or are waiting to be dispatched.
-pub struct InteractionsQueue {
+pub struct InteractionQueue {
     /// Interactions that were already dispatched.
     /// Their status will always be `InProgress`, `Success` or `Failure`.
     pub items: IndexSet<InteractionQueueItem>,
@@ -11,7 +11,7 @@ pub struct InteractionsQueue {
     pub batches: Vec<InteractionQueueBatch>,
 }
 
-impl InteractionsQueue {
+impl InteractionQueue {
     pub fn new() -> Self {
         Self {
             items: IndexSet::new(),
@@ -20,7 +20,7 @@ impl InteractionsQueue {
     }
 }
 
-impl InteractionsQueue {
+impl InteractionQueue {
     /// Returns every interaction in the queue, sorted by its status.
     pub fn sorted_items(&self) -> Vec<InteractionQueueItem> {
         let mut all_items: Vec<InteractionQueueItem> = self

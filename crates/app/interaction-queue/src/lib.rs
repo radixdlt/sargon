@@ -12,6 +12,7 @@ pub mod prelude {
     pub use crate::observer::*;
     pub use crate::queue::*;
     pub use crate::storage::*;
+    pub use crate::manager::*;
 
     pub(crate) use core_utils::prelude::*;
     pub(crate) use gateway_client_and_api::prelude::*;
