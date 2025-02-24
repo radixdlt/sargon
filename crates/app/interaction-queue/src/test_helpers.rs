@@ -65,7 +65,13 @@ impl InteractionQueueItem {
         Self::sample_status(InteractionQueueItemStatus::Queued)
     }
 
-    pub fn sample_next(timestamp: Timestamp) -> Self {
+    pub fn sample_next() -> Self {
+        Self::sample_next_in(500)
+    }
+
+    pub fn sample_next_in(milliseconds: u64) -> Self {
+        let timestamp =
+            Timestamp::now_utc().add(Duration::from_millis(milliseconds));
         Self::sample_status(InteractionQueueItemStatus::Next(timestamp))
     }
 

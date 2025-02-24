@@ -64,16 +64,36 @@ impl InteractionQueueManager {
         Ok(())
     }
 
-    pub fn retry_interaction(&self, _interaction_id: Uuid) {
-        // Find interaction in `queue.items` and retry it
+    /// Retries an interaction that has already failed.
+    pub async fn retry_interaction(&self, interaction: InteractionQueueItem) {
+        assert!(matches!(
+            interaction.status,
+            InteractionQueueItemStatus::Failure(_)
+        ));
+        // Update its status and replace it on the queue
+        let mut item = interaction.clone();
+        item.status = InteractionQueueItemStatus::InProgress;
+        self.queue.write().await.replace_interaction(item.clone());
+
+        // Process the interaction
+        self.process_interaction(item).await;
+
+        // Notify observer and save the queue to local storage.
+        self.handle_queue_update().await;
     }
 
-    pub fn dismiss_interaction(&self, _interaction_id: Uuid) {
-        // Remove interaction from `queue.items`
+    /// Removes an interaction from the queue.
+    /// Should only be called on interactions whose status is final (`Success` or `Failure`).
+    pub async fn remove_interaction(&self, interaction: InteractionQueueItem) {
+        self.queue.write().await.remove_interaction(interaction);
+        self.handle_queue_update().await;
     }
 
-    pub fn cancel_interaction(&self, _interaction_id: Uuid, _batch_id: Uuid) {
-        // Find batch in `queue.batches` and remove the interaction with given id from its list.
+    /// Cancels an interaction that hasn't been submitted yet.
+    /// Should only be called on interactions whose status is pending (`Next` or `Queued`).
+    pub async fn cancel_interaction(&self, interaction: InteractionQueueItem) {
+        self.queue.write().await.cancel_interaction(interaction);
+        self.handle_queue_update().await;
     }
 }
 
@@ -100,7 +120,7 @@ impl InteractionQueueManager {
             self.observer.handle_update(queue.sorted_items());
         }
 
-        let mut queue = self.queue.write().await;
+        let queue = self.queue.write().await;
         let _ = self.storage.save_queue(queue.clone()).await;
     }
 
@@ -233,6 +253,12 @@ impl InteractionQueueManager {
 
         self.queue.write().await.add_interaction(item.clone());
 
+        self.process_interaction(item).await;
+    }
+
+    /// Processes the interaction. If it is a Transaction, it will submit it to the Gateway.
+    /// If it is a PreAuthorization, it won't do anything.
+    async fn process_interaction(&self, item: InteractionQueueItem) {
         if let InteractionQueueItemKind::Transaction(transaction) = item.kind {
             let request = TransactionSubmitRequest {
                 notarized_transaction_hex: transaction
@@ -381,9 +407,7 @@ mod tests {
                 .await;
 
         // Set up the batch with 3 interactions
-        let in_half_a_second =
-            Timestamp::now_utc() + Duration::from_millis(500);
-        let interaction_1 = InteractionQueueItem::sample_next(in_half_a_second);
+        let interaction_1 = InteractionQueueItem::sample_next();
         let interaction_2 = InteractionQueueItem::sample_queued();
         let interaction_3 = InteractionQueueItem::sample_queued();
         let batch = InteractionQueueBatch::with_items([
@@ -430,6 +454,130 @@ mod tests {
                     .with_status(InteractionQueueItemStatus::InProgress)],
                 [batch.dropping_first()],
             );
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
+    async fn retry_interaction_success() {
+        // Test the case an interaction is successfully retried
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let sut = create_and_bootstrap(
+            vec![
+                // Req1: TX is retried successfully
+                submit_transaction_response(),
+            ],
+            observer.clone(),
+            storage.clone(),
+        )
+        .await;
+
+        // Manually add the interaction to the queue
+        let interaction = InteractionQueueItem::sample_failed();
+        sut.queue.write().await.items.insert(interaction.clone());
+
+        // Retry the interaction
+        sut.retry_interaction(interaction.clone()).await;
+
+        // Verify that the queue now has 1 item whose status is `InProgress`
+        let queue = sut.queue.read().await;
+        assert_eq!(queue.items.len(), 1);
+        assert_eq!(
+            queue.items[0].status,
+            InteractionQueueItemStatus::InProgress
+        );
+        drop(queue);
+
+        // Verify queue update
+        let expected_queue = InteractionQueue::with_items(vec![
+            interaction.with_status(InteractionQueueItemStatus::InProgress)
+        ]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
+    #[should_panic]
+    async fn retry_interaction_invalid() {
+        // Test the case an interaction is retried, but it is not in a failed state
+
+        let sut = create_and_bootstrap(
+            vec![],
+            Arc::new(MockObserver::new()),
+            Arc::new(MockStorage::new_empty()),
+        )
+        .await;
+
+        // Manually add the interaction to the queue
+        let interaction = InteractionQueueItem::sample_in_progress();
+        sut.retry_interaction(interaction).await;
+    }
+
+    #[actix_rt::test]
+    async fn remove_interaction() {
+        // Test the case an interaction is removed from the queue
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let sut = create_and_bootstrap(
+            vec![
+                // Req1: TX is retried successfully
+                submit_transaction_response(),
+            ],
+            observer.clone(),
+            storage.clone(),
+        )
+        .await;
+
+        // Manually add the interaction to the queue
+        let interaction = InteractionQueueItem::sample_failed();
+        sut.queue.write().await.items.insert(interaction.clone());
+
+        // Remove the interaction
+        sut.remove_interaction(interaction.clone()).await;
+
+        // Verify that the queue is now empty
+        let queue = sut.queue.read().await;
+        assert!(queue.items.is_empty());
+        drop(queue);
+
+        // Verify queue update
+        let expected_queue = InteractionQueue::with_items(vec![]);
+        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+    }
+
+    #[actix_rt::test]
+    async fn cancel_interaction() {
+        // Test the case an interaction is cancelled from the queue
+
+        let observer = Arc::new(MockObserver::new());
+        let storage = Arc::new(MockStorage::new_empty());
+        let sut = create_and_bootstrap(
+            vec![
+                // Req1: TX is retried successfully
+                submit_transaction_response(),
+            ],
+            observer.clone(),
+            storage.clone(),
+        )
+        .await;
+
+        // Manually add the interaction inside a batch to the queue
+        let interaction = InteractionQueueItem::sample_next();
+        let batch = InteractionQueueBatch::with_items([interaction.clone()]);
+        sut.queue.write().await.batches.push(batch.clone());
+
+        // Cancel the interaction
+        sut.cancel_interaction(interaction.clone()).await;
+
+        // Verify that the queue is now empty
+        let queue = sut.queue.read().await;
+        assert!(queue.items.is_empty());
+        drop(queue);
+
+        // Verify queue update
+        let expected_queue =
+            InteractionQueue::with_batches(vec![batch.dropping_first()]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
     }
 }
