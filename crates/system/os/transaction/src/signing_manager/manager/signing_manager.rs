@@ -1,4 +1,5 @@
 use entity_for_display::EntityForDisplay;
+use serde_json::value::Index;
 
 use crate::prelude::*;
 
@@ -186,6 +187,28 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
         ))
     }
 
+    fn make_entities_which_would_fail_auth(
+        &self,
+        addresses: impl IntoIterator<Item = AddressOfAccountOrPersona>,
+    ) -> Result<IdentifiedVecOf<InvalidTransactionForEntity>> {
+        let invalid_for_display = addresses
+            .into_iter()
+            .map(|e| self.for_display_by_address(e))
+            .collect::<Result<Vec<_>>>()?;
+
+        let entities_which_would_fail_auth = invalid_for_display
+            .into_iter()
+            .map(|(entity_for_display, shield_metadata)| {
+                InvalidTransactionForEntity::new(
+                    entity_for_display,
+                    shield_metadata.map(|s| s.metadata),
+                )
+            })
+            .collect::<IdentifiedVecOf<InvalidTransactionForEntity>>();
+
+        Ok(entities_which_would_fail_auth)
+    }
+
     fn no_cross_role(
         &self,
         signable_id: TransactionIntentHash,
@@ -193,33 +216,25 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
         petitions: Vec<PetitionForEntity<TransactionIntentHash>>,
     ) -> Result<Option<InvalidTransactionIfNeglected<TransactionIntentHash>>>
     {
-        let invalid_for_display = petitions
-            .into_iter()
-            .filter_map(|p| {
-                p.invalid_transaction_if_neglected_factors(
-                    skipped_factor_source_ids.clone(),
-                )
-            })
-            .map(|e| self.for_display_by_address(e))
-            .collect::<Result<Vec<_>>>()?;
+        let entities_which_would_fail_auth = self
+            .make_entities_which_would_fail_auth(
+                petitions.into_iter().filter_map(|p| {
+                    p.invalid_transaction_if_neglected_factors(
+                        skipped_factor_source_ids.clone(),
+                    )
+                }),
+            )?;
 
-        if invalid_for_display.is_empty() {
+        if entities_which_would_fail_auth.is_empty() {
             return Ok(None);
         }
 
-        Ok(Some(InvalidTransactionIfNeglected {
+        Ok(Some(InvalidTransactionIfNeglected::new(
             signable_id,
-            entities_which_would_require_delayed_confirmation: vec![],
-            entities_which_would_fail_auth: invalid_for_display
-                .into_iter()
-                .map(|(entity_for_display, shield_metadata)| {
-                    InvalidTransactionForEntity::new(
-                        entity_for_display,
-                        shield_metadata.map(|s| s.metadata),
-                    )
-                })
-                .collect(),
-        }))
+            // entities_which_would_require_delayed_confirmation
+            [],
+            entities_which_would_fail_auth,
+        )))
     }
 
     fn delayed_confirmation_for_entity(
@@ -237,6 +252,22 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
             shields_info.metadata,
         );
         Ok(delayed)
+    }
+
+    fn make_delayed_confirmation_for_entity(
+        &self,
+        entities: impl IntoIterator<Item = AccountOrPersona>,
+        filter: impl Fn(&AccountOrPersona) -> bool,
+    ) -> Result<IdentifiedVecOf<DelayedConfirmationForEntity>> {
+        entities
+            .into_iter()
+            // we only care about securified entities - unsecurified entities can only
+            // exercise Primary, and we have not come to Primary role yet.
+            .filter(|e| e.is_securified())
+            // .filter(|e| addresses_of_affected_entities.contains(&e.address()))
+            .filter(filter)
+            .map(|e| self.delayed_confirmation_for_entity(e.address()))
+            .collect::<Result<IdentifiedVecOf<DelayedConfirmationForEntity>>>()
     }
 }
 
@@ -277,6 +308,15 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
             );
         };
 
+        let addresses_of_affected_entities = petitions
+            .into_iter()
+            .filter_map(|p| {
+                p.invalid_transaction_if_neglected_factors(
+                    skipped_factor_source_ids.clone(),
+                )
+            })
+            .collect::<IndexSet<AddressOfAccountOrPersona>>();
+
         match current_role {
             RoleKind::Recovery => {
                 // We can always try Confirmation+Primary role for
@@ -290,30 +330,83 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
             RoleKind::Confirmation => {
                 let entities_not_signed_for_with_recovery = self
                     .signing_manager_state_snapshot
-                    .entities_not_signed_for_at_all();
+                    .entities_not_signed_for_with_recovery();
 
-                let entities_which_would_require_delayed_confirmation =
-                    entities_not_signed_for_with_recovery
-                        .into_iter()
-                        // we only care about securified entities - unsecurified entities can only
-                        // exercise Primary, and we have not come to Primary role yet.
-                        .filter(|e| e.is_securified())
-                        .map(|e| {
-                            self.delayed_confirmation_for_entity(e.address())
-                        })
-                        .collect::<Result<Vec<DelayedConfirmationForEntity>>>(
-                        )?;
+                let entities_which_would_require_delayed_confirmation = self
+                    .make_delayed_confirmation_for_entity(
+                        entities_not_signed_for_with_recovery,
+                        |e| {
+                            // We care only about the affected entities of factor sources in question
+                            addresses_of_affected_entities
+                                .contains(&e.address())
+                        },
+                    )?;
+
+                if entities_which_would_require_delayed_confirmation.is_empty()
+                {
+                    return Ok(None);
+                }
 
                 Ok(Some(InvalidTransactionIfNeglected::new(
                     signable_id,
                     entities_which_would_require_delayed_confirmation,
-                    // entities_which_would_fail_auth is empty since we can still
-                    // try Primary role.
+                    // `entities_which_would_fail_auth` is empty since we can
+                    // still try Primary role.
                     [],
                 )))
             }
             RoleKind::Primary => {
-                todo!("impl me")
+                // Note that we cannot do anything with an entity having signed for with
+                // only CONFIRMATION role. So we only need to check for those entities
+                // who have not exercised Recovery.
+                let entities_not_signed_for_with_recovery = self
+                    .signing_manager_state_snapshot
+                    .entities_not_signed_for_with_recovery();
+
+                let entities_not_signed_for_with_recovery =
+                    entities_not_signed_for_with_recovery
+                        .into_iter()
+                        .map(|e| e.address())
+                        .collect_vec();
+
+                // We care only about the affected entities of factor sources in question
+                let entities_not_signed_for_with_recovery =
+                    entities_not_signed_for_with_recovery
+                        .into_iter()
+                        .filter(|a| addresses_of_affected_entities.contains(a))
+                        .collect::<IndexSet<_>>();
+
+                let entities_which_would_fail_auth = self
+                    .make_entities_which_would_fail_auth(
+                        entities_not_signed_for_with_recovery,
+                    )?;
+
+                // Will use Delayed Confirmation (R+T)
+                let entities_signed_for_with_recovery_but_not_confirmation = self
+                    .signing_manager_state_snapshot
+                    .entities_signed_for_with_recovery_but_not_with_confirmation();
+
+                let entities_which_would_require_delayed_confirmation = self
+                    .make_delayed_confirmation_for_entity(
+                        entities_signed_for_with_recovery_but_not_confirmation,
+                        |e| {
+                            // We care only about the affected entities of factor sources in question
+                            addresses_of_affected_entities
+                                .contains(&e.address())
+                        },
+                    )?;
+
+                if entities_which_would_require_delayed_confirmation.is_empty()
+                    && entities_which_would_fail_auth.is_empty()
+                {
+                    return Ok(None);
+                }
+
+                Ok(Some(InvalidTransactionIfNeglected::new(
+                    signable_id,
+                    entities_which_would_require_delayed_confirmation,
+                    entities_which_would_fail_auth,
+                )))
             }
         }
     }

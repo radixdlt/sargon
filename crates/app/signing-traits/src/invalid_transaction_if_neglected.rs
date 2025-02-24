@@ -19,6 +19,12 @@ pub struct DelayedConfirmationForEntity {
     /// committed shield.
     pub shield_metadata: SecurityStructureMetadata,
 }
+impl Identifiable for DelayedConfirmationForEntity {
+    type ID = AddressOfAccountOrPersona;
+    fn id(&self) -> Self::ID {
+        self.entity_for_display.address()
+    }
+}
 
 impl DelayedConfirmationForEntity {
     pub fn new(
@@ -58,6 +64,12 @@ pub struct InvalidTransactionForEntity {
     /// None for transactions which are not shield applications
     /// Some for transactions which are shield applications.
     pub shield_metadata: Option<SecurityStructureMetadata>,
+}
+impl Identifiable for InvalidTransactionForEntity {
+    type ID = AddressOfAccountOrPersona;
+    fn id(&self) -> Self::ID {
+        self.entity_for_display.address()
+    }
 }
 
 impl InvalidTransactionForEntity {

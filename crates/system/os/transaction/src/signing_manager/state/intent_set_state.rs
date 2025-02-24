@@ -23,6 +23,20 @@ impl IntentSetState {
             .has_exercised_recovery_and_confirmation_role_for_all_entities()
     }
 
+    /// N.B. does not include fee payers
+    pub(crate) fn entities_not_signed_for_with_recovery(
+        &self,
+    ) -> Option<AccountOrPersona> {
+        self.internal_state.entities_not_signed_for_with_recovery()
+    }
+    
+        /// N.B. does not include fee payers
+        pub(crate) fn entities_signed_for_with_recovery_but_not_with_confirmation(
+            &self,
+        ) -> Option<AccountOrPersona> {
+            self.internal_state.entities_signed_for_with_recovery_but_not_with_confirmation()
+        }
+
     pub(crate) fn new(
         intent_set_id: IntentSetID,
         shield_application: SecurityShieldApplicationWithTransactionIntents,

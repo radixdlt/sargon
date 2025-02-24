@@ -7,11 +7,24 @@ pub(crate) struct SigningManagerState {
 }
 
 impl SigningManagerState {
-    // TODO: Hmm should this be `IndexMap<IntentSetID, AccountOrPersona>` or something?
-    pub(crate) fn entities_not_signed_for_at_all(
+    /// N.B. does not include fee payers
+    pub(crate) fn entities_not_signed_for_with_recovery(
         &self,
     ) -> IndexSet<AccountOrPersona> {
-        todo!()
+        self.per_set_state
+        .values()
+        .into_iter()
+        .filter_map(|s| s.entities_not_signed_for_with_recovery())
+        .collect()
+    }
+    
+    /// N.B. does not include fee payers
+    pub(crate) fn entities_signed_for_with_recovery_but_not_with_confirmation(&self) -> IndexSet<AccountOrPersona> {
+        self.per_set_state
+        .values()
+        .into_iter()
+        .filter_map(|s| s.entities_signed_for_with_recovery_but_not_with_confirmation())
+        .collect()
     }
 
     pub(crate) fn update_with_exercise_role_outcome(

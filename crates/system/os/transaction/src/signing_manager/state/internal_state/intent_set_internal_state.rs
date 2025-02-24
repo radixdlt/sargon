@@ -18,6 +18,46 @@ impl IntentSetInternalState {
         }
     }
 
+    /// Returns `None` is `Unsecurified`
+    /// Returns `Some(self.entity_applying_shield)` if that entity has not been signed for
+    /// with Recovery role
+    /// Returns `None` otherwise.
+    pub(crate) fn entities_not_signed_for_with_recovery(
+        &self,
+    ) -> Option<AccountOrPersona> {
+        match self {
+            Self::Unsecurified(_) => None,
+            Self::Securified(sec) => {
+                if sec.has_exercised_recovery_role_for_entity_applying_shield()
+                {
+                    None
+                } else {
+                    Some(self.entity_applying_shield())
+                }
+            }
+        }
+    }
+
+    // Returns `None` is `Unsecurified`
+    /// Returns `Some(self.entity_applying_shield)` if that entity has been signed for
+    /// with Recovery role but not with confirmation
+    /// Returns `None` otherwise.
+    pub(crate) fn entities_signed_for_with_recovery_but_not_with_confirmation(
+        &self,
+    ) -> Option<AccountOrPersona> {
+        match self {
+            Self::Unsecurified(_) => None,
+            Self::Securified(sec) => {
+                if sec.entities_signed_for_with_recovery_but_not_with_confirmation()
+                {
+                    None
+                } else {
+                    Some(self.entity_applying_shield())
+                }
+            }
+        }
+    }
+
     /// will return `False` if Self is `Unsecurified`, since unsecured entities only have primary role
     pub(crate) fn has_exercised_recovery_and_confirmation_role_for_all_entities(
         &self,
@@ -30,6 +70,13 @@ impl IntentSetInternalState {
             Self::Securified(sec) => sec
                 .has_exercised_recovery_and_confirmation_role_for_all_entities(
                 ),
+        }
+    }
+
+    pub(crate) fn entity_applying_shield(&self) -> AccountOrPersona {
+        match self {
+            Self::Unsecurified(unsec) => unsec.entity_applying_shield().entity,
+            Self::Securified(sec) => sec.entity_applying_shield().entity,
         }
     }
 

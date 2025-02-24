@@ -31,6 +31,15 @@ impl IntentVariantState {
         self.signatures_per_role
             .has_exercised_role_for_all_entities(role_kind)
     }
+    
+
+    pub(crate) fn has_skipped_exercising_role(
+        &self,
+        role_kind: RoleKind,
+    ) -> bool {
+        self.signatures_per_role
+            .has_skipped_exercising_role(role_kind)
+    }
 
     pub(crate) fn update_with_entity_signed_for(
         &mut self,

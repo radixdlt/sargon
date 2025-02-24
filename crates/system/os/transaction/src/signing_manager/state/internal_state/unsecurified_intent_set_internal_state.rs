@@ -54,6 +54,10 @@ impl UnsecurifiedIntentSetInternalState {
         self.account_paying_for_transaction.account()
     }
 
+    pub(crate) fn entity_applying_shield(&self) -> AnyUnsecurifiedEntity {
+        (*self.entity_applying_shield).clone()
+    }
+
     pub(crate) fn transaction_intent_hash(&self) -> TransactionIntentHash {
         self.transaction_intent.transaction_intent_hash()
     }

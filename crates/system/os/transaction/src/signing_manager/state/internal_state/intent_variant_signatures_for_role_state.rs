@@ -47,6 +47,17 @@ impl IntentVariantSignaturesForRoleState {
             .is_ok()
     }
 
+    pub(crate) fn has_skipped_exercising_role(
+        &self,
+        role_kind: RoleKind,
+    ) -> bool {
+        if role_kind != *self.role {
+            return false;
+        }
+        // TODO: is this enough?
+        !self.neglected_factors_per_entity.is_empty()
+    }
+
     fn set_intent_else_assert(&mut self, intent: &TransactionIntent) {
         if let Some(existing_intent) = self.intent.as_ref() {
             assert_eq!(*existing_intent, intent.transaction_intent_hash());

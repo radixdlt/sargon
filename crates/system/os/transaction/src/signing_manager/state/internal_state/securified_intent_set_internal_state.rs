@@ -77,6 +77,10 @@ impl SecurifiedIntentSetInternalState {
         self.account_paying_for_transaction.account()
     }
 
+    pub(crate) fn entity_applying_shield(&self) -> AnySecurifiedEntity {
+        (*self.entity_applying_shield).clone()
+    }
+
     pub(crate) fn transaction_intent_hashes(
         &self,
     ) -> IndexSet<TransactionIntentHash> {
@@ -84,6 +88,34 @@ impl SecurifiedIntentSetInternalState {
             .iter()
             .map(|v| v.intent.transaction_intent_hash())
             .collect()
+    }
+
+    pub(crate) fn has_exercised_recovery_role_for_entity_applying_shield(
+        &self,
+    ) -> bool {
+        self._all_intent_variant_states()
+            .iter()
+            .filter(|v| v.variant.can_exercise_recovery_role())
+            // TODO: hmm `any` or `all`? Should probably be the same!
+            .any(|v| v.has_exercised_role_for_all_entities(RoleKind::Recovery))
+    }
+
+    pub(crate) fn entities_signed_for_with_recovery_but_not_with_confirmation(
+        &self,
+    ) -> bool {
+        self._all_intent_variant_states()
+            .iter()
+            .filter(|v| {
+                v.variant.can_exercise_recovery_role()
+                    && v.variant.can_exercise_confirmation_role()
+            })
+            // TODO: hmm `any` or `all`? Should probably be the same!
+            .any(|v| {
+                v.has_exercised_role_for_all_entities(RoleKind::Recovery)
+                    && v.has_skipped_exercising_role(
+                        RoleKind::Confirmation,
+                    )
+            })
     }
 
     // We only need one variant to have **both** exericesd Recovery and Confirmation role.

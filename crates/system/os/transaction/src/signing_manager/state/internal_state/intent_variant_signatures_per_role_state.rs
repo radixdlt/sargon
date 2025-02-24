@@ -42,6 +42,17 @@ impl IntentVariantSignaturesPerRoleState {
             false
         }
     }
+    
+    pub(crate) fn has_skipped_exercising_role(
+        &self,
+        role_kind: RoleKind,
+    ) -> bool {
+        if let Some(value) = self.0.get(&role_kind) {
+            value.has_skipped_exercising_role(role_kind)
+        } else {
+            false
+        }
+    }
 
     pub(crate) fn new(
         variant: RolesExercisableInTransactionManifestCombination,
