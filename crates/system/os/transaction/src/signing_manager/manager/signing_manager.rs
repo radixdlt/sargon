@@ -117,7 +117,8 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
         })
     }
 
-    /// N.B. We read
+    /// N.B. We read the metadata of the provisional shield, and the
+    /// time_until_delayed_confirmation_is_callable from the committed shield
     fn for_display_by_address(
         &self,
         entity_address: AddressOfAccountOrPersona,
@@ -136,6 +137,8 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
             }
         };
 
+        // Provisional is used to show the name of the shield
+        // we are applying.
         let id_of_provisional = {
             let provisional_security_config = entity.get_provisional();
 
@@ -150,6 +153,9 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
             security_structure_of_factor_instances.map(|s| s.id())
         };
 
+        // We need to know how long time use need to wait for delayed completion
+        // if they cannot quick confirm, that is the value on the committed shield,
+        // not the provisional (since it is not in use yet).
         let potentially_mixed_security_structure_metadata: Option<_> =
             || -> Result<Option<PotentiallyMixedSecurityStructureMetadata>> {
                 let Some(id_of_provisional) = id_of_provisional else {
@@ -215,6 +221,23 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
                 .collect(),
         }))
     }
+
+    fn delayed_confirmation_for_entity(
+        &self,
+        address: AddressOfAccountOrPersona,
+    ) -> Result<DelayedConfirmationForEntity> {
+        let (entity_for_display, shields_info) =
+            self.for_display_by_address(address)?;
+        let shields_info = shields_info.ok_or(CommonError::Unknown)?; // TODO specific error
+        let delayed = DelayedConfirmationForEntity::new(
+            entity_for_display,
+            shields_info
+                .time_until_delayed_confirmation_is_callable
+                .ok_or(CommonError::Unknown)?, // TODO specific error
+            shields_info.metadata,
+        );
+        Ok(delayed)
+    }
 }
 
 impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
@@ -275,22 +298,11 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
 
                 let new = entities_not_signed_for_with_recovery
                     .into_iter()
-                    .filter(|e| e.is_securified()) // we only care about securified entities - unsecurified entities can only exercise Primary
-                    .map(|e| {
-                        let (entity_for_display, shields_info) =
-                            self.for_display_by_address(e.address())?;
-                        let shields_info =
-                            shields_info.ok_or(CommonError::Unknown)?; // TODO specific error
-                        let delayed = DelayedConfirmationForEntity::new(
-                            entity_for_display,
-                            shields_info
-                                .time_until_delayed_confirmation_is_callable
-                                .ok_or(CommonError::Unknown)?, // TODO specific error
-                            shields_info.metadata,
-                        );
-                        Ok(delayed)
-                    })
-                    .collect::<Result<Vec<_>>>()?;
+                    // we only care about securified entities - unsecurified entities can only
+                    // exercise Primary, and we have not come to Primary role yet.
+                    .filter(|e| e.is_securified())
+                    .map(|e| self.delayed_confirmation_for_entity(e.address()))
+                    .collect::<Result<Vec<DelayedConfirmationForEntity>>>()?;
 
                 entities_which_would_require_delayed_confirmation.extend(new)
             }
