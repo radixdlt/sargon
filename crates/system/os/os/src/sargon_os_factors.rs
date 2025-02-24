@@ -291,6 +291,7 @@ impl SargonOS {
             let _ = self
                 .pre_derive_and_fill_cache_with_instances_for_factor_source(
                     factor_source,
+                    NetworkID::Mainnet, // we care not about other networks here
                 )
                 .await?;
         }
@@ -553,7 +554,7 @@ impl SargonOS {
         entity_kind: EntityKind,
     ) -> Result<()> {
         let cache = self.cache_snapshot().await;
-        let should_spot_check = !cache.is_entity_creation_satisfied(
+        let should_spot_check = cache.is_entity_creation_satisfied(
             network_id,
             factor_source.id_from_hash(),
             entity_kind,
