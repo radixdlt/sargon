@@ -21,14 +21,6 @@ pub trait OsAnalyseTxPreview {
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<TransactionToReview>;
-
-    async fn analyse_pre_auth_preview(
-        &self,
-        instructions: String,
-        blobs: Blobs,
-        nonce: Nonce,
-        notary_public_key: PublicKey,
-    ) -> Result<PreAuthToReview>;
 }
 
 #[async_trait::async_trait]
@@ -51,15 +43,12 @@ impl OsAnalyseTxPreview for SargonOS {
         let transaction_manifest =
             TransactionManifest::new(instructions, network_id, blobs)?;
 
-        transaction_manifest.validate_instructions(
-            network_id,
-            are_instructions_originating_from_host,
-        )?;
+        transaction_manifest
+            .validate_instructions(are_instructions_originating_from_host)?;
 
         // Get the execution summary
         let execution_summary = self
             .get_execution_summary(
-                network_id,
                 transaction_manifest.clone(),
                 nonce,
                 notary_public_key,
@@ -72,68 +61,12 @@ impl OsAnalyseTxPreview for SargonOS {
             execution_summary,
         })
     }
-
-    /// Performs initial transaction analysis for a given raw manifest, including:
-    /// 1. Creating the SubintentManifest.
-    /// 2. Validating if the manifest is open or enclosed.
-    /// 3. If open, the manifest with its summary is returned.
-    /// 4. If enclosed, it extracts the transaction signers and then transaction preview GW request is executed.
-    /// 3. The execution summary is created with the manifest and receipt.
-    ///
-    ///     Maps relevant errors to ensure proper handling by the hosts.
-    async fn analyse_pre_auth_preview(
-        &self,
-        instructions: String,
-        blobs: Blobs,
-        nonce: Nonce,
-        notary_public_key: PublicKey,
-    ) -> Result<PreAuthToReview> {
-        let network_id = self.current_network_id()?;
-        let subintent_manifest = SubintentManifest::new(
-            instructions,
-            network_id,
-            blobs.clone(),
-            ChildSubintentSpecifiers::default(),
-        )?;
-
-        let summary = subintent_manifest.validated_summary(
-            network_id,
-            false, // PreAuth transaction cannot be sent by the Host itself
-        )?;
-
-        let pre_auth_to_review = match subintent_manifest.as_enclosed_scrypto()
-        {
-            Some(manifest) => {
-                let execution_summary = self
-                    .get_execution_summary(
-                        network_id,
-                        manifest,
-                        nonce,
-                        notary_public_key,
-                        false,
-                    )
-                    .await?;
-
-                PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
-                    manifest: subintent_manifest,
-                    summary: execution_summary,
-                })
-            }
-            None => PreAuthToReview::Open(PreAuthOpenManifest {
-                manifest: subintent_manifest,
-                summary,
-            }),
-        };
-
-        Ok(pre_auth_to_review)
-    }
 }
 
 #[async_trait::async_trait]
 pub trait OsExecutionSummary {
     async fn get_execution_summary<T: PreviewableManifest + Send + Sync>(
         &self,
-        network_id: NetworkID,
         manifest: T,
         nonce: Nonce,
         notary_public_key: PublicKey,
@@ -142,14 +75,18 @@ pub trait OsExecutionSummary {
 
     fn extract_signer_public_keys(
         &self,
-        manifest_summary: ManifestSummary,
+        manifest_summary: &ManifestSummary,
     ) -> Result<IndexSet<PublicKey>>;
+
+    fn extract_proofs(
+        &self,
+        manifest_summary: &ManifestSummary,
+    ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>;
 
     fn extract_execution_summary(
         &self,
         manifest: &dyn DynamicallyAnalyzableManifest,
         receipts: PreviewResponseReceipts,
-        network_id: NetworkID,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary>;
 
@@ -162,23 +99,24 @@ pub trait OsExecutionSummary {
 impl OsExecutionSummary for SargonOS {
     async fn get_execution_summary<T: PreviewableManifest + Send + Sync>(
         &self,
-        network_id: NetworkID,
         manifest: T,
         nonce: Nonce,
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
-        let signer_public_keys =
-            self.extract_signer_public_keys(manifest.summary(network_id)?)?;
+        let summary = manifest.summary()?;
 
-        let gateway_client = self.gateway_client_with(network_id);
+        let signer_public_keys = self.extract_signer_public_keys(&summary)?;
+        let proofs = self.extract_proofs(&summary)?;
+
+        let gateway_client = self.gateway_client_with(manifest.network_id());
 
         let epoch = gateway_client.current_epoch().await?;
 
         let receipts = manifest
             .fetch_preview(
+                proofs,
                 &gateway_client,
-                network_id,
                 epoch,
                 signer_public_keys,
                 notary_public_key,
@@ -189,14 +127,13 @@ impl OsExecutionSummary for SargonOS {
         self.extract_execution_summary(
             &manifest,
             receipts,
-            network_id,
             are_instructions_originating_from_host,
         )
     }
 
     fn extract_signer_public_keys(
         &self,
-        manifest_summary: ManifestSummary,
+        manifest_summary: &ManifestSummary,
     ) -> Result<IndexSet<PublicKey>> {
         // Extracting the entities requiring auth to check if the notary is signatory
         let profile = self.profile()?;
@@ -214,11 +151,41 @@ impl OsExecutionSummary for SargonOS {
         .collect::<IndexSet<PublicKey>>())
     }
 
+    fn extract_proofs(
+        &self,
+        manifest_summary: &ManifestSummary,
+    ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>
+    {
+        let entities = manifest_summary
+            .addresses_of_accounts_requiring_auth
+            .iter()
+            .map(|a| self.entity_by_address((*a).into()))
+            .chain(
+                manifest_summary
+                    .addresses_of_personas_requiring_auth
+                    .iter()
+                    .map(|i| self.entity_by_address((*i).into())),
+            )
+            .collect::<Result<Vec<_>>>()?;
+
+        let mut proofs = IndexMap::<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >::new();
+
+        entities.iter().for_each(|e| {
+            if let Some(control) = e.security_state().as_securified() {
+                proofs.insert(e.address(), control.access_controller_address);
+            }
+        });
+
+        Ok(proofs)
+    }
+
     fn extract_execution_summary(
         &self,
         manifest: &dyn DynamicallyAnalyzableManifest,
         receipts: PreviewResponseReceipts,
-        network_id: NetworkID,
         are_instructions_originating_from_host: bool,
     ) -> Result<ExecutionSummary> {
         let receipt = receipts
@@ -234,7 +201,7 @@ impl OsExecutionSummary for SargonOS {
             .ok_or(CommonError::FailedToExtractTransactionReceiptBytes)?;
 
         let mut execution_summary =
-            manifest.execution_summary(engine_toolkit_receipt, network_id)?;
+            manifest.execution_summary(engine_toolkit_receipt)?;
 
         let reserved_manifest_class = execution_summary
             .detailed_classification
@@ -297,12 +264,15 @@ impl OsExecutionSummary for SargonOS {
 
 #[async_trait::async_trait]
 pub trait PreviewableManifest:
-    DynamicallyAnalyzableManifest + StaticallyAnalyzableManifest + Send + Sync
+    DynamicallyAnalyzableManifest + Send + Sync
 {
     async fn fetch_preview(
         &self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
         gateway_client: &GatewayClient,
-        network_id: NetworkID,
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
@@ -311,23 +281,28 @@ pub trait PreviewableManifest:
 }
 
 #[async_trait::async_trait]
-impl PreviewableManifest for ScryptoTransactionManifestV2 {
+impl PreviewableManifest for TransactionManifestV2 {
     async fn fetch_preview(
         &self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
         gateway_client: &GatewayClient,
-        network_id: NetworkID,
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
     ) -> Result<PreviewResponseReceipts> {
+        let modified_with_proofs =
+            self.modify_add_proofs(entities_with_access_controllers)?;
+
         let request = TransactionPreviewRequestV2::new_transaction_analysis(
-            self.clone(),
+            modified_with_proofs,
             start_epoch_inclusive,
             signer_public_keys,
             notary_public_key,
             nonce,
-            network_id,
         )?;
 
         let response = gateway_client.transaction_preview_v2(request).await?;
@@ -343,15 +318,21 @@ impl PreviewableManifest for ScryptoTransactionManifestV2 {
 impl PreviewableManifest for TransactionManifest {
     async fn fetch_preview(
         &self,
+        entities_with_access_controllers: IndexMap<
+            AddressOfAccountOrPersona,
+            AccessControllerAddress,
+        >,
         gateway_client: &GatewayClient,
-        _network_id: NetworkID,
         start_epoch_inclusive: Epoch,
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
     ) -> Result<PreviewResponseReceipts> {
+        let modified_with_proofs =
+            self.modify_add_proofs(entities_with_access_controllers)?;
+
         let request = TransactionPreviewRequest::new_transaction_analysis(
-            self.clone(),
+            modified_with_proofs,
             start_epoch_inclusive,
             signer_public_keys,
             Some(notary_public_key),
@@ -373,8 +354,9 @@ pub struct PreviewResponseReceipts {
 }
 
 #[cfg(test)]
-mod transaction_preview_analysis_tests {
+mod tests {
     use super::*;
+    use crate::single::support::*;
     use radix_engine_toolkit_common::receipt::{
         FeeSummary as RETFeeSummary, LockedFees as RETLockedFees,
         StateUpdatesSummary as RETStateUpdatesSummary,
@@ -426,7 +408,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn failed_preview_response_unknown_error() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -469,7 +451,7 @@ mod transaction_preview_analysis_tests {
     #[actix_rt::test]
     async fn failed_preview_response_deposit_rules_error() {
         let mut responses: Vec<BagOfBytes> = vec![];
-        let mut first_call_responses = prepare_responses(
+        let mut first_call_responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -489,7 +471,7 @@ mod transaction_preview_analysis_tests {
                 },
             },
         );
-        let mut second_call_responses = prepare_responses(
+        let mut second_call_responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -550,7 +532,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn missing_radix_engine_toolkit_receipt_error() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -594,7 +576,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn execution_summary_parse_error() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -667,7 +649,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn success() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -743,7 +725,7 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn signer_entities_not_found() {
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -771,7 +753,7 @@ mod transaction_preview_analysis_tests {
 
         let result = os
             .analyse_transaction_preview(
-                TransactionManifest::sample().instructions_string(),
+                prepare_manifest_with_account_entity().instructions_string(),
                 Blobs::sample(),
                 true,
                 Nonce::sample(),
@@ -824,19 +806,14 @@ mod transaction_preview_analysis_tests {
 
     #[actix_rt::test]
     async fn analyse_open_enclosed_auth_preview() {
-        let responses = vec![
-            to_bag_of_bytes(
-                TransactionConstructionResponse {
-                    ledger_state: LedgerState {
-                        network: "".to_string(),
-                        state_version: 0,
-                        proposer_round_timestamp: "".to_string(),
-                        epoch: 0,
-                        round: 0,
-                    }
-                }
-            ),
-            to_bag_of_bytes(
+        let responses = prepare_preview_response_v2(
+            LedgerState {
+                network: "".to_string(),
+                state_version: 0,
+                proposer_round_timestamp: "".to_string(),
+                epoch: 0,
+                round: 0,
+            },
             TransactionPreviewResponseV2 {
                 at_ledger_state_version: 0,
                 receipt: Some(TransactionReceipt {
@@ -864,7 +841,7 @@ mod transaction_preview_analysis_tests {
                 }),
                 logs: None,
             }
-        )];
+        );
         let os =
             prepare_os(MockNetworkingDriver::new_with_bodies(200, responses))
                 .await;
@@ -922,7 +899,7 @@ mod transaction_preview_analysis_tests {
             .unwrap()
             .0;
 
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -995,7 +972,7 @@ mod transaction_preview_analysis_tests {
             .unwrap()
             .0;
 
-        let responses = prepare_responses(
+        let responses = prepare_preview_response(
             LedgerState {
                 network: "".to_string(),
                 state_version: 0,
@@ -1059,51 +1036,16 @@ mod transaction_preview_analysis_tests {
         );
     }
 
-    async fn prepare_os(
-        mock_networking_driver: MockNetworkingDriver,
-    ) -> Arc<SargonOS> {
-        let req = SUT::boot_test_with_networking_driver(Arc::new(
-            mock_networking_driver,
-        ));
-        let os =
-            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
-                .await
-                .unwrap()
-                .unwrap();
-
-        os.update_profile_with(|profile| {
-            profile.networks.insert(ProfileNetwork::sample_mainnet());
-            profile.factor_sources.insert(FactorSource::sample());
-            Ok(())
-        })
-        .await
-        .unwrap();
-        os
-    }
-
     fn prepare_manifest_with_account_entity() -> TransactionManifest {
         let account = Account::sample_mainnet();
         TransactionManifest::set_owner_keys_hashes(
             &account.address.into(),
             vec![PublicKeyHash::sample()],
         )
-        .modify_add_lock_fee(&account.address, Some(Decimal192::zero()))
-    }
-
-    fn prepare_responses(
-        ledger_state: LedgerState,
-        preview_response: TransactionPreviewResponse,
-    ) -> Vec<BagOfBytes> {
-        vec![
-            to_bag_of_bytes(TransactionConstructionResponse { ledger_state }),
-            to_bag_of_bytes(preview_response),
-        ]
-    }
-
-    fn to_bag_of_bytes<T>(value: T) -> BagOfBytes
-    where
-        T: Serialize,
-    {
-        BagOfBytes::from(serde_json::to_vec(&value).unwrap())
+        .modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+            account.address(),
+            Decimal192::zero(),
+        ))
+        .unwrap()
     }
 }

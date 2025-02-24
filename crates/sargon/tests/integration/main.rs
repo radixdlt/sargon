@@ -293,10 +293,14 @@ mod integration_tests {
                 manifest_builder,
                 NetworkID::Mainnet,
             );
-            manifest = manifest.modify_add_lock_fee(
-                &AccountAddress::sample_stokenet(),
-                Some(Decimal192::one()),
-            );
+            manifest = manifest
+                .modify_add_lock_fee(
+                    LockFeeData::new_with_unsecurified_fee_payer(
+                        AccountAddress::sample_stokenet(),
+                        Decimal192::one(),
+                    ),
+                )
+                .unwrap();
             let manifest_summary = manifest.summary().unwrap();
 
             let result = ExtractorOfEntitiesRequiringAuth::extract(
@@ -355,7 +359,11 @@ mod integration_tests {
                 &persona.address.into(),
                 vec![PublicKeyHash::sample()],
             )
-            .modify_add_lock_fee(&account.address, Some(Decimal192::one()));
+            .modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+                account.address,
+                Decimal192::one(),
+            ))
+            .unwrap();
             let manifest_summary = manifest.summary().unwrap();
 
             let result = ExtractorOfEntitiesRequiringAuth::extract(

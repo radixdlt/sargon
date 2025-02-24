@@ -52,10 +52,6 @@ impl TransactionIntent {
             self.header.network_id,
         )
     }
-
-    pub fn manifest_summary(&self) -> Result<ManifestSummary> {
-        self.manifest.summary()
-    }
 }
 
 impl From<TransactionIntent> for ScryptoIntent {

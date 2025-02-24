@@ -26,6 +26,7 @@ radix-common = { workspace = true }
 radix-engine = { workspace = true }
 radix-engine-interface = { workspace = true }
 radix-engine-toolkit = { workspace = true }
+radix-engine-toolkit-common = { workspace = true }
 radix-rust = { workspace = true }
 radix-transactions = { workspace = true }
 sbor = { workspace = true }

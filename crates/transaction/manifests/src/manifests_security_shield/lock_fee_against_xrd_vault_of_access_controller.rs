@@ -3,7 +3,6 @@ use radix_engine_interface::blueprints::access_controller::{
     AccessControllerLockRecoveryFeeInput as ScryptoAccessControllerLockRecoveryFeeInput,
     ACCESS_CONTROLLER_LOCK_RECOVERY_FEE_IDENT as SCRYPTO_ACCESS_CONTROLLER_LOCK_RECOVERY_FEE_IDENT,
 };
-use radix_transactions::prelude::ManifestBuilder;
 
 use crate::prelude::*;
 
@@ -35,7 +34,7 @@ pub trait TransactionManifestLockFeeAgainstXrdVaultOfAccessController {
         // TODO: remove `entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
         entity_applying_shield: impl Into<AnySecurifiedEntity>,
     ) -> TransactionManifest {
-        let mut builder = ManifestBuilder::new();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
         let entity_applying_shield = entity_applying_shield.into();
         let access_controller_address =
             entity_applying_shield.access_controller_address();
