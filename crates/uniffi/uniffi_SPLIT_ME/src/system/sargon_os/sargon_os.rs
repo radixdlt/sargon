@@ -85,4 +85,10 @@ impl SargonOS {
     pub async fn resolve_host_info(&self) -> HostInfo {
         self.wrapped.resolve_host_info().await.into()
     }
+
+    pub async fn claim_profile(&self, profile: Profile) -> Profile {
+        let mut internal_profile = profile.into_internal();
+        self.wrapped.claim_profile(&mut internal_profile).await;
+        internal_profile.into()
+    }
 }

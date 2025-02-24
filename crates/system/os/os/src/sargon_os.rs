@@ -178,7 +178,7 @@ impl SargonOS {
         let imported_id = profile.id();
         debug!("Importing profile, id: {}", imported_id);
         let mut profile = profile.clone();
-        self.claim_profile(&mut profile).await?;
+        self.claim_profile(&mut profile).await;
         self.secure_storage.save_profile(&profile).await?;
         self.profile_state_holder
             .replace_profile_state_with(ProfileState::Loaded(profile))?;
