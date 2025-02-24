@@ -1,3 +1,4 @@
+use async_std::task::current;
 use entity_for_display::EntityForDisplay;
 
 use crate::prelude::*;
@@ -159,6 +160,22 @@ impl CrossRoleSkipOutcomeAnalyzerForManager {
 impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
     for CrossRoleSkipOutcomeAnalyzerForManager
 {
+    /// This method cares about which Role is being exercised,
+    /// and the state `self.signing_manager_state_snapshot` is in
+    /// when the method is called.
+    ///
+    /// We will try to find out which `RolesExercisableInTransactionManifestCombination`
+    /// we can end up with per role if we where to neglect (skip) a factor.
+    ///
+    /// If it is the last role we are exercising, i.e. Primary, and we cannot
+    /// end up with a valid `RolesExercisableInTransactionManifestCombination`
+    /// then we will return `InvalidTransactionForEntity` for that entity (and
+    /// put it inside the `entities_which_would_fail_auth` vec)
+    ///
+    /// We will return `DelayedConfirmationForEntity` (and put it inside
+    /// the `entities_which_would_require_delayed_confirmation` vec) if we
+    /// can only end up with a valid `RolesExercisableInTransactionManifestCombination`
+    /// for which we can only use Delayed Confirmation.
     fn invalid_transaction_if_neglected_factors(
         &self,
         signable_id: TransactionIntentHash,
@@ -175,6 +192,16 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
                 petitions,
             );
         };
+
+        if current_role == RoleKind::Recovery {
+            // We can always try Confirmation+Primary role for
+            // secuirfied entities, so we don't need to check
+            // for that here.
+            // And for unsecurified entities we can only use
+            // Primary role, which we have not gotten to yet,
+            // since Primary is the last role we are exercising.
+            return None;
+        }
 
         /*
         struct DelayedConfirmationForEntity {
