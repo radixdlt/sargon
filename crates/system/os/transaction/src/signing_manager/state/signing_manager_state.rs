@@ -13,7 +13,6 @@ impl SigningManagerState {
     ) -> IndexSet<AccountOrPersona> {
         self.per_set_state
         .values()
-        .into_iter()
         .filter_map(|s| s.entities_not_signed_for_with_recovery())
         .collect()
     }
@@ -22,7 +21,6 @@ impl SigningManagerState {
     pub(crate) fn entities_signed_for_with_recovery_but_not_with_confirmation(&self) -> IndexSet<AccountOrPersona> {
         self.per_set_state
         .values()
-        .into_iter()
         .filter_map(|s| s.entities_signed_for_with_recovery_but_not_with_confirmation())
         .collect()
     }

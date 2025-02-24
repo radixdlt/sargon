@@ -1,5 +1,4 @@
 use entity_for_display::EntityForDisplay;
-use serde_json::value::Index;
 
 use crate::prelude::*;
 
@@ -325,7 +324,7 @@ impl CrossRoleSkipOutcomeAnalyzer<TransactionIntent>
                 // And for unsecurified entities we can only use
                 // Primary role, which we have not gotten to yet,
                 // since Primary is the last role we are exercising.
-                return Ok(None);
+                Ok(None)
             }
             RoleKind::Confirmation => {
                 let entities_not_signed_for_with_recovery = self
