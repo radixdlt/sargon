@@ -17,13 +17,11 @@ impl IntentVariantState {
         &mut self,
         not_signed: EntityNotSignedFor,
     ) {
-        assert!(self
-            .variant
-            .can_exercise_role(not_signed.role_kind()));
+        assert!(self.variant.can_exercise_role(not_signed.role_kind()));
         assert_eq!(not_signed.intent, *self.intent);
 
         self.signatures_per_role
-        .update_with_entity_not_signed_for(intent_wnot_signedith_signatures)
+            .update_with_entity_not_signed_for(not_signed)
     }
 
     pub(crate) fn update_with_entity_signed_for(
