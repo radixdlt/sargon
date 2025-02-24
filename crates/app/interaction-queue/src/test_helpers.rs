@@ -4,7 +4,7 @@ use std::time::Duration;
 // Helper methods used in Tests
 
 #[cfg(test)]
-impl InteractionsQueue {
+impl InteractionQueue {
     pub fn with_items(items: Vec<InteractionQueueItem>) -> Self {
         Self {
             items: items.into_iter().collect(),

@@ -3,28 +3,28 @@ use async_std::sync::RwLock;
 use async_std::task;
 use std::time::Duration;
 
-pub struct InteractionsQueueManager {
+pub struct InteractionQueueManager {
     /// The queue of interactions.
-    queue: RwLock<InteractionsQueue>,
+    queue: RwLock<InteractionQueue>,
 
     /// Observer to handle updates to the interactions queue.
-    observer: Arc<dyn InteractionsQueueObserver>,
+    observer: Arc<dyn InteractionQueueObserver>,
 
     /// Storage for saving and loading the queue.
-    storage: Arc<dyn InteractionsQueueStorage>,
+    storage: Arc<dyn InteractionQueueStorage>,
 
     // TODO: Improve this
     gateway_client: GatewayClient,
 }
 
-impl InteractionsQueueManager {
+impl InteractionQueueManager {
     pub fn new(
-        observer: Arc<dyn InteractionsQueueObserver>,
-        storage: Arc<dyn InteractionsQueueStorage>,
+        observer: Arc<dyn InteractionQueueObserver>,
+        storage: Arc<dyn InteractionQueueStorage>,
         gateway_client: GatewayClient,
     ) -> Arc<Self> {
         Arc::new(Self {
-            queue: RwLock::new(InteractionsQueue::new()),
+            queue: RwLock::new(InteractionQueue::new()),
             observer,
             storage,
             gateway_client,
@@ -33,7 +33,7 @@ impl InteractionsQueueManager {
 }
 
 // Exported methods (called by Hosts)
-impl InteractionsQueueManager {
+impl InteractionQueueManager {
     /// Method to be called by hosts every time the app is started (or whenever we want)
     /// It will remove the stale data (success transactions).
     pub async fn bootstrap(self: Arc<Self>) -> Result<()> {
@@ -78,7 +78,7 @@ impl InteractionsQueueManager {
 }
 
 // Internal methods (called by other places inside Sargon)
-impl InteractionsQueueManager {
+impl InteractionQueueManager {
     pub async fn add_interaction(&self, item: InteractionQueueItem) {
         self.enqueue_and_process_interaction(item).await;
         self.handle_queue_update().await;
@@ -91,7 +91,7 @@ impl InteractionsQueueManager {
 }
 
 // Private methods
-impl InteractionsQueueManager {
+impl InteractionQueueManager {
     /// Notifies the observer about the updated queue and saves it to the local storage.
     // Note: we probably want this method to not await until the storage is saved
     async fn handle_queue_update(&self) {
@@ -261,7 +261,7 @@ mod tests {
             .await;
 
         // Verify empty queue update
-        let expected_queue = InteractionsQueue::with_items(vec![]);
+        let expected_queue = InteractionQueue::with_items(vec![]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
     }
 
@@ -280,7 +280,7 @@ mod tests {
             InteractionQueueItem::sample_queued(),
         ]);
 
-        let stored_queue = InteractionsQueue::with_items_and_batches(
+        let stored_queue = InteractionQueue::with_items_and_batches(
             [
                 interaction_in_progress.clone(),
                 interaction_suceess.clone(),
@@ -296,7 +296,7 @@ mod tests {
 
         // Verify queue update doesn't contain stale data
         // This is, the success interaction and the empty batch were removed
-        let expected_queue = InteractionsQueue::with_items_and_batches(
+        let expected_queue = InteractionQueue::with_items_and_batches(
             [interaction_in_progress, interaction_failed],
             [batch_non_empty],
         );
@@ -313,7 +313,7 @@ mod tests {
             .await;
 
         // Verify empty queue update
-        let expected_queue = InteractionsQueue::with_items(vec![]);
+        let expected_queue = InteractionQueue::with_items(vec![]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
     }
 
@@ -352,7 +352,7 @@ mod tests {
 
         // Verify queue update
         let expected_queue =
-            InteractionsQueue::with_items(vec![interaction.clone()]);
+            InteractionQueue::with_items(vec![interaction.clone()]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
 
         // Wait a bit for the manager to check its status
@@ -363,7 +363,7 @@ mod tests {
         assert_eq!(queue.items[0].status, InteractionQueueItemStatus::Success);
 
         // Verify new queue update
-        let expected_queue = InteractionsQueue::with_items(vec![interaction
+        let expected_queue = InteractionQueue::with_items(vec![interaction
             .clone()
             .with_status(InteractionQueueItemStatus::Success)]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
@@ -401,7 +401,7 @@ mod tests {
 
         // Verify queue update
         let expected_queue =
-            InteractionsQueue::with_batches(vec![batch.clone()]);
+            InteractionQueue::with_batches(vec![batch.clone()]);
         verify_queue_update(observer.clone(), storage.clone(), expected_queue);
 
         // Wait a bit for the manager to check its status
@@ -425,7 +425,7 @@ mod tests {
 
         // Verify new queue update
         let expected_queue =
-            InteractionsQueue::with_items_and_batches(
+            InteractionQueue::with_items_and_batches(
                 [interaction_1
                     .with_status(InteractionQueueItemStatus::InProgress)],
                 [batch.dropping_first()],
@@ -440,7 +440,7 @@ mod test_support {
     use std::sync::Mutex;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = InteractionsQueueManager;
+    type SUT = InteractionQueueManager;
 
     // Helper methods
 
@@ -448,8 +448,8 @@ mod test_support {
     /// bootstraps it.
     pub(crate) async fn create_and_bootstrap(
         responses: Vec<MockNetworkingDriverResponse>,
-        observer: Arc<dyn InteractionsQueueObserver>,
-        storage: Arc<dyn InteractionsQueueStorage>,
+        observer: Arc<dyn InteractionQueueObserver>,
+        storage: Arc<dyn InteractionQueueStorage>,
     ) -> Arc<SUT> {
         let mock_networking_driver =
             MockNetworkingDriver::new_with_responses(responses);
@@ -467,7 +467,7 @@ mod test_support {
     pub(crate) fn verify_queue_update(
         observer: Arc<MockObserver>,
         storage: Arc<MockStorage>,
-        expected_queue: InteractionsQueue,
+        expected_queue: InteractionQueue,
     ) {
         // Verify that the observer has been notified with the corresponding interactions
         let observers_queue = observer.updated_queue.lock().unwrap().clone();
@@ -504,23 +504,23 @@ mod test_support {
     // Mock implementations
 
     pub(crate) struct MockStorage {
-        saved_queue: Arc<Mutex<InteractionsQueue>>,
+        saved_queue: Arc<Mutex<InteractionQueue>>,
         stubbed_save_queue_result: Result<()>,
-        stubbed_load_queue_result: Result<Option<InteractionsQueue>>,
+        stubbed_load_queue_result: Result<Option<InteractionQueue>>,
     }
 
     impl MockStorage {
         pub(crate) fn new_empty() -> Self {
             Self {
-                saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
+                saved_queue: Arc::new(Mutex::new(InteractionQueue::new())),
                 stubbed_save_queue_result: Ok(()),
                 stubbed_load_queue_result: Ok(None),
             }
         }
 
-        pub(crate) fn new_with_queue(queue: InteractionsQueue) -> Self {
+        pub(crate) fn new_with_queue(queue: InteractionQueue) -> Self {
             Self {
-                saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
+                saved_queue: Arc::new(Mutex::new(InteractionQueue::new())),
                 stubbed_save_queue_result: Ok(()),
                 stubbed_load_queue_result: Ok(Some(queue)),
             }
@@ -528,7 +528,7 @@ mod test_support {
 
         pub(crate) fn new_with_error() -> Self {
             Self {
-                saved_queue: Arc::new(Mutex::new(InteractionsQueue::new())),
+                saved_queue: Arc::new(Mutex::new(InteractionQueue::new())),
                 stubbed_save_queue_result: Err(CommonError::Unknown),
                 stubbed_load_queue_result: Err(CommonError::Unknown),
             }
@@ -536,13 +536,13 @@ mod test_support {
     }
 
     #[async_trait::async_trait]
-    impl InteractionsQueueStorage for MockStorage {
-        async fn save_queue(&self, queue: InteractionsQueue) -> Result<()> {
+    impl InteractionQueueStorage for MockStorage {
+        async fn save_queue(&self, queue: InteractionQueue) -> Result<()> {
             *self.saved_queue.lock().unwrap() = queue;
             self.stubbed_save_queue_result.clone()
         }
 
-        async fn load_queue(&self) -> Result<Option<InteractionsQueue>> {
+        async fn load_queue(&self) -> Result<Option<InteractionQueue>> {
             self.stubbed_load_queue_result.clone()
         }
     }
@@ -560,7 +560,7 @@ mod test_support {
     }
 
     #[async_trait::async_trait]
-    impl InteractionsQueueObserver for MockObserver {
+    impl InteractionQueueObserver for MockObserver {
         fn handle_update(&self, queue: Vec<InteractionQueueItem>) {
             *self.updated_queue.lock().unwrap() = queue;
         }
