@@ -3,6 +3,13 @@
 name: Test
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
   push:
     branches:
       - main
@@ -45,7 +52,7 @@ jobs:
   check-version:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
