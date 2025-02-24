@@ -74,4 +74,13 @@ impl GatewayClient {
             .await
             .map(|r| r.radix_engine_toolkit_receipt)
     }
+
+    /// Returns the status of a pre authorization by its `SubintentHash`.
+    pub async fn get_pre_authorization_status(
+        &self,
+        subintent_hash: SubintentHash,
+    ) -> Result<SubintentStatusResponse> {
+        let request = SubintentStatusRequest::new(subintent_hash.to_string());
+        self.subintent_status(request).await
+    }
 }

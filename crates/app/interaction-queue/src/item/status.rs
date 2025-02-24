@@ -84,3 +84,12 @@ impl From<TransactionStatusResponsePayloadStatus>
         }
     }
 }
+
+impl From<SubintentStatus> for InteractionQueueItemStatus {
+    fn from(value: SubintentStatus) -> Self {
+        match value {
+            SubintentStatus::Unknown => Self::InProgress,
+            SubintentStatus::CommittedSuccess => Self::Success,
+        }
+    }
+}
