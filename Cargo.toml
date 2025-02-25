@@ -52,6 +52,7 @@ members = [
 
     # === INTERACTION QUEUE ===
     "crates/interaction-queue/manager",
+    "crates/interaction-queue/models",
 
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
@@ -148,6 +149,7 @@ default-members = [
 
     # === INTERACTION QUEUE ===
     "crates/interaction-queue/manager",
+    "crates/interaction-queue/models",
 
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
@@ -259,6 +261,7 @@ gateway-models = { path = "crates/gateway/models" }
 
 # === INTERACTION QUEUE ===
 interaction-queue = { path = "crates/interaction-queue/manager" }
+interaction-queue-models = { path = "crates/interaction-queue/models" }
 
 # === PROFILE ===
 profile-logic = { path = "crates/profile/logic/logic_SPLIT_ME" }

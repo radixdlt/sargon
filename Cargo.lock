@@ -2226,6 +2226,22 @@ dependencies = [
  "core-utils",
  "futures",
  "gateway-client-and-api",
+ "interaction-queue-models",
+ "prelude",
+ "serde",
+ "transaction-models",
+]
+
+[[package]]
+name = "interaction-queue-models"
+version = "1.2.1"
+dependencies = [
+ "actix-rt",
+ "async-std",
+ "async-trait",
+ "core-utils",
+ "futures",
+ "gateway-models",
  "prelude",
  "serde",
  "transaction-models",
