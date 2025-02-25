@@ -212,12 +212,12 @@ mod tests {
     fn replace_interaction() {
         let mut sut = SUT::new();
 
-        let interaction = InteractionQueueItem::sample_in_progress();
+        let mut interaction = InteractionQueueItem::sample_in_progress();
         sut.add_interaction(interaction.clone());
         assert_eq!(sut.items[0].status, InteractionQueueItemStatus::InProgress);
 
-        let updated_interaction = InteractionQueueItem::sample_success();
-        sut.replace_interaction(updated_interaction.clone());
+        interaction = interaction.with_status(InteractionQueueItemStatus::Success);
+        sut.replace_interaction(interaction);
 
         assert_eq!(sut.items[0].status, InteractionQueueItemStatus::Success);
     }
