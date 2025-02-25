@@ -43,12 +43,22 @@ impl InteractionQueueManager {
     /// It will remove the stale data (success transactions).
     pub async fn bootstrap(self: Arc<Self>) -> Result<()> {
         // Load queue from local storage.
-        if let Some(queue) = self.storage.load_queue().await? {
-            let mut locked_queue = self.queue.write().await;
-            *locked_queue = queue;
+        match self.storage.load_queue().await {
+            Ok(Some(queue)) => {
+                // Queue successfully fetched from storage.
+                let mut locked_queue = self.queue.write().await;
+                *locked_queue = queue;
 
-            // Remove stale data from queue.
-            locked_queue.removing_stale();
+                // Remove stale data from queue.
+                locked_queue.removing_stale();
+            }
+            Ok(None) => {
+                // No queue found, proceed with default queue (empty).
+            }
+            Err(e) => {
+                // Failed to load queue, proceed with default and log error.
+                error!("Failed to load Interaction Queue {}", e)
+            }
         }
 
         // Notify change_driver and save the queue to local storage.
