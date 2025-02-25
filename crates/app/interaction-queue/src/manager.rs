@@ -197,8 +197,8 @@ impl InteractionQueueManager {
             InteractionQueueItemKind::Transaction(tx) => {
                 self.get_transaction_status(tx).await?
             }
-            InteractionQueueItemKind::PreAuthorization(preAuthorization) => {
-                self.get_pre_authorization_status(preAuthorization).await?
+            InteractionQueueItemKind::PreAuthorization(pre_authorization) => {
+                self.get_pre_authorization_status(pre_authorization).await?
             }
         };
         if status != InteractionQueueItemStatus::InProgress {
