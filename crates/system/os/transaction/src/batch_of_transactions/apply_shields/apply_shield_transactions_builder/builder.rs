@@ -41,27 +41,31 @@ impl ApplyShieldTransactionsBuilderImpl {
     /// Creates a new instance of `ApplyShieldTransactionsBuilderImpl`, using
     /// SargonOS and its clients to init helpers.
     pub fn new(os: &SargonOS) -> Result<Self> {
-        os.profile().map(|profile| {
-            let networking_driver = os.http_client.driver.clone();
-            Self {
-                profile_view: Arc::new(
-                    ApplyShieldTransactionsProfileViewImpl::new(profile),
+        os.profile()
+            .map(|profile| Self::with(profile, os.http_client.driver.clone()))
+    }
+    pub fn with(
+        profile: Profile,
+        networking_driver: Arc<dyn NetworkingDriver>,
+    ) -> Self {
+        Self {
+            profile_view: Arc::new(
+                ApplyShieldTransactionsProfileViewImpl::new(profile),
+            ),
+            xrd_balances_fetcher: Arc::new(
+                ApplyShieldTransactionsXrdBalancesFetcherImpl::new(
+                    networking_driver.clone(),
                 ),
-                xrd_balances_fetcher: Arc::new(
-                    ApplyShieldTransactionsXrdBalancesFetcherImpl::new(
-                        networking_driver.clone(),
-                    ),
+            ),
+            poly_manifest_builder: Arc::new(
+                ApplyShieldTransactionsPolyManifestBuilderImpl::new(),
+            ),
+            transaction_intent_builder: Arc::new(
+                ApplyShieldTransactionsTransactionIntentBuilderImpl::new(
+                    networking_driver,
                 ),
-                poly_manifest_builder: Arc::new(
-                    ApplyShieldTransactionsPolyManifestBuilderImpl::new(),
-                ),
-                transaction_intent_builder: Arc::new(
-                    ApplyShieldTransactionsTransactionIntentBuilderImpl::new(
-                        networking_driver,
-                    ),
-                ),
-            }
-        })
+            ),
+        }
     }
 
     /// Persists notary private keys to be able to cancel transactions.

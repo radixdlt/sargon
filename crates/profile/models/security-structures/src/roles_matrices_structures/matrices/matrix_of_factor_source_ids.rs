@@ -2,6 +2,38 @@ use crate::prelude::*;
 
 pub type MatrixOfFactorSourceIds = AbstractMatrixBuilt<FactorSourceID>;
 
+#[cfg(debug_assertions)]
+impl From<MatrixOfFactorInstances> for MatrixOfFactorSourceIds {
+    fn from(value: MatrixOfFactorInstances) -> Self {
+        unsafe {
+            let primary = value.primary();
+            let recovery = value.recovery();
+            let confirmation = value.confirmation();
+            let map = |factors: &Vec<FactorInstance>| -> Vec<FactorSourceID> {
+                factors.iter().map(|f| f.factor_source_id).collect()
+            };
+            Self::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    primary.get_threshold(),
+                    map(primary.get_threshold_factors()),
+                    map(primary.get_override_factors()),
+                ),
+                RecoveryRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    recovery.get_threshold(),
+                    map(recovery.get_threshold_factors()),
+                    map(recovery.get_override_factors()),
+                ),
+                ConfirmationRoleWithFactorSourceIDs::unbuilt_with_factors(
+                    confirmation.get_threshold(),
+                    map(confirmation.get_threshold_factors()),
+                    map(confirmation.get_override_factors()),
+                ),
+                value.time_until_delayed_confirmation_is_callable,
+            )
+        }
+    }
+}
+
 impl MatrixOfFactorSourceIds {
     pub(crate) fn _unvalidated_with_roles(
         primary: PrimaryRoleWithFactorSourceIds,

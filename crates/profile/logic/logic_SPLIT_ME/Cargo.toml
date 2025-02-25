@@ -5,16 +5,16 @@ edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-prelude = { workspace = true }
-identified-vec-of = { workspace = true }
-hierarchical-deterministic = { workspace = true }
-factors = { workspace = true }
 addresses = { workspace = true }
+entity-by-address = { workspace = true }
+factors = { workspace = true }
+hierarchical-deterministic = { workspace = true }
+identified-vec-of = { workspace = true }
+prelude = { workspace = true }
 profile = { workspace = true }
 profile-persona = { workspace = true }
 profile-supporting-types = { workspace = true }
 time-utils = { workspace = true }
-entity-by-address = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

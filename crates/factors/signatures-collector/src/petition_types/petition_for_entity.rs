@@ -83,7 +83,6 @@ impl<ID: SignableID> PetitionForEntity<ID> {
                             GeneralRoleWithHierarchicalDeterministicFactorInstances::try_from(
                                 (value.security_structure.matrix_of_factors, role_kind)
                             ).unwrap();
-
                     Self::new_securified(
                         payload_id,
                         entity.address(),
@@ -189,7 +188,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
             .collect::<IndexSet<_>>()
     }
 
-    /// Returrns the aggregate of all signatures from both lists, either threshold or override.
+    /// Returns the aggregate of all signatures from both lists, either threshold or override.
     pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
         self.access_both_list_then_form_union(|f| f.all_signatures())
     }
@@ -234,7 +233,7 @@ impl<ID: SignableID> PetitionForEntity<ID> {
 
     /// Returns this petitions entity if the transaction would be invalid if the given factor sources
     /// would be neglected.
-    pub(crate) fn invalid_transaction_if_neglected_factors(
+    pub fn invalid_transaction_if_neglected_factors(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
     ) -> Option<AddressOfAccountOrPersona> {
@@ -500,7 +499,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -526,7 +525,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d0.factor_source_id()),
         );
@@ -551,7 +550,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
         let invalid =
             sut.invalid_transaction_if_neglected_factors(IndexSet::from_iter(
                 [d0.factor_source_id(), d1.factor_source_id()],
@@ -579,7 +578,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
 
         let invalid = sut
             .invalid_transaction_if_neglected_factors(IndexSet::just(
@@ -609,7 +608,7 @@ mod tests {
             Hash::sample_third(),
             NetworkID::Mainnet,
         );
-        let sut = SUT::new_securified(tx.clone(), entity, matrix);
+        let sut = SUT::new_securified(tx, entity, matrix);
 
         let invalid = sut.invalid_transaction_if_neglected_factors(
             IndexSet::just(d1.factor_source_id()),
@@ -667,7 +666,7 @@ mod tests {
         );
         let sut = SUT::from_entity_with_role_kind(
             entity.clone(),
-            intent_hash.clone(),
+            intent_hash,
             RoleKind::Primary,
         );
 
@@ -694,7 +693,7 @@ mod tests {
         let signature = unsafe {
             HDSignature::produced_signing_with_input(
             HDSignatureInput::new(
-                sut.payload_id.clone(),
+                sut.payload_id,
                 OwnedFactorInstance::new(
                     sut.entity,
                     HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
