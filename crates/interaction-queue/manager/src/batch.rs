@@ -52,7 +52,7 @@ impl InteractionQueueBatch {
     pub(crate) fn get_first_if_ready(
         &mut self,
     ) -> Option<InteractionQueueItem> {
-        if let Some(first) = self.interactions.get(0).cloned() {
+        if let Some(first) = self.interactions.first().cloned() {
             if let InteractionQueueItemStatus::Next(next) = first.status {
                 let now = Timestamp::now_utc();
                 if next <= now {
