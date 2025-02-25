@@ -16,7 +16,7 @@ pub trait ApplySecurityShieldCommitting: Send + Sync {
     ///
     /// We will map from `Vec<Manifest>` -> `Vec<Vec<Manifest>>` where for each entity
     /// being unsecurified the inner Vec will be unchanged - one single manifest. But
-    /// for each securified entity - which has a manifest which was create with `InitiateWithRecoveryCompleteWithConfirmation` variant, we will map to all variants of the [`RolesExercisableInTransactionManifestCombination`] enum.
+    /// for each securified entity - which has a manifest which was created with `InitiateWithRecoveryCompleteWithConfirmation` variant, we will map to all variants of the [`RolesExercisableInTransactionManifestCombination`] enum.
     ///
     /// Then we will inner map of the `Vec<Vec<Manifest>>` to
     /// perform look up of all `payer` address and get the Account from
@@ -27,7 +27,7 @@ pub trait ApplySecurityShieldCommitting: Send + Sync {
     /// Then we will build TransactionIntent for all of these - with broad enough
     /// an epoch window so that we can submit these with delay in between.
     ///
-    /// We will compile them and we will start the process of signing them. Which will be the job of `SigningManager` - many instances of `SignaturesCollector` using one Role at a time.
+    /// We will compile them, and we will start the process of signing them. Which will be the job of `SigningManager` - many instances of `SignaturesCollector` using one Role at a time.
     ///
     /// Can work with single transaction of course...
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
@@ -166,6 +166,9 @@ mod tests {
             )
         };
 
+        // Not enough to only save account, we also need to save the SecurityStructureOfFactorSourceIds
+        // for some of the accounts which were instantiated with sample values. Alas, some of them might
+        // have conflicting SecurityShieldIDs so we will replace them with unique, deterministic ones.
         let add_account =
             async |account: Account| match account.security_state() {
                 EntitySecurityState::Unsecured { .. } => {
@@ -192,6 +195,9 @@ mod tests {
                 }
             };
 
+        // Not enough to only save persona, we also need to save the SecurityStructureOfFactorSourceIds
+        // for some of the personas which were instantiated with sample values. Alas, some of them might
+        // have conflicting SecurityShieldIDs so we will replace them with unique, deterministic ones.
         let add_persona =
             async |persona: Persona| match persona.security_state() {
                 EntitySecurityState::Unsecured { .. } => {
