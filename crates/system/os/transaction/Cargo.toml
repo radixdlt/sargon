@@ -9,6 +9,7 @@ core-collections = { workspace = true }
 entity-by-address = { workspace = true }
 entity-for-display = { workspace = true }
 gateway-client-and-api = { workspace = true }
+time-utils = { workspace = true }
 manifests = { workspace = true }
 prelude = { workspace = true }
 profile = { workspace = true }

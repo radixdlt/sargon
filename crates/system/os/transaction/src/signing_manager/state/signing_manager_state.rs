@@ -12,17 +12,21 @@ impl SigningManagerState {
         &self,
     ) -> IndexSet<AccountOrPersona> {
         self.per_set_state
-        .values()
-        .filter_map(|s| s.entities_not_signed_for_with_recovery())
-        .collect()
+            .values()
+            .filter_map(|s| s.entities_not_signed_for_with_recovery())
+            .collect()
     }
-    
+
     /// N.B. does not include fee payers
-    pub(crate) fn entities_signed_for_with_recovery_but_not_with_confirmation(&self) -> IndexSet<AccountOrPersona> {
+    pub(crate) fn entities_signed_for_with_recovery_but_not_with_confirmation(
+        &self,
+    ) -> IndexSet<AccountOrPersona> {
         self.per_set_state
-        .values()
-        .filter_map(|s| s.entities_signed_for_with_recovery_but_not_with_confirmation())
-        .collect()
+            .values()
+            .filter_map(|s| {
+                s.entities_signed_for_with_recovery_but_not_with_confirmation()
+            })
+            .collect()
     }
 
     pub(crate) fn update_with_exercise_role_outcome(

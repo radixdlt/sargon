@@ -112,9 +112,7 @@ impl SecurifiedIntentSetInternalState {
             // TODO: hmm `any` or `all`? Should probably be the same!
             .any(|v| {
                 v.has_exercised_role_for_all_entities(RoleKind::Recovery)
-                    && v.has_skipped_exercising_role(
-                        RoleKind::Confirmation,
-                    )
+                    && v.has_skipped_exercising_role(RoleKind::Confirmation)
             })
     }
 

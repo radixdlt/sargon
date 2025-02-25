@@ -129,7 +129,7 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
     /// entities which would fail auth..
     ///
     /// # Panics
-    /// Panics if `entities_which_would_fail_auth` is empty.
+    /// Panics if both `entities_which_would_fail_auth` and `entities_which_would_require_delayed_confirmation` is empty.
     ///
     /// Panics if any of the entities in `entities_which_would_fail_auth` are also
     /// in `entities_which_would_require_delayed_confirmation`.
@@ -165,7 +165,7 @@ impl<ID: SignableID> InvalidTransactionIfNeglected<ID> {
             .into_iter()
             .collect::<IndexSet<_>>();
 
-        assert!(!entities_which_would_fail_auth.is_empty(), "'entities_which_would_fail_auth' must not be empty, this type is not useful if it is empty.");
+        assert!(!(entities_which_would_fail_auth.is_empty() && entities_which_would_require_delayed_confirmation.is_empty()) , "Both 'entities_which_would_fail_auth' and 'entities_which_would_require_delayed_confirmation' must not be empty, this type is not useful if it is empty.");
 
         assert_eq!(
             entities_which_would_fail_auth.len(),
@@ -253,7 +253,7 @@ mod tests {
 
     #[test]
     #[should_panic(
-        expected = "'entities_which_would_fail_auth' must not be empty, this type is not useful if it is empty."
+        expected = "Both 'entities_which_would_fail_auth' and 'entities_which_would_require_delayed_confirmation' must not be empty, this type is not useful if it is empty."
     )]
     fn panics_if_empty() {
         SUT::new(TransactionIntentHash::sample(), [], []);

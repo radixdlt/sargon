@@ -55,6 +55,8 @@ impl ApplySecurityShieldCommitting for SargonOS {
 mod tests {
     use std::{future::Future, pin::Pin};
 
+    use time_utils::now;
+
     use super::*;
 
     async fn do_test(
@@ -144,30 +146,102 @@ mod tests {
             .await
             .unwrap();
 
+        let id_stepper = Arc::new(IDStepper::<Uuid>::new());
+        let shield_ids_from_shield_instances = |shield_instance: SecurityStructureOfFactorInstances| -> SecurityStructureOfFactorSourceIDs {
+            let id = unsafe { id_stepper.next() };
+            let shield_id = SecurityStructureID::from(id);
+            let metadata = SecurityStructureMetadata::with_details(
+                shield_id,
+                DisplayName::sample(),
+                now(),
+                now(),
+                SecurityStructureFlags::new(),
+            );
+            SecurityStructureOfFactorSourceIds::with_metadata(
+                metadata,
+                shield_instance.matrix_of_factors.clone().into(),
+                shield_instance
+                    .authentication_signing_factor_instance
+                    .factor_source_id().into(),
+            )
+        };
+
+        let add_account =
+            async |account: Account| match account.security_state() {
+                EntitySecurityState::Unsecured { .. } => {
+                    os.add_account(account.clone()).await.unwrap();
+                }
+                EntitySecurityState::Securified { value } => {
+                    let security_structure_of_factor_source_ids =
+                        shield_ids_from_shield_instances(
+                            value.security_structure.clone(),
+                        );
+                    let mut account = account;
+                    let mut secstate = value;
+                    secstate.security_structure.security_structure_id =
+                        security_structure_of_factor_source_ids.id();
+                    account.set_security_state_unchecked(
+                        EntitySecurityState::Securified { value: secstate },
+                    );
+                    os.add_security_structure_of_factor_source_ids(
+                        &security_structure_of_factor_source_ids,
+                    )
+                    .await
+                    .unwrap();
+                    os.add_account(account.clone()).await.unwrap();
+                }
+            };
+
+        let add_persona =
+            async |persona: Persona| match persona.security_state() {
+                EntitySecurityState::Unsecured { .. } => {
+                    os.add_persona(persona.clone()).await.unwrap();
+                }
+                EntitySecurityState::Securified { value } => {
+                    let security_structure_of_factor_source_ids =
+                        shield_ids_from_shield_instances(
+                            value.security_structure.clone(),
+                        );
+                    let mut persona = persona;
+                    let mut secstate = value;
+                    secstate.security_structure.security_structure_id =
+                        security_structure_of_factor_source_ids.id();
+                    persona.set_security_state_unchecked(
+                        EntitySecurityState::Securified { value: secstate },
+                    );
+                    os.add_security_structure_of_factor_source_ids(
+                        &security_structure_of_factor_source_ids,
+                    )
+                    .await
+                    .unwrap();
+                    os.add_persona(persona.clone()).await.unwrap();
+                }
+            };
+
         // Securified Account 2
         let david = Account::sample_at(3);
-        os.add_account(david.clone()).await.unwrap();
+        add_account(david.clone()).await;
 
         // Securified Account 3
         let emily = Account::sample_at(4);
-        os.add_account(emily.clone()).await.unwrap();
+        add_account(emily.clone()).await;
 
         // Securified Account 4
         let frank = Account::sample_at(5);
-        os.add_account(frank.clone()).await.unwrap();
+        add_account(frank.clone()).await;
 
         // Securified Account 5
         let mut paige = Account::sample_at(6);
         paige.display_name = DisplayName::new("Paige").unwrap();
-        os.add_account(paige.clone()).await.unwrap();
+        add_account(paige.clone()).await;
 
         // Securified Persona
         let ziggy = Persona::sample_at(2);
-        os.add_persona(ziggy.clone()).await.unwrap();
+        add_persona(ziggy.clone()).await;
 
         // Securified Persona 2
         let superman = Persona::sample_at(4);
-        os.add_persona(superman.clone()).await.unwrap();
+        add_persona(superman.clone()).await;
 
         // Unsecurified Persona
         let satoshi = os

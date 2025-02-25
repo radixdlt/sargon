@@ -42,7 +42,7 @@ impl IntentVariantSignaturesPerRoleState {
             false
         }
     }
-    
+
     pub(crate) fn has_skipped_exercising_role(
         &self,
         role_kind: RoleKind,
