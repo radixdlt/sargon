@@ -134,6 +134,7 @@ impl SargonOS {
             // only tests for now, need more work in hosts before we can do this in prod
             self.pre_derive_and_fill_cache_with_instances_for_factor_source(
                 bdfs.clone().factor_source.into(),
+                NetworkID::Mainnet, // we care not about other networks here
             )
             .await?;
         }
@@ -146,6 +147,7 @@ impl SargonOS {
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
+        network_id: NetworkID,
     ) -> Result<FactorInstancesProviderOutcome> {
         if !factor_source.factor_source_id().is_hash() {
             panic!("Unsupported FactorSource which is not HD.")
@@ -156,7 +158,7 @@ impl SargonOS {
             Arc::new(self.clients.factor_instances_cache.clone()),
             Arc::new(profile_snapshot),
             factor_source.clone(),
-            NetworkID::Mainnet, // we care not about other networks here
+            network_id,
             keys_derivation_interactors.clone(),
         )
         .await?;

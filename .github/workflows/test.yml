@@ -27,7 +27,8 @@ jobs:
   check-typos:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -103,7 +104,9 @@ jobs:
   
   # phylum
   phylum-analyze:
-    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI')
+    if: >
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
     permissions:
       id-token: write
@@ -124,7 +127,8 @@ jobs:
   check-cargo-check:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -143,7 +147,8 @@ jobs:
   check-formatting:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -162,7 +167,8 @@ jobs:
   check-clippy:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -181,7 +187,8 @@ jobs:
   test-rust:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -206,7 +213,8 @@ jobs:
     name: "Swift format"
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: macos-15
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -221,7 +229,8 @@ jobs:
   test-swift:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: macos-15-xlarge
     timeout-minutes: 20
     steps:
@@ -266,7 +275,8 @@ jobs:
   test-kotlin:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -333,7 +343,8 @@ jobs:
   code-coverage:
     if: >
       ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
-      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') )
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: macos-15-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main

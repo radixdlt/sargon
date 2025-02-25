@@ -1341,6 +1341,15 @@ mod tests {
         )
         .await;
 
+        let main_bdfs = os.main_bdfs().unwrap();
+        // The spot check is performed only when there are enough factor instances in cache
+        os.pre_derive_and_fill_cache_with_instances_for_factor_source(
+            main_bdfs.into(),
+            NetworkID::Mainnet,
+        )
+        .await
+        .unwrap();
+
         // Add Account and verify it was added
         let account = os
             .with_timeout(|x| {
@@ -1366,6 +1375,15 @@ mod tests {
                 TestSpotCheckInteractor::new_failed(spot_check_error.clone()),
             ))
             .await;
+
+        let main_bdfs = os.main_bdfs().unwrap();
+        // The spot check is performed only when there are enough factor instances in cache
+        os.pre_derive_and_fill_cache_with_instances_for_factor_source(
+            main_bdfs.into(),
+            NetworkID::Mainnet,
+        )
+        .await
+        .unwrap();
 
         // Attempt to add Account and check it fails with expected error
         let error = os

@@ -12,7 +12,7 @@ pub trait OsFactorSourceAdder {
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         name: String,
-    ) -> Result<()>;
+    ) -> Result<FactorSourceID>;
 }
 
 #[async_trait::async_trait]
@@ -43,8 +43,9 @@ impl OsFactorSourceAdder for SargonOS {
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         name: String,
-    ) -> Result<()> {
+    ) -> Result<FactorSourceID> {
         let host_info = self.resolve_host_info().await;
+        let network_id = self.current_network_id()?;
         let factor_source = FactorSource::with_mwp(
             factor_source_kind,
             mnemonic_with_passphrase.clone(),
@@ -77,6 +78,7 @@ impl OsFactorSourceAdder for SargonOS {
 
             self.pre_derive_and_fill_cache_with_instances_for_factor_source(
                 factor_source.clone(),
+                network_id,
             )
             .await
         };
@@ -103,7 +105,7 @@ impl OsFactorSourceAdder for SargonOS {
             ))
             .await;
 
-        Ok(())
+        Ok(id)
     }
 }
 
@@ -370,15 +372,18 @@ mod tests {
             // Clear recorded events
             event_bus_driver.clear_recorded();
 
-            os.with_timeout(|x| {
-                x.add_new_mnemonic_factor_source(
-                    factor_source_kind,
-                    mwp.clone(),
-                    "New".to_owned(),
-                )
-            })
-            .await
-            .unwrap();
+            let result_id = os
+                .with_timeout(|x| {
+                    x.add_new_mnemonic_factor_source(
+                        factor_source_kind,
+                        mwp.clone(),
+                        "New".to_owned(),
+                    )
+                })
+                .await
+                .unwrap();
+
+            pretty_assertions::assert_eq!(result_id, fsid);
 
             // Verify that the mnemonic is saved to secure storage
             pretty_assertions::assert_eq!(
