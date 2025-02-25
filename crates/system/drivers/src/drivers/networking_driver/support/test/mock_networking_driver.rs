@@ -12,7 +12,7 @@ pub struct MockNetworkingDriver {
     count: Mutex<u64>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MockNetworkingDriverResponse {
     status: u16,
     body: BagOfBytes,

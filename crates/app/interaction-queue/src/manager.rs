@@ -13,21 +13,21 @@ pub struct InteractionQueueManager {
     /// Storage for saving and loading the queue.
     storage: Arc<dyn InteractionQueueStorage>,
 
-    // TODO: Improve this
-    gateway_client: GatewayClient,
+    /// Function to create a new GatewayClient.
+    create_gateway_client: Box<dyn Fn() -> GatewayClient + Send + Sync>,
 }
 
 impl InteractionQueueManager {
     pub fn new(
         observer: Arc<dyn InteractionQueueObserver>,
         storage: Arc<dyn InteractionQueueStorage>,
-        gateway_client: GatewayClient,
+        create_gateway_client: Box<dyn Fn() -> GatewayClient + Send + Sync>,
     ) -> Arc<Self> {
         Arc::new(Self {
             queue: RwLock::new(InteractionQueue::new()),
             observer,
             storage,
-            gateway_client,
+            create_gateway_client,
         })
     }
 }
@@ -215,7 +215,7 @@ impl InteractionQueueManager {
         transaction: TransactionQueueItem,
     ) -> Option<InteractionQueueItemStatus> {
         let response = self
-            .gateway_client
+            .get_gateway_client()
             .get_transaction_status(transaction.transaction_id)
             .await
             .ok()?;
@@ -232,7 +232,7 @@ impl InteractionQueueManager {
         pre_authorization: PreAuthorizationQueueItem,
     ) -> Option<InteractionQueueItemStatus> {
         let response = self
-            .gateway_client
+            .get_gateway_client()
             .get_pre_authorization_status(pre_authorization.subintent_id)
             .await
             .ok()?;
@@ -281,10 +281,14 @@ impl InteractionQueueManager {
                     .notarized_transaction_hex,
             };
             let _ = self
-                .gateway_client
+                .get_gateway_client()
                 .submit_transaction(request, transaction.transaction_id)
                 .await;
         }
+    }
+
+    fn get_gateway_client(&self) -> GatewayClient {
+        (self.create_gateway_client)()
     }
 }
 
@@ -672,12 +676,19 @@ mod test_support {
         storage: Arc<dyn InteractionQueueStorage>,
     ) -> Arc<SUT> {
         let mock_networking_driver =
-            MockNetworkingDriver::new_with_responses(responses);
-        let gateway_client = GatewayClient::new(
-            Arc::new(mock_networking_driver),
-            NetworkID::Stokenet,
-        );
-        let sut = SUT::new(observer, storage, gateway_client);
+            Arc::new(MockNetworkingDriver::new_with_responses(responses));
+
+        let create_gateway_client = {
+            let mock_networking_driver = mock_networking_driver.clone();
+            Box::new(move || {
+                GatewayClient::new(
+                    mock_networking_driver.clone(),
+                    NetworkID::Stokenet,
+                )
+            })
+        };
+
+        let sut = SUT::new(observer, storage, create_gateway_client);
 
         let _ = sut.clone().bootstrap().await;
         sut
