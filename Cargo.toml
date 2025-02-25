@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     # === FOR APP ===
     "crates/app/home-cards",
-    "crates/app/interaction-queue",
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
@@ -50,6 +49,9 @@ members = [
     # === GATEWAY ===
     "crates/gateway/client-and-api",
     "crates/gateway/models",
+
+    # === INTERACTION QUEUE ===
+    "crates/interaction-queue/manager",
 
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
@@ -97,7 +99,6 @@ members = [
 default-members = [
     # === FOR APP ===
     "crates/app/home-cards",
-    "crates/app/interaction-queue",
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
@@ -144,6 +145,9 @@ default-members = [
     # === GATEWAY ===
     "crates/gateway/client-and-api",
     "crates/gateway/models",
+
+    # === INTERACTION QUEUE ===
+    "crates/interaction-queue/manager",
 
     # === PROFILE ===
     "crates/profile/logic/logic_SPLIT_ME",
@@ -206,7 +210,6 @@ debug = true
 
 # === FOR APP ===
 home-cards = { path = "crates/app/home-cards" }
-interaction-queue = { path = "crates/app/interaction-queue" }
 key-derivation-traits = { path = "crates/app/key-derivation-traits" }
 radix-connect = { path = "crates/app/radix-connect" }
 radix-connect-models = { path = "crates/app/radix-connect-models" }
@@ -253,6 +256,9 @@ factors-supporting-types = { path = "crates/factors/supporting-types" }
 # === GATEWAY ===
 gateway-client-and-api = { path = "crates/gateway/client-and-api" }
 gateway-models = { path = "crates/gateway/models" }
+
+# === INTERACTION QUEUE ===
+interaction-queue = { path = "crates/interaction-queue/manager" }
 
 # === PROFILE ===
 profile-logic = { path = "crates/profile/logic/logic_SPLIT_ME" }
