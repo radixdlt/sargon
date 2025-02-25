@@ -12,6 +12,7 @@ addresses = { workspace = true }
 profile = { workspace = true }
 profile-supporting-types = { workspace = true }
 time-utils = { workspace = true }
+interaction-queue-models = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

@@ -10,6 +10,7 @@ core-utils = { workspace = true }
 transaction-models = { workspace = true }
 gateway-client-and-api = { workspace = true }
 interaction-queue-models = {workspace = true}
+clients = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None
