@@ -14,8 +14,6 @@ pub mod prelude {
     pub use crate::summary::*;
     pub use crate::transaction_item::*;
 
-    
-
     pub(crate) use core_utils::prelude::*;
     pub(crate) use gateway_models::prelude::*;
     pub(crate) use serde::{Deserialize, Serialize};

@@ -13,21 +13,26 @@ pub struct InteractionQueueManager {
     /// Storage for saving and loading the queue.
     storage: Arc<dyn InteractionQueueStorage>,
 
-    /// Function to create a new GatewayClient.
-    create_gateway_client: Box<dyn Fn() -> GatewayClient + Send + Sync>,
+    /// Networking driver to interact with the Gateway.
+    networking_driver: Arc<dyn NetworkingDriver>,
+
+    /// Currently set `NetworkID`
+    network_id: NetworkID,
 }
 
 impl InteractionQueueManager {
     pub fn new(
         observer: Arc<dyn InteractionQueueObserver>,
         storage: Arc<dyn InteractionQueueStorage>,
-        create_gateway_client: Box<dyn Fn() -> GatewayClient + Send + Sync>,
+        networking_driver: Arc<dyn NetworkingDriver>,
+        network_id: NetworkID,
     ) -> Arc<Self> {
         Arc::new(Self {
             queue: RwLock::new(InteractionQueue::new()),
             observer,
             storage,
-            create_gateway_client,
+            networking_driver,
+            network_id,
         })
     }
 }
@@ -99,6 +104,10 @@ impl InteractionQueueManager {
 
 // Internal methods (called by other places inside Sargon)
 impl InteractionQueueManager {
+    pub fn set_network_id(&mut self, network_id: NetworkID) {
+        self.network_id = network_id;
+    }
+
     /// Adds to the queue an interaction ready to be processed.
     pub async fn add_interaction(&self, item: InteractionQueueItem) {
         self.enqueue_and_process_interaction(item).await;
@@ -290,7 +299,7 @@ impl InteractionQueueManager {
     }
 
     fn get_gateway_client(&self) -> GatewayClient {
-        (self.create_gateway_client)()
+        GatewayClient::new(self.networking_driver.clone(), self.network_id)
     }
 }
 
@@ -679,18 +688,12 @@ mod test_support {
     ) -> Arc<SUT> {
         let mock_networking_driver =
             Arc::new(MockNetworkingDriver::new_with_responses(responses));
-
-        let create_gateway_client = {
-            let mock_networking_driver = mock_networking_driver.clone();
-            Box::new(move || {
-                GatewayClient::new(
-                    mock_networking_driver.clone(),
-                    NetworkID::Stokenet,
-                )
-            })
-        };
-
-        let sut = SUT::new(observer, storage, create_gateway_client);
+        let sut = SUT::new(
+            observer,
+            storage,
+            mock_networking_driver,
+            NetworkID::Stokenet,
+        );
 
         let _ = sut.clone().bootstrap().await;
         sut
