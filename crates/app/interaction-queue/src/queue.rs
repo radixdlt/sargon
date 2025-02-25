@@ -216,7 +216,8 @@ mod tests {
         sut.add_interaction(interaction.clone());
         assert_eq!(sut.items[0].status, InteractionQueueItemStatus::InProgress);
 
-        interaction = interaction.with_status(InteractionQueueItemStatus::Success);
+        interaction =
+            interaction.with_status(InteractionQueueItemStatus::Success);
         sut.replace_interaction(interaction);
 
         assert_eq!(sut.items[0].status, InteractionQueueItemStatus::Success);

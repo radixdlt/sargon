@@ -99,11 +99,13 @@ impl InteractionQueueManager {
 
 // Internal methods (called by other places inside Sargon)
 impl InteractionQueueManager {
+    /// Adds to the queue an interaction ready to be processed.
     pub async fn add_interaction(&self, item: InteractionQueueItem) {
         self.enqueue_and_process_interaction(item).await;
         self.handle_queue_update().await;
     }
 
+    /// Adds to the queue a batch of interactions that will be processed with the corresponding delays among them.
     pub async fn add_batch(&self, batch: InteractionQueueBatch) {
         self.queue.write().await.add_batch(batch);
         self.handle_queue_update().await;
@@ -113,8 +115,8 @@ impl InteractionQueueManager {
 // Private methods
 impl InteractionQueueManager {
     /// Notifies the observer about the updated queue and saves it to the local storage.
-    // Note: we probably want this method to not await until the storage is saved
     async fn handle_queue_update(&self) {
+        // Note: we probably want this method to not await any of the two processes.
         {
             let queue = self.queue.read().await;
             self.observer.handle_update(queue.sorted_items());
