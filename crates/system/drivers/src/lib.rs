@@ -6,6 +6,7 @@ pub mod prelude {
     pub(crate) use addresses::prelude::*;
 
     pub(crate) use hierarchical_deterministic::prelude::*;
+    pub(crate) use interaction_queue_models::prelude::*;
     pub(crate) use profile::prelude::*;
     pub(crate) use profile_supporting_types::prelude::*;
 

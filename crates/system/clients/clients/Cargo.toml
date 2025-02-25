@@ -15,6 +15,7 @@ drivers = { workspace = true }
 http-client = { workspace = true }
 gateway-client-and-api = { workspace = true }
 hierarchical-deterministic = { workspace = true }
+interaction-queue-models = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 # None

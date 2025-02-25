@@ -7,8 +7,8 @@ pub struct InteractionQueueManager {
     /// The queue of interactions.
     queue: RwLock<InteractionQueue>,
 
-    /// Observer to handle updates to the interactions queue.
-    observer: Arc<dyn InteractionQueueObserver>,
+    /// Client to notify of updates in the queue.
+    change_client: InteractionQueueChangeClient,
 
     /// Storage for saving and loading the queue.
     storage: Arc<dyn InteractionQueueStorage>,
@@ -22,14 +22,14 @@ pub struct InteractionQueueManager {
 
 impl InteractionQueueManager {
     pub fn new(
-        observer: Arc<dyn InteractionQueueObserver>,
+        change_client: InteractionQueueChangeClient,
         storage: Arc<dyn InteractionQueueStorage>,
         networking_driver: Arc<dyn NetworkingDriver>,
         network_id: NetworkID,
     ) -> Arc<Self> {
         Arc::new(Self {
             queue: RwLock::new(InteractionQueue::new()),
-            observer,
+            change_client,
             storage,
             networking_driver,
             network_id,
@@ -51,7 +51,7 @@ impl InteractionQueueManager {
             locked_queue.removing_stale();
         }
 
-        // Notify observer and save the queue to local storage.
+        // Notify change_driver and save the queue to local storage.
         self.handle_queue_update().await;
 
         // Monitor the status of interactions in the queue.
@@ -83,7 +83,7 @@ impl InteractionQueueManager {
         // Process the interaction
         self.process_interaction(item).await;
 
-        // Notify observer and save the queue to local storage.
+        // Notify change_driver and save the queue to local storage.
         self.handle_queue_update().await;
     }
 
@@ -123,12 +123,12 @@ impl InteractionQueueManager {
 
 // Private methods
 impl InteractionQueueManager {
-    /// Notifies the observer about the updated queue and saves it to the local storage.
+    /// Notifies the change_driver about the updated queue and saves it to the local storage.
     async fn handle_queue_update(&self) {
         // Note: we probably want this method to not await any of the two processes.
         {
             let queue = self.queue.read().await;
-            self.observer.handle_update(queue.sorted_items());
+            self.change_client.emit(queue.sorted_items());
         }
 
         let queue = self.queue.write().await;
@@ -253,7 +253,7 @@ impl InteractionQueueManager {
 
     /// Loop over the batches and call `batch.get_first_if_ready()` for each of them.
     /// If they return an interaction, call `process_interaction()` with it.
-    /// Call observer to notify of updated queue.
+    /// Call change_driver to notify of updated queue.
     async fn check_batch_ready_interactions(&self) {
         let mut queue = self.queue.write().await;
         let ready_interactions: Vec<_> = queue
@@ -312,14 +312,22 @@ mod tests {
     async fn bootstrap_loads_empty_queue() {
         // Test the case the queue loaded from storage is empty.
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_empty());
-        let _ = create_and_bootstrap(vec![], observer.clone(), storage.clone())
-            .await;
+        let _ = create_and_bootstrap(
+            vec![],
+            change_driver.clone(),
+            storage.clone(),
+        )
+        .await;
 
         // Verify empty queue update
         let expected_queue = InteractionQueue::with_items(vec![]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
@@ -346,10 +354,14 @@ mod tests {
             [batch_empty.clone(), batch_non_empty.clone()],
         );
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_with_queue(stored_queue));
-        let _ = create_and_bootstrap(vec![], observer.clone(), storage.clone())
-            .await;
+        let _ = create_and_bootstrap(
+            vec![],
+            change_driver.clone(),
+            storage.clone(),
+        )
+        .await;
 
         // Verify queue update doesn't contain stale data
         // This is, the success interaction and the empty batch were removed
@@ -357,28 +369,40 @@ mod tests {
             [interaction_in_progress, interaction_failed],
             [batch_non_empty],
         );
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
     async fn bootstrap_fails_to_load_queue() {
         // Test the case the queue fails to load from storage.
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_with_error());
-        let _ = create_and_bootstrap(vec![], observer.clone(), storage.clone())
-            .await;
+        let _ = create_and_bootstrap(
+            vec![],
+            change_driver.clone(),
+            storage.clone(),
+        )
+        .await;
 
         // Verify empty queue update
         let expected_queue = InteractionQueue::with_items(vec![]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
     async fn add_interaction_and_react_to_status_updates() {
         // Test the case a Transaction is added to the queue, and after the first check its status is updated.
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_empty());
         let sut = create_and_bootstrap(
             vec![
@@ -389,7 +413,7 @@ mod tests {
                     TransactionStatusResponsePayloadStatus::CommittedSuccess,
                 ),
             ],
-            observer.clone(),
+            change_driver.clone(),
             storage.clone(),
         )
         .await;
@@ -410,7 +434,11 @@ mod tests {
         // Verify queue update
         let expected_queue =
             InteractionQueue::with_items(vec![interaction.clone()]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
 
         // Wait a bit for the manager to check its status
         async_std::task::sleep(Duration::from_millis(10)).await;
@@ -423,14 +451,18 @@ mod tests {
         let expected_queue = InteractionQueue::with_items(vec![interaction
             .clone()
             .with_status(InteractionQueueItemStatus::Success)]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
     async fn add_pre_authorization_and_react_to_status_updates() {
         // Test the case a PreAuthorization is added to the queue, and after two checks the status is updated
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_empty());
         let sut = create_and_bootstrap(
             vec![
@@ -443,7 +475,7 @@ mod tests {
                     SubintentStatus::CommittedSuccess,
                 ),
             ],
-            observer.clone(),
+            change_driver.clone(),
             storage.clone(),
         )
         .await;
@@ -466,7 +498,11 @@ mod tests {
         // Verify queue update
         let expected_queue =
             InteractionQueue::with_items(vec![interaction.clone()]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
 
         // Wait a bit for the manager to check its status twice
         async_std::task::sleep(Duration::from_millis(20)).await;
@@ -479,7 +515,11 @@ mod tests {
         let expected_queue = InteractionQueue::with_items(vec![interaction
             .clone()
             .with_status(InteractionQueueItemStatus::Success)]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
@@ -487,11 +527,14 @@ mod tests {
         // Test the case a batch (with three interactions) is added to the queue, and how the manager
         // reacts when the first interaction is ready to be processed.
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_empty());
-        let sut =
-            create_and_bootstrap(vec![], observer.clone(), storage.clone())
-                .await;
+        let sut = create_and_bootstrap(
+            vec![],
+            change_driver.clone(),
+            storage.clone(),
+        )
+        .await;
 
         // Set up the batch with 3 interactions
         let interaction_1 = InteractionQueueItem::sample_next();
@@ -513,7 +556,11 @@ mod tests {
         // Verify queue update
         let expected_queue =
             InteractionQueue::with_batches(vec![batch.clone()]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
 
         // Wait a bit for the manager to check its status
         async_std::task::sleep(Duration::from_millis(600)).await;
@@ -541,21 +588,25 @@ mod tests {
                     .with_status(InteractionQueueItemStatus::InProgress)],
                 [batch.dropping_first()],
             );
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
     async fn retry_interaction_success() {
         // Test the case an interaction is successfully retried
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_empty());
         let sut = create_and_bootstrap(
             vec![
                 // Req1: TX is retried successfully
                 submit_transaction_response(),
             ],
-            observer.clone(),
+            change_driver.clone(),
             storage.clone(),
         )
         .await;
@@ -580,7 +631,11 @@ mod tests {
         let expected_queue = InteractionQueue::with_items(vec![
             interaction.with_status(InteractionQueueItemStatus::InProgress)
         ]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
@@ -590,7 +645,7 @@ mod tests {
 
         let sut = create_and_bootstrap(
             vec![],
-            Arc::new(MockObserver::new()),
+            RustInteractionQueueChangeDriver::new(),
             Arc::new(MockStorage::new_empty()),
         )
         .await;
@@ -604,14 +659,14 @@ mod tests {
     async fn remove_interaction() {
         // Test the case an interaction is removed from the queue
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_empty());
         let sut = create_and_bootstrap(
             vec![
                 // Req1: TX is retried successfully
                 submit_transaction_response(),
             ],
-            observer.clone(),
+            change_driver.clone(),
             storage.clone(),
         )
         .await;
@@ -630,21 +685,25 @@ mod tests {
 
         // Verify queue update
         let expected_queue = InteractionQueue::with_items(vec![]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 
     #[actix_rt::test]
     async fn cancel_interaction() {
         // Test the case an interaction is cancelled from the queue
 
-        let observer = Arc::new(MockObserver::new());
+        let change_driver = RustInteractionQueueChangeDriver::new();
         let storage = Arc::new(MockStorage::new_empty());
         let sut = create_and_bootstrap(
             vec![
                 // Req1: TX is retried successfully
                 submit_transaction_response(),
             ],
-            observer.clone(),
+            change_driver.clone(),
             storage.clone(),
         )
         .await;
@@ -665,7 +724,11 @@ mod tests {
         // Verify queue update
         let expected_queue =
             InteractionQueue::with_batches(vec![batch.dropping_first()]);
-        verify_queue_update(observer.clone(), storage.clone(), expected_queue);
+        verify_queue_update(
+            change_driver.clone(),
+            storage.clone(),
+            expected_queue,
+        );
     }
 }
 
@@ -683,13 +746,13 @@ mod test_support {
     /// bootstraps it.
     pub(crate) async fn create_and_bootstrap(
         responses: Vec<MockNetworkingDriverResponse>,
-        observer: Arc<dyn InteractionQueueObserver>,
+        change_driver: Arc<dyn InteractionQueueChangeDriver>,
         storage: Arc<dyn InteractionQueueStorage>,
     ) -> Arc<SUT> {
         let mock_networking_driver =
             Arc::new(MockNetworkingDriver::new_with_responses(responses));
         let sut = SUT::new(
-            observer,
+            InteractionQueueChangeClient::new(change_driver),
             storage,
             mock_networking_driver,
             NetworkID::Stokenet,
@@ -699,15 +762,16 @@ mod test_support {
         sut
     }
 
-    /// Verifies that a queue with the given interactions has been notified to the observer and saved in the storage.
+    /// Verifies that a queue with the given interactions has been notified to the change_driver and saved in the storage.
     pub(crate) fn verify_queue_update(
-        observer: Arc<MockObserver>,
+        change_driver: Arc<RustInteractionQueueChangeDriver>,
         storage: Arc<MockStorage>,
         expected_queue: InteractionQueue,
     ) {
-        // Verify that the observer has been notified with the corresponding interactions
-        let observers_queue = observer.updated_queue.lock().unwrap().clone();
-        assert_eq!(observers_queue, expected_queue.clone().sorted_items());
+        // Verify that the change_driver has been notified with the corresponding interactions
+        let change_driver_queue =
+            change_driver.recorded().last().cloned().unwrap();
+        assert_eq!(change_driver_queue, expected_queue.clone().sorted_items());
 
         // Verify that queue is saved in storage
         let saved_queue = storage.saved_queue.lock().unwrap().clone();
@@ -794,25 +858,6 @@ mod test_support {
 
         async fn load_queue(&self) -> Result<Option<InteractionQueue>> {
             self.stubbed_load_queue_result.clone()
-        }
-    }
-
-    pub(crate) struct MockObserver {
-        updated_queue: Arc<Mutex<Vec<InteractionQueueItem>>>,
-    }
-
-    impl MockObserver {
-        pub(crate) fn new() -> Self {
-            Self {
-                updated_queue: Arc::new(Mutex::new(Vec::new())),
-            }
-        }
-    }
-
-    #[async_trait::async_trait]
-    impl InteractionQueueObserver for MockObserver {
-        fn handle_update(&self, queue: Vec<InteractionQueueItem>) {
-            *self.updated_queue.lock().unwrap() = queue;
         }
     }
 }

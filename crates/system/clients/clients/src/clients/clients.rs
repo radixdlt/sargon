@@ -12,6 +12,7 @@ pub struct Clients {
     pub event_bus: EventBusClient,
     pub profile_state_change: ProfileStateChangeClient,
     pub factor_instances_cache: FactorInstancesCacheClient,
+    pub interaction_queue_change: InteractionQueueChangeClient,
 }
 
 impl Clients {
@@ -31,6 +32,9 @@ impl Clients {
         );
         let factor_instances_cache =
             FactorInstancesCacheClient::new(file_system.clone());
+        let interaction_queue_change = InteractionQueueChangeClient::new(
+            drivers.interaction_queue_change_driver.clone(),
+        );
         Self {
             host,
             secure_storage,
@@ -41,6 +45,7 @@ impl Clients {
             event_bus,
             profile_state_change: profile_change,
             factor_instances_cache,
+            interaction_queue_change,
         }
     }
 }

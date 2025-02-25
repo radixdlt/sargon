@@ -10,6 +10,7 @@ pub struct Drivers {
     pub file_system: Arc<dyn FileSystemDriver>,
     pub unsafe_storage: Arc<dyn UnsafeStorageDriver>,
     pub profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+    pub interaction_queue_change_driver: Arc<dyn InteractionQueueChangeDriver>,
 }
 
 impl Drivers {
@@ -24,6 +25,7 @@ impl Drivers {
         file_system: Arc<dyn FileSystemDriver>,
         unsafe_storage: Arc<dyn UnsafeStorageDriver>,
         profile_state_change_driver: Arc<dyn ProfileStateChangeDriver>,
+        interaction_queue_change_driver: Arc<dyn InteractionQueueChangeDriver>,
     ) -> Arc<Self> {
         Arc::new(Self {
             networking,
@@ -35,6 +37,7 @@ impl Drivers {
             file_system,
             unsafe_storage,
             profile_state_change_driver,
+            interaction_queue_change_driver,
         })
     }
 }
@@ -59,6 +62,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -73,6 +77,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -89,6 +94,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -106,6 +112,7 @@ impl Drivers {
             Self::file_system(),
             unsafe_storage,
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -122,6 +129,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -136,6 +144,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -150,6 +159,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -164,6 +174,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -180,6 +191,7 @@ impl Drivers {
             file_system,
             EphemeralUnsafeStorage::new(),
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -196,6 +208,7 @@ impl Drivers {
             Self::file_system(),
             unsafe_storage,
             RustProfileStateChangeDriver::new(),
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 
@@ -212,6 +225,7 @@ impl Drivers {
             Self::file_system(),
             EphemeralUnsafeStorage::new(),
             profile_state_change,
+            RustInteractionQueueChangeDriver::new(),
         )
     }
 }
