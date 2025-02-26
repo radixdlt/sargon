@@ -9,7 +9,6 @@ use sargon::{
     TransactionManifestAssetTransfers as _,
     TransactionManifestFaucet as _,
     TransactionManifestMetadataSetting as _,
-    TransactionManifestModifying as _,
     TransactionManifestStakeClaim as _,
     TransactionManifestThirdPartyDepositUpdating as _,
     TransactionManifestTokenCreating as _,
@@ -140,34 +139,6 @@ pub fn manifest_third_party_deposit_update(
         to.into_internal(),
     )
     .into()
-}
-
-#[uniffi::export]
-pub fn modify_manifest_lock_fee(
-    manifest: TransactionManifest,
-    address_of_fee_payer: &AccountAddress,
-    fee: Option<Decimal192>,
-) -> TransactionManifest {
-    manifest
-        .into_internal()
-        .modify_add_lock_fee(
-            &address_of_fee_payer.into_internal(),
-            fee.map(Into::into),
-        )
-        .into()
-}
-
-/// Modifies `manifest` by inserting transaction "guarantees", which is the wallet
-/// term for `assert_worktop_contains`.
-#[uniffi::export]
-pub fn modify_manifest_add_guarantees(
-    manifest: TransactionManifest,
-    guarantees: Vec<TransactionGuarantee>,
-) -> Result<TransactionManifest> {
-    manifest
-        .into_internal()
-        .modify_add_guarantees_vec(guarantees.into_internal())
-        .into_result()
 }
 
 #[uniffi::export]

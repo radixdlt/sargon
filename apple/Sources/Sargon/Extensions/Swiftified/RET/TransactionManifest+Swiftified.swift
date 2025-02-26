@@ -73,29 +73,6 @@ extension TransactionManifest {
 	}
 }
 
-// MARK: Modify Manifest
-extension TransactionManifest {
-	public func modify(
-		lockFee fee: Decimal192 = .temporaryStandardFee,
-		addressOfFeePayer: AccountAddress
-	) -> Self {
-		modifyManifestLockFee(
-			manifest: self,
-			addressOfFeePayer: addressOfFeePayer,
-			fee: fee
-		)
-	}
-
-	public func modify(
-		addGuarantees guarantees: [TransactionGuarantee]
-	) throws -> Self {
-		try modifyManifestAddGuarantees(
-			manifest: self,
-			guarantees: guarantees
-		)
-	}
-}
-
 #if DEBUG
 extension TransactionManifest {
 	public static func createFungibleToken(

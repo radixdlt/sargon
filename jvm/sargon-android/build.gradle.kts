@@ -372,7 +372,3 @@ tasks.register("cargoClean") {
         }
     }
 }
-
-tasks.getByName("clean") {
-    dependsOn("cargoClean")
-}

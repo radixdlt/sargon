@@ -15,8 +15,6 @@ import com.radixdlt.sargon.extensions.involvedPoolAddresses
 import com.radixdlt.sargon.extensions.involvedResourceAddresses
 import com.radixdlt.sargon.extensions.manifestString
 import com.radixdlt.sargon.extensions.markingAccountAsDAppDefinitionType
-import com.radixdlt.sargon.extensions.modifyAddGuarantees
-import com.radixdlt.sargon.extensions.modifyLockFee
 import com.radixdlt.sargon.extensions.networkId
 import com.radixdlt.sargon.extensions.perAssetTransfers
 import com.radixdlt.sargon.extensions.perRecipientTransfers
@@ -30,7 +28,6 @@ import com.radixdlt.sargon.extensions.xrd
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
 import com.radixdlt.sargon.samples.sampleMainnet
-import com.radixdlt.sargon.samples.sampleStokenet
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -502,54 +499,6 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 )
             )
             assertEquals(3, occurrences(";"))
-        }
-    }
-
-    @Test
-    fun testModifyAddGuarantees() {
-        val unmodifiedManifest = manifest("transfer_1to2_multiple_nf_and_f_tokens")
-        assertFalse(unmodifiedManifest.instructionsString.contains("642"))
-
-        val modifiedManifest =
-            unmodifiedManifest.modifyAddGuarantees(
-                guarantees =
-                listOf(
-                    TransactionGuarantee(
-                        amount =
-                        642.toDecimal192(),
-                        percentage =
-                        1.toDecimal192(),
-                        instructionIndex =
-                        10.toULong(),
-                        resourceAddress =
-                        ResourceAddress.xrd(
-                            NetworkId.STOKENET
-                        ),
-                        resourceDivisibility =
-                        null
-                    )
-                )
-            )
-
-        assertTrue(modifiedManifest.instructionsString.contains("642"))
-    }
-
-    @Test
-    fun testModifyLockFee() {
-        val instructions = manifest("create_pool")
-
-        assertFalse(instructions.instructionsString.contains("lock_fee"))
-
-        val modified =
-            instructions.modifyLockFee(
-                addressOfFeePayer = AccountAddress.sampleStokenet(),
-                fee = 195.toDecimal192()
-            )
-
-        with(modified.instructionsString) {
-            assertTrue(contains("lock_fee"))
-            assertTrue(contains("195"))
-            assertTrue(contains(AccountAddress.sampleStokenet().string))
         }
     }
 

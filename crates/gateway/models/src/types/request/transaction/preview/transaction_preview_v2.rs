@@ -63,12 +63,11 @@ impl TransactionPreviewRequestV2 {
 
 impl TransactionPreviewRequestV2 {
     pub fn new_transaction_analysis(
-        manifest: ScryptoTransactionManifestV2,
+        manifest: TransactionManifestV2,
         start_epoch_inclusive: Epoch,
         signer_public_keys: impl IntoIterator<Item = PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
-        network_id: NetworkID,
     ) -> Result<Self> {
         let signer_public_keys = signer_public_keys
             .into_iter()
@@ -81,7 +80,7 @@ impl TransactionPreviewRequestV2 {
             tip_basis_points: 0,
         };
         let intent_header = ScryptoIntentHeaderV2 {
-            network_id: network_id.discriminant(),
+            network_id: manifest.network_id().discriminant(),
             start_epoch_inclusive: start_epoch_inclusive.into(),
             end_epoch_exclusive: Epoch::window_end_from_start(
                 start_epoch_inclusive,
@@ -93,7 +92,7 @@ impl TransactionPreviewRequestV2 {
         };
 
         let preview_transaction = ScryptoTransactionV2Builder::new()
-            .manifest(manifest)
+            .manifest(manifest.scrypto_manifest())
             .transaction_header(header)
             .intent_header(intent_header)
             .build_preview_transaction(signer_public_keys);
