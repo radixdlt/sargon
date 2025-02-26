@@ -40,7 +40,7 @@ impl IntentSetState {
 
     pub(crate) fn new(
         intent_set_id: IntentSetID,
-        shield_application: SecurityShieldApplicationWithTransactionIntents,
+        shield_application: SecurityShieldApplicationWithTransactionIntentsContent,
     ) -> Self {
         Self {
             intent_set_id,

@@ -17,7 +17,7 @@ impl SigningManager {
             Ok(s.internal_state.paying_account())
         };
 
-        // We are NOT signing intent SETs but we piggy back
+        // We are NOT signing intent SETs, but we piggyback
         // on the existing code above, and inlay a single intent into a set
         // to be able to use the same code.
         let intent_sets = signed_intents
@@ -35,10 +35,28 @@ impl SigningManager {
             })
             .collect::<Result<Vec<IntentSetToSign>>>()?;
 
-        let mut signed_intents = signed_intents
+        let mut signed_intents_with_owners = signed_intents
             .into_iter()
-            .map(|si| (si.intent_set_id(), si.signed_intent))
-            .collect::<IndexMap<IntentSetID, SignedIntent>>();
+            .map(|si| {
+                let intent_set_id = si.intent_set_id();
+
+                let owner = si.entity_applying_shield;
+
+                let owned_signatures = si
+                    .signed_intent
+                    .intent_signatures
+                    .signatures
+                    .into_iter()
+                    .map(|s| OwnedIntentSignature::new(owner.address(), s));
+                let with_owners = SignedIntentWithOwners::new(
+                    intent_set_id,
+                    si.signed_intent.intent,
+                    owned_signatures,
+                );
+                Ok((intent_set_id, with_owners))
+            })
+            .collect::<Result<IndexMap<IntentSetID, SignedIntentWithOwners>>>(
+            )?;
 
         let exercise_role_outcome = self
             .sign_intent_sets_with_role(intent_sets, RoleKind::Primary)
@@ -46,25 +64,27 @@ impl SigningManager {
 
         assert!(exercise_role_outcome.entities_not_signed_for.is_empty());
 
-        exercise_role_outcome.entities_signed_for
+        exercise_role_outcome
+            .entities_signed_for
             .0
             .into_iter()
             .for_each(|signed_with_payer| {
-                let signed_intent = signed_intents
-                    .get_mut(&signed_with_payer.intent_set_id());
-                if signed_intent.is_none() {
-                    println!("🎃 signed_intents did not contain value for intent-set-id: '{:?}'", signed_with_payer.intent_set_id());
-                    panic!("incorrect impl")
-                }
-                let signed_intent = signed_intent.unwrap();
+                let signed_intent = signed_intents_with_owners
+                    .get_mut(&signed_with_payer.intent_set_id())
+                    .unwrap();
+                let payer = signed_with_payer.entity.address();
 
                 signed_intent.add_fee_payer_signatures(
-                    signed_with_payer.intent_signatures(),
+                    signed_with_payer
+                        .intent_signatures()
+                        .into_iter()
+                        .map(|s| OwnedIntentSignature::new(payer, s))
+                        .collect(),
                 );
             });
 
         Ok(SigningManagerOutcome(
-            signed_intents.values().cloned().collect_vec(),
+            signed_intents_with_owners.values().cloned().collect_vec(),
         ))
     }
 }

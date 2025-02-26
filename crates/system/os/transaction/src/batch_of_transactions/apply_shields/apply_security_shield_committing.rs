@@ -175,6 +175,24 @@ mod tests {
                     os.add_account(account.clone()).await.unwrap();
                 }
                 EntitySecurityState::Securified { value } => {
+                    println!(
+                        "🔮 account: {:?}, address: {:?}, keys: {:#?}",
+                        account.display_name.to_string(),
+                        account.address.to_string(),
+                        value
+                            .security_structure
+                            .matrix_of_factors
+                            .all_factors()
+                            .into_iter()
+                            .map(|f| f
+                                .badge
+                                .as_virtual()
+                                .unwrap()
+                                .as_hierarchical_deterministic()
+                                .public_key
+                                .to_string())
+                            .collect_vec()
+                    );
                     let security_structure_of_factor_source_ids =
                         shield_ids_from_shield_instances(
                             value.security_structure.clone(),
@@ -204,6 +222,24 @@ mod tests {
                     os.add_persona(persona.clone()).await.unwrap();
                 }
                 EntitySecurityState::Securified { value } => {
+                    println!(
+                        "🔮 persona: {:?}, address: {:?}, keys: {:#?}",
+                        persona.display_name.to_string(),
+                        persona.address.to_string(),
+                        value
+                            .security_structure
+                            .matrix_of_factors
+                            .all_factors()
+                            .into_iter()
+                            .map(|f| f
+                                .badge
+                                .as_virtual()
+                                .unwrap()
+                                .as_hierarchical_deterministic()
+                                .public_key
+                                .to_string())
+                            .collect_vec()
+                    );
                     let security_structure_of_factor_source_ids =
                         shield_ids_from_shield_instances(
                             value.security_structure.clone(),
@@ -220,6 +256,7 @@ mod tests {
                     )
                     .await
                     .unwrap();
+
                     os.add_persona(persona.clone()).await.unwrap();
                 }
             };
@@ -370,7 +407,7 @@ mod tests {
                 }
                 let interactor = Arc::new(Interactor);
                 let profile = os.profile().unwrap();
-                let tx_builder =    ApplyShieldTransactionsBuilderImpl::with(
+                let tx_builder = ApplyShieldTransactionsBuilderImpl::with(
                     profile.clone(),
                     MockNetworkingDriver::everyones_rich(network_id),
                 );
@@ -388,10 +425,27 @@ mod tests {
                     SaveIntentsToConfirmAfterDelayClient::new(
                         EphemeralUnsafeStorage::new(),
                     ),
-                    applications,
+                    applications.clone(),
                 );
                 let outcome = signing_manager.sign_intent_sets().await. unwrap();
                 assert_eq!(outcome.0.len(), manifest_and_payer_tuples.len());
+                let get_expected_payer_by_intent_set_id = |intent_set_id: IntentSetID| -> Account {
+                    applications
+                    .iter()
+                    .find(|app| app.intent_set_id == intent_set_id)
+                    .map(|app| app.content.paying_account().account()
+                )
+                .unwrap()
+                };
+                // Assert that the the fee payer has also signed each intent
+                for signed_intent in outcome.0 {
+                    let expected_account = get_expected_payer_by_intent_set_id(signed_intent.intent_set_id);
+                    assert!(!signed_intent
+                    .intent_signatures
+                    .iter()
+                    .filter(|sig| sig.owner == AddressOfAccountOrPersona::from(expected_account.address)).collect_vec().is_empty()); // 2 if the payer is also the entity applying the shield
+
+                }
             })
         })
         .await

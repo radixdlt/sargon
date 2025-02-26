@@ -114,7 +114,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
             Ok(intent)
         };
 
-        // Map each `SecurityShieldApplication` to a `SecurityShieldApplicationWithTransactionIntents`
+        // Map each `SecurityShieldApplication` to a `SecurityShieldApplicationWithTransactionIntentsContent`
         let with_intents = manifests_with_entities_with_xrd_balance.into_iter().map(|shield_application| {
             // We can use the same notary private key for all variants since they
             // are in fact the same application
@@ -129,7 +129,7 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                     )?;
                     let with_intent = SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent::with_intent(unsec, intent);
 
-                    Ok(SecurityShieldApplicationWithTransactionIntents::ForUnsecurifiedEntity(with_intent))
+                    Ok(SecurityShieldApplicationWithTransactionIntentsContent::ForUnsecurifiedEntity(with_intent))
                 }
                 SecurityShieldApplication::ForSecurifiedEntity(sec) => {
                     let with_intents: SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents = {
@@ -176,13 +176,20 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
                             )
                         )
                     }?;
-                    Ok(SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(with_intents))
+                    Ok(SecurityShieldApplicationWithTransactionIntentsContent::ForSecurifiedEntity(with_intents))
                 }
             }
-        }).collect::<Result<Vec<SecurityShieldApplicationWithTransactionIntents>>>()?;
+        }).collect::<Result<Vec<SecurityShieldApplicationWithTransactionIntentsContent>>>()?;
 
         let payload_to_sign = ApplySecurityShieldPayloadToSign {
-            applications_with_intents: with_intents,
+            applications_with_intents: with_intents
+                .into_iter()
+                .map(|content| {
+                    SecurityShieldApplicationWithTransactionIntents::new(
+                        content,
+                    )
+                })
+                .collect(),
             notary_keys: transaction_id_to_notary_private_key,
         };
 

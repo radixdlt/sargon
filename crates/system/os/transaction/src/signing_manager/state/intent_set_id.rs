@@ -11,6 +11,7 @@ impl Default for IntentSetID {
 }
 
 impl IntentSetID {
+    /// Generates a new UUID and wraps it in an `IntentSetID`.
     pub fn new() -> Self {
         Self(Uuid::new_v4())
     }

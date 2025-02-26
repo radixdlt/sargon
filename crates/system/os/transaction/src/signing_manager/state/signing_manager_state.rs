@@ -106,8 +106,10 @@ impl SigningManagerState {
             current_role: None, // we start with Recovery
             per_set_state: intent_sets
                 .into_iter()
-                .map(|shield_application| {
-                    let intent_set_id = IntentSetID::new();
+                .map(|shield_application_with_id| {
+                    let shield_application = shield_application_with_id.content;
+                    let intent_set_id =
+                        shield_application_with_id.intent_set_id;
                     let value =
                         IntentSetState::new(intent_set_id, shield_application);
                     (intent_set_id, value)

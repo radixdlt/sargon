@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Clone, Eq, Debug)]
 pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent<
     E: IsEntity,
 > {

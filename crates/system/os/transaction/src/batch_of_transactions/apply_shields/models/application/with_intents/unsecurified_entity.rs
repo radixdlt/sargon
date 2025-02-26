@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, EnumAsInner)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumAsInner)]
 pub enum SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
     Account(
         SecurityShieldApplicationForUnsecurifiedAccountWithTransactionIntent,

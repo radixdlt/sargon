@@ -24,3 +24,20 @@ impl<T: HasSampleValues> HasSampleValues for Owned<T> {
         Self::new(AddressOfAccountOrPersona::sample_other(), T::sample_other())
     }
 }
+
+pub type OwnedIntentSignature = Owned<IntentSignature>;
+
+impl TryFrom<(AddressOfAccountOrPersona, IntentSignature)>
+    for OwnedIntentSignature
+{
+    type Error = CommonError;
+
+    fn try_from(
+        (owner, intent_signature): (AddressOfAccountOrPersona, IntentSignature),
+    ) -> Result<Self> {
+        if !owner.matches_public_key(intent_signature.public_key()) {
+            return Err(CommonError::Unknown); // TODO - better error
+        }
+        Ok(Self::new(owner, intent_signature))
+    }
+}

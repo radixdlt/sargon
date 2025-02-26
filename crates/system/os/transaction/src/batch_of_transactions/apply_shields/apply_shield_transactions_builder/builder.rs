@@ -87,7 +87,7 @@ impl ApplyShieldTransactionsBuilder for ApplyShieldTransactionsBuilderImpl {
     /// Prepares a batch of Applications of SecurityShields ready to be signed
     /// from a list of Manifests and Payers.
     ///
-    /// This is a complex multi-step process:
+    /// This is a complex multistep process:
     /// 1. Lookup entities for each manifest and payer
     /// 2. Fetch XRD balances for each entity
     /// 3. Create 5 variants of each manifest for securified entities

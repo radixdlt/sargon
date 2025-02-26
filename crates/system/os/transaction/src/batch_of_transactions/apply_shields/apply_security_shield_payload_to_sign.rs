@@ -2,9 +2,25 @@ use crate::prelude::*;
 
 pub type AddressOfPayerOfShieldApplication = AddressOfAccessControllerOrAccount;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SecurityShieldApplicationWithTransactionIntents {
+    pub content: SecurityShieldApplicationWithTransactionIntentsContent,
+    pub(crate) intent_set_id: IntentSetID,
+}
+impl SecurityShieldApplicationWithTransactionIntents {
+    pub fn new(
+        content: SecurityShieldApplicationWithTransactionIntentsContent,
+    ) -> Self {
+        Self {
+            content,
+            intent_set_id: IntentSetID::new(),
+        }
+    }
+}
+
 #[allow(clippy::large_enum_variant)]
-#[derive(Debug, PartialEq, Eq, EnumAsInner)]
-pub enum SecurityShieldApplicationWithTransactionIntents {
+#[derive(Debug, Clone, PartialEq, Eq, EnumAsInner)]
+pub enum SecurityShieldApplicationWithTransactionIntentsContent {
     /// Application for an unsecurified entity.
     ForUnsecurifiedEntity(
         SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent,
@@ -14,6 +30,18 @@ pub enum SecurityShieldApplicationWithTransactionIntents {
     ForSecurifiedEntity(
         SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
     ),
+}
+impl SecurityShieldApplicationWithTransactionIntentsContent {
+    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
+        match self {
+            Self::ForUnsecurifiedEntity(application) => {
+                application.paying_account()
+            }
+            Self::ForSecurifiedEntity(application) => {
+                application.paying_account()
+            }
+        }
+    }
 }
 
 impl SecurityShieldApplication {

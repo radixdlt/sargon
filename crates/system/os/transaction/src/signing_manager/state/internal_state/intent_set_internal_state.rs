@@ -132,20 +132,23 @@ impl IntentSetInternalState {
         }
     }
 }
-impl From<(SecurityShieldApplicationWithTransactionIntents, IntentSetID)>
-    for IntentSetInternalState
+impl
+    From<(
+        SecurityShieldApplicationWithTransactionIntentsContent,
+        IntentSetID,
+    )> for IntentSetInternalState
 {
     fn from(
         (shield_application, intent_set_id): (
-            SecurityShieldApplicationWithTransactionIntents,
+            SecurityShieldApplicationWithTransactionIntentsContent,
             IntentSetID,
         ),
     ) -> Self {
         match shield_application {
-            SecurityShieldApplicationWithTransactionIntents::ForSecurifiedEntity(sec) => {
+            SecurityShieldApplicationWithTransactionIntentsContent::ForSecurifiedEntity(sec) => {
                 Self::Securified(SecurifiedIntentSetInternalState::from((sec, intent_set_id)))
             },
-            SecurityShieldApplicationWithTransactionIntents::ForUnsecurifiedEntity(unsec) => {
+            SecurityShieldApplicationWithTransactionIntentsContent::ForUnsecurifiedEntity(unsec) => {
                 Self::Unsecurified(UnsecurifiedIntentSetInternalState::from((unsec, intent_set_id)))
             },
         }
