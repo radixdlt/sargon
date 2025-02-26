@@ -123,6 +123,23 @@ mod tests {
     type SUT = SargonOS;
 
     #[actix_rt::test]
+    async fn test_involved_entities_not_included_in_profile() {
+        let account = Account::sample_mainnet();
+
+        let os = prepare_os([], []);
+        let manifest = TransactionManifest::sample_mainnet_without_lock_fee();
+
+        let result = os.await.modify_transaction_manifest_with_fee_payer(
+            manifest,
+            account.address(),
+            Decimal192::five(),
+            [],
+        );
+
+        assert_eq!(Err(CommonError::UnknownAccount), result);
+    }
+
+    #[actix_rt::test]
     async fn test_fee_payer_resolved_as_unsecurified() {
         let account = Account::sample_mainnet();
 
