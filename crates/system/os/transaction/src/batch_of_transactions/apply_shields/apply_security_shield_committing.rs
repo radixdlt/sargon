@@ -326,7 +326,6 @@ mod tests {
             .unwrap()
             .transactions;
 
-        // let mut manifests_iter = manifests.iter();
         let lookup_map = hacky_tmp_get_entities_applying_shield();
         let _get = |entity: AccountOrPersona,
                     account: AccountAddress|
@@ -411,6 +410,7 @@ mod tests {
                     profile.clone(),
                     MockNetworkingDriver::everyones_rich(network_id),
                 );
+                
                 let applications = tx_builder
                     .build_payload_to_sign(
                         network_id,
@@ -419,6 +419,7 @@ mod tests {
                     .await
                     .unwrap()
                     .applications_with_intents;
+                
                 let signing_manager = SigningManager::new(
                     Arc::new(profile.clone()),
                     interactor,
@@ -427,6 +428,7 @@ mod tests {
                     ),
                     applications.clone(),
                 );
+                
                 let outcome = signing_manager.sign_intent_sets().await. unwrap();
                 assert_eq!(outcome.0.len(), manifest_and_payer_tuples.len());
                 let get_expected_payer_by_intent_set_id = |intent_set_id: IntentSetID| -> Account {
@@ -437,6 +439,7 @@ mod tests {
                 )
                 .unwrap()
                 };
+
                 // Assert that the the fee payer has also signed each intent
                 for signed_intent in outcome.0 {
                     let expected_account = get_expected_payer_by_intent_set_id(signed_intent.intent_set_id);
