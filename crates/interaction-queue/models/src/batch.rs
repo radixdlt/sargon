@@ -49,9 +49,7 @@ impl InteractionQueueBatch {
     /// it will be dropped from the list and returned.
     /// Also, the following interaction in line (if any) will have its status updated
     /// to `Next` with a random delay.
-    pub(crate) fn get_first_if_ready(
-        &mut self,
-    ) -> Option<InteractionQueueItem> {
+    pub fn get_first_if_ready(&mut self) -> Option<InteractionQueueItem> {
         if let Some(first) = self.interactions.first().cloned() {
             if let InteractionQueueItemStatus::Next(next) = first.status {
                 let now = Timestamp::now_utc();

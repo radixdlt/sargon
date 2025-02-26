@@ -62,11 +62,14 @@ impl InteractionQueue {
 
     /// Removes an interaction from the queue.
     pub fn remove_interaction(&mut self, interaction: InteractionQueueItem) {
-        assert!(matches!(
-            interaction.status,
-            InteractionQueueItemStatus::Success
-                | InteractionQueueItemStatus::Failure(_)
-        ), "Should never remove an interaction whose status isn't Success or Failure");
+        assert!(
+            matches!(
+                interaction.status,
+                InteractionQueueItemStatus::Success
+                    | InteractionQueueItemStatus::Failure(_)
+            ),
+            "Should never remove an interaction whose status isn't Success or Failure"
+        );
         self.items.shift_remove(&interaction);
     }
 
@@ -74,11 +77,14 @@ impl InteractionQueue {
     ///
     /// Attempts to find the given interaction in any batch, and if found, it is removed from such batch
     pub fn cancel_interaction(&mut self, interaction: InteractionQueueItem) {
-        assert!(matches!(
-            interaction.status,
-            InteractionQueueItemStatus::Next(_)
-                | InteractionQueueItemStatus::Queued
-        ), "Should never cancel an interaction whose status isn't Next or Queued");
+        assert!(
+            matches!(
+                interaction.status,
+                InteractionQueueItemStatus::Next(_)
+                    | InteractionQueueItemStatus::Queued
+            ),
+            "Should never cancel an interaction whose status isn't Next or Queued"
+        );
         for batch in self.batches.iter_mut() {
             if let Some(index) =
                 batch.interactions.iter().position(|i| i == &interaction)
@@ -133,23 +139,20 @@ mod tests {
             [batch_1.clone(), batch_2.clone()],
         );
 
-        assert_eq!(
-            sut.sorted_items(),
-            vec![
-                // First failed
-                interaction_failed,
-                // Then success
-                interaction_success,
-                // Then in progress
-                interaction_in_progress,
-                // Then next
-                interaction_b1_next,
-                interaction_b2_next,
-                // Then queued
-                interaction_b1_queued,
-                interaction_b2_queued,
-            ]
-        );
+        assert_eq!(sut.sorted_items(), vec![
+            // First failed
+            interaction_failed,
+            // Then success
+            interaction_success,
+            // Then in progress
+            interaction_in_progress,
+            // Then next
+            interaction_b1_next,
+            interaction_b2_next,
+            // Then queued
+            interaction_b1_queued,
+            interaction_b2_queued,
+        ]);
     }
 
     #[test]
@@ -280,14 +283,13 @@ mod tests {
         sut.cancel_interaction(interaction_b1_next.clone());
 
         assert_eq!(sut.batches.len(), 2);
-        assert_eq!(
-            sut.batches[0].interactions,
-            vec![interaction_b1_queued.clone()]
-        );
-        assert_eq!(
-            sut.batches[1].interactions,
-            vec![interaction_b2_next.clone(), interaction_b2_queued.clone()]
-        );
+        assert_eq!(sut.batches[0].interactions, vec![
+            interaction_b1_queued.clone()
+        ]);
+        assert_eq!(sut.batches[1].interactions, vec![
+            interaction_b2_next.clone(),
+            interaction_b2_queued.clone()
+        ]);
 
         sut.cancel_interaction(interaction_b2_queued.clone());
         assert_eq!(sut.batches.len(), 2);
