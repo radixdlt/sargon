@@ -15,6 +15,7 @@ build-info = { workspace = true }
 interactors = { workspace = true }
 sub-systems = { workspace = true }
 host-info = { workspace = true }
+manifests = { workspace = true }
 key-derivation-traits = { workspace = true }
 signing-traits = { workspace = true }
 factor-instances-provider = { workspace = true }

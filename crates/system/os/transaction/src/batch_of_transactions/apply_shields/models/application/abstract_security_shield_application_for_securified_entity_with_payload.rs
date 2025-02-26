@@ -52,3 +52,32 @@ impl<Entity, Payload>
         }
     }
 }
+
+impl<Entity, Payload: Clone>
+    AbstractSecurityShieldApplicationForSecurifiedEntityWithPayload<
+        Entity,
+        Payload,
+    >
+{
+    pub fn initiate_with_recovery_complete_with_primary(&self) -> Payload {
+        self.initiate_with_recovery_complete_with_primary.clone()
+    }
+
+    pub fn initiate_with_recovery_complete_with_confirmation(&self) -> Payload {
+        self.initiate_with_recovery_complete_with_confirmation
+            .clone()
+    }
+
+    pub fn initiate_with_recovery_delayed_completion(&self) -> Payload {
+        self.initiate_with_recovery_delayed_completion.clone()
+    }
+
+    pub fn initiate_with_primary_complete_with_confirmation(&self) -> Payload {
+        self.initiate_with_primary_complete_with_confirmation
+            .clone()
+    }
+
+    pub fn initiate_with_primary_delayed_completion(&self) -> Payload {
+        self.initiate_with_primary_delayed_completion.clone()
+    }
+}

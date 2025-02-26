@@ -760,6 +760,7 @@ dependencies = [
  "gateway-client-and-api",
  "hierarchical-deterministic",
  "http-client",
+ "manifests",
  "prelude",
  "pretty_assertions",
  "profile",
@@ -1233,12 +1234,32 @@ dependencies = [
 name = "entity-by-address"
 version = "1.2.8"
 dependencies = [
+ "account-for-display",
  "addresses",
+ "entity-for-display",
  "error",
+ "persona-for-display",
  "prelude",
  "profile-account",
  "profile-account-or-persona",
  "profile-persona",
+]
+
+[[package]]
+name = "entity-for-display"
+version = "1.2.1"
+dependencies = [
+ "account-for-display",
+ "addresses",
+ "derive_more",
+ "entity-foundation",
+ "has-sample-values",
+ "identified-vec-of",
+ "network",
+ "persona-for-display",
+ "prelude",
+ "serde",
+ "short-string",
 ]
 
 [[package]]
@@ -2821,6 +2842,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
 
 [[package]]
+name = "persona-for-display"
+version = "1.2.1"
+dependencies = [
+ "addresses",
+ "derive_more",
+ "has-sample-values",
+ "identified-vec-of",
+ "network",
+ "prelude",
+ "serde",
+ "short-string",
+]
+
+[[package]]
 name = "pin-project-lite"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3013,10 +3048,13 @@ dependencies = [
 name = "profile-account-or-persona"
 version = "1.2.8"
 dependencies = [
+ "account-for-display",
  "cap26-models",
  "derive_more",
+ "entity-for-display",
  "enum-as-inner",
  "hierarchical-deterministic",
+ "persona-for-display",
  "prelude",
  "profile-account",
  "profile-base-entity",
@@ -3130,6 +3168,7 @@ dependencies = [
  "hierarchical-deterministic",
  "host-info",
  "once_cell",
+ "persona-for-display",
  "prelude",
  "profile-base-entity",
  "profile-persona-data",
@@ -3852,6 +3891,7 @@ dependencies = [
  "interactors",
  "key-derivation-traits",
  "log",
+ "manifests",
  "prelude",
  "pretty_assertions",
  "profile",
@@ -3991,8 +4031,10 @@ dependencies = [
  "actix-rt",
  "async-std",
  "async-trait",
+ "core-collections",
  "derive_more",
  "entity-by-address",
+ "entity-for-display",
  "enum-as-inner",
  "gateway-client-and-api",
  "itertools 0.12.1",
@@ -4005,6 +4047,7 @@ dependencies = [
  "profile",
  "profile-account-or-persona",
  "profile-logic",
+ "profile-supporting-types",
  "radix-common",
  "radix-connect-models",
  "radix-engine-interface",
@@ -4016,6 +4059,7 @@ dependencies = [
  "serde_with",
  "signatures-collector",
  "signing-traits",
+ "time-utils",
  "transaction-models",
 ]
 
@@ -4500,6 +4544,7 @@ dependencies = [
  "derive_more",
  "ecc",
  "entity-by-address",
+ "entity-for-display",
  "enum-as-inner",
  "error",
  "hash",
@@ -4509,7 +4554,9 @@ dependencies = [
  "pretty_assertions",
  "profile-account",
  "profile-account-or-persona",
+ "profile-logic",
  "profile-persona",
+ "profile-security-structures",
  "radix-connect-models",
  "radix-engine-interface",
  "radix-transactions",
@@ -5022,6 +5069,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_with",
+ "short-string",
  "strum 0.26.3",
  "transaction-foundation",
 ]

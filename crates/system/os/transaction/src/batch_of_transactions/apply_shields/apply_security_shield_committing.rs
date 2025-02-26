@@ -16,7 +16,7 @@ pub trait ApplySecurityShieldCommitting: Send + Sync {
     ///
     /// We will map from `Vec<Manifest>` -> `Vec<Vec<Manifest>>` where for each entity
     /// being unsecurified the inner Vec will be unchanged - one single manifest. But
-    /// for each securified entity - which has a manifest which was create with `InitiateWithRecoveryCompleteWithConfirmation` variant, we will map to all variants of the [`RolesExercisableInTransactionManifestCombination`] enum.
+    /// for each securified entity - which has a manifest which was created with `InitiateWithRecoveryCompleteWithConfirmation` variant, we will map to all variants of the [`RolesExercisableInTransactionManifestCombination`] enum.
     ///
     /// Then we will inner map of the `Vec<Vec<Manifest>>` to
     /// perform look up of all `payer` address and get the Account from
@@ -27,7 +27,7 @@ pub trait ApplySecurityShieldCommitting: Send + Sync {
     /// Then we will build TransactionIntent for all of these - with broad enough
     /// an epoch window so that we can submit these with delay in between.
     ///
-    /// We will compile them and we will start the process of signing them. Which will be the job of `SigningManager` - many instances of `SignaturesCollector` using one Role at a time.
+    /// We will compile them, and we will start the process of signing them. Which will be the job of `SigningManager` - many instances of `SignaturesCollector` using one Role at a time.
     ///
     /// Can work with single transaction of course...
     async fn sign_and_enqueue_batch_of_transactions_applying_security_shield(
@@ -55,27 +55,43 @@ impl ApplySecurityShieldCommitting for SargonOS {
 mod tests {
     use std::{future::Future, pin::Pin};
 
+    use time_utils::now;
+
     use super::*;
 
-    #[actix_rt::test]
-    async fn test() {
+    async fn do_test(
+        act_and_assert: impl Fn(
+            Arc<SargonOS>,
+            NetworkID,
+            Vec<ManifestWithPayerByAddress>,
+        ) -> Pin<Box<dyn Future<Output = ()>>>,
+    ) {
         let network_id = NetworkID::Mainnet;
         let mock_networking_driver =
             MockNetworkingDriver::everyones_rich(network_id);
 
-        let os =
-            SargonOS::boot_test_with_networking_driver(mock_networking_driver)
-                .await
-                .unwrap();
+        let bdfs_mnemonic = MnemonicWithPassphrase::sample_device();
+        let os = SargonOS::boot_test_with_networking_driver_and_bdfs(
+            mock_networking_driver,
+            Some(bdfs_mnemonic),
+        )
+        .await
+        .unwrap();
+
         let bdfs = os.main_bdfs().unwrap();
+        println!("🔮 bdfs: {:?}", bdfs.factor_source_id());
         let ledger = FactorSource::sample_at(1);
-        let arculus = FactorSource::sample_at(3);
         let password = FactorSource::sample_at(5);
         let off_device_mnemonic = FactorSource::sample_at(7);
-        os.add_factor_source(ledger.clone()).await.unwrap();
-        os.add_factor_source(arculus.clone()).await.unwrap();
-        os.add_factor_source(password.clone()).await.unwrap();
-        os.add_factor_source(off_device_mnemonic.clone())
+
+        for fs in FactorSource::sample_all().into_iter() {
+            if fs.factor_source_id() == bdfs.factor_source_id() {
+                continue;
+            }
+            os.add_factor_source(fs).await.unwrap();
+        }
+
+        os.set_main_factor_source(bdfs.factor_source_id())
             .await
             .unwrap();
 
@@ -130,30 +146,145 @@ mod tests {
             .await
             .unwrap();
 
+        let id_stepper = Arc::new(IDStepper::<Uuid>::new());
+        let shield_ids_from_shield_instances = |shield_instance: SecurityStructureOfFactorInstances| -> SecurityStructureOfFactorSourceIDs {
+            let id = unsafe { id_stepper.next() };
+            let shield_id = SecurityStructureID::from(id);
+            let metadata = SecurityStructureMetadata::with_details(
+                shield_id,
+                DisplayName::sample(),
+                now(),
+                now(),
+                SecurityStructureFlags::new(),
+            );
+            SecurityStructureOfFactorSourceIds::with_metadata(
+                metadata,
+                shield_instance.matrix_of_factors.clone().into(),
+                shield_instance
+                    .authentication_signing_factor_instance
+                    .factor_source_id().into(),
+            )
+        };
+
+        // Not enough to only save account, we also need to save the SecurityStructureOfFactorSourceIds
+        // for some of the accounts which were instantiated with sample values. Alas, some of them might
+        // have conflicting SecurityShieldIDs so we will replace them with unique, deterministic ones.
+        let add_account =
+            async |account: Account| match account.security_state() {
+                EntitySecurityState::Unsecured { .. } => {
+                    os.add_account(account.clone()).await.unwrap();
+                }
+                EntitySecurityState::Securified { value } => {
+                    println!(
+                        "🔮 account: {:?}, address: {:?}, keys: {:#?}",
+                        account.display_name.to_string(),
+                        account.address.to_string(),
+                        value
+                            .security_structure
+                            .matrix_of_factors
+                            .all_factors()
+                            .into_iter()
+                            .map(|f| f
+                                .badge
+                                .as_virtual()
+                                .unwrap()
+                                .as_hierarchical_deterministic()
+                                .public_key
+                                .to_string())
+                            .collect_vec()
+                    );
+                    let security_structure_of_factor_source_ids =
+                        shield_ids_from_shield_instances(
+                            value.security_structure.clone(),
+                        );
+                    let mut account = account;
+                    let mut secstate = value;
+                    secstate.security_structure.security_structure_id =
+                        security_structure_of_factor_source_ids.id();
+                    account.set_security_state_unchecked(
+                        EntitySecurityState::Securified { value: secstate },
+                    );
+                    os.add_security_structure_of_factor_source_ids(
+                        &security_structure_of_factor_source_ids,
+                    )
+                    .await
+                    .unwrap();
+                    os.add_account(account.clone()).await.unwrap();
+                }
+            };
+
+        // Not enough to only save persona, we also need to save the SecurityStructureOfFactorSourceIds
+        // for some of the personas which were instantiated with sample values. Alas, some of them might
+        // have conflicting SecurityShieldIDs so we will replace them with unique, deterministic ones.
+        let add_persona =
+            async |persona: Persona| match persona.security_state() {
+                EntitySecurityState::Unsecured { .. } => {
+                    os.add_persona(persona.clone()).await.unwrap();
+                }
+                EntitySecurityState::Securified { value } => {
+                    println!(
+                        "🔮 persona: {:?}, address: {:?}, keys: {:#?}",
+                        persona.display_name.to_string(),
+                        persona.address.to_string(),
+                        value
+                            .security_structure
+                            .matrix_of_factors
+                            .all_factors()
+                            .into_iter()
+                            .map(|f| f
+                                .badge
+                                .as_virtual()
+                                .unwrap()
+                                .as_hierarchical_deterministic()
+                                .public_key
+                                .to_string())
+                            .collect_vec()
+                    );
+                    let security_structure_of_factor_source_ids =
+                        shield_ids_from_shield_instances(
+                            value.security_structure.clone(),
+                        );
+                    let mut persona = persona;
+                    let mut secstate = value;
+                    secstate.security_structure.security_structure_id =
+                        security_structure_of_factor_source_ids.id();
+                    persona.set_security_state_unchecked(
+                        EntitySecurityState::Securified { value: secstate },
+                    );
+                    os.add_security_structure_of_factor_source_ids(
+                        &security_structure_of_factor_source_ids,
+                    )
+                    .await
+                    .unwrap();
+
+                    os.add_persona(persona.clone()).await.unwrap();
+                }
+            };
+
         // Securified Account 2
         let david = Account::sample_at(3);
-        os.add_account(david.clone()).await.unwrap();
+        add_account(david.clone()).await;
 
         // Securified Account 3
         let emily = Account::sample_at(4);
-        os.add_account(emily.clone()).await.unwrap();
+        add_account(emily.clone()).await;
 
         // Securified Account 4
         let frank = Account::sample_at(5);
-        os.add_account(frank.clone()).await.unwrap();
+        add_account(frank.clone()).await;
 
         // Securified Account 5
         let mut paige = Account::sample_at(6);
         paige.display_name = DisplayName::new("Paige").unwrap();
-        os.add_account(paige.clone()).await.unwrap();
+        add_account(paige.clone()).await;
 
         // Securified Persona
         let ziggy = Persona::sample_at(2);
-        os.add_persona(ziggy.clone()).await.unwrap();
+        add_persona(ziggy.clone()).await;
 
         // Securified Persona 2
         let superman = Persona::sample_at(4);
-        os.add_persona(superman.clone()).await.unwrap();
+        add_persona(superman.clone()).await;
 
         // Unsecurified Persona
         let satoshi = os
@@ -195,7 +326,6 @@ mod tests {
             .unwrap()
             .transactions;
 
-        // let mut manifests_iter = manifests.iter();
         let lookup_map = hacky_tmp_get_entities_applying_shield();
         let _get = |entity: AccountOrPersona,
                     account: AccountAddress|
@@ -254,14 +384,90 @@ mod tests {
 
         assert_eq!(manifest_and_payer_tuples.len(), manifests.len());
 
-        let committer = ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+        act_and_assert(os, network_id, manifest_and_payer_tuples).await;
+    }
 
-        let txids = committer
-            .commit(network_id, manifest_and_payer_tuples)
-            .await
-            .unwrap();
+    #[actix_rt::test]
+    async fn test_signing_manager() {
+        do_test(|os, network_id, manifest_and_payer_tuples| {
+            Box::pin(async move {
+                struct Interactor;
+                #[async_trait::async_trait]
+                impl SignInteractor<TransactionIntent> for Interactor {
+                    async fn sign(
+                        &self,
+                        request: SignRequest<TransactionIntent>,
+                    ) -> Result<SignResponse<TransactionIntentHash>>
+                    {
+                        TestSignInteractor::new(SimulatedUser::prudent_no_fail())
+                            .sign(request)
+                            .await
+                    }
+                }
+                let interactor = Arc::new(Interactor);
+                let profile = os.profile().unwrap();
+                let tx_builder = ApplyShieldTransactionsBuilderImpl::with(
+                    profile.clone(),
+                    MockNetworkingDriver::everyones_rich(network_id),
+                );
+                
+                let applications = tx_builder
+                    .build_payload_to_sign(
+                        network_id,
+                        manifest_and_payer_tuples.clone(),
+                    )
+                    .await
+                    .unwrap()
+                    .applications_with_intents;
+                
+                let signing_manager = SigningManager::new(
+                    Arc::new(profile.clone()),
+                    interactor,
+                    SaveIntentsToConfirmAfterDelayClient::new(
+                        EphemeralUnsafeStorage::new(),
+                    ),
+                    applications.clone(),
+                );
+                
+                let outcome = signing_manager.sign_intent_sets().await. unwrap();
+                assert_eq!(outcome.0.len(), manifest_and_payer_tuples.len());
+                let get_expected_payer_by_intent_set_id = |intent_set_id: IntentSetID| -> Account {
+                    applications
+                    .iter()
+                    .find(|app| app.intent_set_id == intent_set_id)
+                    .map(|app| app.content.paying_account().account()
+                )
+                .unwrap()
+                };
 
-        assert_eq!(txids.len(), addresses.len());
+                // Assert that the the fee payer has also signed each intent
+                for signed_intent in outcome.0 {
+                    let expected_account = get_expected_payer_by_intent_set_id(signed_intent.intent_set_id);
+                    assert!(!signed_intent
+                    .intent_signatures
+                    .iter()
+                    .filter(|sig| sig.owner == AddressOfAccountOrPersona::from(expected_account.address)).collect_vec().is_empty()); // 2 if the payer is also the entity applying the shield
+
+                }
+            })
+        })
+        .await
+    }
+
+    #[actix_rt::test]
+    async fn test_committer() {
+        do_test(|os, network_id, manifest_and_payer_tuples| {
+            Box::pin(async move {
+                let committer =
+                    ApplyShieldTransactionsCommitterImpl::new(&os).unwrap();
+                let txids = committer
+                    .commit(network_id, manifest_and_payer_tuples.clone())
+                    .await
+                    .unwrap();
+                assert_eq!(txids.len(), manifest_and_payer_tuples.len());
+            })
+        })
+        .await
     }
 
     #[actix_rt::test]

@@ -73,25 +73,105 @@ impl<S: Signable> Petitions<S> {
             txid_to_petition: RwLock::new(txid_to_petition),
         }
     }
+}
 
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct FailedTransactions<ID: SignableID> {
+    /// Collection of transactions which might be signed or not.
+    pub(super) transactions: IndexMap<ID, PetitionTransactionOutcome<ID>>,
+}
+impl<ID: SignableID + HasSampleValues> HasSampleValues
+    for FailedTransactions<ID>
+{
+    fn sample() -> Self {
+        Self {
+            transactions: [
+                PetitionTransactionOutcome::<ID>::sample(),
+                PetitionTransactionOutcome::<ID>::sample_other(),
+            ]
+            .into_iter()
+            .map(|p| (p.signable_id.clone(), p))
+            .collect(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            transactions: [PetitionTransactionOutcome::<ID>::sample_other()]
+                .into_iter()
+                .map(|p| (p.signable_id.clone(), p))
+                .collect(),
+        }
+    }
+}
+
+impl<ID: SignableID> FailedTransactions<ID> {
+    pub fn empty() -> Self {
+        Self {
+            transactions: IndexMap::new(),
+        }
+    }
+
+    pub fn outcomes(&self) -> Vec<PetitionTransactionOutcome<ID>> {
+        self.transactions.values().cloned().collect_vec()
+    }
+
+    /// Returns all the signatures for all the transactions.
+    pub(crate) fn all_signatures(&self) -> IndexSet<HDSignature<ID>> {
+        self.transactions
+            .values()
+            .flat_map(|v| v.signatures.iter())
+            .cloned()
+            .collect()
+    }
+
+    pub(crate) fn transactions(&self) -> Vec<SignedTransaction<ID>> {
+        self.transactions
+            .clone()
+            .into_iter()
+            .map(|(k, v)| SignedTransaction::new(k, v.signatures))
+            .collect_vec()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.transactions.is_empty()
+    }
+
+    pub fn failure_hashes(&self) -> IndexSet<ID> {
+        self.transactions.keys().cloned().collect::<IndexSet<_>>()
+    }
+
+    pub(crate) fn add_outcome(
+        &mut self,
+        id: ID,
+        outcome: PetitionTransactionOutcome<ID>,
+    ) {
+        assert!(!outcome.transaction_valid);
+        self.transactions.insert(id, outcome);
+    }
+}
+
+impl<S: Signable> Petitions<S> {
     pub(crate) fn outcome(&self) -> SignaturesOutcome<S::ID> {
         let txid_to_petition = self
             .txid_to_petition
             .read()
             .expect("Petitions lock should not have been poisoned.");
-        let mut failed_transactions = MaybeSignedTransactions::empty();
+        let mut failed_transactions = FailedTransactions::empty();
         let mut successful_transactions = MaybeSignedTransactions::empty();
         let mut neglected_factor_sources = IndexSet::<NeglectedFactor>::new();
-        for (intent_hash, petition_of_transaction) in txid_to_petition.clone() {
-            let outcome = petition_of_transaction.outcome();
-            let signatures = outcome.signatures;
+
+        for (intent_hash, petition_of_transaction) in txid_to_petition.iter() {
+            let outcome = petition_of_transaction.clone().outcome();
+            let intent_hash = intent_hash.clone();
+            neglected_factor_sources.extend(outcome.neglected_factors());
 
             if outcome.transaction_valid {
-                successful_transactions.add_signatures(intent_hash, signatures);
+                successful_transactions
+                    .add_signatures(intent_hash, outcome.signatures);
             } else {
-                failed_transactions.add_signatures(intent_hash, signatures);
+                failed_transactions.add_outcome(intent_hash, outcome);
             }
-            neglected_factor_sources.extend(outcome.neglected_factors)
         }
 
         SignaturesOutcome::new(
@@ -101,12 +181,12 @@ impl<S: Signable> Petitions<S> {
         )
     }
 
-    pub(crate) fn each_petition<T, U>(
+    pub(crate) fn try_each_petition<T, U>(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
         each: impl Fn(&PetitionForTransaction<S>) -> T,
-        combine: impl Fn(Vec<T>) -> U,
-    ) -> U {
+        combine: impl Fn(Vec<T>) -> Result<U>,
+    ) -> Result<U> {
         let for_each = factor_source_ids
             .clone()
             .iter()
@@ -126,19 +206,36 @@ impl<S: Signable> Petitions<S> {
         combine(for_each)
     }
 
-    pub(crate) fn invalid_transactions_if_neglected_factors(
+    pub(crate) fn each_petition<T, U>(
         &self,
         factor_source_ids: IndexSet<FactorSourceIDFromHash>,
-    ) -> IndexSet<InvalidTransactionIfNeglected<S::ID>> {
-        self.each_petition(
+        each: impl Fn(&PetitionForTransaction<S>) -> T,
+        combine: impl Fn(Vec<T>) -> U,
+    ) -> U {
+        self.try_each_petition(factor_source_ids, each, |x| {
+            Ok(combine(x))
+        })
+        .expect("Should not have failed. You should switch to `try_each_petition` if you expect failures.")
+    }
+
+    pub(crate) fn invalid_transactions_if_neglected_factors(
+        &self,
+        cross_role_skip_outcome_analyzer: Arc<
+            dyn CrossRoleSkipOutcomeAnalyzer<S>,
+        >,
+        factor_source_ids: IndexSet<FactorSourceIDFromHash>,
+    ) -> Result<IndexSet<InvalidTransactionIfNeglected<S::ID>>> {
+        let vecs = self.try_each_petition(
             factor_source_ids.clone(),
             |p| {
                 p.invalid_transaction_if_neglected_factors(
+                    cross_role_skip_outcome_analyzer.clone(),
                     factor_source_ids.clone(),
                 )
             },
-            |i| i.into_iter().flatten().collect(),
-        )
+            |i| i.into_iter().collect::<Result<Vec<_>>>(),
+        )?;
+        Ok(vecs.into_iter().flatten().collect::<IndexSet<_>>())
     }
 
     pub(crate) fn should_neglect_factors_due_to_irrelevant(

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Debug, PartialEq, Eq, EnumAsInner)]
+#[derive(Debug, Clone, PartialEq, Eq, EnumAsInner)]
 pub enum SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
     Account(
         SecurityShieldApplicationForUnsecurifiedAccountWithTransactionIntent,
@@ -8,6 +8,28 @@ pub enum SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
     Persona(
         SecurityShieldApplicationForUnsecurifiedPersonaWithTransactionIntent,
     ),
+}
+
+impl SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {
+    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
+        match self {
+            Self::Account(a) => a.paying_account(),
+            Self::Persona(p) => p.paying_account(),
+        }
+    }
+    pub fn entity_applying_shield(&self) -> AnyUnsecurifiedEntity {
+        match self {
+            Self::Account(a) => a.entity_applying_shield(),
+            Self::Persona(p) => p.entity_applying_shield(),
+        }
+    }
+
+    pub fn transaction_intent(&self) -> TransactionIntent {
+        match self {
+            Self::Account(a) => a.transaction_intent(),
+            Self::Persona(p) => p.transaction_intent(),
+        }
+    }
 }
 
 impl SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent {

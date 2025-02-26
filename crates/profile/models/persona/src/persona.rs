@@ -65,6 +65,12 @@ impl Persona {
     }
 }
 
+impl From<Persona> for PersonaForDisplay {
+    fn from(value: Persona) -> Self {
+        Self::new(value.address, value.display_name)
+    }
+}
+
 impl Deref for Persona {
     type Target = BaseEntity<IdentityAddress>;
 
@@ -106,7 +112,7 @@ impl HasSecurityState for Persona {
     }
 }
 
-impl IsBaseEntity for Persona {
+impl IsBaseBaseEntity for Persona {
     type Address = IdentityAddress;
 
     fn address(&self) -> Self::Address {

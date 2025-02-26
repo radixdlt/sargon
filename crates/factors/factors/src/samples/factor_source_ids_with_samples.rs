@@ -94,8 +94,9 @@ impl FactorSourceIDFromHash {
     }
 
     pub fn sample_associated_mnemonic(&self) -> MnemonicWithPassphrase {
-        self.maybe_sample_associated_mnemonic()
-            .expect("Sample mnemonic with passphrase for id {} not found")
+        self.maybe_sample_associated_mnemonic().unwrap_or_else(|| {
+            panic!("Sample mnemonic with passphrase for id {} not found", self)
+        })
     }
 }
 

@@ -224,7 +224,7 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
+        self.create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(name).await.map(|(x, _)| {      println!("🔮 account: {:?}, address: {:?}, veci: {:#?}", x.display_name.to_string(), x.address.to_string(), x.security_state.as_unsecured().unwrap().transaction_signing);x})
     }
 
     pub async fn create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(

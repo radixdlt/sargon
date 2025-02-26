@@ -37,12 +37,6 @@ impl<ID: SignableID> MaybeSignedTransactions<ID> {
         Self::new(IndexMap::new())
     }
 
-    /// Returns whether or not this `MaybeSignedTransactions` contains
-    /// any transactions.
-    pub(crate) fn is_empty(&self) -> bool {
-        self.transactions.is_empty()
-    }
-
     pub(crate) fn transactions(&self) -> Vec<SignedTransaction<ID>> {
         self.transactions
             .clone()
@@ -279,7 +273,7 @@ mod tests {
         let mut sut = SUT::sample();
         let tx = TransactionIntentHash::sample();
         let input = HDSignatureInput::new(
-            tx.clone(),
+            tx,
             OwnedFactorInstance::new(
                 AddressOfAccountOrPersona::sample(),
                 HierarchicalDeterministicFactorInstance::sample_mainnet_tx_account(
@@ -329,7 +323,7 @@ mod tests {
         let mut sut = SUT::empty();
         let factor_instance = OwnedFactorInstance::sample();
         let tx = TransactionIntentHash::sample();
-        let input = HDSignatureInput::new(tx.clone(), factor_instance.clone());
+        let input = HDSignatureInput::new(tx, factor_instance.clone());
         let sig_a = HDSignature {
             input: input.clone(),
             signature: SignatureWithPublicKey::sample(),

@@ -2,9 +2,25 @@ use crate::prelude::*;
 
 pub type AddressOfPayerOfShieldApplication = AddressOfAccessControllerOrAccount;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SecurityShieldApplicationWithTransactionIntents {
+    pub content: SecurityShieldApplicationWithTransactionIntentsContent,
+    pub(crate) intent_set_id: IntentSetID,
+}
+impl SecurityShieldApplicationWithTransactionIntents {
+    pub fn new(
+        content: SecurityShieldApplicationWithTransactionIntentsContent,
+    ) -> Self {
+        Self {
+            content,
+            intent_set_id: IntentSetID::new(),
+        }
+    }
+}
+
 #[allow(clippy::large_enum_variant)]
-#[derive(Debug, PartialEq, Eq, EnumAsInner)]
-pub enum SecurityShieldApplicationWithTransactionIntents {
+#[derive(Debug, Clone, PartialEq, Eq, EnumAsInner)]
+pub enum SecurityShieldApplicationWithTransactionIntentsContent {
     /// Application for an unsecurified entity.
     ForUnsecurifiedEntity(
         SecurityShieldApplicationForUnsecurifiedEntityWithTransactionIntent,
@@ -14,6 +30,18 @@ pub enum SecurityShieldApplicationWithTransactionIntents {
     ForSecurifiedEntity(
         SecurityShieldApplicationForSecurifiedEntityWithTransactionIntents,
     ),
+}
+impl SecurityShieldApplicationWithTransactionIntentsContent {
+    pub fn paying_account(&self) -> ApplicationInputPayingAccount {
+        match self {
+            Self::ForUnsecurifiedEntity(application) => {
+                application.paying_account()
+            }
+            Self::ForSecurifiedEntity(application) => {
+                application.paying_account()
+            }
+        }
+    }
 }
 
 impl SecurityShieldApplication {
@@ -35,9 +63,7 @@ impl SecurityShieldApplication {
 /// Essentially holds a manifest for exercising the primary role,
 /// to create an AccessController with factors specified in the shield.
 #[derive(Clone, PartialEq, Eq, derive_more::Debug)]
-pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<
-    E: IsBaseEntity + std::hash::Hash + Eq + Clone,
-> {
+pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<E: IsEntity> {
     #[allow(dead_code)]
     #[doc(hidden)]
     #[debug(skip)]
@@ -64,9 +90,10 @@ pub struct AbstractSecurityShieldApplicationForUnsecurifiedEntity<
     pub modified_manifest: TransactionManifest,
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
-    AbstractSecurityShieldApplicationForUnsecurifiedEntity<E>
-{
+impl<E: IsEntity> AbstractSecurityShieldApplicationForUnsecurifiedEntity<E> {
+    pub fn entity_applying_shield(&self) -> AbstractUnsecurifiedEntity<E> {
+        self.entity_applying_shield.clone()
+    }
     pub fn fee_tip_percentage(&self) -> Option<u16> {
         self.fee_tip_percentage
     }
@@ -100,7 +127,7 @@ pub(crate) trait HasFeeTipPercentage {
 /// pay for the topping up up the AccessControllers XRD vault.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<
-    E: IsBaseEntity + std::hash::Hash + Eq + Clone,
+    E: IsEntity,
 > {
     /// The entity to apply the shield for.
     pub entity: AbstractSecurifiedEntity<E>,
@@ -112,7 +139,7 @@ pub struct SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<
     pub account_topping_up_xrd_vault_of_access_controller:
         ApplicationInputPayingAccount,
 }
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
+impl<E: IsEntity>
     SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<E>
 {
     pub fn new(
@@ -128,7 +155,7 @@ impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone>
     }
 }
 
-impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasFeeTipPercentage
+impl<E: IsEntity> HasFeeTipPercentage
     for SecurityShieldApplicationForSecurifiedEntityWithPayingAccount<E>
 {
     fn fee_tip_percentage(&self) -> Option<u16> {

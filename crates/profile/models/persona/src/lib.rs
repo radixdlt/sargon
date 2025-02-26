@@ -14,6 +14,7 @@ pub mod prelude {
     pub(crate) use has_sample_values::prelude::*;
     pub(crate) use hierarchical_deterministic::prelude::*;
     pub(crate) use host_info::prelude::*;
+    pub(crate) use persona_for_display::prelude::*;
     pub(crate) use profile_base_entity::prelude::*;
     pub(crate) use profile_persona_data::prelude::*;
     pub(crate) use profile_security_structures::prelude::*;

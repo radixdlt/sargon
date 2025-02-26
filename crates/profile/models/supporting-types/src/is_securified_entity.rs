@@ -3,7 +3,7 @@ use std::hash::Hash;
 use crate::prelude::*;
 
 pub trait IsSecurifiedEntity: Hash + Eq + Clone + IsNetworkAware {
-    type BaseEntity: IsBaseEntity + std::hash::Hash + Eq;
+    type BaseEntity: IsBaseBaseEntity + std::hash::Hash + Eq;
 
     fn securified_entity_control(&self) -> SecuredEntityControl;
 
