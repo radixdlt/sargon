@@ -117,7 +117,7 @@ impl PasswordMnemonicBuilder {
     /// Returns the `FactorSourceID` from the mnemonic
     /// Panics if the mnemonic wasn't yet created
     pub fn get_factor_source_id(&self) -> FactorSourceID {
-        FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
+        FactorSourceID::from(FactorSourceIDFromHash::new_for_password(
             &self.get_mnemonic_with_passphrase(),
         ))
     }
@@ -212,7 +212,7 @@ mod tests {
         let fsid = sut.get_factor_source_id();
         pretty_assertions::assert_eq!(
             fsid,
-            FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
+            FactorSourceID::from(FactorSourceIDFromHash::new_for_password(
                 &MnemonicWithPassphrase::sample()
             ))
         );

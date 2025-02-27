@@ -95,17 +95,23 @@ mod tests {
                 "securepassword123".to_owned(),
             )
             .unwrap();
+        let internal_mnemonic = sargon::MnemonicWithPassphrase::new(sargon::Mnemonic::from_phrase(
+            "slice divert oppose salon poverty chalk educate twelve essence celery chuckle park sail clutch clutch teach video eyebrow skill renew random attend guide quarter"
+        ).unwrap());
 
         pretty_assertions::assert_eq!(
             sut.clone().build(),
-            sargon::MnemonicWithPassphrase::new(sargon::Mnemonic::from_phrase(
-            "slice divert oppose salon poverty chalk educate twelve essence celery chuckle park sail clutch clutch teach video eyebrow skill renew random attend guide quarter"
-            ))
+            internal_mnemonic.clone().into()
         );
 
         pretty_assertions::assert_eq!(
             sut.clone().get_factor_source_id(),
-            FactorSourceID::sample_password()
+            sargon::FactorSourceID::Hash {
+                value: sargon::FactorSourceIDFromHash::new_for_password(
+                    &internal_mnemonic
+                )
+            }
+            .into()
         );
     }
 }
