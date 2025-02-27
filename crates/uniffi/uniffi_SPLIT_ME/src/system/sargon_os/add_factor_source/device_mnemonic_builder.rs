@@ -18,7 +18,7 @@ pub enum DeviceMnemonicBuildOutcome {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
     },
     /// The mnemonic words were unconfirmed
-    Unconfirmed { indices_in_mnemonic: Vec<u8> },
+    Unconfirmed { indices_in_mnemonic: Vec<u16> },
 }
 
 impl From<InternalDeviceMnemonicBuildOutcome> for DeviceMnemonicBuildOutcome {
@@ -34,7 +34,7 @@ impl From<InternalDeviceMnemonicBuildOutcome> for DeviceMnemonicBuildOutcome {
             } => DeviceMnemonicBuildOutcome::Unconfirmed {
                 indices_in_mnemonic: indices_in_mnemonic
                     .into_iter()
-                    .map(|i| i as u8)
+                    .map(|i| i as u16)
                     .sorted()
                     .collect::<Vec<_>>(),
             },
@@ -100,12 +100,12 @@ impl DeviceMnemonicBuilder {
     /// Always includes the last mnemonic word index.
     pub fn get_indices_in_mnemonic_of_words_to_confirm(
         self: Arc<Self>,
-    ) -> Vec<u8> {
+    ) -> Vec<u16> {
         self.get(|builder| {
             builder
                 .get_indices_in_mnemonic_of_words_to_confirm()
                 .into_iter()
-                .map(|i| i as u8)
+                .map(|i| i as u16)
                 .collect::<Vec<_>>()
         })
     }
@@ -147,7 +147,7 @@ impl DeviceMnemonicBuilder {
     /// Returns unconfirmed words if not all of the words were confirmed or the `MnemonicWithPassphrase`.
     pub fn build(
         self: Arc<Self>,
-        words_to_confirm: HashMap<u8, String>,
+        words_to_confirm: HashMap<u16, String>,
     ) -> DeviceMnemonicBuildOutcome {
         self.wrapped
             .build(
