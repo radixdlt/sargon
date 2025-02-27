@@ -951,6 +951,12 @@ pub enum CommonError {
 
     #[error("Factor source already exists")]
     FactorSourceAlreadyExists = 10267,
+
+    #[error("Password too short")]
+    PasswordTooShort = 10268,
+
+    #[error("Passwords do not match")]
+    PasswordsDoNotMatch = 10269,
 }
 
 impl CommonError {

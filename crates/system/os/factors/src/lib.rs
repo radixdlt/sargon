@@ -16,6 +16,7 @@ pub mod prelude {
 
     pub use addresses::prelude::*;
     pub use clients::prelude::*;
+    pub use encryption::prelude::*;
     pub use factor_instances_provider::prelude::*;
     pub use key_derivation_traits::prelude::*;
     pub use manifests::prelude::*;

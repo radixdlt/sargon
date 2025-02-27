@@ -128,6 +128,8 @@ pub enum CommonError {
     InvalidMnemonicWords {
         indices_in_mnemonic: Vec<u8>,
     },
+    PasswordTooShort,
+    PasswordsDoNotMatch,
 }
 
 #[uniffi::export]

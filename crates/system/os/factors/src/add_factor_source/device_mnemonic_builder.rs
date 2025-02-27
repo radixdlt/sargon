@@ -48,12 +48,14 @@ impl std::hash::Hash for DeviceMnemonicBuilder {
 
 impl HasSampleValues for DeviceMnemonicBuilder {
     fn sample() -> Self {
-        Self::with_mnemonic_with_passphrase(MnemonicWithPassphrase::sample())
+        Self::with_mnemonic_with_passphrase(
+            MnemonicWithPassphrase::sample_device(),
+        )
     }
 
     fn sample_other() -> Self {
         Self::with_mnemonic_with_passphrase(
-            MnemonicWithPassphrase::sample_other(),
+            MnemonicWithPassphrase::sample_device_other(),
         )
     }
 }
@@ -80,7 +82,7 @@ impl DeviceMnemonicBuilder {
 // ==== GET / READ ====
 // ====================
 impl DeviceMnemonicBuilder {
-    /// Returns the words of the mnemonic with passphrase.
+    /// Returns the words of the mnemonic.
     pub fn get_words(&self) -> Vec<BIP39Word> {
         self.get_mnemonic_with_passphrase().mnemonic.words
     }
@@ -91,7 +93,7 @@ impl DeviceMnemonicBuilder {
             .read()
             .unwrap()
             .clone()
-            .expect("Mnemonic with passphrase should be created first")
+            .expect("Mnemonic should be created first")
     }
 }
 
@@ -111,28 +113,8 @@ impl DeviceMnemonicBuilder {
         &self,
         words: Vec<String>,
     ) -> Result<&Self> {
-        let (bip39_words, invalid_words): (Vec<_>, Vec<_>) = words
-            .iter()
-            .enumerate()
-            .map(|(index, w)| (index, BIP39Word::english(w)))
-            .partition(|(_, word)| word.is_ok());
-
-        let mnemonic_indices_of_invalid_words = invalid_words
-            .into_iter()
-            .map(|(index, _)| index)
-            .collect::<Vec<_>>();
-
-        if !mnemonic_indices_of_invalid_words.is_empty() {
-            return Err(CommonError::InvalidMnemonicWords {
-                indices_in_mnemonic: mnemonic_indices_of_invalid_words,
-            });
-        }
-
-        let bip39_words = bip39_words
-            .into_iter()
-            .map(|(_, word)| word.unwrap())
-            .collect::<Vec<BIP39Word>>();
-        let mnemonic = Mnemonic::from_words(bip39_words)?;
+        let mnemonic =
+            CommonMnemonicBuilder::create_mnemonic_from_words(words)?;
         self.set_mnemonic_with_passphrase(mnemonic);
         Ok(self)
     }
@@ -174,8 +156,8 @@ impl DeviceMnemonicBuilder {
             .collect::<IndexSet<_>>()
     }
 
-    /// Returns the `FactorSourceID` from the mnemonic with passphrase
-    /// Panics if the mnemonic with passphrase wasn't yet created
+    /// Returns the `FactorSourceID` from the mnemonic
+    /// Panics if the mnemonic wasn't yet created
     pub fn get_factor_source_id(&self) -> FactorSourceID {
         FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
             &self.get_mnemonic_with_passphrase(),
@@ -266,7 +248,7 @@ mod tests {
     }
 
     #[test]
-    fn generate_new_mnemonic_with_passphrase() {
+    fn generate_new_mnemonic() {
         let sut = SUT::default();
         pretty_assertions::assert_eq!(
             sut.mnemonic_with_passphrase.read().unwrap().clone(),
@@ -277,7 +259,7 @@ mod tests {
     }
 
     #[test]
-    fn create_mnemonic_with_passphrase_from_words_error() {
+    fn create_mnemonic_from_words_error() {
         let sut = SUT::default();
 
         let result = sut.create_mnemonic_from_words(vec![
@@ -301,7 +283,7 @@ mod tests {
     }
 
     #[test]
-    fn create_mnemonic_with_passphrase_from_words() {
+    fn create_mnemonic_from_words() {
         let sut = SUT::default();
         let mnemonic = Mnemonic::sample();
         pretty_assertions::assert_eq!(
@@ -336,9 +318,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(
-        expected = "Mnemonic with passphrase should be created first"
-    )]
+    #[should_panic(expected = "Mnemonic should be created first")]
     fn get_factor_source_id_panics_if_mnemonic_not_created() {
         let sut = SUT::default();
         let _ = sut.get_factor_source_id();

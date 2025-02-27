@@ -551,6 +551,10 @@ impl FactorSourceID {
     pub fn sample_password_other() -> Self {
         Self::new(sargon::FactorSourceID::sample_password_other())
     }
+
+    pub fn sample_off_device() -> Self {
+        Self::new(sargon::FactorSourceID::sample_off_device())
+    }
 }
 
 impl FactorSource {
