@@ -19,6 +19,7 @@ key-derivation-traits = { workspace = true }
 radix-connect = { workspace = true }
 transaction-models = { workspace = true }
 manifests = { workspace = true }
+encryption = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None

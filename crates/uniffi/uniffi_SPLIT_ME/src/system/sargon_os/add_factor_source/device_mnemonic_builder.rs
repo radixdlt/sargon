@@ -89,7 +89,7 @@ impl DeviceMnemonicBuilder {
 // ====================
 #[uniffi::export]
 impl DeviceMnemonicBuilder {
-    /// Returns the words of the mnemonic with passphrase.
+    /// Returns the words of the mnemonic.
     pub fn get_words(self: Arc<Self>) -> Vec<BIP39Word> {
         self.get(|builder| {
             builder.get_words().into_iter().map(Into::into).collect()
@@ -110,8 +110,8 @@ impl DeviceMnemonicBuilder {
         })
     }
 
-    /// Returns the `FactorSourceID` from the mnemonic with passphrase
-    /// Panics if the mnemonic with passphrase wasn't yet created
+    /// Returns the `FactorSourceID` from the mnemonic
+    /// Panics if the mnemonic wasn't yet created
     pub fn get_factor_source_id(self: Arc<Self>) -> FactorSourceID {
         self.get(|builder| builder.get_factor_source_id().into())
     }

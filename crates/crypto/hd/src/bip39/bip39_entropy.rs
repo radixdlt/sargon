@@ -125,6 +125,27 @@ impl Mnemonic {
             generate_byte_array::<32>(),
         )))
     }
+
+    pub fn generate_new_with_word_count(word_count: BIP39WordCount) -> Self {
+        let entropy = match word_count {
+            BIP39WordCount::TwentyFour => BIP39Entropy::from(
+                Entropy32Bytes::new(generate_byte_array::<32>()),
+            ),
+            BIP39WordCount::TwentyOne => BIP39Entropy::from(
+                Entropy28Bytes::new(generate_byte_array::<28>()),
+            ),
+            BIP39WordCount::Eighteen => BIP39Entropy::from(
+                Entropy24Bytes::new(generate_byte_array::<24>()),
+            ),
+            BIP39WordCount::Fifteen => BIP39Entropy::from(Entropy20Bytes::new(
+                generate_byte_array::<20>(),
+            )),
+            BIP39WordCount::Twelve => BIP39Entropy::from(Entropy16Bytes::new(
+                generate_byte_array::<16>(),
+            )),
+        };
+        Self::from_entropy(entropy)
+    }
 }
 
 #[cfg(test)]

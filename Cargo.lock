@@ -3918,6 +3918,7 @@ dependencies = [
  "clients",
  "derive_more",
  "drivers",
+ "encryption",
  "enum-as-inner",
  "error",
  "factor-instances-provider",
