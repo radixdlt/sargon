@@ -503,3 +503,6 @@ See Android example app in [examples/android](examples/android)
 Import the `/jvm` directory in Android Studio and run the `android` configuration.
 
 [vscodeext]: https://github.com/radixdlt/radix-transaction-manifest-extension
+
+# Acknowledgements
+Sargon was originally created by Alexander Cyon @Sajjon in his own free time. Radix (RDX Works) then chose to adopt his work and use it in the Radix Wallet, migrated to this repo. You can find Alexanders original repository (pre-dating this repo) at https://github.com/sajjon/RadixWalletKit and you will find Alex work on crucial modules such as `SignaturesCollector` and `KeysCollector` in his MFA playground repo https://github.com/sajjon/one-does-not-simply-sign (later migrated to https://github.com/radixdlt/sargon-mfa and then migrated into Sargon).
