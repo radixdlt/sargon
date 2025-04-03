@@ -4,7 +4,20 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.radixdlt.sargon.AuthorizationPurpose
+import com.radixdlt.sargon.AuthorizationResponse
 import com.radixdlt.sargon.Bios
+import com.radixdlt.sargon.FactorSource
+import com.radixdlt.sargon.HostInteractor
+import com.radixdlt.sargon.KeyDerivationRequest
+import com.radixdlt.sargon.KeyDerivationResponse
+import com.radixdlt.sargon.SignRequestOfAuthIntent
+import com.radixdlt.sargon.SignRequestOfSubintent
+import com.radixdlt.sargon.SignRequestOfTransactionIntent
+import com.radixdlt.sargon.SignResponseOfAuthIntentHash
+import com.radixdlt.sargon.SignResponseOfSubintentHash
+import com.radixdlt.sargon.SignResponseOfTransactionIntentHash
+import com.radixdlt.sargon.SpotCheckResponse
 import com.radixdlt.sargon.android.BuildConfig
 import com.radixdlt.sargon.os.SargonOsManager
 import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
@@ -139,6 +152,34 @@ object ApplicationModule {
     fun provideProfileStateChangeDriver(): AndroidProfileStateChangeDriver =
         AndroidProfileStateChangeDriver
 
+    object HostInteractorStub : HostInteractor {
+
+        override suspend fun signTransactions(request: SignRequestOfTransactionIntent): SignResponseOfTransactionIntentHash {
+            throw Exception("Not yet implemented")
+        }
+
+        override suspend fun signSubintents(request: SignRequestOfSubintent): SignResponseOfSubintentHash {
+            throw Exception("Not yet implemented")
+        }
+
+        override suspend fun deriveKeys(request: KeyDerivationRequest): KeyDerivationResponse {
+            throw Exception("Not yet implemented")
+        }
+
+        override suspend fun signAuth(request: SignRequestOfAuthIntent): SignResponseOfAuthIntentHash {
+            throw Exception("Not yet implemented")
+        }
+
+        override suspend fun requestAuthorization(purpose: AuthorizationPurpose): AuthorizationResponse {
+            throw Exception("Not yet implemented")
+        }
+
+        override suspend fun spotCheck(factorSource: FactorSource, allowSkip: Boolean): SpotCheckResponse {
+            throw Exception("Not yet implemented")
+        }
+
+    }
+
     @Provides
     @Singleton
     fun provideBios(
@@ -170,6 +211,7 @@ object ApplicationModule {
     ): SargonOsManager = SargonOsManager.factory(
         bios = bios,
         applicationScope = applicationScope,
-        defaultDispatcher = dispatcher
+        defaultDispatcher = dispatcher,
+        hostInteractor = HostInteractorStub
     )
 }

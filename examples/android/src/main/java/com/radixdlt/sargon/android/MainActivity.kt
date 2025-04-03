@@ -329,12 +329,11 @@ private fun ProfileContent(
         )
         profile.factorSources.forEach { fs ->
             val fsHint = when (fs) {
-                is FactorSource.ArculusCard -> "${fs.value.hint.name} ${fs.value.hint.model}"
-                is FactorSource.Device -> "${fs.value.hint.name} ${fs.value.hint.model}"
-                is FactorSource.Ledger -> "${fs.value.hint.name} ${fs.value.hint.model}"
-                is FactorSource.OffDeviceMnemonic -> "${fs.value.hint.displayName}"
-                is FactorSource.SecurityQuestions -> "security questions"
-                is FactorSource.TrustedContact -> "${fs.value.contact.name} - ${fs.value.contact.emailAddress.email} "
+                is FactorSource.ArculusCard -> "${fs.value.hint.label} ${fs.value.hint.model}"
+                is FactorSource.Device -> "${fs.value.hint.label} ${fs.value.hint.model}"
+                is FactorSource.Ledger -> "${fs.value.hint.label} ${fs.value.hint.model}"
+                is FactorSource.OffDeviceMnemonic -> "${fs.value.hint.label}"
+                is FactorSource.Password -> fs.value.hint.label
             }
 
             val kind = if (fs is FactorSource.Device) {
