@@ -23,7 +23,7 @@ class CargoDesktopPlugin : Plugin<Project> {
                         }
 
                         exec {
-                            commandLine("mkdir", "-p", "${buildDir}/generated/src/resources/${current.jnaName}")
+                            commandLine("mkdir", "-p", "${layout.buildDirectory.get()}/generated/src/resources/${current.jnaName}")
                         }
                     }
 
@@ -52,7 +52,7 @@ class CargoDesktopPlugin : Plugin<Project> {
                             commandLine(
                                 "cp",
                                 "target/${current.rustTargetTripleName}/${buildType.lowercase}/${current.binaryName}",
-                                "${buildDir}/generated/src/resources/${current.jnaName}/${current.binaryName}"
+                                "${layout.buildDirectory.get()}/generated/src/resources/${current.jnaName}/${current.binaryName}"
                             )
                         }
                     }
@@ -63,13 +63,9 @@ class CargoDesktopPlugin : Plugin<Project> {
 }
 
 fun Project.currentTargetTriple(): DesktopTargetTriple {
-    val rustcVersion: String = ByteArrayOutputStream().use { outputStream ->
-        project.exec {
-            commandLine("rustc", "--version", "--verbose")
-            standardOutput = outputStream
-        }
-        outputStream.toString()
-    }
+    val rustcVersion = providers.exec {
+        commandLine("rustc", "--version", "--verbose")
+    }.standardOutput.asText.get()
 
     val regex = "host: (.+)".toRegex()
     val host = regex.find(rustcVersion)
