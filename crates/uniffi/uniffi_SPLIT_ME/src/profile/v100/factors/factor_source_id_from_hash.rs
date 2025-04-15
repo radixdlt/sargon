@@ -47,3 +47,21 @@ pub fn new_factor_source_id_from_hash_sample() -> FactorSourceIDFromHash {
 pub fn new_factor_source_id_from_hash_sample_other() -> FactorSourceIDFromHash {
     InternalFactorSourceIDFromHash::sample_other().into()
 }
+
+#[uniffi::export]
+fn new_vec_of_factor_source_id_from_hash_from_json(
+    json_bytes: BagOfBytes,
+) -> Result<Vec<FactorSourceIDFromHash>> {
+    sargon::new_vec_of_factor_source_id_from_hash_from_json(
+        json_bytes.into_internal(),
+    )
+    .into_iter_result()
+}
+
+#[uniffi::export]
+fn vec_of_factor_source_id_from_hash_to_json(
+    ids: Vec<FactorSourceIDFromHash>,
+) -> Result<BagOfBytes> {
+    sargon::vec_of_factor_source_id_from_hash_to_json(ids.into_internal())
+        .into_result()
+}
