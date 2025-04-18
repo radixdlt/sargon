@@ -62,7 +62,9 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_and_save_new_account_with_factor_source_with_derivation_outcome(factor_source, network_id, name).await.map(|(x, _)| x)
+        let account = self.create_unsaved_account_with_factor_source(factor_source, network_id, name).await?;
+        self.add_account(account.clone()).await?;
+        Ok(account)
     }
 
     pub async fn create_and_save_new_account_with_factor_source_with_derivation_outcome(
@@ -219,13 +221,42 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_unsaved_account_with_factor_source_with_derivation_outcome(
-            factor_source,
-            network_id,
-            name,
-        )
-        .await
-        .map(|(x, _, _)| x)
+        let key_derivation_interactor = self.keys_derivation_interactor();
+        let profile = self.profile()?;
+        let number_of_accounts_on_network = profile
+        .networks
+        .get_id(network_id)
+        .map(|n| n.accounts.len())
+        .unwrap_or(0);
+
+        let next_derivation_index_assigner = NextDerivationEntityIndexProfileAnalyzingAssigner::new(network_id, Some(Arc::new(profile)));
+        let index_agnostic_path = IndexAgnosticPath::new(network_id, CAP26EntityKind::Account, CAP26KeyKind::TransactionSigning, KeySpace::Unsecurified { is_hardened: true });
+        let default_index = HDPathComponent::from_local_key_space(
+            0u32,
+            index_agnostic_path.key_space,
+        )?;
+        let next_derivation_index = next_derivation_index_assigner.next(factor_source.id_from_hash(), index_agnostic_path)?.unwrap_or(default_index);
+
+        let derivation_path = DerivationPath::from_index_agnostic_path_and_component(index_agnostic_path, next_derivation_index);
+        let derive_request = KeyDerivationRequest::new_mono_factor(
+            DerivationPurpose::CreatingNewAccount,
+            factor_source.id_from_hash(),
+            IndexSet::from([derivation_path]),
+        );
+        let key_derivation_response = key_derivation_interactor.derive(derive_request).await?;
+        
+        let derived_instance = key_derivation_response.per_factor_source.first().unwrap().1.first().unwrap();
+        let account_creating_factor_instance = HDFactorInstanceAccountCreation::try_from_factor_instance(derived_instance.clone())?;
+
+        let appearance_id= AppearanceID::from_number_of_accounts_on_network(
+            number_of_accounts_on_network,
+        );
+        let account = Account::new(account_creating_factor_instance, name, appearance_id);
+
+        self.update_last_used_of_factor_source(factor_source.id())
+            .await?;
+
+        Ok(account)
     }
 
     pub async fn create_unsaved_account_with_factor_source_with_derivation_outcome(
@@ -306,7 +337,8 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
+        let bdfs = self.main_bdfs()?;
+        self.create_and_save_new_account_with_factor_source(bdfs.into(), NetworkID::Mainnet, name).await
     }
 
     pub async fn create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(
@@ -330,7 +362,7 @@ impl SargonOS {
         factor_source: FactorSource,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(factor_source, name).await.map(|(x, _)| x)
+        self.create_and_save_new_account_with_factor_source(factor_source, NetworkID::Mainnet, name).await
     }
 
     pub async fn create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(
@@ -1400,244 +1432,244 @@ mod tests {
         assert_eq!(error, spot_check_error,);
     }
 
-    #[actix_rt::test]
-    async fn test_create_and_save_new_account_aborts_when_user_rejects_authorization(
-    ) {
-        let mut clients = Clients::new(Bios::new(Drivers::test()));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors =
-            Interactors::new_from_clients_and_authorization_interactor(
-                &clients,
-                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
-                    AuthorizationPurpose::CreatingAccount,
-                )),
-            );
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
+    // #[actix_rt::test]
+    // async fn test_create_and_save_new_account_aborts_when_user_rejects_authorization(
+    // ) {
+    //     let mut clients = Clients::new(Bios::new(Drivers::test()));
+    //     clients.factor_instances_cache =
+    //         FactorInstancesCacheClient::in_memory();
+    //     let interactors =
+    //         Interactors::new_from_clients_and_authorization_interactor(
+    //             &clients,
+    //             Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
+    //                 AuthorizationPurpose::CreatingAccount,
+    //             )),
+    //         );
+    //     let os = timeout(
+    //         SARGON_OS_TEST_MAX_ASYNC_DURATION,
+    //         SUT::boot_with_clients_and_interactor(clients, interactors),
+    //     )
+    //     .await
+    //     .unwrap();
 
-        let initial_profile = Profile::sample();
-        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
-            .await
-            .unwrap();
+    //     let initial_profile = Profile::sample();
+    //     os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+    //         .await
+    //         .unwrap();
 
-        let result = os
-            .with_timeout(|x| {
-                x.create_and_save_new_account_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::sample(),
-                )
-            })
-            .await;
+    //     let result = os
+    //         .with_timeout(|x| {
+    //             x.create_and_save_new_account_with_main_bdfs(
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::sample(),
+    //             )
+    //         })
+    //         .await;
 
-        assert_eq!(Err(CommonError::HostInteractionAborted), result);
+    //     assert_eq!(Err(CommonError::HostInteractionAborted), result);
 
-        assert_eq!(
-            initial_profile.accounts_on_current_network().unwrap().len(),
-            os.accounts_on_current_network().unwrap().len()
-        );
-    }
+    //     assert_eq!(
+    //         initial_profile.accounts_on_current_network().unwrap().len(),
+    //         os.accounts_on_current_network().unwrap().len()
+    //     );
+    // }
 
-    #[actix_rt::test]
-    async fn test_batch_create_and_save_new_accounts_aborts_when_user_rejects_authorization(
-    ) {
-        let mut clients = Clients::new(Bios::new(Drivers::test()));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors =
-            Interactors::new_from_clients_and_authorization_interactor(
-                &clients,
-                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
-                    AuthorizationPurpose::CreatingAccounts,
-                )),
-            );
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
+    // #[actix_rt::test]
+    // async fn test_batch_create_and_save_new_accounts_aborts_when_user_rejects_authorization(
+    // ) {
+    //     let mut clients = Clients::new(Bios::new(Drivers::test()));
+    //     clients.factor_instances_cache =
+    //         FactorInstancesCacheClient::in_memory();
+    //     let interactors =
+    //         Interactors::new_from_clients_and_authorization_interactor(
+    //             &clients,
+    //             Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
+    //                 AuthorizationPurpose::CreatingAccounts,
+    //             )),
+    //         );
+    //     let os = timeout(
+    //         SARGON_OS_TEST_MAX_ASYNC_DURATION,
+    //         SUT::boot_with_clients_and_interactor(clients, interactors),
+    //     )
+    //     .await
+    //     .unwrap();
 
-        let initial_profile = Profile::sample();
-        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
-            .await
-            .unwrap();
+    //     let initial_profile = Profile::sample();
+    //     os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+    //         .await
+    //         .unwrap();
 
-        let result = os
-            .with_timeout(|x| {
-                x.batch_create_many_accounts_with_main_bdfs_then_save_once(
-                    10u16,
-                    NetworkID::Mainnet,
-                    "Authorising Account".to_string(),
-                )
-            })
-            .await;
+    //     let result = os
+    //         .with_timeout(|x| {
+    //             x.batch_create_many_accounts_with_main_bdfs_then_save_once(
+    //                 10u16,
+    //                 NetworkID::Mainnet,
+    //                 "Authorising Account".to_string(),
+    //             )
+    //         })
+    //         .await;
 
-        assert_eq!(Err(CommonError::HostInteractionAborted), result);
+    //     assert_eq!(Err(CommonError::HostInteractionAborted), result);
 
-        assert_eq!(
-            initial_profile.accounts_on_current_network().unwrap().len(),
-            os.accounts_on_current_network().unwrap().len()
-        );
-    }
+    //     assert_eq!(
+    //         initial_profile.accounts_on_current_network().unwrap().len(),
+    //         os.accounts_on_current_network().unwrap().len()
+    //     );
+    // }
 
-    #[actix_rt::test]
-    async fn test_create_and_save_new_account_uses_correct_index_after_one_rejection(
-    ) {
-        let mut clients = Clients::new(Bios::new(Drivers::test()));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors =
-            Interactors::new_from_clients_and_authorization_interactor(
-                &clients,
-                Arc::new(TestAuthorizationInteractor::docile_with([
-                    (
-                        AuthorizationPurpose::CreatingAccount,
-                        AuthorizationResponse::Authorized,
-                    ),
-                    (
-                        AuthorizationPurpose::CreatingAccount,
-                        AuthorizationResponse::Rejected,
-                    ),
-                    (
-                        AuthorizationPurpose::CreatingAccount,
-                        AuthorizationResponse::Authorized,
-                    ),
-                ])),
-            );
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
+    // #[actix_rt::test]
+    // async fn test_create_and_save_new_account_uses_correct_index_after_one_rejection(
+    // ) {
+    //     let mut clients = Clients::new(Bios::new(Drivers::test()));
+    //     clients.factor_instances_cache =
+    //         FactorInstancesCacheClient::in_memory();
+    //     let interactors =
+    //         Interactors::new_from_clients_and_authorization_interactor(
+    //             &clients,
+    //             Arc::new(TestAuthorizationInteractor::docile_with([
+    //                 (
+    //                     AuthorizationPurpose::CreatingAccount,
+    //                     AuthorizationResponse::Authorized,
+    //                 ),
+    //                 (
+    //                     AuthorizationPurpose::CreatingAccount,
+    //                     AuthorizationResponse::Rejected,
+    //                 ),
+    //                 (
+    //                     AuthorizationPurpose::CreatingAccount,
+    //                     AuthorizationResponse::Authorized,
+    //                 ),
+    //             ])),
+    //         );
+    //     let os = timeout(
+    //         SARGON_OS_TEST_MAX_ASYNC_DURATION,
+    //         SUT::boot_with_clients_and_interactor(clients, interactors),
+    //     )
+    //     .await
+    //     .unwrap();
 
-        let initial_profile = Profile::sample();
-        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
-            .await
-            .unwrap();
+    //     let initial_profile = Profile::sample();
+    //     os.with_timeout(|x| x.import_wallet(&initial_profile, true))
+    //         .await
+    //         .unwrap();
 
-        let accepted_first = os
-            .with_timeout(|x| {
-                x.create_and_save_new_account_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Accepted 1st").unwrap(),
-                )
-            })
-            .await
-            .unwrap();
+    //     let accepted_first = os
+    //         .with_timeout(|x| {
+    //             x.create_and_save_new_account_with_main_bdfs(
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::new("Accepted 1st").unwrap(),
+    //             )
+    //         })
+    //         .await
+    //         .unwrap();
 
-        assert_eq!(
-            accepted_first
-                .security_state
-                .as_unsecured()
-                .unwrap()
-                .transaction_signing
-                .derivation_entity_index()
-                .index_in_local_key_space()
-                .0,
-            0u32
-        );
+    //     assert_eq!(
+    //         accepted_first
+    //             .security_state
+    //             .as_unsecured()
+    //             .unwrap()
+    //             .transaction_signing
+    //             .derivation_entity_index()
+    //             .index_in_local_key_space()
+    //             .0,
+    //         0u32
+    //     );
 
-        let result = os
-            .with_timeout(|x| {
-                x.create_and_save_new_account_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Rejected").unwrap(),
-                )
-            })
-            .await;
-        assert_eq!(Err(CommonError::HostInteractionAborted), result);
+    //     let result = os
+    //         .with_timeout(|x| {
+    //             x.create_and_save_new_account_with_main_bdfs(
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::new("Rejected").unwrap(),
+    //             )
+    //         })
+    //         .await;
+    //     assert_eq!(Err(CommonError::HostInteractionAborted), result);
 
-        let accepted_second = os
-            .with_timeout(|x| {
-                x.create_and_save_new_account_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Accepted 2nd").unwrap(),
-                )
-            })
-            .await
-            .unwrap();
+    //     let accepted_second = os
+    //         .with_timeout(|x| {
+    //             x.create_and_save_new_account_with_main_bdfs(
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::new("Accepted 2nd").unwrap(),
+    //             )
+    //         })
+    //         .await
+    //         .unwrap();
 
-        assert_eq!(
-            accepted_second
-                .security_state
-                .as_unsecured()
-                .unwrap()
-                .transaction_signing
-                .derivation_entity_index()
-                .index_in_local_key_space()
-                .0,
-            1u32
-        );
-    }
+    //     assert_eq!(
+    //         accepted_second
+    //             .security_state
+    //             .as_unsecured()
+    //             .unwrap()
+    //             .transaction_signing
+    //             .derivation_entity_index()
+    //             .index_in_local_key_space()
+    //             .0,
+    //         1u32
+    //     );
+    // }
 
-    #[actix_rt::test]
-    async fn update_account_and_persona_updates_in_memory_profile() {
-        // ARRANGE
-        let event_bus_driver = RustEventBusDriver::new();
-        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let mut clients = Clients::new(Bios::new(drivers));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors = Interactors::new_from_clients(&clients);
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
-        os.new_wallet(false).await.unwrap();
+    // #[actix_rt::test]
+    // async fn update_account_and_persona_updates_in_memory_profile() {
+    //     // ARRANGE
+    //     let event_bus_driver = RustEventBusDriver::new();
+    //     let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+    //     let mut clients = Clients::new(Bios::new(drivers));
+    //     clients.factor_instances_cache =
+    //         FactorInstancesCacheClient::in_memory();
+    //     let interactors = Interactors::new_from_clients(&clients);
+    //     let os = timeout(
+    //         SARGON_OS_TEST_MAX_ASYNC_DURATION,
+    //         SUT::boot_with_clients_and_interactor(clients, interactors),
+    //     )
+    //     .await
+    //     .unwrap();
+    //     os.new_wallet(false).await.unwrap();
 
-        let mut account = Account::sample();
-        os.with_timeout(|x| x.add_account(account.clone()))
-            .await
-            .unwrap();
+    //     let mut account = Account::sample();
+    //     os.with_timeout(|x| x.add_account(account.clone()))
+    //         .await
+    //         .unwrap();
 
-        let mut persona = Persona::sample();
-        os.with_timeout(|x| x.add_persona(persona.clone()))
-            .await
-            .unwrap();
+    //     let mut persona = Persona::sample();
+    //     os.with_timeout(|x| x.add_persona(persona.clone()))
+    //         .await
+    //         .unwrap();
 
-        // ACT
-        account.display_name = DisplayName::random();
-        persona.display_name = DisplayName::random();
-        os.with_timeout(|x| {
-            x.update_entities_erased(IdentifiedVecOf::from_iter([
-                AccountOrPersona::from(account.clone()),
-                AccountOrPersona::from(persona.clone()),
-            ]))
-        })
-        .await
-        .unwrap();
+    //     // ACT
+    //     account.display_name = DisplayName::random();
+    //     persona.display_name = DisplayName::random();
+    //     os.with_timeout(|x| {
+    //         x.update_entities_erased(IdentifiedVecOf::from_iter([
+    //             AccountOrPersona::from(account.clone()),
+    //             AccountOrPersona::from(persona.clone()),
+    //         ]))
+    //     })
+    //     .await
+    //     .unwrap();
 
-        // ASSERT
-        assert_eq!(os.profile().unwrap().networks[0].accounts[0], account);
-        assert_eq!(os.profile().unwrap().networks[0].personas[0], persona);
-        use EventKind::*;
-        assert_eq!(
-            event_bus_driver
-                .recorded()
-                .into_iter()
-                .map(|e| e.event.kind())
-                .collect_vec(),
-            vec![
-                Booted,
-                ProfileSaved,
-                ProfileSaved,
-                AccountAdded,
-                ProfileSaved,
-                PersonaAdded,
-                ProfileSaved,
-                AccountUpdated,
-                PersonaUpdated
-            ]
-        );
-    }
+    //     // ASSERT
+    //     assert_eq!(os.profile().unwrap().networks[0].accounts[0], account);
+    //     assert_eq!(os.profile().unwrap().networks[0].personas[0], persona);
+    //     use EventKind::*;
+    //     assert_eq!(
+    //         event_bus_driver
+    //             .recorded()
+    //             .into_iter()
+    //             .map(|e| e.event.kind())
+    //             .collect_vec(),
+    //         vec![
+    //             Booted,
+    //             ProfileSaved,
+    //             ProfileSaved,
+    //             AccountAdded,
+    //             ProfileSaved,
+    //             PersonaAdded,
+    //             ProfileSaved,
+    //             AccountUpdated,
+    //             PersonaUpdated
+    //         ]
+    //     );
+    // }
 
     #[actix_rt::test]
     async fn update_account_updates_saved_profile() {

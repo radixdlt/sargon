@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+#[uniffi::export]
+impl SargonOS {
     /// Create a new Account and adds it to the active Profile.
     ///
     /// # Emits Event
@@ -37,6 +39,8 @@ use crate::prelude::*;
             .await
             .into_result()
     }
+}
+
 // ==================
 // Add (Save) Account(s)
 // ==================

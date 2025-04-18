@@ -81,6 +81,7 @@ impl NextDerivationEntityIndexProfileAnalyzingAssigner {
         let of_unsecurified =
             max_veci(entities.into_iter().map(|x| x.veci()).collect());
 
+        print!("{:?}", of_unsecurified);
         // The securified entities might have been originally created - having a veci -
         // with the same factor source id.
         let of_securified = max_veci(
