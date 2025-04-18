@@ -20,6 +20,16 @@ pub enum DeviceMnemonicBuildOutcome {
     },
 }
 
+#[derive(Debug, PartialEq)]
+pub enum DeviceMnemonicValidationOutcome {
+    /// The mnemonic words were valid
+    Valid,
+    /// The mnemonic words were invalid
+    Invalid {
+        indices_in_mnemonic: IndexSet<usize>,
+    },
+}
+
 impl Default for DeviceMnemonicBuilder {
     fn default() -> Self {
         Self::new()
@@ -86,7 +96,7 @@ impl DeviceMnemonicBuilder {
     }
 
     /// Returns the `mnemonic_with_passphrase` if it was previously created or panics.
-    fn get_mnemonic_with_passphrase(&self) -> MnemonicWithPassphrase {
+    pub fn get_mnemonic_with_passphrase(&self) -> MnemonicWithPassphrase {
         self.mnemonic_with_passphrase
             .read()
             .unwrap()
@@ -182,13 +192,7 @@ impl DeviceMnemonicBuilder {
         ))
     }
 
-    /// Verifies if the `words_to_confirm` contains the expected number of words.
-    /// Verifies if the `words_to_confirm` are correct within the previously created `MnemonicWithPassphrase`.
-    /// Returns unconfirmed words if not all of the words were confirmed or the `MnemonicWithPassphrase`.
-    pub fn build(
-        &self,
-        words_to_confirm: &HashMap<usize, String>,
-    ) -> DeviceMnemonicBuildOutcome {
+    pub fn validate_words(&self, words_to_confirm: &HashMap<usize, String>) -> DeviceMnemonicValidationOutcome {
         if words_to_confirm.len()
             != Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM
         {
@@ -205,13 +209,11 @@ impl DeviceMnemonicBuilder {
                 }
             })
             .collect::<IndexSet<_>>();
-
+        
         if unconfirmed_indices_in_mnemonic.is_empty() {
-            DeviceMnemonicBuildOutcome::Confirmed {
-                mnemonic_with_passphrase: self.get_mnemonic_with_passphrase(),
-            }
+            DeviceMnemonicValidationOutcome::Valid
         } else {
-            DeviceMnemonicBuildOutcome::Unconfirmed {
+            DeviceMnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: unconfirmed_indices_in_mnemonic,
             }
         }
