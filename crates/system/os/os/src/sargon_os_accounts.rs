@@ -34,7 +34,89 @@ impl SargonOS {
         self.profile_state_holder.entity_by_address(entity_address)
     }
 
-    /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
+    /// Create a new Account using main BDFS and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_account_with_main_bdfs(
+        &self,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        let bdfs = self.main_bdfs()?;
+        self.create_and_save_new_account_with_factor_source(
+            bdfs.into(),
+            network_id,
+            name,
+        )
+        .await
+    }
+
+    /// Create a new Account and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_and_save_new_account_with_factor_source_with_derivation_outcome(factor_source, network_id, name).await.map(|(x, _)| x)
+    }
+
+    pub async fn create_and_save_new_account_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+        self.spot_check_factor_source_before_entity_creation_if_necessary(
+            factor_source.clone(),
+            network_id,
+            EntityKind::Account,
+        )
+        .await?;
+        debug!("Creating account.");
+        let (account, instances_in_cache_consumer, derivation_outcome) = self
+            .create_unsaved_account_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                name,
+            )
+            .await?;
+        debug!("Created account, requesting authorization...");
+
+        let authorization = self
+            .authorization_interactor()
+            .request_authorization(AuthorizationPurpose::CreatingAccount)
+            .await;
+
+        match authorization {
+            AuthorizationResponse::Rejected => {
+                debug!("User rejected authorization, aborting.");
+                return Err(CommonError::HostInteractionAborted);
+            }
+            AuthorizationResponse::Authorized => {
+                debug!("User authorized, saving to profile...");
+            }
+        }
+
+        // Add account to Profile...
+        self.add_account(account.clone()).await?;
+        // .. if successful consume the FactorInstances from the Cache!
+        instances_in_cache_consumer.consume().await?;
+
+        info!(
+            "Created account and saved new account into profile, address: {}",
+            account.address
+        );
+        Ok((account, derivation_outcome))
+    }
+}
+
+impl SargonOS {
+     /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
     /// index of the next account for the main BDFS.
     ///
     /// # Emits Event
@@ -263,87 +345,7 @@ impl SargonOS {
         )
         .await
     }
-
-    /// Create a new Account using main BDFS and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_account_with_main_bdfs(
-        &self,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<Account> {
-        let bdfs = self.main_bdfs()?;
-        self.create_and_save_new_account_with_factor_source(
-            bdfs.into(),
-            network_id,
-            name,
-        )
-        .await
-    }
-
-    /// Create a new Account and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_account_with_factor_source(
-        &self,
-        factor_source: FactorSource,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<Account> {
-        self.create_and_save_new_account_with_factor_source_with_derivation_outcome(factor_source, network_id, name).await.map(|(x, _)| x)
-    }
-
-    pub async fn create_and_save_new_account_with_factor_source_with_derivation_outcome(
-        &self,
-        factor_source: FactorSource,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-        self.spot_check_factor_source_before_entity_creation_if_necessary(
-            factor_source.clone(),
-            network_id,
-            EntityKind::Account,
-        )
-        .await?;
-        debug!("Creating account.");
-        let (account, instances_in_cache_consumer, derivation_outcome) = self
-            .create_unsaved_account_with_factor_source_with_derivation_outcome(
-                factor_source,
-                network_id,
-                name,
-            )
-            .await?;
-        debug!("Created account, requesting authorization...");
-
-        let authorization = self
-            .authorization_interactor()
-            .request_authorization(AuthorizationPurpose::CreatingAccount)
-            .await;
-
-        match authorization {
-            AuthorizationResponse::Rejected => {
-                debug!("User rejected authorization, aborting.");
-                return Err(CommonError::HostInteractionAborted);
-            }
-            AuthorizationResponse::Authorized => {
-                debug!("User authorized, saving to profile...");
-            }
-        }
-
-        // Add account to Profile...
-        self.add_account(account.clone()).await?;
-        // .. if successful consume the FactorInstances from the Cache!
-        instances_in_cache_consumer.consume().await?;
-
-        info!(
-            "Created account and saved new account into profile, address: {}",
-            account.address
-        );
-        Ok((account, derivation_outcome))
-    }
-
+    
     /// Creates account using main BDFS.
     /// The account names will be `<name_prefix> <index>`
     ///
@@ -560,7 +562,6 @@ impl SargonOS {
         Ok((entities, instances_in_cache_consumer, derivation_outcome))
     }
 }
-
 // ==================
 // Add (Save) Account(s)
 // ==================
