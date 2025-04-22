@@ -277,7 +277,9 @@ impl SargonOS {
         name: DisplayName,
         persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
-        let mut persona: Persona = self.create_unsaved_entity_with_factor_source(factor_source, network_id, name).await?;
+        let profile = self.profile()?;
+        let key_derivation_interactor = self.keys_derivation_interactor();
+        let mut persona: Persona = profile.create_unsaved_persona_with_factor_source(factor_source, network_id, name, key_derivation_interactor).await?;
 
         if let Some(persona_data) = persona_data {
             persona.persona_data = persona_data;
