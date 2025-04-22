@@ -63,4 +63,102 @@ impl SargonOS {
         let display_name = DisplayName::new(name)?;
         self.create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(display_name).await
     }
+
+
+    pub async fn create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(
+        &self,
+        name: DisplayName,
+    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+        let bdfs = self.main_bdfs()?;
+        self.create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(
+            bdfs.into(),
+            name,
+        )
+        .await
+    }
+
+    /// Create a new mainnet Account using the selected factor source and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
+    pub async fn create_and_save_new_mainnet_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_and_save_new_account_with_factor_source(factor_source, NetworkID::Mainnet, name).await
+    }
+
+    pub async fn create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        name: DisplayName,
+    ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
+        self.create_and_save_new_account_with_factor_source_with_derivation_outcome(
+            factor_source,
+            NetworkID::Mainnet,
+            name,
+        )
+        .await
+    }
+
+         /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
+    /// index of the next account for the main BDFS.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
+    pub async fn create_unsaved_unnamed_mainnet_account_with_main_bdfs(
+        &self,
+    ) -> Result<Account> {
+        let bdfs = self.main_bdfs()?;
+        self.create_unsaved_unnamed_mainnet_account_with_factor_source(
+            bdfs.into(),
+        )
+        .await
+    }
+
+    /// Creates a new unsaved mainnet account named "Unnamed {N}", where `N` is the
+    /// index of the next account for the selected factor_source.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
+    pub async fn create_unsaved_unnamed_mainnet_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<Account> {
+        self.create_unsaved_account_with_factor_source(
+            factor_source,
+            NetworkID::Mainnet,
+            DisplayName::new("Unnamed").unwrap(),
+        )
+        .await
+    }
+
+    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using main BDFS.
+    pub async fn create_unsaved_mainnet_account_with_main_bdfs(
+        &self,
+        name: DisplayName,
+    ) -> Result<Account> {
+        let bdfs = self.main_bdfs()?;
+        self.create_unsaved_mainnet_account_with_factor_source(
+            bdfs.into(),
+            name,
+        )
+        .await
+    }
+
+    /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using
+    /// the specified `factor_source`.
+    pub async fn create_unsaved_mainnet_account_with_factor_source(
+        &self,
+        factor_source: FactorSource,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_unsaved_account_with_factor_source(
+            factor_source,
+            NetworkID::Mainnet,
+            name,
+        )
+        .await
+    }
 }
