@@ -37,41 +37,4 @@ public final class TestOS {
 
 extension TestOS: SargonOSProtocol {}
 
-// MARK: Private
-extension TestOS {
-	private func nextAccountName() -> DisplayName {
-		let index = (try? accountsForDisplayOnCurrentNetwork.count) ?? 0
-		return DisplayName(value: "Unnamed \(index)")
-	}
-}
-
-// MARK: Public
-extension TestOS {
-	@discardableResult
-	public func createAccount(
-		named name: String? = nil
-	) async throws -> Self {
-		let accountName = try name.map {
-			try DisplayName(
-				validating: $0
-			)
-		} ?? nextAccountName()
-
-		let _ = try await os.createAccountWithBDFS(
-			networkId: nil,
-			name: accountName
-		)
-		return self
-	}
-
-	@discardableResult
-	public func batchCreateAccounts(
-		count: UInt16,
-		namePrefix: DisplayName
-	) async throws -> Self {
-		let _ = try await os.batchCreateManyAccountsWithMainBdfsThenSaveOnce(count: count, networkId: currentNetworkID, namePrefix: namePrefix.value)
-		return self
-	}
-}
-
 #endif // DEBUG

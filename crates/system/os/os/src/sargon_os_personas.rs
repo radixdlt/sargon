@@ -19,233 +19,6 @@ impl SargonOS {
         self.profile_state_holder.persona_by_address(address)
     }
 
-    /// Creates a new unsaved mainnet persona named "Unnamed" using main bdfs.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_persona_with_main_bdfs(
-        &self,
-    ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
-        self.create_unsaved_unnamed_mainnet_persona_with_factor_source(
-            bdfs.into(),
-        )
-        .await
-    }
-
-    /// Creates a new unsaved mainnet persona named "Unnamed {N}", where `N` is the
-    /// index of the next persona for the selected factor_source.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_persona_with_factor_source(
-        &self,
-        factor_source: FactorSource,
-    ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        self.create_unsaved_persona_with_factor_source(
-            factor_source,
-            NetworkID::Mainnet,
-            DisplayName::new("Unnamed").unwrap(),
-        )
-        .await
-    }
-
-    /// Uses `create_unsaved_persona` specifying `NetworkID::Mainnet` using main BDFS.
-    pub async fn create_unsaved_mainnet_persona_with_main_bdfs(
-        &self,
-        name: DisplayName,
-    ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
-        self.create_unsaved_mainnet_persona_with_factor_source(
-            bdfs.into(),
-            name,
-        )
-        .await
-    }
-
-    /// Uses `create_unsaved_persona` specifying `NetworkID::Mainnet` using
-    /// the specified `factor_source`.
-    pub async fn create_unsaved_mainnet_persona_with_factor_source(
-        &self,
-        factor_source: FactorSource,
-        name: DisplayName,
-    ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        self.create_unsaved_persona_with_factor_source(
-            factor_source,
-            NetworkID::Mainnet,
-            name,
-        )
-        .await
-    }
-
-    /// Creates a new non securified persona **WITHOUT** adding it to Profile,
-    /// using the *main* "Babylon" `DeviceFactorSource` and the "next" index for
-    /// this FactorSource as derivation path.
-    ///
-    /// If you want to add it to Profile, call `os.add_persona(persona)`.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage, since the `last_used_on` date
-    /// of the factor source has been updated.
-    ///
-    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    pub async fn create_unsaved_persona_with_main_bdfs(
-        &self,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
-        self.create_unsaved_persona_with_factor_source(
-            bdfs.into(),
-            network_id,
-            name,
-        )
-        .await
-    }
-
-    /// Creates a new non securified persona **WITHOUT** adding it to Profile,
-    /// using specified factor source and the "next" index for this FactorSource
-    ///
-    /// If you want to add it to Profile, call `os.add_persona(persona)`.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage, since the `last_used_on` date
-    /// of the factor source has been updated.
-    ///
-    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    pub async fn create_unsaved_persona_with_factor_source(
-        &self,
-        factor_source: FactorSource,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        self.create_unsaved_persona_with_factor_source_with_derivation_outcome(
-            factor_source,
-            network_id,
-            name,
-        )
-        .await
-        .map(|(x, y, _)| (x, y))
-    }
-
-    pub async fn create_unsaved_persona_with_factor_source_with_derivation_outcome(
-        &self,
-        factor_source: FactorSource,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<(
-        Persona,
-        InstancesInCacheConsumer,
-        FactorInstancesProviderOutcomeForFactor,
-    )> {
-        let key_derivation_interactors = self.keys_derivation_interactor();
-
-        let profile = self.profile()?;
-
-        let future = profile
-            .create_unsaved_persona_with_factor_source_with_derivation_outcome(
-                factor_source,
-                network_id,
-                name,
-                Arc::new(self.clients.factor_instances_cache.clone()),
-                key_derivation_interactors,
-            );
-
-        let (
-            factor_source_id,
-            persona,
-            instances_in_cache_consumer,
-            derivation_outcome,
-        ) = future.await?;
-
-        // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
-        // Change of `last_used_on` of FactorSource
-        self.update_last_used_of_factor_source(factor_source_id)
-            .await?;
-
-        Ok((persona, instances_in_cache_consumer, derivation_outcome))
-    }
-
-    /// Create a new mainnet Persona named "Unnamed" using main BDFS and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_unnamed_mainnet_persona_with_main_bdfs(
-        &self,
-    ) -> Result<Persona> {
-        let bdfs = self.main_bdfs()?;
-        self.create_and_save_new_unnamed_mainnet_persona_with_factor_source(
-            bdfs.into(),
-        )
-        .await
-    }
-
-    /// Create a new mainnet Persona named "Unnamed" using selected factor source and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_unnamed_mainnet_persona_with_factor_source(
-        &self,
-        factor_source: FactorSource,
-    ) -> Result<Persona> {
-        self.create_and_save_new_mainnet_persona_with_factor_source(
-            factor_source,
-            DisplayName::new("Unnamed").unwrap(),
-        )
-        .await
-    }
-
-    /// Create a new mainnet Persona using the mian BDFS and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_mainnet_persona_with_main_bdfs(
-        &self,
-        name: DisplayName,
-    ) -> Result<Persona> {
-        self.create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
-    }
-
-    pub async fn create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(
-        &self,
-        name: DisplayName,
-    ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.main_bdfs()?;
-        self.create_and_save_new_mainnet_persona_with_factor_source_with_derivation_outcome(
-            bdfs.into(),
-            name,
-        )
-        .await
-    }
-
-    /// Create a new mainnet Persona using the selected factor source and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_mainnet_persona_with_factor_source(
-        &self,
-        factor_source: FactorSource,
-        name: DisplayName,
-    ) -> Result<Persona> {
-        self.create_and_save_new_mainnet_persona_with_factor_source_with_derivation_outcome(factor_source, name).await.map(|(x, _)| x)
-    }
-
-    pub async fn create_and_save_new_mainnet_persona_with_factor_source_with_derivation_outcome(
-        &self,
-        factor_source: FactorSource,
-        name: DisplayName,
-    ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
-        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(
-            factor_source,
-            NetworkID::Mainnet,
-            name,
-            None,
-        )
-        .await
-    }
-
     /// Create a new Persona with main BDFS and adds it to the active Profile.
     ///
     /// # Emits Event
@@ -268,7 +41,7 @@ impl SargonOS {
 
     /// Create a new Persona and adds it to the active Profile.
     ///
-    /// # Emits Event
+    /// # Emits Events
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
     pub async fn create_and_save_new_persona_with_factor_source(
         &self,
@@ -277,7 +50,25 @@ impl SargonOS {
         name: DisplayName,
         persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
-        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, name, persona_data).await.map(|(x, _)| x)
+        let profile = self.profile()?;
+        let key_derivation_interactor = self.keys_derivation_interactor();
+        let mut persona: Persona = profile
+            .create_unsaved_persona_with_factor_source(
+                factor_source.clone(),
+                network_id,
+                name,
+                key_derivation_interactor,
+            )
+            .await?;
+
+        if let Some(persona_data) = persona_data {
+            persona.persona_data = persona_data;
+        }
+
+        self.update_last_used_of_factor_source(factor_source.id())
+            .await?;
+        self.add_persona(persona.clone()).await?;
+        Ok(persona)
     }
 
     pub async fn create_and_save_new_persona_with_factor_source_with_derivation_outcome(
@@ -334,145 +125,13 @@ impl SargonOS {
         Ok((persona, derivation_outcome))
     }
 
-    /// Creates persona using BDFS
-    /// The persona names will be `<name_prefix> <index>`
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    ///
-    /// And also emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage.
-    pub async fn batch_create_many_personas_with_bdfs_then_save_once(
-        &self,
-        count: u16,
-        network_id: NetworkID,
-        name_prefix: String,
-    ) -> Result<Personas> {
-        self.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) | x)
-    }
-
-    pub async fn batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(
-        &self,
-        count: u16,
-        network_id: NetworkID,
-        name_prefix: String,
-    ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.main_bdfs()?;
-        self.batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(
-            bdfs.into(),
-            count,
-            network_id,
-            name_prefix,
-        )
-        .await
-    }
-
-    /// Creates persona using specified factor source.
-    /// The persona names will be `<name_prefix> <index>`
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    ///
-    /// And also emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage.
-    pub async fn batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(
-        &self,
-        factor_source: FactorSource,
-        count: u16,
-        network_id: NetworkID,
-        name_prefix: String,
-    ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
-        debug!("Batch creating #{} personas.", count);
-        let (personas, instances_in_cache_consumer, derivation_outcome) = self
-            .batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
-                factor_source,
-                network_id,
-                count,
-                name_prefix,
-            )
-            .await?;
-        debug!("Created #{} personas, requesting authorization...", count);
-
-        let authorization = self
-            .authorization_interactor()
-            .request_authorization(AuthorizationPurpose::CreatingPersonas)
-            .await;
-
-        match authorization {
-            AuthorizationResponse::Rejected => {
-                debug!("User rejected authorization, aborting.");
-                return Err(CommonError::HostInteractionAborted);
-            }
-            AuthorizationResponse::Authorized => {
-                debug!("User authorized, saving to profile...");
-            }
-        }
-
-        // First save personas into Profile...
-        self.add_personas(personas.clone()).await?;
-        // ... if successful, consume FactorInstances from cache!
-        instances_in_cache_consumer.consume().await?;
-
-        info!("Created and saved #{} new personas into profile", count);
-        Ok((personas, derivation_outcome))
-    }
-
-    /// Creates many new non securified personas **WITHOUT** add them to Profile, using the *main* "Babylon"
-    /// `DeviceFactorSource` and the "next" indices for this FactorSource as derivation paths.
-    ///
-    /// If you want to add them to Profile, call `add_personas(personas)`
-    ///
-    /// # Emits Event
-    /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
-    /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_personas_with_bdfs(
-        &self,
-        network_id: NetworkID,
-        count: u16,
-        name_prefix: String,
-    ) -> Result<(Personas, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
-        self.batch_create_unsaved_personas_with_factor_source(
-            bdfs.into(),
-            network_id,
-            count,
-            name_prefix,
-        )
-        .await
-    }
-
-    /// Creates many new non securified personas **WITHOUT** add them to Profile, using selected factor source
-    ///  and the "next" indices for this FactorSource as derivation paths.
-    ///
-    /// If you want to add them to Profile, call `add_personas(personas)`
-    ///
-    /// # Emits Event
-    /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
-    /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_personas_with_factor_source(
+    pub async fn create_unsaved_persona_with_factor_source_with_derivation_outcome(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
-        count: u16,
-        name_prefix: String,
-    ) -> Result<(Personas, InstancesInCacheConsumer)> {
-        self.batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
-            factor_source,
-            network_id,
-            count,
-            name_prefix,
-        )
-        .await
-        .map(|(x, y, _)| (x, y))
-    }
-    pub async fn batch_create_unsaved_personas_with_factor_source_with_derivation_outcome(
-        &self,
-        factor_source: FactorSource,
-        network_id: NetworkID,
-        count: u16,
-        name_prefix: String,
+        name: DisplayName,
     ) -> Result<(
-        Personas,
+        Persona,
         InstancesInCacheConsumer,
         FactorInstancesProviderOutcomeForFactor,
     )> {
@@ -480,31 +139,28 @@ impl SargonOS {
 
         let profile = self.profile()?;
 
-        let (
-            factor_source_id,
-            personas,
-            instances_in_cache_consumer,
-            derivation_outcome,
-        ) = profile
-            .create_unsaved_personas_with_factor_source_with_derivation_outcome(
+        let future = profile
+            .create_unsaved_persona_with_factor_source_with_derivation_outcome(
                 factor_source,
                 network_id,
-                count,
+                name,
                 Arc::new(self.clients.factor_instances_cache.clone()),
                 key_derivation_interactors,
-                |idx| {
-                    DisplayName::new(format!("{} {}", name_prefix, idx))
-                        .expect("Should have used a non empty name.")
-                },
-            )
-            .await?;
+            );
+
+        let (
+            factor_source_id,
+            persona,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = future.await?;
 
         // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
         // Change of `last_used_on` of FactorSource
         self.update_last_used_of_factor_source(factor_source_id)
             .await?;
 
-        Ok((personas, instances_in_cache_consumer, derivation_outcome))
+        Ok((persona, instances_in_cache_consumer, derivation_outcome))
     }
 }
 
@@ -822,16 +478,16 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        let n: u32 = 3;
-        os.with_timeout(|x| {
-            x.batch_create_many_personas_with_bdfs_then_save_once(
-                n as u16,
-                NetworkID::Mainnet,
-                "test".to_owned(),
-            )
-        })
-        .await
-        .unwrap();
+        let n: u32 = 10;
+        for _ in 0..n {
+            os.with_timeout(|os| {
+                os.create_and_save_new_mainnet_persona_with_main_bdfs(
+                    DisplayName::sample(),
+                )
+            })
+            .await
+            .unwrap();
+        }
 
         // ASSERT
         let indices = os.profile().unwrap().networks[0]
@@ -849,167 +505,11 @@ mod tests {
             .map(|i| u32::from(i.index_in_local_key_space()))
             .collect_vec();
         assert_eq!(indices, (0u32..n).collect_vec());
-    }
 
-    #[actix_rt::test]
-    async fn test_batch_create_and_add_persona_n_has_names_with_index_appended_to_prefix(
-    ) {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-
-        // ACT
-        let n: u32 = 3;
-        os.with_timeout(|x| {
-            x.batch_create_many_personas_with_bdfs_then_save_once(
-                n as u16,
-                NetworkID::Mainnet,
-                "test".to_owned(),
-            )
-        })
-        .await
-        .unwrap();
-
-        // ASSERT
-        let names = os.profile().unwrap().networks[0]
-            .personas
-            .iter()
-            .map(|x| x.display_name.value())
-            .collect_vec();
-
-        assert_eq!(
-            names,
-            ["test 0", "test 1", "test 2"]
-                .into_iter()
-                .map(|x| x.to_owned())
-                .collect_vec()
-        );
-    }
-
-    #[actix_rt::test]
-    async fn batch_create_persona_then_n_personas_are_saved_and_have_persona_data_default(
-    ) {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-
-        // ACT
-        let n = AppearanceID::all().len() as u32 * 2;
-        os.with_timeout(|x| {
-            x.batch_create_many_personas_with_bdfs_then_save_once(
-                n as u16,
-                NetworkID::Mainnet,
-                "test".to_owned(),
-            )
-        })
-        .await
-        .unwrap();
-
-        // ASSERT
         os.profile().unwrap().networks[0]
             .personas
             .iter()
             .for_each(|p| assert_eq!(p.persona_data, PersonaData::default()))
-    }
-
-    #[actix_rt::test]
-    async fn batch_create_persona_unsaved_are_not_saved() {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-
-        // ACT
-        os.with_timeout(|x| {
-            x.batch_create_unsaved_personas_with_bdfs(
-                NetworkID::Mainnet,
-                3,
-                "test".to_owned(),
-            )
-        })
-        .await
-        .unwrap();
-
-        // ASSERT
-        assert!(os.profile().unwrap().networks[0].personas.is_empty())
-    }
-
-    #[actix_rt::test]
-    async fn test_create_unsaved_persona_emits_factor_source_updated() {
-        // ARRANGE (and ACT)
-        let event_bus_driver = RustEventBusDriver::new();
-        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let mut clients = Clients::new(Bios::new(drivers));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors = Interactors::new_from_clients(&clients);
-
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
-
-        // ACT
-        os.with_timeout(|x| {
-            x.create_unsaved_unnamed_mainnet_persona_with_main_bdfs()
-        })
-        .await
-        .unwrap();
-
-        // ASSERT
-        assert!(event_bus_driver
-            .recorded()
-            .iter()
-            .any(|e| e.event.kind() == EventKind::FactorSourceUpdated));
-    }
-
-    #[actix_rt::test]
-    async fn test_create_and_save_new_persona_emits_events() {
-        // ARRANGE (and ACT)
-        let event_bus_driver = RustEventBusDriver::new();
-        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
-        let mut clients = Clients::new(Bios::new(drivers));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors = Interactors::new_from_clients(&clients);
-
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
-
-        // ACT
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
-        os.with_timeout(|x| {
-            x.create_and_save_new_persona_with_main_bdfs(
-                NetworkID::Mainnet,
-                DisplayName::sample(),
-                None,
-            )
-        })
-        .await
-        .unwrap();
-
-        // ASSERT
-        let events = event_bus_driver
-            .recorded()
-            .iter()
-            .map(|e| e.event.kind())
-            .collect_vec();
-
-        use EventKind::*;
-        assert_eq!(
-            events,
-            vec![
-                Booted,
-                ProfileSaved, // Save of initial profile
-                ProfileSaved, // Save of the new persona
-                FactorSourceUpdated,
-                ProfileSaved,
-                PersonaAdded
-            ]
-        );
     }
 
     #[actix_rt::test]
@@ -1295,254 +795,6 @@ mod tests {
         assert_eq!(
             os.persona_by_address(IdentityAddress::sample_mainnet()),
             Err(CommonError::UnknownPersona)
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_create_and_save_new_persona_continues_when_user_skips_spot_check(
-    ) {
-        let os = SUT::boot_test_empty_wallet_with_spot_check_interactor(
-            Arc::new(TestSpotCheckInteractor::new_skipped()),
-        )
-        .await;
-
-        let main_bdfs = os.main_bdfs().unwrap();
-        // The spot check is performed only when there are enough factor instances in cache
-        os.pre_derive_and_fill_cache_with_instances_for_factor_source(
-            main_bdfs.into(),
-            NetworkID::Mainnet,
-        )
-        .await
-        .unwrap();
-
-        // Add Persona and verify it was added
-        let persona = os
-            .with_timeout(|x| {
-                x.create_and_save_new_persona_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::sample(),
-                    None,
-                )
-            })
-            .await
-            .unwrap();
-
-        assert_eq!(
-            os.profile().unwrap().networks[0].personas,
-            Personas::just(persona)
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_create_and_save_new_persona_fails_when_spot_check_fails() {
-        let spot_check_error = CommonError::sample_other();
-        let os =
-            SUT::boot_test_empty_wallet_with_spot_check_interactor(Arc::new(
-                TestSpotCheckInteractor::new_failed(spot_check_error.clone()),
-            ))
-            .await;
-
-        let main_bdfs = os.main_bdfs().unwrap();
-        // The spot check is performed only when there are enough factor instances in cache
-        os.pre_derive_and_fill_cache_with_instances_for_factor_source(
-            main_bdfs.into(),
-            NetworkID::Mainnet,
-        )
-        .await
-        .unwrap();
-
-        // Attempt to add Persona and check it fails with expected error
-        let error = os
-            .with_timeout(|x| {
-                x.create_and_save_new_persona_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::sample(),
-                    None,
-                )
-            })
-            .await
-            .expect_err("Expected error");
-
-        assert_eq!(error, spot_check_error);
-    }
-
-    #[actix_rt::test]
-    async fn test_create_and_save_new_persona_aborts_when_user_rejects_authorization(
-    ) {
-        let mut clients = Clients::new(Bios::new(Drivers::test()));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors =
-            Interactors::new_from_clients_and_authorization_interactor(
-                &clients,
-                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
-                    AuthorizationPurpose::CreatingPersona,
-                )),
-            );
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
-
-        let initial_profile = Profile::sample();
-        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
-            .await
-            .unwrap();
-
-        let result = os
-            .with_timeout(|x| {
-                x.create_and_save_new_persona_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::sample(),
-                    None,
-                )
-            })
-            .await;
-
-        assert_eq!(Err(CommonError::HostInteractionAborted), result);
-
-        assert_eq!(
-            initial_profile.personas_on_current_network().unwrap().len(),
-            os.personas_on_current_network().unwrap().len()
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_batch_create_and_save_new_personas_aborts_when_user_rejects_authorization(
-    ) {
-        let mut clients = Clients::new(Bios::new(Drivers::test()));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors =
-            Interactors::new_from_clients_and_authorization_interactor(
-                &clients,
-                Arc::new(TestAuthorizationInteractor::stubborn_rejecting_specific_purpose(
-                    AuthorizationPurpose::CreatingPersonas,
-                )),
-            );
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
-
-        let initial_profile = Profile::sample();
-        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
-            .await
-            .unwrap();
-
-        let result = os
-            .with_timeout(|x| {
-                x.batch_create_many_personas_with_bdfs_then_save_once(
-                    10,
-                    NetworkID::Mainnet,
-                    "test".to_owned(),
-                )
-            })
-            .await;
-
-        assert_eq!(Err(CommonError::HostInteractionAborted), result);
-
-        assert_eq!(
-            initial_profile.personas_on_current_network().unwrap().len(),
-            os.personas_on_current_network().unwrap().len()
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_create_and_save_new_persona_uses_correct_index_after_one_rejection(
-    ) {
-        let mut clients = Clients::new(Bios::new(Drivers::test()));
-        clients.factor_instances_cache =
-            FactorInstancesCacheClient::in_memory();
-        let interactors =
-            Interactors::new_from_clients_and_authorization_interactor(
-                &clients,
-                Arc::new(TestAuthorizationInteractor::docile_with([
-                    (
-                        AuthorizationPurpose::CreatingPersona,
-                        AuthorizationResponse::Authorized,
-                    ),
-                    (
-                        AuthorizationPurpose::CreatingPersona,
-                        AuthorizationResponse::Rejected,
-                    ),
-                    (
-                        AuthorizationPurpose::CreatingPersona,
-                        AuthorizationResponse::Authorized,
-                    ),
-                ])),
-            );
-        let os = timeout(
-            SARGON_OS_TEST_MAX_ASYNC_DURATION,
-            SUT::boot_with_clients_and_interactor(clients, interactors),
-        )
-        .await
-        .unwrap();
-
-        let initial_profile = Profile::sample();
-        os.with_timeout(|x| x.import_wallet(&initial_profile, true))
-            .await
-            .unwrap();
-
-        let accepted_first = os
-            .with_timeout(|x| {
-                x.create_and_save_new_persona_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Accepted 1st").unwrap(),
-                    None,
-                )
-            })
-            .await
-            .unwrap();
-
-        assert_eq!(
-            accepted_first
-                .security_state
-                .as_unsecured()
-                .unwrap()
-                .transaction_signing
-                .derivation_entity_index()
-                .index_in_local_key_space()
-                .0,
-            0u32
-        );
-
-        let result = os
-            .with_timeout(|x| {
-                x.create_and_save_new_persona_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Rejected").unwrap(),
-                    None,
-                )
-            })
-            .await;
-        assert_eq!(Err(CommonError::HostInteractionAborted), result);
-
-        let accepted_second = os
-            .with_timeout(|x| {
-                x.create_and_save_new_persona_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Accepted 2nd").unwrap(),
-                    None,
-                )
-            })
-            .await
-            .unwrap();
-
-        assert_eq!(
-            accepted_second
-                .security_state
-                .as_unsecured()
-                .unwrap()
-                .transaction_signing
-                .derivation_entity_index()
-                .index_in_local_key_space()
-                .0,
-            1u32
         );
     }
 }

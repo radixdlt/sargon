@@ -7,15 +7,12 @@ pub struct DeviceMnemonicBuilder {
     mnemonic_with_passphrase: RwLock<Option<MnemonicWithPassphrase>>,
 }
 
-/// The outcome of the `build` function from `DeviceMnemonicBuilder`.
 #[derive(Debug, PartialEq)]
-pub enum DeviceMnemonicBuildOutcome {
-    /// The mnemonic words were confirmed
-    Confirmed {
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
-    },
-    /// The mnemonic words were unconfirmed
-    Unconfirmed {
+pub enum DeviceMnemonicValidationOutcome {
+    /// The mnemonic words were valid
+    Valid,
+    /// The mnemonic words were invalid
+    Invalid {
         indices_in_mnemonic: IndexSet<usize>,
     },
 }
@@ -86,7 +83,7 @@ impl DeviceMnemonicBuilder {
     }
 
     /// Returns the `mnemonic_with_passphrase` if it was previously created or panics.
-    fn get_mnemonic_with_passphrase(&self) -> MnemonicWithPassphrase {
+    pub fn get_mnemonic_with_passphrase(&self) -> MnemonicWithPassphrase {
         self.mnemonic_with_passphrase
             .read()
             .unwrap()
@@ -182,13 +179,10 @@ impl DeviceMnemonicBuilder {
         ))
     }
 
-    /// Verifies if the `words_to_confirm` contains the expected number of words.
-    /// Verifies if the `words_to_confirm` are correct within the previously created `MnemonicWithPassphrase`.
-    /// Returns unconfirmed words if not all of the words were confirmed or the `MnemonicWithPassphrase`.
-    pub fn build(
+    pub fn validate_words(
         &self,
         words_to_confirm: &HashMap<usize, String>,
-    ) -> DeviceMnemonicBuildOutcome {
+    ) -> DeviceMnemonicValidationOutcome {
         if words_to_confirm.len()
             != Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM
         {
@@ -207,11 +201,9 @@ impl DeviceMnemonicBuilder {
             .collect::<IndexSet<_>>();
 
         if unconfirmed_indices_in_mnemonic.is_empty() {
-            DeviceMnemonicBuildOutcome::Confirmed {
-                mnemonic_with_passphrase: self.get_mnemonic_with_passphrase(),
-            }
+            DeviceMnemonicValidationOutcome::Valid
         } else {
-            DeviceMnemonicBuildOutcome::Unconfirmed {
+            DeviceMnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: unconfirmed_indices_in_mnemonic,
             }
         }
@@ -368,18 +360,18 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "Words to confirm count mismatch")]
-    fn build_with_words_to_confirm_count_mismatch() {
+    fn validate_words_to_confirm_count_mismatch() {
         let sut = SUT::sample();
         let words_to_confirm =
             vec![(0, "abandon".to_owned()), (1, "about".to_owned())]
                 .into_iter()
                 .collect::<HashMap<_, _>>();
 
-        sut.build(&words_to_confirm);
+        sut.validate_words(&words_to_confirm);
     }
 
     #[test]
-    fn build_with_all_valid_but_incorrect_words() {
+    fn validate_words_all_valid_but_incorrect_words() {
         let sut = SUT::sample();
         let words_to_confirm = vec![
             (0, "abandon".to_owned()),
@@ -391,15 +383,15 @@ mod tests {
         .collect::<HashMap<_, _>>();
 
         pretty_assertions::assert_eq!(
-            sut.build(&words_to_confirm),
-            DeviceMnemonicBuildOutcome::Unconfirmed {
+            sut.validate_words(&words_to_confirm),
+            DeviceMnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: indexset![0, 1, 2, 3]
             }
         );
     }
 
     #[test]
-    fn build_unconfirmed() {
+    fn validate_words_invalid() {
         let sut = SUT::sample();
         let words_to_confirm = vec![
             (0, "device".to_owned()),
@@ -411,15 +403,15 @@ mod tests {
         .collect::<HashMap<_, _>>();
 
         pretty_assertions::assert_eq!(
-            sut.build(&words_to_confirm),
-            DeviceMnemonicBuildOutcome::Unconfirmed {
+            sut.validate_words(&words_to_confirm),
+            DeviceMnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: indexset![7, 13]
             }
         );
     }
 
     #[test]
-    fn build_confirmed() {
+    fn validate_words_valid() {
         let sut = SUT::sample();
         let words_to_confirm = vec![
             (0, "device".to_owned()),
@@ -430,13 +422,11 @@ mod tests {
         .into_iter()
         .collect::<HashMap<_, _>>();
 
-        let result = sut.build(&words_to_confirm);
+        let result = sut.validate_words(&words_to_confirm);
 
         pretty_assertions::assert_eq!(
             result,
-            DeviceMnemonicBuildOutcome::Confirmed {
-                mnemonic_with_passphrase: MnemonicWithPassphrase::sample()
-            }
+            DeviceMnemonicValidationOutcome::Valid
         );
     }
 }
