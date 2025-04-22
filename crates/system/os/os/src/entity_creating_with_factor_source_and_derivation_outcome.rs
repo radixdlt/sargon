@@ -2,7 +2,9 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
-    async fn create_unsaved_entity_with_factor_source<E: IsEntity + Identifiable>(
+    async fn create_unsaved_entity_with_factor_source<
+        E: IsEntity + Identifiable,
+    >(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
@@ -17,7 +19,13 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
         name: DisplayName,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<Account> {
-        self.create_unsaved_entity_with_factor_source(factor_source, network_id, name, key_derivation_interactor).await
+        self.create_unsaved_entity_with_factor_source(
+            factor_source,
+            network_id,
+            name,
+            key_derivation_interactor,
+        )
+        .await
     }
 
     async fn create_unsaved_persona_with_factor_source(
@@ -27,7 +35,13 @@ pub trait EntityCreatingWithFactorSourceAndDerivationOutcome {
         name: DisplayName,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<Persona> {
-        self.create_unsaved_entity_with_factor_source(factor_source, network_id, name, key_derivation_interactor).await
+        self.create_unsaved_entity_with_factor_source(
+            factor_source,
+            network_id,
+            name,
+            key_derivation_interactor,
+        )
+        .await
     }
 
     async fn create_unsaved_entities_with_factor_source_with_derivation_outcome<
@@ -266,22 +280,39 @@ impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
         ))
     }
 
-    async fn create_unsaved_entity_with_factor_source<E: IsEntity + Identifiable>(
+    async fn create_unsaved_entity_with_factor_source<
+        E: IsEntity + Identifiable,
+    >(
         &self,
         factor_source: FactorSource,
         network_id: NetworkID,
         name: DisplayName,
         key_derivation_interactor: Arc<dyn KeyDerivationInteractor>,
     ) -> Result<E> {
-        let next_derivation_index_assigner = NextDerivationEntityIndexProfileAnalyzingAssigner::new(network_id, Some(Arc::new(self.clone())));
-        let index_agnostic_path = IndexAgnosticPath::new(network_id, E::entity_kind(), CAP26KeyKind::TransactionSigning, KeySpace::Unsecurified { is_hardened: true });
+        let next_derivation_index_assigner =
+            NextDerivationEntityIndexProfileAnalyzingAssigner::new(
+                network_id,
+                Some(Arc::new(self.clone())),
+            );
+        let index_agnostic_path = IndexAgnosticPath::new(
+            network_id,
+            E::entity_kind(),
+            CAP26KeyKind::TransactionSigning,
+            KeySpace::Unsecurified { is_hardened: true },
+        );
         let default_index = HDPathComponent::from_local_key_space(
             0u32,
             index_agnostic_path.key_space,
         )?;
-        let next_derivation_index = next_derivation_index_assigner.next(factor_source.id_from_hash(), index_agnostic_path)?.unwrap_or(default_index);
+        let next_derivation_index = next_derivation_index_assigner
+            .next(factor_source.id_from_hash(), index_agnostic_path)?
+            .unwrap_or(default_index);
 
-        let derivation_path = DerivationPath::from_index_agnostic_path_and_component(index_agnostic_path, next_derivation_index);
+        let derivation_path =
+            DerivationPath::from_index_agnostic_path_and_component(
+                index_agnostic_path,
+                next_derivation_index,
+            );
         let purpose = match E::entity_kind() {
             CAP26EntityKind::Account => DerivationPurpose::CreatingNewAccount,
             CAP26EntityKind::Identity => DerivationPurpose::CreatingNewPersona,
@@ -293,10 +324,23 @@ impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
             IndexSet::from([derivation_path]),
         );
 
-        let key_derivation_response = key_derivation_interactor.derive(derive_request).await?;
+        let key_derivation_response =
+            key_derivation_interactor.derive(derive_request).await?;
 
-        let derived_instance = key_derivation_response.per_factor_source.first().unwrap().1.first().unwrap();
-        let entity = E::with_veci_and_name(HDFactorInstanceTransactionSigning::<E::Path>::new(derived_instance.clone()).unwrap(), name);
+        let derived_instance = key_derivation_response
+            .per_factor_source
+            .first()
+            .unwrap()
+            .1
+            .first()
+            .unwrap();
+        let entity = E::with_veci_and_name(
+            HDFactorInstanceTransactionSigning::<E::Path>::new(
+                derived_instance.clone(),
+            )
+            .unwrap(),
+            name,
+        );
         Ok(entity)
     }
 
