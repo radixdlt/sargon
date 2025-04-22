@@ -7,19 +7,6 @@ pub struct DeviceMnemonicBuilder {
     mnemonic_with_passphrase: RwLock<Option<MnemonicWithPassphrase>>,
 }
 
-/// The outcome of the `build` function from `DeviceMnemonicBuilder`.
-#[derive(Debug, PartialEq)]
-pub enum DeviceMnemonicBuildOutcome {
-    /// The mnemonic words were confirmed
-    Confirmed {
-        mnemonic_with_passphrase: MnemonicWithPassphrase,
-    },
-    /// The mnemonic words were unconfirmed
-    Unconfirmed {
-        indices_in_mnemonic: IndexSet<usize>,
-    },
-}
-
 #[derive(Debug, PartialEq)]
 pub enum DeviceMnemonicValidationOutcome {
     /// The mnemonic words were valid

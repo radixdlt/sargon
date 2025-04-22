@@ -122,6 +122,44 @@ impl SargonOS {
         );
         Ok((persona, derivation_outcome))
     }
+
+    pub async fn create_unsaved_persona_with_factor_source_with_derivation_outcome(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<(
+        Persona,
+        InstancesInCacheConsumer,
+        FactorInstancesProviderOutcomeForFactor,
+    )> {
+        let key_derivation_interactors = self.keys_derivation_interactor();
+
+        let profile = self.profile()?;
+
+        let future = profile
+            .create_unsaved_persona_with_factor_source_with_derivation_outcome(
+                factor_source,
+                network_id,
+                name,
+                Arc::new(self.clients.factor_instances_cache.clone()),
+                key_derivation_interactors,
+            );
+
+        let (
+            factor_source_id,
+            persona,
+            instances_in_cache_consumer,
+            derivation_outcome,
+        ) = future.await?;
+
+        // TODO: move this to the FactorInstancesProvider... it should take a `emit_last_used` closure
+        // Change of `last_used_on` of FactorSource
+        self.update_last_used_of_factor_source(factor_source_id)
+            .await?;
+
+        Ok((persona, instances_in_cache_consumer, derivation_outcome))
+    }
 }
 
 // ==================
