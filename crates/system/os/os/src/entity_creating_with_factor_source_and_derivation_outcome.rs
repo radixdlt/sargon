@@ -329,16 +329,15 @@ impl EntityCreatingWithFactorSourceAndDerivationOutcome for Profile {
 
         let derived_instance = key_derivation_response
             .per_factor_source
+            .get(&factor_source.id_from_hash())
+            .expect("Response should contain the requested factor source")
             .first()
-            .unwrap()
-            .1
-            .first()
-            .unwrap();
+            .expect("Response should contain the derive instance");
+
         let entity = E::with_veci_and_name(
             HDFactorInstanceTransactionSigning::<E::Path>::new(
                 derived_instance.clone(),
-            )
-            .unwrap(),
+            )?,
             name,
         );
         Ok(entity)
