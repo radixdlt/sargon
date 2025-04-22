@@ -41,7 +41,7 @@ impl SargonOS {
 
     /// Create a new Persona and adds it to the active Profile.
     ///
-    /// # Emits Event
+    /// # Emits Events
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
     pub async fn create_and_save_new_persona_with_factor_source(
         &self,
@@ -54,7 +54,7 @@ impl SargonOS {
         let key_derivation_interactor = self.keys_derivation_interactor();
         let mut persona: Persona = profile
             .create_unsaved_persona_with_factor_source(
-                factor_source,
+                factor_source.clone(),
                 network_id,
                 name,
                 key_derivation_interactor,
@@ -65,6 +65,7 @@ impl SargonOS {
             persona.persona_data = persona_data;
         }
 
+        self.update_last_used_of_factor_source(factor_source.id()).await?;
         self.add_persona(persona.clone()).await?;
         Ok(persona)
     }
