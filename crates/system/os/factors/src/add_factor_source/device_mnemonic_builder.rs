@@ -192,7 +192,10 @@ impl DeviceMnemonicBuilder {
         ))
     }
 
-    pub fn validate_words(&self, words_to_confirm: &HashMap<usize, String>) -> DeviceMnemonicValidationOutcome {
+    pub fn validate_words(
+        &self,
+        words_to_confirm: &HashMap<usize, String>,
+    ) -> DeviceMnemonicValidationOutcome {
         if words_to_confirm.len()
             != Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM
         {
@@ -209,7 +212,7 @@ impl DeviceMnemonicBuilder {
                 }
             })
             .collect::<IndexSet<_>>();
-        
+
         if unconfirmed_indices_in_mnemonic.is_empty() {
             DeviceMnemonicValidationOutcome::Valid
         } else {

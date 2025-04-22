@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::DeviceMnemonicValidationOutcome as InternalDeviceMnemonicValidationOutcome;
 use sargon::DeviceMnemonicBuilder as InternalDeviceMnemonicBuilder;
+use sargon::DeviceMnemonicValidationOutcome as InternalDeviceMnemonicValidationOutcome;
 
 /// A builder of `MnemonicWithPassphrase` required for a new `DeviceFactorSource` creation.
 /// Exposes functions to be called by hosts to be able to use the resulting `MnemonicWithPassphrase`.
@@ -16,15 +16,17 @@ pub enum DeviceMnemonicValidationOutcome {
     /// The mnemonic words were valid
     Valid,
     /// The mnemonic words were invalid
-    Invalid {
-        indices_in_mnemonic: Vec<u16>,
-    },
+    Invalid { indices_in_mnemonic: Vec<u16> },
 }
 
-impl From<InternalDeviceMnemonicValidationOutcome> for DeviceMnemonicValidationOutcome {
+impl From<InternalDeviceMnemonicValidationOutcome>
+    for DeviceMnemonicValidationOutcome
+{
     fn from(value: InternalDeviceMnemonicValidationOutcome) -> Self {
         match value {
-            InternalDeviceMnemonicValidationOutcome::Valid => DeviceMnemonicValidationOutcome::Valid,
+            InternalDeviceMnemonicValidationOutcome::Valid => {
+                DeviceMnemonicValidationOutcome::Valid
+            }
             InternalDeviceMnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic,
             } => DeviceMnemonicValidationOutcome::Invalid {
@@ -85,7 +87,9 @@ impl DeviceMnemonicBuilder {
 // ====================
 #[uniffi::export]
 impl DeviceMnemonicBuilder {
-    pub fn get_mnemonic_with_passphrase(self: Arc<Self>) -> MnemonicWithPassphrase {
+    pub fn get_mnemonic_with_passphrase(
+        self: Arc<Self>,
+    ) -> MnemonicWithPassphrase {
         self.get(|builder| builder.get_mnemonic_with_passphrase().into())
     }
 

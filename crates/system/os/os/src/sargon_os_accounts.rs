@@ -62,7 +62,13 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let account = self.create_unsaved_account_with_factor_source(factor_source, network_id, name).await?;
+        let account = self
+            .create_unsaved_account_with_factor_source(
+                factor_source,
+                network_id,
+                name,
+            )
+            .await?;
         self.add_account(account.clone()).await?;
         Ok(account)
     }
@@ -206,8 +212,16 @@ impl SargonOS {
     ) -> Result<Account> {
         let key_derivation_interactor = self.keys_derivation_interactor();
         let profile = self.profile()?;
-        let account = profile.create_unsaved_account_with_factor_source(factor_source.clone(), network_id, name, key_derivation_interactor).await?;
-        self.update_last_used_of_factor_source(factor_source.id()).await?;
+        let account = profile
+            .create_unsaved_account_with_factor_source(
+                factor_source.clone(),
+                network_id,
+                name,
+                key_derivation_interactor,
+            )
+            .await?;
+        self.update_last_used_of_factor_source(factor_source.id())
+            .await?;
         Ok(account)
     }
 }
@@ -550,16 +564,32 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
 
-    async fn create_unsaved_mainnet_account_with_main_bdfs_and_name(os: &SargonOS, name: DisplayName) -> Result<Account> {
-        os.create_unsaved_account_with_main_bdfs(NetworkID::Mainnet, name).await
+    async fn create_unsaved_mainnet_account_with_main_bdfs_and_name(
+        os: &SargonOS,
+        name: DisplayName,
+    ) -> Result<Account> {
+        os.create_unsaved_account_with_main_bdfs(NetworkID::Mainnet, name)
+            .await
     }
 
-    async fn create_unsaved_mainnet_account_with_main_bdfs(os: &SargonOS) -> Result<Account> {
-        create_unsaved_mainnet_account_with_main_bdfs_and_name(os, DisplayName::sample()).await
+    async fn create_unsaved_mainnet_account_with_main_bdfs(
+        os: &SargonOS,
+    ) -> Result<Account> {
+        create_unsaved_mainnet_account_with_main_bdfs_and_name(
+            os,
+            DisplayName::sample(),
+        )
+        .await
     }
 
-    async fn create_and_save_mainnet_account_with_main_bdfs(os: &SargonOS) -> Result<Account> {
-        os.create_and_save_new_account_with_main_bdfs(NetworkID::Mainnet, DisplayName::sample()).await
+    async fn create_and_save_mainnet_account_with_main_bdfs(
+        os: &SargonOS,
+    ) -> Result<Account> {
+        os.create_and_save_new_account_with_main_bdfs(
+            NetworkID::Mainnet,
+            DisplayName::sample(),
+        )
+        .await
     }
 
     #[actix_rt::test]
@@ -735,7 +765,7 @@ mod tests {
 
         // ACT
         let n: u32 = 10;
-        for idx in 0..n {
+        for _ in 0..n {
             os.with_timeout(|os| {
                 create_and_save_mainnet_account_with_main_bdfs(os)
             })
@@ -780,11 +810,9 @@ mod tests {
         os.with_timeout(|os| os.new_wallet(false)).await.unwrap();
 
         // ACT
-        os.with_timeout(|os| {
-            create_unsaved_mainnet_account_with_main_bdfs(os)
-        })
-        .await
-        .unwrap();
+        os.with_timeout(|os| create_unsaved_mainnet_account_with_main_bdfs(os))
+            .await
+            .unwrap();
 
         // ASSERT
         assert!(event_bus_driver
@@ -1080,9 +1108,9 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         let _ = os
-        .with_timeout(|os| {
-            create_and_save_mainnet_account_with_main_bdfs(os)
-        })
+            .with_timeout(|os| {
+                create_and_save_mainnet_account_with_main_bdfs(os)
+            })
             .await
             .unwrap();
 
@@ -1103,9 +1131,9 @@ mod tests {
 
         // ACT
         let account = os
-        .with_timeout(|os| {
-            create_and_save_mainnet_account_with_main_bdfs(os)
-        })
+            .with_timeout(|os| {
+                create_and_save_mainnet_account_with_main_bdfs(os)
+            })
             .await
             .unwrap();
 
@@ -1123,9 +1151,9 @@ mod tests {
 
         // ACT
         let account = os
-        .with_timeout(|os| {
-            create_and_save_mainnet_account_with_main_bdfs(os)
-        })
+            .with_timeout(|os| {
+                create_and_save_mainnet_account_with_main_bdfs(os)
+            })
             .await
             .unwrap();
 
@@ -1141,9 +1169,9 @@ mod tests {
         // ACT
         // so that we have at least one network (with one account)
         let _ = os
-        .with_timeout(|os| {
-            create_and_save_mainnet_account_with_main_bdfs(os)
-        })
+            .with_timeout(|os| {
+                create_and_save_mainnet_account_with_main_bdfs(os)
+            })
             .await
             .unwrap();
 

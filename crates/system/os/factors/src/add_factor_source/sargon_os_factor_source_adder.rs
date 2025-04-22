@@ -58,7 +58,8 @@ impl OsFactorSourceAdder for SargonOS {
                 .await?
         }
 
-        let save_result = self.update_profile_with(|p| {
+        let save_result = self
+            .update_profile_with(|p| {
                 p.factor_sources.append(factor_source.clone());
                 Ok(())
             })
