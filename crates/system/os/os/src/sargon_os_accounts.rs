@@ -204,6 +204,46 @@ impl SargonOS {
         .await
     }
 
+    pub async fn create_unsaved_entity_with_factor_source<E: IsEntity + Identifiable>(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<E> {
+        let key_derivation_interactor = self.keys_derivation_interactor();
+        let profile = self.profile()?;
+
+        let next_derivation_index_assigner = NextDerivationEntityIndexProfileAnalyzingAssigner::new(network_id, Some(Arc::new(profile)));
+        let index_agnostic_path = IndexAgnosticPath::new(network_id, E::entity_kind(), CAP26KeyKind::TransactionSigning, KeySpace::Unsecurified { is_hardened: true });
+        let default_index = HDPathComponent::from_local_key_space(
+            0u32,
+            index_agnostic_path.key_space,
+        )?;
+        let next_derivation_index = next_derivation_index_assigner.next(factor_source.id_from_hash(), index_agnostic_path)?.unwrap_or(default_index);
+
+        let derivation_path = DerivationPath::from_index_agnostic_path_and_component(index_agnostic_path, next_derivation_index);
+        let purpose = match E::entity_kind() {
+            CAP26EntityKind::Account => DerivationPurpose::CreatingNewAccount,
+            CAP26EntityKind::Identity => DerivationPurpose::CreatingNewPersona,
+        };
+
+        let derive_request = KeyDerivationRequest::new_mono_factor(
+            purpose,
+            factor_source.id_from_hash(),
+            IndexSet::from([derivation_path]),
+        );
+
+        let key_derivation_response = key_derivation_interactor.derive(derive_request).await?;
+
+        let derived_instance = key_derivation_response.per_factor_source.first().unwrap().1.first().unwrap();
+        let entity = E::with_veci_and_name( HDFactorInstanceTransactionSigning::<E::Path>::new(derived_instance.clone()).unwrap(), name);
+
+        self.update_last_used_of_factor_source(factor_source.id())
+            .await?;
+
+        Ok(entity)
+    }
+
     /// Creates a new non securified account **WITHOUT** adding it to Profile,
     /// using specified factor source and the "next" index for this FactorSource
     ///
@@ -221,42 +261,7 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let key_derivation_interactor = self.keys_derivation_interactor();
-        let profile = self.profile()?;
-        let number_of_accounts_on_network = profile
-        .networks
-        .get_id(network_id)
-        .map(|n| n.accounts.len())
-        .unwrap_or(0);
-
-        let next_derivation_index_assigner = NextDerivationEntityIndexProfileAnalyzingAssigner::new(network_id, Some(Arc::new(profile)));
-        let index_agnostic_path = IndexAgnosticPath::new(network_id, CAP26EntityKind::Account, CAP26KeyKind::TransactionSigning, KeySpace::Unsecurified { is_hardened: true });
-        let default_index = HDPathComponent::from_local_key_space(
-            0u32,
-            index_agnostic_path.key_space,
-        )?;
-        let next_derivation_index = next_derivation_index_assigner.next(factor_source.id_from_hash(), index_agnostic_path)?.unwrap_or(default_index);
-
-        let derivation_path = DerivationPath::from_index_agnostic_path_and_component(index_agnostic_path, next_derivation_index);
-        let derive_request = KeyDerivationRequest::new_mono_factor(
-            DerivationPurpose::CreatingNewAccount,
-            factor_source.id_from_hash(),
-            IndexSet::from([derivation_path]),
-        );
-        let key_derivation_response = key_derivation_interactor.derive(derive_request).await?;
-        
-        let derived_instance = key_derivation_response.per_factor_source.first().unwrap().1.first().unwrap();
-        let account_creating_factor_instance = HDFactorInstanceAccountCreation::try_from_factor_instance(derived_instance.clone())?;
-
-        let appearance_id= AppearanceID::from_number_of_accounts_on_network(
-            number_of_accounts_on_network,
-        );
-        let account = Account::new(account_creating_factor_instance, name, appearance_id);
-
-        self.update_last_used_of_factor_source(factor_source.id())
-            .await?;
-
-        Ok(account)
+        self.create_unsaved_entity_with_factor_source(factor_source, network_id, name).await
     }
 
     pub async fn create_unsaved_account_with_factor_source_with_derivation_outcome(

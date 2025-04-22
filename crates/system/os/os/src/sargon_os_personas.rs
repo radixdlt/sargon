@@ -277,7 +277,14 @@ impl SargonOS {
         name: DisplayName,
         persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
-        self.create_and_save_new_persona_with_factor_source_with_derivation_outcome(factor_source, network_id, name, persona_data).await.map(|(x, _)| x)
+        let mut persona: Persona = self.create_unsaved_entity_with_factor_source(factor_source, network_id, name).await?;
+
+        if let Some(persona_data) = persona_data {
+            persona.persona_data = persona_data;
+        }
+
+        self.add_persona(persona.clone()).await?;
+        Ok(persona)
     }
 
     pub async fn create_and_save_new_persona_with_factor_source_with_derivation_outcome(
