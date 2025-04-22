@@ -65,7 +65,8 @@ impl SargonOS {
             persona.persona_data = persona_data;
         }
 
-        self.update_last_used_of_factor_source(factor_source.id()).await?;
+        self.update_last_used_of_factor_source(factor_source.id())
+            .await?;
         self.add_persona(persona.clone()).await?;
         Ok(persona)
     }
