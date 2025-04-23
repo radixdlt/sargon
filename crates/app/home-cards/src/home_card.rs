@@ -17,6 +17,10 @@ use crate::prelude::*;
 /// An enum describing the different cards that Wallet can display on home page.
 /// Each card has an associated content and optional action.
 pub enum HomeCard {
+    /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
+    /// Action: Redirect user to Radix Ecosystem.
+    DiscoverRadixDapps,
+
     /// Content: "Start RadQuest, learn about Radix, earn XRD and collectibles."
     /// Action: Redirect user to RadQuest.
     StartRadQuest,
@@ -33,10 +37,6 @@ pub enum HomeCard {
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
     /// Action: None
     Connector,
-
-    /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
-    /// Action: Redirect user to Radix Ecosystem.
-    DiscoverRadixDapps,
 }
 
 impl Identifiable for HomeCard {

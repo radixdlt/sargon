@@ -123,7 +123,7 @@ impl HomeCardsManager {
     pub async fn wallet_reset(&self) -> Result<()> {
         let updated_cards = self
             .update_cards(|write_guard| {
-                **write_guard = HomeCards::new();
+                **write_guard = HomeCards::from_iter([HomeCard::DiscoverRadixDapps]);
             })
             .await?;
         self.save_cards(updated_cards).await
@@ -335,18 +335,16 @@ mod tests {
             observer.clone(),
         );
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::DiscoverRadixDapps,
             HomeCard::StartRadQuest,
             HomeCard::Connector,
-            HomeCard::DiscoverRadixDapps,
         ]);
 
         manager.wallet_created().await.unwrap();
 
         let handled_cards =
             observer.handled_cards.lock().unwrap().clone().unwrap();
-        pretty_assertions::assert_eq!(handled_cards, expected_cards);
-        pretty_assertions::assert_eq!(handled_cards[0], expected_cards[0]);
-        pretty_assertions::assert_eq!(handled_cards[1], expected_cards[1]);
+        pretty_assertions::assert_eq!(handled_cards.items(), expected_cards.items());
     }
 
     #[actix_rt::test]
@@ -366,9 +364,9 @@ mod tests {
     #[actix_rt::test]
     async fn test_wallet_created_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::DiscoverRadixDapps,
             HomeCard::StartRadQuest,
             HomeCard::Connector,
-            HomeCard::DiscoverRadixDapps,
         ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
@@ -381,8 +379,8 @@ mod tests {
         );
 
         manager.wallet_created().await.unwrap();
-        let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+        let handled_cards = observer.handled_cards.lock().unwrap().clone().unwrap();
+        pretty_assertions::assert_eq!(handled_cards.items(), expected_cards.items());
     }
 
     #[actix_rt::test]
@@ -407,13 +405,13 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
-            HomeCard::Dapp { icon_url: None },
-            HomeCard::ContinueRadQuest,
-            HomeCard::Connector,
             HomeCard::DiscoverRadixDapps,
+            HomeCard::ContinueRadQuest,
+            HomeCard::Dapp { icon_url: None },
+            HomeCard::Connector,
         ]);
-        let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+        let handled_cards = observer.handled_cards.lock().unwrap().clone().unwrap();
+        pretty_assertions::assert_eq!(handled_cards.items(), expected_cards.items());
     }
 
     #[actix_rt::test]
@@ -446,13 +444,13 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::DiscoverRadixDapps,
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
-            HomeCard::DiscoverRadixDapps,
         ]);
-        let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(handled_cards, Some(expected_cards));
+        let handled_cards = observer.handled_cards.lock().unwrap().clone().unwrap();
+        pretty_assertions::assert_eq!(handled_cards.items(), expected_cards.items());
     }
 
     #[actix_rt::test]
@@ -543,6 +541,6 @@ mod tests {
         manager.wallet_reset().await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::new());
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::from_iter([HomeCard::DiscoverRadixDapps]));
     }
 }
