@@ -41,7 +41,7 @@ extension SargonOS {
 		if !isEmulatingFreshInstall, _shared != nil {
 			throw SargonOSAlreadyBooted()
 		}
-		let shared = await SargonOS.boot(
+		let shared = try await SargonOS.boot(
 			bios: bios,
 			interactor: hostInteractor
 		)

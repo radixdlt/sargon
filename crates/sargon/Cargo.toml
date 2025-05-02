@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.2.14"
+version = "1.2.15"
 edition = "2021"
 
 resolver = "2" # features enabled in integration test

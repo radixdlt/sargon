@@ -27,7 +27,7 @@ public final class TestOS {
 	}
 
 	public convenience init(bios: BIOS) async {
-		let os = await SargonOS.boot(
+		let os = try! await SargonOS.boot(
 			bios: bios,
 			interactor: ThrowingHostInteractor.shared
 		)
