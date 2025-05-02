@@ -34,11 +34,9 @@ impl SargonOS {
         )
         .await;
 
-        Result::Ok(
-            Arc::new(SargonOS {
-                wrapped: internal_sargon_os,
-            })
-        )
+        Result::Ok(Arc::new(SargonOS {
+            wrapped: internal_sargon_os,
+        }))
     }
 
     pub async fn new_wallet(
