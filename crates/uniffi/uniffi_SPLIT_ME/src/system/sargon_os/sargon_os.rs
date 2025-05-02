@@ -19,7 +19,7 @@ impl SargonOS {
     pub async fn boot(
         bios: Arc<Bios>,
         interactor: Arc<dyn HostInteractor>,
-    ) -> Arc<Self> {
+    ) -> Result<Arc<Self>> {
         let internal_sargon_os = InternalSargonOS::boot(
             Arc::new(bios.as_ref().clone().into()),
             Interactors::new(
@@ -34,9 +34,11 @@ impl SargonOS {
         )
         .await;
 
-        Arc::new(SargonOS {
-            wrapped: internal_sargon_os,
-        })
+        Result::Ok(
+            Arc::new(SargonOS {
+                wrapped: internal_sargon_os,
+            })
+        )
     }
 
     pub async fn new_wallet(
