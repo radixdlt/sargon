@@ -9,8 +9,17 @@ pub struct AssertMatches {
 }
 
 impl AssertMatches {
+    /// Due to a legacy bug described in [VirtualEntityCreatingInstance::check_for_derivation_path_discrepancies]
+    /// this assertion regarding entity kind should become a warning and should not fail
+    /// any operation initiated by the user.
     pub fn matches(&self, path: &DerivationPath) -> DerivationPath {
-        assert_eq!(self.entity_kind, path.get_entity_kind());
+        if self.entity_kind != path.get_entity_kind() {
+            warn!(
+                "Expected path should be of entity kind {} but received {}.",
+                self.entity_kind,
+                path.get_entity_kind()
+            );
+        }
         assert_eq!(self.network_id, path.network_id());
         assert_eq!(self.key_kind, path.get_key_kind());
         assert_eq!(self.key_space, path.key_space());
