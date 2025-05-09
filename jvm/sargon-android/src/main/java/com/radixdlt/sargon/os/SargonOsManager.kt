@@ -11,12 +11,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.annotations.VisibleForTesting
 
 class SargonOsManager internal constructor(
-    bios: Bios,
-    hostInteractor: HostInteractor,
-    applicationScope: CoroutineScope,
-    defaultDispatcher: CoroutineDispatcher
+    private val bios: Bios,
+    private val hostInteractor: HostInteractor,
+    private val applicationScope: CoroutineScope,
+    private val defaultDispatcher: CoroutineDispatcher
 ) {
     private val _sargonState = MutableStateFlow<SargonOsState>(SargonOsState.Idle)
 
@@ -24,11 +25,19 @@ class SargonOsManager internal constructor(
     val sargonOs: SargonOs
         get() = (sargonState.value as? SargonOsState.Booted)?.os ?: throw SargonOsNotBooted()
 
-    init {
+    fun boot() {
         applicationScope.launch {
+            if (sargonState.value is SargonOsState.Booted) {
+                return@launch
+            }
             withContext(defaultDispatcher) {
-                val os = SargonOs.boot(bios, hostInteractor)
-                _sargonState.update { SargonOsState.Booted(os) }
+                runCatching {
+                    SargonOs.boot(bios, hostInteractor)
+                }.onSuccess { os ->
+                    _sargonState.update { SargonOsState.Booted(os) }
+                }.onFailure { error ->
+                    _sargonState.update { SargonOsState.BootError(error) }
+                }
             }
         }
     }
@@ -52,6 +61,12 @@ class SargonOsManager internal constructor(
                 instance = it
             }
         }
+
+        // Only used for testing
+        @VisibleForTesting
+        internal fun tearDown() = synchronized(this) {
+            instance = null
+        }
     }
 }
 
@@ -59,6 +74,9 @@ sealed interface SargonOsState {
     data object Idle : SargonOsState
     data class Booted(
         val os: SargonOs
+    ) : SargonOsState
+    data class BootError(
+        val error: Throwable
     ) : SargonOsState
 }
 
