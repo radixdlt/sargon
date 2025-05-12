@@ -213,5 +213,5 @@ object ApplicationModule {
         applicationScope = applicationScope,
         defaultDispatcher = dispatcher,
         hostInteractor = HostInteractorStub
-    )
+    ).also { it.boot() }
 }

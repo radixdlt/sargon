@@ -95,9 +95,10 @@ fun WalletContent(
                 title = {
                     Column {
                         Text(text = "Sargon App")
-                        val status = when (state.sargonState) {
+                        val status = when (val sargonState = state.sargonState) {
                             SargonOsState.Idle -> "Idle"
                             is SargonOsState.Booted -> "Booted"
+                            is SargonOsState.BootError -> "Boot Error\n${sargonState.error.printStackTrace()}"
                         }
                         Text(
                             text = "OS Status: $status",
