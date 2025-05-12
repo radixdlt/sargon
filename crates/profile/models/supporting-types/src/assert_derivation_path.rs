@@ -139,3 +139,33 @@ impl HighestDerivationPathIndex for SecuredEntityControl {
         committed.max(provisional)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AssertMatches;
+
+    #[test]
+    fn test_assert_matches_derivation_path_with_different_entity_kind_does_not_fail(
+    ) {
+        let sut = SUT {
+            network_id: NetworkID::Mainnet,
+            key_kind: CAP26KeyKind::TransactionSigning,
+            entity_kind: CAP26EntityKind::Identity,
+            key_space: KeySpace::Unsecurified { is_hardened: true },
+        };
+
+        let derivation_path_with_bug = AccountPath::new(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            Hardened::from_local_key_space(0u32, IsSecurified(false)).unwrap(),
+        )
+        .derivation_path();
+
+        let verified_path = sut.matches(&derivation_path_with_bug);
+
+        assert_eq!(verified_path, derivation_path_with_bug)
+    }
+}
