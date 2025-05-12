@@ -14,10 +14,10 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.VisibleForTesting
 
 class SargonOsManager internal constructor(
-    private val bios: Bios,
-    private val hostInteractor: HostInteractor,
-    private val applicationScope: CoroutineScope,
-    private val defaultDispatcher: CoroutineDispatcher
+    bios: Bios,
+    hostInteractor: HostInteractor,
+    applicationScope: CoroutineScope,
+    defaultDispatcher: CoroutineDispatcher
 ) {
     private val _sargonState = MutableStateFlow<SargonOsState>(SargonOsState.Idle)
 
@@ -25,11 +25,8 @@ class SargonOsManager internal constructor(
     val sargonOs: SargonOs
         get() = (sargonState.value as? SargonOsState.Booted)?.os ?: throw SargonOsNotBooted()
 
-    fun boot() {
+    init {
         applicationScope.launch {
-            if (sargonState.value is SargonOsState.Booted) {
-                return@launch
-            }
             withContext(defaultDispatcher) {
                 runCatching {
                     SargonOs.boot(bios, hostInteractor)

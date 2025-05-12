@@ -48,8 +48,6 @@ class SargonOsManagerTest {
         )
 
         manager.sargonState.test {
-            manager.boot()
-
             assert(awaitItem() is SargonOsState.Idle)
             assertThrows<SargonOsNotBooted> {
                 manager.sargonOs
@@ -66,13 +64,6 @@ class SargonOsManagerTest {
             defaultDispatcher = testDispatcher
         )
         assertEquals(newManager, manager)
-
-        manager.sargonState.test {
-            val alreadyBootedState = awaitItem() as SargonOsState.Booted
-            manager.boot()
-            assertEquals(alreadyBootedState, manager.sargonState.value)
-            expectNoEvents()
-        }
 
         SargonOsManager.tearDown()
     }
@@ -93,9 +84,7 @@ class SargonOsManagerTest {
             defaultDispatcher = testDispatcher
         )
 
-        // First boot should fail
         manager.sargonState.test {
-            manager.boot()
             assert(awaitItem() is SargonOsState.Idle)
             assertThrows<SargonOsNotBooted> {
                 manager.sargonOs
@@ -108,42 +97,6 @@ class SargonOsManagerTest {
             }
         }
         unmockkObject(SargonOs)
-
-        // Second boot should succeed
-        manager.sargonState.test {
-            manager.boot()
-            assertThrows<SargonOsNotBooted> {
-                manager.sargonOs
-
-            }
-            assert(awaitItem() is SargonOsState.BootError)
-            assert(awaitItem() is SargonOsState.Booted)
-            assertInstanceOf(SargonOs::class.java, manager.sargonOs)
-        }
-
-        // Any next boot should not affect the stream
-        manager.sargonState.test {
-            val alreadyBootedState = awaitItem() as SargonOsState.Booted
-            manager.boot()
-            assertEquals(alreadyBootedState, manager.sargonState.value)
-            expectNoEvents()
-        }
-
-        // Creating a new manager should not affect sargon os state
-        val newManager = SargonOsManager.factory(
-            bios = bios(),
-            hostInteractor = hostInteractor,
-            applicationScope = testScope,
-            defaultDispatcher = testDispatcher
-        )
-        assertEquals(newManager, manager)
-
-        manager.sargonState.test {
-            val alreadyBootedState = awaitItem() as SargonOsState.Booted
-            manager.boot()
-            assertEquals(alreadyBootedState, manager.sargonState.value)
-            expectNoEvents()
-        }
 
         SargonOsManager.tearDown()
     }
