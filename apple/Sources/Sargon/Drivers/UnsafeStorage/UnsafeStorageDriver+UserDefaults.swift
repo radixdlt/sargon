@@ -1,7 +1,7 @@
 import Foundation
 import SargonUniFFI
 
-// MARK: - UserDefaults + @unchecked Sendable
+// MARK: - UserDefaults + @unchecked @retroactive Sendable
 extension UserDefaults: @unchecked @retroactive Sendable {}
 
 // Makes it possible to type `.shared` on an initalizer/func taking
