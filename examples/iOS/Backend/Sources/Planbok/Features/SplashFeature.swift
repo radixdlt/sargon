@@ -53,7 +53,6 @@ public struct SplashFeature {
 			case .view(.appear):
 				struct SplashID: Hashable {}
 				return .run { [isEmulatingFreshInstall = state.isEmulatingFreshInstall] send in
-
 					let os = try await SargonOS._creatingShared(
 						bootingWith: BIOS.shared,
 						isEmulatingFreshInstall: isEmulatingFreshInstall
