@@ -43,7 +43,6 @@ struct OverlayFeature {
 
 	public var body: some ReducerOf<Self> {
 		Reduce { state, action in
-
 			switch action {
 			case .view(.task):
 				return .run { send in
