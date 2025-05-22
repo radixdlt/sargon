@@ -54,10 +54,7 @@ impl HomeCardsManager {
     /// This function should be called before invoking any other public functions.
     /// Notifies `HomeCardsObserver`.
     pub async fn bootstrap(&self) -> Result<()> {
-        let mut stored_cars = self.load_cards().await?;
-        if !stored_cars.contains_id(HomeCard::DiscoverRadixDapps) {
-            stored_cars.insert_at(HomeCard::DiscoverRadixDapps, 0);
-        }
+        let stored_cars = self.load_cards().await?;
         self.update_cards(|write_guard| {
             Self::insert_cards(write_guard, stored_cars)
         })
@@ -70,7 +67,6 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     pub async fn wallet_created(&self) -> Result<()> {
         let default_cards = HomeCards::from_iter([
-            HomeCard::DiscoverRadixDapps,
             HomeCard::Connector,
             HomeCard::StartRadQuest,
         ]);
@@ -104,7 +100,7 @@ impl HomeCardsManager {
     pub async fn wallet_restored(&self) -> Result<()> {
         let updated_cards = self
             .update_cards(|write_guard| {
-                **write_guard = HomeCards::just(HomeCard::DiscoverRadixDapps);
+                **write_guard = HomeCards::new();
             })
             .await?;
         self.save_cards(updated_cards).await
@@ -126,7 +122,7 @@ impl HomeCardsManager {
     pub async fn wallet_reset(&self) -> Result<()> {
         let updated_cards = self
             .update_cards(|write_guard| {
-                **write_guard = HomeCards::just(HomeCard::DiscoverRadixDapps);
+                **write_guard = HomeCards::new();
             })
             .await?;
         self.save_cards(updated_cards).await
@@ -147,7 +143,11 @@ impl HomeCardsManager {
         f(&mut write_guard);
 
         let updated_cards = write_guard.clone();
-        let sorted_cards = updated_cards.sort();
+        let sorted_cards = updated_cards
+            .iter()
+            .filter(|c| c.is_supported())
+            .collect::<HomeCards>()
+            .sort();
 
         self.observer.handle_cards_update(sorted_cards.clone());
         Ok(sorted_cards)
@@ -158,13 +158,16 @@ impl HomeCardsManager {
         cards: HomeCards,
     ) {
         // Insert all cards into write_guard
-        cards.into_iter().for_each(|card| {
-            if write_guard.try_insert_unique(card).is_ok() {
-                debug!("Home card inserted");
-            } else {
-                debug!("Home card insert failed");
-            }
-        });
+        cards
+            .into_iter()
+            .filter(|c| c.is_supported())
+            .for_each(|card| {
+                if write_guard.try_insert_unique(card).is_ok() {
+                    debug!("Home card inserted");
+                } else {
+                    debug!("Home card insert failed");
+                }
+            });
 
         // Check if ContinueRadQuest is present and remove StartRadQuest if it is
         if write_guard.contains_id(&HomeCard::ContinueRadQuest) {
@@ -181,12 +184,18 @@ impl HomeCardsManager {
             .load_cards()
             .await?
             .ok_or(CommonError::HomeCardsNotFound)?;
-        cards_bytes.deserialize()
+        cards_bytes
+            .deserialize::<HomeCards>()
+            .map(|cards| cards.iter().filter(|c| c.is_supported()).collect())
     }
 
     /// Saves the home cards to storage.
     async fn save_cards(&self, cards: HomeCards) -> Result<()> {
-        let bytes = cards.serialize_to_bytes()?;
+        let bytes = cards
+            .iter()
+            .filter(|c| c.is_supported())
+            .collect::<HomeCards>()
+            .serialize_to_bytes()?;
         self.cards_storage
             .save_cards(bytes.into())
             .await
@@ -312,10 +321,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             handled_cards,
-            Some(HomeCards::from_iter([
-                HomeCard::DiscoverRadixDapps,
-                HomeCard::Connector
-            ]))
+            Some(HomeCards::from_iter([HomeCard::Connector]))
         );
     }
 
@@ -343,7 +349,6 @@ mod tests {
             observer.clone(),
         );
         let expected_cards = HomeCards::from_iter(vec![
-            HomeCard::DiscoverRadixDapps,
             HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
@@ -355,26 +360,6 @@ mod tests {
         pretty_assertions::assert_eq!(
             handled_cards.items(),
             expected_cards.items()
-        );
-    }
-
-    #[actix_rt::test]
-    async fn test_old_wallet_dismissed_all_cards_boots_with_discover_dapps() {
-        let observer = Arc::new(MockHomeCardsObserver::new());
-        let manager = SUT::new(
-            Arc::new(MockNetworkingDriver::new_always_failing()),
-            NetworkID::Stokenet,
-            Arc::new(MockHomeCardsStorage::new_empty()),
-            observer.clone(),
-        );
-
-        manager.bootstrap().await.unwrap();
-
-        let handled_cards =
-            observer.handled_cards.lock().unwrap().clone().unwrap();
-        pretty_assertions::assert_eq!(
-            handled_cards.items(),
-            HomeCards::just(HomeCard::DiscoverRadixDapps).items()
         );
     }
 
@@ -393,18 +378,18 @@ mod tests {
     }
 
     #[actix_rt::test]
+    #[allow(deprecated)]
     async fn test_wallet_created_with_stored_cards() {
-        let expected_cards = HomeCards::from_iter(vec![
-            HomeCard::DiscoverRadixDapps,
-            HomeCard::StartRadQuest,
-            HomeCard::Connector,
-        ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockNetworkingDriver::new_always_failing()),
             NetworkID::Stokenet,
             Arc::new(MockHomeCardsStorage::new_with_stored_cards(
-                expected_cards.clone(),
+                HomeCards::from_iter(vec![
+                    HomeCard::DiscoverRadixDapps,
+                    HomeCard::StartRadQuest,
+                    HomeCard::Connector,
+                ]),
             )),
             observer.clone(),
         );
@@ -414,7 +399,11 @@ mod tests {
             observer.handled_cards.lock().unwrap().clone().unwrap();
         pretty_assertions::assert_eq!(
             handled_cards.items(),
-            expected_cards.items()
+            HomeCards::from_iter(vec![
+                HomeCard::StartRadQuest,
+                HomeCard::Connector,
+            ])
+            .items()
         );
     }
 
@@ -440,7 +429,6 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
-            HomeCard::DiscoverRadixDapps,
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
@@ -483,7 +471,6 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
-            HomeCard::DiscoverRadixDapps,
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
@@ -518,10 +505,7 @@ mod tests {
         manager.wallet_restored().await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(
-            handled_cards.unwrap(),
-            HomeCards::just(HomeCard::DiscoverRadixDapps)
-        );
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::new());
     }
 
     #[actix_rt::test]
@@ -543,16 +527,12 @@ mod tests {
         let handled_cards =
             observer.handled_cards.lock().unwrap().clone().unwrap();
 
-        assert_eq!(handled_cards.len(), 1);
-        assert_eq!(handled_cards.first(), Some(&HomeCard::DiscoverRadixDapps));
+        assert_eq!(handled_cards.len(), 0);
     }
 
     #[actix_rt::test]
     async fn test_card_dismissed_does_nothing_if_card_does_not_exist() {
-        let initial_cards = HomeCards::from_iter([
-            HomeCard::DiscoverRadixDapps,
-            HomeCard::Connector,
-        ]);
+        let initial_cards = HomeCards::from_iter([HomeCard::Connector]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockNetworkingDriver::new_always_failing()),
@@ -593,9 +573,6 @@ mod tests {
         manager.wallet_reset().await.unwrap();
 
         let handled_cards = observer.handled_cards.lock().unwrap().clone();
-        pretty_assertions::assert_eq!(
-            handled_cards.unwrap(),
-            HomeCards::from_iter([HomeCard::DiscoverRadixDapps])
-        );
+        pretty_assertions::assert_eq!(handled_cards.unwrap(), HomeCards::new());
     }
 }

@@ -16,9 +16,14 @@ use crate::prelude::*;
 
 /// An enum describing the different cards that Wallet can display on home page.
 /// Each card has an associated content and optional action.
+#[allow(deprecated)]
 pub enum HomeCard {
     /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
     /// Action: Redirect user to Radix Ecosystem.
+    #[deprecated(
+        since = "1.2.18", // (1.14.0 in wallets)
+        note = "The wallets display a built-in section for dApp discovery. This HomeCard is no longer necessary."
+    )]
     DiscoverRadixDapps,
 
     /// Content: "Start RadQuest, learn about Radix, earn XRD and collectibles."
@@ -37,6 +42,18 @@ pub enum HomeCard {
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
     /// Action: None
     Connector,
+}
+
+impl HomeCard {
+    /// Defines which cards are supported and which need to be ignored by wallets.
+    #[allow(deprecated)]
+    pub fn is_supported(&self) -> bool {
+        if self == &HomeCard::DiscoverRadixDapps {
+            return false;
+        }
+
+        true
+    }
 }
 
 impl Identifiable for HomeCard {
