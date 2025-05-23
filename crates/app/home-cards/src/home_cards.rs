@@ -52,19 +52,13 @@ mod tests {
 
     #[test]
     fn sort() {
-        let result = SUT::from_iter(vec![
-            HomeCard::Connector,
-            HomeCard::StartRadQuest,
-            HomeCard::DiscoverRadixDapps,
-        ])
-        .sort()
-        .items();
-        let expected_result = SUT::from_iter(vec![
-            HomeCard::DiscoverRadixDapps,
-            HomeCard::StartRadQuest,
-            HomeCard::Connector,
-        ])
-        .items();
+        let result =
+            SUT::from_iter(vec![HomeCard::Connector, HomeCard::StartRadQuest])
+                .sort()
+                .items();
+        let expected_result =
+            SUT::from_iter(vec![HomeCard::StartRadQuest, HomeCard::Connector])
+                .items();
         pretty_assertions::assert_eq!(result, expected_result);
     }
 }
