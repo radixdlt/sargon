@@ -16,11 +16,11 @@ use crate::prelude::*;
 
 /// An enum describing the different cards that Wallet can display on home page.
 /// Each card has an associated content and optional action.
+///
+/// **Deprecated cards:**
+/// Some cards used in the past have been removed.
+/// - One example is `DiscoverRadixDapps` which is now a separate tab in home screen.1
 pub enum HomeCard {
-    /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
-    /// Action: Redirect user to Radix Ecosystem.
-    DiscoverRadixDapps,
-
     /// Content: "Start RadQuest, learn about Radix, earn XRD and collectibles."
     /// Action: Redirect user to RadQuest.
     StartRadQuest,
