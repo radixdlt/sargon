@@ -1,0 +1,101 @@
+{
+  "non_fungible_id_type": "Bytes",
+  "ledger_state": {
+    "network": "mainnet",
+    "state_version": 296029700,
+    "proposer_round_timestamp": "2025-05-27T14:44:33.608Z",
+    "epoch": 207050,
+    "round": 252
+  },
+  "resource_address": "resource_rdx1n2dd0w53zpdlqdz65vpymygj8a60vqnggyuxfpfdldjmy2224x020q",
+  "non_fungible_ids": [
+    {
+      "is_burned": false,
+      "non_fungible_id": "[9a5fb8db4539384dfe275647bfef559e]",
+      "data": {
+        "raw_hex": "5c21070c0b62616b697263692e78726422010180513e859de428805aa7f645ff3f80eb1d2aa76e97f7910f5d91252e550574052476c1670000000022010105a4a9a269000000002201012102805da66318c6318c61f5a61b4c6318c6318cf794aa8d295f14e6318c6318c6a0000020c65abc8ed70a0000000000000000000000000000002200000c2568747470733a2f2f71722e726e732e666f756e646174696f6e2f62616b697263692e787264",
+        "programmatic_json": {
+          "fields": [
+            {
+              "value": "bakirci.xrd",
+              "kind": "String",
+              "field_name": "name"
+            },
+            {
+              "variant_id": "1",
+              "variant_name": "Some",
+              "fields": [
+                {
+                  "value": "account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4",
+                  "kind": "Reference",
+                  "type_name": "ComponentAddress"
+                }
+              ],
+              "kind": "Enum",
+              "type_name": "Option",
+              "field_name": "address"
+            },
+            {
+              "value": "1740731940",
+              "kind": "I64",
+              "field_name": "created_timestamp"
+            },
+            {
+              "variant_id": "1",
+              "variant_name": "Some",
+              "fields": [
+                {
+                  "value": "1772267940",
+                  "kind": "I64"
+                }
+              ],
+              "kind": "Enum",
+              "type_name": "Option",
+              "field_name": "last_valid_timestamp"
+            },
+            {
+              "variant_id": "1",
+              "variant_name": "Some",
+              "fields": [
+                {
+                  "fields": [
+                    {
+                      "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
+                      "kind": "Reference",
+                      "type_name": "ResourceAddress"
+                    },
+                    {
+                      "value": "200",
+                      "kind": "Decimal"
+                    }
+                  ],
+                  "kind": "Tuple"
+                }
+              ],
+              "kind": "Enum",
+              "type_name": "Option",
+              "field_name": "deposit_amount"
+            },
+            {
+              "variant_id": "0",
+              "variant_name": "None",
+              "fields": [],
+              "kind": "Enum",
+              "type_name": "Option",
+              "field_name": "primary_domain"
+            },
+            {
+              "value": "https://qr.rns.foundation/bakirci.xrd",
+              "kind": "String",
+              "type_name": "Url",
+              "field_name": "key_image_url"
+            }
+          ],
+          "kind": "Tuple",
+          "type_name": "Domain"
+        }
+      },
+      "last_updated_at_state_version": 233548509
+    }
+  ]
+}

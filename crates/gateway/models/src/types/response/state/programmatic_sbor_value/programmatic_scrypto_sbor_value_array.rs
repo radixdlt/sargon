@@ -1,9 +1,7 @@
-
-use serde::{Deserialize, Serialize};
 use crate::*;
+use serde::{Deserialize, Serialize};
 
-
-#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProgrammaticScryptoSborValueArray {
     pub element_kind: ProgrammaticScryptoSborValueKind,
     pub element_type_name: Option<String>,
@@ -13,7 +11,10 @@ pub struct ProgrammaticScryptoSborValueArray {
 }
 
 impl ProgrammaticScryptoSborValueArray {
-    pub fn new(element_kind: ProgrammaticScryptoSborValueKind, elements: Vec<ProgrammaticScryptoSborValue>) -> ProgrammaticScryptoSborValueArray {
+    pub fn new(
+        element_kind: ProgrammaticScryptoSborValueKind,
+        elements: Vec<ProgrammaticScryptoSborValue>,
+    ) -> ProgrammaticScryptoSborValueArray {
         ProgrammaticScryptoSborValueArray {
             element_kind,
             element_type_name: None,
@@ -23,4 +24,3 @@ impl ProgrammaticScryptoSborValueArray {
         }
     }
 }
-

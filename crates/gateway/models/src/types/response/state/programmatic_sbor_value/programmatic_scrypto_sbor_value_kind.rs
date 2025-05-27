@@ -1,13 +1,21 @@
-
-
 use crate::*;
 use serde::{Deserialize, Serialize};
 
-/// ProgrammaticScryptoSborValueKind : These are the Scrypto SBOR `ValueKind`s, but with `Bytes` added as an alias for `Vec`, to display such values as hex-encoded strings. 
-/// These are the Scrypto SBOR `ValueKind`s, but with `Bytes` added as an alias for `Vec`, to display such values as hex-encoded strings. 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
+/// ProgrammaticScryptoSborValueKind : These are the Scrypto SBOR `ValueKind`s, but with `Bytes` added as an alias for `Vec`, to display such values as hex-encoded strings.
+/// These are the Scrypto SBOR `ValueKind`s, but with `Bytes` added as an alias for `Vec`, to display such values as hex-encoded strings.
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    Serialize,
+    Deserialize,
+)]
 pub enum ProgrammaticScryptoSborValueKind {
-
     Bool,
 
     I8,
@@ -51,7 +59,6 @@ pub enum ProgrammaticScryptoSborValueKind {
     PreciseDecimal,
 
     NonFungibleLocalId,
-
 }
 
 impl std::fmt::Display for ProgrammaticScryptoSborValueKind {
@@ -88,4 +95,3 @@ impl Default for ProgrammaticScryptoSborValueKind {
         Self::Bool
     }
 }
-

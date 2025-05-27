@@ -541,6 +541,25 @@ impl GatewayClient {
     }
 }
 
+impl GatewayClient {
+    pub async fn fetch_non_fungible_data(
+        &self,
+        collection_address: NonFungibleResourceAddress,
+        id: NonFungibleLocalId,
+    ) -> Result<NonFungibleTokenData> {
+        let request = StateNonFungibleDataRequest::new(collection_address, [id.clone()], None);
+        let response = self.state_non_fungible_data(request)
+            .await?;
+        let item = response.non_fungible_ids.first().unwrap();
+        Ok(
+            NonFungibleTokenData::new(
+                NonFungibleGlobalId::new(collection_address, id),
+                item.data.clone()
+            )
+        )
+    }
+}
+
 #[cfg(test)]
 mod fetch_all_resources_tests {
     use crate::prelude::*;
@@ -961,3 +980,29 @@ mod filter_transferable_tests {
         }
     }
 }
+
+// #[cfg(test)]
+// mod non_fungible_data_tests {
+//     use crate::prelude::*;
+//     use profile_gateway::prelude::Gateway;
+
+//     #[allow(clippy::upper_case_acronyms)]
+//     type SUT = GatewayClient;
+
+//     #[actix_rt::test]
+//     async fn fetch_non_fungible_data() {
+//         // Mock the driver
+
+//         let mock_driver = MockNetworkingDriver::new_with_responses(vec![
+//             entity_details_response,
+//         ]);
+//         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
+
+
+//         let collection_address = NonFungibleResourceAddress::sample_mainnet();
+//         let id = NonFungibleLocalId::sample();
+//         let result = sut.fetch_non_fungible_data(collection_address, id).await.unwrap();
+
+//         assert!(result.is_some());
+//     }
+// }

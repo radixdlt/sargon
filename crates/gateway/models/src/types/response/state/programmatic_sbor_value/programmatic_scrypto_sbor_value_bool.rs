@@ -1,9 +1,7 @@
-
-
 use crate::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Default, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ProgrammaticScryptoSborValueBool {
     pub field_name: Option<String>,
     pub type_name: Option<String>,
@@ -19,4 +17,3 @@ impl ProgrammaticScryptoSborValueBool {
         }
     }
 }
-
