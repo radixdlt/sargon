@@ -52,15 +52,17 @@ impl RadixNameService {
         &self,
         domain: String,
     ) -> Result<ResolvedReceiver> {
-        if domain == "invalid.xrd" {
-            Err(CommonError::Unknown)
-        } else {
-            Ok(
-            ResolvedReceiver {
-                domain: domain,
-                account: InternalAccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap().into(),
-            }
-        )
-        }
+        self.wrapped
+            .resolve_receiver_account_for_domain(
+                InternalDomain::new(domain.clone()).into(),
+            )
+            .await
+            .and_then(|resolved| {
+                Ok(ResolvedReceiver {
+                    domain: domain,
+                    account: resolved.account.into(),
+                })
+            })
+            .into_result()
     }
 }

@@ -77,9 +77,28 @@ impl RadixNameService {
     }
 }
 
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub struct ResolvedReceiver {
+    pub domain: Domain,
+    pub account: AccountAddress,
+}
+
 impl RadixNameService {
-    pub async fn resolve_receiver_account_for_domain(&self, domain: Domain) {
-        todo!()
+    pub async fn resolve_receiver_account_for_domain(
+        &self,
+        domain: Domain,
+    ) -> Result<ResolvedReceiver> {
+        let record = self
+            .resolve_record(domain.clone(), Docket::wildcard_receiver())
+            .await?;
+        let account = match record.value {
+            ProgrammaticScryptoSborValue::String(account_str) => {
+                AccountAddress::from_str(&account_str.value)?
+            }
+            _ => return Err(CommonError::Unknown),
+        };
+
+        Ok(ResolvedReceiver { domain, account })
     }
 }
 
@@ -100,11 +119,13 @@ impl RadixNameService {
         Ok(fetched_domain_details)
     }
 
-    async fn resolve_record(&self, domain: Domain, docket: Docket) {
-        // Get domain details
-        // Validate domain authenticity
-        // Fetch record details
-        todo!()
+    async fn resolve_record(
+        &self,
+        domain: Domain,
+        docket: Docket,
+    ) -> Result<RecordDetails> {
+        self.fetch_record_details(domain.clone(), docket.clone())
+            .await
     }
 
     async fn check_domain_authenticity(
@@ -156,6 +177,46 @@ impl RadixNameService {
 
     async fn fetch_account_domains(&self, account: AccountAddress) {
         todo!()
+    }
+}
+
+#[cfg(test)]
+mod pub_api_tests {
+    use super::*;
+    use prelude::fixture_gw_model;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = RadixNameService;
+
+    #[actix_rt::test]
+    async fn test_resolve_receiver_account_for_domain() {
+        let (_, json) = fixture_and_json::<StateNonFungibleDataResponse>(
+            fixture_gw_model!("state/request_non_fungible_data_domain_record"),
+        )
+        .unwrap();
+
+        let body = json.serialize_to_bytes().unwrap();
+
+        let mock_antenna =
+            MockNetworkingDriver::with_spy(200, body, |req, v| {});
+
+        let sut =
+            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
+                .unwrap();
+
+        let domain = Domain::new("grenadine.xrd".to_owned());
+        let result = sut
+            .resolve_receiver_account_for_domain(domain.clone())
+            .await
+            .unwrap();
+
+        assert_eq!(
+            result,
+            ResolvedReceiver {
+                domain,
+                account: AccountAddress::from_str("account_rdx128pu3gp74hgl0a9d6d899vd0nn8wh5z0syrkvp28hd492dk0u8fe8t").unwrap()
+            }
+        );
     }
 }
 
