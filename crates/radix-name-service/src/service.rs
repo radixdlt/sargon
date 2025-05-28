@@ -14,11 +14,11 @@ struct RadixNameServiceConfig {
 impl RadixNameServiceConfig {
     fn new(
         domains_collection_address: NonFungibleResourceAddress,
-    records_collection_address: NonFungibleResourceAddress,
+        records_collection_address: NonFungibleResourceAddress,
     ) -> Self {
         Self {
             domains_collection_address,
-            records_collection_address
+            records_collection_address,
         }
     }
 
@@ -50,8 +50,13 @@ impl RadixNameService {
         }
     }
 
-    pub fn new_xrd_domains(networking_driver: Arc<dyn NetworkingDriver>, network_id: NetworkID) -> Result<Self> {
-        if let config = Self::xrd_domains_config().get(&network_id).unwrap().clone() {
+    pub fn new_xrd_domains(
+        networking_driver: Arc<dyn NetworkingDriver>,
+        network_id: NetworkID,
+    ) -> Result<Self> {
+        if let config =
+            Self::xrd_domains_config().get(&network_id).unwrap().clone()
+        {
             Ok(Self::new(networking_driver, config, network_id))
         } else {
             Err(CommonError::Unknown)
@@ -60,17 +65,20 @@ impl RadixNameService {
 
     fn xrd_domains_config() -> HashMap<NetworkID, RadixNameServiceConfig> {
         HashMap::from([
-            (NetworkID::Mainnet, RadixNameServiceConfig::xrd_domains_mainnet()),
-            (NetworkID::Stokenet, RadixNameServiceConfig::xrd_domains_stokenet()),
+            (
+                NetworkID::Mainnet,
+                RadixNameServiceConfig::xrd_domains_mainnet(),
+            ),
+            (
+                NetworkID::Stokenet,
+                RadixNameServiceConfig::xrd_domains_stokenet(),
+            ),
         ])
     }
 }
 
 impl RadixNameService {
-    pub async fn resolve_receiver_account_for_domain(
-        &self,
-        domain: Domain,
-    ) {
+    pub async fn resolve_receiver_account_for_domain(&self, domain: Domain) {
         todo!()
     }
 }
@@ -92,11 +100,7 @@ impl RadixNameService {
         Ok(fetched_domain_details)
     }
 
-    async fn resolve_record(
-        &self,
-        domain: Domain,
-        docket: Docket
-    ) {
+    async fn resolve_record(&self, domain: Domain, docket: Docket) {
         // Get domain details
         // Validate domain authenticity
         // Fetch record details
@@ -109,8 +113,6 @@ impl RadixNameService {
     ) -> Result<()> {
         Ok(())
     }
-
-
 }
 
 /// Fetch
@@ -123,7 +125,10 @@ impl RadixNameService {
 
         let data = self
             .gateway_client
-            .fetch_non_fungible_data(self.config.domains_collection_address.clone(), domain_id)
+            .fetch_non_fungible_data(
+                self.config.domains_collection_address.clone(),
+                domain_id,
+            )
             .await?;
         let sbor_data = data.data.ok_or(CommonError::Unknown)?;
 
@@ -133,53 +138,50 @@ impl RadixNameService {
     async fn fetch_record_details(
         &self,
         domain: Domain,
-        docket: Docket
+        docket: Docket,
     ) -> Result<RecordDetails> {
         let record_id = docket.to_non_fungible_id(domain.clone())?;
 
         let data = self
             .gateway_client
-            .fetch_non_fungible_data(self.config.records_collection_address.clone(), record_id)
+            .fetch_non_fungible_data(
+                self.config.records_collection_address.clone(),
+                record_id,
+            )
             .await?;
         let sbor_data = data.data.ok_or(CommonError::Unknown)?;
 
         TryFrom::try_from(sbor_data)
     }
 
-    async fn fetch_account_domains(
-        &self,
-        account: AccountAddress
-    ) {
+    async fn fetch_account_domains(&self, account: AccountAddress) {
         todo!()
     }
 }
 
 #[cfg(test)]
 mod fetch_tests {
-    use prelude::fixture_gw_model;
     use super::*;
+    use prelude::fixture_gw_model;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = RadixNameService;
 
     #[actix_rt::test]
     async fn test_fetch_domain_details() {
-        let (_, json) = fixture_and_json::<StateNonFungibleDataResponse>(fixture_gw_model!(
-            "state/request_non_fungible_data_domain"
-        ))
+        let (_, json) = fixture_and_json::<StateNonFungibleDataResponse>(
+            fixture_gw_model!("state/request_non_fungible_data_domain"),
+        )
         .unwrap();
 
         let body = json.serialize_to_bytes().unwrap();
 
         let mock_antenna =
-            MockNetworkingDriver::with_spy(200, body, |req, v| {
+            MockNetworkingDriver::with_spy(200, body, |req, v| {});
 
-            });
-
-        let sut = SUT::new_xrd_domains(
-            Arc::new(mock_antenna),
-             NetworkID::Mainnet
-            ).unwrap();
+        let sut =
+            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
+                .unwrap();
 
         let domain = Domain::new("bakirci.xrd".to_owned());
         let result = sut.fetch_domain_details(domain.clone()).await.unwrap();
@@ -193,26 +195,26 @@ mod fetch_tests {
 
     #[actix_rt::test]
     async fn test_fetch_domain_record_details() {
-        let (_, json) = fixture_and_json::<StateNonFungibleDataResponse>(fixture_gw_model!(
-            "state/request_non_fungible_data_domain_record"
-        ))
+        let (_, json) = fixture_and_json::<StateNonFungibleDataResponse>(
+            fixture_gw_model!("state/request_non_fungible_data_domain_record"),
+        )
         .unwrap();
 
         let body = json.serialize_to_bytes().unwrap();
 
         let mock_antenna =
-            MockNetworkingDriver::with_spy(200, body, |req, v| {
+            MockNetworkingDriver::with_spy(200, body, |req, v| {});
 
-            });
-
-        let sut = SUT::new_xrd_domains(
-            Arc::new(mock_antenna),
-             NetworkID::Mainnet
-            ).unwrap();
+        let sut =
+            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
+                .unwrap();
 
         let domain = Domain::new("grenadine.xrd".to_owned());
         let docket = Docket::wildcard_receiver();
-        let result = sut.fetch_record_details(domain.clone(), docket.clone()).await.unwrap();
+        let result = sut
+            .fetch_record_details(domain.clone(), docket.clone())
+            .await
+            .unwrap();
 
         let expected_details = RecordDetails::new(
             domain.to_non_fungible_id().unwrap(),

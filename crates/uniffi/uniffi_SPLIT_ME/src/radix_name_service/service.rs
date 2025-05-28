@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use indexmap::map::raw_entry_v1::RawEntryMut;
 use sargon::AccountAddress as InternalAccountAddress;
-use sargon::RadixNameService as InternalRadixNameService;
 use sargon::Domain as InternalDomain;
+use sargon::RadixNameService as InternalRadixNameService;
 
 #[derive(uniffi::Object)]
 pub struct RadixNameService {

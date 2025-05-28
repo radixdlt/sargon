@@ -21,10 +21,10 @@ pub mod prelude {
     pub use crate::core::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
-    pub use crate::radix_name_service::*;
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
+    pub use crate::radix_name_service::*;
     pub use crate::security_center::*;
     pub use crate::signing::*;
     pub use crate::system::*;

@@ -10,10 +10,7 @@ pub struct Docket {
 
 impl Docket {
     pub fn new(context: DocketContext, directive: Directive) -> Self {
-        Self {
-            context,
-            directive,
-        }
+        Self { context, directive }
     }
 
     pub fn to_non_fungible_id(
@@ -24,10 +21,7 @@ impl Docket {
         let context_str = self.context.to_string();
         let directive_str = self.directive.0.clone();
 
-        let id_str = format!(
-            "{}-{}-{}",
-            domain_id, context_str, directive_str
-        );
+        let id_str = format!("{}-{}-{}", domain_id, context_str, directive_str);
 
         domain_to_non_fungible_id(&id_str, true)
     }
@@ -102,9 +96,9 @@ mod tests {
         let domain = Domain::new("grenadine.xrd".to_string());
 
         let id = docket.to_non_fungible_id(domain).unwrap();
-        let expected_id = NonFungibleLocalId::from_str(
-            "[663c8eb2eaf0907ea4dd742be3b4c606]",
-        ).unwrap();
+        let expected_id =
+            NonFungibleLocalId::from_str("[663c8eb2eaf0907ea4dd742be3b4c606]")
+                .unwrap();
 
         assert_eq!(id, expected_id)
     }

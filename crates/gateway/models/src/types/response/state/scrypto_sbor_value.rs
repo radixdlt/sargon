@@ -6,10 +6,7 @@ pub struct ScryptoSborValue {
     pub programmatic_json: ProgrammaticScryptoSborValue,
 }
 pub trait ScryptoSborValueFieldExtraction {
-    fn get_string_field(
-        &self,
-        name: &str,
-    ) -> Option<String>;
+    fn get_string_field(&self, name: &str) -> Option<String>;
     fn get_enum_field(
         &self,
         name: &str,
@@ -23,9 +20,7 @@ pub trait ScryptoSborValueFieldExtraction {
         name: &str,
     ) -> Option<NonFungibleLocalId>;
 
-    fn first_string_field(
-        &self,
-    ) -> Option<String>;
+    fn first_string_field(&self) -> Option<String>;
 
     fn first_reference_field(
         &self,
@@ -33,10 +28,7 @@ pub trait ScryptoSborValueFieldExtraction {
 }
 
 impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
-    fn get_string_field(
-        &self,
-        name: &str,
-    ) -> Option<String> {
+    fn get_string_field(&self, name: &str) -> Option<String> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::String(str_sbor_value) => {
                 if str_sbor_value.field_name == Some(name.to_owned()) {
@@ -92,9 +84,7 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
         })
     }
 
-    fn first_string_field(
-        &self,
-    ) -> Option<String> {
+    fn first_string_field(&self) -> Option<String> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::String(string_sbor_value) => {
                 return Some(string_sbor_value.value.clone())
@@ -102,7 +92,7 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
             _ => return None,
         })
     }
-    
+
     fn get_non_fungible_local_id_field(
         &self,
         name: &str,
@@ -114,7 +104,10 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
                 if non_fungible_local_id_sbor_value.field_name
                     == Some(name.to_owned())
                 {
-                    return NonFungibleLocalId::from_str(&non_fungible_local_id_sbor_value.value).ok();
+                    return NonFungibleLocalId::from_str(
+                        &non_fungible_local_id_sbor_value.value,
+                    )
+                    .ok();
                 } else {
                     return None;
                 }

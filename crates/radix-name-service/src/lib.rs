@@ -2,8 +2,8 @@ mod common;
 mod service;
 
 pub mod prelude {
-    pub(crate) use crate::common::*;
     pub use crate::common::Domain;
+    pub(crate) use crate::common::*;
     pub use crate::service::*;
 
     pub(crate) use addresses::prelude::*;
