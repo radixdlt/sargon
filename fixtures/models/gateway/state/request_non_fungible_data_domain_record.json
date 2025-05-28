@@ -1,0 +1,88 @@
+{
+    "non_fungible_id_type": "Bytes",
+    "ledger_state": {
+      "network": "mainnet",
+      "state_version": 296698051,
+      "proposer_round_timestamp": "2025-05-28T12:07:31.836Z",
+      "epoch": 207306,
+      "round": 1870
+    },
+    "resource_address": "resource_rdx1nf7lt68zan0fvlfqqrtnxasxjmv877ncnr2kpdl69t076sw4whjc27",
+    "non_fungible_ids": [
+      {
+        "is_burned": false,
+        "non_fungible_id": "[663c8eb2eaf0907ea4dd742be3b4c606]",
+        "data": {
+          "raw_hex": "5c2107200c00c0021017fc13db52193bca352110102a2da4f20c097265636569766572732201010c012a2201010c1e7872642e646f6d61696e733a7265636569766572732e77696c64636172642201010c426163636f756e745f7264783132387075336770373468676c3061396436643839397664306e6e387768357a307379726b767032386864343932646b307538666538740c3968747470733a2f2f726e732e666f756e646174696f6e2f6173736574732f69636f6e732f696e646976696475616c2d7265636f72642e706e67",
+          "programmatic_json": {
+            "fields": [
+              {
+                "element_kind": "String",
+                "elements": [],
+                "kind": "Array",
+                "field_name": "id_additions"
+              },
+              {
+                "value": "[17fc13db52193bca352110102a2da4f2]",
+                "kind": "NonFungibleLocalId",
+                "field_name": "domain_id"
+              },
+              {
+                "value": "receivers",
+                "kind": "String",
+                "field_name": "context"
+              },
+              {
+                "variant_id": "1",
+                "variant_name": "Some",
+                "fields": [
+                  {
+                    "value": "*",
+                    "kind": "String"
+                  }
+                ],
+                "kind": "Enum",
+                "type_name": "Option",
+                "field_name": "directive"
+              },
+              {
+                "variant_id": "1",
+                "variant_name": "Some",
+                "fields": [
+                  {
+                    "value": "xrd.domains:receivers.wildcard",
+                    "kind": "String"
+                  }
+                ],
+                "kind": "Enum",
+                "type_name": "Option",
+                "field_name": "platform_identifier"
+              },
+              {
+                "variant_id": "1",
+                "variant_name": "Some",
+                "fields": [
+                  {
+                    "value": "account_rdx128pu3gp74hgl0a9d6d899vd0nn8wh5z0syrkvp28hd492dk0u8fe8t",
+                    "kind": "String"
+                  }
+                ],
+                "kind": "Enum",
+                "type_name": "Option",
+                "field_name": "value"
+              },
+              {
+                "value": "https://rns.foundation/assets/icons/individual-record.png",
+                "kind": "String",
+                "type_name": "Url",
+                "field_name": "key_image_url"
+              }
+            ],
+            "kind": "Tuple",
+            "type_name": "Record"
+          }
+        },
+        "last_updated_at_state_version": 295137226
+      }
+    ]
+  }

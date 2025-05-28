@@ -2,6 +2,7 @@ use std::fmt::format;
 
 use crate::prelude::*;
 
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Docket {
     pub context: DocketContext,
     pub directive: Directive,
@@ -38,14 +39,20 @@ impl Docket {
     }
 }
 
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Directive(String);
 
 impl Directive {
+    pub fn new(directive: String) -> Self {
+        Self(directive)
+    }
+
     pub fn wildcard() -> Self {
         Self("*".to_owned())
     }
 }
 
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum DocketContext {
     Receivers,
     Delegation,
@@ -53,6 +60,22 @@ pub enum DocketContext {
     Social,
     Discovery,
     Widgets,
+}
+
+impl FromStr for DocketContext {
+    type Err = CommonError;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "receivers" => Ok(DocketContext::Receivers),
+            "delegation" => Ok(DocketContext::Delegation),
+            "navigation" => Ok(DocketContext::Navigation),
+            "social" => Ok(DocketContext::Social),
+            "discovery" => Ok(DocketContext::Discovery),
+            "widgets" => Ok(DocketContext::Widgets),
+            _ => Err(CommonError::Unknown),
+        }
+    }
 }
 
 impl ToString for DocketContext {

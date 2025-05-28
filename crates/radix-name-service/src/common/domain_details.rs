@@ -21,7 +21,6 @@ impl TryFrom<ScryptoSborValue> for DomainDetails {
                 let name = tuple
                     .fields
                     .get_string_field("name")
-                    .map(|field| field.value)
                     .ok_or(CommonError::Unknown)?;
                 let owner_address = tuple
                     .fields

@@ -9,7 +9,7 @@ pub trait ScryptoSborValueFieldExtraction {
     fn get_string_field(
         &self,
         name: &str,
-    ) -> Option<ProgrammaticScryptoSborValueString>;
+    ) -> Option<String>;
     fn get_enum_field(
         &self,
         name: &str,
@@ -18,6 +18,15 @@ pub trait ScryptoSborValueFieldExtraction {
         &self,
         name: &str,
     ) -> Option<ProgrammaticScryptoSborValueReference>;
+    fn get_non_fungible_local_id_field(
+        &self,
+        name: &str,
+    ) -> Option<NonFungibleLocalId>;
+
+    fn first_string_field(
+        &self,
+    ) -> Option<String>;
+
     fn first_reference_field(
         &self,
     ) -> Option<ProgrammaticScryptoSborValueReference>;
@@ -27,11 +36,11 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
     fn get_string_field(
         &self,
         name: &str,
-    ) -> Option<ProgrammaticScryptoSborValueString> {
+    ) -> Option<String> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::String(str_sbor_value) => {
                 if str_sbor_value.field_name == Some(name.to_owned()) {
-                    return Some(str_sbor_value.clone());
+                    return Some(str_sbor_value.value.clone());
                 } else {
                     return None;
                 }
@@ -78,6 +87,37 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::Reference(reference_sbor_value) => {
                 return Some(reference_sbor_value.clone())
+            }
+            _ => return None,
+        })
+    }
+
+    fn first_string_field(
+        &self,
+    ) -> Option<String> {
+        self.iter().find_map(|field| match field {
+            ProgrammaticScryptoSborValue::String(string_sbor_value) => {
+                return Some(string_sbor_value.value.clone())
+            }
+            _ => return None,
+        })
+    }
+    
+    fn get_non_fungible_local_id_field(
+        &self,
+        name: &str,
+    ) -> Option<NonFungibleLocalId> {
+        self.iter().find_map(|field| match field {
+            ProgrammaticScryptoSborValue::NonFungibleLocalId(
+                non_fungible_local_id_sbor_value,
+            ) => {
+                if non_fungible_local_id_sbor_value.field_name
+                    == Some(name.to_owned())
+                {
+                    return NonFungibleLocalId::from_str(&non_fungible_local_id_sbor_value.value).ok();
+                } else {
+                    return None;
+                }
             }
             _ => return None,
         })
