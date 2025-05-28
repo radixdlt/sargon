@@ -46,7 +46,7 @@ pub struct ResolvedReceiver {
 }
 
 #[uniffi::export]
-impl HomeCardsManager {
+impl RadixNameService {
     /// Initializes `HomeCards` by loading from storage.
     /// This function should be called before invoking any other public functions.
     /// Notifies `HomeCardsObserver`.
