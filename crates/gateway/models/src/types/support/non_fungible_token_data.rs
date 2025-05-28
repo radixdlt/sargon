@@ -8,10 +8,10 @@ pub struct NonFungibleTokenData {
 }
 
 impl NonFungibleTokenData {
-    pub fn new(id: NonFungibleGlobalId, data: Option<ScryptoSborValue>) -> Self {
-        Self {
-            id,
-            data
-        }
+    pub fn new(
+        id: NonFungibleGlobalId,
+        data: Option<ScryptoSborValue>,
+    ) -> Self {
+        Self { id, data }
     }
 }

@@ -4,5 +4,12 @@ version = "1.2.18"
 edition = "2021"
 
 [dependencies]
-gateway-client-and-api = { workspace = true }
 k256 = { workspace = true }
+addresses = { workspace = true }
+bytes = { workspace = true }
+core-utils = { workspace = true }
+network = { workspace = true }
+metadata = { workspace = true }
+drivers = { workspace = true }
+gateway-client-and-api = { workspace = true }
+gateway-models = { workspace = true }

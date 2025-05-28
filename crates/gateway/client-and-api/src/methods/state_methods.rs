@@ -547,16 +547,17 @@ impl GatewayClient {
         collection_address: NonFungibleResourceAddress,
         id: NonFungibleLocalId,
     ) -> Result<NonFungibleTokenData> {
-        let request = StateNonFungibleDataRequest::new(collection_address, [id.clone()], None);
-        let response = self.state_non_fungible_data(request)
-            .await?;
+        let request = StateNonFungibleDataRequest::new(
+            collection_address,
+            [id.clone()],
+            None,
+        );
+        let response = self.state_non_fungible_data(request).await?;
         let item = response.non_fungible_ids.first().unwrap();
-        Ok(
-            NonFungibleTokenData::new(
-                NonFungibleGlobalId::new(collection_address, id),
-                item.data.clone()
-            )
-        )
+        Ok(NonFungibleTokenData::new(
+            NonFungibleGlobalId::new(collection_address, id),
+            item.data.clone(),
+        ))
     }
 }
 
@@ -997,7 +998,6 @@ mod filter_transferable_tests {
 //             entity_details_response,
 //         ]);
 //         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
-
 
 //         let collection_address = NonFungibleResourceAddress::sample_mainnet();
 //         let id = NonFungibleLocalId::sample();

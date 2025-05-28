@@ -31,7 +31,7 @@ mod tests {
             "state/request_non_fungible_data_domain"
         ))
         .unwrap();
-        
+
         let data = response.0.non_fungible_ids.first().unwrap().data.clone();
         assert!(data.is_some(), "Expected data to be present");
         print!("Decoded NFT data: {:?}", data);
