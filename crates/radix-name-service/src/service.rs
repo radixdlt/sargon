@@ -1,17 +1,6 @@
-use gateway_client_and_api::NonFungibleResourceAddress;
-
 use crate::prelude::*;
 
-#[derive(PartialEq, Eq, Clone)]
-struct Domain(String);
-
-#[derive(PartialEq, Eq, Clone)]
-struct DomainDetails {
-    domain: Domain,
-    owner: AccountAddress,
-}
-
-struct RadixNameService {
+pub struct RadixNameService {
     domains_collection: NonFungibleResourceAddress,
     records_collection: NonFungibleResourceAddress,
 
@@ -35,6 +24,15 @@ impl RadixNameService {
 }
 
 impl RadixNameService {
+    async fn get_receiver_account_for_domain(
+        &self,
+        domain: Domain,
+    ) {
+        todo!()
+    }
+}
+
+impl RadixNameService {
     async fn get_domain_details(
         &self,
         domain: Domain,
@@ -51,6 +49,15 @@ impl RadixNameService {
         Ok(fetched_domain_details)
     }
 
+    async fn resolve_record(
+        &self,
+        domain: Domain,
+        docket: Docket
+    ) {
+        // 
+        todo!()
+    }
+
     async fn check_domain_authenticity(
         &self,
         domain_details: DomainDetails,
@@ -58,6 +65,11 @@ impl RadixNameService {
         Ok(())
     }
 
+
+}
+
+/// Fetch
+impl RadixNameService {
     async fn fetch_domain_details(
         &self,
         domain: Domain,
@@ -72,42 +84,17 @@ impl RadixNameService {
 
         TryFrom::try_from(sbor_data)
     }
-}
 
-impl TryFrom<ScryptoSborValue> for DomainDetails {
-    type Error = CommonError;
-
-    fn try_from(value: ScryptoSborValue) -> Result<Self> {
-        match value.programmatic_json {
-            ProgrammaticScryptoSborValue::Tuple(tuple) => {
-                let name = tuple
-                    .fields
-                    .get_string_field("name")
-                    .map(|field| field.value)
-                    .ok_or(CommonError::Unknown)?;
-                let owner_address = tuple
-                    .fields
-                    .get_enum_field("address")
-                    .and_then(|field| {
-                        field
-                            .fields
-                            .first_reference_field()
-                            .map(|field| field.value)
-                    })
-                    .ok_or(CommonError::Unknown)?;
-
-                Ok(DomainDetails {
-                    domain: Domain(name),
-                    owner: AccountAddress::from_str(&owner_address)?,
-                })
-            }
-            _ => Err(CommonError::Unknown),
-        }
+    async fn fetch_record_details(
+        &self
+    ) {
+        todo!()
     }
-}
 
-impl Domain {
-    fn to_non_fungible_id(&self) -> Result<NonFungibleLocalId> {
-        domain_to_non_fungible_id(&self.0, true)
+    async fn fetch_account_domains(
+        &self,
+        account: AccountAddress
+    ) {
+        todo!()
     }
 }
