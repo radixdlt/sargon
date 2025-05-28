@@ -3456,6 +3456,7 @@ dependencies = [
 name = "radix-name-service"
 version = "1.2.18"
 dependencies = [
+ "actix-rt",
  "addresses",
  "bytes 1.2.18",
  "core-utils",
@@ -3465,6 +3466,8 @@ dependencies = [
  "k256",
  "metadata",
  "network",
+ "prelude",
+ "serde",
 ]
 
 [[package]]

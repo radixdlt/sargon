@@ -1,9 +1,21 @@
 use crate::prelude::*;
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct DomainDetails {
     pub domain: Domain,
     pub owner: AccountAddress,
+}
+
+impl DomainDetails {
+    pub fn new(
+        domain: Domain,
+        owner: AccountAddress,
+    ) -> Self {
+        Self {
+            domain,
+            owner
+        }
+    }
 }
 
 impl TryFrom<ScryptoSborValue> for DomainDetails {

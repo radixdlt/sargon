@@ -5,6 +5,7 @@ mod prelude {
     pub use crate::common::*;
     pub use crate::service::*;
 
+    pub(crate) use prelude::prelude::*;
     pub(crate) use addresses::prelude::*;
     pub(crate) use bytes::prelude::*;
 

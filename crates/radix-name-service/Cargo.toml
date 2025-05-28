@@ -4,6 +4,7 @@ version = "1.2.18"
 edition = "2021"
 
 [dependencies]
+prelude = { workspace = true }
 k256 = { workspace = true }
 addresses = { workspace = true }
 bytes = { workspace = true }
@@ -13,3 +14,7 @@ metadata = { workspace = true }
 drivers = { workspace = true }
 gateway-client-and-api = { workspace = true }
 gateway-models = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }

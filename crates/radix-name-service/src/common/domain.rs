@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Domain(String);
 
 impl Domain {
@@ -12,5 +12,9 @@ impl Domain {
 impl Domain {
     pub fn to_non_fungible_id(&self) -> Result<NonFungibleLocalId> {
         domain_to_non_fungible_id(&self.0, true)
+    }
+
+    pub fn validate(&self) -> Result<()> {
+        todo!("Implement domain validation")
     }
 }

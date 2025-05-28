@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 pub struct RadixNameService {
-    domains_collection: NonFungibleResourceAddress,
-    records_collection: NonFungibleResourceAddress,
+    domains_collection_address: NonFungibleResourceAddress,
+    records_collection_address: NonFungibleResourceAddress,
 
     gateway_client: GatewayClient,
 }
@@ -10,14 +10,14 @@ pub struct RadixNameService {
 impl RadixNameService {
     pub fn new(
         networking_driver: Arc<dyn NetworkingDriver>,
-        domains_collection: NonFungibleResourceAddress,
-        records_collection: NonFungibleResourceAddress,
+        domains_collection_address: NonFungibleResourceAddress,
+        records_collection_address: NonFungibleResourceAddress,
         network_id: NetworkID,
     ) -> Self {
         let gateway_client = GatewayClient::new(networking_driver, network_id);
         Self {
-            domains_collection,
-            records_collection,
+            domains_collection_address,
+            records_collection_address,
             gateway_client,
         }
     }
@@ -54,7 +54,9 @@ impl RadixNameService {
         domain: Domain,
         docket: Docket
     ) {
-        // 
+        // Get domain details
+        // Validate domain authenticity
+        // Fetch record details
         todo!()
     }
 
@@ -78,7 +80,7 @@ impl RadixNameService {
 
         let data = self
             .gateway_client
-            .fetch_non_fungible_data(self.domains_collection.clone(), domain_id)
+            .fetch_non_fungible_data(self.domains_collection_address.clone(), domain_id)
             .await?;
         let sbor_data = data.data.ok_or(CommonError::Unknown)?;
 
@@ -96,5 +98,46 @@ impl RadixNameService {
         account: AccountAddress
     ) {
         todo!()
+    }
+}
+
+#[cfg(test)]
+mod fetch_tests {
+    use prelude::fixture_gw_model;
+    use super::*;
+    use serde::Serialize;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = RadixNameService;
+
+    #[actix_rt::test]
+    async fn test_fetch_domain_details() {
+        let (_, json) = fixture_and_json::<StateNonFungibleDataResponse>(fixture_gw_model!(
+            "state/request_non_fungible_data_domain"
+        ))
+        .unwrap();
+
+        let body = json.serialize_to_bytes().unwrap();
+
+        let mock_antenna =
+            MockNetworkingDriver::with_spy(200, body, |req, v| {
+
+            });
+
+        let sut = SUT::new(
+            Arc::new(mock_antenna), 
+            NonFungibleResourceAddress::sample_mainnet(),
+            NonFungibleResourceAddress::sample_mainnet_other(), 
+             NetworkID::Mainnet
+            );
+
+        let domain = Domain::new("bakirci.xrd".to_owned());
+        let result = sut.fetch_domain_details(domain.clone()).await.unwrap();
+
+        let expected_domain_details = DomainDetails::new(
+            domain,
+            AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap()
+        );
+        assert_eq!(result, expected_domain_details);
     }
 }
