@@ -3467,6 +3467,7 @@ dependencies = [
  "metadata",
  "network",
  "prelude",
+ "regex",
  "serde",
 ]
 
@@ -3833,6 +3834,7 @@ dependencies = [
  "radix-connect-models",
  "radix-engine-interface",
  "radix-engine-toolkit-common",
+ "radix-name-service",
  "radix-transactions",
  "sargon-os",
  "sargon-os-accounts",

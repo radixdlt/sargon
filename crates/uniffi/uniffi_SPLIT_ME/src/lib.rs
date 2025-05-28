@@ -9,6 +9,7 @@ mod home_cards;
 mod keys_collector;
 mod profile;
 mod radix_connect;
+mod radix_name_service;
 mod security_center;
 mod signing;
 mod system;
@@ -20,6 +21,7 @@ pub mod prelude {
     pub use crate::core::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
+    pub use crate::radix_name_service::*;
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;

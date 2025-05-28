@@ -7,14 +7,8 @@ pub struct DomainDetails {
 }
 
 impl DomainDetails {
-    pub fn new(
-        domain: Domain,
-        owner: AccountAddress,
-    ) -> Self {
-        Self {
-            domain,
-            owner
-        }
+    pub fn new(domain: Domain, owner: AccountAddress) -> Self {
+        Self { domain, owner }
     }
 }
 

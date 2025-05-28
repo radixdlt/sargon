@@ -1,8 +1,4 @@
 use crate::prelude::*;
-use std::str::FromStr;
-
-use addresses::NonFungibleLocalId;
-use bytes::CommonError;
 use k256::sha2::{Digest, Sha256};
 
 pub fn domain_to_non_fungible_id(

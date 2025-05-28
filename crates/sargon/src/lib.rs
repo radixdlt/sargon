@@ -13,6 +13,7 @@ pub mod prelude {
     pub use profile_logic::prelude::*;
     pub use radix_connect::prelude::*;
     pub use radix_connect_models::prelude::*;
+    pub use radix_name_service::prelude::*;
     pub use sargon_os::prelude::*;
     pub use sargon_os_accounts::prelude::*;
     pub use sargon_os_derive_public_keys::prelude::*;

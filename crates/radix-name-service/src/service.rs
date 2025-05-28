@@ -1,30 +1,73 @@
 use crate::prelude::*;
 
 pub struct RadixNameService {
-    domains_collection_address: NonFungibleResourceAddress,
-    records_collection_address: NonFungibleResourceAddress,
-
+    config: RadixNameServiceConfig,
     gateway_client: GatewayClient,
 }
 
-impl RadixNameService {
-    pub fn new(
-        networking_driver: Arc<dyn NetworkingDriver>,
+#[derive(Clone)]
+struct RadixNameServiceConfig {
+    domains_collection_address: NonFungibleResourceAddress,
+    records_collection_address: NonFungibleResourceAddress,
+}
+
+impl RadixNameServiceConfig {
+    fn new(
         domains_collection_address: NonFungibleResourceAddress,
-        records_collection_address: NonFungibleResourceAddress,
-        network_id: NetworkID,
+    records_collection_address: NonFungibleResourceAddress,
     ) -> Self {
-        let gateway_client = GatewayClient::new(networking_driver, network_id);
         Self {
             domains_collection_address,
-            records_collection_address,
-            gateway_client,
+            records_collection_address
         }
+    }
+
+    fn xrd_domains_mainnet() -> Self {
+        Self::new(
+            NonFungibleResourceAddress::from_str("resource_rdx1n2dd0w53zpdlqdz65vpymygj8a60vqnggyuxfpfdldjmy2224x020q").unwrap(),
+            NonFungibleResourceAddress::from_str("resource_rdx1nf7lt68zan0fvlfqqrtnxasxjmv877ncnr2kpdl69t076sw4whjc27").unwrap(),
+        )
+    }
+
+    fn xrd_domains_stokenet() -> Self {
+        Self::new(
+            NonFungibleResourceAddress::from_str("resource_tdx_2_1n2leg5zgd0cw3766mdae43jg8dvp2h4x08rjjcrf3qrta8lhfjt7wq").unwrap(),
+            NonFungibleResourceAddress::from_str("resource_tdx_2_1ng2r922evyvtzhdfdh4r2nqznw4zwkfesed296aclc5xqfr857t8mz").unwrap(),
+        )
     }
 }
 
 impl RadixNameService {
-    async fn get_receiver_account_for_domain(
+    fn new(
+        networking_driver: Arc<dyn NetworkingDriver>,
+        config: RadixNameServiceConfig,
+        network_id: NetworkID,
+    ) -> Self {
+        let gateway_client = GatewayClient::new(networking_driver, network_id);
+        Self {
+            config,
+            gateway_client,
+        }
+    }
+
+    pub fn new_xrd_domains(networking_driver: Arc<dyn NetworkingDriver>, network_id: NetworkID) -> Result<Self> {
+        if let config = Self::xrd_domains_config().get(&network_id).unwrap().clone() {
+            Ok(Self::new(networking_driver, config, network_id))
+        } else {
+            Err(CommonError::Unknown)
+        }
+    }
+
+    fn xrd_domains_config() -> HashMap<NetworkID, RadixNameServiceConfig> {
+        HashMap::from([
+            (NetworkID::Mainnet, RadixNameServiceConfig::xrd_domains_mainnet()),
+            (NetworkID::Stokenet, RadixNameServiceConfig::xrd_domains_stokenet()),
+        ])
+    }
+}
+
+impl RadixNameService {
+    pub async fn resolve_receiver_account_for_domain(
         &self,
         domain: Domain,
     ) {
@@ -80,7 +123,7 @@ impl RadixNameService {
 
         let data = self
             .gateway_client
-            .fetch_non_fungible_data(self.domains_collection_address.clone(), domain_id)
+            .fetch_non_fungible_data(self.config.domains_collection_address.clone(), domain_id)
             .await?;
         let sbor_data = data.data.ok_or(CommonError::Unknown)?;
 
@@ -88,7 +131,9 @@ impl RadixNameService {
     }
 
     async fn fetch_record_details(
-        &self
+        &self,
+        domain: Domain,
+        docket: Docket
     ) {
         todo!()
     }
@@ -105,7 +150,6 @@ impl RadixNameService {
 mod fetch_tests {
     use prelude::fixture_gw_model;
     use super::*;
-    use serde::Serialize;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = RadixNameService;
@@ -124,12 +168,10 @@ mod fetch_tests {
 
             });
 
-        let sut = SUT::new(
-            Arc::new(mock_antenna), 
-            NonFungibleResourceAddress::sample_mainnet(),
-            NonFungibleResourceAddress::sample_mainnet_other(), 
+        let sut = SUT::new_xrd_domains(
+            Arc::new(mock_antenna),
              NetworkID::Mainnet
-            );
+            ).unwrap();
 
         let domain = Domain::new("bakirci.xrd".to_owned());
         let result = sut.fetch_domain_details(domain.clone()).await.unwrap();
