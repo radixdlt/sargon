@@ -47,9 +47,6 @@ pub struct ResolvedReceiver {
 
 #[uniffi::export]
 impl RadixNameService {
-    /// Initializes `HomeCards` by loading from storage.
-    /// This function should be called before invoking any other public functions.
-    /// Notifies `HomeCardsObserver`.
     #[uniffi::method]
     pub async fn resolve_receiver_account_for_domain(
         &self,
