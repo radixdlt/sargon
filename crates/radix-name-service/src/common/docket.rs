@@ -4,14 +4,14 @@ use crate::prelude::*;
 
 pub struct Docket {
     pub context: DocketContext,
-    pub derivative: Derivative,
+    pub directive: Directive,
 }
 
 impl Docket {
-    pub fn new(context: DocketContext, derivative: Derivative) -> Self {
+    pub fn new(context: DocketContext, directive: Directive) -> Self {
         Self {
             context,
-            derivative,
+            directive,
         }
     }
 
@@ -20,25 +20,27 @@ impl Docket {
         domain: Domain,
     ) -> Result<NonFungibleLocalId> {
         let domain_id = domain.to_non_fungible_id()?;
-        let composed_id = format!(
-            "{:?}-{:?}-{:?}",
-            domain_id.to_string(),
-            self.context.to_string(),
-            self.derivative.0
+        let context_str = self.context.to_string();
+        let directive_str = self.directive.0.clone();
+
+        let id_str = format!(
+            "{}-{}-{}",
+            domain_id, context_str, directive_str
         );
-        return domain_to_non_fungible_id(&composed_id, true);
+
+        domain_to_non_fungible_id(&id_str, true)
     }
 }
 
 impl Docket {
     pub fn wildcard_receiver() -> Self {
-        Self::new(DocketContext::Receivers, Derivative::wildcard())
+        Self::new(DocketContext::Receivers, Directive::wildcard())
     }
 }
 
-pub struct Derivative(String);
+pub struct Directive(String);
 
-impl Derivative {
+impl Directive {
     pub fn wildcard() -> Self {
         Self("*".to_owned())
     }
@@ -67,13 +69,20 @@ impl ToString for DocketContext {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn to_non_fungible_id() {
-//         let docket = Docket::wildcard_receiver();
-//         let domain =
-//     }
-// }
+    #[test]
+    fn to_non_fungible_id() {
+        let docket = Docket::wildcard_receiver();
+        let domain = Domain::new("grenadine.xrd".to_string());
+
+        let id = docket.to_non_fungible_id(domain).unwrap();
+        let expected_id = NonFungibleLocalId::from_str(
+            "[663c8eb2eaf0907ea4dd742be3b4c606]",
+        ).unwrap();
+
+        assert_eq!(id, expected_id)
+    }
+}
