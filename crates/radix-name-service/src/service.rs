@@ -79,8 +79,30 @@ impl RadixNameService {
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct ResolvedReceiver {
-    pub domain: Domain,
+    pub domain: DomainDetails,
     pub account: AccountAddress,
+}
+
+impl HasSampleValues for ResolvedReceiver {
+    fn sample() -> Self {
+        ResolvedReceiver::new(
+            DomainDetails::sample(),
+            AccountAddress::sample_mainnet()
+        )
+    }
+
+    fn sample_other() -> Self {
+        ResolvedReceiver::new(
+            DomainDetails::sample_other(),
+            AccountAddress::sample_mainnet_other()
+        )
+    }
+}
+
+impl ResolvedReceiver {
+    pub fn new(domain: DomainDetails, account: AccountAddress) -> Self {
+        Self { domain, account }
+    }
 }
 
 impl RadixNameService {
@@ -88,6 +110,15 @@ impl RadixNameService {
         &self,
         domain: Domain,
     ) -> Result<ResolvedReceiver> {
+        let domain_details =
+        self.fetch_domain_details(domain.clone()).await?;
+    if domain != domain_details.domain {
+        return Err(CommonError::Unknown);
+    }
+
+    self.check_domain_authenticity(domain_details.clone())
+        .await?;
+
         let record = self
             .resolve_record(domain.clone(), Docket::wildcard_receiver())
             .await?;
@@ -98,41 +129,50 @@ impl RadixNameService {
             _ => return Err(CommonError::Unknown),
         };
 
-        Ok(ResolvedReceiver { domain, account })
+        Ok(ResolvedReceiver::new(domain_details, account ))
     }
 }
 
 impl RadixNameService {
-    async fn get_domain_details(
-        &self,
-        domain: Domain,
-    ) -> Result<DomainDetails> {
-        let fetched_domain_details =
-            self.fetch_domain_details(domain.clone()).await?;
-        if domain != fetched_domain_details.domain {
-            return Err(CommonError::Unknown);
-        }
-
-        self.check_domain_authenticity(fetched_domain_details.clone())
-            .await?;
-
-        Ok(fetched_domain_details)
-    }
-
     async fn resolve_record(
         &self,
         domain: Domain,
         docket: Docket,
     ) -> Result<RecordDetails> {
-        self.fetch_record_details(domain.clone(), docket.clone())
-            .await
+        let record = self.fetch_record_details(domain.clone(), docket.clone())
+            .await?;
+
+        if record.domain_id != domain.to_non_fungible_id()? {
+            return Err(CommonError::Unknown);
+        }
+        if record.context != docket.context {
+            return Err(CommonError::Unknown);
+        }
+        if record.directive != docket.directive {
+            return Err(CommonError::Unknown);
+        }
+
+        return Ok(record)
     }
 
     async fn check_domain_authenticity(
         &self,
         domain_details: DomainDetails,
     ) -> Result<()> {
-        Ok(())
+        let id = domain_details.domain.to_non_fungible_id()?;
+        let domain_location = self.gateway_client.fetch_non_fungible_location(self.config.domains_collection_address, id).await?;
+        match domain_location {
+            Some(location) => {
+                if location.as_account() != Some(&domain_details.owner){
+                    return Err(CommonError::Unknown);
+                }
+                return Ok(())
+            }
+            None => {
+                return Err(CommonError::Unknown);
+            }
+            
+        }
     }
 }
 
@@ -174,10 +214,6 @@ impl RadixNameService {
 
         TryFrom::try_from(sbor_data)
     }
-
-    async fn fetch_account_domains(&self, account: AccountAddress) {
-        todo!()
-    }
 }
 
 #[cfg(test)]
@@ -210,12 +246,19 @@ mod pub_api_tests {
             .await
             .unwrap();
 
+            let expected_domain_details = DomainDetails::new(
+                domain,
+                AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
+                "#FF5722".to_owned(),
+                "#D32F2F".to_owned(),
+            );
+
         assert_eq!(
             result,
-            ResolvedReceiver {
-                domain,
-                account: AccountAddress::from_str("account_rdx128pu3gp74hgl0a9d6d899vd0nn8wh5z0syrkvp28hd492dk0u8fe8t").unwrap()
-            }
+            ResolvedReceiver::new(
+                expected_domain_details,
+                AccountAddress::from_str("account_rdx128pu3gp74hgl0a9d6d899vd0nn8wh5z0syrkvp28hd492dk0u8fe8t").unwrap()
+            )
         );
     }
 }
@@ -249,7 +292,9 @@ mod fetch_tests {
 
         let expected_domain_details = DomainDetails::new(
             domain,
-            AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap()
+            AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
+            "#FF5722".to_owned(),
+            "#D32F2F".to_owned(),
         );
         assert_eq!(result, expected_domain_details);
     }

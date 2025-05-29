@@ -3,11 +3,25 @@ use crate::prelude::*;
 use indexmap::map::raw_entry_v1::RawEntryMut;
 use sargon::AccountAddress as InternalAccountAddress;
 use sargon::Domain as InternalDomain;
+use sargon::DomainDetails as InternalDomainDetails;
+use sargon::ResolvedReceiver as InternalResolvedReceiver;
 use sargon::RadixNameService as InternalRadixNameService;
 
 #[derive(uniffi::Object)]
 pub struct RadixNameService {
     pub wrapped: Arc<InternalRadixNameService>,
+}
+
+uniffi::custom_newtype!(Domain, String);
+#[derive(Debug, Clone, PartialEq, Eq, Hash, InternalConversion)]
+pub struct Domain(pub String);
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug, InternalConversion, uniffi::Record)]
+pub struct DomainDetails {
+    pub domain: Domain,
+    pub owner: AccountAddress,
+    pub gradient_color_start: String,
+    pub gradient_color_end: String,
 }
 
 #[uniffi::export]
@@ -32,16 +46,15 @@ impl RadixNameService {
 }
 
 #[uniffi::export]
-pub fn rns_domain_validated(raw: String) -> Result<String> {
-    InternalDomain::new(raw.clone())
+pub fn rns_domain_validated(domain: Domain) -> Result<Domain> {
+    domain.into_internal()
         .validated()
-        .map(|domain| raw)
-        .map_err(|_| CommonError::Unknown)
+        .into_result()
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, uniffi::Record)]
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ResolvedReceiver {
-    pub domain: String,
+    pub domain: DomainDetails,
     pub account: AccountAddress,
 }
 
@@ -50,19 +63,13 @@ impl RadixNameService {
     #[uniffi::method]
     pub async fn resolve_receiver_account_for_domain(
         &self,
-        domain: String,
+        domain: Domain,
     ) -> Result<ResolvedReceiver> {
         self.wrapped
             .resolve_receiver_account_for_domain(
-                InternalDomain::new(domain.clone()).into(),
+                domain.into_internal(),
             )
             .await
-            .and_then(|resolved| {
-                Ok(ResolvedReceiver {
-                    domain: domain,
-                    account: resolved.account.into(),
-                })
-            })
             .into_result()
     }
 }
