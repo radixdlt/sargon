@@ -22,7 +22,7 @@ impl RadixNameService {
                 return Ok(())
             }
             None => {
-                return Err(CommonError::RnsUnauthenticDomain { reason: "Failed to reado domain location".to_owned() });
+                return Err(CommonError::RnsUnauthenticDomain { reason: "Failed to read domain location".to_owned() });
             }
             
         }

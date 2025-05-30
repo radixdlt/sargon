@@ -91,33 +91,87 @@ impl Domain {
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
-    fn test_domain_validated() {
+    fn test_valid_domain() {
+        // Valid domain with one label and TLD "xrd"
         let domain = Domain::new("example.xrd".to_string());
         assert!(domain.validated().is_ok());
-
-        let invalid_domain = Domain::new("e.xrd".to_string());
-        assert!(invalid_domain.validated().is_err());
-
-        let invalid_domain2 = Domain::new("example_xrd".to_string());
-        assert!(invalid_domain2.validated().is_err());
-
-        let invalid_domain3 = Domain::new("example.xrd_invalid".to_string());
-        assert!(invalid_domain3.validated().is_err());
     }
 
     #[test]
-    fn test_subdomain_validated() {
-        let subdomain = Domain::new("sub.example.xrd".to_string());
-        assert!(subdomain.validated().is_ok());
+    fn test_valid_subdomain() {
+        // Valid domain with subdomain
+        let domain = Domain::new("sub.example.xrd".to_string());
+        assert!(domain.validated().is_ok());
+    }
 
-        let invalid_subdomain = Domain::new("sub.example_xrd".to_string());
-        assert!(invalid_subdomain.validated().is_err());
+    #[test]
+    fn test_invalid_domain_too_few_parts() {
+        // A domain without a dot should be invalid.
+        let domain = Domain::new("example".to_string());
+        assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
+    }
 
-        let invalid_subdomain2 = Domain::new("sub.example.xrd_invalid".to_string());
-        assert!(invalid_subdomain2.validated().is_err());
+    #[test]
+    fn test_invalid_domain_wrong_tld() {
+        // Domain with TLD other than "xrd" should be rejected.
+        let domain = Domain::new("example.com".to_string());
+        assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
+    }
+
+    #[test]
+    fn test_invalid_label_too_short() {
+        // The first label must be at least 2 characters long.
+        let domain = Domain::new("e.xrd".to_string());
+        assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
+    }
+
+    #[test]
+    fn test_invalid_label_too_long() {
+        // Create a label with 66 characters (should be too long)
+        let long_label = "a".repeat(66);
+        let domain_str = format!("{}.xrd", long_label);
+        let domain = Domain::new(domain_str);
+        assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
+    }
+
+    #[test]
+    fn test_invalid_label_with_underscore() {
+        // Labels with underscores are not allowed.
+        let domain = Domain::new("exa_mple.xrd".to_string());
+        assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
+    }
+
+    #[test]
+    fn test_invalid_label_bad_characters() {
+        // Domain containing an invalid symbol (e.g. '@') should be rejected.
+        let domain = Domain::new("ex@mple.xrd".to_string());
+        assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
+    }
+
+    #[test]
+    fn test_invalid_subdomain_missing_separator() {
+        // A domain with an extra period leading to an empty label should fail.
+        let domain = Domain::new("example..xrd".to_string());
+        // The empty label (between the two dots) fails the length check.
+        assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
+    }
+
+    #[test]
+    fn test_gradient_colors_for_example_domain() {
+        let domain_str = "example.xrd".to_string();
+        let domain = Domain::new(domain_str.clone());
+        // Calling gradient_colors does not require validation.
+        let (color1, color2) = domain.gradient_colors();
+        // For "example.xrd", we expect colors based on our GRADIENT_PALETTE computation.
+        // Calculation:
+        // char_sum = sum("example.xrd" chars) = 1128, input.len() = 11.
+        // index1 = (1128 + 11) % 160 = 1139 % 160 = 19, color = GRADIENT_PALETTE[19] => "#00BCD4"
+        // index2 = ((1128 * 2) + 11) % 160 = 2267 % 160 = 27, color = GRADIENT_PALETTE[27] => "#4CAF50"
+        assert_eq!(color1, "#00BCD4".to_string());
+        assert_eq!(color2, "#4CAF50".to_string());
     }
 }

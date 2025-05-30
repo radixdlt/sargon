@@ -65,7 +65,7 @@ impl FromStr for DocketContext {
             "social" => Ok(DocketContext::Social),
             "discovery" => Ok(DocketContext::Discovery),
             "widgets" => Ok(DocketContext::Widgets),
-            _ => Err(CommonError::Unknown),
+            _ => Err(CommonError::RnsInvalidRecordContext { context: s.to_owned() }),
         }
     }
 }

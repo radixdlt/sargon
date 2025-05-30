@@ -969,6 +969,9 @@ pub enum CommonError {
 
     #[error("RNS unsupported network: {network}")]
     RnsUnsupportedNetwork { network: u8 } = 10273,
+
+    #[error("Invalid RNS record context: {context}")]
+    RnsInvalidRecordContext { context: String } = 10274,
 }
 
 impl CommonError {
