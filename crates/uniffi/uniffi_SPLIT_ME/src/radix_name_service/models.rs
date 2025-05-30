@@ -18,7 +18,6 @@ pub struct RnsDomainDetails {
     pub gradient_color_end: String,
 }
 
-
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct RnsDomainConfiguredReceiver {
     pub domain: RnsDomainDetails,
