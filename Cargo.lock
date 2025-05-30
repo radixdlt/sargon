@@ -3469,6 +3469,7 @@ dependencies = [
  "prelude",
  "regex",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

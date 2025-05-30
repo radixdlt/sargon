@@ -1,9 +1,7 @@
 use crate::prelude::*;
 use k256::sha2::{Digest, Sha256};
 
-pub fn domain_to_non_fungible_id(
-    domain: &str,
-) -> Result<NonFungibleLocalId> {
+pub fn domain_to_non_fungible_id(domain: &str) -> Result<NonFungibleLocalId> {
     let mut hasher = Sha256::new();
     hasher.update(domain.as_bytes());
     let hash = hasher.finalize();

@@ -20,8 +20,16 @@ impl HasSampleValues for Domain {
     }
 }
 
-
 impl Domain {
+    pub fn root_domain(&self) -> Result<Domain> {
+        let parts: Vec<&str> = self.0.split('.').collect();
+        if parts.len() < 2 {
+            return Err(CommonError::RnsInvalidDomain);
+        }
+        let root = parts[parts.len() - 2..].join(".");
+        Ok(Domain::new(root))
+    }
+
     pub fn to_non_fungible_id(&self) -> Result<NonFungibleLocalId> {
         domain_to_non_fungible_id(&self.0)
     }
@@ -39,9 +47,10 @@ impl Domain {
             return Err(CommonError::RnsInvalidDomain);
         }
 
-        let label_regex = Regex::new(r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,63}[a-zA-Z0-9])?$")
-            .map_err(|_| CommonError::RnsInvalidDomain)?;
-    
+        let label_regex =
+            Regex::new(r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,63}[a-zA-Z0-9])?$")
+                .map_err(|_| CommonError::RnsInvalidDomain)?;
+
         for label in &parts[..parts.len() - 1] {
             if label.len() < 2 || label.len() > 65 {
                 return Err(CommonError::RnsInvalidDomain);
@@ -53,28 +62,39 @@ impl Domain {
                 return Err(CommonError::RnsInvalidDomain);
             }
         }
-    
+
         Ok(self.clone())
     }
 }
 
 const GRADIENT_PALETTE: [&str; 160] = [
-    "#FF1744", "#FF1744", "#FF3D00", "#FF3D00", "#FF9100", "#FF9100", "#FFC400", "#FFC400", "#FFEA00", "#FFEA00",
-        "#CDDC39", "#CDDC39", "#8BC34A", "#8BC34A", "#4CAF50", "#4CAF50", "#26C6DA", "#26C6DA", "#00BCD4", "#00BCD4",
-        "#E57373", "#FF8A65", "#FFB74D", "#FFD54F", "#FFEE58", "#CDDC39", "#8BC34A", "#4CAF50", "#26C6DA", "#00BCD4",
-        "#BA68C8", "#9575CD", "#7986CB", "#64B5F6", "#4FC3F7", "#4DD0E1", "#4DB6AC", "#81C784", "#AED581", "#DCE775",
-        "#F06292", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50",
-        "#EF5350", "#FF7043", "#FFA726", "#FFC107", "#FFEB3B", "#CDDC39", "#8BC34A", "#4CAF50", "#26A69A", "#009688",
-        "#FF1744", "#FF3D00", "#FF9100", "#FFC400", "#FFEA00", "#CDDC39", "#8BC34A", "#4CAF50", "#26C6DA", "#00BCD4",
-        "#E53935", "#D32F2F", "#C2185B", "#7B1FA2", "#512DA8", "#303F9F", "#1976D2", "#0288D1", "#0097A7", "#00ACC1",
-        "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#795548", "#607D8B", "#333333",
-        "#E57373", "#FF8A65", "#FFB74D", "#FFD54F", "#FFEE58", "#CDDC39", "#8BC34A", "#4CAF50", "#26C6DA", "#00BCD4",
-        "#BA68C8", "#9575CD", "#7986CB", "#64B5F6", "#4FC3F7", "#4DD0E1", "#4DB6AC", "#81C784", "#AED581", "#DCE775",
-        "#F06292", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50",
-        "#EF5350", "#FF7043", "#FFA726", "#FFC107", "#FFEB3B", "#CDDC39", "#8BC34A", "#4CAF50", "#26A69A", "#009688",
-        "#FF1744", "#FF3D00", "#FF9100", "#FFC400", "#FFEA00", "#CDDC39", "#8BC34A", "#4CAF50", "#26C6DA", "#00BCD4",
-        "#E53935", "#D32F2F", "#C2185B", "#7B1FA2", "#512DA8", "#303F9F", "#1976D2", "#0288D1", "#0097A7", "#00ACC1",
-        "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#795548", "#607D8B", "#333333"
+    "#FF1744", "#FF1744", "#FF3D00", "#FF3D00", "#FF9100", "#FF9100",
+    "#FFC400", "#FFC400", "#FFEA00", "#FFEA00", "#CDDC39", "#CDDC39",
+    "#8BC34A", "#8BC34A", "#4CAF50", "#4CAF50", "#26C6DA", "#26C6DA",
+    "#00BCD4", "#00BCD4", "#E57373", "#FF8A65", "#FFB74D", "#FFD54F",
+    "#FFEE58", "#CDDC39", "#8BC34A", "#4CAF50", "#26C6DA", "#00BCD4",
+    "#BA68C8", "#9575CD", "#7986CB", "#64B5F6", "#4FC3F7", "#4DD0E1",
+    "#4DB6AC", "#81C784", "#AED581", "#DCE775", "#F06292", "#E91E63",
+    "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4",
+    "#009688", "#4CAF50", "#EF5350", "#FF7043", "#FFA726", "#FFC107",
+    "#FFEB3B", "#CDDC39", "#8BC34A", "#4CAF50", "#26A69A", "#009688",
+    "#FF1744", "#FF3D00", "#FF9100", "#FFC400", "#FFEA00", "#CDDC39",
+    "#8BC34A", "#4CAF50", "#26C6DA", "#00BCD4", "#E53935", "#D32F2F",
+    "#C2185B", "#7B1FA2", "#512DA8", "#303F9F", "#1976D2", "#0288D1",
+    "#0097A7", "#00ACC1", "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B",
+    "#FFC107", "#FF9800", "#FF5722", "#795548", "#607D8B", "#333333",
+    "#E57373", "#FF8A65", "#FFB74D", "#FFD54F", "#FFEE58", "#CDDC39",
+    "#8BC34A", "#4CAF50", "#26C6DA", "#00BCD4", "#BA68C8", "#9575CD",
+    "#7986CB", "#64B5F6", "#4FC3F7", "#4DD0E1", "#4DB6AC", "#81C784",
+    "#AED581", "#DCE775", "#F06292", "#E91E63", "#9C27B0", "#673AB7",
+    "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50",
+    "#EF5350", "#FF7043", "#FFA726", "#FFC107", "#FFEB3B", "#CDDC39",
+    "#8BC34A", "#4CAF50", "#26A69A", "#009688", "#FF1744", "#FF3D00",
+    "#FF9100", "#FFC400", "#FFEA00", "#CDDC39", "#8BC34A", "#4CAF50",
+    "#26C6DA", "#00BCD4", "#E53935", "#D32F2F", "#C2185B", "#7B1FA2",
+    "#512DA8", "#303F9F", "#1976D2", "#0288D1", "#0097A7", "#00ACC1",
+    "#4CAF50", "#8BC34A", "#CDDC39", "#FFEB3B", "#FFC107", "#FF9800",
+    "#FF5722", "#795548", "#607D8B", "#333333",
 ];
 
 impl Domain {
@@ -93,6 +113,22 @@ impl Domain {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_root_domain_subdomain() {
+        // Valid domain with subdomain
+        let domain = Domain::new("sub.example.xrd".to_string());
+        let root = domain.root_domain().unwrap();
+        assert_eq!(root.0, "example.xrd");
+    }
+
+    #[test]
+    fn test_root_domain_no_subdomain() {
+        // Domain without subdomain
+        let domain = Domain::new("example.xrd".to_string());
+        let root = domain.root_domain().unwrap();
+        assert_eq!(root.0, "example.xrd");
+    }
 
     #[test]
     fn test_valid_domain() {

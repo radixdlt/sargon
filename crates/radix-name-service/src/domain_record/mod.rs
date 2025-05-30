@@ -4,8 +4,8 @@ mod record_details;
 pub use docket::*;
 pub use record_details::*;
 
-use crate::service::RadixNameService;
 use crate::prelude::*;
+use crate::service::RadixNameService;
 
 impl RadixNameService {
     pub(crate) async fn resolve_record(
@@ -13,20 +13,12 @@ impl RadixNameService {
         domain: Domain,
         docket: Docket,
     ) -> Result<RecordDetails> {
-        let record = self.fetch_record_details(domain.clone(), docket.clone())
+        let record = self
+            .fetch_record_details(domain.clone(), docket.clone())
             .await?;
 
-        if record.domain_id != domain.to_non_fungible_id()? {
-            return Err(CommonError::RnsInvalidDomainConfiguration { reason: "domain_id missmatch".to_owned() });
-        }
-        if record.context != docket.context {
-            return Err(CommonError::RnsInvalidDomainConfiguration { reason: "context missmatch".to_owned() });
-        }
-        if record.directive != docket.directive {
-            return Err(CommonError::RnsInvalidDomainConfiguration { reason: "directive missmatch".to_owned()});
-        }
-
-        return Ok(record)
+        record.validate(&domain, &docket)?;
+        return Ok(record);
     }
 
     async fn fetch_record_details(
@@ -43,7 +35,8 @@ impl RadixNameService {
                 record_id,
             )
             .await?;
-        let sbor_data = data.data.ok_or(CommonError::UnexpectedNFTDataFormat)?;
+        let sbor_data =
+            data.data.ok_or(CommonError::UnexpectedNFTDataFormat)?;
 
         TryFrom::try_from(sbor_data)
     }
@@ -67,7 +60,25 @@ mod fetch_tests {
         let body = json.serialize_to_bytes().unwrap();
 
         let mock_antenna =
-            MockNetworkingDriver::with_spy(200, body, |req, v| {});
+            MockNetworkingDriver::with_spy(200, body, |req, v| {
+                let nft_data_request = serde_json::from_slice::<
+                    StateNonFungibleDataRequest,
+                >(req.body.bytes())
+                .unwrap();
+                assert_eq!(
+                    nft_data_request.resource_address,
+                    RadixNameServiceConfig::xrd_domains_mainnet()
+                        .records_collection_address
+                );
+                assert_eq!(
+                    nft_data_request.non_fungible_ids,
+                    vec![Docket::wildcard_receiver()
+                        .to_non_fungible_id(Domain::new(
+                            "grenadine.xrd".to_owned()
+                        ))
+                        .unwrap(),]
+                );
+            });
 
         let sut =
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)

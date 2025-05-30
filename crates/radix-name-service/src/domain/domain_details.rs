@@ -14,8 +14,13 @@ impl DomainDetails {
         owner: AccountAddress,
         gradient_color_start: String,
         gradient_color_end: String,
-     ) -> Self {
-        Self { domain, owner, gradient_color_start, gradient_color_end }
+    ) -> Self {
+        Self {
+            domain,
+            owner,
+            gradient_color_start,
+            gradient_color_end,
+        }
     }
 }
 
@@ -51,7 +56,9 @@ impl TryFrom<ScryptoSborValue> for DomainDetails {
                 let name = tuple
                     .fields
                     .get_string_field(SCRYPTO_SBOR_DOMAIN_NAME_FIELD)
-                    .ok_or(CommonError::MissingNFTDataField { field: "Domain name".to_owned() })?;
+                    .ok_or(CommonError::MissingNFTDataField {
+                        field: "Domain name".to_owned(),
+                    })?;
 
                 let owner_address = tuple
                     .fields
@@ -62,16 +69,19 @@ impl TryFrom<ScryptoSborValue> for DomainDetails {
                             .first_reference_field()
                             .map(|field| field.value)
                     })
-                    .ok_or(CommonError::MissingNFTDataField { field: "Domain owner address".to_owned() })?;
+                    .ok_or(CommonError::MissingNFTDataField {
+                        field: "Domain owner address".to_owned(),
+                    })?;
 
                 let domain = Domain::new(name.clone());
                 let owner = AccountAddress::from_str(&owner_address)?;
-                let (gradient_color_start, gradient_color_end) = domain.gradient_colors();
+                let (gradient_color_start, gradient_color_end) =
+                    domain.gradient_colors();
                 Ok(DomainDetails::new(
                     domain,
                     owner,
                     gradient_color_start,
-                    gradient_color_end
+                    gradient_color_end,
                 ))
             }
             _ => Err(CommonError::UnexpectedNFTDataFormat),
@@ -87,20 +97,31 @@ mod tests {
     // Helper function to build a valid ScryptoSborValue for DomainDetails conversion.
     fn valid_domain_details_scrypto_value() -> ScryptoSborValue {
         // Build the "name" field as a String variant.
-        let mut name_field = ProgrammaticScryptoSborValueString::new("example.xrd".to_owned());
+        let mut name_field =
+            ProgrammaticScryptoSborValueString::new("example.xrd".to_owned());
         name_field.field_name = Some(SCRYPTO_SBOR_DOMAIN_NAME_FIELD.to_owned());
         let name_variant = ProgrammaticScryptoSborValue::String(name_field);
 
         // Build the owner field as an Enum variant.
         // The enum’s field name should be "address" and its inner fields must yield a reference value.
-        let owner_ref = ProgrammaticScryptoSborValueReference::new(AccountAddress::sample_mainnet().to_string());
-        let enum_inner = vec![ProgrammaticScryptoSborValue::Reference(owner_ref)];
-        let mut owner_enum = ProgrammaticScryptoSborValueEnum::new(enum_inner, "dummy_variant".to_owned());
-        owner_enum.field_name = Some(SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD.to_owned());
+        let owner_ref = ProgrammaticScryptoSborValueReference::new(
+            AccountAddress::sample_mainnet().to_string(),
+        );
+        let enum_inner =
+            vec![ProgrammaticScryptoSborValue::Reference(owner_ref)];
+        let mut owner_enum = ProgrammaticScryptoSborValueEnum::new(
+            enum_inner,
+            "dummy_variant".to_owned(),
+        );
+        owner_enum.field_name =
+            Some(SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD.to_owned());
         let owner_variant = ProgrammaticScryptoSborValue::Enum(owner_enum);
 
         // Build the tuple with both fields.
-        let tuple = ProgrammaticScryptoSborValueTuple::new(vec![name_variant, owner_variant]);
+        let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
+            name_variant,
+            owner_variant,
+        ]);
         // Wrap the tuple in the top-level ScryptoSborValue.
         ScryptoSborValue {
             programmatic_json: ProgrammaticScryptoSborValue::Tuple(tuple),
@@ -110,7 +131,8 @@ mod tests {
     #[test]
     fn test_try_from_valid() {
         let scrypto_value = valid_domain_details_scrypto_value();
-        let details = DomainDetails::try_from(scrypto_value).expect("Conversion should succeed");
+        let details = DomainDetails::try_from(scrypto_value)
+            .expect("Conversion should succeed");
         // Check that the domain value was set correctly
         assert_eq!(details.domain.0, "example.xrd".to_owned());
         // Check that the gradient colors were computed (we assume gradient_colors is deterministic)
@@ -125,7 +147,9 @@ mod tests {
     fn test_try_from_unexpected_format() {
         // Create a ScryptoSborValue with a non-tuple variant.
         let scrypto_value = ScryptoSborValue {
-            programmatic_json: ProgrammaticScryptoSborValue::Bool(ProgrammaticScryptoSborValueBool::default()),
+            programmatic_json: ProgrammaticScryptoSborValue::Bool(
+                ProgrammaticScryptoSborValueBool::default(),
+            ),
         };
         let result = DomainDetails::try_from(scrypto_value);
         assert_eq!(result, Err(CommonError::UnexpectedNFTDataFormat));
@@ -135,10 +159,17 @@ mod tests {
     fn test_missing_name_field() {
         // Build a tuple with missing domain name.
         // Only include the owner field.
-        let owner_ref = ProgrammaticScryptoSborValueReference::new(AccountAddress::sample_mainnet().to_string());
-        let enum_inner = vec![ProgrammaticScryptoSborValue::Reference(owner_ref)];
-        let mut owner_enum = ProgrammaticScryptoSborValueEnum::new(enum_inner, "dummy_variant".to_owned());
-        owner_enum.field_name = Some(SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD.to_owned());
+        let owner_ref = ProgrammaticScryptoSborValueReference::new(
+            AccountAddress::sample_mainnet().to_string(),
+        );
+        let enum_inner =
+            vec![ProgrammaticScryptoSborValue::Reference(owner_ref)];
+        let mut owner_enum = ProgrammaticScryptoSborValueEnum::new(
+            enum_inner,
+            "dummy_variant".to_owned(),
+        );
+        owner_enum.field_name =
+            Some(SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD.to_owned());
         let owner_variant = ProgrammaticScryptoSborValue::Enum(owner_enum);
         let tuple = ProgrammaticScryptoSborValueTuple::new(vec![owner_variant]);
 
@@ -156,7 +187,8 @@ mod tests {
     #[test]
     fn test_missing_owner_field() {
         // Build a tuple with missing owner address.
-        let mut name_field = ProgrammaticScryptoSborValueString::new("example.xrd".to_owned());
+        let mut name_field =
+            ProgrammaticScryptoSborValueString::new("example.xrd".to_owned());
         name_field.field_name = Some(SCRYPTO_SBOR_DOMAIN_NAME_FIELD.to_owned());
         let name_variant = ProgrammaticScryptoSborValue::String(name_field);
         // Do not include the owner field.
@@ -176,17 +208,28 @@ mod tests {
     #[test]
     fn test_invalid_owner_address() {
         // Build a valid tuple but supply an invalid owner address that AccountAddress::from_str fails to parse.
-        let mut name_field = ProgrammaticScryptoSborValueString::new("example.xrd".to_owned());
+        let mut name_field =
+            ProgrammaticScryptoSborValueString::new("example.xrd".to_owned());
         name_field.field_name = Some(SCRYPTO_SBOR_DOMAIN_NAME_FIELD.to_owned());
         let name_variant = ProgrammaticScryptoSborValue::String(name_field);
 
-        let owner_ref = ProgrammaticScryptoSborValueReference::new("invalid_address".to_owned());
-        let enum_inner = vec![ProgrammaticScryptoSborValue::Reference(owner_ref)];
-        let mut owner_enum = ProgrammaticScryptoSborValueEnum::new(enum_inner, "dummy_variant".to_owned());
-        owner_enum.field_name = Some(SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD.to_owned());
+        let owner_ref = ProgrammaticScryptoSborValueReference::new(
+            "invalid_address".to_owned(),
+        );
+        let enum_inner =
+            vec![ProgrammaticScryptoSborValue::Reference(owner_ref)];
+        let mut owner_enum = ProgrammaticScryptoSborValueEnum::new(
+            enum_inner,
+            "dummy_variant".to_owned(),
+        );
+        owner_enum.field_name =
+            Some(SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD.to_owned());
         let owner_variant = ProgrammaticScryptoSborValue::Enum(owner_enum);
 
-        let tuple = ProgrammaticScryptoSborValueTuple::new(vec![name_variant, owner_variant]);
+        let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
+            name_variant,
+            owner_variant,
+        ]);
         let scrypto_value = ScryptoSborValue {
             programmatic_json: ProgrammaticScryptoSborValue::Tuple(tuple),
         };

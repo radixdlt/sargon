@@ -3,8 +3,8 @@ use crate::prelude::*;
 use indexmap::map::raw_entry_v1::RawEntryMut;
 use sargon::AccountAddress as InternalAccountAddress;
 use sargon::Domain as InternalDomain;
-use sargon::DomainDetails as InternalDomainDetails;
 use sargon::DomainConfiguredReceiver as InternalDomainConfiguredReceiver;
+use sargon::DomainDetails as InternalDomainDetails;
 use sargon::RadixNameService as InternalRadixNameService;
 
 #[derive(uniffi::Object)]
@@ -16,7 +16,9 @@ uniffi::custom_newtype!(Domain, String);
 #[derive(Debug, Clone, PartialEq, Eq, Hash, InternalConversion)]
 pub struct Domain(pub String);
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug, InternalConversion, uniffi::Record)]
+#[derive(
+    PartialEq, Eq, Hash, Clone, Debug, InternalConversion, uniffi::Record,
+)]
 pub struct DomainDetails {
     pub domain: Domain,
     pub owner: AccountAddress,
@@ -47,9 +49,7 @@ impl RadixNameService {
 
 #[uniffi::export]
 pub fn rns_domain_validated(domain: Domain) -> Result<Domain> {
-    domain.into_internal()
-        .validated()
-        .into_result()
+    domain.into_internal().validated().into_result()
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
@@ -66,9 +66,7 @@ impl RadixNameService {
         domain: Domain,
     ) -> Result<DomainConfiguredReceiver> {
         self.wrapped
-            .resolve_receiver_account_for_domain(
-                domain.into_internal(),
-            )
+            .resolve_receiver_account_for_domain(domain.into_internal())
             .await
             .into_result()
     }

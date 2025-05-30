@@ -27,8 +27,10 @@ impl RadixNameService {
         match Self::xrd_domains_config().get(&network_id) {
             Some(config) => {
                 Ok(Self::new(networking_driver, config.clone(), network_id))
-            },
-            None => Err(CommonError::RnsUnsupportedNetwork { network: network_id.discriminant() })
+            }
+            None => Err(CommonError::RnsUnsupportedNetwork {
+                network: network_id.discriminant(),
+            }),
         }
     }
 
@@ -63,14 +65,14 @@ impl RadixNameServiceConfig {
         }
     }
 
-    fn xrd_domains_mainnet() -> Self {
+    pub(crate) fn xrd_domains_mainnet() -> Self {
         Self::new(
             NonFungibleResourceAddress::from_str("resource_rdx1n2dd0w53zpdlqdz65vpymygj8a60vqnggyuxfpfdldjmy2224x020q").unwrap(),
             NonFungibleResourceAddress::from_str("resource_rdx1nf7lt68zan0fvlfqqrtnxasxjmv877ncnr2kpdl69t076sw4whjc27").unwrap(),
         )
     }
 
-    fn xrd_domains_stokenet() -> Self {
+    pub(crate) fn xrd_domains_stokenet() -> Self {
         Self::new(
             NonFungibleResourceAddress::from_str("resource_tdx_2_1n2leg5zgd0cw3766mdae43jg8dvp2h4x08rjjcrf3qrta8lhfjt7wq").unwrap(),
             NonFungibleResourceAddress::from_str("resource_tdx_2_1ng2r922evyvtzhdfdh4r2nqznw4zwkfesed296aclc5xqfr857t8mz").unwrap(),

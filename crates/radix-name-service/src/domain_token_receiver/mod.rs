@@ -5,10 +5,11 @@ impl RadixNameService {
         &self,
         domain: Domain,
     ) -> Result<DomainConfiguredReceiver> {
-        let domain_details =
-        self.fetch_domain_details(domain.clone()).await?;
+        let domain_details = self.fetch_domain_details(domain.clone()).await?;
         if domain != domain_details.domain {
-            return Err(CommonError::RnsInvalidDomainConfiguration { reason: "Domain details: domain missmatch".to_owned() });
+            return Err(CommonError::RnsInvalidDomainConfiguration {
+                reason: "Domain details: domain missmatch".to_owned(),
+            });
         }
 
         self.check_domain_authenticity(domain_details.clone())
@@ -22,10 +23,15 @@ impl RadixNameService {
             ProgrammaticScryptoSborValue::String(account_str) => {
                 AccountAddress::from_str(&account_str.value)?
             }
-            _ => return Err(CommonError::RnsInvalidDomainConfiguration { reason: "Configured receiver is not an account address".to_owned() }),
+            _ => {
+                return Err(CommonError::RnsInvalidDomainConfiguration {
+                    reason: "Configured receiver is not an account address"
+                        .to_owned(),
+                })
+            }
         };
 
-        Ok(DomainConfiguredReceiver::new(domain_details, account ))
+        Ok(DomainConfiguredReceiver::new(domain_details, account))
     }
 }
 
@@ -39,14 +45,14 @@ impl HasSampleValues for DomainConfiguredReceiver {
     fn sample() -> Self {
         DomainConfiguredReceiver::new(
             DomainDetails::sample(),
-            AccountAddress::sample_mainnet()
+            AccountAddress::sample_mainnet(),
         )
     }
 
     fn sample_other() -> Self {
         DomainConfiguredReceiver::new(
             DomainDetails::sample_other(),
-            AccountAddress::sample_mainnet_other()
+            AccountAddress::sample_mainnet_other(),
         )
     }
 }
@@ -87,7 +93,7 @@ mod pub_api_tests {
             .await
             .unwrap();
 
-            let expected_domain_details = DomainDetails::new(
+        let expected_domain_details = DomainDetails::new(
                 domain,
                 AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
                 "#FF5722".to_owned(),
