@@ -77,37 +77,35 @@ impl TryFrom<ScryptoSborValue> for RecordDetails {
 mod tests {
     use super::*;
 
-    // Helper: Build a valid ScryptoSborValue for RecordDetails conversion.
+    // Helper function to create a string field with a specified field name.
+    fn new_string_field(value: &str, field_name: &str) -> ProgrammaticScryptoSborValue {
+        let mut field = ProgrammaticScryptoSborValueString::new(value.to_owned());
+        field.field_name = Some(field_name.to_owned());
+        ProgrammaticScryptoSborValue::String(field)
+    }
+
+    // Helper function to create a NonFungibleLocalId field with a specified field name.
+    fn new_nf_local_id_field(value: &str, field_name: &str) -> ProgrammaticScryptoSborValue {
+        let mut field = ProgrammaticScryptoSborValueNonFungibleLocalId::new(value.to_owned());
+        field.field_name = Some(field_name.to_owned());
+        ProgrammaticScryptoSborValue::NonFungibleLocalId(field)
+    }
+
+    // Helper function to create an enum field wrapping a string field.
+    fn new_enum_field(value: &str, field_name: &str) -> ProgrammaticScryptoSborValue {
+        let inner = new_string_field(value, ""); // inner field does not require a name
+        let mut enum_variant = ProgrammaticScryptoSborValueEnum::new(vec![inner], "dummy_variant".to_owned());
+        enum_variant.field_name = Some(field_name.to_owned());
+        ProgrammaticScryptoSborValue::Enum(enum_variant)
+    }
+
+    // Helper to build a valid ScryptoSborValue for RecordDetails conversion.
     fn valid_record_details_value() -> ScryptoSborValue {
-        // Domain id field – using a string variant which is then interpreted as a NonFungibleLocalId.
-        let mut domain_id_field = ProgrammaticScryptoSborValueNonFungibleLocalId::new("[9a5fb8db4539384dfe275647bfef559e]".to_owned());
-        domain_id_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD.to_owned());
-        let domain_id_variant = ProgrammaticScryptoSborValue::NonFungibleLocalId(domain_id_field);
+        let domain_id_variant = new_nf_local_id_field("[9a5fb8db4539384dfe275647bfef559e]", SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD);
+        let context_variant = new_string_field(&DocketContext::Receivers.to_string(), SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD);
+        let directive_variant = new_enum_field("*", SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD);
+        let value_variant = new_enum_field("some value", SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD);
 
-        // Context field.
-        let mut context_field = ProgrammaticScryptoSborValueString::new(DocketContext::Receivers.to_string());
-        context_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD.to_owned());
-        let context_variant = ProgrammaticScryptoSborValue::String(context_field);
-
-        // Directive field: as an enum whose inner fields return a string.
-        let inner_directive = {
-            let mut inner = ProgrammaticScryptoSborValueString::new("*".to_owned());
-            // No need to set field_name on the inner value.
-            inner
-        };
-        let directive_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_directive)], "dummy_variant".to_owned());
-        let mut directive_enum = directive_enum;
-        directive_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD.to_owned());
-        let directive_variant = ProgrammaticScryptoSborValue::Enum(directive_enum);
-        
-        // Value field: as an enum holding a simple string.
-        let inner_value = ProgrammaticScryptoSborValueString::new("some value".to_owned());
-        let value_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_value)], "dummy_variant".to_owned());
-        let mut value_enum = value_enum;
-        value_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD.to_owned());
-        let value_variant = ProgrammaticScryptoSborValue::Enum(value_enum);
-
-        // Build the tuple containing all four fields. The order does not matter as long as the helper methods find them by field name.
         let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
             domain_id_variant,
             context_variant,
@@ -122,18 +120,16 @@ mod tests {
     #[test]
     fn test_try_from_valid() {
         let scrypto_value = valid_record_details_value();
-        let record = RecordDetails::try_from(scrypto_value).map_err(|e| {
-            panic!("Failed to convert ScryptoSborValue to RecordDetails: {:?}", e);
-        }).unwrap();
-        // Check domain_id conversion (assuming NonFungibleLocalId wraps a string)
+        let record = RecordDetails::try_from(scrypto_value).expect("Conversion should succeed");
+        // Check domain_id conversion.
         assert_eq!(record.domain_id.to_string(), "[9a5fb8db4539384dfe275647bfef559e]".to_owned());
-        // Check docket context conversion – DocketContext::from_str is used in conversion.
+        // Check docket context conversion.
         let expected_context = DocketContext::Receivers;
         assert_eq!(record.context, expected_context);
-        // Check the directive is correctly constructed.
+        // Check the directive.
         let expected_directive = Directive::new("*".to_owned());
         assert_eq!(record.directive, expected_directive);
-
+        // Check the value field: it should be a string with "some value".
         if let ProgrammaticScryptoSborValue::String(inner_str) = record.value {
             assert_eq!(inner_str.value, "some value".to_owned());
         } else {
@@ -144,7 +140,6 @@ mod tests {
     #[test]
     fn test_try_from_unexpected_format() {
         // Provide a ScryptoSborValue with a non-tuple variant.
-        // For example, a simple Bool (assuming such a variant exists in your codebase).
         let scrypto_value = ScryptoSborValue {
             programmatic_json: ProgrammaticScryptoSborValue::Bool(ProgrammaticScryptoSborValueBool::default()),
         };
@@ -154,24 +149,11 @@ mod tests {
 
     #[test]
     fn test_missing_domain_id() {
-        // Build a tuple without a domain_id field.
-        // Only include context, directive, and value.
-        let mut context_field = ProgrammaticScryptoSborValueString::new(DocketContext::Receivers.to_string());
-        context_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD.to_owned());
-        let context_variant = ProgrammaticScryptoSborValue::String(context_field);
-        
-        let inner_directive = ProgrammaticScryptoSborValueString::new("*".to_owned());
-        let directive_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_directive)], "dummy_variant".to_owned());
-        let mut directive_enum = directive_enum;
-        directive_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD.to_owned());
-        let directive_variant = ProgrammaticScryptoSborValue::Enum(directive_enum);
-        
-        let inner_value = ProgrammaticScryptoSborValueString::new("some value".to_owned());
-        let value_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_value)], "dummy_variant".to_owned());
-        let mut value_enum = value_enum;
-        value_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD.to_owned());
-        let value_variant = ProgrammaticScryptoSborValue::Enum(value_enum);
-        
+        // Build a tuple without the domain_id field.
+        let context_variant = new_string_field(&DocketContext::Receivers.to_string(), SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD);
+        let directive_variant = new_enum_field("*", SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD);
+        let value_variant = new_enum_field("some value", SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD);
+
         let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
             context_variant,
             directive_variant,
@@ -189,23 +171,11 @@ mod tests {
 
     #[test]
     fn test_missing_context_field() {
-        // Build a tuple without a context field.
-        let mut domain_id_field = ProgrammaticScryptoSborValueNonFungibleLocalId::new("[9a5fb8db4539384dfe275647bfef559e]".to_owned());
-        domain_id_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD.to_owned());
-        let domain_id_variant = ProgrammaticScryptoSborValue::NonFungibleLocalId(domain_id_field);
-
-        let inner_directive = ProgrammaticScryptoSborValueString::new("*".to_owned());
-        let directive_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_directive)], "dummy_variant".to_owned());
-        let mut directive_enum = directive_enum;
-        directive_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD.to_owned());
-        let directive_variant = ProgrammaticScryptoSborValue::Enum(directive_enum);
-
-        let inner_value = ProgrammaticScryptoSborValueString::new("some value".to_owned());
-        let value_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_value)], "dummy_variant".to_owned());
-        let mut value_enum = value_enum;
-        value_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD.to_owned());
-        let value_variant = ProgrammaticScryptoSborValue::Enum(value_enum);
-
+        // Build a tuple without the context field.
+        let domain_id_variant = new_nf_local_id_field("[9a5fb8db4539384dfe275647bfef559e]", SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD);
+        let directive_variant = new_enum_field("*", SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD);
+        let value_variant = new_enum_field("some value", SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD);
+        
         let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
             domain_id_variant,
             directive_variant,
@@ -223,20 +193,10 @@ mod tests {
 
     #[test]
     fn test_missing_directive_field() {
-        // Build a tuple without a directive field.
-        let mut domain_id_field = ProgrammaticScryptoSborValueNonFungibleLocalId::new("[9a5fb8db4539384dfe275647bfef559e]".to_owned());
-        domain_id_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD.to_owned());
-        let domain_id_variant = ProgrammaticScryptoSborValue::NonFungibleLocalId(domain_id_field);
-
-        let mut context_field = ProgrammaticScryptoSborValueString::new(DocketContext::Receivers.to_string());
-        context_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD.to_owned());
-        let context_variant = ProgrammaticScryptoSborValue::String(context_field);
-        
-        let inner_value = ProgrammaticScryptoSborValueString::new("some value".to_owned());
-        let value_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_value)], "dummy_variant".to_owned());
-        let mut value_enum = value_enum;
-        value_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD.to_owned());
-        let value_variant = ProgrammaticScryptoSborValue::Enum(value_enum);
+        // Build a tuple without the directive field.
+        let domain_id_variant = new_nf_local_id_field("[9a5fb8db4539384dfe275647bfef559e]", SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD);
+        let context_variant = new_string_field(&DocketContext::Receivers.to_string(), SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD);
+        let value_variant = new_enum_field("some value", SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD);
 
         let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
             domain_id_variant,
@@ -255,20 +215,10 @@ mod tests {
 
     #[test]
     fn test_missing_value_field() {
-        // Build a tuple without a value field.
-        let mut domain_id_field = ProgrammaticScryptoSborValueNonFungibleLocalId::new("[9a5fb8db4539384dfe275647bfef559e]".to_owned());
-        domain_id_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD.to_owned());
-        let domain_id_variant = ProgrammaticScryptoSborValue::NonFungibleLocalId(domain_id_field);
-
-        let mut context_field = ProgrammaticScryptoSborValueString::new(DocketContext::Receivers.to_string());
-        context_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD.to_owned());
-        let context_variant = ProgrammaticScryptoSborValue::String(context_field);
-
-        let inner_directive = ProgrammaticScryptoSborValueString::new("*".to_owned());
-        let directive_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_directive)], "dummy_variant".to_owned());
-        let mut directive_enum = directive_enum;
-        directive_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD.to_owned());
-        let directive_variant = ProgrammaticScryptoSborValue::Enum(directive_enum);
+        // Build a tuple without the value field.
+        let domain_id_variant = new_nf_local_id_field("[9a5fb8db4539384dfe275647bfef559e]", SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD);
+        let context_variant = new_string_field(&DocketContext::Receivers.to_string(), SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD);
+        let directive_variant = new_enum_field("*", SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD);
 
         let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
             domain_id_variant,
@@ -285,31 +235,14 @@ mod tests {
         ));
     }
 
-    // Optionally, if DocketContext::from_str can fail on an invalid input, test that as well.
     #[test]
     fn test_invalid_docket_context() {
         // Build a tuple with an invalid docket context.
-        let mut domain_id_field = ProgrammaticScryptoSborValueNonFungibleLocalId::new("[9a5fb8db4539384dfe275647bfef559e]".to_owned());
-        domain_id_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD.to_owned());
-        let domain_id_variant = ProgrammaticScryptoSborValue::NonFungibleLocalId(domain_id_field);
+        let domain_id_variant = new_nf_local_id_field("[9a5fb8db4539384dfe275647bfef559e]", SCRYPTO_SBOR_RECORD_DOMAIN_ID_FIELD);
+        let context_variant = new_string_field("invalid_context", SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD);
+        let directive_variant = new_enum_field("*", SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD);
+        let value_variant = new_enum_field("some value", SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD);
 
-        // Use an invalid string for docket context (assuming that DocketContext::from_str will reject it).
-        let mut context_field = ProgrammaticScryptoSborValueString::new("invalid_context".to_owned());
-        context_field.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_CONTEXT_FIELD.to_owned());
-        let context_variant = ProgrammaticScryptoSborValue::String(context_field);
-        
-        let inner_directive = ProgrammaticScryptoSborValueString::new("*".to_owned());
-        let directive_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_directive)], "dummy_variant".to_owned());
-        let mut directive_enum = directive_enum;
-        directive_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_DIRECTIVE_FIELD.to_owned());
-        let directive_variant = ProgrammaticScryptoSborValue::Enum(directive_enum);
-        
-        let inner_value = ProgrammaticScryptoSborValueString::new("some value".to_owned());
-        let value_enum = ProgrammaticScryptoSborValueEnum::new(vec![ProgrammaticScryptoSborValue::String(inner_value)], "dummy_variant".to_owned());
-        let mut value_enum = value_enum;
-        value_enum.field_name = Some(SCRYPTO_SBOR_RECORD_DOCKET_VALUE_FIELD.to_owned());
-        let value_variant = ProgrammaticScryptoSborValue::Enum(value_enum);
-        
         let tuple = ProgrammaticScryptoSborValueTuple::new(vec![
             domain_id_variant,
             context_variant,
@@ -320,7 +253,6 @@ mod tests {
             programmatic_json: ProgrammaticScryptoSborValue::Tuple(tuple),
         };
         let result = RecordDetails::try_from(scrypto_value);
-        // Expect an error because the docket context is invalid.
         assert!(result.is_err());
     }
 }
