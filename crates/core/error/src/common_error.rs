@@ -951,6 +951,24 @@ pub enum CommonError {
 
     #[error("Factor source already exists")]
     FactorSourceAlreadyExists = 10267,
+
+    #[error("Missing NFT Data field {field}")]
+    MissingNFTDataField { field: String } = 10268,
+
+    #[error("Unexpected NFT Data format")]
+    UnexpectedNFTDataFormat = 10269,
+
+    #[error("Invalid RNS domain")]
+    RnsInvalidDomain = 10270,
+
+    #[error("Unauthentic RNS domain: {reason}")]
+    RnsUnauthenticDomain { reason: String } = 10271,
+
+    #[error("Invalid RNS domain configuration: {reason}")]
+    RnsInvalidDomainConfiguration { reason: String } = 10272,
+
+    #[error("RNS unsupported network: {network}")]
+    RnsUnsupportedNetwork { network: u8 } = 10273,
 }
 
 impl CommonError {

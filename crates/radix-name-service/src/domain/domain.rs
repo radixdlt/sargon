@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use regex::Regex;
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Domain(pub String);
@@ -19,41 +20,37 @@ impl HasSampleValues for Domain {
     }
 }
 
-use regex::Regex;
 
 impl Domain {
     pub fn to_non_fungible_id(&self) -> Result<NonFungibleLocalId> {
-        domain_to_non_fungible_id(&self.0, true)
+        domain_to_non_fungible_id(&self.0)
     }
 
     pub fn validated(&self) -> Result<Domain> {
         let raw = self.0.clone();
-        // Split the domain into parts by '.'
+
         let parts: Vec<&str> = raw.split('.').collect();
-        // A valid domain must have at least one label and a TLD.
+
         if parts.len() < 2 {
-            return Err(CommonError::Unknown);
+            return Err(CommonError::RnsInvalidDomain);
         }
-        // The last part must be "xrd"
+
         if parts.last().map(|s| *s) != Some("xrd") {
-            return Err(CommonError::Unknown);
+            return Err(CommonError::RnsInvalidDomain);
         }
-        // Regex for a label: must start and end with alphanumeric characters.
-        // Allows dashes or underscores in the middle (though we'll disallow underscores explicitly).
-        // Length between 2 and 65 as in the original validation.
+
         let label_regex = Regex::new(r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,63}[a-zA-Z0-9])?$")
-            .map_err(|_| CommonError::Unknown)?;
+            .map_err(|_| CommonError::RnsInvalidDomain)?;
     
-        // Check each label (excluding TLD)
         for label in &parts[..parts.len() - 1] {
             if label.len() < 2 || label.len() > 65 {
-                return Err(CommonError::Unknown);
+                return Err(CommonError::RnsInvalidDomain);
             }
             if label.contains('_') {
-                return Err(CommonError::Unknown);
+                return Err(CommonError::RnsInvalidDomain);
             }
             if !label_regex.is_match(label) {
-                return Err(CommonError::Unknown);
+                return Err(CommonError::RnsInvalidDomain);
             }
         }
     

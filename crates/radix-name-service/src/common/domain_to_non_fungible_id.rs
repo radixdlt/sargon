@@ -3,12 +3,7 @@ use k256::sha2::{Digest, Sha256};
 
 pub fn domain_to_non_fungible_id(
     domain: &str,
-    is_byte_id: bool,
 ) -> Result<NonFungibleLocalId> {
-    if !domain.is_ascii() {
-        return Err(CommonError::Unknown);
-    }
-
     let mut hasher = Sha256::new();
     hasher.update(domain.as_bytes());
     let hash = hasher.finalize();
@@ -20,11 +15,7 @@ pub fn domain_to_non_fungible_id(
         .rev()
         .collect();
 
-    let id = if is_byte_id {
-        format!("[{}]", hex_string)
-    } else {
-        hex_string
-    };
+    let id = format!("[{}]", hex_string);
 
     NonFungibleLocalId::from_str(&id)
 }
@@ -42,11 +33,11 @@ mod test {
                 .unwrap();
 
         assert_eq!(
-            super::domain_to_non_fungible_id(domain, false).unwrap(),
+            super::domain_to_non_fungible_id(domain).unwrap(),
             expected_id
         );
         assert_eq!(
-            super::domain_to_non_fungible_id(domain, true).unwrap(),
+            super::domain_to_non_fungible_id(domain).unwrap(),
             expected_byte_id
         );
     }

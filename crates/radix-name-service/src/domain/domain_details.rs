@@ -39,6 +39,9 @@ impl HasSampleValues for DomainDetails {
     }
 }
 
+const SCRYPTO_SBOR_DOMAIN_NAME_FIELD: &str = "name";
+const SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD: &str = "address";
+
 impl TryFrom<ScryptoSborValue> for DomainDetails {
     type Error = CommonError;
 
@@ -47,18 +50,19 @@ impl TryFrom<ScryptoSborValue> for DomainDetails {
             ProgrammaticScryptoSborValue::Tuple(tuple) => {
                 let name = tuple
                     .fields
-                    .get_string_field("name")
-                    .ok_or(CommonError::Unknown)?;
+                    .get_string_field(SCRYPTO_SBOR_DOMAIN_NAME_FIELD)
+                    .ok_or(CommonError::MissingNFTDataField { field: "Domain name".to_owned() })?;
+
                 let owner_address = tuple
                     .fields
-                    .get_enum_field("address")
+                    .get_enum_field(SCRYPTO_SBOR_DOMAIN_OWNER_ADDRESS_FIELD)
                     .and_then(|field| {
                         field
                             .fields
                             .first_reference_field()
                             .map(|field| field.value)
                     })
-                    .ok_or(CommonError::Unknown)?;
+                    .ok_or(CommonError::MissingNFTDataField { field: "Domain owner address".to_owned() })?;
 
                 let domain = Domain::new(name.clone());
                 let owner = AccountAddress::from_str(&owner_address)?;
@@ -70,7 +74,7 @@ impl TryFrom<ScryptoSborValue> for DomainDetails {
                     gradient_color_end
                 ))
             }
-            _ => Err(CommonError::Unknown),
+            _ => Err(CommonError::UnexpectedNFTDataFormat),
         }
     }
 }

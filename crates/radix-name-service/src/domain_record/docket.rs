@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use crate::prelude::*;
 
 #[derive(PartialEq, Eq, Clone, Debug)]
@@ -23,7 +21,7 @@ impl Docket {
 
         let id_str = format!("{}-{}-{}", domain_id, context_str, directive_str);
 
-        domain_to_non_fungible_id(&id_str, true)
+        domain_to_non_fungible_id(&id_str)
     }
 }
 
@@ -93,7 +91,7 @@ mod tests {
     #[test]
     fn to_non_fungible_id() {
         let docket = Docket::wildcard_receiver();
-        let domain = Domain::new("grenadine.xrd".to_string());
+        let domain = Domain::new("s1.grenadine.xrd".to_string());
 
         let id = docket.to_non_fungible_id(domain).unwrap();
         let expected_id =

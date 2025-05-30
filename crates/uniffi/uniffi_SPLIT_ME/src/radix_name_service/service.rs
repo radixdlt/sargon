@@ -4,7 +4,7 @@ use indexmap::map::raw_entry_v1::RawEntryMut;
 use sargon::AccountAddress as InternalAccountAddress;
 use sargon::Domain as InternalDomain;
 use sargon::DomainDetails as InternalDomainDetails;
-use sargon::ResolvedReceiver as InternalResolvedReceiver;
+use sargon::DomainConfiguredReceiver as InternalDomainConfiguredReceiver;
 use sargon::RadixNameService as InternalRadixNameService;
 
 #[derive(uniffi::Object)]
@@ -53,9 +53,9 @@ pub fn rns_domain_validated(domain: Domain) -> Result<Domain> {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
-pub struct ResolvedReceiver {
+pub struct DomainConfiguredReceiver {
     pub domain: DomainDetails,
-    pub account: AccountAddress,
+    pub receiver: AccountAddress,
 }
 
 #[uniffi::export]
@@ -64,7 +64,7 @@ impl RadixNameService {
     pub async fn resolve_receiver_account_for_domain(
         &self,
         domain: Domain,
-    ) -> Result<ResolvedReceiver> {
+    ) -> Result<DomainConfiguredReceiver> {
         self.wrapped
             .resolve_receiver_account_for_domain(
                 domain.into_internal(),
