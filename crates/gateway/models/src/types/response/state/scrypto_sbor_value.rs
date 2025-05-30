@@ -32,12 +32,12 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::String(str_sbor_value) => {
                 if str_sbor_value.field_name == Some(name.to_owned()) {
-                    return Some(str_sbor_value.value.clone());
+                    Some(str_sbor_value.value.clone())
                 } else {
-                    return None;
+                    None
                 }
             }
-            _ => return None,
+            _ => None,
         })
     }
 
@@ -48,12 +48,12 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::Enum(enum_sbor_value) => {
                 if enum_sbor_value.field_name == Some(name.to_owned()) {
-                    return Some(enum_sbor_value.clone());
+                    Some(enum_sbor_value.clone())
                 } else {
-                    return None;
+                    None
                 }
             }
-            _ => return None,
+            _ => None,
         })
     }
 
@@ -64,12 +64,12 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::Reference(reference_sbor_value) => {
                 if reference_sbor_value.field_name == Some(name.to_owned()) {
-                    return Some(reference_sbor_value.clone());
+                    Some(reference_sbor_value.clone())
                 } else {
-                    return None;
+                    None
                 }
             }
-            _ => return None,
+            _ => None,
         })
     }
 
@@ -78,18 +78,18 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
     ) -> Option<ProgrammaticScryptoSborValueReference> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::Reference(reference_sbor_value) => {
-                return Some(reference_sbor_value.clone())
+                Some(reference_sbor_value.clone())
             }
-            _ => return None,
+            _ => None,
         })
     }
 
     fn first_string_field(&self) -> Option<String> {
         self.iter().find_map(|field| match field {
             ProgrammaticScryptoSborValue::String(string_sbor_value) => {
-                return Some(string_sbor_value.value.clone())
+                Some(string_sbor_value.value.clone())
             }
-            _ => return None,
+            _ => None,
         })
     }
 
@@ -104,15 +104,15 @@ impl ScryptoSborValueFieldExtraction for Vec<ProgrammaticScryptoSborValue> {
                 if non_fungible_local_id_sbor_value.field_name
                     == Some(name.to_owned())
                 {
-                    return NonFungibleLocalId::from_str(
+                    NonFungibleLocalId::from_str(
                         &non_fungible_local_id_sbor_value.value,
                     )
-                    .ok();
+                    .ok()
                 } else {
-                    return None;
+                    None
                 }
             }
-            _ => return None,
+            _ => None,
         })
     }
 }

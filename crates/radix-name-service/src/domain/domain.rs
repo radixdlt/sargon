@@ -43,7 +43,7 @@ impl RnsDomain {
             return Err(CommonError::RnsInvalidDomain);
         }
 
-        if parts.last().map(|s| *s) != Some("xrd") {
+        if parts.last().copied() != Some("xrd") {
             return Err(CommonError::RnsInvalidDomain);
         }
 

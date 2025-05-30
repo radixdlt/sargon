@@ -572,7 +572,7 @@ impl GatewayClient {
         );
         let response = self.state_non_fungible_location(request).await?;
         let item = response.non_fungible_ids.first().ok_or(CommonError::GWMissingResponseItem { item: "StateNonFungibleLocationResponseItem".to_owned() })?;
-        Ok(item.owning_vault_global_ancestor_address.clone())
+        Ok(item.owning_vault_global_ancestor_address)
     }
 }
 

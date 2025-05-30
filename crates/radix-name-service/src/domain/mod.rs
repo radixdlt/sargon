@@ -29,12 +29,12 @@ impl RadixNameService {
                         reason: "Account owner missmatch".to_owned(),
                     });
                 }
-                return Ok(());
+                Ok(())
             }
             None => {
-                return Err(CommonError::RnsUnauthenticDomain {
+                Err(CommonError::RnsUnauthenticDomain {
                     reason: "Failed to read domain location".to_owned(),
-                });
+                })
             }
         }
     }
@@ -48,7 +48,7 @@ impl RadixNameService {
         let data = self
             .gateway_client
             .fetch_non_fungible_data(
-                self.config.domains_collection_address.clone(),
+                self.config.domains_collection_address,
                 domain_id,
             )
             .await?;

@@ -866,7 +866,7 @@ mod tests {
         assert!(!implicit_main_bdfs.is_main_bdfs());
 
         let bdfs_count_before_import =
-            profile_to_restore.device_factor_sources().iter().count();
+            profile_to_restore.device_factor_sources().len();
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
@@ -877,7 +877,7 @@ mod tests {
         assert_eq!(os.profile().unwrap().main_bdfs().id, implicit_main_bdfs.id);
         // Assert that no new bdfs is created and the existing implicit one is marked as main.
         assert_eq!(
-            os.profile().unwrap().device_factor_sources().iter().count(),
+            os.profile().unwrap().device_factor_sources().len(),
             bdfs_count_before_import
         );
     }
@@ -906,7 +906,7 @@ mod tests {
         assert!(!implicit_main_bdfs.is_main_bdfs());
 
         let bdfs_count_before_import =
-            profile_to_restore.device_factor_sources().iter().count();
+            profile_to_restore.device_factor_sources().len();
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
@@ -917,7 +917,7 @@ mod tests {
         assert_ne!(os.profile().unwrap().main_bdfs().id, implicit_main_bdfs.id);
         // Assert that a new bdfs is created
         assert_eq!(
-            os.profile().unwrap().device_factor_sources().iter().count(),
+            os.profile().unwrap().device_factor_sources().len(),
             bdfs_count_before_import + 1
         );
     }

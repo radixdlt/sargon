@@ -18,7 +18,7 @@ impl RadixNameService {
             .await?;
 
         record.validate(&domain, &docket)?;
-        return Ok(record);
+        Ok(record)
     }
 
     async fn fetch_record_details(
@@ -31,7 +31,7 @@ impl RadixNameService {
         let data = self
             .gateway_client
             .fetch_non_fungible_data(
-                self.config.records_collection_address.clone(),
+                self.config.records_collection_address,
                 record_id,
             )
             .await?;

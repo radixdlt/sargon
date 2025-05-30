@@ -810,7 +810,7 @@ mod tests {
         os.with_timeout(|os| os.new_wallet(false)).await.unwrap();
 
         // ACT
-        os.with_timeout(|os| create_unsaved_mainnet_account_with_main_bdfs(os))
+        os.with_timeout(create_unsaved_mainnet_account_with_main_bdfs)
             .await
             .unwrap();
 
