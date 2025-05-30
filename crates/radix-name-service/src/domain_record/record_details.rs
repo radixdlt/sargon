@@ -25,7 +25,7 @@ impl RecordDetails {
 }
 
 impl RecordDetails {
-    pub fn validate(&self, domain: &Domain, docket: &Docket) -> Result<()> {
+    pub fn validate(&self, domain: &RnsDomain, docket: &Docket) -> Result<()> {
         if self.domain_id != domain.to_non_fungible_id()? {
             return Err(CommonError::RnsInvalidDomainConfiguration {
                 reason: "RecordDetails domain_id does not match Docket"
@@ -116,7 +116,7 @@ mod validation_tests {
 
     #[test]
     fn test_record_details_validation_success() {
-        let domain = Domain::new("example.com".to_owned());
+        let domain = RnsDomain::new("example.com".to_owned());
         let docket = Docket::wildcard_receiver();
         let domain_id = domain.to_non_fungible_id().unwrap();
         let context = DocketContext::Receivers;
@@ -134,9 +134,9 @@ mod validation_tests {
 
     #[test]
     fn test_record_details_validation_domain_mismatch() {
-        let domain = Domain::new("example.com".to_owned());
+        let domain = RnsDomain::new("example.com".to_owned());
         let docket = Docket::wildcard_receiver();
-        let domain_id = Domain::new("example2.com".to_owned())
+        let domain_id = RnsDomain::new("example2.com".to_owned())
             .to_non_fungible_id()
             .unwrap();
         let context = DocketContext::Receivers;
@@ -154,7 +154,7 @@ mod validation_tests {
 
     #[test]
     fn test_record_details_validation_context_mismatch() {
-        let domain = Domain::new("example.com".to_owned());
+        let domain = RnsDomain::new("example.com".to_owned());
         let docket = Docket::wildcard_receiver();
         let domain_id = domain.to_non_fungible_id().unwrap();
         let context = DocketContext::Delegation; // Different context
@@ -172,7 +172,7 @@ mod validation_tests {
 
     #[test]
     fn test_record_details_validation_directive_mismatch() {
-        let domain = Domain::new("example.com".to_owned());
+        let domain = RnsDomain::new("example.com".to_owned());
         let docket = Docket::wildcard_receiver();
         let domain_id = domain.to_non_fungible_id().unwrap();
         let context = DocketContext::Receivers;

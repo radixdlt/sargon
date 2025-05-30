@@ -2,39 +2,39 @@ use crate::prelude::*;
 use regex::Regex;
 
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub struct Domain(pub String);
+pub struct RnsDomain(pub String);
 
-impl Domain {
+impl RnsDomain {
     pub fn new(raw_domain: String) -> Self {
         Self(raw_domain)
     }
 }
 
-impl HasSampleValues for Domain {
+impl HasSampleValues for RnsDomain {
     fn sample() -> Self {
-        Domain::new("sample1.xrd".to_owned())
+        RnsDomain::new("sample1.xrd".to_owned())
     }
 
     fn sample_other() -> Self {
-        Domain::new("sample2.xrd".to_owned())
+        RnsDomain::new("sample2.xrd".to_owned())
     }
 }
 
-impl Domain {
-    pub fn root_domain(&self) -> Result<Domain> {
+impl RnsDomain {
+    pub fn root_domain(&self) -> Result<RnsDomain> {
         let parts: Vec<&str> = self.0.split('.').collect();
         if parts.len() < 2 {
             return Err(CommonError::RnsInvalidDomain);
         }
         let root = parts[parts.len() - 2..].join(".");
-        Ok(Domain::new(root))
+        Ok(RnsDomain::new(root))
     }
 
     pub fn to_non_fungible_id(&self) -> Result<NonFungibleLocalId> {
         domain_to_non_fungible_id(&self.0)
     }
 
-    pub fn validated(&self) -> Result<Domain> {
+    pub fn validated(&self) -> Result<RnsDomain> {
         let raw = self.0.clone();
 
         let parts: Vec<&str> = raw.split('.').collect();
@@ -97,7 +97,7 @@ const GRADIENT_PALETTE: [&str; 160] = [
     "#FF5722", "#795548", "#607D8B", "#333333",
 ];
 
-impl Domain {
+impl RnsDomain {
     pub fn gradient_colors(&self) -> (String, String) {
         let input = &self.0;
         let char_sum: usize = input.chars().map(|c| c as usize).sum();
@@ -117,7 +117,7 @@ mod tests {
     #[test]
     fn test_root_domain_subdomain() {
         // Valid domain with subdomain
-        let domain = Domain::new("sub.example.xrd".to_string());
+        let domain = RnsDomain::new("sub.example.xrd".to_string());
         let root = domain.root_domain().unwrap();
         assert_eq!(root.0, "example.xrd");
     }
@@ -125,7 +125,7 @@ mod tests {
     #[test]
     fn test_root_domain_no_subdomain() {
         // Domain without subdomain
-        let domain = Domain::new("example.xrd".to_string());
+        let domain = RnsDomain::new("example.xrd".to_string());
         let root = domain.root_domain().unwrap();
         assert_eq!(root.0, "example.xrd");
     }
@@ -133,35 +133,35 @@ mod tests {
     #[test]
     fn test_valid_domain() {
         // Valid domain with one label and TLD "xrd"
-        let domain = Domain::new("example.xrd".to_string());
+        let domain = RnsDomain::new("example.xrd".to_string());
         assert!(domain.validated().is_ok());
     }
 
     #[test]
     fn test_valid_subdomain() {
         // Valid domain with subdomain
-        let domain = Domain::new("sub.example.xrd".to_string());
+        let domain = RnsDomain::new("sub.example.xrd".to_string());
         assert!(domain.validated().is_ok());
     }
 
     #[test]
     fn test_invalid_domain_too_few_parts() {
         // A domain without a dot should be invalid.
-        let domain = Domain::new("example".to_string());
+        let domain = RnsDomain::new("example".to_string());
         assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
     }
 
     #[test]
     fn test_invalid_domain_wrong_tld() {
         // Domain with TLD other than "xrd" should be rejected.
-        let domain = Domain::new("example.com".to_string());
+        let domain = RnsDomain::new("example.com".to_string());
         assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
     }
 
     #[test]
     fn test_invalid_label_too_short() {
         // The first label must be at least 2 characters long.
-        let domain = Domain::new("e.xrd".to_string());
+        let domain = RnsDomain::new("e.xrd".to_string());
         assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
     }
 
@@ -170,28 +170,28 @@ mod tests {
         // Create a label with 66 characters (should be too long)
         let long_label = "a".repeat(66);
         let domain_str = format!("{}.xrd", long_label);
-        let domain = Domain::new(domain_str);
+        let domain = RnsDomain::new(domain_str);
         assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
     }
 
     #[test]
     fn test_invalid_label_with_underscore() {
         // Labels with underscores are not allowed.
-        let domain = Domain::new("exa_mple.xrd".to_string());
+        let domain = RnsDomain::new("exa_mple.xrd".to_string());
         assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
     }
 
     #[test]
     fn test_invalid_label_bad_characters() {
         // Domain containing an invalid symbol (e.g. '@') should be rejected.
-        let domain = Domain::new("ex@mple.xrd".to_string());
+        let domain = RnsDomain::new("ex@mple.xrd".to_string());
         assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
     }
 
     #[test]
     fn test_invalid_subdomain_missing_separator() {
         // A domain with an extra period leading to an empty label should fail.
-        let domain = Domain::new("example..xrd".to_string());
+        let domain = RnsDomain::new("example..xrd".to_string());
         // The empty label (between the two dots) fails the length check.
         assert_eq!(domain.validated(), Err(CommonError::RnsInvalidDomain));
     }
@@ -199,7 +199,7 @@ mod tests {
     #[test]
     fn test_gradient_colors_for_example_domain() {
         let domain_str = "example.xrd".to_string();
-        let domain = Domain::new(domain_str.clone());
+        let domain = RnsDomain::new(domain_str.clone());
         // Calling gradient_colors does not require validation.
         let (color1, color2) = domain.gradient_colors();
         // For "example.xrd", we expect colors based on our GRADIENT_PALETTE computation.

@@ -10,7 +10,7 @@ use crate::service::RadixNameService;
 impl RadixNameService {
     pub(crate) async fn resolve_record(
         &self,
-        domain: Domain,
+        domain: RnsDomain,
         docket: Docket,
     ) -> Result<RecordDetails> {
         let record = self
@@ -23,7 +23,7 @@ impl RadixNameService {
 
     async fn fetch_record_details(
         &self,
-        domain: Domain,
+        domain: RnsDomain,
         docket: Docket,
     ) -> Result<RecordDetails> {
         let record_id = docket.to_non_fungible_id(domain.clone())?;
@@ -73,7 +73,7 @@ mod fetch_tests {
                 assert_eq!(
                     nft_data_request.non_fungible_ids,
                     vec![Docket::wildcard_receiver()
-                        .to_non_fungible_id(Domain::new(
+                        .to_non_fungible_id(RnsDomain::new(
                             "grenadine.xrd".to_owned()
                         ))
                         .unwrap(),]
@@ -84,7 +84,7 @@ mod fetch_tests {
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
                 .unwrap();
 
-        let domain = Domain::new("grenadine.xrd".to_owned());
+        let domain = RnsDomain::new("grenadine.xrd".to_owned());
         let docket = Docket::wildcard_receiver();
         let result = sut
             .fetch_record_details(domain.clone(), docket.clone())

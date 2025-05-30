@@ -3,8 +3,8 @@ use crate::prelude::*;
 impl RadixNameService {
     pub async fn resolve_receiver_account_for_domain(
         &self,
-        domain: Domain,
-    ) -> Result<DomainConfiguredReceiver> {
+        domain: RnsDomain,
+    ) -> Result<RnsDomainConfiguredReceiver> {
         let domain_details = self.fetch_domain_details(domain.clone()).await?;
         if domain != domain_details.domain {
             return Err(CommonError::RnsInvalidDomainConfiguration {
@@ -31,34 +31,34 @@ impl RadixNameService {
             }
         };
 
-        Ok(DomainConfiguredReceiver::new(domain_details, account))
+        Ok(RnsDomainConfiguredReceiver::new(domain_details, account))
     }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct DomainConfiguredReceiver {
-    pub domain: DomainDetails,
+pub struct RnsDomainConfiguredReceiver {
+    pub domain: RnsDomainDetails,
     pub receiver: AccountAddress,
 }
 
-impl HasSampleValues for DomainConfiguredReceiver {
+impl HasSampleValues for RnsDomainConfiguredReceiver {
     fn sample() -> Self {
-        DomainConfiguredReceiver::new(
-            DomainDetails::sample(),
+        RnsDomainConfiguredReceiver::new(
+            RnsDomainDetails::sample(),
             AccountAddress::sample_mainnet(),
         )
     }
 
     fn sample_other() -> Self {
-        DomainConfiguredReceiver::new(
-            DomainDetails::sample_other(),
+        RnsDomainConfiguredReceiver::new(
+            RnsDomainDetails::sample_other(),
             AccountAddress::sample_mainnet_other(),
         )
     }
 }
 
-impl DomainConfiguredReceiver {
-    pub fn new(domain: DomainDetails, receiver: AccountAddress) -> Self {
+impl RnsDomainConfiguredReceiver {
+    pub fn new(domain: RnsDomainDetails, receiver: AccountAddress) -> Self {
         Self { domain, receiver }
     }
 }
@@ -87,13 +87,13 @@ mod pub_api_tests {
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
                 .unwrap();
 
-        let domain = Domain::new("grenadine.xrd".to_owned());
+        let domain = RnsDomain::new("grenadine.xrd".to_owned());
         let result = sut
             .resolve_receiver_account_for_domain(domain.clone())
             .await
             .unwrap();
 
-        let expected_domain_details = DomainDetails::new(
+        let expected_domain_details = RnsDomainDetails::new(
                 domain,
                 AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
                 "#FF5722".to_owned(),
@@ -102,7 +102,7 @@ mod pub_api_tests {
 
         assert_eq!(
             result,
-            DomainConfiguredReceiver::new(
+            RnsDomainConfiguredReceiver::new(
                 expected_domain_details,
                 AccountAddress::from_str("account_rdx128pu3gp74hgl0a9d6d899vd0nn8wh5z0syrkvp28hd492dk0u8fe8t").unwrap()
             )

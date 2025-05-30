@@ -1,29 +1,9 @@
 use crate::prelude::*;
-
-use indexmap::map::raw_entry_v1::RawEntryMut;
-use sargon::AccountAddress as InternalAccountAddress;
-use sargon::Domain as InternalDomain;
-use sargon::DomainConfiguredReceiver as InternalDomainConfiguredReceiver;
-use sargon::DomainDetails as InternalDomainDetails;
 use sargon::RadixNameService as InternalRadixNameService;
 
 #[derive(uniffi::Object)]
 pub struct RadixNameService {
     pub wrapped: Arc<InternalRadixNameService>,
-}
-
-uniffi::custom_newtype!(Domain, String);
-#[derive(Debug, Clone, PartialEq, Eq, Hash, InternalConversion)]
-pub struct Domain(pub String);
-
-#[derive(
-    PartialEq, Eq, Hash, Clone, Debug, InternalConversion, uniffi::Record,
-)]
-pub struct DomainDetails {
-    pub domain: Domain,
-    pub owner: AccountAddress,
-    pub gradient_color_start: String,
-    pub gradient_color_end: String,
 }
 
 #[uniffi::export]
@@ -48,14 +28,8 @@ impl RadixNameService {
 }
 
 #[uniffi::export]
-pub fn rns_domain_validated(domain: Domain) -> Result<Domain> {
+pub fn rns_domain_validated(domain: RnsDomain) -> Result<RnsDomain> {
     domain.into_internal().validated().into_result()
-}
-
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
-pub struct DomainConfiguredReceiver {
-    pub domain: DomainDetails,
-    pub receiver: AccountAddress,
 }
 
 #[uniffi::export]
@@ -63,8 +37,8 @@ impl RadixNameService {
     #[uniffi::method]
     pub async fn resolve_receiver_account_for_domain(
         &self,
-        domain: Domain,
-    ) -> Result<DomainConfiguredReceiver> {
+        domain: RnsDomain,
+    ) -> Result<RnsDomainConfiguredReceiver> {
         self.wrapped
             .resolve_receiver_account_for_domain(domain.into_internal())
             .await

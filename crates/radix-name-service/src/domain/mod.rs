@@ -10,7 +10,7 @@ use crate::service::RadixNameService;
 impl RadixNameService {
     pub(crate) async fn check_domain_authenticity(
         &self,
-        domain_details: DomainDetails,
+        domain_details: RnsDomainDetails,
     ) -> Result<()> {
         let id = domain_details.domain.root_domain()?.to_non_fungible_id()?;
         let domain_location = self
@@ -41,8 +41,8 @@ impl RadixNameService {
 
     pub(crate) async fn fetch_domain_details(
         &self,
-        domain: Domain,
-    ) -> Result<DomainDetails> {
+        domain: RnsDomain,
+    ) -> Result<RnsDomainDetails> {
         let domain_id = domain.to_non_fungible_id()?;
 
         let data = self
@@ -89,7 +89,7 @@ mod fetch_tests {
                 );
                 assert_eq!(
                     nft_data_request.non_fungible_ids,
-                    vec![Domain::new("bakirci.xrd".to_owned())
+                    vec![RnsDomain::new("bakirci.xrd".to_owned())
                         .to_non_fungible_id()
                         .unwrap()]
                 );
@@ -99,10 +99,10 @@ mod fetch_tests {
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
                 .unwrap();
 
-        let domain = Domain::new("bakirci.xrd".to_owned());
+        let domain = RnsDomain::new("bakirci.xrd".to_owned());
         let result = sut.fetch_domain_details(domain.clone()).await.unwrap();
 
-        let expected_domain_details = DomainDetails::new(
+        let expected_domain_details = RnsDomainDetails::new(
             domain,
             AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
             "#FF5722".to_owned(),
@@ -130,8 +130,8 @@ mod fetch_tests {
             non_fungible_ids: vec![nft_location_item],
         };
 
-        let domain_details = DomainDetails::new(
-            Domain::new("bakirci.xrd".to_owned()),
+        let domain_details = RnsDomainDetails::new(
+            RnsDomain::new("bakirci.xrd".to_owned()),
             AccountAddress::sample(),
             "#FF5722".to_owned(),
             "#D32F2F".to_owned(),
@@ -153,7 +153,7 @@ mod fetch_tests {
                 );
                 assert_eq!(
                     location_request.non_fungible_ids,
-                    vec![Domain::new("bakirci.xrd".to_owned())
+                    vec![RnsDomain::new("bakirci.xrd".to_owned())
                         .to_non_fungible_id()
                         .unwrap()]
                 )
@@ -192,8 +192,8 @@ mod fetch_tests {
             non_fungible_ids: vec![nft_location_item],
         };
 
-        let domain_details = DomainDetails::new(
-            Domain::new("bakirci.xrd".to_owned()),
+        let domain_details = RnsDomainDetails::new(
+            RnsDomain::new("bakirci.xrd".to_owned()),
             AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
             "#FF5722".to_owned(),
             "#D32F2F".to_owned(),
@@ -237,8 +237,8 @@ mod fetch_tests {
             non_fungible_ids: vec![nft_location_item],
         };
 
-        let domain_details = DomainDetails::new(
-            Domain::new("bakirci.xrd".to_owned()),
+        let domain_details = RnsDomainDetails::new(
+            RnsDomain::new("bakirci.xrd".to_owned()),
             AccountAddress::sample_mainnet(),
             "#FF5722".to_owned(),
             "#D32F2F".to_owned(),

@@ -13,7 +13,7 @@ impl Docket {
 
     pub fn to_non_fungible_id(
         &self,
-        domain: Domain,
+        domain: RnsDomain,
     ) -> Result<NonFungibleLocalId> {
         let domain_id = domain.to_non_fungible_id()?;
         let context_str = self.context.to_string();
@@ -93,7 +93,7 @@ mod tests {
     #[test]
     fn to_non_fungible_id() {
         let docket = Docket::wildcard_receiver();
-        let domain = Domain::new("s1.grenadine.xrd".to_string());
+        let domain = RnsDomain::new("s1.grenadine.xrd".to_string());
 
         let id = docket.to_non_fungible_id(domain).unwrap();
         let expected_id =
