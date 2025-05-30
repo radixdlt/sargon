@@ -973,7 +973,7 @@ pub enum CommonError {
     #[error("Invalid RNS record context: {context}")]
     RnsInvalidRecordContext { context: String } = 10274,
 
-    #[error("Invalid RNS record type: {record_type}")]
+    #[error("Gw missing response item: {item}")]
     GWMissingResponseItem { item: String } = 10275,
 }
 

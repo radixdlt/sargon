@@ -996,28 +996,3 @@ mod filter_transferable_tests {
         }
     }
 }
-
-// #[cfg(test)]
-// mod non_fungible_data_tests {
-//     use crate::prelude::*;
-//     use profile_gateway::prelude::Gateway;
-
-//     #[allow(clippy::upper_case_acronyms)]
-//     type SUT = GatewayClient;
-
-//     #[actix_rt::test]
-//     async fn fetch_non_fungible_data() {
-//         // Mock the driver
-
-//         let mock_driver = MockNetworkingDriver::new_with_responses(vec![
-//             entity_details_response,
-//         ]);
-//         let sut = SUT::with_gateway(Arc::new(mock_driver), Gateway::stokenet());
-
-//         let collection_address = NonFungibleResourceAddress::sample_mainnet();
-//         let id = NonFungibleLocalId::sample();
-//         let result = sut.fetch_non_fungible_data(collection_address, id).await.unwrap();
-
-//         assert!(result.is_some());
-//     }
-// }
