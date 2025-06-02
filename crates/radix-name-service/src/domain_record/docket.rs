@@ -77,9 +77,9 @@ impl FromStr for DocketContext {
     }
 }
 
-impl ToString for DocketContext {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for DocketContext {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             DocketContext::Receivers => "receivers",
             DocketContext::Delegation => "delegation",
             DocketContext::Navigation => "navigation",
@@ -87,7 +87,8 @@ impl ToString for DocketContext {
             DocketContext::Discovery => "discovery",
             DocketContext::Widgets => "widgets",
         }
-        .to_owned()
+        .to_owned();
+        write!(f, "{}", str)
     }
 }
 
@@ -98,11 +99,11 @@ mod tests {
     #[test]
     fn to_non_fungible_id() {
         let docket = Docket::wildcard_receiver();
-        let domain = RnsDomain::new("s1.grenadine.xrd".to_string());
+        let domain = RnsDomain::new("s1.gvp.xrd".to_string());
 
         let id = docket.to_non_fungible_id(domain).unwrap();
         let expected_id =
-            NonFungibleLocalId::from_str("[663c8eb2eaf0907ea4dd742be3b4c606]")
+            NonFungibleLocalId::from_str("[8df41db37972d92e9dd411f6e7dbed10]")
                 .unwrap();
 
         assert_eq!(id, expected_id)
