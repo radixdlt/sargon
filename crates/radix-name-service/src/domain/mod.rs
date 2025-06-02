@@ -27,7 +27,7 @@ impl RadixNameService {
             Some(location) => {
                 if location.as_account() != Some(&domain_details.owner) {
                     return Err(CommonError::RnsUnauthenticDomain {
-                        reason: "Account owner missmatch".to_owned(),
+                        reason: "Account owner mismatch".to_owned(),
                     });
                 }
                 Ok(())
@@ -111,7 +111,7 @@ mod fetch_tests {
     }
 
     #[actix_rt::test]
-    async fn test_check_domain_authenticity_mising_ancestor_address() {
+    async fn test_check_domain_authenticity_missing_ancestor_address() {
         let nft_location_item = StateNonFungibleLocationResponseItem {
             non_fungible_id: NonFungibleLocalId::from_str(
                 "[9a5fb8db4539384dfe275647bfef559e]",

@@ -61,9 +61,12 @@ impl RadixNameService {
     }
 }
 
+/// The configuration for the Radix Name Service instance.
 #[derive(Clone)]
 pub(crate) struct RadixNameServiceConfig {
+    /// The address of the collection containing domain non-fungible tokens.
     pub(crate) domains_collection_address: NonFungibleResourceAddress,
+    /// The address of the collection containing domain record non-fungible tokens.
     pub(crate) records_collection_address: NonFungibleResourceAddress,
 }
 

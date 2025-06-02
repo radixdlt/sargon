@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+/// Definition https://docs.rns.foundation/#/wiki/resolution/dockets
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Docket {
     pub context: DocketContext,
@@ -26,11 +27,14 @@ impl Docket {
 }
 
 impl Docket {
+    /// Creates a new Docket for the Receivers context with a wildcard directive.
+    /// This is used to match any receiver in the Receivers context.
     pub fn wildcard_receiver() -> Self {
         Self::new(DocketContext::Receivers, Directive::wildcard())
     }
 }
 
+/// Narrows down the context to a more granular level.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Directive(String);
 
@@ -44,6 +48,7 @@ impl Directive {
     }
 }
 
+/// The wider context of the record.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum DocketContext {
     Receivers,

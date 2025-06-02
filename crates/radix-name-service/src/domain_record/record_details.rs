@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-/// Represenation of the domain's record(docket), extracted from the NFT data.
+/// Representation of the domain's record(docket), extracted from the NFT data.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct RecordDetails {
     /// The domain id of the record.

@@ -8,7 +8,7 @@ impl RadixNameService {
         let domain_details = self.fetch_domain_details(domain.clone()).await?;
         if domain != domain_details.domain {
             return Err(CommonError::RnsInvalidDomainConfiguration {
-                reason: "Domain details: domain missmatch".to_owned(),
+                reason: "Domain details: domain mismatch".to_owned(),
             });
         }
 
@@ -35,9 +35,12 @@ impl RadixNameService {
     }
 }
 
+/// Represents a configured receiver for a domain in the Radix Name Service (RNS).
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct RnsDomainConfiguredReceiver {
+    /// The owning domain details, useful for in wallet display.
     pub domain: RnsDomainDetails,
+    /// The account address that is configured to receive tokens for the domain.
     pub receiver: AccountAddress,
 }
 

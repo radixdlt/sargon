@@ -21,9 +21,9 @@ impl RadixNameService {
         )
         .into_result()?;
 
-        return Ok(Self {
+        Ok(Self {
             wrapped: Arc::new(wrapped),
-        });
+        })
     }
 }
 
