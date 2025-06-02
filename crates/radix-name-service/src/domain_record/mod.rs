@@ -60,7 +60,7 @@ mod fetch_tests {
         let body = json.serialize_to_bytes().unwrap();
 
         let mock_antenna =
-            MockNetworkingDriver::with_spy(200, body, |req, v| {
+            MockNetworkingDriver::with_spy(200, body, |req, _| {
                 let nft_data_request = serde_json::from_slice::<
                     StateNonFungibleDataRequest,
                 >(req.body.bytes())

@@ -90,7 +90,7 @@ mod pub_api_tests {
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
                 .unwrap();
 
-        let domain = RnsDomain::new("grenadine.xrd".to_owned());
+        let domain = RnsDomain::new("s1.gvp.xrd".to_owned());
         let result = sut
             .resolve_receiver_account_for_domain(domain.clone())
             .await
