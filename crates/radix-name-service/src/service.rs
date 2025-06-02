@@ -1,9 +1,23 @@
-
 use crate::prelude::*;
 
 pub struct RadixNameService {
     pub(crate) config: RadixNameServiceConfig,
     pub(crate) gateway_client: GatewayClient,
+}
+
+impl RadixNameService {
+    /// Resolve the receiver account for a given domain.
+    /// This function fetches the domain details, checks the authenticity of the domain,
+    /// and retrieves the configured receiver account for the domain.
+    ///
+    /// The domain's configured receiver is represented through the `receivers` docket,
+    /// as such, a domain could be claimed, but not have a configured receiver.
+    pub async fn resolve_receiver_account_for_domain(
+        &self,
+        domain: RnsDomain,
+    ) -> Result<RnsDomainConfiguredReceiver> {
+        self._resolve_receiver_account_for_domain(domain).await
+    }
 }
 
 impl RadixNameService {

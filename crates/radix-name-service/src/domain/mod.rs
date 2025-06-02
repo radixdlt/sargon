@@ -22,6 +22,7 @@ impl RadixNameService {
             .await
             .ok()
             .flatten();
+
         match domain_location {
             Some(location) => {
                 if location.as_account() != Some(&domain_details.owner) {
@@ -31,11 +32,9 @@ impl RadixNameService {
                 }
                 Ok(())
             }
-            None => {
-                Err(CommonError::RnsUnauthenticDomain {
-                    reason: "Failed to read domain location".to_owned(),
-                })
-            }
+            None => Err(CommonError::RnsUnauthenticDomain {
+                reason: "Failed to read domain location".to_owned(),
+            }),
         }
     }
 

@@ -1,5 +1,5 @@
-mod service;
 mod models;
+mod service;
 
-pub use service::*;
 pub use models::*;
+pub use service::*;

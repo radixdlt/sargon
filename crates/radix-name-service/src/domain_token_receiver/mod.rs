@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl RadixNameService {
-    pub async fn resolve_receiver_account_for_domain(
+    pub(crate) async fn _resolve_receiver_account_for_domain(
         &self,
         domain: RnsDomain,
     ) -> Result<RnsDomainConfiguredReceiver> {

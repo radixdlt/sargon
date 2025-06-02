@@ -1,10 +1,15 @@
 use crate::prelude::*;
 
+/// Represenation of the domain's record(docket), extracted from the NFT data.
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub struct RecordDetails {
+    /// The domain id of the record.
     pub domain_id: NonFungibleLocalId,
+    /// The context of the docket.
     pub context: DocketContext,
+    /// The directive of the docket.
     pub directive: Directive,
+    /// The value of the record, which is a programmatic Scrypto SBOR value.
     pub value: ProgrammaticScryptoSborValue,
 }
 

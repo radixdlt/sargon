@@ -553,7 +553,11 @@ impl GatewayClient {
             None,
         );
         let response = self.state_non_fungible_data(request).await?;
-        let item = response.non_fungible_ids.first().ok_or(CommonError::GWMissingResponseItem { item: "StateNonFungibleDataResponseItem".to_owned() })?;
+        let item = response.non_fungible_ids.first().ok_or(
+            CommonError::GWMissingResponseItem {
+                item: "StateNonFungibleDataResponseItem".to_owned(),
+            },
+        )?;
         Ok(NonFungibleTokenData::new(
             NonFungibleGlobalId::new(collection_address, id),
             item.data.clone(),
@@ -571,7 +575,11 @@ impl GatewayClient {
             None,
         );
         let response = self.state_non_fungible_location(request).await?;
-        let item = response.non_fungible_ids.first().ok_or(CommonError::GWMissingResponseItem { item: "StateNonFungibleLocationResponseItem".to_owned() })?;
+        let item = response.non_fungible_ids.first().ok_or(
+            CommonError::GWMissingResponseItem {
+                item: "StateNonFungibleLocationResponseItem".to_owned(),
+            },
+        )?;
         Ok(item.owning_vault_global_ancestor_address)
     }
 }
