@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use regex::Regex;
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct RnsDomain(pub String);
 
 impl RnsDomain {

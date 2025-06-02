@@ -20,6 +20,7 @@ profile-account-or-persona = { workspace = true }
 profile-supporting-types = { workspace = true }
 profile-base-entity = { workspace = true }
 account-for-display = { workspace = true }
+radix-name-service = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }

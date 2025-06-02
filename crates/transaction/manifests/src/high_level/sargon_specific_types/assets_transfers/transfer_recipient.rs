@@ -2,21 +2,23 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 #[allow(clippy::large_enum_variant)]
-pub enum AccountOrAddressOf {
+pub enum TransferRecipient {
     ProfileAccount { value: AccountForDisplay },
     AddressOfExternalAccount { value: AccountAddress },
+    RnsDomainConfiguredReceiver { value: RnsDomainConfiguredReceiver },
 }
 
-impl AccountOrAddressOf {
+impl TransferRecipient {
     pub fn account_address(&self) -> &AccountAddress {
         match self {
-            AccountOrAddressOf::ProfileAccount { value } => &value.address,
-            AccountOrAddressOf::AddressOfExternalAccount { value } => value,
+            TransferRecipient::ProfileAccount { value } => &value.address,
+            TransferRecipient::AddressOfExternalAccount { value } => value,
+            TransferRecipient::RnsDomainConfiguredReceiver { value } => &value.receiver,
         }
     }
 }
 
-impl AccountOrAddressOf {
+impl TransferRecipient {
     pub(crate) fn sample_mainnet() -> Self {
         Self::ProfileAccount {
             value: AccountForDisplay::new(AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap(), 
@@ -44,7 +46,7 @@ impl AccountOrAddressOf {
     }
 }
 
-impl HasSampleValues for AccountOrAddressOf {
+impl HasSampleValues for TransferRecipient {
     fn sample() -> Self {
         Self::sample_mainnet()
     }
@@ -59,7 +61,7 @@ mod tests {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = AccountOrAddressOf;
+    type SUT = TransferRecipient;
 
     #[test]
     fn equality() {

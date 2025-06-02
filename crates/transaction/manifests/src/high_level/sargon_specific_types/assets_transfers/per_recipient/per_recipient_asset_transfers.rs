@@ -60,7 +60,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
         Self::new(
             AccountAddress::sample_mainnet(),
             [PerRecipientAssetTransfer::new(
-                AccountOrAddressOf::ProfileAccount { value: AccountForDisplay::new(AccountAddress::from_str("account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv").unwrap(), DisplayName::sample(), AppearanceID::sample()) },
+                TransferRecipient::ProfileAccount { value: AccountForDisplay::new(AccountAddress::from_str("account_rdx129akrrsd9ctuphe99lesa8cf6auc5vqwdd2lu0ej6csncnuw9eedgv").unwrap(), DisplayName::sample(), AppearanceID::sample()) },
                 [PerRecipientFungibleTransfer::new(
                     ResourceAddress::sample_mainnet_xrd(),
                     Decimal192::from_str("237.13372718281828").unwrap(),
@@ -75,7 +75,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                 ],
             ),
             PerRecipientAssetTransfer::new(
-                AccountOrAddressOf::AddressOfExternalAccount { value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap() }
+                TransferRecipient::AddressOfExternalAccount { value: AccountAddress::from_str("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7").unwrap() }
                 ,
                 [PerRecipientFungibleTransfer::new(
                     ResourceAddress::sample_mainnet_xrd(),
@@ -115,7 +115,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
             sender,
             [
                 PerRecipientAssetTransfer::new(
-                    AccountOrAddressOf::AddressOfExternalAccount {
+                    TransferRecipient::AddressOfExternalAccount {
                         value: recip0,
                     },
                     [
@@ -142,7 +142,7 @@ impl HasSampleValues for PerRecipientAssetTransfers {
                     ],
                 ),
                 PerRecipientAssetTransfer::new(
-                    AccountOrAddressOf::AddressOfExternalAccount {
+                    TransferRecipient::AddressOfExternalAccount {
                         value: recip1,
                     },
                     [
@@ -306,14 +306,14 @@ mod tests {
                     PerAssetFungibleResource::new(fung_0, 18),
                     [
                         PerAssetFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip0,
                             },
                             true,
                             30,
                         ),
                         PerAssetFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip1,
                             },
                             true,
@@ -325,14 +325,14 @@ mod tests {
                     PerAssetFungibleResource::new(fung_1, 18),
                     [
                         PerAssetFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip0,
                             },
                             true,
                             3,
                         ),
                         PerAssetFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip1,
                             },
                             true,
@@ -346,7 +346,7 @@ mod tests {
                     nft_c0,
                     [
                         PerAssetNonFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip0,
                             },
                             true,
@@ -356,7 +356,7 @@ mod tests {
                             ],
                         ),
                         PerAssetNonFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip1,
                             },
                             true,
@@ -371,7 +371,7 @@ mod tests {
                     nft_c1,
                     [
                         PerAssetNonFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip0,
                             },
                             true,
@@ -381,7 +381,7 @@ mod tests {
                             ],
                         ),
                         PerAssetNonFungibleTransfer::new(
-                            AccountOrAddressOf::AddressOfExternalAccount {
+                            TransferRecipient::AddressOfExternalAccount {
                                 value: recip1,
                             },
                             true,

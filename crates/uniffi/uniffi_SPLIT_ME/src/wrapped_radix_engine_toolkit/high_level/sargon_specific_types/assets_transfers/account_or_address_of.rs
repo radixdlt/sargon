@@ -1,11 +1,12 @@
 use crate::prelude::*;
-use sargon::AccountOrAddressOf as InternalAccountOrAddressOf;
+use sargon::TransferRecipient as InternalAccountOrAddressOf;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 #[allow(clippy::large_enum_variant)] // we cannot Box<Account>, since Box is not UniFFI compatible.
 pub enum AccountOrAddressOf {
     ProfileAccount { value: AccountForDisplay },
     AddressOfExternalAccount { value: AccountAddress },
+    RnsDomainConfiguredReceiver { value: RnsDomainConfiguredReceiver },
 }
 
 #[uniffi::export]

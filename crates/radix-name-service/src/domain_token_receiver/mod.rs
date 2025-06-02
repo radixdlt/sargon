@@ -36,7 +36,7 @@ impl RadixNameService {
 }
 
 /// Represents a configured receiver for a domain in the Radix Name Service (RNS).
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct RnsDomainConfiguredReceiver {
     /// The owning domain details, useful for in wallet display.
     pub domain: RnsDomainDetails,

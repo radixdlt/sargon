@@ -2480,6 +2480,7 @@ dependencies = [
  "radix-engine",
  "radix-engine-interface",
  "radix-engine-toolkit",
+ "radix-name-service",
  "radix-rust",
  "radix-transactions",
  "sbor",

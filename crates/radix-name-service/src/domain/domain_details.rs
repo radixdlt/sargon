@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(PartialEq, Eq, Clone, Debug)]
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct RnsDomainDetails {
     /// The domain name, e.g. "example.xrd"
     pub domain: RnsDomain,
