@@ -356,7 +356,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                                         .string
                                 )
                             )
-                        is TransferRecipient.RnsDomainConfiguredReceiver ->
+                        is TransferRecipient.RnsDomain ->
                             assertTrue(
                                 contains(
                                     recipient.value.address

@@ -629,7 +629,7 @@ impl From<InternalCommonError> for CommonError {
                 }
             }
             InternalCommonError::RnsUnsupportedNetwork { network } => {
-                RnsUnsupportedNetwork { network: network }
+                RnsUnsupportedNetwork { network }
             }
             InternalCommonError::RnsInvalidRecordContext { context } => {
                 RnsInvalidRecordContext {
