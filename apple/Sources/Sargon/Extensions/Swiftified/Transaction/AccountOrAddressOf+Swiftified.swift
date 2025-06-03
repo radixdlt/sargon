@@ -1,16 +1,16 @@
 import SargonUniFFI
 
-// MARK: - AccountOrAddressOf + SargonModel
+// MARK: - TransferRecipient + SargonModel
 extension TransferRecipient: SargonModel {}
 
-// MARK: - AccountOrAddressOf + CustomStringConvertible
+// MARK: - TransferRecipient + CustomStringConvertible
 extension TransferRecipient: CustomStringConvertible {
 	public var description: String {
 		accountAddress.address
 	}
 }
 
-// MARK: - AccountOrAddressOf + Identifiable
+// MARK: - TransferRecipient + Identifiable
 extension TransferRecipient: Identifiable {
 	public typealias ID = AccountAddress
 	public var id: ID {
