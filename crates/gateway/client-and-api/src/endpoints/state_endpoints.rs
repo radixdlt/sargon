@@ -153,4 +153,12 @@ impl GatewayClient {
         self.post(Self::PATH_STATE_NON_FUNGIBLE_LOCATION, request, res_id)
             .await
     }
+
+    pub async fn state_non_fungible_data(
+        &self,
+        request: StateNonFungibleDataRequest,
+    ) -> Result<StateNonFungibleDataResponse> {
+        self.post(Self::PATH_STATE_NON_FUNGIBLE_DATA, request, res_id)
+            .await
+    }
 }

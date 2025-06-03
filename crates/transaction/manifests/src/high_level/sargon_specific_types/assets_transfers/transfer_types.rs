@@ -47,7 +47,7 @@ macro_rules! decl_per_asset_transfer_of {
             $struct_name,
             $($fields)*
             /// The account or account address to send the tokens to.
-            pub recipient: AccountOrAddressOf,
+            pub recipient: TransferRecipient,
         );
 
         paste::paste! {

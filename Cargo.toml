@@ -88,6 +88,9 @@ members = [
     "crates/transaction/manifests",
     "crates/transaction/models",
 
+    # === RNS ===
+    "crates/radix-name-service",
+
     # === UNIFFI ===
     "crates/uniffi/uniffi_SPLIT_ME",
     "crates/uniffi/conversion-macros",
@@ -179,6 +182,9 @@ default-members = [
     "crates/transaction/foundation",
     "crates/transaction/manifests",
     "crates/transaction/models",
+
+    # === RNS ===
+    "crates/radix-name-service",
 
     # === UNIFFI ===
     # Uniffi is omitted for maximum compilation speed
@@ -288,6 +294,9 @@ sargon-os-transaction = { path = "crates/system/os/transaction" }
 transaction-foundation = { path = "crates/transaction/foundation" }
 manifests = { path = "crates/transaction/manifests" }
 transaction-models = { path = "crates/transaction/models" }
+
+# === RNS ===
+radix-name-service = { path = "crates/radix-name-service"}
 
 # === UNIFFI ===
 sargon-uniffi = { path = "crates/uniffi/uniffi_SPLIT_ME" }

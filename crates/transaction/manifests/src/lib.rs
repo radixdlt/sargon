@@ -32,6 +32,7 @@ pub mod prelude {
     pub use metadata::prelude::*;
     pub use prelude::prelude::*;
     pub use profile::prelude::*;
+    pub use radix_name_service::prelude::*;
 
     pub use std::str::FromStr;
 

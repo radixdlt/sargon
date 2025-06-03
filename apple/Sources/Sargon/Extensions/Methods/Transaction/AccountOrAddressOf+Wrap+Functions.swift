@@ -1,7 +1,7 @@
 import SargonUniFFI
 
-extension AccountOrAddressOf {
+extension TransferRecipient {
 	public var accountAddress: AccountAddress {
-		accountOrAddressOfAccountAddress(recipient: self)
+		transferRecipientAddress(recipient: self)
 	}
 }

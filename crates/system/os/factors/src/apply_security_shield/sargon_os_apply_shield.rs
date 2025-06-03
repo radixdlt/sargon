@@ -1410,13 +1410,11 @@ mod tests {
             .unwrap();
 
         // Get Shield
-        let shield = os
-            .security_structure_of_factor_sources_from_security_structure_id(
-                sec.id(),
-            )
-            .unwrap();
 
-        shield
+        os.security_structure_of_factor_sources_from_security_structure_id(
+            sec.id(),
+        )
+        .unwrap()
     }
 
     /// Fetches the first Account on Profile and updates it to be securified with an instance of the
