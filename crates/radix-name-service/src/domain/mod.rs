@@ -201,7 +201,7 @@ mod fetch_tests {
         let body = nft_location_response.serialize_to_bytes().unwrap();
 
         let mock_antenna =
-            MockNetworkingDriver::with_spy(200, body, |req, v| {});
+            MockNetworkingDriver::new(200, body);
 
         let sut =
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
@@ -246,7 +246,7 @@ mod fetch_tests {
         let body = nft_location_response.serialize_to_bytes().unwrap();
 
         let mock_antenna =
-            MockNetworkingDriver::with_spy(200, body, |req, v| {});
+            MockNetworkingDriver::new(200, body);
 
         let sut =
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
