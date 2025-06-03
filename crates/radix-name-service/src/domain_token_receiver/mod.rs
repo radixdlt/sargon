@@ -76,20 +76,50 @@ mod pub_api_tests {
 
     #[actix_rt::test]
     async fn test_resolve_receiver_account_for_domain() {
-        let (_, json) = fixture_and_json::<StateNonFungibleDataResponse>(
+        let (_, record) = fixture_and_json::<StateNonFungibleDataResponse>(
             fixture_gw_model!("state/request_non_fungible_data_domain_record"),
         )
         .unwrap();
+        let (_, domain) = fixture_and_json::<StateNonFungibleDataResponse>(
+            fixture_gw_model!("state/request_non_fungible_data_domain"),
+        )
+        .unwrap();
 
-        let body = json.serialize_to_bytes().unwrap();
+        let nft_location_item = StateNonFungibleLocationResponseItem {
+            non_fungible_id: NonFungibleLocalId::from_str(
+                "[9a5fb8db4539384dfe275647bfef559e]",
+            )
+            .unwrap(),
+            is_burned: false,
+            last_updated_at_state_version: 123456789,
+            owning_vault_address: VaultAddress::sample_mainnet(),
+            owning_vault_parent_ancestor_address: Some(Address::Account(
+                AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
+            )),
+            owning_vault_global_ancestor_address: Some(Address::Account(
+                AccountAddress::from_str("account_rdx12ylgt80y9zq94flkghlnlq8tr542wm5h77gs7hv3y5h92pt5hs46c4").unwrap(),
+            )),
+        };
+        let nft_location_response = StateNonFungibleLocationResponse {
+            ledger_state: LedgerState::sample(),
+            resource_address: ResourceAddress::sample_mainnet(),
+            non_fungible_ids: vec![nft_location_item],
+        };
 
-        let mock_antenna = MockNetworkingDriver::new(200, body);
+        let record_body = record.serialize_to_bytes().unwrap();
+        let domain_body = domain.serialize_to_bytes().unwrap();
+        let location_body = nft_location_response.serialize_to_bytes().unwrap();
+
+        let mock_antenna = MockNetworkingDriver::new_with_bodies(
+            200,
+            vec![domain_body.into(), location_body.into(), record_body.into()],
+        );
 
         let sut =
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
                 .unwrap();
 
-        let domain = RnsDomain::new("grenadine.xrd".to_owned());
+        let domain = RnsDomain::new("bakirci.xrd".to_owned());
         let result = sut
             .resolve_receiver_account_for_domain(domain.clone())
             .await
