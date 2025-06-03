@@ -24,9 +24,7 @@ impl PerAssetFungibleTransfer {
 impl From<(&TransferRecipient, PerRecipientFungibleTransfer)>
     for PerAssetFungibleTransfer
 {
-    fn from(
-        value: (&TransferRecipient, PerRecipientFungibleTransfer),
-    ) -> Self {
+    fn from(value: (&TransferRecipient, PerRecipientFungibleTransfer)) -> Self {
         let (recipient, transfer) = value;
         Self::new(
             recipient.clone(),

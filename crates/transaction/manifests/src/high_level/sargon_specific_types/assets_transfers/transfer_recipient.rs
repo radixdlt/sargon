@@ -13,7 +13,9 @@ impl TransferRecipient {
         match self {
             TransferRecipient::ProfileAccount { value } => &value.address,
             TransferRecipient::AddressOfExternalAccount { value } => value,
-            TransferRecipient::RnsDomainConfiguredReceiver { value } => &value.receiver,
+            TransferRecipient::RnsDomainConfiguredReceiver { value } => {
+                &value.receiver
+            }
         }
     }
 }

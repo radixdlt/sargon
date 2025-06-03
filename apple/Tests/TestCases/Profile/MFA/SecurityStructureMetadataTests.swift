@@ -11,7 +11,7 @@ final class SecurityStructureMetadataTests: Test<SecurityStructureMetadata> {
 	}
 
 	func test_is_main() {
-		var sut = SUT(name: "foo")
+		let sut = SUT(name: "foo")
 		XCTAssert(sut.isMain)
 	}
 }
