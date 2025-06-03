@@ -25,7 +25,7 @@ mod test {
     use super::*;
     #[test]
     fn test_domain_to_non_fungible_id() {
-        let domain = "bakirci.xrd";
+        let domain = "s1.gvp.xrd";
         let expected_hex = "[99a979b2006cead35c3c9209ff7d1c63]";
         let expected_id = NonFungibleLocalId::from_str(expected_hex).unwrap();
 

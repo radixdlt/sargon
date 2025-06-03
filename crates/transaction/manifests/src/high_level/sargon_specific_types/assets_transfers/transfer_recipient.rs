@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub enum TransferRecipient {
     ProfileAccount { value: AccountForDisplay },
     AddressOfExternalAccount { value: AccountAddress },
-    RnsDomainConfiguredReceiver { value: RnsDomainConfiguredReceiver },
+    RnsDomain { value: RnsDomainConfiguredReceiver },
 }
 
 impl TransferRecipient {
@@ -13,9 +13,7 @@ impl TransferRecipient {
         match self {
             TransferRecipient::ProfileAccount { value } => &value.address,
             TransferRecipient::AddressOfExternalAccount { value } => value,
-            TransferRecipient::RnsDomainConfiguredReceiver { value } => {
-                &value.receiver
-            }
+            TransferRecipient::RnsDomain { value } => &value.receiver,
         }
     }
 }

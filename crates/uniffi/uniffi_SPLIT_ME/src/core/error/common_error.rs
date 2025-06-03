@@ -128,6 +128,26 @@ pub enum CommonError {
     InvalidMnemonicWords {
         indices_in_mnemonic: Vec<u8>,
     },
+    MissingNFTDataField {
+        field: String,
+    },
+    UnexpectedNFTDataFormat,
+    RnsInvalidDomain,
+    RnsUnauthenticDomain {
+        reason: String,
+    },
+    RnsInvalidDomainConfiguration {
+        reason: String,
+    },
+    RnsUnsupportedNetwork {
+        network: u8,
+    },
+    RnsInvalidRecordContext {
+        context: String,
+    },
+    GWMissingResponseItem {
+        item: String,
+    },
 }
 
 #[uniffi::export]
@@ -382,6 +402,38 @@ impl CommonError {
                     .map(|i| *i as usize)
                     .collect::<Vec<_>>(),
             },
+            MissingNFTDataField { field } => {
+                InternalCommonError::MissingNFTDataField {
+                    field: field.clone(),
+                }
+            }
+            UnexpectedNFTDataFormat => {
+                InternalCommonError::UnexpectedNFTDataFormat
+            }
+            RnsInvalidDomain => InternalCommonError::RnsInvalidDomain,
+            RnsUnauthenticDomain { reason } => {
+                InternalCommonError::RnsUnauthenticDomain {
+                    reason: reason.clone(),
+                }
+            }
+            RnsInvalidDomainConfiguration { reason } => {
+                InternalCommonError::RnsInvalidDomainConfiguration {
+                    reason: reason.clone(),
+                }
+            }
+            RnsUnsupportedNetwork { network } => {
+                InternalCommonError::RnsUnsupportedNetwork { network: *network }
+            }
+            RnsInvalidRecordContext { context } => {
+                InternalCommonError::RnsInvalidRecordContext {
+                    context: context.clone(),
+                }
+            }
+            GWMissingResponseItem { item } => {
+                InternalCommonError::GWMissingResponseItem {
+                    item: item.clone(),
+                }
+            }
             _ => InternalCommonError::Unknown,
         }
     }
@@ -557,6 +609,36 @@ impl From<InternalCommonError> for CommonError {
                     .map(|i| i as u8)
                     .collect::<Vec<_>>(),
             },
+            InternalCommonError::MissingNFTDataField { field } => {
+                MissingNFTDataField {
+                    field: field.clone(),
+                }
+            }
+            InternalCommonError::UnexpectedNFTDataFormat => {
+                UnexpectedNFTDataFormat
+            }
+            InternalCommonError::RnsInvalidDomain => RnsInvalidDomain,
+            InternalCommonError::RnsUnauthenticDomain { reason } => {
+                RnsUnauthenticDomain {
+                    reason: reason.clone(),
+                }
+            }
+            InternalCommonError::RnsInvalidDomainConfiguration { reason } => {
+                RnsInvalidDomainConfiguration {
+                    reason: reason.clone(),
+                }
+            }
+            InternalCommonError::RnsUnsupportedNetwork { network } => {
+                RnsUnsupportedNetwork { network: *network }
+            }
+            InternalCommonError::RnsInvalidRecordContext { context } => {
+                RnsInvalidRecordContext {
+                    context: context.clone(),
+                }
+            }
+            InternalCommonError::GWMissingResponseItem { item } => {
+                GWMissingResponseItem { item: item.clone() }
+            }
             _ => Self::erased(value),
         }
     }

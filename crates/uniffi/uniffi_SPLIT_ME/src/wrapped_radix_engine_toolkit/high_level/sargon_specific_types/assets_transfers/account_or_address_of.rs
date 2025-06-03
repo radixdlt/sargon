@@ -6,7 +6,7 @@ use sargon::TransferRecipient as InternalTransferRecipient;
 pub enum TransferRecipient {
     ProfileAccount { value: AccountForDisplay },
     AddressOfExternalAccount { value: AccountAddress },
-    RnsDomainConfiguredReceiver { value: RnsDomainConfiguredReceiver },
+    RnsDomain { value: RnsDomainConfiguredReceiver },
 }
 
 #[uniffi::export]
