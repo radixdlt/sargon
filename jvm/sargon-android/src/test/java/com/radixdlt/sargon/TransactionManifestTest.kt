@@ -359,7 +359,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                         is TransferRecipient.RnsDomain ->
                             assertTrue(
                                 contains(
-                                    recipient.value.address
+                                    recipient.value.receiver
                                         .string
                                 )
                             )

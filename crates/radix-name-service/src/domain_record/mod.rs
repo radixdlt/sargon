@@ -74,7 +74,7 @@ mod fetch_tests {
                     nft_data_request.non_fungible_ids,
                     vec![Docket::wildcard_receiver()
                         .to_non_fungible_id(RnsDomain::new(
-                            "grenadine.xrd".to_owned()
+                            "bakirci.xrd".to_owned()
                         ))
                         .unwrap(),]
                 );
@@ -84,7 +84,7 @@ mod fetch_tests {
             SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
                 .unwrap();
 
-        let domain = RnsDomain::new("grenadine.xrd".to_owned());
+        let domain = RnsDomain::new("bakirci.xrd".to_owned());
         let docket = Docket::wildcard_receiver();
         let result = sut
             .fetch_record_details(domain.clone(), docket.clone())
