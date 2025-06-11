@@ -1066,6 +1066,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "discover"
+version = "1.2.19"
+dependencies = [
+ "actix-rt",
+ "addresses",
+ "async-trait",
+ "base64",
+ "bytes 1.2.19",
+ "core-utils",
+ "derive_more",
+ "drivers",
+ "enum-as-inner",
+ "gateway-client-and-api",
+ "gateway-models",
+ "identified-vec-of",
+ "log",
+ "metadata",
+ "network",
+ "paste",
+ "prelude",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "url",
+]
+
+[[package]]
 name = "displaydoc"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3805,6 +3832,7 @@ dependencies = [
  "clients",
  "core-misc",
  "derive_more",
+ "discover",
  "drivers",
  "encryption",
  "enum-iterator",
