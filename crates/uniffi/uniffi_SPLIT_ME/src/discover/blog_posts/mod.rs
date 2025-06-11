@@ -1,5 +1,5 @@
-mod blog_post;
+mod blog_posts;
 mod client;
 
-pub use blog_post::*;
+pub use blog_posts::*;
 pub use client::*;

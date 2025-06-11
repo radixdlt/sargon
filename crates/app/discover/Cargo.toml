@@ -13,6 +13,7 @@ core-utils = { workspace = true }
 network = { workspace = true }
 metadata = { workspace = true }
 drivers = { workspace = true }
+clients = { workspace = true }
 gateway-client-and-api = { workspace = true }
 gateway-models = { workspace = true }
 

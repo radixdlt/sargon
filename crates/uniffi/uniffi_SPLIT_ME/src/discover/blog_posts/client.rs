@@ -12,14 +12,14 @@ impl BlogPostsClient {
     #[uniffi::constructor]
     pub fn new() -> Self {
         Self {
-            wrapped: Arc::new(InternalBlogPostsClient::new()),
+            wrapped: Arc::new(InternalBlogPostsClient::test_client()),
         }
     }
 }
 
 #[uniffi::export]
 impl BlogPostsClient {
-    pub async fn get_blog_posts(&self) -> Result<Vec<BlogPost>> {
-        self.wrapped.get_blog_posts().await.into_iter_result()
+    pub async fn get_blog_posts(&self) -> Result<BlogPosts> {
+        self.wrapped.get_blog_posts().await.into_result()
     }
 }

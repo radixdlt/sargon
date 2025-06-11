@@ -1,5 +1,34 @@
 use crate::prelude::*;
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct BlogPosts {
+    /// All of the blog posts
+    pub posts: Vec<BlogPost>,
+    /// The most recent new blog post.
+    /// There might be more than one new blog post, but we'll inform the user
+    /// about the latest one only.
+    pub new_blog_post: Option<BlogPost>,
+}
+
+impl BlogPosts {
+    pub fn new(posts: Vec<BlogPost>, new_blog_post: Option<BlogPost>) -> Self {
+        Self {
+            posts,
+            new_blog_post,
+        }
+    }
+}
+
+impl HasSampleValues for BlogPosts {
+    fn sample() -> Self {
+        Self::new(vec![BlogPost::sample()], Some(BlogPost::sample_other()))
+    }
+
+    fn sample_other() -> Self {
+        Self::new(vec![BlogPost::sample_other()], Some(BlogPost::sample()))
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct BlogPost {
     pub name: String,

@@ -1074,6 +1074,7 @@ dependencies = [
  "async-trait",
  "base64",
  "bytes 1.2.19",
+ "clients",
  "core-utils",
  "derive_more",
  "drivers",
