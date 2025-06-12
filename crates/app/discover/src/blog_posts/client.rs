@@ -1,5 +1,3 @@
-use gateway_client_and_api::HttpClient;
-
 use crate::prelude::*;
 
 const BLOG_BASE_PATH: &str = "https://www.radixdlt.com/blog/";
@@ -152,7 +150,6 @@ struct RemoteBlogPost {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::prelude::*;
     use std::path::Path;
     use std::str::FromStr;
     use std::sync::Arc;
