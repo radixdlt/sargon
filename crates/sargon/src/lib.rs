@@ -4,6 +4,7 @@ pub mod prelude {
 
     pub use build_info::prelude::*;
     pub use clients::prelude::*;
+    pub use discover::prelude::*;
     pub use factor_instances_provider::prelude::*;
     pub use home_cards::prelude::*;
     pub use interactors::prelude::*;

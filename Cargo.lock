@@ -1066,6 +1066,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "discover"
+version = "1.2.19"
+dependencies = [
+ "actix-rt",
+ "clients",
+ "core-utils",
+ "prelude",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "url",
+]
+
+[[package]]
 name = "displaydoc"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3805,6 +3819,7 @@ dependencies = [
  "clients",
  "core-misc",
  "derive_more",
+ "discover",
  "drivers",
  "encryption",
  "enum-iterator",

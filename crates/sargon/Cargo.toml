@@ -34,6 +34,7 @@ gateway-models = { workspace = true }
 clients = { workspace = true }
 drivers = { workspace = true }
 home-cards = { workspace = true }
+discover = { workspace = true }
 radix-name-service = { workspace = true }
 security-center = { workspace = true }
 radix-connect = { workspace = true }
