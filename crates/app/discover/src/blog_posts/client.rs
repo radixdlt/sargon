@@ -2,10 +2,11 @@ use crate::prelude::*;
 
 const BLOG_BASE_PATH: &str = "https://www.radixdlt.com/blog/";
 const CACHE_BLOG_POSTS_PATH: &str = "blog_posts.json";
+const BLOG_POSTS_URL: &str = "https://webflow-blog-posts-proxy.radixdlt.com/v2/collections/649aa8a9681ec6168a57d972/items?offset=0&limit=100";
 
 pub struct BlogPostsClient {
-    http_client: Arc<HttpClient>,
-    file_system_client: Arc<FileSystemClient>,
+    pub(crate) http_client: Arc<HttpClient>,
+    pub(crate) file_system_client: Arc<FileSystemClient>,
 }
 
 impl BlogPostsClient {
@@ -33,7 +34,9 @@ impl BlogPostsClient {
 
                 let new_blog_post =
                     remote_blog_posts.first().and_then(|blog_post| {
-                        if !cached_blog_posts.contains(blog_post) {
+                        if !cached_blog_posts.is_empty()
+                            && !cached_blog_posts.contains(blog_post)
+                        {
                             Some(blog_post.clone())
                         } else {
                             None
@@ -75,14 +78,6 @@ impl BlogPostsClient {
                 true,
             )
             .await;
-    }
-
-    async fn fetch_remote_blog_posts(&self) -> Result<Vec<RemoteBlogPost>> {
-        // TODO: use real url
-        let request = NetworkRequest::new_get(Url::sample());
-        self.http_client
-            .execute_request_with_decoding(request)
-            .await
     }
 }
 
