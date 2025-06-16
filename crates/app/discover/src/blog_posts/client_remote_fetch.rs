@@ -1,8 +1,4 @@
 use crate::prelude::*;
-use serde::de::{self, Deserializer};
-
-const BLOG_BASE_PATH: &str = "https://www.radixdlt.com/blog/";
-const BLOG_POSTS_URL: &str = "https://webflow-blog-posts-proxy.radixdlt.com/v2/collections/649aa8a9681ec6168a57d972/items?offset=0&limit=100";
 
 impl BlogPostsClient {
     pub async fn fetch_remote_blog_posts(&self) -> Result<Vec<BlogPost>> {
@@ -19,10 +15,10 @@ impl BlogPostsClient {
 
 impl From<RemoteBlogPost> for BlogPost {
     fn from(value: RemoteBlogPost) -> Self {
-        let slug = &value.fieldData.slug;
+        let slug = &value.field_data.slug;
         Self::new(
-            value.fieldData.name,
-            value.fieldData.image.url,
+            value.field_data.name,
+            value.field_data.image.url,
             Url::from_str(&format!("{BLOG_BASE_PATH}/{slug}")).unwrap(),
         )
     }
@@ -42,7 +38,7 @@ struct Image {
 
 #[derive(PartialEq, Eq, Debug, Deserialize)]
 struct RemoteBlogPost {
-    fieldData: FieldData,
+    field_data: FieldData,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize)]
@@ -123,7 +119,7 @@ mod tests {
         let encoded = json.as_bytes().to_vec();
         let expected_blog_posts = vec![
             RemoteBlogPost {
-                fieldData: FieldData {
+                field_data: FieldData {
                     name: "It's Live! RedStone Oracles Now Powering Next-Generation DeFi on Radix ".to_owned(), 
                     slug: "its-live-redstone-oracles-now-powering-next-generation-defi-on-radix".to_owned(), 
                     image: Image {
@@ -132,7 +128,7 @@ mod tests {
                 }
             },
             RemoteBlogPost {
-                fieldData: FieldData {
+                field_data: FieldData {
                     name: "Meet The Project: Stabilis".to_owned(), 
                     slug: "meet-the-project-stabilis".to_owned(), 
                     image: Image {

@@ -68,11 +68,10 @@ impl FactorInstancesCacheClient {
     }
 
     async fn path(&self) -> Result<String> {
-        let dir = self.file_system_client.writable_app_dir_path().await?;
-        let path = Path::new(&dir).join(Self::CACHE_FILE);
-        let path_str = path.to_string_lossy().to_string();
-        let path_str =
-            self.file_system_client.create_if_needed(path_str).await?;
+        let path_str = self
+            .file_system_client
+            .create_if_needed(Self::CACHE_FILE)
+            .await?;
         Ok(path_str)
     }
 
