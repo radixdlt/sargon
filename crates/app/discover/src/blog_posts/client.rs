@@ -50,9 +50,15 @@ impl BlogPostsClient {
                     BlogPosts::new(remote_blog_posts, new_blog_post);
                 return Ok(blog_posts);
             }
-            Err(_) => {
+            Err(error) => {
                 return cached_blog_posts
-                    .map(|blog_posts| BlogPosts::new(blog_posts, None))
+                .and_then(|blog_posts| {
+                    if blog_posts.is_empty() {
+                        Err(error) 
+                    } else {
+                        Ok(BlogPosts::new(blog_posts, None))
+                    }
+                })
             }
         }
     }

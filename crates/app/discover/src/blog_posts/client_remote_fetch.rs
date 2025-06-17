@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+
 impl BlogPostsClient {
     pub async fn fetch_remote_blog_posts(&self) -> Result<Vec<BlogPost>> {
         let url = Url::from_str(BLOG_POSTS_URL).unwrap();
@@ -7,8 +8,8 @@ impl BlogPostsClient {
         self.http_client
             .execute_request_with_decoding(request)
             .await
-            .map(|remote_blog_posts: Vec<RemoteBlogPost>| {
-                remote_blog_posts.into_iter().map(BlogPost::from).collect()
+            .map(|remote_blog_posts: RemoteBlogPosts| {
+                remote_blog_posts.items.into_iter().map(BlogPost::from).collect()
             })
     }
 }
@@ -37,6 +38,7 @@ struct Image {
 }
 
 #[derive(PartialEq, Eq, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct RemoteBlogPost {
     field_data: FieldData,
 }
