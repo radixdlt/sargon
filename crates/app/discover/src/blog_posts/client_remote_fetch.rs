@@ -1,5 +1,7 @@
-use crate::prelude::*;
+use iso8601_timestamp::time::{PrimitiveDateTime, Time};
 
+use crate::prelude::*;
+use serde::Deserializer;
 
 impl BlogPostsClient {
     pub async fn fetch_remote_blog_posts(&self) -> Result<Vec<BlogPost>> {
@@ -9,8 +11,22 @@ impl BlogPostsClient {
             .execute_request_with_decoding(request)
             .await
             .map(|remote_blog_posts: RemoteBlogPosts| {
-                remote_blog_posts.items.into_iter().map(BlogPost::from).collect()
+                remote_blog_posts
+                    .items
+                    .into_iter()
+                    .map(BlogPost::from)
+                    .collect()
             })
+    }
+
+    pub async fn fetch_blog_posts_collection_details(
+        &self,
+    ) -> Result<BlogPostsCollectionDetails> {
+        let url = Url::from_str(BLOG_POSTS_DETAILS_URL).unwrap();
+        let request = NetworkRequest::new_get(url);
+        self.http_client
+            .execute_request_with_decoding(request)
+            .await
     }
 }
 
@@ -25,32 +41,120 @@ impl From<RemoteBlogPost> for BlogPost {
     }
 }
 
-#[derive(PartialEq, Eq, Debug, Deserialize)]
-struct FieldData {
+#[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BlogPostsCollectionDetails {
+    #[serde(deserialize_with = "deserialize_timestamp_truncated_to_seconds")]
+    pub last_updated: Timestamp,
+}
+
+pub fn timestamp_truncated_to_seconds(timestamp: Timestamp) -> Timestamp {
+    let time = Time::from_hms(
+        timestamp.hour(),
+        timestamp.minute(),
+        timestamp.second(),
+    )
+    .unwrap();
+    Timestamp::from_primitive_datetime(PrimitiveDateTime::new(
+        timestamp.date(),
+        time,
+    ))
+}
+
+fn deserialize_timestamp_truncated_to_seconds<'de, D>(
+    deserializer: D,
+) -> Result<Timestamp, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let timestamp: Timestamp = Timestamp::deserialize(deserializer)?;
+    Ok(timestamp_truncated_to_seconds(timestamp))
+}
+
+impl BlogPostsCollectionDetails {
+    pub fn new(last_updated: Timestamp) -> Self {
+        Self { last_updated }
+    }
+}
+
+impl Default for BlogPostsCollectionDetails {
+    fn default() -> Self {
+        Self {
+            last_updated: Timestamp::UNIX_EPOCH,
+        }
+    }
+}
+
+#[derive(Eq, PartialEq, Clone, Debug, Deserialize, Serialize)]
+pub struct RemoteBlogPosts {
+    pub items: Vec<RemoteBlogPost>,
+}
+
+#[cfg(test)]
+impl RemoteBlogPosts {
+    pub fn new(items: Vec<RemoteBlogPost>) -> Self {
+        Self { items }
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RemoteBlogPost {
+    field_data: FieldData,
+}
+
+impl RemoteBlogPost {
+    pub fn new(field_data: FieldData) -> Self {
+        Self { field_data }
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
+pub struct FieldData {
     name: String,
     slug: String,
     image: Image,
 }
 
-#[derive(PartialEq, Eq, Debug, Deserialize)]
+impl FieldData {
+    pub fn new(name: String, slug: String, image_url: Url) -> Self {
+        Self {
+            name,
+            slug,
+            image: Image::new(image_url),
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize)]
 struct Image {
     url: Url,
 }
 
-#[derive(PartialEq, Eq, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RemoteBlogPost {
-    field_data: FieldData,
-}
-
-#[derive(Eq, PartialEq, Debug, Deserialize)]
-struct RemoteBlogPosts {
-    items: Vec<RemoteBlogPost>,
+impl Image {
+    fn new(url: Url) -> Self {
+        Self { url }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[actix_rt::test]
+    async fn test_last_update_decoding() {
+        //let timestamp: DateTime<Utc> = "2025-06-10T09:02:35.944Z".parse().unwrap();
+        // let t2: Timestamp = "2025-06-10T09:02:35.944Z".parse().unwrap();
+        let json = r#"
+      {
+        "lastUpdated":"2025-06-10T09:02:35.944Z"
+      }
+      "#;
+        let encoded = json.as_bytes().to_vec();
+        let decoded: BlogPostsCollectionDetails =
+            encoded.deserialize().unwrap();
+        print!("{:?}", decoded);
+    }
 
     #[actix_rt::test]
     async fn test_remote_blog_posts_decoding() {

@@ -1,8 +1,5 @@
-use std::{borrow::Borrow, path::Path};
-
-// use async_std::path::PathBuf;
-
 use crate::prelude::*;
+use std::borrow::Borrow;
 
 /// A client which manages the cache of factor instances, by saving and loading from FileSystem
 /// using a `FileSystemClient`.
