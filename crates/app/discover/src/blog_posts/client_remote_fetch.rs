@@ -113,13 +113,13 @@ impl Image {
 }
 
 fn deserialize_timestamp_truncated_to_seconds<'de, D>(
-  deserializer: D,
+    deserializer: D,
 ) -> Result<Timestamp, D::Error>
 where
-  D: Deserializer<'de>,
+    D: Deserializer<'de>,
 {
-  let timestamp: Timestamp = Timestamp::deserialize(deserializer)?;
-  Ok(timestamp_truncated_to_seconds(timestamp))
+    let timestamp: Timestamp = Timestamp::deserialize(deserializer)?;
+    Ok(timestamp_truncated_to_seconds(timestamp))
 }
 
 #[cfg(test)]

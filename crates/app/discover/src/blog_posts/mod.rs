@@ -6,9 +6,9 @@ mod client_remote_fetch;
 pub use blog_post::*;
 pub use client::*;
 
-use iso8601_timestamp::Timestamp;
 use iso8601_timestamp::time::PrimitiveDateTime;
 use iso8601_timestamp::time::Time;
+use iso8601_timestamp::Timestamp;
 
 pub const CACHE_BLOG_POSTS_PATH: &str = "blog_posts.json";
 pub const BLOG_BASE_PATH: &str = "https://www.radixdlt.com/blog/";

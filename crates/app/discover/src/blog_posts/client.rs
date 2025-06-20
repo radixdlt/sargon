@@ -42,9 +42,13 @@ impl BlogPostsClient {
             // Attempt refresh; fallback to existing cache on error
             match self.refresh_from_remote(remote_last_update).await {
                 Ok(fresh_posts) => {
-                    let new_item = fresh_posts
-                        .first()
-                        .and_then(|post| if !cached.posts.contains(post) { Some(post.clone()) } else { None });
+                    let new_item = fresh_posts.first().and_then(|post| {
+                        if !cached.posts.contains(post) {
+                            Some(post.clone())
+                        } else {
+                            None
+                        }
+                    });
                     return Ok(BlogPosts::new(fresh_posts, new_item));
                 }
                 Err(_) => return Ok(BlogPosts::new(cached.posts, None)),
@@ -70,8 +74,7 @@ impl BlogPostsClient {
 mod tests {
     use crate::blog_posts::client_caching::CachedBlogPosts;
     use crate::blog_posts::client_remote_fetch::{
-        BlogPostsCollectionDetails, FieldData,
-        RemoteBlogPost, RemoteBlogPosts,
+        BlogPostsCollectionDetails, FieldData, RemoteBlogPost, RemoteBlogPosts,
     };
 
     use super::*;
