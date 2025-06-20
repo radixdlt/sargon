@@ -52,10 +52,6 @@ impl FileSystemClient {
             .map(|p| p.to_string_lossy().to_string())
     }
 
-    // pub async fn writable_app_dir_path(&self) -> Result<String> {
-    //     self.driver.writable_app_dir_path().await
-    // }
-
     pub async fn load_from_file(
         &self,
         relative_path: impl AsRef<Path>,

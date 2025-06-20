@@ -127,21 +127,6 @@ mod tests {
     use super::*;
 
     #[actix_rt::test]
-    async fn test_last_update_decoding() {
-        //let timestamp: DateTime<Utc> = "2025-06-10T09:02:35.944Z".parse().unwrap();
-        // let t2: Timestamp = "2025-06-10T09:02:35.944Z".parse().unwrap();
-        let json = r#"
-      {
-        "lastUpdated":"2025-06-10T09:02:35.944Z"
-      }
-      "#;
-        let encoded = json.as_bytes().to_vec();
-        let decoded: BlogPostsCollectionDetails =
-            encoded.deserialize().unwrap();
-        print!("{:?}", decoded);
-    }
-
-    #[actix_rt::test]
     async fn test_remote_blog_posts_decoding() {
         let json = r#"
        {
