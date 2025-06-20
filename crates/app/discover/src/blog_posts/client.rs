@@ -27,56 +27,32 @@ impl BlogPostsClient {
     }
 
     pub async fn get_blog_posts(&self) -> Result<BlogPosts> {
-        let cached_blog_posts =
-            self.fetch_cached_blog_posts().await.unwrap_or(None);
-        let remote_blog_posts_last_update = self
+        let remote_last_update = self
             .fetch_blog_posts_collection_details()
             .await
             .unwrap_or_default()
             .last_updated;
+        let maybe_cached = self.fetch_cached_blog_posts().await.unwrap_or(None);
 
-        match cached_blog_posts {
-            Some(cached_blog_posts) => {
-                if cached_blog_posts.last_update < remote_blog_posts_last_update
-                {
-                    let remote_blog_posts = self
-                        .refresh_from_remote(remote_blog_posts_last_update)
-                        .await;
-                    match remote_blog_posts {
-                        Ok(remote_blog_posts) => {
-                            let new_blog_post = remote_blog_posts
-                                .first()
-                                .and_then(|blog_post| {
-                                    if !cached_blog_posts.posts.is_empty()
-                                        && !cached_blog_posts
-                                            .posts
-                                            .contains(blog_post)
-                                    {
-                                        Some(blog_post.clone())
-                                    } else {
-                                        None
-                                    }
-                                });
-                            let blog_posts = BlogPosts::new(
-                                remote_blog_posts,
-                                new_blog_post,
-                            );
-                            Ok(blog_posts)
-                        }
-                        _ => Ok(BlogPosts::new(cached_blog_posts.posts, None)),
-                    }
-                } else {
-                    Ok(BlogPosts::new(cached_blog_posts.posts, None))
-                }
+        if let Some(cached) = maybe_cached {
+            // Return cached if up-to-date
+            if cached.last_update >= remote_last_update {
+                return Ok(BlogPosts::new(cached.posts, None));
             }
-            None => {
-                let remote_blog_posts = self
-                    .refresh_from_remote(remote_blog_posts_last_update)
-                    .await?;
-                let blog_posts = BlogPosts::new(remote_blog_posts, None);
-                Ok(blog_posts)
+            // Attempt refresh; fallback to existing cache on error
+            match self.refresh_from_remote(remote_last_update).await {
+                Ok(fresh_posts) => {
+                    let new_item = fresh_posts
+                        .first()
+                        .and_then(|post| if !cached.posts.contains(post) { Some(post.clone()) } else { None });
+                    return Ok(BlogPosts::new(fresh_posts, new_item));
+                }
+                Err(_) => return Ok(BlogPosts::new(cached.posts, None)),
             }
         }
+        // No cache: fetch and return
+        let fresh = self.refresh_from_remote(remote_last_update).await?;
+        Ok(BlogPosts::new(fresh, None))
     }
 
     async fn refresh_from_remote(
@@ -106,7 +82,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn failure_empty_cache_remote_failure() {
-        let file_system_client = FileSystemClient::test();
+        let file_system_client = FileSystemClient::in_memory();
         let http_client = HttpClient::new(Arc::new(
             MockNetworkingDriver::new_always_failing(),
         ));
@@ -121,7 +97,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn success_empty_cache_remote_success() {
-        let file_system_client = Arc::new(FileSystemClient::test());
+        let file_system_client = Arc::new(FileSystemClient::in_memory());
         let last_updated_time = Timestamp::now_utc();
         print!("Now {:?}", last_updated_time);
         let blog_post_details =
@@ -177,7 +153,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn existing_cache_no_remote_updates() {
-        let file_system_client = Arc::new(FileSystemClient::test());
+        let file_system_client = Arc::new(FileSystemClient::in_memory());
         let last_updated_time = Timestamp::now_utc();
         print!("Now {:?}", last_updated_time);
         let blog_post_details =
@@ -216,7 +192,7 @@ mod tests {
     #[actix_rt::test]
     async fn existing_cache_remote_updates_exist_failed_to_fetch_new_blog_posts(
     ) {
-        let file_system_client = Arc::new(FileSystemClient::test());
+        let file_system_client = Arc::new(FileSystemClient::in_memory());
         let last_updated_time = Timestamp::now_utc();
         print!("Now {:?}", last_updated_time);
         let blog_post_details = BlogPostsCollectionDetails::new(
@@ -255,7 +231,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn existing_cache_remote_updates_exist_refresh_with_new_blog_posts() {
-        let file_system_client = Arc::new(FileSystemClient::test());
+        let file_system_client = Arc::new(FileSystemClient::in_memory());
         let last_updated_time = Timestamp::now_utc();
         let blog_post_details = BlogPostsCollectionDetails::new(
             last_updated_time.saturating_add(Duration::seconds(10)),
