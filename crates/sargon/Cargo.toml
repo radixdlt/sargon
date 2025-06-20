@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.2.19"
+version = "1.2.20"
 edition = "2021"
 
 resolver = "2" # features enabled in integration test
@@ -34,6 +34,7 @@ gateway-models = { workspace = true }
 clients = { workspace = true }
 drivers = { workspace = true }
 home-cards = { workspace = true }
+discover = { workspace = true }
 radix-name-service = { workspace = true }
 security-center = { workspace = true }
 radix-connect = { workspace = true }

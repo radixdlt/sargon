@@ -1,8 +1,5 @@
-use std::{borrow::Borrow, path::Path};
-
-// use async_std::path::PathBuf;
-
 use crate::prelude::*;
+use std::borrow::Borrow;
 
 /// A client which manages the cache of factor instances, by saving and loading from FileSystem
 /// using a `FileSystemClient`.
@@ -68,11 +65,10 @@ impl FactorInstancesCacheClient {
     }
 
     async fn path(&self) -> Result<String> {
-        let dir = self.file_system_client.writable_app_dir_path().await?;
-        let path = Path::new(&dir).join(Self::CACHE_FILE);
-        let path_str = path.to_string_lossy().to_string();
-        let path_str =
-            self.file_system_client.create_if_needed(path_str).await?;
+        let path_str = self
+            .file_system_client
+            .create_if_needed(Self::CACHE_FILE)
+            .await?;
         Ok(path_str)
     }
 

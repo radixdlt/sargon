@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     # === FOR APP ===
     "crates/app/home-cards",
+    "crates/app/discover",
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
@@ -99,6 +100,7 @@ members = [
 default-members = [
     # === FOR APP ===
     "crates/app/home-cards",
+    "crates/app/discover",
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
@@ -210,6 +212,7 @@ debug = true
 
 # === FOR APP ===
 home-cards = { path = "crates/app/home-cards" }
+discover = { path = "crates/app/discover" }
 radix-connect = { path = "crates/app/radix-connect" }
 radix-connect-models = { path = "crates/app/radix-connect-models" }
 security-center = { path = "crates/app/security-center" }
