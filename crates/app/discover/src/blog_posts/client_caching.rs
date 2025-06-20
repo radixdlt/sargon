@@ -21,11 +21,11 @@ impl BlogPostsClient {
 
     pub async fn save_blog_posts_to_cache(
         &self,
-        posts: &Vec<BlogPost>,
+        posts: &[BlogPost],
         last_update: Timestamp,
     ) {
         let to_save = CachedBlogPosts {
-            posts: posts.clone(),
+            posts: posts.to_owned(),
             last_update,
         };
         _ = self

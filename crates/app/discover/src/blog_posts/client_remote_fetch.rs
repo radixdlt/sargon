@@ -1,5 +1,3 @@
-use iso8601_timestamp::time::{PrimitiveDateTime, Time};
-
 use crate::prelude::*;
 use serde::Deserializer;
 
@@ -46,29 +44,6 @@ impl From<RemoteBlogPost> for BlogPost {
 pub struct BlogPostsCollectionDetails {
     #[serde(deserialize_with = "deserialize_timestamp_truncated_to_seconds")]
     pub last_updated: Timestamp,
-}
-
-pub fn timestamp_truncated_to_seconds(timestamp: Timestamp) -> Timestamp {
-    let time = Time::from_hms(
-        timestamp.hour(),
-        timestamp.minute(),
-        timestamp.second(),
-    )
-    .unwrap();
-    Timestamp::from_primitive_datetime(PrimitiveDateTime::new(
-        timestamp.date(),
-        time,
-    ))
-}
-
-fn deserialize_timestamp_truncated_to_seconds<'de, D>(
-    deserializer: D,
-) -> Result<Timestamp, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let timestamp: Timestamp = Timestamp::deserialize(deserializer)?;
-    Ok(timestamp_truncated_to_seconds(timestamp))
 }
 
 impl BlogPostsCollectionDetails {
@@ -135,6 +110,16 @@ impl Image {
     fn new(url: Url) -> Self {
         Self { url }
     }
+}
+
+fn deserialize_timestamp_truncated_to_seconds<'de, D>(
+  deserializer: D,
+) -> Result<Timestamp, D::Error>
+where
+  D: Deserializer<'de>,
+{
+  let timestamp: Timestamp = Timestamp::deserialize(deserializer)?;
+  Ok(timestamp_truncated_to_seconds(timestamp))
 }
 
 #[cfg(test)]

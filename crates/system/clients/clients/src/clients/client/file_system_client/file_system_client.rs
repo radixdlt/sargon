@@ -47,7 +47,7 @@ impl FileSystemClient {
                     "Failed to canonicalize path: {:?}, error: {:?}",
                     path, e
                 );
-                CommonError::FailedToCanonicalize { path: path }
+                CommonError::FailedToCanonicalize { path }
             })
             .map(|p| p.to_string_lossy().to_string())
     }

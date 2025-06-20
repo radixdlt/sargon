@@ -70,7 +70,7 @@ impl BlogPostsClient {
 mod tests {
     use crate::blog_posts::client_caching::CachedBlogPosts;
     use crate::blog_posts::client_remote_fetch::{
-        timestamp_truncated_to_seconds, BlogPostsCollectionDetails, FieldData,
+        BlogPostsCollectionDetails, FieldData,
         RemoteBlogPost, RemoteBlogPosts,
     };
 
