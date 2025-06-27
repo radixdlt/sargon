@@ -1,10 +1,10 @@
 use crate::prelude::*;
-use sargon::BagOfBytes as InternalBagOfBytes;
-use sargon::NFCTagDriver as InternalNFCTagDriver;
-use sargon::Result as InternalResult;
-use sargon::NFCTagDriverPurpose as InternalNFCTagDriverPurpose;
-use sargon::NFCTagArculusInteractonPurpose as InternalNFCTagArculusInteractonPurpose;
 use sargon::ArculusCardFactorSource as InternalArculusCardFactorSource;
+use sargon::BagOfBytes as InternalBagOfBytes;
+use sargon::NFCTagArculusInteractonPurpose as InternalNFCTagArculusInteractonPurpose;
+use sargon::NFCTagDriver as InternalNFCTagDriver;
+use sargon::NFCTagDriverPurpose as InternalNFCTagDriverPurpose;
+use sargon::Result as InternalResult;
 
 #[derive(Debug, Clone, PartialEq, InternalConversion, uniffi::Enum)]
 pub enum NFCTagArculusInteractonPurpose {
@@ -18,7 +18,7 @@ pub enum NFCTagArculusInteractonPurpose {
 
 #[derive(Debug, Clone, PartialEq, InternalConversion, uniffi::Enum)]
 pub enum NFCTagDriverPurpose {
-    Arculus(NFCTagArculusInteractonPurpose)
+    Arculus(NFCTagArculusInteractonPurpose),
 }
 
 #[uniffi::export(with_foreign)]
@@ -43,12 +43,20 @@ pub struct NFCTagDriverAdapter {
 
 #[async_trait::async_trait]
 impl InternalNFCTagDriver for NFCTagDriverAdapter {
-    async fn start_session(&self, purpose: InternalNFCTagDriverPurpose) -> InternalResult<()> {
-        self.wrapped.start_session(purpose.into()).await.into_internal_result()
+    async fn start_session(
+        &self,
+        purpose: InternalNFCTagDriverPurpose,
+    ) -> InternalResult<()> {
+        self.wrapped
+            .start_session(purpose.into())
+            .await
+            .into_internal_result()
     }
 
     async fn end_session(&self, with_failure: Option<sargon::CommonError>) {
-        self.wrapped.end_session(with_failure.map(CommonError::from)).await
+        self.wrapped
+            .end_session(with_failure.map(CommonError::from))
+            .await
     }
 
     async fn send_receive(

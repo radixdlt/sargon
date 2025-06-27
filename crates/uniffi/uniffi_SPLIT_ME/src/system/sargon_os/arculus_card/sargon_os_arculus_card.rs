@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use sargon::OsArculusCard;
 use sargon::ArculusCardState as InternalArculusCardState;
+use sargon::OsArculusCard;
 
 use sargon::AuthIntent as InternalAuthIntent;
 use sargon::AuthIntentHash as InternalAuthIntentHash;
@@ -18,19 +18,13 @@ pub enum ArculusCardState {
 #[uniffi::export]
 impl SargonOS {
     async fn arculus_get_card_state(&self) -> Result<ArculusCardState> {
-        self.wrapped
-            .arculus_get_card_state()
-            .await
-            .into_result()
+        self.wrapped.arculus_get_card_state().await.into_result()
     }
 
     pub async fn arculus_configure_card(
         &self,
     ) -> Result<FactorSourceIDFromHash> {
-        self.wrapped
-            .arculus_configure_card()
-            .await
-            .into_result()
+        self.wrapped.arculus_configure_card().await.into_result()
     }
 
     pub async fn arculus_configure_card_with_mnemonic(
@@ -68,37 +62,49 @@ impl SargonOS {
     pub async fn arculus_card_sign_transaction(
         &self,
         factor_source: ArculusCardFactorSource,
-        per_transaction: Vec<TransactionSignRequestInputOfTransactionIntent>
+        per_transaction: Vec<TransactionSignRequestInputOfTransactionIntent>,
     ) -> Result<Vec<HDSignatureOfTransactionIntentHash>> {
-        self.wrapped.arculus_card_sign(
-            factor_source.id.into_internal(),
-            NFCTagArculusInteractonPurpose::SignTransaction(factor_source).into_internal(),
-             per_transaction.into_internal()
-        ).await.into_iter_result()
+        self.wrapped
+            .arculus_card_sign(
+                factor_source.id.into_internal(),
+                NFCTagArculusInteractonPurpose::SignTransaction(factor_source)
+                    .into_internal(),
+                per_transaction.into_internal(),
+            )
+            .await
+            .into_iter_result()
     }
 
     pub async fn arculus_card_sign_subintent(
         &self,
         factor_source: ArculusCardFactorSource,
-        per_transaction: Vec<TransactionSignRequestInputOfSubintent>
+        per_transaction: Vec<TransactionSignRequestInputOfSubintent>,
     ) -> Result<Vec<HDSignatureOfSubintentHash>> {
-        self.wrapped.arculus_card_sign(
-            factor_source.id.into_internal(),
-            NFCTagArculusInteractonPurpose::SignPreAuth(factor_source).into_internal(),
-             per_transaction.into_internal()
-        ).await.into_iter_result()
+        self.wrapped
+            .arculus_card_sign(
+                factor_source.id.into_internal(),
+                NFCTagArculusInteractonPurpose::SignPreAuth(factor_source)
+                    .into_internal(),
+                per_transaction.into_internal(),
+            )
+            .await
+            .into_iter_result()
     }
 
     pub async fn arculus_card_sign_auth(
         &self,
         factor_source: ArculusCardFactorSource,
-        per_transaction: Vec<TransactionSignRequestInputOfAuthIntent>
+        per_transaction: Vec<TransactionSignRequestInputOfAuthIntent>,
     ) -> Result<Vec<HDSignatureOfAuthIntentHash>> {
-        self.wrapped.arculus_card_sign(
-            factor_source.id.into_internal(),
-            NFCTagArculusInteractonPurpose::ProveOwnership(factor_source).into_internal(),
-             per_transaction.into_internal(),
-        ).await.into_iter_result()
+        self.wrapped
+            .arculus_card_sign(
+                factor_source.id.into_internal(),
+                NFCTagArculusInteractonPurpose::ProveOwnership(factor_source)
+                    .into_internal(),
+                per_transaction.into_internal(),
+            )
+            .await
+            .into_iter_result()
     }
 
     pub async fn arculus_card_reset(&self) -> Result<()> {

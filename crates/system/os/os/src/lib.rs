@@ -29,8 +29,8 @@ pub mod prelude {
     pub use crate::sargon_os_profile::*;
     pub use crate::testing_interactors::*;
     pub use clients::prelude::ArculusCardState;
-    pub use clients::prelude::NFCTagDriverPurpose;
     pub use clients::prelude::NFCTagArculusInteractonPurpose;
+    pub use clients::prelude::NFCTagDriverPurpose;
 
     pub(crate) use build_info::prelude::*;
     pub(crate) use clients::prelude::*;

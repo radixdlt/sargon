@@ -387,19 +387,19 @@ impl CommonError {
             }
             CommonError::ArculusCardFactorSourceIdMissmatch => {
                 InternalCommonError::ArculusCardFactorSourceIdMissmatch
-            },
+            }
             CommonError::NFCSessionCancelled => {
                 InternalCommonError::NFCSessionCancelled
-            },
+            }
             CommonError::NFCSessionLostTagConnection => {
                 InternalCommonError::NFCSessionLostTagConnection
-            },
+            }
             CommonError::NFCSessionUnknownTag => {
                 InternalCommonError::NFCSessionUnknownTag
-            },
+            }
             CommonError::ArculusCardNotConfigured => {
                 InternalCommonError::ArculusCardNotConfigured
-            },
+            }
             AddressInvalidEntityType {
                 address_kind,
                 entity_type,
@@ -621,6 +621,7 @@ impl From<InternalCommonError> for CommonError {
             }
             InternalCommonError::ArculusCardNotConfigured => {
                 CommonError::ArculusCardNotConfigured
+            }
             InternalCommonError::AddressInvalidEntityType {
                 address_kind,
                 entity_type,

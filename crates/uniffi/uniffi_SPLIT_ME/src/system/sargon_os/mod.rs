@@ -1,5 +1,5 @@
-mod arculus_card;
 mod add_factor_source;
+mod arculus_card;
 mod entities;
 mod pre_authorization;
 mod profile_state_holder;
@@ -17,8 +17,8 @@ mod sargon_os_security_structures;
 mod sargon_os_signing;
 mod transactions;
 
-pub use arculus_card::*;
 pub use add_factor_source::*;
+pub use arculus_card::*;
 pub use entities::*;
 pub use pre_authorization::*;
 pub use profile_state_holder::*;

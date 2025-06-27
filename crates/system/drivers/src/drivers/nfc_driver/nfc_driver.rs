@@ -12,7 +12,7 @@ pub enum NFCTagArculusInteractonPurpose {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum NFCTagDriverPurpose {
-    Arculus(NFCTagArculusInteractonPurpose)
+    Arculus(NFCTagArculusInteractonPurpose),
 }
 
 #[cfg(any(test, feature = "mock"))]
