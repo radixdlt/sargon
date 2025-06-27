@@ -12,7 +12,7 @@ pub type MatrixBuilderBuildResult =
 /// * RecoveryRoleBuilder
 /// * ConfirmationRoleBuilder
 ///
-/// And `number_of_days_until_auto_confirm`.
+/// And `time_until_delayed_confirmation_is_callable`.
 pub type MatrixBuilder = AbstractMatrixBuilderOrBuilt<
     IS_MATRIX_BUILDER,
     IS_ROLE_BUILDER,
@@ -28,8 +28,8 @@ impl MatrixBuilder {
             primary_role: PrimaryRoleBuilder::new(),
             recovery_role: RecoveryRoleBuilder::new(),
             confirmation_role: ConfirmationRoleBuilder::new(),
-            number_of_days_until_auto_confirm:
-                Self::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
+            time_until_delayed_confirmation_is_callable:
+                Self::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
         }
     }
 
@@ -37,7 +37,7 @@ impl MatrixBuilder {
     ///
     /// If valid it returns a "built" `MatrixOfFactorSourceIds`.
     pub fn build(&self) -> MatrixBuilderBuildResult {
-        self.validate_number_of_days_until_auto_confirm()?;
+        self.validate_time_until_delayed_confirmation_is_callable()?;
 
         let primary = self
             .primary_role
@@ -61,7 +61,7 @@ impl MatrixBuilder {
                 primary,
                 recovery,
                 confirmation,
-                self.number_of_days_until_auto_confirm,
+                self.time_until_delayed_confirmation_is_callable,
             )
         };
         Ok(built)
@@ -379,17 +379,20 @@ impl MatrixBuilder {
         self.primary_role.get_threshold()
     }
 
-    pub fn set_number_of_days_until_auto_confirm(
+    pub fn set_time_until_delayed_confirmation_is_callable(
         &mut self,
         number_of_days: u16,
     ) -> MatrixBuilderMutateResult {
-        self.number_of_days_until_auto_confirm = number_of_days;
+        self.time_until_delayed_confirmation_is_callable =
+            TimePeriod::with_days(number_of_days);
 
-        self.validate_number_of_days_until_auto_confirm()
+        self.validate_time_until_delayed_confirmation_is_callable()
     }
 
-    pub fn get_number_of_days_until_auto_confirm(&self) -> u16 {
-        self.number_of_days_until_auto_confirm
+    pub fn get_time_until_delayed_confirmation_is_callable(
+        &self,
+    ) -> TimePeriod {
+        self.time_until_delayed_confirmation_is_callable
     }
 
     fn remove_factor_from_role<const ROLE: u8>(
@@ -533,13 +536,13 @@ impl MatrixBuilder {
         }
     }
 
-    fn validate_number_of_days_until_auto_confirm(
+    fn validate_time_until_delayed_confirmation_is_callable(
         &self,
     ) -> MatrixBuilderMutateResult {
-        if self.number_of_days_until_auto_confirm == 0 {
+        if self.time_until_delayed_confirmation_is_callable.is_zero() {
             return Err(MatrixBuilderValidation::CombinationViolation(
                 MatrixRolesInCombinationViolation::Basic(
-                    MatrixRolesInCombinationBasicViolation::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero,
+                    MatrixRolesInCombinationBasicViolation::NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero,
                 ),
             ));
         }
@@ -603,14 +606,14 @@ impl MatrixBuilder {
     /// 1. If only one factor is used for `Primary`, that factor may not be used for either `Recovery` or `Confirmation`
     /// 2. No factor may be used (override) in both `Recovery` and `Confirmation`
     /// 3. No factor may be used in both the `Primary` threshold and `Primary` override
-    /// 4. Number of days until auto confirm is greater than zero
+    /// 4. Number of days until timed confirm is callable is greater than zero
     fn validate_combination(&self) -> MatrixBuilderMutateResult {
         self.validate_if_primary_has_single_it_must_not_be_used_by_any_other_role()?;
         self.validate_primary_cannot_have_multiple_devices()?;
         self.validate_no_factor_may_be_used_in_both_primary_threshold_and_override()?;
         self.validate_no_factor_may_be_used_in_both_recovery_and_confirmation(
         )?;
-        self.validate_number_of_days_until_auto_confirm()?;
+        self.validate_time_until_delayed_confirmation_is_callable()?;
         Ok(())
     }
 }

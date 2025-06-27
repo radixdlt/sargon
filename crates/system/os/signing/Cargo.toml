@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os-signing"
-version = "1.1.120"
+version = "1.2.20"
 edition = "2021"
 
 [dependencies]
@@ -8,7 +8,7 @@ edition = "2021"
 prelude = { workspace = true }
 sargon-os = { path = "../../../system/os/os" }
 error = { workspace = true }
-signing = { workspace = true }
+signatures-collector = { workspace = true }
 signing-traits = { workspace = true }
 transaction-models = { workspace = true }
 profile-security-structures = { workspace = true }

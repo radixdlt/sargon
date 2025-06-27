@@ -35,7 +35,7 @@ pub use v1::*;
 pub use v2::*;
 
 pub(crate) fn map_static_analysis_error(
-    error: radix_transactions::manifest::static_resource_movements::StaticResourceMovementsError,
+    error: RetManifestAnalysisError,
 ) -> CommonError {
     error!(
         "Failed to get execution summary from RET, error: {:?}",

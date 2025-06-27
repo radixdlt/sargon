@@ -26,6 +26,18 @@ impl SargonOS {
             .into_iter_result()
     }
 
+    /// Returns the `SecurityStructureOfFactorSourceIDs` with the given `shield_id`.
+    pub fn security_structure_of_factor_source_ids_by_security_structure_id(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<SecurityStructureOfFactorSourceIDs> {
+        self.wrapped
+            .security_structure_of_factor_source_ids_by_security_structure_id(
+                shield_id.into_internal(),
+            )
+            .into_result()
+    }
+
     /// Returns all the `SecurityStructuresOfFactorSourceIDs` which are stored
     /// in profile.
     pub fn security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
@@ -61,6 +73,24 @@ impl SargonOS {
             .into_result()
     }
 
+    /// Sets the Security Shield with the given `shield_id` as the main shield.
+    /// If a main Security Shield already exists, it is removed and replaced with the new one.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::SecurityStructuresUpdated { id } }`
+    pub async fn set_main_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+    ) -> Result<()> {
+        self.wrapped
+            .set_main_security_structure(shield_id.into_internal())
+            .await
+            .into_result()
+    }
+
     /// Returns the status of the prerequisites for building a Security Shield.
     ///
     /// According to [definition][doc], a Security Shield can be built if the user has, asides from
@@ -73,5 +103,16 @@ impl SargonOS {
         self.wrapped
             .security_shield_prerequisites_status()
             .into_result()
+    }
+
+    /// Returns all the Security Shields along with the number of entities linked to each Security Shield,
+    /// either provisionally or currently securified.
+    pub async fn get_shields_for_display(
+        &self,
+    ) -> Result<Vec<ShieldForDisplay>> {
+        self.wrapped
+            .get_shields_for_display()
+            .await
+            .into_iter_result()
     }
 }

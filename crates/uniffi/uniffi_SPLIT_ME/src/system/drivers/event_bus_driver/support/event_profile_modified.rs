@@ -42,4 +42,7 @@ pub enum EventProfileModified {
 
     /// Profile updated with a new Security Structure.
     SecurityStructureAdded { id: SecurityStructureID },
+
+    /// Security structures have been updated
+    SecurityStructuresUpdated { ids: Vec<SecurityStructureID> },
 }

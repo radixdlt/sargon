@@ -3,6 +3,7 @@ package com.radixdlt.sargon.os.interactor
 import com.radixdlt.sargon.AuthorizationPurpose
 import com.radixdlt.sargon.AuthorizationResponse
 import com.radixdlt.sargon.CommonException
+import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.HostInteractor
 import com.radixdlt.sargon.KeyDerivationRequest
 import com.radixdlt.sargon.KeyDerivationResponse
@@ -12,6 +13,7 @@ import com.radixdlt.sargon.SignRequestOfTransactionIntent
 import com.radixdlt.sargon.SignResponseOfAuthIntentHash
 import com.radixdlt.sargon.SignResponseOfSubintentHash
 import com.radixdlt.sargon.SignResponseOfTransactionIntentHash
+import com.radixdlt.sargon.SpotCheckResponse
 
 class FakeHostInteractor: HostInteractor {
     override suspend fun signTransactions(
@@ -34,6 +36,13 @@ class FakeHostInteractor: HostInteractor {
 
     override suspend fun requestAuthorization(purpose: AuthorizationPurpose): AuthorizationResponse {
         return AuthorizationResponse.REJECTED
+    }
+
+    override suspend fun spotCheck(
+        factorSource: FactorSource,
+        allowSkip: Boolean
+    ): SpotCheckResponse {
+        throw CommonException.HostInteractionAborted()
     }
 
 }

@@ -11,14 +11,14 @@ use crate::prelude::*;
 #[serde(untagged, remote = "Self")]
 #[allow(clippy::large_enum_variant)]
 pub enum EntitySecurityState {
-    /// The account is controlled by a single factor (private key)
+    /// The entity is controlled by a single factor (private key)
     Unsecured {
         /// The current state of the unsecured entity
         #[serde(rename = "unsecuredEntityControl")]
         value: UnsecuredEntityControl,
     },
 
-    /// The account is controlled by multi-factor
+    /// The entity is controlled by multi-factor
     Securified {
         /// The current state of the securified entity
         #[serde(rename = "securedEntityControl")]
@@ -382,7 +382,10 @@ mod tests {
                         }
                       ]
                     },
-                    "numberOfDaysUntilAutoConfirm": 14
+                    "timeUntilDelayedConfirmationIsCallable": {
+                    	"value": 2,
+                    	"unit": "weeks"
+                    }
                   },
                   "authenticationSigningFactorInstance": {
                     "factorSourceID": {
@@ -508,7 +511,10 @@ mod tests {
                           }
                         ]
                       },
-                      "numberOfDaysUntilAutoConfirm": 14
+                      "timeUntilDelayedConfirmationIsCallable": {
+                    	"value": 2,
+                    	"unit": "weeks"
+                      }
                     },
                     "authenticationSigningFactorInstance": {
                       "factorSourceID": {

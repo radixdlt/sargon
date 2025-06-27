@@ -1,41 +1,81 @@
 {
-  "kind": "CommitSuccess",
   "state_updates_summary": {
+    "non_fungible_data_updates": {},
     "new_entities": [],
     "metadata_updates": {},
-    "non_fungible_data_updates": {},
     "newly_minted_non_fungibles": []
   },
+  "kind": "CommitSuccess",
   "worktop_changes": {
-    "1": [
+    "3": [
       {
-        "kind": "Put",
+        "kind": "Take",
         "value": {
           "kind": "Amount",
-          "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-          "amount": "44"
+          "resource_address": "resource_tdx_2_1t5gweua2ggcgw6u0g6xvf7l5t40mvwww8a856q0tzcjdnut7jdh84d",
+          "amount": "100"
         }
       }
     ],
-    "2": [
+    "1": [
       {
         "kind": "Take",
         "value": {
           "kind": "Amount",
           "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
-          "amount": "44"
+          "amount": "100"
+        }
+      }
+    ],
+    "4": [
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1t4u9jzqe69k3ghuhe4ulrmsthqyk2qw8wh6l4hjkt9r8m0736xx4qd",
+          "amount": "100"
+        }
+      }
+    ],
+    "2": [
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1t5gweua2ggcgw6u0g6xvf7l5t40mvwww8a856q0tzcjdnut7jdh84d",
+          "amount": "100"
+        }
+      }
+    ],
+    "0": [
+      {
+        "kind": "Put",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc",
+          "amount": "100"
+        }
+      }
+    ],
+    "5": [
+      {
+        "kind": "Take",
+        "value": {
+          "kind": "Amount",
+          "resource_address": "resource_tdx_2_1t4u9jzqe69k3ghuhe4ulrmsthqyk2qw8wh6l4hjkt9r8m0736xx4qd",
+          "amount": "100"
         }
       }
     ]
   },
-  "fee_summary": {
-    "execution_fees_in_xrd": "0.1493972",
-    "finalization_fees_in_xrd": "0.01125345",
-    "storage_fees_in_xrd": "0.0782012926",
-    "royalty_fees_in_xrd": "0"
-  },
   "locked_fees": {
-    "contingent": "0",
-    "non_contingent": "0.36962"
+    "non_contingent": "0",
+    "contingent": "0"
+  },
+  "fee_summary": {
+    "storage_fees_in_xrd": "0.17910003354",
+    "execution_fees_in_xrd": "0.27887505",
+    "finalization_fees_in_xrd": "0.04776125",
+    "royalty_fees_in_xrd": "0"
   }
 }

@@ -74,6 +74,30 @@ impl SargonOS {
             profile_state = ProfileState::None;
         }
 
+        // Consistency check on main BDFS
+        if let Some(profile) = profile_state.as_loaded_mut() {
+            let bdfs = profile.main_bdfs();
+
+            if !bdfs.is_main_bdfs() {
+                let profile_updated = profile
+                    .update_factor_source_add_flag_main(&FactorSourceID::from(
+                        bdfs.id,
+                    ))
+                    .is_ok();
+
+                if profile_updated {
+                    let _ = clients.secure_storage.save_profile(profile)
+                        .await
+                        .inspect(|_| {
+                            info!("Profile updated to have explicit main BDFS")
+                        })
+                        .inspect_err(|error| {
+                            warn!("Profile failed to update to have explicit main BDFS: {}", error);
+                        });
+                }
+            }
+        }
+
         let host_id = Self::get_host_id(&clients).await;
         let os = Arc::new(Self {
             clients,
@@ -134,6 +158,7 @@ impl SargonOS {
             // only tests for now, need more work in hosts before we can do this in prod
             self.pre_derive_and_fill_cache_with_instances_for_factor_source(
                 bdfs.clone().factor_source.into(),
+                NetworkID::Mainnet, // we care not about other networks here
             )
             .await?;
         }
@@ -143,11 +168,10 @@ impl SargonOS {
         Ok(())
     }
 
-    // only for debug for now, need integration work in hosts before enabling this for prod
-    #[cfg(debug_assertions)]
     pub async fn pre_derive_and_fill_cache_with_instances_for_factor_source(
         &self,
         factor_source: FactorSource,
+        network_id: NetworkID,
     ) -> Result<FactorInstancesProviderOutcome> {
         if !factor_source.factor_source_id().is_hash() {
             panic!("Unsupported FactorSource which is not HD.")
@@ -158,7 +182,7 @@ impl SargonOS {
             Arc::new(self.clients.factor_instances_cache.clone()),
             Arc::new(profile_snapshot),
             factor_source.clone(),
-            NetworkID::Mainnet, // we care not about other networks here
+            network_id,
             keys_derivation_interactors.clone(),
         )
         .await?;
@@ -180,7 +204,25 @@ impl SargonOS {
         let imported_id = profile.id();
         debug!("Importing profile, id: {}", imported_id);
         let mut profile = profile.clone();
-        self.claim_profile(&mut profile).await?;
+        self.claim_profile(&mut profile).await;
+
+        let bdfs = profile.main_bdfs();
+        // In case were the user loads an old profile without any main BDFS,
+        // and at the same time `bdfs_skipped` is false since there was no main BDFS to skip,
+        // then the profile needs to be updated to mark the implicit BDFS as main.
+        // In case that the user marks `bdfs_skipped` to true, then a new BDFS will be created
+        // below that will be marked as main.
+        if !bdfs.is_main_bdfs() && !bdfs_skipped {
+            let _ = profile
+                .update_factor_source_add_flag_main(&FactorSourceID::from(bdfs.id))
+                .inspect(|_| {
+                    info!("Imported profile updated to use main bdfs an implicit bdfs")
+                })
+                .inspect_err(|error| {
+                    warn!("Imported profile failed to update main bdfs: {}", error)
+                });
+        }
+
         self.secure_storage.save_profile(&profile).await?;
         self.profile_state_holder
             .replace_profile_state_with(ProfileState::Loaded(profile))?;
@@ -320,6 +362,10 @@ impl SargonOS {
         self.interactors.authorization_interactor.clone()
     }
 
+    pub fn spot_check_interactor(&self) -> Arc<dyn SpotCheckInteractor> {
+        self.interactors.spot_check_interactor.clone()
+    }
+
     pub fn host_id(&self) -> HostId {
         self.host_id
     }
@@ -436,6 +482,7 @@ impl SargonOS {
         authorization_interactor: impl Into<
             Option<Arc<dyn AuthorizationInteractor>>,
         >,
+        spot_check_interactor: impl Into<Option<Arc<dyn SpotCheckInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Result<Arc<Self>> {
         let test_drivers =
@@ -457,11 +504,17 @@ impl SargonOS {
                 Arc::new(TestAuthorizationInteractor::stubborn_authorizing())
             });
 
+        let spot_check_interactor =
+            spot_check_interactor.into().unwrap_or_else(|| {
+                Arc::new(TestSpotCheckInteractor::new_succeeded())
+            });
+
         let os = Self::boot_with_clients_and_interactor(
             clients,
-            Interactors::new_with_derivation_and_authorization_interactor(
+            Interactors::new_with_derivation_authorization_and_spot_check_interactor(
                 keys_derivation_interactor,
                 authorization_interactor,
+                spot_check_interactor
             ),
         )
         .await;
@@ -491,13 +544,11 @@ impl SargonOS {
         derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
         pre_derive_factor_instance_for_bdfs: bool,
     ) -> Arc<Self> {
-        let authorization_interactor: Arc<dyn AuthorizationInteractor> =
-            Arc::new(TestAuthorizationInteractor::stubborn_authorizing());
-
         let req = Self::boot_test_with_bdfs_mnemonic_and_interactors(
             bdfs_mnemonic,
             derivation_interactor,
-            authorization_interactor,
+            None,
+            None,
             pre_derive_factor_instance_for_bdfs,
         );
 
@@ -515,7 +566,7 @@ impl SargonOS {
 
     pub async fn boot_test() -> Result<Arc<Self>> {
         Self::boot_test_with_bdfs_mnemonic_and_interactors(
-            None, None, None, true,
+            None, None, None, None, true,
         )
         .await
     }
@@ -552,14 +603,37 @@ impl SargonOS {
 
         Ok(os)
     }
+
+    pub async fn boot_test_empty_wallet_with_spot_check_interactor(
+        spot_check_interactor: Arc<dyn SpotCheckInteractor>,
+    ) -> Arc<Self> {
+        let mut clients = Clients::new(Bios::new(Drivers::test()));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                spot_check_interactor,
+            );
+        let os = actix_rt::time::timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            Self::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        // Create empty Wallet
+        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+
+        os
+    }
 }
 
 #[cfg(test)]
 mod tests {
-
-    use actix_rt::time::timeout;
-
     use super::*;
+    use actix_rt::time::timeout;
+    use prelude::fixture_profiles;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
@@ -735,6 +809,116 @@ mod tests {
         assert_ne!(
             os.profile().unwrap().main_bdfs(),
             profile_to_import.main_bdfs()
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_existing_wallet_mark_as_main_when_no_main_bdfs_exists() {
+        let profile_state_change_driver =
+            RustProfileStateChangeDriver::with_spy(|profile_state| {
+                if let Some(profile) = profile_state.as_loaded() {
+                    assert!(profile.main_bdfs().is_main_bdfs())
+                }
+            });
+        let bios = Bios::new(Drivers::with_profile_state_change(
+            profile_state_change_driver,
+        ));
+        let clients = Clients::new(bios);
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let (profile_to_save, _) = fixture_and_json::<Profile>(
+            fixture_profiles!("only_plaintext_profile_snapshot_version_100"),
+        )
+        .unwrap();
+        clients
+            .secure_storage
+            .save_profile(&profile_to_save)
+            .await
+            .unwrap();
+
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
+
+        assert!(os.profile().unwrap().main_bdfs().is_main_bdfs());
+    }
+
+    #[actix_rt::test]
+    async fn test_import_wallet_with_no_main_bdfs_and_didnt_skip_bdfs_marks_implicit_as_main(
+    ) {
+        let profile_state_change_driver =
+            RustProfileStateChangeDriver::with_spy(|profile_state| {
+                if let Some(profile) = profile_state.as_loaded() {
+                    assert!(profile.main_bdfs().is_main_bdfs())
+                }
+            });
+        let bios = Bios::new(Drivers::with_profile_state_change(
+            profile_state_change_driver,
+        ));
+        let clients = Clients::new(bios);
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let (profile_to_restore, _) = fixture_and_json::<Profile>(
+            fixture_profiles!("only_plaintext_profile_snapshot_version_100"),
+        )
+        .unwrap();
+        // Indicates that the test profile has no main bdfs.
+        let implicit_main_bdfs = profile_to_restore.main_bdfs();
+        assert!(!implicit_main_bdfs.is_main_bdfs());
+
+        let bdfs_count_before_import =
+            profile_to_restore.device_factor_sources().len();
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
+
+        os.import_wallet(&profile_to_restore, false).await.unwrap();
+
+        assert!(os.profile().unwrap().main_bdfs().is_main_bdfs());
+        // Assert that the implicit main is marked as explicit main
+        assert_eq!(os.profile().unwrap().main_bdfs().id, implicit_main_bdfs.id);
+        // Assert that no new bdfs is created and the existing implicit one is marked as main.
+        assert_eq!(
+            os.profile().unwrap().device_factor_sources().len(),
+            bdfs_count_before_import
+        );
+    }
+
+    #[actix_rt::test]
+    async fn test_import_wallet_with_no_main_bdfs_but_skipped_bdfs_marks_new_as_main(
+    ) {
+        let profile_state_change_driver =
+            RustProfileStateChangeDriver::with_spy(|profile_state| {
+                if let Some(profile) = profile_state.as_loaded() {
+                    assert!(profile.main_bdfs().is_main_bdfs())
+                }
+            });
+        let bios = Bios::new(Drivers::with_profile_state_change(
+            profile_state_change_driver,
+        ));
+        let clients = Clients::new(bios);
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let (profile_to_restore, _) = fixture_and_json::<Profile>(
+            fixture_profiles!("only_plaintext_profile_snapshot_version_100"),
+        )
+        .unwrap();
+        // Indicates that the test profile has no main bdfs.
+        let implicit_main_bdfs = profile_to_restore.main_bdfs();
+        assert!(!implicit_main_bdfs.is_main_bdfs());
+
+        let bdfs_count_before_import =
+            profile_to_restore.device_factor_sources().len();
+        let os =
+            SUT::boot_with_clients_and_interactor(clients, interactors).await;
+
+        os.import_wallet(&profile_to_restore, true).await.unwrap();
+
+        assert!(os.profile().unwrap().main_bdfs().is_main_bdfs());
+        // Assert that explicit main is not the previous implicit main
+        assert_ne!(os.profile().unwrap().main_bdfs().id, implicit_main_bdfs.id);
+        // Assert that a new bdfs is created
+        assert_eq!(
+            os.profile().unwrap().device_factor_sources().len(),
+            bdfs_count_before_import + 1
         );
     }
 

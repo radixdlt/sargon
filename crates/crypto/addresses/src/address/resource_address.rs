@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ret_wrapped_address!(
+decl_address!(
     /// Addresses identifying an asset, either fungible (Token) or non_fungible (NFT), on the Radix network, e.g.
     /// `"resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"`
     /// Being the unique identifier of the Radix Token, the Rad, on mainnet.
@@ -13,24 +13,42 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L236-L239
-    resource
+    resource => [
+        ScryptoEntityType::GlobalFungibleResourceManager,
+        ScryptoEntityType::GlobalNonFungibleResourceManager
+    ]
 );
 
 impl ResourceAddress {
     pub fn is_fungible(&self) -> bool {
-        self.0.is_fungible()
+        self.node_id.is_global_fungible_resource_manager()
     }
 
     pub fn is_non_fungible(&self) -> bool {
-        self.0.is_non_fungible()
+        self.node_id.is_global_non_fungible_resource_manager()
     }
 
     pub fn xrd_on_network(id: NetworkID) -> Self {
-        Self::new(XRD, id).expect("Should never fail to get XRD on network.")
+        Self::new_from_node_id(XRD, id)
+            .expect("Should never fail to get XRD on network.")
     }
 
     pub fn is_xrd_on_network(&self, id: NetworkID) -> bool {
         self == &Self::xrd_on_network(id)
+    }
+}
+
+impl TryFrom<(ScryptoManifestResourceAddress, NetworkID)> for ResourceAddress {
+    type Error = CommonError;
+    fn try_from(
+        (address, n): (ScryptoManifestResourceAddress, NetworkID),
+    ) -> Result<Self> {
+        match address {
+            ScryptoManifestResourceAddress::Static(resource_address) => {
+                Ok(ResourceAddress::from((resource_address, n)))
+            }
+            _ => Err(CommonError::NamedAddressesAreNotSupported),
+        }
     }
 }
 
@@ -144,6 +162,7 @@ impl ResourceAddress {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use radix_common::prelude::ManifestNamedAddress;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = ResourceAddress;
@@ -366,5 +385,30 @@ mod tests {
     #[test]
     fn xrd_on_stokenet() {
         assert_eq!(SUT::xrd_on_network(NetworkID::Stokenet).to_string(), "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc");
+    }
+
+    #[test]
+    fn from_static_scrypto_manifest_resource_address() {
+        let expected_address = SUT::sample_mainnet_xrd();
+        let address = ScryptoManifestResourceAddress::Static(
+            ScryptoResourceAddress::try_from(expected_address.scrypto())
+                .unwrap(),
+        );
+        let network_id = NetworkID::Mainnet;
+        assert_eq!(
+            SUT::try_from((address, network_id)).unwrap(),
+            expected_address
+        );
+    }
+
+    #[test]
+    fn from_named_scrypto_manifest_resource_address() {
+        let address =
+            ScryptoManifestResourceAddress::Named(ManifestNamedAddress(0));
+        let network_id = NetworkID::Mainnet;
+        assert_eq!(
+            SUT::try_from((address, network_id)),
+            Err(CommonError::NamedAddressesAreNotSupported)
+        );
     }
 }

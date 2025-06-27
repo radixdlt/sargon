@@ -28,6 +28,8 @@ pub mod prelude {
     pub use crate::transaction_status::*;
     pub use crate::unvalidated_transaction_manifest::*;
 
+    pub(crate) use either::Either;
+
     pub(crate) use radix_common::{
         crypto::Secp256k1PrivateKey as ScryptoSecp256k1PrivateKey,
         math::Decimal as ScryptoDecimal192,
@@ -36,7 +38,6 @@ pub mod prelude {
 
     pub(crate) use radix_engine::{
         blueprints::consensus_manager::UnstakeData as ScryptoUnstakeData,
-        system::system_modules::execution_trace::ResourceSpecifier as ScryptoResourceSpecifier,
         transaction::FeeLocks as ScryptoFeeLocks,
     };
 
@@ -59,7 +60,8 @@ pub mod prelude {
                 },
                 manifest::{
                     from_payload_bytes as RET_from_payload_bytes_manifest_v1,
-                    statically_analyze_and_validate as RET_statically_analyze_and_validate,
+                    statically_analyze as RET_statically_analyze_v1,
+                    statically_validate as RET_statically_validate_v1,
                     to_payload_bytes as RET_to_payload_bytes_manifest_v1,
                 },
                 notarized_transaction::{
@@ -87,7 +89,8 @@ pub mod prelude {
                 subintent_manifest::{
                     as_enclosed as RET_subintent_manifest_as_enclosed,
                     from_payload_bytes as RET_from_payload_bytes_subintent_manifest,
-                    statically_analyze_and_validate as RET_statically_analyze_and_validate_subintent_manifest,
+                    statically_analyze as RET_statically_analyze_subintent_manifest,
+                    statically_validate as RET_statically_validate_subintent_manifest,
                     to_payload_bytes as RET_to_payload_bytes_subintent_manifest,
                 },
                 transaction_intent::{
@@ -97,42 +100,37 @@ pub mod prelude {
                 transaction_manifest::{
                     dynamically_analyze as RET_dynamically_analyze_v2,
                     from_payload_bytes as RET_from_payload_bytes_manifest_v2,
-                    statically_analyze_and_validate as RET_statically_analyze_and_validate_v2,
+                    statically_analyze as RET_statically_analyze_v2,
+                    statically_validate as RET_statically_validate_v2,
                     to_payload_bytes as RET_to_payload_bytes_manifest_v2,
                 },
             },
         },
-        models::{
-            canonical_address_types::{
-                CanonicalAccessControllerAddress as RetAccessControllerAddress,
-                CanonicalAccountAddress as RetAccountAddress,
-                CanonicalAddress as RetIsAddressTrait,
-                CanonicalComponentAddress as RetComponentAddress,
-                CanonicalIdentityAddress as RetIdentityAddress,
-                CanonicalLockerAddress as RetLockerAddress,
-                CanonicalPackageAddress as RetPackageAddress,
-                CanonicalPoolAddress as RetPoolAddress,
-                CanonicalResourceAddress as RetResourceAddress,
-                CanonicalValidatorAddress as RetValidatorAddress,
-                CanonicalVaultAddress as RetVaultAddress,
-            },
-            node_id::TypedNodeId as RetTypedNodeId,
-        },
-        transaction_types::{
-            DetailedManifestClass as RetDetailedManifestClass,
+        manifest_analysis::{
+            AccountSettingsUpdateOutput as RetAccountSettingsUpdateOutput,
+            AccountStaticResourceMovementsOutput as RetAccountStaticResourceMovementsOutput,
+            DetailedManifestClassification as RetDetailedManifestClass,
             DynamicAnalysis as RetDynamicAnalysis, FeeSummary as RetFeeSummary,
-            FungibleResourceIndicator as RetFungibleResourceIndicator,
-            ManifestClass as RetManifestClass, NewEntities as RetNewEntities,
-            NonFungibleResourceIndicator as RetNonFungibleResourceIndicator,
-            Operation as RetOperation, Predicted as RetPredicted,
-            ReservedInstruction as RetReservedInstruction,
-            ResourceIndicator as RetResourceIndicator,
-            StaticAnalysisWithResourceMovements as RetStaticAnalysisWithResourceMovements,
-            TrackedPoolContribution as RetTrackedPoolContribution,
-            TrackedPoolRedemption as RetTrackedPoolRedemption,
-            TrackedValidatorClaim as RetTrackedValidatorClaim,
-            TrackedValidatorStake as RetTrackedValidatorStake,
-            TransactionTypesError as RetTransactionTypesError,
+            ManifestAnalysisError as RetManifestAnalysisError,
+            ManifestClassification as RetManifestClass,
+            NewEntitiesOutput as RetNewEntitiesOutput,
+            PoolContributionOperation as RetPoolContributionOperation,
+            PoolContributionOutput as RetPoolContributionOutput,
+            PoolRedemptionOperation as RetPoolRedemptionOperation,
+            PoolRedemptionOutput as RetPoolRedemptionOutput,
+            ReservedInstructionsOutput as RetReservedInstructionsOutput,
+            StaticAnalysis as RetStaticAnalysis,
+            ValidatorClaimOperation as RetValidatorClaimOperation,
+            ValidatorClaimingXrdOutput as RetValidatorClaimingXrdOutput,
+            ValidatorStakeOperation as RetValidatorStakeOperation,
+            ValidatorStakingOutput as RetValidatorStakingOutput,
+            ValidatorUnstakingOutput as RetValidatorUnstakingOutput,
+        },
+        types::{
+            EitherGuaranteedOrPredicted as RetEitherGuaranteedOrPredicted,
+            InvocationIoItem as RetInvocationIoItem,
+            ManifestResourceSpecifier as RetManifestResourceSpecifier,
+            Operation as RetOperation, Tracked as RetTracked,
             Update as RetUpdate,
         },
     };
@@ -206,9 +204,8 @@ pub mod prelude {
     };
 
     pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use log::*;
+    pub(crate) use profile_security_structures::prelude::*;
     pub(crate) use serde::{Deserialize, Serialize};
-    pub(crate) use std::collections::HashMap;
 
     #[cfg(test)]
     pub(crate) use serde_json::json;

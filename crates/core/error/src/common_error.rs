@@ -623,9 +623,9 @@ pub enum CommonError {
     #[error("No Profile is yet loaded. Current state is: {current_state}")]
     ProfileStateNotLoaded { current_state: String } = 10180,
 
-    #[error("Failed to create Address from global_address (hex): {global_address_as_hex}, network_id: {network_id}")]
-    FailedToCreateAddressFromGlobalAddressAndNetworkID {
-        global_address_as_hex: String,
+    #[error("Failed to create Address from manifest address (hex): {manifest_address}, network_id: {network_id}")]
+    FailedToCreateAddressFromManifestAddressAndNetworkID {
+        manifest_address: String,
         network_id: String,
     } = 10181,
 
@@ -951,6 +951,117 @@ pub enum CommonError {
         "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
     )]
     StructureAlreadyExists { bad_value: String } = 10277,
+
+    #[error(
+        "Tried to create {address_kind}Address with wrong entity type: {entity_type}, for node id: {node_id_as_hex}"
+    )]
+    AddressInvalidEntityType {
+        address_kind: String,
+        entity_type: u8,
+        node_id_as_hex: String,
+    } = 10278,
+
+    #[error(
+        "Tried to create an Address with node id: {node_id_as_hex} which does not have entity type"
+    )]
+    AddressNodeIdNoEntityType { node_id_as_hex: String } = 10279,
+
+    #[error(
+        "Failed to find network id from Bech32m string: {bech32m_encoded_address}"
+    )]
+    FailedToFindNetworkIdFromBech32mString { bech32m_encoded_address: String } =
+        10280,
+
+    #[error("Invalid NodeId length: {actual}, expected: {expected}")]
+    InvalidNodeIdLength { expected: usize, actual: usize } = 10281,
+
+    #[error("No entity found with AccessController address {bad_value}")]
+    NoEntityFoundWithAccessControllerAddress { bad_value: String } = 10282,
+
+    #[error("Failed to cast Address to specific type '{expected_specific_type}', from value: '{got_value}'")]
+    FailedToMapAddressToSpecificType {
+        expected_specific_type: String,
+        got_value: String,
+    } = 10283,
+
+    #[error("Payer cannot be in batch of entities applying shield")]
+    PayerCannotBeInBatchOfEntitiesApplyingShield = 10284,
+
+    #[error("No XRD balance fetched for entity applying shield (or XRD Vault of AC), address {address}")]
+    NoXrdBalanceFetchedForEntityApplyingShieldOrItsVault { address: String } =
+        10285,
+
+    #[error("No XRD balance fetched for payer of application of shield, address_of_payer {address_of_payer}")]
+    NoXrdBalanceFetchedForPayerOfApplicationOfShield {
+        address_of_payer: String,
+    } = 10286,
+
+    #[error("Unable to contribute to AccessControllers Xrd Vault, insufficient balance of payer {payer}, vault of entity {vault_of_entity}, payer balance {payer_balance}, needed balance {needed_balance}")]
+    UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
+        payer: String,
+        vault_of_entity: String,
+        payer_balance: String,
+        needed_balance: String,
+    } = 10287,
+
+    #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
+    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10259,
+
+    #[error("Unable to top up Xrd Vault, payer is entity applying shield: {payer_is_entity_applying_shield}, can exercise primary role: {can_exercise_primary_role} for entity owning AccessController: {entity_owning_access_controller}")]
+    UnableToTopUpXrdVault {
+        entity_owning_access_controller: String,
+        payer_is_entity_applying_shield: bool,
+        can_exercise_primary_role: bool,
+    } = 10288,
+
+    #[error("Unsecurified Personas require an account fee payer, but none was provided, for persona with address: {identity_address}")]
+    UnsecurifiedPersonasRequireAnAccountFeePayerButNoneWasProvided {
+        identity_address: String,
+    } = 10289,
+
+    #[error("Named addresses are not supported")]
+    NamedAddressesAreNotSupported = 10290,
+
+    #[error("Entity has no provisional security config set")]
+    EntityHasNoProvisionalSecurityConfigSet = 10291,
+
+    #[error("Entity's provisional config is wrong. It is expected to be in instances derived state.")]
+    ProvisionalConfigInWrongStateExpectedInstancesDerived = 10292,
+
+    #[error("Entity {entity_bech32m_encoded_address} is not controller by access controller on ledger")]
+    EntityIsNotControlledByAnAccessControllerOnLedger {
+        entity_bech32m_encoded_address: String,
+    } = 10293,
+
+    #[error("Invalid mnemonic words")]
+    InvalidMnemonicWords { indices_in_mnemonic: Vec<usize> } = 10294,
+
+    #[error("Factor source already exists")]
+    FactorSourceAlreadyExists = 10295,
+
+    #[error("Missing NFT Data field {field}")]
+    MissingNFTDataField { field: String } = 10296,
+
+    #[error("Unexpected NFT Data format")]
+    UnexpectedNFTDataFormat = 10297,
+
+    #[error("Invalid RNS domain")]
+    RnsInvalidDomain = 10298,
+
+    #[error("Unauthentic RNS domain: {reason}")]
+    RnsUnauthenticDomain { reason: String } = 10299,
+
+    #[error("Invalid RNS domain configuration: {reason}")]
+    RnsInvalidDomainConfiguration { reason: String } = 10300,
+
+    #[error("RNS unsupported network: {network}")]
+    RnsUnsupportedNetwork { network: u8 } = 10301,
+
+    #[error("Invalid RNS record context: {context}")]
+    RnsInvalidRecordContext { context: String } = 10302,
+
+    #[error("Gw missing response item: {item}")]
+    GWMissingResponseItem { item: String } = 10303,
 }
 
 impl CommonError {

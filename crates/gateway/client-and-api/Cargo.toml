@@ -1,6 +1,6 @@
 [package]
 name = "gateway-client-and-api"
-version = "1.1.120"
+version = "1.2.20"
 edition = "2021"
 
 [dependencies]
@@ -15,11 +15,13 @@ http-client = { workspace = true }
 gateway-models = { workspace = true }
 transaction-models = { workspace = true }
 profile-gateway = { workspace = true }
+profile-base-entity = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
+futures = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 

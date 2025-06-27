@@ -4,11 +4,14 @@ use sargon::AuthIntentHash as InternalAuthIntentHash;
 use sargon::AuthorizationInteractor as InternalAuthorizationInteractor;
 use sargon::AuthorizationPurpose as InternalAuthorizationPurpose;
 use sargon::AuthorizationResponse as InternalAuthorizationResponse;
+use sargon::FactorSource as InternalFactorSource;
 use sargon::KeyDerivationInteractor as InternalKeyDerivationInteractor;
 use sargon::KeyDerivationRequest as InternalKeyDerivationRequest;
 use sargon::KeyDerivationResponse as InternalKeyDerivationResponse;
 use sargon::Result as InternalResult;
 use sargon::SignInteractor as InternalSignInteractor;
+use sargon::SpotCheckInteractor as InternalSpotCheckInteractor;
+use sargon::SpotCheckResponse as InternalSpotCheckResponse;
 use sargon::Subintent as InternalSubintent;
 use sargon::SubintentHash as InternalSubintentHash;
 use sargon::TransactionIntent as InternalTransactionIntent;
@@ -54,6 +57,12 @@ pub trait HostInteractor: Send + Sync + std::fmt::Debug {
         &self,
         purpose: AuthorizationPurpose,
     ) -> AuthorizationResponse;
+
+    async fn spot_check(
+        &self,
+        factor_source: FactorSource,
+        allow_skip: bool,
+    ) -> Result<SpotCheckResponse>;
 }
 
 #[derive(Debug)]
@@ -77,6 +86,31 @@ impl InternalAuthorizationInteractor for AuthorizationInteractorAdapter {
             .request_authorization(purpose.into())
             .await
             .into_internal()
+    }
+}
+
+#[derive(Debug)]
+pub struct SpotCheckInteractorAdapter {
+    pub wrapped: Arc<dyn HostInteractor>,
+}
+
+impl SpotCheckInteractorAdapter {
+    pub fn new(wrapped: Arc<dyn HostInteractor>) -> Self {
+        Self { wrapped }
+    }
+}
+
+#[async_trait::async_trait]
+impl InternalSpotCheckInteractor for SpotCheckInteractorAdapter {
+    async fn spot_check(
+        &self,
+        factor_source: InternalFactorSource,
+        allow_skip: bool,
+    ) -> InternalResult<InternalSpotCheckResponse> {
+        self.wrapped
+            .spot_check(factor_source.into(), allow_skip)
+            .await
+            .into_internal_result()
     }
 }
 

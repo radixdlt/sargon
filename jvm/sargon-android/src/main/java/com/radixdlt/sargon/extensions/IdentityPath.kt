@@ -20,6 +20,4 @@ fun IdentityPath.Companion.init(
     index = index
 )
 
-public fun Cap26EntityKind.discriminant(): String = cap26EntityKindToString(kind = this)
-
 fun IdentityPath.asGeneral(): DerivationPath = DerivationPath.Identity(value = this)

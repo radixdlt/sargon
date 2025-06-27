@@ -17,7 +17,7 @@ pub mod prelude {
     pub use addresses::prelude::*;
     pub use cap26_models::prelude::*;
     pub use core_collections::prelude::{Just, JustKV};
-    pub use core_utils::prelude::*;
+
     pub use factors::prelude::*;
     pub use has_sample_values::prelude::*;
     pub use hierarchical_deterministic::prelude::*;
@@ -43,6 +43,4 @@ pub mod prelude {
     pub(crate) use serde::{Deserialize, Serialize};
     #[cfg(test)]
     pub(crate) use serde_json::json;
-
-    pub(crate) use std::collections::HashSet;
 }

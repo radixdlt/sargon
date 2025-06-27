@@ -46,8 +46,7 @@ impl OsCreateDeleteAccountManifest for SargonOS {
         recipient_account_address: Option<AccountAddress>,
     ) -> Result<CreateDeleteAccountManifestOutcome> {
         let network_id = account_address.network_id();
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let gateway_client = self.gateway_client_with(network_id);
 
         // Get current ledger state
         let ledger_state = gateway_client.gateway_status().await?.ledger_state;

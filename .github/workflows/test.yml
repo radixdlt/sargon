@@ -3,6 +3,13 @@
 name: Test
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
   push:
     branches:
       - main
@@ -18,6 +25,10 @@ env:
 jobs:
   # typos
   check-typos:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -40,6 +51,9 @@ jobs:
 
   # version bump
   check-version:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -90,7 +104,9 @@ jobs:
   
   # phylum
   phylum-analyze:
-    if: ${{ github.event.pull_request }}
+    if: >
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     uses: radixdlt/public-iac-resuable-artifacts/.github/workflows/phylum-analyze.yml@main
     permissions:
       id-token: write
@@ -109,6 +125,10 @@ jobs:
 
   # cargo check
   check-cargo-check:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -125,6 +145,10 @@ jobs:
 
   # cargo fmt check
   check-formatting:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -141,6 +165,10 @@ jobs:
 
   # clippy
   check-clippy:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -157,6 +185,10 @@ jobs:
 
   # Rust unit, doc and integration
   test-rust:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
@@ -180,12 +212,10 @@ jobs:
   check-swift-format:
     name: "Swift format"
     if: >
-      ( github.event.action == 'opened' && github.event.pull_request.draft == false ) ||
-      ( github.event.pull_request.draft == false && github.event.action == 'synchronize' ) ||
-      ( github.event.action == 'ready_for_review' ) ||
-      ( github.event_name == 'push' && github.ref == 'refs/heads/main' )
-    runs-on: macos-15-xlarge
-
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
+    runs-on: macos-15
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -197,10 +227,23 @@ jobs:
 
   # Swift testing on macOS (Apple Silicon)
   test-swift:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: macos-15-xlarge
     timeout-minutes: 20
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
+          app_name: 'sargon'
+          step_name: 'sargon-code-cov-token'
+          secret_prefix: GH_CODECOV
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
+          parse_json: true
 
       - uses: RDXWorks-actions/setup-xcode@master
         with:
@@ -222,7 +265,7 @@ jobs:
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.GH_CODECOV_TOKEN }}
           fail_ci_if_error: true
           files: ${{ env.SWIFT_CODE_COV_REPORT_PATH }}
           name: codecov-swift
@@ -230,9 +273,22 @@ jobs:
 
   # Kotlin test run on JVM on macOS (Apple Silicon)
   test-kotlin:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: ubuntu-latest
     steps:
       - uses: RDXWorks-actions/checkout@main
+
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
+          app_name: 'sargon'
+          step_name: 'sargon-code-cov-token'
+          secret_prefix: GH_CODECOV
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
+          parse_json: true
 
       - name: Remove unused software
         run: |
@@ -277,7 +333,7 @@ jobs:
       - name: Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.GH_CODECOV_TOKEN }}
           fail_ci_if_error: true
           file: ./jvm/sargon-android/build/reports/kover/reportDebug.xml
           name: codecov-jvm
@@ -285,10 +341,23 @@ jobs:
 
   # Code Coverage uses Tarpaulin and uploads to CodeCov.io
   code-coverage:
+    if: >
+      ( github.ref == 'refs/heads/main' && github.event_name == 'push' ) ||
+      ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'RunCI') ) ||
+      ( github.event_name == 'pull_request' && github.event.action == 'opened' && !github.event.pull_request.draft )
     runs-on: macos-15-xlarge
     steps:
       - uses: RDXWorks-actions/checkout@main
 
+      - uses: radixdlt/public-iac-resuable-artifacts/fetch-secrets@main
+        with:
+          role_name: 'arn:aws:iam::${{ secrets.SECRETS_ACCOUNT_ID }}:role/gh-common-secrets-read-access'
+          app_name: 'sargon'
+          step_name: 'sargon-code-cov-token'
+          secret_prefix: GH_CODECOV
+          secret_name: 'arn:aws:secretsmanager:eu-west-2:${{ secrets.SECRETS_ACCOUNT_ID }}:secret:github-actions/common/codecov-o1ImFr'
+          parse_json: true
+          
       - uses: RDXWorks-actions/setup-xcode@master
         with:
           # trying to fix https://github.com/rust-lang/rust/issues/113783
@@ -313,6 +382,6 @@ jobs:
       - name: Code Coverage - Upload to CodeCov.io
         uses: RDXWorks-actions/codecov-action@main
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.GH_CODECOV_TOKEN }}
           fail_ci_if_error: true
           flags: rust

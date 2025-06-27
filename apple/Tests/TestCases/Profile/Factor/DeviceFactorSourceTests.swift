@@ -64,9 +64,9 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 		}
 	}
 
-	func test_other_wrong() {
-		XCTAssertNil(SUT.extract(from: TrustedContactFactorSource.sample))
-	}
+//	func test_other_wrong() {
+//		XCTAssertNil(SUT.extract(from: TrustedContactFactorSource.sample))
+//	}
 
 	func test_extract_wrong_throws() throws {
 		try eachSample { sut in
@@ -93,6 +93,7 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 		)
 	}
 
+	@available(*, deprecated)
 	func test_json_decoding_of_profile_fails_if_factorSource_supported_curves_is_empty() throws {
 		var json = JSON(Profile.sample)
 		json["factorSources"][0]["device.common.cryptoParameters.supportedCurves"] = []

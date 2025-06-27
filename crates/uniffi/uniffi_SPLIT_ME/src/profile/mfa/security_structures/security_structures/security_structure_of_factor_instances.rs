@@ -31,3 +31,15 @@ pub struct SecurityStructureOfFactorInstances {
     pub authentication_signing_factor_instance:
         HierarchicalDeterministicFactorInstance,
 }
+
+#[uniffi::export]
+pub fn new_security_structure_of_factor_instances_sample(
+) -> SecurityStructureOfFactorInstances {
+    InternalSecurityStructureOfFactorInstances::sample().into()
+}
+
+#[uniffi::export]
+pub fn new_security_structure_of_factor_instances_sample_other(
+) -> SecurityStructureOfFactorInstances {
+    InternalSecurityStructureOfFactorInstances::sample_other().into()
+}

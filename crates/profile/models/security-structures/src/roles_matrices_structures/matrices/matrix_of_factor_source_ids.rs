@@ -13,7 +13,7 @@ impl MatrixOfFactorSourceIds {
                 primary,
                 recovery,
                 confirmation,
-                Self::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
+                Self::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
             )
         }
     }
@@ -25,14 +25,14 @@ impl MatrixOfFactorSourceIds {
         primary: PrimaryRoleWithFactorSourceIds,
         recovery: RecoveryRoleWithFactorSourceIds,
         confirmation: ConfirmationRoleWithFactorSourceIds,
-        number_of_days_until_auto_confirm: u16,
+        time_until_delayed_confirmation_is_callable: TimePeriod,
     ) -> Self {
         unsafe {
             Self::unbuilt_with_roles_and_days(
                 primary,
                 recovery,
                 confirmation,
-                number_of_days_until_auto_confirm,
+                time_until_delayed_confirmation_is_callable,
             )
         }
     }
@@ -46,7 +46,7 @@ impl MatrixOfFactorSourceIds {
             primary,
             recovery,
             confirmation,
-            Self::DEFAULT_NUMBER_OF_DAYS_UNTIL_AUTO_CONFIRM,
+            Self::DEFAULT_TIME_UNTIL_DELAYED_CONFIRMATION_IS_CALLABLE,
         )
     }
 }
@@ -321,7 +321,10 @@ mod tests {
                   }
                 ]
               },
-              "numberOfDaysUntilAutoConfirm": 14
+              "timeUntilDelayedConfirmationIsCallable": {
+            	"value": 2,
+            	"unit": "weeks"
+               }
             }
             "#,
         );
@@ -373,7 +376,10 @@ mod tests {
                   }
                 ]
               },
-              "numberOfDaysUntilAutoConfirm": 14
+              "timeUntilDelayedConfirmationIsCallable": {
+            	"value": 2,
+            	"unit": "weeks"
+              }
             }
             "#,
         );

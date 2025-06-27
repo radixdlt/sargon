@@ -15,6 +15,7 @@ macro_rules! decl_specialized_address {
 
         paste! {
             use sargon::$specialized_address_type as [< Internal $specialized_address_type >];
+            use sargon::IsNetworkAware;
 
             $(
                 #[doc = $expr]

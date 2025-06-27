@@ -3,9 +3,9 @@ use crate::prelude::*;
 impl DynamicallyAnalyzableManifest for ScryptoTransactionManifestV2 {
     fn ret_dynamically_analyze(
         &self,
-        receipt: &ScryptoRuntimeToolkitTransactionReceipt,
-    ) -> Result<RetDynamicAnalysis, RetTransactionTypesError> {
-        RET_dynamically_analyze_v2(self, receipt)
+        receipt: ScryptoRuntimeToolkitTransactionReceipt,
+    ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError> {
+        RET_dynamically_analyze_v2(self, receipt.clone())
     }
 }
 
@@ -28,7 +28,7 @@ mod tests {
         assert_eq!(
             manifest.execution_summary(wrong_receipt, NetworkID::Mainnet),
             Err(CommonError::ExecutionSummaryFail {
-                underlying: "InvalidReceipt".to_owned()
+                underlying: "NotACommitSuccessReceipt".to_owned()
             })
         );
     }

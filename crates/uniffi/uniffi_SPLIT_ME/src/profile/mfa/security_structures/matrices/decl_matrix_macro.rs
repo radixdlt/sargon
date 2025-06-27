@@ -25,7 +25,7 @@ macro_rules! matrix_conversion {
                 pub recovery_role: #recovery_role_type,
                 pub confirmation_role: #confirmation_role_type,
 
-                pub number_of_days_until_auto_confirm: u16,
+                pub time_until_delayed_confirmation_is_callable: TimePeriod,
             }
 
             delegate_debug_into!(#struct_name, #internal_struct_name);
@@ -36,8 +36,8 @@ macro_rules! matrix_conversion {
                         primary_role: value.primary().clone().into(),
                         recovery_role: value.recovery().clone().into(),
                         confirmation_role: value.confirmation().clone().into(),
-                        number_of_days_until_auto_confirm: value
-                            .number_of_days_until_auto_confirm,
+                        time_until_delayed_confirmation_is_callable: value
+                            .time_until_delayed_confirmation_is_callable.into(),
                     }
                 }
             }
@@ -49,7 +49,7 @@ macro_rules! matrix_conversion {
                             self.primary_role.clone().into(),
                             self.recovery_role.clone().into(),
                             self.confirmation_role.clone().into(),
-                            self.number_of_days_until_auto_confirm,
+                            self.time_until_delayed_confirmation_is_callable.into(),
                         )
                     }
                 }

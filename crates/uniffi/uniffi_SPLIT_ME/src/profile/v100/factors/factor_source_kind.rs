@@ -2,7 +2,7 @@ use crate::prelude::*;
 use sargon::FactorSourceKind as InternalFactorSourceKind;
 
 /// The **kind** (or "type") of FactorSource describes how it is used.
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
+#[derive(Clone, PartialEq, Eq, Hash, uniffi::Enum)]
 pub enum FactorSourceKind {
     /// A user owned unencrypted mnemonic (and optional BIP39 passphrase) stored on device,
     /// thus directly usable. This kind is used as the standard factor source for all new
@@ -36,24 +36,6 @@ pub enum FactorSourceKind {
     ///  * Hierarchical deterministic  (Mnemonic)
     OffDeviceMnemonic,
 
-    /// A contact, friend, company, organization or otherwise third party the user trusts enough
-    /// to be given a recovery token user has minted and sent the this contact.
-    ///
-    /// Attributes:
-    ///  * **Not** mine
-    ///  * Off device
-    TrustedContact,
-
-    /// An encrypted user owned mnemonic (*never* any BIP39 passphrase) which can
-    /// be decrypted by answers to **security question**, which are personal questions
-    /// that should be only known to the user.
-    ///
-    /// Attributes:
-    ///  * Mine
-    ///  * Off device
-    ///  * Hierarchical deterministic  (**Encrypted** mnemonic)
-    SecurityQuestions,
-
     /// An Arculus card, in credit card size, communicating with host using NFC.
     ///
     /// For more info see [link]
@@ -77,6 +59,54 @@ pub enum FactorSourceKind {
 }
 
 delegate_display_debug_into!(FactorSourceKind, InternalFactorSourceKind);
+
+impl FactorSourceKind {
+    pub fn into_internal(&self) -> InternalFactorSourceKind {
+        self.clone().into()
+    }
+}
+
+impl From<InternalFactorSourceKind> for FactorSourceKind {
+    fn from(value: InternalFactorSourceKind) -> Self {
+        match value {
+            InternalFactorSourceKind::Device => FactorSourceKind::Device,
+            InternalFactorSourceKind::LedgerHQHardwareWallet => {
+                FactorSourceKind::LedgerHQHardwareWallet
+            }
+            InternalFactorSourceKind::OffDeviceMnemonic => {
+                FactorSourceKind::OffDeviceMnemonic
+            }
+            InternalFactorSourceKind::ArculusCard => {
+                FactorSourceKind::ArculusCard
+            }
+            InternalFactorSourceKind::Password => FactorSourceKind::Password,
+            InternalFactorSourceKind::TrustedContact => {
+                panic!("TrustedContact not yet supported in the Wallet")
+            }
+            InternalFactorSourceKind::SecurityQuestions => {
+                panic!("SecurityQuestions not yet supported in the Wallet")
+            }
+        }
+    }
+}
+
+impl From<FactorSourceKind> for InternalFactorSourceKind {
+    fn from(val: FactorSourceKind) -> Self {
+        match val {
+            FactorSourceKind::Device => InternalFactorSourceKind::Device,
+            FactorSourceKind::LedgerHQHardwareWallet => {
+                InternalFactorSourceKind::LedgerHQHardwareWallet
+            }
+            FactorSourceKind::OffDeviceMnemonic => {
+                InternalFactorSourceKind::OffDeviceMnemonic
+            }
+            FactorSourceKind::ArculusCard => {
+                InternalFactorSourceKind::ArculusCard
+            }
+            FactorSourceKind::Password => InternalFactorSourceKind::Password,
+        }
+    }
+}
 
 #[uniffi::export]
 pub fn new_factor_source_kind_sample() -> FactorSourceKind {

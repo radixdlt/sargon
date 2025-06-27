@@ -24,14 +24,14 @@ class FactorSourceIdTest {
             hashFactorSourceId.asGeneral()
         )
 
-        val addressFactorSourceId = FactorSourceIdFromAddress(
-            kind = FactorSourceKind.TRUSTED_CONTACT,
-            body = AccountAddress.sampleMainnet().string
-        )
-        assertEquals(
-            FactorSourceId.Address(addressFactorSourceId),
-            addressFactorSourceId.asGeneral()
-        )
+//        val addressFactorSourceId = FactorSourceIdFromAddress(
+//            kind = FactorSourceKind.TRUSTED_CONTACT,
+//            body = AccountAddress.sampleMainnet().string
+//        )
+//        assertEquals(
+//            FactorSourceId.Address(addressFactorSourceId),
+//            addressFactorSourceId.asGeneral()
+//        )
     }
 
     @Test
@@ -46,15 +46,15 @@ class FactorSourceIdTest {
             FactorSourceId.fromJson(factorSourceIdHash.toJson())
         )
 
-        val addressFactorSourceId = FactorSourceIdFromAddress(
-            kind = FactorSourceKind.TRUSTED_CONTACT,
-            body = AccountAddress.sampleMainnet().asGeneral().string
-        )
-        val factorSourceIdAddress = FactorSourceId.Address(addressFactorSourceId) as FactorSourceId
-        assertEquals(
-            addressFactorSourceId.asGeneral(),
-            FactorSourceId.fromJson(factorSourceIdAddress.toJson())
-        )
+//        val addressFactorSourceId = FactorSourceIdFromAddress(
+//            kind = FactorSourceKind.TRUSTED_CONTACT,
+//            body = AccountAddress.sampleMainnet().asGeneral().string
+//        )
+//        val factorSourceIdAddress = FactorSourceId.Address(addressFactorSourceId) as FactorSourceId
+//        assertEquals(
+//            addressFactorSourceId.asGeneral(),
+//            FactorSourceId.fromJson(factorSourceIdAddress.toJson())
+//        )
     }
 
     @Test
@@ -69,15 +69,15 @@ class FactorSourceIdTest {
             FactorSourceId.Hash.fromJson(sutHash.toJson())
         )
 
-        val sutAddress = FactorSourceIdFromAddress(
-            kind = FactorSourceKind.TRUSTED_CONTACT,
-            body = AccountAddress.sampleMainnet().string
-        ).asGeneral()
-
-        assertEquals(
-            sutAddress,
-            FactorSourceId.Address.fromJson(sutAddress.toJson())
-        )
+//        val sutAddress = FactorSourceIdFromAddress(
+//            kind = FactorSourceKind.TRUSTED_CONTACT,
+//            body = AccountAddress.sampleMainnet().string
+//        ).asGeneral()
+//
+//        assertEquals(
+//            sutAddress,
+//            FactorSourceId.Address.fromJson(sutAddress.toJson())
+//        )
     }
 
     @Test

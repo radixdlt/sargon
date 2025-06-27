@@ -1,10 +1,5 @@
 CALL_METHOD
     Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
-    "lock_fee"
-    Decimal("1.035896544278")
-;
-CALL_METHOD
-    Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
     "withdraw"
     Address("resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc")
     Decimal("3000")
@@ -18,10 +13,6 @@ CALL_METHOD
     Address("validator_tdx_2_1sdtnujyn3720ymg8lakydkvc5tw4q3zecdj95akdwt9de362mvtd94")
     "stake"
     Bucket("bucket1")
-;
-ASSERT_WORKTOP_CONTAINS
-    Address("resource_tdx_2_1t45l9ku3r5mwxazht2qutmhhk3660hqqvxkkyl8rxs20n9k2zv0w7t")
-    Decimal("990")
 ;
 TAKE_ALL_FROM_WORKTOP
     Address("resource_tdx_2_1t45l9ku3r5mwxazht2qutmhhk3660hqqvxkkyl8rxs20n9k2zv0w7t")
@@ -42,10 +33,6 @@ CALL_METHOD
     "stake"
     Bucket("bucket3")
 ;
-ASSERT_WORKTOP_CONTAINS
-    Address("resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn")
-    Decimal("990")
-;
 TAKE_ALL_FROM_WORKTOP
     Address("resource_tdx_2_1t5hpjckz9tm63gqvxsl60ejhzvnlguly77tltvywnj06s2x9wjdxjn")
     Bucket("bucket4")
@@ -64,10 +51,6 @@ CALL_METHOD
     Address("validator_tdx_2_1svr6rmtd9ts5zx8d3euwmmp6mmjdtcj2q7zlmd8xjrn4qx7q5snkas")
     "stake"
     Bucket("bucket5")
-;
-ASSERT_WORKTOP_CONTAINS
-    Address("resource_tdx_2_1t48zl3qmcv3pf24r0765q4zc6rrk83cfjv6wza2xksej80pcfd7p5g")
-    Decimal("990")
 ;
 TAKE_ALL_FROM_WORKTOP
     Address("resource_tdx_2_1t48zl3qmcv3pf24r0765q4zc6rrk83cfjv6wza2xksej80pcfd7p5g")

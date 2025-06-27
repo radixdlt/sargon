@@ -1,8 +1,8 @@
 import Foundation
 import SargonUniFFI
 
-// MARK: - FileManager + @unchecked Sendable
-extension FileManager: @unchecked Sendable {}
+// MARK: - FileManager + @unchecked @retroactive Sendable
+extension FileManager: @unchecked @retroactive Sendable {}
 
 // Makes it possible to type `.shared` on an initalizer/func taking
 // `some FileSystemDriver` as parameter.

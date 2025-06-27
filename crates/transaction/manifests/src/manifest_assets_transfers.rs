@@ -96,7 +96,7 @@ mod tests {
         let transfers = PerRecipientAssetTransfers::new(
             AccountAddress::sample_mainnet(),
             [PerRecipientAssetTransfer::new(
-                AccountOrAddressOf::AddressOfExternalAccount {
+                TransferRecipient::AddressOfExternalAccount {
                     value: AccountAddress::sample_mainnet_other(),
                 },
                 [PerRecipientFungibleTransfer::new(

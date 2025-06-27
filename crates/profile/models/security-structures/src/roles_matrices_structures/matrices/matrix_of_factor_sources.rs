@@ -30,7 +30,7 @@ impl MatrixOfFactorSources {
                 primary_role,
                 recovery_role,
                 confirmation_role,
-                matrix.number_of_days_until_auto_confirm,
+                matrix.time_until_delayed_confirmation_is_callable,
             )
         };
 

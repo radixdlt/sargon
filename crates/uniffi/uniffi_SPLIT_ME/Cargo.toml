@@ -1,6 +1,6 @@
 [package]
 name = "sargon-uniffi"
-version = "1.1.120"
+version = "1.2.20"
 edition = "2021"
 build = "build.rs"
 
@@ -30,7 +30,7 @@ gateway-models = { workspace = true }
 core-misc = { workspace = true }
 clients = { workspace = true }
 drivers = { workspace = true }
-signing = { workspace = true }
+signatures-collector = { workspace = true }
 profile-persona = { workspace = true }
 profile-account = { workspace = true }
 gateway-client-and-api = { workspace = true }

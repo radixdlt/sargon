@@ -118,8 +118,29 @@ impl std::fmt::Display for NonFungibleLocalId {
     }
 }
 
+impl From<AddressOfAccountOrPersona> for NonFungibleLocalId {
+    fn from(value: AddressOfAccountOrPersona) -> Self {
+        match value {
+            AddressOfAccountOrPersona::Account(account_address) => {
+                Self::from(account_address)
+            }
+            AddressOfAccountOrPersona::Identity(identity_address) => {
+                Self::from(identity_address)
+            }
+        }
+    }
+}
+
 impl From<AccountAddress> for NonFungibleLocalId {
     fn from(value: AccountAddress) -> Self {
+        Self::bytes(value.node_id().0).expect(
+            "NonFungibleLocalId bytes size is always NodeId::Length (30)",
+        )
+    }
+}
+
+impl From<IdentityAddress> for NonFungibleLocalId {
+    fn from(value: IdentityAddress) -> Self {
         Self::bytes(value.node_id().0).expect(
             "NonFungibleLocalId bytes size is always NodeId::Length (30)",
         )

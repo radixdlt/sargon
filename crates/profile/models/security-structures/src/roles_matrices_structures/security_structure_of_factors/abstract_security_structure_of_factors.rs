@@ -59,11 +59,20 @@ impl<FACTOR> AbstractSecurityStructure<FACTOR> {
         matrix_of_factors: AbstractMatrixBuilt<FACTOR>,
         authentication_signing_factor: FACTOR,
     ) -> Self {
-        let metadata = SecurityStructureMetadata::new(display_name);
+        let metadata = SecurityStructureMetadata::new(
+            display_name,
+            SecurityStructureFlags::new(),
+        );
         Self::with_metadata(
             metadata,
             matrix_of_factors,
             authentication_signing_factor,
         )
+    }
+}
+
+impl<FACTOR> AbstractSecurityStructure<FACTOR> {
+    pub fn is_main(&self) -> bool {
+        self.metadata.is_main()
     }
 }

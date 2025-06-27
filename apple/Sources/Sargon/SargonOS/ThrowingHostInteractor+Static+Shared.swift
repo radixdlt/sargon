@@ -21,4 +21,8 @@ public class ThrowingHostInteractor: HostInteractor {
 	public func requestAuthorization(purpose: SargonUniFFI.AuthorizationPurpose) async -> SargonUniFFI.AuthorizationResponse {
 		.rejected
 	}
+
+	public func spotCheck(factorSource: FactorSource, allowSkip: Bool) async throws -> SpotCheckResponse {
+		throw CommonError.HostInteractionAborted
+	}
 }

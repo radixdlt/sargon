@@ -7,6 +7,10 @@ extension Account: EntityBaseProtocol {
 	public var asGeneral: AccountOrPersona {
 		.account(self)
 	}
+
+	public var unsecuredControllingFactorInstance: SargonUniFFI.HierarchicalDeterministicFactorInstance? {
+		accountUnsecuredControllingFactorInstance(account: self)
+	}
 }
 
 extension Account {

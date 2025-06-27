@@ -70,9 +70,9 @@ pub trait TransactionManifestModifying: Sized {
     fn modify_add_lock_fee(
         self,
         address_of_fee_payer: &AccountAddress,
-        fee: Option<Decimal192>,
+        fee: impl Into<Option<Decimal192>>,
     ) -> Self {
-        let fee = fee.unwrap_or(default_fee());
+        let fee = fee.into().unwrap_or(default_fee());
         let instruction = single(|b| b.lock_fee(address_of_fee_payer, fee));
         self.prepend_instruction(instruction)
     }

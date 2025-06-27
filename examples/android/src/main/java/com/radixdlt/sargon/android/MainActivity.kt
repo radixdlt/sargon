@@ -56,8 +56,10 @@ import com.radixdlt.sargon.extensions.vendor
 import com.radixdlt.sargon.extensions.version
 import com.radixdlt.sargon.os.SargonOsState
 import com.radixdlt.sargon.os.driver.BiometricsHandler
+import com.radixdlt.sargon.os.driver.OnBiometricsLifecycleCallbacks
 import com.radixdlt.sargon.samples.sample
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -71,7 +73,16 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        biometricsHandler.register(this)
+        biometricsHandler.register(this, object : OnBiometricsLifecycleCallbacks {
+            override fun onBeforeBiometricsRequest() {
+                Timber.d("About to request biometrics")
+            }
+
+            override fun onAfterBiometricsResult() {
+                Timber.d("Biometrics request ended.")
+            }
+
+        })
 
         setContent {
             SargonAndroidTheme {
@@ -95,9 +106,10 @@ fun WalletContent(
                 title = {
                     Column {
                         Text(text = "Sargon App")
-                        val status = when (state.sargonState) {
+                        val status = when (val sargonState = state.sargonState) {
                             SargonOsState.Idle -> "Idle"
                             is SargonOsState.Booted -> "Booted"
+                            is SargonOsState.BootError -> "Boot Error\n${sargonState.error.printStackTrace()}"
                         }
                         Text(
                             text = "OS Status: $status",
@@ -329,12 +341,11 @@ private fun ProfileContent(
         )
         profile.factorSources.forEach { fs ->
             val fsHint = when (fs) {
-                is FactorSource.ArculusCard -> "${fs.value.hint.name} ${fs.value.hint.model}"
-                is FactorSource.Device -> "${fs.value.hint.name} ${fs.value.hint.model}"
-                is FactorSource.Ledger -> "${fs.value.hint.name} ${fs.value.hint.model}"
-                is FactorSource.OffDeviceMnemonic -> "${fs.value.hint.displayName}"
-                is FactorSource.SecurityQuestions -> "security questions"
-                is FactorSource.TrustedContact -> "${fs.value.contact.name} - ${fs.value.contact.emailAddress.email} "
+                is FactorSource.ArculusCard -> "${fs.value.hint.label} ${fs.value.hint.model}"
+                is FactorSource.Device -> "${fs.value.hint.label} ${fs.value.hint.model}"
+                is FactorSource.Ledger -> "${fs.value.hint.label} ${fs.value.hint.model}"
+                is FactorSource.OffDeviceMnemonic -> "${fs.value.hint.label}"
+                is FactorSource.Password -> fs.value.hint.label
             }
 
             val kind = if (fs is FactorSource.Device) {

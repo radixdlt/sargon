@@ -1,10 +1,5 @@
 CALL_METHOD
     Address("account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac")
-    "lock_fee"
-    Decimal("0.9093259971025")
-;
-CALL_METHOD
-    Address("account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac")
     "create_proof_of_non_fungibles"
     Address("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue")
     Array<NonFungibleLocalId>(
@@ -26,10 +21,6 @@ CALL_METHOD
     Address("component_tdx_2_1cr4pa9ex9xhwzfjzclv8vjnfylw93wvhkwcwc0xlahpkel0krxqedw")
     "buy_candy_with_member_card"
     Bucket("bucket1")
-;
-ASSERT_WORKTOP_CONTAINS
-    Address("resource_tdx_2_1thcmn5q5ww3fm0mx55zs9cj0n36qc0jtx956q7vh9ycxk3vh8553qc")
-    Decimal("40")
 ;
 CALL_METHOD
     Address("account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac")

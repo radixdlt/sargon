@@ -1,6 +1,6 @@
 [package]
 name = "profile-base-entity"
-version = "1.1.120"
+version = "1.2.20"
 edition = "2021"
 
 [dependencies]

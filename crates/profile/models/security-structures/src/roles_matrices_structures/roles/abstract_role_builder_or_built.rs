@@ -42,6 +42,20 @@ pub struct AbstractRoleBuilderOrBuilt<const ROLE: u8, const MODE: u8, FACTOR> {
     override_factors: Vec<FACTOR>,
 }
 
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_RECOVERY, IS_BUILT_ROLE, FACTOR>
+{
+    /// WEAK SHIELD!
+    ///
+    /// # Safety
+    /// Rust memory safe, but marked "unsafe" since it might allow for instantiation
+    /// of unsafe - as in application **unsecure** - Role of Factors, which might
+    /// lead to increase risk for end user to loose funds.
+    pub unsafe fn empty() -> Self {
+        Self::with_factors_and_threshold(Threshold::All, [], [])
+    }
+}
+
 #[cfg(debug_assertions)]
 impl<FACTOR: IsMaybeKeySpaceAware>
     AbstractRoleBuilderOrBuilt<ROLE_RECOVERY, IS_BUILT_ROLE, FACTOR>
@@ -49,11 +63,21 @@ impl<FACTOR: IsMaybeKeySpaceAware>
     pub fn override_only(
         override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
-        Self::with_factors_and_threshold(
-            Threshold::All,
-            vec![],
-            override_factors,
-        )
+        Self::with_factors_and_threshold(Threshold::All, [], override_factors)
+    }
+}
+
+impl<FACTOR: IsMaybeKeySpaceAware>
+    AbstractRoleBuilderOrBuilt<ROLE_CONFIRMATION, IS_BUILT_ROLE, FACTOR>
+{
+    /// WEAK SHIELD!
+    ///
+    /// # Safety
+    /// Rust memory safe, but marked "unsafe" since it might allow for instantiation
+    /// of unsafe - as in application **unsecure** - Role of Factors, which might
+    /// lead to increase risk for end user to loose funds.
+    pub unsafe fn empty() -> Self {
+        Self::with_factors_and_threshold(Threshold::All, [], [])
     }
 }
 
@@ -64,11 +88,7 @@ impl<FACTOR: IsMaybeKeySpaceAware>
     pub fn override_only(
         override_factors: impl IntoIterator<Item = FACTOR>,
     ) -> Self {
-        Self::with_factors_and_threshold(
-            Threshold::All,
-            vec![],
-            override_factors,
-        )
+        Self::with_factors_and_threshold(Threshold::All, [], override_factors)
     }
 }
 

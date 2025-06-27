@@ -19,6 +19,7 @@ import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.samples.sample
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
@@ -78,6 +79,7 @@ class AndroidStorageDriverTest {
         sut.deleteDataForKey(key)
 
         assertNull(sut.loadData(key))
+        assertFalse(sut.containsDataForKey(key))
     }
 
     @Test

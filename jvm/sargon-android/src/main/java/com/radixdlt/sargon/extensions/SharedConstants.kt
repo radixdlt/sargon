@@ -19,12 +19,15 @@ object SharedConstants {
 
 @KoverIgnore
 val Account.Companion.nameMaxLength: Long
+    @KoverIgnore
     get() = entityNameMaxLength
 
 @KoverIgnore
 val Persona.Companion.nameMaxLength: Long
+    @KoverIgnore
     get() = entityNameMaxLength
 
 @KoverIgnore
 val DisplayName.Companion.maxLength: Long
+    @KoverIgnore
     get() = displayNameMaxLength

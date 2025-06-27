@@ -140,7 +140,7 @@ impl Account {
     ) -> Self {
         Self::with(
             NetworkID::Mainnet,
-            AccountAddress::new(
+            AccountAddress::new_from_public_key(
                 genesis_factor_instance.public_key.public_key,
                 NetworkID::Mainnet,
             ),
@@ -163,9 +163,8 @@ impl Account {
     ) -> Self {
         let role = make_role();
         assert_eq!(role.get_role_kind(), RoleKind::Primary, "If this tests fails you can update the code below to not be hardcoded to set the primary role...");
-        let mut matrix = MatrixOfFactorInstances::sample();
-        unsafe {
-            matrix.set_primary_role(
+        let matrix = unsafe {
+            MatrixOfFactorInstances::unbuilt_with_roles_and_days(
                 PrimaryRoleWithFactorInstances::with_factors(
                     role.get_threshold(),
                     role.get_threshold_factors()
@@ -177,12 +176,17 @@ impl Account {
                         .map(FactorInstance::from)
                         .collect_vec(),
                 ),
-            );
-        }
+                RecoveryRoleWithFactorInstances::empty(),
+                ConfirmationRoleWithFactorInstances::empty(),
+                TimePeriod::with_days(237),
+            )
+        };
 
         let network_id = NetworkID::Mainnet;
-        let address =
-            AccountAddress::new(veci.public_key(), NetworkID::Mainnet);
+        let address = AccountAddress::new_from_public_key(
+            veci.public_key(),
+            NetworkID::Mainnet,
+        );
 
         let security_structure_of_factor_instances =
             SecurityStructureOfFactorInstances::new(

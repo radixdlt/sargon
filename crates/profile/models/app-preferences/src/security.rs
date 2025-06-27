@@ -184,7 +184,8 @@ mod tests {
                             "id": "ffffffff-ffff-ffff-ffff-ffffffffffff",
                             "displayName": "Spending Account",
                             "createdOn": "2023-09-11T16:05:56.000Z",
-                            "lastUpdatedOn": "2023-09-11T16:05:56.000Z"
+                            "lastUpdatedOn": "2023-09-11T16:05:56.000Z",
+                            "flags": ["main"]
                         },
                         "authenticationSigningFactor": {
                             "discriminator": "fromHash",
@@ -247,7 +248,10 @@ mod tests {
                                     }
                                 ]
                             },
-                            "numberOfDaysUntilAutoConfirm": 14
+                            "timeUntilDelayedConfirmationIsCallable": {
+	                            "value": 2,
+	                            "unit": "weeks"
+                            }
                         }
                     },
                     {
@@ -255,7 +259,8 @@ mod tests {
                             "id": "dededede-dede-dede-dede-dededededede",
                             "displayName": "Savings Account",
                             "createdOn": "2023-12-24T17:13:56.123Z",
-                            "lastUpdatedOn": "2023-12-24T17:13:56.123Z"
+                            "lastUpdatedOn": "2023-12-24T17:13:56.123Z",
+                            "flags": []
                         },
                         "authenticationSigningFactor": {
                           "discriminator": "fromHash",
@@ -304,7 +309,10 @@ mod tests {
                                     }
                                 ]
                             },
-                            "numberOfDaysUntilAutoConfirm": 14
+                            "timeUntilDelayedConfirmationIsCallable": {
+	                            "value": 2,
+                            	"unit": "weeks"
+                            }
                         }
                     }
                 ]

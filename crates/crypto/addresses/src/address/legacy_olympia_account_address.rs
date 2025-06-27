@@ -5,7 +5,7 @@ use radix_engine_toolkit::functions::derive::{
 };
 
 use core_utils::prelude::format_string;
-use radix_engine_toolkit::functions::derive::OlympiaNetwork as ScryptoOlympiaNetwork;
+use radix_engine_toolkit::types::OlympiaNetwork as ScryptoOlympiaNetwork;
 
 #[derive(
     Clone,
@@ -57,7 +57,7 @@ impl LegacyOlympiaAccountAddress {
 
 impl LegacyOlympiaAccountAddress {
     pub fn to_babylon_account_address(self) -> AccountAddress {
-        AccountAddress::new(self.value, NetworkID::Mainnet)
+        AccountAddress::new_from_public_key(self.value, NetworkID::Mainnet)
     }
 }
 

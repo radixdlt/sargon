@@ -59,7 +59,7 @@ impl Decimal {
         self.0
     }
 
-    fn from_native(decimal: ScryptoDecimal192) -> Self {
+    pub const fn from_native(decimal: ScryptoDecimal192) -> Self {
         Self(decimal)
     }
 

@@ -2,12 +2,14 @@ mod access_controller_address;
 mod account_address;
 mod address;
 mod address_format;
+mod address_of_access_controller_or_account;
 mod address_of_account_or_persona;
 
 #[macro_use]
 mod address_union;
 
 mod component_address;
+mod decl_address;
 mod entity_address;
 mod identity_address;
 mod legacy_olympia_account_address;
@@ -22,14 +24,15 @@ mod public_key_hash;
 mod resource_address;
 mod validator_address;
 mod vault_address;
-mod wrap_ret_address;
 
 pub use access_controller_address::*;
 pub use account_address::*;
 pub use address::*;
 pub use address_format::*;
+pub use address_of_access_controller_or_account::*;
 pub use address_of_account_or_persona::*;
 pub use component_address::*;
+pub use decl_address::*;
 pub use entity_address::*;
 pub use identity_address::*;
 pub use legacy_olympia_account_address::*;
@@ -44,4 +47,3 @@ pub use public_key_hash::*;
 pub use resource_address::*;
 pub use validator_address::*;
 pub use vault_address::*;
-pub use wrap_ret_address::*;

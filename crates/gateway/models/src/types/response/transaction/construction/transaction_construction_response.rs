@@ -11,6 +11,11 @@ use crate::prelude::*;
 pub struct TransactionConstructionResponse {
     pub ledger_state: LedgerState,
 }
+impl TransactionConstructionResponse {
+    pub fn new(ledger_state: LedgerState) -> Self {
+        Self { ledger_state }
+    }
+}
 
 #[cfg(test)]
 mod tests {

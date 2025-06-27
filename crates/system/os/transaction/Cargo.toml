@@ -1,35 +1,40 @@
 [package]
 name = "sargon-os-transaction"
-version = "1.1.120"
+version = "1.2.20"
 edition = "2021"
 
 [dependencies]
 # === SARGON CRATES ===
-prelude = { workspace = true }
-sargon-os = { path = "../../../system/os/os" }
-transaction-models = { workspace = true }
-manifests = { workspace = true }
-signing-traits = { workspace = true }
-radix-connect-models = { workspace = true }
-signing = { workspace = true }
 entity-by-address = { workspace = true }
-profile = { workspace = true }
-# profile-state-holder = { workspace = true }
-profile-account-or-persona = { workspace = true }
 gateway-client-and-api = { workspace = true }
+manifests = { workspace = true }
+prelude = { workspace = true }
+profile = { workspace = true }
+profile-account-or-persona = { workspace = true }
+profile-logic = { workspace = true }
+radix-connect-models = { workspace = true }
+sargon-os = { workspace = true }
+sargon-os-factors = { workspace = true }
+signatures-collector = { workspace = true }
+signing-traits = { workspace = true }
+transaction-models = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
+radix-common = { workspace = true }
 radix-engine-interface = { workspace = true }
 radix-engine-toolkit-common = { workspace = true }
-radix-common = { workspace = true }
 
 # ==== EXTERNAL DEPENDENCIES ====
 actix-rt = { workspace = true }
 async-std = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }
+enum-as-inner = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }
+paste = { workspace = true }
+preinterpret = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde_with = { workspace = true }

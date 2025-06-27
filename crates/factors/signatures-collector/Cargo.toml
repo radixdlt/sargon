@@ -1,0 +1,44 @@
+[package]
+name = "signatures-collector"
+version = "1.2.20"
+edition = "2021"
+
+
+[dependencies]
+# === SARGON CRATES ===
+prelude = { workspace = true }
+assert-json = { workspace = true }
+addresses = { workspace = true }
+has-sample-values = { workspace = true }
+core-misc = { workspace = true }
+core-collections = { workspace = true }
+bytes = { workspace = true }
+ecc = { workspace = true }
+metadata = { workspace = true }
+hash = { workspace = true }
+cap26-models = { workspace = true }
+transaction-models = { workspace = true }
+network = { workspace = true }
+identified-vec-of = { workspace = true }
+radix-connect-models = { workspace = true }
+profile-account-or-persona = { workspace = true }
+profile-persona = { workspace = true }
+profile-base-entity = { workspace = true }
+profile-account = { workspace = true }
+entity-foundation = { workspace = true }
+profile-security-structures = { workspace = true } # TODO only RoleKind and FactorListKind and GeneralRoleWithHierarchicalDeterministicFactorInstances? maybe move to a smaller crate?
+entity-by-address = { workspace = true }
+signing-traits = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+radix-engine-interface = { workspace = true }
+radix-transactions = { workspace = true }
+
+# === EXTERNAL DEPENDENCIES ===
+actix-rt = { workspace = true }
+async-trait = { workspace = true }
+derive_more = { workspace = true }
+log = { workspace = true }
+pretty_assertions = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

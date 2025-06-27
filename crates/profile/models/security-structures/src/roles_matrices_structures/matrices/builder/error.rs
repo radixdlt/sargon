@@ -17,8 +17,8 @@ pub enum MatrixRolesInCombinationBasicViolation {
     #[error("The factor source was not found in any role")]
     FactorSourceNotFoundInAnyRole,
 
-    #[error("The number of days until auto confirm must be greater than zero")]
-    NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero,
+    #[error("The number of days until timed confirm is callable must be greater than zero")]
+    NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, thiserror::Error)]

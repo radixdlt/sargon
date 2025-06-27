@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-decl_ret_wrapped_address!(
+decl_address!(
     /// Addresses to a specific vault, owned by a user, holding asset of one kind, either fungible or non_fungible.
     /// Identities cannot own assets so they do not have vaults, but Accounts do, e.g.:
     /// `"internal_vault_rdx1tz474x29nxxd4k2p2reete9xyz4apawv63dphxkr00qt23vyju49fq"`
@@ -13,16 +13,19 @@ decl_ret_wrapped_address!(
     ///
     /// [entt]: https://github.com/radixdlt/radixdlt-scrypto/blob/fc196e21aacc19c0a3dbb13f3cd313dccf4327ca/radix-engine-common/src/types/entity_type.rs
     /// [ret]: https://github.com/radixdlt/radix-engine-toolkit/blob/34fcc3d5953f4fe131d63d4ee2c41259a087e7a5/crates/radix-engine-toolkit/src/models/canonical_address_types.rs#L251-L255
-    vault
+    vault => [
+        ScryptoEntityType::InternalFungibleVault,
+        ScryptoEntityType::InternalNonFungibleVault
+    ]
 );
 
 impl VaultAddress {
     pub fn is_fungible(&self) -> bool {
-        self.0.is_fungible()
+        self.node_id.is_internal_fungible_vault()
     }
 
     pub fn is_non_fungible(&self) -> bool {
-        self.0.is_non_fungible()
+        !self.is_fungible()
     }
 }
 

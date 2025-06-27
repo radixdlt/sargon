@@ -4,11 +4,13 @@
 #![allow(internal_features)]
 
 mod core;
+mod discover;
 mod hierarchical_deterministic;
 mod home_cards;
 mod keys_collector;
 mod profile;
 mod radix_connect;
+mod radix_name_service;
 mod security_center;
 mod signing;
 mod system;
@@ -18,11 +20,13 @@ mod wrapped_radix_engine_toolkit;
 pub mod prelude {
 
     pub use crate::core::*;
+    pub use crate::discover::*;
     pub use crate::hierarchical_deterministic::*;
     pub use crate::home_cards::*;
     pub use crate::keys_collector::*;
     pub use crate::profile::*;
     pub use crate::radix_connect::*;
+    pub use crate::radix_name_service::*;
     pub use crate::security_center::*;
     pub use crate::signing::*;
     pub use crate::system::*;

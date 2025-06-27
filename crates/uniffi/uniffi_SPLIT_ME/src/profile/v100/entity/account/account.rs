@@ -1,4 +1,7 @@
 use crate::prelude::*;
+use profile_logic::{
+    AccountIsLegacy, EntityUnsecuredControllingFactorInstance,
+};
 use sargon::Account as InternalAccount;
 
 decl_vec_samples_for!(Accounts, Account);
@@ -128,4 +131,19 @@ pub fn new_account_sample_stokenet_olivia() -> Account {
 #[uniffi::export]
 pub fn new_account_sample_stokenet_paige() -> Account {
     InternalAccount::sample_stokenet_paige().into()
+}
+
+#[uniffi::export]
+pub fn account_is_legacy(account: Account) -> bool {
+    account.into_internal().is_legacy()
+}
+
+#[uniffi::export]
+pub fn account_unsecured_controlling_factor_instance(
+    account: Account,
+) -> Option<HierarchicalDeterministicFactorInstance> {
+    account
+        .into_internal()
+        .unsecured_controlling_factor_instance()
+        .map(|key| key.into())
 }

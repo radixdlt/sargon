@@ -41,10 +41,9 @@ impl SubintentManifest {
 
 impl StaticallyAnalyzableManifest for SubintentManifest {
     fn summary(&self, network_id: NetworkID) -> Result<ManifestSummary> {
-        let summary = RET_statically_analyze_and_validate_subintent_manifest(
-            &self.scrypto_manifest(),
-        )
-        .map_err(map_static_analysis_error)?;
+        let summary =
+            RET_statically_analyze_subintent_manifest(&self.scrypto_manifest())
+                .map_err(map_static_analysis_error)?;
 
         Ok(ManifestSummary::from((summary, network_id)))
     }
@@ -178,7 +177,7 @@ impl SubintentManifest {
         addresses
             .into_iter()
             .filter_map(|a| {
-                ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
+                ResourceAddress::new_from_node_id(a, self.network_id()).ok()
             })
             .collect_vec()
     }
@@ -188,7 +187,7 @@ impl SubintentManifest {
         addresses
             .into_iter()
             .filter_map(|a| {
-                PoolAddress::new(*a.as_node_id(), self.network_id()).ok()
+                PoolAddress::new_from_node_id(a, self.network_id()).ok()
             })
             .collect_vec()
     }

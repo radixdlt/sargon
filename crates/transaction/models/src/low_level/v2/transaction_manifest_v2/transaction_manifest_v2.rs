@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 impl StaticallyAnalyzableManifest for ScryptoTransactionManifestV2 {
     fn summary(&self, network_id: NetworkID) -> Result<ManifestSummary> {
-        let summary = RET_statically_analyze_and_validate_v2(self)
+        let summary = RET_statically_analyze_v2(self)
             .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, network_id)))
     }
@@ -147,9 +147,8 @@ impl TransactionManifestV2 {
     }
 
     pub fn summary(&self) -> Result<ManifestSummary> {
-        let summary =
-            RET_statically_analyze_and_validate_v2(&self.scrypto_manifest())
-                .map_err(map_static_analysis_error)?;
+        let summary = RET_statically_analyze_v2(&self.scrypto_manifest())
+            .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, self.network_id())))
     }
 
@@ -163,7 +162,7 @@ impl TransactionManifestV2 {
         addresses
             .into_iter()
             .filter_map(|a| {
-                ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
+                ResourceAddress::new_from_node_id(a, self.network_id()).ok()
             })
             .collect_vec()
     }
@@ -173,7 +172,7 @@ impl TransactionManifestV2 {
         addresses
             .into_iter()
             .filter_map(|a| {
-                PoolAddress::new(*a.as_node_id(), self.network_id()).ok()
+                PoolAddress::new_from_node_id(a, self.network_id()).ok()
             })
             .collect_vec()
     }

@@ -102,9 +102,11 @@ impl SecurityShieldBuilder {
             .collect()
     }
 
-    pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
-        self.get(|builder| builder.get_time_period_until_auto_confirm())
-            .into()
+    pub fn get_time_until_timed_confirmation_is_callable(&self) -> TimePeriod {
+        self.get(|builder| {
+            builder.get_time_until_timed_confirmation_is_callable()
+        })
+        .into()
     }
 
     pub fn get_name(&self) -> String {
@@ -206,13 +208,14 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold.into()))
     }
 
-    pub fn set_time_period_until_auto_confirm(
+    pub fn set_time_until_delayed_confirmation_is_callable(
         self: Arc<Self>,
         time_period: TimePeriod,
     ) -> Arc<Self> {
         self.set(|builder| {
-            builder
-                .set_time_period_until_auto_confirm(time_period.clone().into())
+            builder.set_time_until_delayed_confirmation_is_callable(
+                time_period.into(),
+            )
         })
     }
 
@@ -277,14 +280,14 @@ impl SecurityShieldBuilder {
     pub fn disallowed_factor_source_kinds_for_authentication_signing(
         &self,
     ) -> Vec<FactorSourceKind> {
-        sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().into_type()
+        sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().into_iter().filter(|f| f.is_supported()).into_type()
     }
 
     /// "Statically" queries which FactorSourceKinds are allowed for authentication signing.
     pub fn allowed_factor_source_kinds_for_authentication_signing(
         &self,
     ) -> Vec<FactorSourceKind> {
-        sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().into_type()
+        sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().into_iter().filter(|f| f.is_supported()).into_type()
     }
 
     /// "Statically" queries if `factor_source_kind`` is allowed for authentication signing.
@@ -529,9 +532,9 @@ impl FactorSourceID {
         Self::new(sargon::FactorSourceID::sample_ledger_other())
     }
 
-    pub fn sample_trusted_contact() -> Self {
-        Self::new(sargon::FactorSourceID::sample_trusted_contact())
-    }
+    // pub fn sample_trusted_contact() -> Self {
+    //     Self::new(sargon::FactorSourceID::sample_trusted_contact())
+    // }
 
     pub fn sample_arculus() -> Self {
         Self::new(sargon::FactorSourceID::sample_arculus())
@@ -569,9 +572,9 @@ impl FactorSource {
     pub fn sample_password() -> Self {
         Self::new(sargon::FactorSource::sample_password())
     }
-    pub fn sample_trusted_contact_frank() -> Self {
-        Self::new(sargon::FactorSource::sample_trusted_contact_frank())
-    }
+    // pub fn sample_trusted_contact_frank() -> Self {
+    //     Self::new(sargon::FactorSource::sample_trusted_contact_frank())
+    // }
     pub fn sample_device_babylon() -> Self {
         Self::new(sargon::FactorSource::sample_device_babylon())
     }
@@ -599,10 +602,12 @@ mod tests {
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SecurityShieldBuilder;
 
+    // TODO: We should uncomment every reference in tests to TrustedContact and SecurityQuestions once they are supported
     #[test]
     fn rola() {
         let sut = SUT::new();
-        assert_eq!(sut.disallowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().len());
+        // UniFFI list doesn't include unsupported kinds (TrustedContact & SecurityQuestions)
+        assert_eq!(sut.disallowed_factor_source_kinds_for_authentication_signing().len() + 2, sargon::SecurityShieldBuilder::disallowed_factor_source_kinds_for_authentication_signing().len());
 
         assert_eq!(sut.allowed_factor_source_kinds_for_authentication_signing().len(), sargon::SecurityShieldBuilder::allowed_factor_source_kinds_for_authentication_signing().len());
 
@@ -616,16 +621,17 @@ mod tests {
                 FactorSourceKind::Password
             )
         );
-        assert!(
-            !sut.is_allowed_factor_source_kind_for_authentication_signing(
-                FactorSourceKind::TrustedContact
-            )
-        );
-        assert!(
-            !sut.is_allowed_factor_source_kind_for_authentication_signing(
-                FactorSourceKind::SecurityQuestions
-            )
-        );
+
+        // assert!(
+        //     !sut.is_allowed_factor_source_kind_for_authentication_signing(
+        //         FactorSourceKind::TrustedContact
+        //     )
+        // );
+        // assert!(
+        //     !sut.is_allowed_factor_source_kind_for_authentication_signing(
+        //         FactorSourceKind::SecurityQuestions
+        //     )
+        // );
     }
 
     #[test]
@@ -637,16 +643,16 @@ mod tests {
 
         assert_eq!(
             time_period_to_days(
-                &sut.clone().get_time_period_until_auto_confirm()
+                &sut.clone().get_time_until_timed_confirmation_is_callable()
             ),
             14
         );
-        sut = sut.set_time_period_until_auto_confirm(
+        sut = sut.set_time_until_delayed_confirmation_is_callable(
             new_time_period_with_days(u16::MAX),
         );
         assert_eq!(
             time_period_to_days(
-                &sut.clone().get_time_period_until_auto_confirm()
+                &sut.clone().get_time_until_timed_confirmation_is_callable()
             ),
             u16::MAX
         );
@@ -955,7 +961,7 @@ mod tests {
         let mut sut = SUT::new();
         let all_factors_in_profile = vec![
             FactorSource::sample_password(),
-            FactorSource::sample_trusted_contact_frank(),
+            // FactorSource::sample_trusted_contact_frank(),
             FactorSource::sample_device_babylon(),
             FactorSource::sample_device_babylon_other(),
             FactorSource::sample_ledger(),
@@ -964,12 +970,15 @@ mod tests {
             FactorSource::sample_ledger_other(),
         ];
         let name = "Auto Built";
-        let days_to_auto_confirm = 237;
+        let days_until_timed_confirmation = TimePeriod {
+            value: 237,
+            unit: TimePeriodUnit::Days,
+        };
         sut = sut
             .set_name(name.to_owned())
-            .set_time_period_until_auto_confirm(new_time_period_with_days(
-                days_to_auto_confirm,
-            ))
+            .set_time_until_delayed_confirmation_is_callable(
+                new_time_period_with_days(237),
+            )
             .add_factor_source_to_primary_threshold(
                 FactorSource::sample_device_babylon().id(),
             )
@@ -986,8 +995,8 @@ mod tests {
         assert_eq!(shield.metadata.display_name.value, name.to_owned());
         let matrix = shield.matrix_of_factors;
         assert_eq!(
-            matrix.number_of_days_until_auto_confirm,
-            days_to_auto_confirm
+            matrix.time_until_delayed_confirmation_is_callable,
+            days_until_timed_confirmation
         );
 
         pretty_assertions::assert_eq!(
@@ -1008,9 +1017,9 @@ mod tests {
                 threshold: Threshold::All,
                 threshold_factors: Vec::new(),
                 override_factors: vec![
-                    FactorSourceID::sample_trusted_contact(),
+                    // FactorSourceID::sample_trusted_contact(),
                     FactorSourceID::sample_ledger(),
-                    FactorSourceID::sample_arculus_other(),
+                    FactorSourceID::sample_arculus(), // will be sample_arculus_other once we include sample_trusted_contact
                     FactorSourceID::sample_ledger_other(),
                 ]
             }
@@ -1023,7 +1032,7 @@ mod tests {
                 threshold_factors: Vec::new(),
                 override_factors: vec![
                     FactorSourceID::sample_password(),
-                    FactorSourceID::sample_arculus(),
+                    FactorSourceID::sample_arculus_other(), // will be sample_arculus once we include sample_trusted_contact
                     FactorSourceID::sample_device(),
                     FactorSourceID::sample_device_other(),
                 ]
@@ -1031,23 +1040,23 @@ mod tests {
         );
     }
 
-    #[test]
-    fn primary_override_validation_status_trusted_contact() {
-        let sut = SUT::new();
-        let res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
-            vec![FactorSourceID::sample_trusted_contact()],
-        );
-        pretty_assertions::assert_eq!(
-            res,
-            vec![
-                FactorSourceValidationStatus {
-                    role: RoleKind::Primary,
-                    factor_source_id: FactorSourceID::sample_trusted_contact(),
-                    reason_if_invalid: Some(FactorSourceValidationStatusReasonIfInvalid::NonBasic(
-                        SecurityShieldBuilderRuleViolation::PrimaryCannotContainTrustedContact
-                    ))
-                }
-            ]
-        )
-    }
+    // #[test]
+    // fn primary_override_validation_status_trusted_contact() {
+    //     let sut = SUT::new();
+    //     let res = sut.validation_for_addition_of_factor_source_to_primary_override_for_each(
+    //         vec![FactorSourceID::sample_trusted_contact()],
+    //     );
+    //     pretty_assertions::assert_eq!(
+    //         res,
+    //         vec![
+    //             FactorSourceValidationStatus {
+    //                 role: RoleKind::Primary,
+    //                 factor_source_id: FactorSourceID::sample_trusted_contact(),
+    //                 reason_if_invalid: Some(FactorSourceValidationStatusReasonIfInvalid::NonBasic(
+    //                     SecurityShieldBuilderRuleViolation::PrimaryCannotContainTrustedContact
+    //                 ))
+    //             }
+    //         ]
+    //     )
+    // }
 }

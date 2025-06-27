@@ -122,6 +122,37 @@ pub enum CommonError {
     InvalidInstructionsString {
         underlying: String,
     },
+    AddressInvalidEntityType {
+        address_kind: String,
+        entity_type: u8,
+        node_id_as_hex: String,
+    },
+    FailedToFindNetworkIdFromBech32mString {
+        bech32m_encoded_address: String,
+    },
+    InvalidMnemonicWords {
+        indices_in_mnemonic: Vec<u8>,
+    },
+    MissingNFTDataField {
+        field: String,
+    },
+    UnexpectedNFTDataFormat,
+    RnsInvalidDomain,
+    RnsUnauthenticDomain {
+        reason: String,
+    },
+    RnsInvalidDomainConfiguration {
+        reason: String,
+    },
+    RnsUnsupportedNetwork {
+        network: u8,
+    },
+    RnsInvalidRecordContext {
+        context: String,
+    },
+    GWMissingResponseItem {
+        item: String,
+    },
 }
 
 #[uniffi::export]
@@ -369,6 +400,60 @@ impl CommonError {
             CommonError::ArculusCardNotConfigured => {
                 InternalCommonError::ArculusCardNotConfigured
             },
+            AddressInvalidEntityType {
+                address_kind,
+                entity_type,
+                node_id_as_hex,
+            } => InternalCommonError::AddressInvalidEntityType {
+                address_kind: address_kind.clone(),
+                entity_type: *entity_type,
+                node_id_as_hex: node_id_as_hex.clone(),
+            },
+            FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address,
+            } => InternalCommonError::FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address: bech32m_encoded_address.clone(),
+            },
+            InvalidMnemonicWords {
+                indices_in_mnemonic,
+            } => InternalCommonError::InvalidMnemonicWords {
+                indices_in_mnemonic: indices_in_mnemonic
+                    .iter()
+                    .map(|i| *i as usize)
+                    .collect::<Vec<_>>(),
+            },
+            MissingNFTDataField { field } => {
+                InternalCommonError::MissingNFTDataField {
+                    field: field.clone(),
+                }
+            }
+            UnexpectedNFTDataFormat => {
+                InternalCommonError::UnexpectedNFTDataFormat
+            }
+            RnsInvalidDomain => InternalCommonError::RnsInvalidDomain,
+            RnsUnauthenticDomain { reason } => {
+                InternalCommonError::RnsUnauthenticDomain {
+                    reason: reason.clone(),
+                }
+            }
+            RnsInvalidDomainConfiguration { reason } => {
+                InternalCommonError::RnsInvalidDomainConfiguration {
+                    reason: reason.clone(),
+                }
+            }
+            RnsUnsupportedNetwork { network } => {
+                InternalCommonError::RnsUnsupportedNetwork { network: *network }
+            }
+            RnsInvalidRecordContext { context } => {
+                InternalCommonError::RnsInvalidRecordContext {
+                    context: context.clone(),
+                }
+            }
+            GWMissingResponseItem { item } => {
+                InternalCommonError::GWMissingResponseItem {
+                    item: item.clone(),
+                }
+            }
             _ => InternalCommonError::Unknown,
         }
     }
@@ -536,6 +621,57 @@ impl From<InternalCommonError> for CommonError {
             }
             InternalCommonError::ArculusCardNotConfigured => {
                 CommonError::ArculusCardNotConfigured
+            InternalCommonError::AddressInvalidEntityType {
+                address_kind,
+                entity_type,
+                node_id_as_hex,
+            } => AddressInvalidEntityType {
+                address_kind: address_kind.clone(),
+                entity_type,
+                node_id_as_hex: node_id_as_hex.clone(),
+            },
+            InternalCommonError::FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address,
+            } => FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address: bech32m_encoded_address.clone(),
+            },
+            InternalCommonError::InvalidMnemonicWords {
+                indices_in_mnemonic,
+            } => InvalidMnemonicWords {
+                indices_in_mnemonic: indices_in_mnemonic
+                    .into_iter()
+                    .map(|i| i as u8)
+                    .collect::<Vec<_>>(),
+            },
+            InternalCommonError::MissingNFTDataField { field } => {
+                MissingNFTDataField {
+                    field: field.clone(),
+                }
+            }
+            InternalCommonError::UnexpectedNFTDataFormat => {
+                UnexpectedNFTDataFormat
+            }
+            InternalCommonError::RnsInvalidDomain => RnsInvalidDomain,
+            InternalCommonError::RnsUnauthenticDomain { reason } => {
+                RnsUnauthenticDomain {
+                    reason: reason.clone(),
+                }
+            }
+            InternalCommonError::RnsInvalidDomainConfiguration { reason } => {
+                RnsInvalidDomainConfiguration {
+                    reason: reason.clone(),
+                }
+            }
+            InternalCommonError::RnsUnsupportedNetwork { network } => {
+                RnsUnsupportedNetwork { network }
+            }
+            InternalCommonError::RnsInvalidRecordContext { context } => {
+                RnsInvalidRecordContext {
+                    context: context.clone(),
+                }
+            }
+            InternalCommonError::GWMissingResponseItem { item } => {
+                GWMissingResponseItem { item: item.clone() }
             }
             _ => Self::erased(value),
         }

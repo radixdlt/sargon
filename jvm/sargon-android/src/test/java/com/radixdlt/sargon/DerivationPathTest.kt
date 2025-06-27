@@ -8,6 +8,7 @@ import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.initForEntity
 import com.radixdlt.sargon.extensions.initFromLocal
 import com.radixdlt.sargon.extensions.lastPathComponent
+import com.radixdlt.sargon.extensions.scheme
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.samples.Sample
 import com.radixdlt.sargon.samples.sample
@@ -55,6 +56,24 @@ class DerivationPathTest: SampleTestable<DerivationPath> {
         assertEquals(
             Slip10Curve.SECP256K1,
             Bip44LikePath.sample().asGeneral().curve
+        )
+    }
+
+    @Test
+    fun testScheme() {
+        assertEquals(
+            DerivationPathScheme.CAP26,
+            AccountPath.sample().asGeneral().scheme
+        )
+
+        assertEquals(
+            DerivationPathScheme.CAP26,
+            IdentityPath.sample().asGeneral().scheme
+        )
+
+        assertEquals(
+            DerivationPathScheme.BIP44_OLYMPIA,
+            Bip44LikePath.sample().asGeneral().scheme
         )
     }
 

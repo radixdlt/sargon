@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, EnumAsInner)]
 pub enum ResourceIndicator {
     Fungible {
         resource_address: ResourceAddress,
@@ -63,18 +63,18 @@ impl ResourceIndicator {
     }
 }
 
-impl From<(RetResourceIndicator, NetworkID)> for ResourceIndicator {
-    fn from(value: (RetResourceIndicator, NetworkID)) -> Self {
+impl From<(RetInvocationIoItem, NetworkID)> for ResourceIndicator {
+    fn from(value: (RetInvocationIoItem, NetworkID)) -> Self {
         let (ret, network_id) = value;
         match ret {
-            RetResourceIndicator::Fungible(
+            RetInvocationIoItem::Fungible(
                 resource_address,
                 fungible_indicator,
             ) => Self::fungible(
                 (resource_address, network_id),
                 fungible_indicator,
             ),
-            RetResourceIndicator::NonFungible(
+            RetInvocationIoItem::NonFungible(
                 resource_address,
                 non_fungible_indicator,
             ) => Self::non_fungible(
@@ -113,6 +113,8 @@ impl HasSampleValues for ResourceIndicator {
 #[cfg(test)]
 mod tests {
 
+    use radix_engine_toolkit::types::InstructionIndex;
+
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
@@ -141,9 +143,9 @@ mod tests {
     #[test]
     fn from_ret_fungible() {
         let resource_address = ResourceAddress::sample();
-        let ret = RetResourceIndicator::Fungible(
+        let ret = RetInvocationIoItem::new_guaranteed_fungible(
             resource_address.into(),
-            RetFungibleResourceIndicator::Guaranteed(1.into()),
+            1.into(),
         );
 
         assert_eq!(SUT::from((ret.clone(), NetworkID::Mainnet)), SUT::sample());
@@ -156,21 +158,12 @@ mod tests {
     fn from_ret_non_fungible() {
         let resource_address = NonFungibleResourceAddress::sample_other();
 
-        let ret = RetResourceIndicator::NonFungible(
+        let ret = RetInvocationIoItem::new_predicted_non_fungible(
             ResourceAddress::from(resource_address).into(),
-            RetNonFungibleResourceIndicator::ByAll {
-                predicted_amount: RetPredicted {
-                    value: 1.into(),
-                    instruction_index: 0,
-                },
-                predicted_ids: RetPredicted {
-                    value: [NonFungibleLocalId::sample_other()]
-                        .into_iter()
-                        .map(ScryptoNonFungibleLocalId::from)
-                        .collect(),
-                    instruction_index: 1,
-                },
-            },
+            [NonFungibleLocalId::sample_other()]
+                .into_iter()
+                .map(ScryptoNonFungibleLocalId::from),
+            InstructionIndex::of(0),
         );
 
         assert_eq!(

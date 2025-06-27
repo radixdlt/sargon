@@ -1,13 +1,17 @@
 package com.radixdlt.sargon.extensions
 
+import com.radixdlt.sargon.FactorSource
 import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSourceIdFromAddress
 import com.radixdlt.sargon.FactorSourceIdFromHash
 import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.MnemonicWithPassphrase
+import com.radixdlt.sargon.SpotCheckInput
 import com.radixdlt.sargon.factorSourceIDFromAddressToJsonBytes
 import com.radixdlt.sargon.factorSourceIDFromHashToJsonBytes
 import com.radixdlt.sargon.factorSourceIDToJsonBytes
+import com.radixdlt.sargon.factorSourceIdPerformSpotCheck
+import com.radixdlt.sargon.factorSourcePerformSpotCheck
 import com.radixdlt.sargon.newFactorSourceIDFromAddressFromJsonBytes
 import com.radixdlt.sargon.newFactorSourceIDFromHashFromJsonBytes
 import com.radixdlt.sargon.newFactorSourceIDFromJsonBytes
@@ -15,9 +19,9 @@ import com.radixdlt.sargon.newFactorSourceIdFromHashFromMnemonicWithPassphrase
 
 fun FactorSourceIdFromHash.asGeneral() = FactorSourceId.Hash(value = this)
 
-fun FactorSourceIdFromAddress.asGeneral() = FactorSourceId.Address(
-    value = this
-)
+//fun FactorSourceIdFromAddress.asGeneral() = FactorSourceId.Address(
+//    value = this
+//)
 
 fun FactorSourceId.Hash.Companion.init(
     kind: FactorSourceKind,
@@ -27,15 +31,15 @@ fun FactorSourceId.Hash.Companion.init(
     mnemonicWithPassphrase = mnemonicWithPassphrase
 ).asGeneral()
 
-@Throws(SargonException::class)
-fun FactorSourceId.Address.Companion.fromJson(
-    jsonString: String
-): FactorSourceId.Address = newFactorSourceIDFromAddressFromJsonBytes(
-    jsonBytes = bagOfBytes(fromString = jsonString)
-).asGeneral()
+//@Throws(SargonException::class)
+//fun FactorSourceId.Address.Companion.fromJson(
+//    jsonString: String
+//): FactorSourceId.Address = newFactorSourceIDFromAddressFromJsonBytes(
+//    jsonBytes = bagOfBytes(fromString = jsonString)
+//).asGeneral()
 
-fun FactorSourceId.Address.toJson(): String =
-    factorSourceIDFromAddressToJsonBytes(factorSourceIDFromAddress = value).string
+//fun FactorSourceId.Address.toJson(): String =
+//    factorSourceIDFromAddressToJsonBytes(factorSourceIDFromAddress = value).string
 
 @Throws(SargonException::class)
 fun FactorSourceId.Hash.Companion.fromJson(
@@ -56,3 +60,7 @@ fun FactorSourceId.Companion.fromJson(
 
 fun FactorSourceId.toJson(): String =
     factorSourceIDToJsonBytes(factorSourceID = this).string
+
+fun FactorSourceId.spotCheck(
+    input: SpotCheckInput
+) = factorSourceIdPerformSpotCheck(this, input)

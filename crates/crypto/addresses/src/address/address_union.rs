@@ -20,7 +20,7 @@ macro_rules! address_union {
                 PartialEq,
                 Eq,
                 Hash,
-                EnumAsInner,
+                enum_as_inner::EnumAsInner,
                 derive_more::Display,
                 derive_more::Debug,
                 SerializeDisplay,
@@ -79,14 +79,6 @@ macro_rules! address_union {
                 }
 
                 #[test]
-                fn into_scrypto_global_address() {
-                    // this is quite a bad unit tests... but I could not come up with anything better.
-                    assert_eq!(
-                        SUT::sample().scrypto().to_vec().len(), 30
-                    );
-                }
-
-                #[test]
                 fn string_roundtrip() {
                     let test = |a: SUT| {
                         let s = a.to_string();
@@ -121,6 +113,21 @@ macro_rules! address_union {
                 }
             )+
 
+            $(
+                impl TryFrom<$union_name> for $variant_type {
+                    type Error = CommonError;
+                    fn try_from(value: $union_name) -> Result<Self> {
+                        match value {
+                            $union_name::$variant_name(address) => Ok(address),
+                            _ => Err(CommonError::FailedToMapAddressToSpecificType {
+                                expected_specific_type: stringify!($variant_type).to_string(),
+                                got_value: value.to_string(),
+                            }),
+                        }
+                    }
+                }
+            )+
+
             impl IsAddress for $union_name {}
             impl IsNetworkAware for $union_name {
 
@@ -129,6 +136,16 @@ macro_rules! address_union {
                     match self {
                         $(
                             Self::$variant_name(address) => address.network_id(),
+                        )+
+                    }
+                }
+            }
+
+            impl HasNodeId for $union_name {
+                fn node_id(&self) -> ScryptoNodeId {
+                    match self {
+                        $(
+                            Self::$variant_name(address) => address.node_id(),
                         )+
                     }
                 }
@@ -150,7 +167,6 @@ macro_rules! address_union {
                         )+
                     }
                 }
-
             }
 
             impl $union_name {

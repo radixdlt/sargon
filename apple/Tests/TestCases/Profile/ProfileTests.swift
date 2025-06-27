@@ -24,6 +24,7 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertNoDifference(SUT.sample.id, SUT.sample.header.id)
 	}
 
+	@available(*, deprecated)
 	func test_encryption_roundtrip() throws {
 		let password = "ultra secret"
 		let sut = SUT.sample
@@ -102,6 +103,7 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertTrue(jsonString.contains("version"))
 	}
 
+	@available(*, deprecated)
 	func test_json_roundtrip() throws {
 		func doTest(_ sut: SUT, _ json: String) throws {
 			let encoded = sut.toJSONString(prettyPrinted: false)
@@ -146,8 +148,9 @@ final class ProfileTests: Test<Profile> {
 		}
 	}
 
+	@available(*, deprecated)
 	func test_check_if_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
-		let json = try openFile(subPath: "vector", "only_plaintext_profile_snapshot_version_100", extension: "json")
+		let json = try jsonData(file: "only_plaintext_profile_snapshot_version_100")
 		XCTAssert(
 			SUT.checkIfProfileJsonContainsLegacyP2PLinks(contents: json)
 		)
@@ -159,15 +162,16 @@ final class ProfileTests: Test<Profile> {
 		)
 	}
 
+	@available(*, deprecated)
 	func test_check_if_encrypted_profile_json_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
-		let json = try openFile(subPath: "vector", "profile_encrypted_by_password_of_babylon", extension: "json")
+		let json = try jsonData(file: "profile_encrypted_by_password_of_babylon")
 		XCTAssert(
 			SUT.checkIfEncryptedProfileJsonContainsLegacyP2PLinks(contents: json, password: "babylon")
 		)
 	}
 
 	func test_check_if_encrypted_profile_json_string_contains_legacy_p2p_links_when_p2p_links_are_present() throws {
-		let json = try openFile(subPath: "vector", "profile_encrypted_by_password_of_babylon", extension: "json")
+		let json = try jsonData(file: "profile_encrypted_by_password_of_babylon")
 		let jsonString = try XCTUnwrap(String(data: json, encoding: .utf8))
 		XCTAssert(
 			SUT.checkIfEncryptedProfileJsonStringContainsLegacyP2PLinks(jsonString: jsonString, password: "babylon")

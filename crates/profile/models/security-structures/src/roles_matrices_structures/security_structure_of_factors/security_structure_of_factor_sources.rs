@@ -104,7 +104,7 @@ impl From<MatrixOfFactorSources> for MatrixOfFactorSourceIDs {
                 ConfirmationRoleWithFactorSourceIds::from(
                     value.confirmation_role,
                 ),
-                value.number_of_days_until_auto_confirm,
+                value.time_until_delayed_confirmation_is_callable,
             )
         }
     }

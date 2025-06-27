@@ -90,9 +90,17 @@ impl DeviceFactorSourceHint {
     }
 
     pub fn with_info(host_info: &HostInfo, word_count: BIP39WordCount) -> Self {
+        Self::with_info_and_label(host_info, word_count, label_default())
+    }
+
+    pub fn with_info_and_label(
+        host_info: &HostInfo,
+        word_count: BIP39WordCount,
+        label: impl AsRef<str>,
+    ) -> Self {
         let description = host_info.description.clone();
         Self::new(
-            label_default(),
+            label,
             description.name,
             description.model,
             host_info.host_os.version(),

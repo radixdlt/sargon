@@ -4,6 +4,7 @@ import com.radixdlt.sargon.Account
 import com.radixdlt.sargon.AccountAddress
 import com.radixdlt.sargon.AddressOfAccountOrPersona
 import com.radixdlt.sargon.EntitySecurityState
+import com.radixdlt.sargon.HierarchicalDeterministicFactorInstance
 import com.radixdlt.sargon.IdentityAddress
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Persona
@@ -13,6 +14,12 @@ sealed interface ProfileEntity {
     val address: AddressOfAccountOrPersona
     val securityState: EntitySecurityState
     val flags: EntityFlags
+
+    val unsecuredControllingFactorInstance: HierarchicalDeterministicFactorInstance?
+        get() = when (this) {
+            is AccountEntity -> account.unsecuredControllingFactorInstance
+            is PersonaEntity -> persona.unsecuredControllingFactorInstance
+        }
 
     data class AccountEntity(
         val account: Account

@@ -1,4 +1,3 @@
-extern crate sargon;
 use regex::Regex;
 use sargon::prelude::*;
 

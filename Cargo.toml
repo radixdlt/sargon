@@ -3,10 +3,10 @@ resolver = "2"
 members = [
     # === FOR APP ===
     "crates/app/home-cards",
+    "crates/app/discover",
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
-    "crates/app/signing",
     "crates/app/signing-traits",
     "crates/app/key-derivation-traits",
 
@@ -43,6 +43,7 @@ members = [
     "crates/factors/factors",
     "crates/factors/instances-provider",
     "crates/factors/keys-collector",
+    "crates/factors/signatures-collector",
     "crates/factors/next-derivation-index-ephemeral",
     "crates/factors/supporting-types",
 
@@ -89,6 +90,9 @@ members = [
     "crates/transaction/manifests",
     "crates/transaction/models",
 
+    # === RNS ===
+    "crates/radix-name-service",
+
     # === UNIFFI ===
     "crates/uniffi/uniffi_SPLIT_ME",
     "crates/uniffi/conversion-macros",
@@ -97,10 +101,10 @@ members = [
 default-members = [
     # === FOR APP ===
     "crates/app/home-cards",
+    "crates/app/discover",
     "crates/app/radix-connect",
     "crates/app/radix-connect-models",
     "crates/app/security-center",
-    "crates/app/signing",
     "crates/app/signing-traits",
     "crates/app/key-derivation-traits",
 
@@ -137,6 +141,7 @@ default-members = [
     "crates/factors/factors",
     "crates/factors/instances-provider",
     "crates/factors/keys-collector",
+    "crates/factors/signatures-collector",
     "crates/factors/next-derivation-index-ephemeral",
     "crates/factors/supporting-types",
 
@@ -182,6 +187,9 @@ default-members = [
     "crates/transaction/manifests",
     "crates/transaction/models",
 
+    # === RNS ===
+    "crates/radix-name-service",
+
     # === UNIFFI ===
     # Uniffi is omitted for maximum compilation speed
     # you can `cargo check --workspace` to check it.
@@ -206,10 +214,10 @@ debug = true
 
 # === FOR APP ===
 home-cards = { path = "crates/app/home-cards" }
+discover = { path = "crates/app/discover" }
 radix-connect = { path = "crates/app/radix-connect" }
 radix-connect-models = { path = "crates/app/radix-connect-models" }
 security-center = { path = "crates/app/security-center" }
-signing = { path = "crates/app/signing" }
 signing-traits = { path = "crates/app/signing-traits" }
 key-derivation-traits = { path = "crates/app/key-derivation-traits" }
 
@@ -246,6 +254,7 @@ hierarchical-deterministic = { path = "crates/crypto/hd" }
 factors = { path = "crates/factors/factors" }
 factor-instances-provider = { path = "crates/factors/instances-provider" }
 keys-collector = { path = "crates/factors/keys-collector" }
+signatures-collector = { path = "crates/factors/signatures-collector" }
 next-derivation-index-ephemeral = { path = "crates/factors/next-derivation-index-ephemeral" }
 factors-supporting-types = { path = "crates/factors/supporting-types" }
 
@@ -292,26 +301,29 @@ transaction-foundation = { path = "crates/transaction/foundation" }
 manifests = { path = "crates/transaction/manifests" }
 transaction-models = { path = "crates/transaction/models" }
 
+# === RNS ===
+radix-name-service = { path = "crates/radix-name-service"}
+
 # === UNIFFI ===
 sargon-uniffi = { path = "crates/uniffi/uniffi_SPLIT_ME" }
 sargon-uniffi-conversion-macros = { path = "crates/uniffi/conversion-macros" }
 
 
 # ==== RADIX DEPENDENCIES ====
-radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
+radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
     "serde",
     "secp256k1_sign_and_validate",
 ] }
-radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "2ab5b35a6cb96c9faeb98ed8df67b870336e6873" }
-radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0", features = [
+radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "279c050a25543a0394fffe7818573a2d1d2d3acf" }
+radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
     "serde",
 ] }
-radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
-sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", tag = "v1.3.0" }
+radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 
 
 # ==== EXTERNAL DEPENDENCIES ====
@@ -373,6 +385,7 @@ iso8601-timestamp = { version = "0.2.16", default-features = false, features = [
 ] }
 
 itertools = { version = "0.12.0", default-features = true }
+either = { version = "1.13.0", default-features = false }
 k256 = { version = "=0.13.3", default-features = false }
 log = { version = "0.4.20", default-features = false }
 once_cell = { version = "1.19.0", default-features = false }

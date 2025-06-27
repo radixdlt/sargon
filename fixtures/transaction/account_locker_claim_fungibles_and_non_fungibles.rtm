@@ -1,9 +1,4 @@
 CALL_METHOD
-    Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")
-    "lock_fee"
-    Decimal("0.595383053951")
-;
-CALL_METHOD
     Address("locker_tdx_2_1dr6v4fwufgacxqwxsm44ysglhdv7yyxgvq6xazcwzvu35937wzsjnx")
     "claim"
     Address("account_tdx_2_12x2lmewv5lfen4x96aurw7a5z5ukdzyyc0fkytamqgml77lah44kkp")

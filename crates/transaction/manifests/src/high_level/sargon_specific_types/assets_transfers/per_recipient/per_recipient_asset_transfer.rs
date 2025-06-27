@@ -2,14 +2,14 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct PerRecipientAssetTransfer {
-    pub recipient: AccountOrAddressOf,
+    pub recipient: TransferRecipient,
     pub fungibles: Vec<PerRecipientFungibleTransfer>,
     pub non_fungibles: Vec<PerRecipientNonFungibleTransfer>,
 }
 
 impl PerRecipientAssetTransfer {
     pub fn new(
-        recipient: impl Into<AccountOrAddressOf>,
+        recipient: impl Into<TransferRecipient>,
         fungibles: impl IntoIterator<Item = PerRecipientFungibleTransfer>,
         non_fungibles: impl IntoIterator<Item = PerRecipientNonFungibleTransfer>,
     ) -> Self {
@@ -25,7 +25,7 @@ impl PerRecipientAssetTransfer {
 impl PerRecipientAssetTransfer {
     pub(crate) fn sample_mainnet() -> Self {
         Self::new(
-            AccountOrAddressOf::sample_mainnet(),
+            TransferRecipient::sample_mainnet(),
             [
                 PerRecipientFungibleTransfer::sample_mainnet(),
                 PerRecipientFungibleTransfer::sample_mainnet_other(),
@@ -39,7 +39,7 @@ impl PerRecipientAssetTransfer {
 
     pub(crate) fn sample_mainnet_other() -> Self {
         Self::new(
-            AccountOrAddressOf::sample_mainnet_other(),
+            TransferRecipient::sample_mainnet_other(),
             [PerRecipientFungibleTransfer::sample_mainnet_other()],
             [PerRecipientNonFungibleTransfer::sample_mainnet_other()],
         )
@@ -47,7 +47,7 @@ impl PerRecipientAssetTransfer {
 
     pub(crate) fn sample_stokenet() -> Self {
         Self::new(
-            AccountOrAddressOf::sample_stokenet(),
+            TransferRecipient::sample_stokenet(),
             [
                 PerRecipientFungibleTransfer::sample_stokenet(),
                 PerRecipientFungibleTransfer::sample_stokenet_other(),
@@ -61,7 +61,7 @@ impl PerRecipientAssetTransfer {
 
     pub(crate) fn sample_stokenet_other() -> Self {
         Self::new(
-            AccountOrAddressOf::sample_stokenet_other(),
+            TransferRecipient::sample_stokenet_other(),
             [PerRecipientFungibleTransfer::sample_stokenet_other()],
             [PerRecipientNonFungibleTransfer::sample_stokenet_other()],
         )

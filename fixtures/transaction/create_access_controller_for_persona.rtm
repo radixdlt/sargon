@@ -7,6 +7,25 @@ TAKE_FROM_WORKTOP
     Decimal("1")
     Bucket("bucket1")
 ;
+CREATE_PROOF_FROM_BUCKET_OF_ALL
+    Bucket("bucket1")
+    Proof("proof1")
+;
+PUSH_TO_AUTH_ZONE
+    Proof("proof1")
+;
+SET_METADATA
+    Address("identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw")
+    "owner_keys"
+    Enum<143u8>(
+        Array<Enum>(
+            Enum<1u8>(
+                Bytes("675506ad8d7ce4c602cb06c593c0f10e1cc4dcdf2c4144360ef33ebeef")
+            )
+        )
+    )
+;
+DROP_AUTH_ZONE_PROOFS;
 ALLOCATE_GLOBAL_ADDRESS
     Address("package_rdx1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxcntrlr")
     "AccessController"
@@ -85,16 +104,5 @@ CREATE_ACCESS_CONTROLLER
     )
     Enum<1u8>(
         AddressReservation("reservation1")
-    )
-;
-SET_METADATA
-    Address("identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw")
-    "owner_keys"
-    Enum<143u8>(
-        Array<Enum>(
-            Enum<1u8>(
-                Bytes("675506ad8d7ce4c602cb06c593c0f10e1cc4dcdf2c4144360ef33ebeef")
-            )
-        )
     )
 ;

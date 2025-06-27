@@ -26,6 +26,34 @@ impl From<WalletToDappInteractionPersonaProof>
     }
 }
 
+impl From<(AddressOfAccountOrPersona, SignatureWithPublicKey)>
+    for WalletToDappInteractionProofOfOwnership
+{
+    fn from(
+        value: (AddressOfAccountOrPersona, SignatureWithPublicKey),
+    ) -> Self {
+        let (owner, signature_with_public_key) = value;
+        match owner {
+            AddressOfAccountOrPersona::Account(account_address) => {
+                WalletToDappInteractionProofOfOwnership::Account(
+                    WalletToDappInteractionAccountProof::new(
+                        account_address,
+                        signature_with_public_key.into(),
+                    ),
+                )
+            }
+            AddressOfAccountOrPersona::Identity(identity_address) => {
+                WalletToDappInteractionProofOfOwnership::Persona(
+                    WalletToDappInteractionPersonaProof::new(
+                        identity_address,
+                        signature_with_public_key.into(),
+                    ),
+                )
+            }
+        }
+    }
+}
+
 impl HasSampleValues for WalletToDappInteractionProofOfOwnership {
     fn sample() -> Self {
         Self::Account(WalletToDappInteractionAccountProof::sample())
@@ -68,6 +96,42 @@ mod tests {
             SUT::sample_other(),
             WalletToDappInteractionPersonaProof::sample().into()
         )
+    }
+
+    #[test]
+    fn from_account_address_and_signature() {
+        let signature_with_public_key = SignatureWithPublicKey::sample();
+        let account_address = AccountAddress::sample();
+        let result =
+            SUT::from((account_address.into(), signature_with_public_key));
+        match result {
+            SUT::Account(account_proof) => {
+                assert_eq!(account_proof.account_address, account_address);
+                assert_eq!(
+                    account_proof.proof,
+                    signature_with_public_key.into()
+                );
+            }
+            _ => panic!("Expected Account proof"),
+        }
+    }
+
+    #[test]
+    fn from_persona_address_and_signature() {
+        let signature_with_public_key = SignatureWithPublicKey::sample();
+        let identity_address = IdentityAddress::sample();
+        let result =
+            SUT::from((identity_address.into(), signature_with_public_key));
+        match result {
+            SUT::Persona(persona_proof) => {
+                assert_eq!(persona_proof.identity_address, identity_address);
+                assert_eq!(
+                    persona_proof.proof,
+                    signature_with_public_key.into()
+                );
+            }
+            _ => panic!("Expected Persona proof"),
+        }
     }
 
     #[test]

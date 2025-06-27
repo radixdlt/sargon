@@ -34,9 +34,8 @@ impl TransactionManifest {
 
 impl StaticallyAnalyzableManifest for TransactionManifest {
     fn summary(&self, network_id: NetworkID) -> Result<ManifestSummary> {
-        let summary =
-            RET_statically_analyze_and_validate(&self.scrypto_manifest())
-                .map_err(map_static_analysis_error)?;
+        let summary = RET_statically_analyze_v1(&self.scrypto_manifest())
+            .map_err(map_static_analysis_error)?;
         Ok(ManifestSummary::from((summary, network_id)))
     }
 }
@@ -106,6 +105,15 @@ pub fn manifest_string_from(
     })
 }
 
+impl UnvalidatedTransactionManifest {
+    pub fn manifest(
+        &self,
+        network_id: NetworkID,
+    ) -> Result<TransactionManifest> {
+        (self.clone(), network_id).try_into()
+    }
+}
+
 impl TryFrom<(UnvalidatedTransactionManifest, NetworkID)>
     for TransactionManifest
 {
@@ -164,7 +172,7 @@ impl TransactionManifest {
         addresses
             .into_iter()
             .filter_map(|a| {
-                ResourceAddress::new(*a.as_node_id(), self.network_id()).ok()
+                ResourceAddress::new_from_node_id(a, self.network_id()).ok()
             })
             .collect_vec()
     }
@@ -174,7 +182,7 @@ impl TransactionManifest {
         addresses
             .into_iter()
             .filter_map(|a| {
-                PoolAddress::new(*a.as_node_id(), self.network_id()).ok()
+                PoolAddress::new_from_node_id(a, self.network_id()).ok()
             })
             .collect_vec()
     }
@@ -357,40 +365,6 @@ DROP_AUTH_ZONE_PROOFS;
                 underlying: "FormattingError(Error)".to_string(),
             })
         )
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "Account withdraw output should not have unspecified resources"
-    )] // https://github.com/radixdlt/radixdlt-scrypto/blob/develop/radix-transactions/src/manifest/static_resource_movements/types.rs#L1386
-    fn non_sensical_manifest_panics() {
-        // We are passing in an account address instead of resource address as argument
-        // to "withdraw", which does not make any sense.
-        let non_sensical = r#"
-CALL_METHOD
-  Address("account_tdx_2_1c90qdw5e3t3tjyd8axt3zg9zezhhhymt2mr8y4l0k2285mfwhczhdt")
-  "withdraw"
-  Address("account_tdx_2_12y0errvzu4caktegxc5v0ug93u5yat9d90k4zdqkcy6n55pt7wlgmq")
-  Decimal("0.01")
-;
-TAKE_FROM_WORKTOP
-  Address("resource_tdx_2_1thqru9whuem5sjltshg4q7vj3e22xfh27u6s9xvwecz4fallqjny90")
-  Decimal("0.01")
-  Bucket("burn")
-;
-
-BURN_RESOURCE
-  Bucket("burn")
-;
-        "#;
-
-        let manifest = TransactionManifest::new(
-            non_sensical,
-            NetworkID::Stokenet,
-            Blobs::default(),
-        )
-        .unwrap();
-        let _ = manifest.summary();
     }
 
     #[test]

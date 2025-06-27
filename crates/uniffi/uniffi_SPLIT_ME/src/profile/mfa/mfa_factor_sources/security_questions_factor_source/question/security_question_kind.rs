@@ -1,7 +1,1 @@
-use crate::prelude::*;
-use sargon::SecurityQuestionKind as InternalSecurityQuestionKind;
-
-#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
-pub enum SecurityQuestionKind {
-    Freeform,
-}
+// Disabled in https://github.com/radixdlt/sargon/pull/361 migrate over once production ready in sargon

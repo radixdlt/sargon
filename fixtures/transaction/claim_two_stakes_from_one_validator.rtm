@@ -1,10 +1,5 @@
 CALL_METHOD
     Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
-    "lock_fee"
-    Decimal("0.571994908619")
-;
-CALL_METHOD
-    Address("account_tdx_2_129uv9r46an4hwng8wc97qwpraspvnrc7v2farne4lr6ff7yaevaz2a")
     "withdraw_non_fungibles"
     Address("resource_tdx_2_1ng3g2nj5pfpmdphgz0nrh8z0gtqcxx5z5dn48t85ar0z0zjhefufaw")
     Array<NonFungibleLocalId>(

@@ -21,8 +21,4 @@ pub enum HomeCard {
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
     /// Action: None
     Connector,
-
-    /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
-    /// Action: Redirect user to Radix Ecosystem.
-    DiscoverRadixDapps,
 }

@@ -22,6 +22,7 @@ pub mod prelude {
     pub use crate::veci::*;
 
     pub use hierarchical_deterministic::prelude::*;
+    pub use prelude::prelude::*;
     pub use profile::prelude::*;
 
     pub(crate) use enum_as_inner::EnumAsInner;

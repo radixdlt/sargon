@@ -9,9 +9,19 @@ pub struct AbstractUnsecurifiedEntity<
     E::Address: Into<AddressOfAccountOrPersona>,
 {
     pub entity: E,
-    unsecured_entity_control: UnsecuredEntityControl,
+    pub unsecured_entity_control: UnsecuredEntityControl,
     veci: VirtualEntityCreatingInstance,
     pub provisional_securified_config: Option<ProvisionalSecurifiedConfig>,
+}
+
+impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> HasEntityAddress
+    for AbstractUnsecurifiedEntity<E>
+where
+    E::Address: Into<AddressOfAccountOrPersona>,
+{
+    fn address_erased(&self) -> AddressOfAccountOrPersona {
+        self.entity.address_erased()
+    }
 }
 
 impl<E: IsBaseEntity + std::hash::Hash + Eq + Clone> Identifiable
@@ -48,12 +58,12 @@ where
 
     /// # Throws
     /// Throws if the entity is securified
-    pub fn new(entity: E) -> Result<Self> {
+    pub fn new<T: HasSecurityState + Into<E>>(entity: T) -> Result<Self> {
         match entity.security_state() {
             EntitySecurityState::Unsecured {
                 value: unsecured_entity_control,
             } => Ok(Self::with_unsecured_entity_control(
-                entity,
+                entity.into(),
                 unsecured_entity_control,
             )),
             EntitySecurityState::Securified { .. } => {
@@ -78,7 +88,34 @@ where
 pub type AnyUnsecurifiedEntity = AbstractUnsecurifiedEntity<AccountOrPersona>;
 
 pub type UnsecurifiedAccount = AbstractUnsecurifiedEntity<Account>;
+
+impl HasSampleValues for UnsecurifiedAccount {
+    fn sample() -> Self {
+        Self::new(Account::sample()).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(Account::sample_other()).unwrap()
+    }
+}
+
+impl From<UnsecurifiedAccount> for Account {
+    fn from(value: UnsecurifiedAccount) -> Self {
+        value.entity
+    }
+}
+
 pub type UnsecurifiedPersona = AbstractUnsecurifiedEntity<Persona>;
+
+impl HasSampleValues for UnsecurifiedPersona {
+    fn sample() -> Self {
+        Self::new(Persona::sample()).unwrap()
+    }
+
+    fn sample_other() -> Self {
+        Self::new(Persona::sample_other()).unwrap()
+    }
+}
 
 impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedAccount {
     type Error = CommonError;
@@ -94,6 +131,23 @@ impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedAccount {
         }
     }
 }
+
+impl TryFrom<Account> for UnsecurifiedAccount {
+    type Error = CommonError;
+
+    fn try_from(value: Account) -> Result<Self> {
+        Self::new(value)
+    }
+}
+
+impl TryFrom<Persona> for UnsecurifiedPersona {
+    type Error = CommonError;
+
+    fn try_from(value: Persona) -> Result<Self> {
+        Self::new(value)
+    }
+}
+
 impl From<UnsecurifiedAccount> for AnyUnsecurifiedEntity {
     fn from(value: UnsecurifiedAccount) -> Self {
         Self::with_unsecured_entity_control(
@@ -129,11 +183,11 @@ impl TryFrom<AnyUnsecurifiedEntity> for UnsecurifiedPersona {
 
 impl HasSampleValues for AnyUnsecurifiedEntity {
     fn sample() -> Self {
-        Self::new(Account::sample().into()).unwrap()
+        Self::new(Account::sample()).unwrap()
     }
 
     fn sample_other() -> Self {
-        Self::new(Account::sample_other().into()).unwrap()
+        Self::new(Account::sample_other()).unwrap()
     }
 }
 
@@ -158,5 +212,21 @@ mod tests {
     #[test]
     fn network_id() {
         assert_eq!(SUT::sample_other().network_id(), NetworkID::Mainnet);
+    }
+
+    #[test]
+    fn erased_address() {
+        let entity = SUT::sample();
+        assert_eq!(entity.address_erased(), entity.address());
+    }
+
+    #[test]
+    fn from_sut_for_account() {
+        let entity = SecurifiedAccount::sample();
+        let account = Account::from(entity.clone());
+        assert_eq!(
+            AddressOfAccountOrPersona::from(account.address()),
+            entity.address()
+        );
     }
 }

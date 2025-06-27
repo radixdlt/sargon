@@ -18,7 +18,7 @@ pub const MAX_TRANSFERS_PER_TRANSACTION: u64 = 50;
 pub const GATEWAY_CHUNK_NON_FUNGIBLES: u64 = 100;
 
 /// Max amount of addresses to be queried in one request to `/state/entity/details/`.
-pub const GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES: u64 = 20;
+pub const GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES: usize = 20;
 
 /// Minimum XRD balance required for a fee payer to execute an account deletion transaction.
 /// Includes a safety margin above the estimated 3 XRD fee for maximum resource transfer.

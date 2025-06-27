@@ -6,7 +6,7 @@ macro_rules! decl_specialized_address {
             #[doc = $expr: expr]
         )*
         $specialized_address_type: ident,
-        $base_addr: ty,
+        $base_addr: ident,
         $validate: ident,
         $validation_err: ident
     ) => {
@@ -44,19 +44,36 @@ macro_rules! decl_specialized_address {
                 /// Returns a new address, with the same node_id, but using `network_id` as
                 /// network.
                 pub fn map_to_network(&self, network_id: NetworkID) -> Self {
-                    <Self as AddressViaRet>::new(self.node_id(), network_id).expect("Should always be able to map an address to a different network.")
+                    self.0.map_to_network(network_id).try_into().expect("Should always be able to map an address to a different network.")
                 }
 
                 pub fn new_from_bech32(bech32: String) -> Result<Self> {
                     $base_addr::try_from_bech32(&bech32).and_then(TryInto::try_into)
                 }
 
-                pub fn network_id(&self) -> NetworkID {
-                    self.0.network_id()
-                }
-
                 pub fn bech32_address(&self) -> String {
                     self.0.to_string()
+                }
+            }
+
+            impl AddressFromNodeId for $specialized_address_type {
+                fn new_from_node_id(
+                    node_id: impl Into<ScryptoNodeId>,
+                    network_id: NetworkID
+                ) -> Result<Self> {
+                    $base_addr::new_from_node_id(node_id, network_id).and_then(Self::new)
+                }
+            }
+
+            impl IsNetworkAware for $specialized_address_type {
+                fn network_id(&self) -> NetworkID {
+                    self.0.network_id()
+                }
+            }
+
+            impl HasNodeId for $specialized_address_type {
+                fn node_id(&self) -> ScryptoNodeId {
+                    self.0.node_id()
                 }
             }
 
@@ -87,15 +104,6 @@ macro_rules! decl_specialized_address {
                 /// TEST ONLY
                 fn from(value: &str) -> Self {
                     value.parse().expect(&format!("Test failed since the passed in str is not a valid address: '{}'", value))
-                }
-            }
-
-            impl AddressViaRet for $specialized_address_type {
-                fn new(
-                    node_id: impl Into<ScryptoNodeId>,
-                    network_id: NetworkID,
-                ) -> Result<Self, CommonError> {
-                    <$base_addr as AddressViaRet>::new(node_id, network_id).and_then(Self::new)
                 }
             }
         }
@@ -141,10 +149,7 @@ impl NonFungibleResourceAddress {
             entity_byte,
             &generate_byte_array::<{ ScryptoNodeId::RID_LENGTH }>(),
         );
-        let ret_address =
-            RetResourceAddress::new(node_id, network_id.discriminant())
-                .unwrap();
-        Self::from_str(&ret_address.to_string()).unwrap()
+        Self::new_from_node_id(node_id, network_id).unwrap()
     }
 
     pub fn sample_mainnet() -> Self {

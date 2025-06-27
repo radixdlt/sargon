@@ -18,7 +18,7 @@ pub trait IsBaseEntityAddress:
 pub trait IsEntityAddress:
     IsBaseEntityAddress
     + HasEntityKind
-    + AddressViaRet
+    + AddressFromNodeId
     + std::hash::Hash
     + std::cmp::Eq
 {
@@ -35,7 +35,7 @@ pub trait IsEntityAddress:
 
         let node_id = component.into_node_id();
 
-        Self::new(node_id, network_id).expect("To always be able to create a address from public key and network id.")
+        Self::new_from_node_id(node_id, network_id).expect("To always be able to create a address from public key and network id.")
     }
 
     fn from_hd_factor_instance_virtual_entity_creation<E: IsEntityPath>(

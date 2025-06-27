@@ -16,7 +16,6 @@ class NonFungibleResourceIndicatorTest: SampleTestable<NonFungibleResourceIndica
         assertEquals(
             listOf(
                 NonFungibleLocalId.init("{deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead-deaddeaddeaddead}"),
-                NonFungibleLocalId.init("<foobar>")
             ),
             NonFungibleResourceIndicator.sample().ids
         )

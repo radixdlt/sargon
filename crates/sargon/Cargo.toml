@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.1.120"
+version = "1.2.20"
 edition = "2021"
 
 resolver = "2" # features enabled in integration test
@@ -34,19 +34,21 @@ gateway-models = { workspace = true }
 clients = { workspace = true }
 drivers = { workspace = true }
 home-cards = { workspace = true }
+discover = { workspace = true }
+radix-name-service = { workspace = true }
 security-center = { workspace = true }
 radix-connect = { workspace = true }
 radix-connect-models = { workspace = true }
-signing = { workspace = true }
+signatures-collector = { workspace = true }
 network = { workspace = true }
 next-derivation-index-ephemeral = { workspace = true }
 sub-systems = { workspace = true }
 interactors = { workspace = true }
 key-derivation-traits = { workspace = true }
 signing-traits = { workspace = true }
-sargon-os = { path = "../system/os/os" }
+sargon-os = { workspace = true }
 sargon-os-arculus-card = { workspace = true }
-sargon-os-transaction = { path = "../system/os/transaction" }
+sargon-os-transaction = { workspace = true }
 sargon-os-accounts = { workspace = true }
 sargon-os-derive-public-keys = { workspace = true }
 sargon-os-factors = { workspace = true }

@@ -21,6 +21,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -151,6 +152,7 @@ class AndroidStorageDriverDeviceFactorSourceMnemonicTest {
         assertNull(
             sut.loadData(SecureStorageKey.DeviceFactorSourceMnemonic(id))
         )
+        assertFalse(sut.containsDataForKey(SecureStorageKey.DeviceFactorSourceMnemonic(id)))
     }
 
 

@@ -24,8 +24,10 @@ fn with_android_bug_with_shared_pubkey_between_account_and_persona() -> Profile
     let account =
         Account::new(veci, DisplayName::sample(), AppearanceID::sample());
     let mut persona = Persona::sample();
-    persona.address =
-        IdentityAddress::new(public_key.into(), NetworkID::Mainnet);
+    persona.address = IdentityAddress::new_from_public_key(
+        public_key.into(),
+        NetworkID::Mainnet,
+    );
     persona.security_state = EntitySecurityState::Unsecured {
         value: UnsecuredEntityControl::new(hd_fi, None).unwrap(),
     };
@@ -130,8 +132,10 @@ fn with_instance_collision_both_personas() -> Profile {
         HierarchicalDeterministicPublicKey::new(public_key.into(), path.into()),
     );
     let mut persona1 = Persona::sample();
-    persona1.address =
-        IdentityAddress::new(public_key.into(), NetworkID::Mainnet);
+    persona1.address = IdentityAddress::new_from_public_key(
+        public_key.into(),
+        NetworkID::Mainnet,
+    );
     persona1.security_state = EntitySecurityState::Unsecured {
         value: UnsecuredEntityControl::new(hd_fi.clone(), None).unwrap(),
     };

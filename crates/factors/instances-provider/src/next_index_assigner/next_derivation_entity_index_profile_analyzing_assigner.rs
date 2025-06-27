@@ -483,7 +483,7 @@ mod tests {
                 ConfirmationRoleWithFactorInstances::override_only(
                     [fi.clone()],
                 ),
-                10,
+                TimePeriod::with_days(10),
             )
         };
 
@@ -539,7 +539,7 @@ mod tests {
                 ConfirmationRoleWithFactorInstances::override_only(
                     [fi.clone()],
                 ),
-                10,
+                TimePeriod::with_days(10),
             )
         };
 
@@ -675,7 +675,7 @@ mod tests {
                 ConfirmationRoleWithFactorInstances::override_only(
                     factors.clone(),
                 ),
-                123,
+                TimePeriod::with_days(123),
             )
         };
 

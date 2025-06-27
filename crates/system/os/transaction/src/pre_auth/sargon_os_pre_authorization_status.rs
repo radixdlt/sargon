@@ -55,9 +55,7 @@ impl OSPollPreAuthorizationStatusWithDelays for SargonOS {
         intent_hash: SubintentHash,
         seconds_until_expiration: u64,
     ) -> Result<(PreAuthorizationStatus, Vec<u64>)> {
-        let network_id = self.current_network_id()?;
-        let gateway_client =
-            GatewayClient::new(self.http_client.driver.clone(), network_id);
+        let gateway_client = self.gateway_client()?;
 
         // We are going to play safe and leave an extra second to make sure we check the status one second after it has theoretically expired.
         // This is to avoid considering expired a subintent that got committed in the last instant.

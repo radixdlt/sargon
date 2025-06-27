@@ -20,7 +20,7 @@ pub enum DetailedManifestClass {
         /// regard this as a "simple transfer" and communicate this information
         /// to the ledger hardware wallet. Otherwise, if `false`, then this is
         /// not a one-to-one transfer.
-        is_one_to_one: bool,
+        is_one_to_one_transfer: bool,
     },
 
     /// A manifest where XRD is claimed from one or more validators.
@@ -92,6 +92,17 @@ pub enum DetailedManifestClass {
     DeleteAccounts {
         /// The addresses of the accounts that are being deleted
         account_addresses: Vec<AccountAddress>,
+    },
+
+    /// A manifest that is presented when a provisional security structure is applied
+    /// to an entity
+    SecurifyEntity {
+        /// The entity address that is about to be securified
+        entity_address: AddressOfAccountOrPersona,
+
+        /// The provisional security structure metadata that is about to be applied
+        /// into the entity address
+        provisional_security_structure_metadata: SecurityStructureMetadata,
     },
 }
 

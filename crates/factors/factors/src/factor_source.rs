@@ -1,6 +1,7 @@
-use std::cmp::Ordering;
-
 use crate::prelude::*;
+use host_info::prelude::HostInfo;
+use short_string::prelude::DisplayName;
+use std::cmp::Ordering;
 
 #[allow(clippy::large_enum_variant)]
 #[derive(
@@ -151,6 +152,63 @@ impl FactorSource {
             dfs.is_main_bdfs()
         } else {
             false
+        }
+    }
+}
+
+impl FactorSource {
+    pub fn with_mwp(
+        factor_source_kind: FactorSourceKind,
+        mnemonic_with_passphrase: MnemonicWithPassphrase,
+        name: String,
+        host_info: HostInfo,
+    ) -> Result<Self> {
+        let display_name = DisplayName::new(name)?;
+        let id_from_hash =
+            FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+                factor_source_kind,
+                &mnemonic_with_passphrase,
+            );
+
+        match factor_source_kind {
+            FactorSourceKind::Device => {
+                let is_main = false;
+                let hint = DeviceFactorSourceHint::with_info_and_label(
+                    &host_info,
+                    mnemonic_with_passphrase.mnemonic.word_count,
+                    display_name.value(),
+                );
+                Ok(FactorSource::from(DeviceFactorSource::babylon_with_hint(
+                    is_main,
+                    id_from_hash,
+                    hint,
+                )))
+            }
+            FactorSourceKind::OffDeviceMnemonic => {
+                let hint = OffDeviceMnemonicHint::new(
+                    display_name,
+                    mnemonic_with_passphrase.mnemonic.word_count,
+                );
+                Ok(FactorSource::from(OffDeviceMnemonicFactorSource::new(
+                    id_from_hash,
+                    hint,
+                )))
+            }
+            FactorSourceKind::Password => {
+                let hint = PasswordFactorSourceHint::new(display_name.value());
+                Ok(FactorSource::from(PasswordFactorSource::new(
+                    id_from_hash,
+                    hint,
+                )))
+            }
+            FactorSourceKind::LedgerHQHardwareWallet
+            | FactorSourceKind::ArculusCard
+            | FactorSourceKind::SecurityQuestions
+            | FactorSourceKind::TrustedContact => {
+                Err(CommonError::InvalidFactorSourceKind {
+                    bad_value: factor_source_kind.to_string(),
+                })
+            }
         }
     }
 }

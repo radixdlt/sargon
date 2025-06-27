@@ -2,7 +2,6 @@ use crate::prelude::*;
 
 /// A `HttpClient` needs a "network antenna" to be able to execute the
 /// network requests - which is a trait that clients implement on the FFI side (iOS/Android).
-#[derive(Debug)]
 pub struct HttpClient {
     /// An object implementing the `NetworkingDriver` traits, which iOS/Android
     /// clients pass into the constructor of this GatewayClient, so that it can

@@ -171,7 +171,7 @@ impl SampleRequestParams {
     }
 
     pub fn new_from_text_vector() -> Self {
-        fixture::<SampleRequestParams>(prelude::fixture_vector!(
+        fixture::<SampleRequestParams>(prelude::fixture_interaction!(
             "deep_link_request_params"
         ))
         .unwrap()
@@ -468,10 +468,12 @@ mod tests {
         let invalid_dapp_definition_address_url = request.build_base_url();
         let result =
             parse_mobile_connect_request(invalid_dapp_definition_address_url);
-        assert!(matches!(
+        assert_eq!(
             result,
-            Err(CommonError::FailedToDecodeAddressFromBech32 { .. })
-        ));
+            Err(CommonError::FailedToFindNetworkIdFromBech32mString {
+                bech32m_encoded_address: "invalid".to_string()
+            })
+        );
     }
 
     #[test]

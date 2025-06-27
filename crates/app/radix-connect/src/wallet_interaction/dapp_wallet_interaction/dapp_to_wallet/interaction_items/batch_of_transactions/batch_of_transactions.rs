@@ -1,3 +1,5 @@
+use prelude::fixture_rtm;
+
 use crate::prelude::*;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
@@ -17,14 +19,33 @@ impl DappToWalletInteractionBatchOfTransactions {
 
 impl HasSampleValues for DappToWalletInteractionBatchOfTransactions {
     fn sample() -> Self {
-        Self::new([
-            UnvalidatedTransactionManifest::sample(),
-            UnvalidatedTransactionManifest::sample_other(),
-        ])
+        let init_p_conf_r = TransactionManifest::new(
+            fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_P"),
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+        let unsecurified = TransactionManifest::new(
+            fixture_rtm!("create_access_controller_for_account"),
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+        Self::new(
+            [init_p_conf_r, unsecurified]
+                .map(UnvalidatedTransactionManifest::from),
+        )
     }
 
     fn sample_other() -> Self {
-        Self::new([UnvalidatedTransactionManifest::sample_other()])
+        let init_p_conf_c = TransactionManifest::new(
+            fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_P"),
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+
+        Self::new([init_p_conf_c].map(UnvalidatedTransactionManifest::from))
     }
 }
 

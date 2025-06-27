@@ -275,11 +275,9 @@ impl SecurityShieldBuilder {
         })
     }
 
-    pub fn get_time_period_until_auto_confirm(&self) -> TimePeriod {
+    pub fn get_time_until_timed_confirmation_is_callable(&self) -> TimePeriod {
         self.get(|builder| {
-            TimePeriod::with_days(
-                builder.get_number_of_days_until_auto_confirm(),
-            )
+            builder.get_time_until_delayed_confirmation_is_callable()
         })
     }
 
@@ -433,12 +431,14 @@ impl SecurityShieldBuilder {
         self.set(|builder| builder.set_threshold(threshold))
     }
 
-    pub fn set_time_period_until_auto_confirm(
+    pub fn set_time_until_delayed_confirmation_is_callable(
         &self,
         time_period: TimePeriod,
     ) -> &Self {
         self.set(|builder| {
-            builder.set_number_of_days_until_auto_confirm(time_period.days())
+            builder.set_time_until_delayed_confirmation_is_callable(
+                time_period.days(),
+            )
         })
     }
 
@@ -870,6 +870,7 @@ impl SecurityShieldBuilder {
             display_name,
             self.created_on,
             self.created_on,
+            SecurityStructureFlags::new(),
         );
 
         let shield = SecurityStructureOfFactorSourceIds {
@@ -999,15 +1000,17 @@ mod tests {
     }
 
     #[test]
-    fn test_get_time_period_until_auto_confirm() {
+    fn test_get_time_until_timed_confirmation_is_callable() {
         let sut = SUT::strict();
         assert_eq!(
-            sut.get_time_period_until_auto_confirm(),
+            sut.get_time_until_timed_confirmation_is_callable(),
             TimePeriod::with_days(14)
         );
-        sut.set_time_period_until_auto_confirm(TimePeriod::with_days(42));
+        sut.set_time_until_delayed_confirmation_is_callable(
+            TimePeriod::with_days(42),
+        );
         assert_eq!(
-            sut.get_time_period_until_auto_confirm(),
+            sut.get_time_until_timed_confirmation_is_callable(),
             TimePeriod::with_days(42)
         );
     }
@@ -1041,7 +1044,9 @@ mod tests {
                 FactorSourceID::sample_device(),
             ))
             // Primary
-            .set_time_period_until_auto_confirm(TimePeriod::with_days(42))
+            .set_time_until_delayed_confirmation_is_callable(
+                TimePeriod::with_days(42),
+            )
             .add_factor_source_to_primary_threshold(
                 FactorSourceID::sample_device(),
             )
@@ -1585,12 +1590,14 @@ mod test_invalid {
     }
 
     #[test]
-    fn number_of_auto_confirm_days_invalid() {
+    fn time_until_delayed_confirmation_is_callable_invalid() {
         let sut = valid();
-        sut.set_time_period_until_auto_confirm(TimePeriod::with_days(0));
+        sut.set_time_until_delayed_confirmation_is_callable(
+            TimePeriod::with_days(0),
+        );
         assert_eq!(
             sut.validate().unwrap(),
-            SecurityShieldBuilderRuleViolation::NumberOfDaysUntilAutoConfirmMustBeGreaterThanZero
+            SecurityShieldBuilderRuleViolation::NumberOfDaysUntilTimeBasedConfirmationMustBeGreaterThanZero
         );
     }
 

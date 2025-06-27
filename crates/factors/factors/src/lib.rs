@@ -10,6 +10,7 @@ mod factor_source_flag;
 mod factor_source_id;
 mod factor_source_id_from_address;
 mod factor_source_id_from_hash;
+mod factor_source_id_spot_check;
 mod factor_source_kind;
 mod factor_sources;
 mod factor_sources_of_kind;
@@ -43,6 +44,7 @@ pub mod prelude {
     pub use crate::factor_source_id::*;
     pub use crate::factor_source_id_from_address::*;
     pub use crate::factor_source_id_from_hash::*;
+    pub use crate::factor_source_id_spot_check::*;
     pub use crate::factor_source_kind::*;
     pub use crate::factor_sources::*;
     pub use crate::factor_sources_of_kind::*;

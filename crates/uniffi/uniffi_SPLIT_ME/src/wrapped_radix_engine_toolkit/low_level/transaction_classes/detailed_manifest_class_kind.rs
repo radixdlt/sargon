@@ -13,6 +13,7 @@ pub enum DetailedManifestClassKind {
     PoolContribution,
     PoolRedemption,
     DeleteAccounts,
+    SecurifyEntity,
 }
 
 delegate_display_debug_into!(

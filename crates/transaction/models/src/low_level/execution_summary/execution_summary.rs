@@ -1,6 +1,5 @@
-use radix_rust::prelude::IndexMap;
-
 use crate::prelude::*;
+use radix_rust::prelude::IndexMap;
 
 pub(crate) fn to_vec_network_aware<T, U>(
     values: impl IntoIterator<Item = T>,
@@ -27,6 +26,23 @@ where
     values
         .into_iter()
         .map(|(k, v)| (L::from((k, network_id)), U::from(v)))
+        .collect::<HashMap<L, U>>()
+}
+
+pub(crate) fn filter_try_to_hashmap_network_aware_key<K, V, L, U>(
+    values: impl IntoIterator<Item = (K, V)>,
+    network_id: NetworkID,
+) -> HashMap<L, U>
+where
+    L: Eq + std::hash::Hash + TryFrom<(K, NetworkID)>,
+    U: From<V>,
+{
+    values
+        .into_iter()
+        .filter_map(|(k, v)| {
+            let l = L::try_from((k, network_id)).ok()?;
+            Some((l, U::from(v)))
+        })
         .collect::<HashMap<L, U>>()
 }
 
@@ -70,16 +86,15 @@ pub struct ExecutionSummary {
     /// Information on the global entities created in the transaction.
     pub new_entities: NewEntities,
 
-    /// The various classifications that this manifest matched against. Note
-    /// that an empty set means that the manifest is non-conforming.
-    pub detailed_classification: Vec<DetailedManifestClass>,
+    /// The manifest classification if any. None means that the manifest is non-conforming.
+    pub detailed_classification: Option<DetailedManifestClass>,
 
     /// List of newly created Non-Fungibles during this transaction.
     pub newly_created_non_fungibles: Vec<NonFungibleGlobalId>,
 
     /// The set of instructions encountered in the manifest that are reserved
     /// and can only be included in the manifest by the wallet itself.
-    pub reserved_instructions: Vec<ReservedInstruction>,
+    pub reserved_instructions: IndexSet<ReservedInstruction>,
 
     /// The list of the resources of proofs that were presented in the manifest.
     pub presented_proofs: Vec<ResourceSpecifier>,
@@ -112,12 +127,12 @@ impl ExecutionSummary {
             Item = IdentityAddress,
         >,
         newly_created_non_fungibles: impl IntoIterator<Item = NonFungibleGlobalId>,
-        reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
+        reserved_instructions: impl Into<IndexSet<ReservedInstruction>>,
         presented_proofs: impl IntoIterator<Item = ResourceSpecifier>,
         encountered_addresses: impl IntoIterator<
             Item = ManifestEncounteredComponentAddress,
         >,
-        detailed_classification: impl IntoIterator<Item = DetailedManifestClass>,
+        detailed_classification: Option<DetailedManifestClass>,
         fee_locks: impl Into<FeeLocks>,
         fee_summary: impl Into<FeeSummary>,
         new_entities: impl Into<NewEntities>,
@@ -136,16 +151,12 @@ impl ExecutionSummary {
             newly_created_non_fungibles: newly_created_non_fungibles
                 .into_iter()
                 .collect_vec(),
-            reserved_instructions: reserved_instructions
-                .into_iter()
-                .collect_vec(),
+            reserved_instructions: reserved_instructions.into(),
             presented_proofs: presented_proofs.into_iter().collect_vec(),
             encountered_addresses: encountered_addresses
                 .into_iter()
                 .collect_vec(),
-            detailed_classification: detailed_classification
-                .into_iter()
-                .collect_vec(),
+            detailed_classification,
             fee_locks: fee_locks.into(),
             fee_summary: fee_summary.into(),
             new_entities: new_entities.into(),
@@ -156,7 +167,7 @@ impl ExecutionSummary {
 impl ExecutionSummary {
     pub fn classify_delete_accounts_if_present(&mut self) {
         // Only try to classify if RET analysis didn't yield any classification
-        if !self.detailed_classification.is_empty() {
+        if self.detailed_classification.is_some() {
             return;
         }
 
@@ -171,7 +182,7 @@ impl ExecutionSummary {
                     .filter_map(|resource| {
                         resource.get_non_fungible_indicator()
                     })
-                    .flat_map(|indicator| indicator.ids())
+                    .flat_map(|indicator| indicator.get_value())
                     // Find the account badge in the list of deposits
                     .any(|id| id.derives_account_address(*account_address))
                     .then_some(*account_address)
@@ -179,24 +190,75 @@ impl ExecutionSummary {
             .collect();
 
         if !deleted_accounts.is_empty() {
-            self.detailed_classification.push(
-                DetailedManifestClass::DeleteAccounts {
+            self.detailed_classification =
+                Some(DetailedManifestClass::DeleteAccounts {
                     account_addresses: deleted_accounts,
-                },
-            );
+                });
         }
+    }
+
+    /// Responsible for identifying if the summary can be classified as a securify summary.
+    pub fn classify_securify_entity_if_present<F>(
+        &mut self,
+        get_provisional_security_structure: F,
+    ) -> Result<()>
+    where
+        F: Fn(
+            AddressOfAccountOrPersona,
+        ) -> Result<SecurityStructureOfFactorSources>,
+    {
+        // Only try to classify if RET analysis didn't yield any classification
+        if self.detailed_classification.is_some() {
+            return Ok(());
+        }
+
+        /////// TEMPORARY solution until RET classifies it properly
+        let entity_address_to_securify = if self
+            .reserved_instructions
+            .contains(&ReservedInstruction::AccountSecurify)
+        {
+            self.addresses_of_accounts_requiring_auth
+                .first()
+                .map(|address| AddressOfAccountOrPersona::from(*address))
+        } else if self
+            .reserved_instructions
+            .contains(&ReservedInstruction::IdentitySecurify)
+        {
+            self.addresses_of_identities_requiring_auth
+                .first()
+                .map(|address| AddressOfAccountOrPersona::from(*address))
+        } else {
+            None
+        };
+        ///// END of temporary code
+
+        if let Some(address) = entity_address_to_securify {
+            let security_structure =
+                get_provisional_security_structure(address)?;
+
+            self.detailed_classification =
+                Some(DetailedManifestClass::SecurifyEntity {
+                    entity_address: address,
+                    provisional_security_structure_metadata: security_structure
+                        .metadata,
+                });
+        }
+
+        Ok(())
     }
 }
 
 fn addresses_of_accounts_from_ret(
-    ret: IndexMap<ScryptoComponentAddress, Vec<RetResourceIndicator>>,
+    ret: IndexMap<ScryptoGlobalAddress, Vec<RetInvocationIoItem>>,
     network_id: NetworkID,
 ) -> HashMap<AccountAddress, Vec<ResourceIndicator>> {
     ret.into_iter()
-        .map(|p| {
+        .filter(|(_, deposits)| !deposits.is_empty())
+        .map(|(address, invocation)| {
             (
-                AccountAddress::from((p.0, network_id)),
-                p.1.into_iter()
+                (address, network_id).into(),
+                invocation
+                    .into_iter()
                     .map(|i| (i, network_id))
                     .map(ResourceIndicator::from)
                     .collect_vec(),
@@ -209,30 +271,62 @@ impl From<(RetDynamicAnalysis, NetworkID)> for ExecutionSummary {
     fn from(value: (RetDynamicAnalysis, NetworkID)) -> Self {
         let (ret, n) = value;
 
-        let mut newly_created_non_fungibles =
-            to_vec_network_aware(ret.newly_created_non_fungibles, n);
+        let mut newly_created_non_fungibles = to_vec_network_aware(
+            ret.entities_newly_created_summary.new_non_fungibles,
+            n,
+        );
         newly_created_non_fungibles.sort();
 
+        let new_entities = NewEntities::from((
+            (
+                ret.entities_newly_created_summary.new_resource_entities,
+                ret.entities_newly_created_summary.global_entities_metadata,
+            ),
+            n,
+        ));
+
+        let classification = ret
+            .detailed_manifest_classification
+            .into_iter()
+            .filter_map(|d| DetailedManifestClass::new_from(d, n))
+            .find_or_first(|class| !class.is_general());
+
         let mut summary = Self::new(
-            addresses_of_accounts_from_ret(ret.account_withdraws, n),
-            addresses_of_accounts_from_ret(ret.account_deposits, n),
-            to_vec_network_aware(ret.accounts_requiring_auth, n),
-            to_vec_network_aware(ret.identities_requiring_auth, n),
+            addresses_of_accounts_from_ret(
+                ret.account_dynamic_resource_movements_summary
+                    .account_withdraws,
+                n,
+            ),
+            addresses_of_accounts_from_ret(
+                ret.account_dynamic_resource_movements_summary
+                    .account_deposits,
+                n,
+            ),
+            filter_try_to_vec_network_aware(
+                ret.entities_requiring_auth_summary.accounts,
+                n,
+            ),
+            filter_try_to_vec_network_aware(
+                ret.entities_requiring_auth_summary.identities,
+                n,
+            ),
             newly_created_non_fungibles,
-            ret.reserved_instructions
-                .into_iter()
-                .map(ReservedInstruction::from),
-            ret.presented_proofs
+            ReservedInstruction::from_ret_reserved_instructions_output(
+                ret.reserved_instructions_summary,
+            ),
+            ret.proofs_created_summary
+                .created_proofs
                 .values()
                 .cloned()
                 .flat_map(|vec| filter_try_to_vec_network_aware(vec, n)),
-            filter_try_to_vec_network_aware(ret.encountered_entities, n),
-            ret.detailed_classification
-                .into_iter()
-                .map(|d| DetailedManifestClass::from((d, n))),
-            ret.fee_locks,
-            ret.fee_summary,
-            (ret.new_entities, n),
+            filter_try_to_vec_network_aware(
+                ret.entities_encountered_summary.entities,
+                n,
+            ),
+            classification,
+            ret.fee_locks_summary,
+            ret.fee_consumption_summary,
+            new_entities,
         );
 
         summary.classify_delete_accounts_if_present();
@@ -261,13 +355,15 @@ impl ExecutionSummary {
             ],
             addresses_of_identities_requiring_auth: Vec::new(),
             newly_created_non_fungibles: Vec::new(),
-            reserved_instructions: Vec::new(),
+            reserved_instructions: IndexSet::from([
+                ReservedInstruction::sample(),
+            ]),
             presented_proofs: Vec::new(),
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample_component_stokenet(
                 ),
             ],
-            detailed_classification: vec![DetailedManifestClass::sample()],
+            detailed_classification: Some(DetailedManifestClass::sample()),
             fee_locks: FeeLocks::sample(),
             fee_summary: FeeSummary::sample(),
             new_entities: NewEntities::sample(),
@@ -294,12 +390,14 @@ impl HasSampleValues for ExecutionSummary {
                 IdentityAddress::sample(),
             ],
             newly_created_non_fungibles: vec![NonFungibleGlobalId::sample()],
-            reserved_instructions: vec![ReservedInstruction::sample()],
+            reserved_instructions: IndexSet::from([
+                ReservedInstruction::sample(),
+            ]),
             presented_proofs: vec![ResourceSpecifier::sample()],
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample(),
             ],
-            detailed_classification: vec![DetailedManifestClass::sample()],
+            detailed_classification: Some(DetailedManifestClass::sample()),
             fee_locks: FeeLocks::sample(),
             fee_summary: FeeSummary::sample(),
             new_entities: NewEntities::sample(),
@@ -328,12 +426,14 @@ impl HasSampleValues for ExecutionSummary {
             newly_created_non_fungibles: vec![
                 NonFungibleGlobalId::sample_other(),
             ],
-            reserved_instructions: vec![ReservedInstruction::sample_other()],
+            reserved_instructions: IndexSet::from([
+                ReservedInstruction::sample_other(),
+            ]),
             presented_proofs: vec![ResourceSpecifier::sample_other()],
             encountered_addresses: vec![
                 ManifestEncounteredComponentAddress::sample_other(),
             ],
-            detailed_classification: vec![DetailedManifestClass::sample_other()],
+            detailed_classification: Some(DetailedManifestClass::sample_other()),
             fee_locks: FeeLocks::sample_other(),
             fee_summary: FeeSummary::sample_other(),
             new_entities: NewEntities::sample_other(),

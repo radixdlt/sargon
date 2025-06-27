@@ -9,4 +9,9 @@ final class SecurityStructureMetadataTests: Test<SecurityStructureMetadata> {
 		let sut = SUT(name: "foo")
 		XCTAssertEqual(sut.displayName, "foo")
 	}
+
+	func test_is_main() {
+		let sut = SUT(name: "foo")
+		XCTAssert(sut.isMain)
+	}
 }

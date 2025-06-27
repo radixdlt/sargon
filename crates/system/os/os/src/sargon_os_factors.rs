@@ -72,7 +72,7 @@ impl SargonOS {
     ) -> Result<bool> {
         let id = factor_source.factor_source_id();
 
-        let contains = self.factor_source_ids()?.contains(&id);
+        let contains = self.profile_contains_factor_source(id).await?;
 
         if contains {
             return Ok(false);
@@ -232,6 +232,14 @@ impl SargonOS {
         self.load_private_device_factor_source(&device_factor_source)
             .await
     }
+
+    /// Accesses the active profile and checks if it contains a factor source with the given `id`.
+    pub async fn profile_contains_factor_source(
+        &self,
+        id: FactorSourceID,
+    ) -> Result<bool> {
+        Ok(self.factor_source_ids()?.contains(&id))
+    }
 }
 
 impl SargonOS {
@@ -283,6 +291,7 @@ impl SargonOS {
             let _ = self
                 .pre_derive_and_fill_cache_with_instances_for_factor_source(
                     factor_source,
+                    NetworkID::Mainnet, // we care not about other networks here
                 )
                 .await?;
         }
@@ -515,6 +524,52 @@ impl SargonOS {
             .snapshot()
             .await
             .unwrap()
+    }
+}
+
+impl SargonOS {
+    /// Triggers the spot check for the given factor source, and returns whether the spot check was successful.
+    pub async fn trigger_spot_check(
+        &self,
+        factor_source: FactorSource,
+        allow_skip: bool,
+    ) -> Result<bool> {
+        let response = self
+            .spot_check_interactor()
+            .spot_check(factor_source, allow_skip)
+            .await?;
+        match response {
+            SpotCheckResponse::Valid => Ok(true),
+            SpotCheckResponse::Skipped => Ok(false),
+        }
+    }
+
+    /// If necessary, performs a spot check on the factor source before creating an entity.
+    ///
+    /// We only perform the spot check when we have enough keys in the cache to create the entity without deriving anymore.
+    pub async fn spot_check_factor_source_before_entity_creation_if_necessary(
+        &self,
+        factor_source: FactorSource,
+        network_id: NetworkID,
+        entity_kind: EntityKind,
+    ) -> Result<()> {
+        let cache = self.cache_snapshot().await;
+        let should_spot_check = cache.is_entity_creation_satisfied(
+            network_id,
+            factor_source.id_from_hash(),
+            entity_kind,
+        );
+        if should_spot_check {
+            debug!("Spot checking the factor source...");
+            let response = self
+                .spot_check_interactor()
+                .spot_check(factor_source, false)
+                .await?;
+            debug!("Spot check response: {:?}", response);
+        } else {
+            debug!("No need to spot check the factor source.");
+        }
+        Ok(())
     }
 }
 
@@ -1056,6 +1111,82 @@ mod tests {
                     ids: vec![factor_source.factor_source_id()],
                 }
             }));
+    }
+
+    #[actix_rt::test]
+    async fn trigger_spot_check_valid() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_succeeded()),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.trigger_spot_check(FactorSource::sample(), false)
+            })
+            .await
+            .unwrap();
+
+        assert!(result);
+    }
+
+    #[actix_rt::test]
+    async fn trigger_spot_check_skipped() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_skipped()),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.trigger_spot_check(FactorSource::sample(), true)
+            })
+            .await
+            .unwrap();
+
+        assert!(!result);
+    }
+
+    #[actix_rt::test]
+    async fn trigger_spot_check_failing() {
+        let clients = Clients::new(Bios::new(Drivers::test()));
+        let error = CommonError::sample();
+        let interactors =
+            Interactors::new_from_clients_and_spot_check_interactor(
+                &clients,
+                Arc::new(TestSpotCheckInteractor::new_failed(error.clone())),
+            );
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+
+        let result = os
+            .with_timeout(|x| {
+                x.trigger_spot_check(FactorSource::sample(), false)
+            })
+            .await
+            .expect_err("Expected an error");
+
+        assert_eq!(result, error);
     }
 
     async fn boot(event_bus_driver: Arc<RustEventBusDriver>) -> Arc<SUT> {

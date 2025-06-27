@@ -1,28 +1,5 @@
 use crate::prelude::*;
 
-macro_rules! from_scrypto_global_address {
-    ($address_type: ty) => {
-        paste::paste! {
-            impl TryFrom<(ScryptoGlobalAddress, NetworkID)> for $address_type {
-                type Error = crate::CommonError;
-                fn try_from(value: (ScryptoGlobalAddress, NetworkID)) -> Result<Self> {
-                    <$address_type as AddressViaRet>::new(value.0.into_node_id(), value.1)
-                }
-            }
-        }
-    };
-}
-
-from_scrypto_global_address!(PackageAddress);
-from_scrypto_global_address!(ResourceAddress);
-from_scrypto_global_address!(NonFungibleResourceAddress);
-from_scrypto_global_address!(ValidatorAddress);
-from_scrypto_global_address!(AccessControllerAddress);
-from_scrypto_global_address!(AccountAddress);
-from_scrypto_global_address!(IdentityAddress);
-from_scrypto_global_address!(ComponentAddress);
-from_scrypto_global_address!(LockerAddress);
-
 macro_rules! from_scrypto_address_variant {
 
     ($address_type: ty) => {
@@ -30,7 +7,7 @@ macro_rules! from_scrypto_address_variant {
             impl From<([< Scrypto $address_type >], NetworkID)> for $address_type {
                 fn from(value: ([< Scrypto $address_type >], NetworkID)) -> Self {
                     let target_type_name = stringify!($address_type);
-                    <$address_type as AddressViaRet>::new(value.0.into_node_id(), value.1)
+                    $address_type::new_from_node_id(value.0.into_node_id(), value.1)
                     .expect(&format!("Should always be able to convert from Scrypto {} to Sargon {}", target_type_name, target_type_name))
                 }
             }
@@ -45,7 +22,7 @@ macro_rules! from_scrypto_component_address {
         paste::paste! {
             impl From<(ScryptoComponentAddress, NetworkID)> for $address_type {
                 fn from(value: (ScryptoComponentAddress, NetworkID)) -> Self {
-                    <$address_type as AddressViaRet>::new(value.0.into_node_id(), value.1)
+                    $address_type::new_from_node_id(value.0.into_node_id(), value.1)
                     .expect(&format!("Should always be able to convert from ScryptoComponentAddress to Sargon {}", stringify!($address_type)))
                 }
             }
@@ -151,7 +128,7 @@ mod tests {
             match scrypto {
                 ScryptoDynamicComponentAddress::Static(static_scrypto) => {
                     assert_eq!(
-                        &<AccountAddress as AddressViaRet>::new(
+                        &AccountAddress::new_from_node_id(
                             static_scrypto.into_node_id(),
                             a.network_id()
                         )
@@ -175,7 +152,7 @@ mod tests {
             match scrypto {
                 ScryptoDynamicResourceAddress::Static(static_scrypto) => {
                     assert_eq!(
-                        &<ResourceAddress as AddressViaRet>::new(
+                        &ResourceAddress::new_from_node_id(
                             static_scrypto.into_node_id(),
                             a.network_id()
                         )

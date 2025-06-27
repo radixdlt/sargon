@@ -26,9 +26,9 @@ struct ShieldTests {
 	@Test("days")
 	func days() {
 		var builder = SecurityShieldBuilder()
-		#expect(builder.timePeriodUntilAutoConfirm == TimePeriod(days: 14))
-		builder = builder.setTimePeriodUntilAutoConfirm(timePeriod: TimePeriod(days: 237))
-		#expect(builder.timePeriodUntilAutoConfirm == TimePeriod(days: 237))
+		#expect(builder.timeUntilTimedConfirmationIsCallable == TimePeriod(days: 14))
+		builder = builder.setTimeUntilDelayedConfirmationIsCallable(timePeriod: TimePeriod(days: 237))
+		#expect(builder.timeUntilTimedConfirmationIsCallable == TimePeriod(days: 237))
 	}
 
 	@Test("empty primary threshold")
@@ -55,11 +55,17 @@ struct ShieldTests {
 		#expect(builder.confirmationRoleFactors == [])
 	}
 
-	@Test("primary override validation status trustedContact")
-	func primValidationStatusTrustedContact() {
-		let builder = SecurityShieldBuilder()
-		#expect(builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [TrustedContactFactorSource.sample.asGeneral.id]).compactMap(\.reasonIfInvalid) == [FactorSourceValidationStatusReasonIfInvalid.nonBasic(SecurityShieldBuilderRuleViolation.PrimaryCannotContainTrustedContact)])
-	}
+	// @Test("primary override validation status trustedContact")
+	// func primValidationStatusTrustedContact() {
+	// 	let builder = SecurityShieldBuilder()
+	// 	#expect(
+	// 		builder.validationForAdditionOfFactorSourceToPrimaryOverrideForEach(factorSources: [
+	// 			TrustedContactFactorSource.sample.asGeneral.id,
+	// 		]).compactMap(\.reasonIfInvalid) == [
+	// 			FactorSourceValidationStatusReasonIfInvalid.nonBasic(
+	// 				SecurityShieldBuilderRuleViolation.PrimaryCannotContainTrustedContact),
+	// 		])
+	// }
 
 	@Test("Auto lowering of threshold upon deletion")
 	func deleteFactorSourceFromPrimaryLowersThreshold() {
@@ -76,14 +82,18 @@ struct ShieldTests {
 
 		#expect(builder.threshold == Threshold.specific(3))
 
-		builder = builder.removeFactorFromPrimary(factorSourceId: x, factorListKind: FactorListKind.threshold)
+		builder = builder.removeFactorFromPrimary(
+			factorSourceId: x, factorListKind: FactorListKind.threshold
+		)
 		#expect(builder.threshold == Threshold.specific(2))
 
 		builder = builder.removeFactorFromAllRoles(factorSourceId: y)
 		#expect(builder.recoveryRoleFactors == []) // assert `y` is removed from Recovery and Primary
 		#expect(builder.threshold == Threshold.specific(1))
 
-		builder = builder.removeFactorFromPrimary(factorSourceId: z, factorListKind: FactorListKind.threshold)
+		builder = builder.removeFactorFromPrimary(
+			factorSourceId: z, factorListKind: FactorListKind.threshold
+		)
 		#expect(builder.threshold == Threshold.all)
 		#expect(builder.primaryRoleThresholdFactors == [])
 	}
@@ -92,13 +102,13 @@ struct ShieldTests {
 	func preventAddOfForbiddenFactorSourceKinds() throws {
 		let builder = SecurityShieldBuilder()
 			// Primary
-			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleTrustedContact) // Verboten
-			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleSecurityQuestions) // Verboten
+//			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleTrustedContact) // Verboten
+//			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleSecurityQuestions) // Verboten
 			// Recovery
-			.addFactorSourceToRecoveryOverride(factorSourceId: .sampleSecurityQuestions) // Verboten
+//			.addFactorSourceToRecoveryOverride(factorSourceId: .sampleSecurityQuestions) // Verboten
 			.addFactorSourceToRecoveryOverride(factorSourceId: .samplePassword) // Verboten
-			// Confirmation
-			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleTrustedContact) // Verboten
+		// Confirmation
+//			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleTrustedContact) // Verboten
 
 		#expect(builder.primaryRoleThresholdFactors.isEmpty)
 		#expect(builder.recoveryRoleFactors.isEmpty)
@@ -115,9 +125,11 @@ struct ShieldTests {
 		#expect(builder.primaryRoleThresholdFactors == [factor])
 		#expect(builder.primaryRoleOverrideFactors == [other])
 
-		builder = builder.removeFactorFromPrimary(factorSourceId: factor, factorListKind: FactorListKind.threshold)
-			.addFactorSourceToPrimaryOverride(factorSourceId: factor)
-			.addFactorSourceToPrimaryThreshold(factorSourceId: other)
+		builder = builder.removeFactorFromPrimary(
+			factorSourceId: factor, factorListKind: FactorListKind.threshold
+		)
+		.addFactorSourceToPrimaryOverride(factorSourceId: factor)
+		.addFactorSourceToPrimaryThreshold(factorSourceId: other)
 		#expect(builder.primaryRoleThresholdFactors == [other])
 		#expect(builder.primaryRoleOverrideFactors == [other, factor])
 
@@ -130,7 +142,7 @@ struct ShieldTests {
 	func build() throws {
 		var builder = SecurityShieldBuilder()
 			.setName(name: "S.H.I.E.L.D.")
-			.setTimePeriodUntilAutoConfirm(timePeriod: TimePeriod(days: 42))
+			.setTimeUntilDelayedConfirmationIsCallable(timePeriod: TimePeriod(days: 42))
 			.setAuthenticationSigningFactor(new: .sampleDevice)
 
 		// Primary
@@ -145,7 +157,9 @@ struct ShieldTests {
 			// Confirmation
 			.addFactorSourceToConfirmationOverride(factorSourceId: .sampleDevice)
 			// Remove
-			.removeFactorFromPrimary(factorSourceId: .sampleArculusOther, factorListKind: FactorListKind.override)
+			.removeFactorFromPrimary(
+				factorSourceId: .sampleArculusOther, factorListKind: FactorListKind.override
+			)
 			.removeFactorFromRecovery(factorSourceId: .sampleLedgerOther)
 
 		builder = builder.setAuthenticationSigningFactor(new: .sampleDevice)
@@ -175,7 +189,11 @@ struct ShieldTests {
 		let builder = SecurityShieldBuilder()
 			.addFactorSourceToPrimaryThreshold(factorSourceId: .samplePassword)
 
-		#expect(builder.selectedPrimaryThresholdFactorsStatus() == .invalid(reason: SelectedPrimaryThresholdFactorsStatusInvalidReason.cannotBeUsedAlone(factorSourceKind: FactorSourceKind.password)))
+		#expect(
+			builder.selectedPrimaryThresholdFactorsStatus()
+				== .invalid(
+					reason: SelectedPrimaryThresholdFactorsStatusInvalidReason.cannotBeUsedAlone(
+						factorSourceKind: FactorSourceKind.password)))
 	}
 
 	@Test("selected primary threshold factors status")
@@ -209,12 +227,16 @@ extension FactorSourceID {
 	public static let samplePasswordOther = PasswordFactorSource.sampleOther.asGeneral.id
 
 	public static let sampleOffDeviceMnemonic = OffDeviceMnemonicFactorSource.sample.asGeneral.id
-	public static let sampleOffDeviceMnemonicOther = OffDeviceMnemonicFactorSource.sampleOther.asGeneral.id
+	public static let sampleOffDeviceMnemonicOther = OffDeviceMnemonicFactorSource.sampleOther
+		.asGeneral.id
 
-	public static let sampleTrustedContact = TrustedContactFactorSource.sample.asGeneral.id
-	public static let sampleTrustedContactOther = TrustedContactFactorSource.sampleOther.asGeneral.id
+	// public static let sampleTrustedContact = TrustedContactFactorSource.sample.asGeneral.id
+	// public static let sampleTrustedContactOther = TrustedContactFactorSource.sampleOther.asGeneral
+	// 	.id
 
-	public static let sampleSecurityQuestions = SecurityQuestionsNotProductionReadyFactorSource.sample.asGeneral.id
-	public static let sampleSecurityQuestionsOther = SecurityQuestionsNotProductionReadyFactorSource.sampleOther.asGeneral.id
+	// public static let sampleSecurityQuestions = SecurityQuestionsNotProductionReadyFactorSource
+	// 	.sample.asGeneral.id
+	// public static let sampleSecurityQuestionsOther = SecurityQuestionsNotProductionReadyFactorSource
+	// 	.sampleOther.asGeneral.id
 }
 #endif

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.annotations.VisibleForTesting
 
 class SargonOsManager internal constructor(
     bios: Bios,
@@ -27,8 +28,13 @@ class SargonOsManager internal constructor(
     init {
         applicationScope.launch {
             withContext(defaultDispatcher) {
-                val os = SargonOs.boot(bios, hostInteractor)
-                _sargonState.update { SargonOsState.Booted(os) }
+                runCatching {
+                    SargonOs.boot(bios, hostInteractor)
+                }.onSuccess { os ->
+                    _sargonState.update { SargonOsState.Booted(os) }
+                }.onFailure { error ->
+                    _sargonState.update { SargonOsState.BootError(error) }
+                }
             }
         }
     }
@@ -52,6 +58,12 @@ class SargonOsManager internal constructor(
                 instance = it
             }
         }
+
+        // Only used for testing
+        @VisibleForTesting
+        internal fun tearDown() = synchronized(this) {
+            instance = null
+        }
     }
 }
 
@@ -59,6 +71,9 @@ sealed interface SargonOsState {
     data object Idle : SargonOsState
     data class Booted(
         val os: SargonOs
+    ) : SargonOsState
+    data class BootError(
+        val error: Throwable
     ) : SargonOsState
 }
 

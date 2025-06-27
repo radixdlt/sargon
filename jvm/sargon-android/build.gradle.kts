@@ -1,8 +1,6 @@
 import com.radixdlt.cargo.desktop.DesktopTargetTriple
 import com.radixdlt.cargo.desktop.currentTargetTriple
 import com.radixdlt.cargo.toml.sargonVersion
-import org.gradle.configurationcache.extensions.capitalized
-import org.gradle.internal.logging.text.StyledTextOutput
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.nio.file.Files
 
@@ -47,17 +45,17 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.srcDir("${buildDir}/generated/src/kotlin")
+            java.srcDir("${layout.buildDirectory.get()}/generated/src/kotlin")
         }
 
         configureEach {
             if (name.startsWith("test")) {
                 // Unit tests need to be linked with "desktop", native to the machine, libraries
-                resources.srcDirs("${buildDir}/generated/src/resources")
+                resources.srcDirs("${layout.buildDirectory.get()}/generated/src/resources")
             } else {
                 // The rest of the tasks are android related and need to link
                 // with the android jniLibs
-                jniLibs.srcDirs("${buildDir}/generated/src/jniLibs")
+                jniLibs.srcDirs("${layout.buildDirectory.get()}/generated/src/jniLibs")
             }
         }
     }
@@ -73,9 +71,9 @@ android {
     }
 
     buildTypes.forEach {
-        val buildTypeVariant = it.name.capitalized()
+        val buildTypeVariant = it.name.replaceFirstChar(Char::uppercase)
         tasks.register<Jar>("desktopJar${buildTypeVariant}") {
-            from("${buildDir}/generated/src/resources")
+            from("${layout.buildDirectory.get()}/generated/src/resources")
 
             if (it.isDebuggable) {
                 // For debug we only need to build for the current architecture. Used by maven publication in
@@ -105,7 +103,7 @@ tasks.withType<Test> {
     // Need to specifically set the path for JNA
     // The binary file is not automatically included in the classpath
     val triple = project.currentTargetTriple()
-    systemProperties["jna.library.path"] = "${buildDir}/generated/src/resources/${triple.jnaName}"
+    systemProperties["jna.library.path"] = "${layout.buildDirectory.get()}/generated/src/resources/${triple.jnaName}"
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -183,7 +181,7 @@ dependencies {
 publishing {
     publications {
         android.buildTypes.forEach {
-            val buildTypeVariant = it.name.capitalized()
+            val buildTypeVariant = it.name.replaceFirstChar(Char::uppercase)
 
             // Publishing the android library we just need to build the library from the release component
             register<MavenPublication>("android$buildTypeVariant") {
@@ -300,7 +298,7 @@ afterEvaluate {
         doLast {
             copy {
                 from("src/main/jniLibs")
-                into("${buildDir}/generated/src/jniLibs")
+                into("${layout.buildDirectory.get()}/generated/src/jniLibs")
             }
             delete("src/main/jniLibs")
         }
@@ -333,7 +331,7 @@ tasks.register("copyExternalArtifacts") {
     doFirst {
         DesktopTargetTriple.ciSupported.forEach { triple ->
             exec {
-                commandLine("mkdir", "-p", "${buildDir}/generated/src/resources/${triple.jnaName}")
+                commandLine("mkdir", "-p", "${layout.buildDirectory.get()}/generated/src/resources/${triple.jnaName}")
             }
         }
     }
@@ -342,36 +340,32 @@ tasks.register("copyExternalArtifacts") {
         val rustProjectDir = projectDir.parentFile.parentFile
         val artifactsDir = File(rustProjectDir, "artifacts")
 
-        val fileTargets = artifactsDir.listFiles()?.mapNotNull { file ->
+        val directoryTargets = artifactsDir.listFiles()?.mapNotNull { file ->
             val triple = DesktopTargetTriple.from(file.name) ?: return@mapNotNull null
             file to triple
         }.orEmpty()
 
-        if (fileTargets.isEmpty()) {
+        if (directoryTargets.isEmpty()) {
             error("No files found in ${artifactsDir.absolutePath}")
         }
 
-        fileTargets.forEach { target ->
+        directoryTargets.forEach { target ->
             exec {
                 workingDir = rustProjectDir
                 commandLine(
                     "cp",
                     "${target.first.canonicalPath}/${target.second.binaryName}",
-                    "${buildDir}/generated/src/resources/${target.second.jnaName}/${target.second.binaryName}"
+                    "${layout.buildDirectory.get()}/generated/src/resources/${target.second.jnaName}/${target.second.binaryName}"
                 )
             }
         }
     }
 }
 
-tasks.register("cargoClean") {
+tasks.register("cargoClean", Exec::class) {
     group = BasePlugin.BUILD_GROUP
-    doLast {
-        exec {
-            workingDir = rootDir.parentFile
-            commandLine("cargo", "clean")
-        }
-    }
+    workingDir = rootDir.parentFile
+    commandLine("cargo", "clean")
 }
 
 tasks.getByName("clean") {

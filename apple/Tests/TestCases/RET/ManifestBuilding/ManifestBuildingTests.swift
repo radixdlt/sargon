@@ -188,7 +188,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		let guarantee = TransactionGuarantee(
 			amount: 642,
 			percentage: 0.9,
-			instructionIndex: 12,
+			instructionIndex: 10,
 			resourceAddress: .sampleStokenetXRD,
 			resourceDivisibility: nil
 		)

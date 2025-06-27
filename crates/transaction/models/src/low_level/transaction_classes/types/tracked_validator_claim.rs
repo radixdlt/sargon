@@ -29,8 +29,8 @@ impl TrackedValidatorClaim {
     }
 }
 
-impl From<(RetTrackedValidatorClaim, NetworkID)> for TrackedValidatorClaim {
-    fn from(value: (RetTrackedValidatorClaim, NetworkID)) -> Self {
+impl From<(RetValidatorClaimOperation, NetworkID)> for TrackedValidatorClaim {
+    fn from(value: (RetValidatorClaimOperation, NetworkID)) -> Self {
         let (ret, n) = value;
 
         Self::new(

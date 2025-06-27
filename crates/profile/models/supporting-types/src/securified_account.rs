@@ -15,6 +15,12 @@ impl From<SecurifiedAccount> for AnySecurifiedEntity {
     }
 }
 
+impl From<SecurifiedAccount> for Account {
+    fn from(value: SecurifiedAccount) -> Self {
+        value.entity
+    }
+}
+
 impl HasEntityKind for SecurifiedAccount {
     fn entity_kind() -> CAP26EntityKind {
         CAP26EntityKind::Account
@@ -26,6 +32,14 @@ impl TryFrom<AccountOrPersona> for SecurifiedAccount {
 
     fn try_from(value: AccountOrPersona) -> Result<Self> {
         Account::try_from(value).and_then(Self::new)
+    }
+}
+
+impl TryFrom<Account> for SecurifiedAccount {
+    type Error = CommonError;
+
+    fn try_from(value: Account) -> Result<Self> {
+        Self::new(value)
     }
 }
 

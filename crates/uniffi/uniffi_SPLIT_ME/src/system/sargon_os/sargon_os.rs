@@ -19,21 +19,24 @@ impl SargonOS {
     pub async fn boot(
         bios: Arc<Bios>,
         interactor: Arc<dyn HostInteractor>,
-    ) -> Arc<Self> {
+    ) -> Result<Arc<Self>> {
         let internal_sargon_os = InternalSargonOS::boot(
             Arc::new(bios.as_ref().clone().into()),
             Interactors::new(
                 Arc::new(UseFactorSourcesInteractorAdapter::new(
                     interactor.clone(),
                 )),
-                Arc::new(AuthorizationInteractorAdapter::new(interactor)),
+                Arc::new(AuthorizationInteractorAdapter::new(
+                    interactor.clone(),
+                )),
+                Arc::new(SpotCheckInteractorAdapter::new(interactor)),
             ),
         )
         .await;
 
-        Arc::new(SargonOS {
+        Result::Ok(Arc::new(SargonOS {
             wrapped: internal_sargon_os,
-        })
+        }))
     }
 
     pub async fn new_wallet(
@@ -81,5 +84,11 @@ impl SargonOS {
 
     pub async fn resolve_host_info(&self) -> HostInfo {
         self.wrapped.resolve_host_info().await.into()
+    }
+
+    pub async fn claim_profile(&self, profile: Profile) -> Profile {
+        let mut internal_profile = profile.into_internal();
+        self.wrapped.claim_profile(&mut internal_profile).await;
+        internal_profile.into()
     }
 }

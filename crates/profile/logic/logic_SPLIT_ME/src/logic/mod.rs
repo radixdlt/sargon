@@ -1,5 +1,7 @@
 mod account;
+mod app_preferences;
 mod authorized_dapps_logic;
+mod entity;
 mod gateway;
 mod instances_deriving_with_factor_sources;
 mod persona;
@@ -10,7 +12,9 @@ mod profile_update;
 mod query_factor_sources;
 
 pub use account::*;
+pub use app_preferences::*;
 pub use authorized_dapps_logic::*;
+pub use entity::*;
 pub use gateway::*;
 pub use persona::*;
 pub use profile_header::*;

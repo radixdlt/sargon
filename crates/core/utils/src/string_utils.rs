@@ -7,12 +7,25 @@ pub fn suffix_str(n: usize, s: impl AsRef<str>) -> String {
     s.as_ref()[split_pos..].to_string()
 }
 
-pub fn type_name<T>() -> String {
+fn _type_name<T>() -> String {
     std::any::type_name::<T>()
         .split("::")
         .last()
         .unwrap()
         .to_owned()
+}
+pub fn type_name<T>() -> String {
+    _type_name::<T>()
+}
+
+pub trait TypeName {
+    fn type_name() -> String;
+}
+
+impl<T> TypeName for T {
+    fn type_name() -> String {
+        _type_name::<T>()
+    }
 }
 
 pub fn format_string(s: impl AsRef<str>, start: usize, end: usize) -> String {

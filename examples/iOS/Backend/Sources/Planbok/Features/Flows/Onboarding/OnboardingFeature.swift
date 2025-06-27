@@ -74,7 +74,6 @@ public struct OnboardingFeature {
 				}
 
 			case .welcome(.delegate(.done)):
-
 				state.path.append(.newOrImportProfile(.init()))
 				return .none
 

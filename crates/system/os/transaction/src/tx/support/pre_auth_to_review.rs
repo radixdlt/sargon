@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 /// This is the result of the Pre-Auth preview analysis.
 /// It contains all the information needed to compute and display the transaction details to the user.
+#[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug, PartialEq)]
 pub enum PreAuthToReview {
     /// Pre-Auth analysis open manifest, which contains multiple interactions with the parent manifest,

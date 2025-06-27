@@ -27,7 +27,7 @@ fn wrong_entity_kind() {
                 [],
                 [],
             ),
-            1,
+            TimePeriod::with_days(1),
         )
     };
     let res = invalid.index_agnostic_path_of_all_tx_signing_factor_instances();
@@ -62,7 +62,7 @@ fn wrong_key_kind() {
                 [],
                 [],
             ),
-            1,
+            TimePeriod::with_days(1),
         )
     };
     let res = invalid.index_agnostic_path_of_all_tx_signing_factor_instances();
