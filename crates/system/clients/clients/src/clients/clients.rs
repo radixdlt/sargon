@@ -12,6 +12,7 @@ pub struct Clients {
     pub event_bus: EventBusClient,
     pub profile_state_change: ProfileStateChangeClient,
     pub factor_instances_cache: FactorInstancesCacheClient,
+    pub arculus_wallet_client: ArculusWalletClient,
 }
 
 impl Clients {
@@ -31,6 +32,10 @@ impl Clients {
         );
         let factor_instances_cache =
             FactorInstancesCacheClient::new(file_system.clone());
+        let arculus_wallet_client = ArculusWalletClient::new(
+            drivers.arculus_csdk_driver.clone(),
+            drivers.nfc_tag_driver.clone(),
+        );
         Self {
             host,
             secure_storage,
@@ -41,6 +46,7 @@ impl Clients {
             event_bus,
             profile_state_change: profile_change,
             factor_instances_cache,
+            arculus_wallet_client,
         }
     }
 }
