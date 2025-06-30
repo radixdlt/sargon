@@ -1004,8 +1004,6 @@ pub enum CommonError {
         needed_balance: String,
     } = 10287,
 
-    #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
-    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10259,
 
     #[error("Unable to top up Xrd Vault, payer is entity applying shield: {payer_is_entity_applying_shield}, can exercise primary role: {can_exercise_primary_role} for entity owning AccessController: {entity_owning_access_controller}")]
     UnableToTopUpXrdVault {
@@ -1062,6 +1060,9 @@ pub enum CommonError {
 
     #[error("Gw missing response item: {item}")]
     GWMissingResponseItem { item: String } = 10303,
+    
+    #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
+    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10304,
 }
 
 impl CommonError {
