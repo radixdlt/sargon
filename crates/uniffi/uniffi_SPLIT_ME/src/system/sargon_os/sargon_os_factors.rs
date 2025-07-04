@@ -163,18 +163,17 @@ impl SargonOS {
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
     /// either a "BDFS" or an "Olympia" one.
-    pub async fn create_device_factor_source(
+    pub fn create_device_factor_source(
         &self,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
-    ) -> Result<DeviceFactorSource> {
+    ) -> DeviceFactorSource {
         self.wrapped
             .create_device_factor_source(
                 mnemonic_with_passphrase.into_internal(),
                 factor_type.into_internal(),
             )
-            .await
-            .into_result()
+            .into()
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,

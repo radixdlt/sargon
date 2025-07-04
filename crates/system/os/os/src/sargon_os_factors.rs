@@ -190,12 +190,12 @@ impl SargonOS {
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
     /// either a "BDFS" or an "Olympia" one.
-    pub async fn create_device_factor_source(
+    pub fn create_device_factor_source(
         &self,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
-    ) -> Result<DeviceFactorSource> {
-        let host_info = self.host_info().await;
+    ) -> DeviceFactorSource {
+        let host_info = self.host_info();
         let factor_source = match factor_type {
             DeviceFactorSourceType::Olympia => DeviceFactorSource::olympia(
                 &mnemonic_with_passphrase,
@@ -209,7 +209,7 @@ impl SargonOS {
                 )
             }
         };
-        Ok(factor_source)
+        factor_source
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -775,15 +775,10 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        let bdfs = os
-            .with_timeout(|x| {
-                x.create_device_factor_source(
+        let bdfs = os.create_device_factor_source(
                     MnemonicWithPassphrase::sample(),
                     DeviceFactorSourceType::Babylon { is_main: true },
-                )
-            })
-            .await
-            .unwrap();
+                );
 
         // ASSERT
         assert!(bdfs.is_main_bdfs());
@@ -795,15 +790,10 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        let bdfs = os
-            .with_timeout(|x| {
-                x.create_device_factor_source(
+        let bdfs = os.create_device_factor_source(
                     MnemonicWithPassphrase::sample(),
                     DeviceFactorSourceType::Babylon { is_main: false },
-                )
-            })
-            .await
-            .unwrap();
+                );
 
         // ASSERT
         assert!(!bdfs.is_main_bdfs());
@@ -817,15 +807,10 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        let dfs = os
-            .with_timeout(|x| {
-                x.create_device_factor_source(
+        let dfs = os.create_device_factor_source(
                     MnemonicWithPassphrase::sample_device_12_words(),
                     DeviceFactorSourceType::Olympia,
-                )
-            })
-            .await
-            .unwrap();
+                );
 
         // ASSERT
         assert!(!dfs.common.is_main());
@@ -853,7 +838,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         // ACT
         let ids = os
@@ -1202,7 +1187,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
         os
     }
 }

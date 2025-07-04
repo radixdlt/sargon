@@ -17,9 +17,9 @@ impl SargonOS {
 
     /// "Claims" the `profile`, meaning the last_used_on_device is updated in the
     /// header
-    pub async fn claim_profile(&self, profile: &mut Profile) {
+    pub fn claim_profile(&self, profile: &mut Profile) {
         debug!("Claiming profile, id: {}", &profile.id());
-        let host_info = self.host_info().await;
+        let host_info = self.host_info();
         let claiming_device_info =
             DeviceInfo::new_from_info(&self.host_id, &host_info);
 
@@ -82,7 +82,7 @@ impl SargonOS {
         let imported_id = profile.id();
         debug!("Importing profile, id: {}", imported_id);
         let mut profile = profile;
-        self.claim_profile(&mut profile).await;
+        self.claim_profile(&mut profile);
 
         self.secure_storage.save_profile(&profile).await?;
 
@@ -344,7 +344,7 @@ mod tests {
 
         // ASSERT
         let host_id = os.host_id;
-        let host_info = os.host_info().await;
+        let host_info = os.host_info();
         assert_eq!(
             os.profile().unwrap().header.last_used_on_device,
             DeviceInfo::new_from_info(&host_id, &host_info)

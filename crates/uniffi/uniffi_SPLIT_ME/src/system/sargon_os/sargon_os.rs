@@ -40,11 +40,10 @@ impl SargonOS {
     }
 
     pub async fn new_wallet(
-        &self,
-        should_pre_derive_instances: bool,
+        &self
     ) -> Result<()> {
         self.wrapped
-            .new_wallet(should_pre_derive_instances)
+            .new_wallet()
             .await
             .into_result()
     }
@@ -82,13 +81,13 @@ impl SargonOS {
         self.wrapped.host_id().into()
     }
 
-    pub async fn resolve_host_info(&self) -> HostInfo {
-        self.wrapped.resolve_host_info().await.into()
+    pub fn resolve_host_info(&self) -> HostInfo {
+        self.wrapped.resolve_host_info().into()
     }
 
-    pub async fn claim_profile(&self, profile: Profile) -> Profile {
+    pub fn claim_profile(&self, profile: Profile) -> Profile {
         let mut internal_profile = profile.into_internal();
-        self.wrapped.claim_profile(&mut internal_profile).await;
+        self.wrapped.claim_profile(&mut internal_profile);
         internal_profile.into()
     }
 }

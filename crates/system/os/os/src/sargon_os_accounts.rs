@@ -807,7 +807,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|os| os.new_wallet(false)).await.unwrap();
+        os.with_timeout(|os| os.new_wallet()).await.unwrap();
 
         // ACT
         os.with_timeout(create_unsaved_mainnet_account_with_main_bdfs)
@@ -836,7 +836,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.new_wallet(false).await.unwrap();
+        os.new_wallet().await.unwrap();
 
         let mut account = Account::sample();
         os.with_timeout(|x| x.add_account(account.clone()))
@@ -925,7 +925,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         let mut account = Account::sample();
         os.with_timeout(|x| x.add_account(account.clone()))

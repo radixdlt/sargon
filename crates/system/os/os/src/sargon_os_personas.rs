@@ -577,7 +577,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         let mut persona = Persona::sample();
         os.with_timeout(|x| x.add_persona(persona.clone()))
@@ -613,7 +613,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         let mut persona = Persona::sample();
         let mut persona2 = Persona::sample_other();

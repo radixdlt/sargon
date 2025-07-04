@@ -408,7 +408,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
@@ -533,7 +533,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
@@ -622,7 +622,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
