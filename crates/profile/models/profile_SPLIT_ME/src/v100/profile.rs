@@ -695,9 +695,7 @@ mod tests {
 								},
 								"addedOn": "2023-09-11T16:05:56.000Z",
 								"lastUsedOn": "2023-09-11T16:05:56.000Z",
-								"flags": [
-									"main"
-								]
+								"flags": []
 							},
 							"hint": {
 								"name": "My precious",
