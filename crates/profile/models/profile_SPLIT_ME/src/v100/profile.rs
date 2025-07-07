@@ -174,9 +174,6 @@ impl Profile {
         host_info: HostInfo,
         maybe_accounts: Option<impl Into<Accounts>>,
     ) -> Self {
-        if !device_factor_source.is_main_bdfs() {
-            panic!("DeviceFactorSource is not main BDFS");
-        }
         let bdfs = device_factor_source;
         let header =
             Header::new(DeviceInfo::new_from_info(&host_id, &host_info));
@@ -208,11 +205,8 @@ impl Profile {
         host_id: HostId,
         host_info: HostInfo,
     ) -> Self {
-        let bdfs = DeviceFactorSource::babylon(
-            true,
-            &mnemonic_with_passphrase,
-            &host_info,
-        );
+        let bdfs =
+            DeviceFactorSource::babylon(&mnemonic_with_passphrase, &host_info);
         Self::from_device_factor_source(
             bdfs,
             host_id,

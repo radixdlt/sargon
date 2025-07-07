@@ -49,8 +49,8 @@ pub fn new_factor_source_common_babylon() -> FactorSourceCommon {
 }
 
 #[uniffi::export]
-pub fn new_factor_source_common_bdfs(is_main: bool) -> FactorSourceCommon {
-    InternalFactorSourceCommon::new_bdfs(is_main).into()
+pub fn new_factor_source_common_bdfs() -> FactorSourceCommon {
+    InternalFactorSourceCommon::new_bdfs().into()
 }
 
 decl_conversion_tests_for!(FactorSourceCommon);

@@ -77,19 +77,8 @@ impl FactorSourceCommon {
         Self::new(FactorSourceCryptoParameters::babylon(), Vec::new())
     }
 
-    pub fn new_bdfs(is_main: bool) -> Self {
-        Self::new(
-            FactorSourceCryptoParameters::babylon(),
-            if is_main {
-                vec![FactorSourceFlag::Main]
-            } else {
-                Vec::new()
-            },
-        )
-    }
-
-    pub fn new_main_bdfs() -> Self {
-        Self::new_bdfs(true)
+    pub fn new_bdfs() -> Self {
+        Self::new(FactorSourceCryptoParameters::babylon(), Vec::new())
     }
 
     pub fn supports_babylon(&self) -> bool {
@@ -98,11 +87,6 @@ impl FactorSourceCommon {
 
     pub fn supports_olympia(&self) -> bool {
         self.crypto_parameters.supports_olympia()
-    }
-
-    /// Checks if it is a main factor source.
-    pub fn is_main(&self) -> bool {
-        self.flags.contains_by_id(&FactorSourceFlag::Main)
     }
 }
 
@@ -184,7 +168,7 @@ mod tests {
             FactorSourceCryptoParameters::default(),
             date,
             date,
-            [FactorSourceFlag::Main],
+            Vec::new(),
         );
 
         assert_eq_after_json_roundtrip(
@@ -196,37 +180,10 @@ mod tests {
                     "supportedCurves": ["curve25519"],
                     "supportedDerivationPathSchemes": ["cap26"]
                 },
-                "flags": ["main"],
+                "flags": [],
                 "lastUsedOn": "2023-09-11T16:05:56.000Z"
             }
             "#,
         );
-    }
-
-    #[test]
-    fn main_flag_present_if_main() {
-        assert!(FactorSourceCommon::new_bdfs(true)
-            .flags
-            .contains_by_id(&FactorSourceFlag::Main));
-    }
-
-    #[test]
-    fn main_flag_not_present_if_not_main() {
-        assert!(FactorSourceCommon::new_bdfs(false).flags.is_empty());
-    }
-
-    #[test]
-    fn main() {
-        let sut = FactorSourceCommon::new(
-            FactorSourceCryptoParameters::olympia(),
-            [FactorSourceFlag::Main],
-        );
-        assert!(sut.is_main());
-
-        let sut = FactorSourceCommon::new(
-            FactorSourceCryptoParameters::olympia(),
-            Vec::new(),
-        );
-        assert!(!sut.is_main());
     }
 }

@@ -17,22 +17,9 @@ pub trait ProfileFactorSourceQuerying {
 
     fn device_factor_sources(&self) -> Vec<DeviceFactorSource>;
 
-    fn main_factor_source_of_kind(
-        &self,
-        kind: FactorSourceKind,
-    ) -> Option<FactorSourceID>;
-
     fn main_bdfs(&self) -> DeviceFactorSource {
         let device_factor_sources = self.device_factor_sources();
-        let explicit_main = device_factor_sources
-            .clone()
-            .into_iter()
-            .filter(|x| x.is_main_bdfs())
-            .collect_vec()
-            .first()
-            .cloned();
-
-        let implicit_main = device_factor_sources
+        device_factor_sources
             .into_iter()
             .filter(|x| x.common.supports_babylon())
             .collect_vec()
@@ -40,9 +27,7 @@ pub trait ProfileFactorSourceQuerying {
             .expect(
                 "A Profile should always contain Babylon DeviceFactorSource",
             )
-            .clone();
-
-        explicit_main.unwrap_or(implicit_main).clone()
+            .clone()
     }
 }
 
@@ -72,24 +57,6 @@ impl ProfileFactorSourceQuerying for Profile {
             .iter()
             .filter_map(|f| f.as_device().cloned())
             .collect_vec()
-    }
-
-    fn main_factor_source_of_kind(
-        &self,
-        kind: FactorSourceKind,
-    ) -> Option<FactorSourceID> {
-        let main_factor_sources = self
-            .factor_sources
-            .iter()
-            .filter(|f| {
-                f.factor_source_kind() == kind
-                    && f.common_properties().is_main()
-            })
-            .map(|f| f.factor_source_id())
-            .collect::<Vec<_>>();
-        assert!(main_factor_sources.len() <= 1, "We should never have more than 1 main FactorSource of a given FactorSourceKind");
-
-        main_factor_sources.first().cloned()
     }
 }
 
@@ -264,42 +231,5 @@ mod tests {
     fn bdfs_fail_for_invalid_profile_without_babylon_device_factor_source() {
         let profile = Profile::sample_no_babylon_device_factor_source();
         profile.main_bdfs();
-    }
-
-    #[test]
-    fn main_factor_source_of_kind_present() {
-        let profile = Profile::sample();
-        let dfs = DeviceFactorSource::sample();
-        assert_eq!(
-            profile.main_factor_source_of_kind(FactorSourceKind::Device),
-            Some(dfs.factor_source_id())
-        );
-    }
-
-    #[test]
-    fn main_factor_source_of_kind_absent() {
-        let profile =
-            Profile::sample_no_factor_source_explicitly_marked_as_main();
-        assert_eq!(
-            profile.main_factor_source_of_kind(FactorSourceKind::Device),
-            None
-        );
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "We should never have more than 1 main FactorSource of a given FactorSourceKind"
-    )]
-    fn main_factor_source_of_kind_panics_when_multiple() {
-        let mut profile = Profile::sample();
-        let second_main_device_factor_source = DeviceFactorSource::babylon(
-            true,
-            &MnemonicWithPassphrase::sample_other(),
-            &HostInfo::sample_other(),
-        );
-        profile
-            .factor_sources
-            .insert(second_main_device_factor_source.into());
-        let _ = profile.main_factor_source_of_kind(FactorSourceKind::Device);
     }
 }

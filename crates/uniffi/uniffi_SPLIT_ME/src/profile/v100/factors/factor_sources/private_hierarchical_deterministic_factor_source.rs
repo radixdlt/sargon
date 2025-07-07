@@ -9,12 +9,10 @@ pub struct PrivateHierarchicalDeterministicFactorSource {
 
 #[uniffi::export]
 pub fn new_private_hd_factor_source_babylon(
-    is_main: bool,
     entropy: NonEmptyMax32Bytes,
     host_info: &HostInfo,
 ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
     InternalPrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy_bytes(
-        is_main,
         entropy.into_internal(),
         &host_info.into_internal(),
     ).into_result()
@@ -22,11 +20,10 @@ pub fn new_private_hd_factor_source_babylon(
 
 #[uniffi::export]
 pub fn new_private_hd_factor_source_babylon_from_mnemonic_with_passphrase(
-    is_main: bool,
     mnemonic_with_passphrase: MnemonicWithPassphrase,
     host_info: &HostInfo,
 ) -> PrivateHierarchicalDeterministicFactorSource {
-    InternalPrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(is_main, mnemonic_with_passphrase.into_internal(), &host_info.into_internal()).into()
+    InternalPrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(mnemonic_with_passphrase.into_internal(), &host_info.into_internal()).into()
 }
 
 #[uniffi::export]

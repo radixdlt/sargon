@@ -85,7 +85,6 @@ impl DeviceFactorSource {
     }
 
     pub fn babylon(
-        is_main: bool,
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
         host_info: &HostInfo,
     ) -> Self {
@@ -97,15 +96,14 @@ impl DeviceFactorSource {
             host_info,
             mnemonic_with_passphrase.mnemonic.word_count,
         );
-        Self::babylon_with_hint(is_main, id, hint)
+        Self::babylon_with_hint(id, hint)
     }
 
     pub fn babylon_with_hint(
-        is_main: bool,
         id: FactorSourceIDFromHash,
         hint: DeviceFactorSourceHint,
     ) -> Self {
-        Self::new(id, FactorSourceCommon::new_bdfs(is_main), hint)
+        Self::new(id, FactorSourceCommon::new_bdfs(), hint)
     }
 
     pub fn olympia(
@@ -121,11 +119,6 @@ impl DeviceFactorSource {
             mnemonic_with_passphrase.mnemonic.word_count,
         );
         Self::new(id, FactorSourceCommon::new_olympia(), hint)
-    }
-
-    /// Checks if its Main Babylon Device Factor Source (BDFS).
-    pub fn is_main_bdfs(&self) -> bool {
-        self.common.supports_babylon() && self.common.is_main()
     }
 }
 
@@ -145,7 +138,6 @@ impl DeviceFactorSource {
     /// A sample used to facilitate unit tests.
     pub fn sample_babylon() -> Self {
         let mut source = Self::babylon(
-            true,
             &MnemonicWithPassphrase::sample_device(),
             &HostInfo::sample(),
         );
@@ -157,7 +149,6 @@ impl DeviceFactorSource {
     /// A sample used to facilitate unit tests.
     pub fn sample_babylon_other() -> Self {
         let mut source = Self::babylon(
-            false,
             &MnemonicWithPassphrase::sample_device_other(),
             &HostInfo::sample_other(),
         );
@@ -205,29 +196,6 @@ mod tests {
     #[test]
     fn inequality() {
         assert_ne!(SUT::sample(), SUT::sample_other());
-    }
-
-    #[test]
-    fn is_main_bdfs() {
-        assert!(SUT::babylon(
-            true,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample()
-        )
-        .is_main_bdfs());
-
-        assert!(!SUT::babylon(
-            false,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample()
-        )
-        .is_main_bdfs());
-
-        assert!(!SUT::olympia(
-            &MnemonicWithPassphrase::sample_device_12_words(),
-            &HostInfo::sample_other()
-        )
-        .is_main_bdfs());
     }
 
     #[test]

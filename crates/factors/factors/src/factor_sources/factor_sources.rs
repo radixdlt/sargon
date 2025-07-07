@@ -12,9 +12,7 @@ pub trait FactorSourcesWithBDFS {
 
 impl FactorSourcesWithBDFS for FactorSources {
     /// Panics if `device_factor_source` is not using Babylon crypto parameters
-    /// AND marked "main".
     fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
-        assert!(device_factor_source.is_main_bdfs());
         Self::just(device_factor_source.into())
     }
 }
