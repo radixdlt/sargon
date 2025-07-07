@@ -466,21 +466,10 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "DeviceFactorSource is not main BDFS")]
-    fn new_from_non_main_bdfs_panics() {
-        let _ = SUT::from_device_factor_source(
-            DeviceFactorSource::sample_other(),
-            HostId::sample(),
-            HostInfo::sample(),
-            None::<Accounts>,
-        );
-    }
-
-    #[test]
     #[should_panic(
         expected = "Discrepancy, found an Account on other network than mainnet"
     )]
-    fn new_from_main_bdfs_with_stokenet_accounts_panics() {
+    fn new_from_bdfs_with_stokenet_accounts_panics() {
         let accounts = Accounts::sample_stokenet();
         SUT::from_device_factor_source(
             DeviceFactorSource::sample(),

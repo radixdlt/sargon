@@ -19,21 +19,66 @@ impl SargonOS {
             .clone()
     }
 
-    pub async fn create_and_save_new_mainnet_account_with_main_bdfs(
+    pub async fn create_and_save_new_account_with_bdfs(
         &self,
+        network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        self.create_and_save_new_account_with_main_bdfs(
-            NetworkID::Mainnet,
+        let bdfs = self.bdfs();
+        self.create_and_save_new_account_with_factor_source(
+            bdfs.into(),
+            network_id,
             name,
         )
         .await
     }
 
-    pub async fn create_and_save_new_unnamed_mainnet_account_with_main_bdfs(
+    /// Create a new Persona with main BDFS and adds it to the active Profile.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
+    pub async fn create_and_save_new_persona_with_bdfs(
+        &self,
+        network_id: NetworkID,
+        name: DisplayName,
+        persona_data: Option<PersonaData>,
+    ) -> Result<Persona> {
+        let bdfs = self.bdfs();
+        self.create_and_save_new_persona_with_factor_source(
+            bdfs.into(),
+            network_id,
+            name,
+            persona_data,
+        )
+        .await
+    }
+
+    pub async fn create_unsaved_account_with_bdfs(
+        &self,
+        network_id: NetworkID,
+        name: DisplayName,
+    ) -> Result<Account> {
+        let bdfs = self.bdfs();
+        self.create_unsaved_account_with_factor_source(
+            bdfs.into(),
+            network_id,
+            name,
+        )
+        .await
+    }
+
+    pub async fn create_and_save_new_mainnet_account_with_bdfs(
+        &self,
+        name: DisplayName,
+    ) -> Result<Account> {
+        self.create_and_save_new_account_with_bdfs(NetworkID::Mainnet, name)
+            .await
+    }
+
+    pub async fn create_and_save_new_unnamed_mainnet_account_with_bdfs(
         &self,
     ) -> Result<Account> {
-        self.create_and_save_new_mainnet_account_with_main_bdfs(
+        self.create_and_save_new_mainnet_account_with_bdfs(
             DisplayName::sample(),
         )
         .await
@@ -44,7 +89,7 @@ impl SargonOS {
         name: impl AsRef<str>,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
         let display_name = DisplayName::new(name)?;
-        self.create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(display_name).await
+        self.create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(display_name).await
     }
 
     pub async fn create_and_save_new_mainnet_persona(
@@ -90,10 +135,10 @@ impl SargonOS {
         name: impl AsRef<str>,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
         let display_name = DisplayName::new(name)?;
-        self.create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(display_name).await
+        self.create_and_save_new_mainnet_persona_with_bdfs_with_derivation_outcome(display_name).await
     }
 
-    pub async fn create_and_save_new_mainnet_account_with_main_bdfs_with_derivation_outcome(
+    pub async fn create_and_save_new_mainnet_account_with_bdfs_with_derivation_outcome(
         &self,
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
@@ -140,7 +185,7 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_account_with_main_bdfs(
+    pub async fn create_unsaved_unnamed_mainnet_account_with_bdfs(
         &self,
     ) -> Result<Account> {
         let bdfs = self.bdfs();
@@ -168,7 +213,7 @@ impl SargonOS {
     }
 
     /// Uses `create_unsaved_account` specifying `NetworkID::Mainnet` using main BDFS.
-    pub async fn create_unsaved_mainnet_account_with_main_bdfs(
+    pub async fn create_unsaved_mainnet_account_with_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Account> {
@@ -203,16 +248,16 @@ impl SargonOS {
     ///
     /// And also emits `Event::ProfileSaved` after having successfully written the JSON
     /// of the active profile to secure storage.
-    pub async fn batch_create_many_accounts_with_main_bdfs_then_save_once(
+    pub async fn batch_create_many_accounts_with_bdfs_then_save_once(
         &self,
         count: u16,
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<Accounts> {
-        self.batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) |x)
+        self.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(count, network_id, name_prefix).await.map(|(x, _) |x)
     }
 
-    pub async fn batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(
+    pub async fn batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(
         &self,
         count: u16,
         network_id: NetworkID,
@@ -286,14 +331,14 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
     /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_accounts_with_main_bdfs_consuming_factor_instances(
+    pub async fn batch_create_unsaved_accounts_with_bdfs_consuming_factor_instances(
         &self,
         network_id: NetworkID,
         count: u16,
         name_prefix: String,
     ) -> Result<Accounts> {
         let (accounts, instances_in_cache_consumer) = self
-            .batch_create_unsaved_accounts_with_main_bdfs(
+            .batch_create_unsaved_accounts_with_bdfs(
                 network_id,
                 count,
                 name_prefix,
@@ -311,7 +356,7 @@ impl SargonOS {
     /// # Emits Event
     /// Emits `Event::FactorSourceUpdated { id: FactorSourceID }` since the date in
     /// `factor_source.common.last_used` is updated.
-    pub async fn batch_create_unsaved_accounts_with_main_bdfs(
+    pub async fn batch_create_unsaved_accounts_with_bdfs(
         &self,
         network_id: NetworkID,
         count: u16,
@@ -415,7 +460,7 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::FactorSourceUpdated }`
-    pub async fn create_unsaved_unnamed_mainnet_persona_with_main_bdfs(
+    pub async fn create_unsaved_unnamed_mainnet_persona_with_bdfs(
         &self,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
         let bdfs = self.bdfs();
@@ -443,7 +488,7 @@ impl SargonOS {
     }
 
     /// Uses `create_unsaved_persona` specifying `NetworkID::Mainnet` using main BDFS.
-    pub async fn create_unsaved_mainnet_persona_with_main_bdfs(
+    pub async fn create_unsaved_mainnet_persona_with_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
@@ -482,7 +527,7 @@ impl SargonOS {
     /// of the factor source has been updated.
     ///
     /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    pub async fn create_unsaved_persona_with_main_bdfs(
+    pub async fn create_unsaved_persona_with_bdfs(
         &self,
         network_id: NetworkID,
         name: DisplayName,
@@ -526,7 +571,7 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_unnamed_mainnet_persona_with_main_bdfs(
+    pub async fn create_and_save_new_unnamed_mainnet_persona_with_bdfs(
         &self,
     ) -> Result<Persona> {
         let bdfs = self.bdfs();
@@ -555,14 +600,14 @@ impl SargonOS {
     ///
     /// # Emits Event
     /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_mainnet_persona_with_main_bdfs(
+    pub async fn create_and_save_new_mainnet_persona_with_bdfs(
         &self,
         name: DisplayName,
     ) -> Result<Persona> {
-        self.create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
+        self.create_and_save_new_mainnet_persona_with_bdfs_with_derivation_outcome(name).await.map(|(x, _)| x)
     }
 
-    pub async fn create_and_save_new_mainnet_persona_with_main_bdfs_with_derivation_outcome(
+    pub async fn create_and_save_new_mainnet_persona_with_bdfs_with_derivation_outcome(
         &self,
         name: DisplayName,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {

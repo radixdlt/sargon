@@ -221,14 +221,14 @@ mod tests {
             let shield_id = shield.id();
             let network = NetworkID::Mainnet;
             let account = os
-                .create_and_save_new_account_with_main_bdfs(
+                .create_and_save_new_account_with_bdfs(
                     network,
                     DisplayName::sample(),
                 )
                 .await
                 .unwrap();
             let persona = os
-                .create_and_save_new_persona_with_main_bdfs(
+                .create_and_save_new_persona_with_bdfs(
                     network,
                     DisplayName::sample_other(),
                     None,
@@ -321,14 +321,14 @@ mod tests {
             };
 
             let account = os
-                .create_and_save_new_account_with_main_bdfs(
+                .create_and_save_new_account_with_bdfs(
                     network,
                     DisplayName::sample(),
                 )
                 .await
                 .unwrap();
             let persona = os
-                .create_and_save_new_persona_with_main_bdfs(
+                .create_and_save_new_persona_with_bdfs(
                     network,
                     DisplayName::sample_other(),
                     None,

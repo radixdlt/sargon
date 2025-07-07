@@ -4,8 +4,8 @@ import SargonUniFFI
 extension FactorSourceCommon {
 	/// Creates a new `FactorSourceCommon` with crypto parameters
 	/// for "Babylon"
-	public static func babylon(isMain: Bool = false) -> Self {
-		newFactorSourceCommonBdfs(isMain: isMain)
+	public static func babylon() -> Self {
+		newFactorSourceCommonBdfs()
 	}
 
 	/// Creates a new `FactorSourceCommon` with crypto parameters

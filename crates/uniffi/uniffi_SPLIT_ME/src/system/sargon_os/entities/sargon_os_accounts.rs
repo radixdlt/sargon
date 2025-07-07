@@ -21,24 +21,6 @@ impl SargonOS {
             .await
             .into_result()
     }
-
-    /// Create a new Account using main BDFS and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::AccountAdded }`
-    pub async fn create_and_save_new_account_with_main_bdfs(
-        &self,
-        network_id: NetworkID,
-        name: DisplayName,
-    ) -> Result<Account> {
-        self.wrapped
-            .create_and_save_new_account_with_main_bdfs(
-                network_id.into_internal(),
-                name.into_internal(),
-            )
-            .await
-            .into_result()
-    }
 }
 
 // ==================

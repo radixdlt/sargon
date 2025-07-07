@@ -198,9 +198,9 @@ mod tests {
             let os =
                 SUT::boot_with_clients_and_interactor(clients, interactors)
                     .await;
-            os.new_wallet_with_mnemonic(
-                Some(MnemonicWithPassphrase::sample_device())
-            )
+            os.new_wallet_with_mnemonic(Some(
+                MnemonicWithPassphrase::sample_device(),
+            ))
             .await
             .unwrap();
 
@@ -257,9 +257,9 @@ mod tests {
             let os =
                 SUT::boot_with_clients_and_interactor(clients, interactors)
                     .await;
-            os.new_wallet_with_mnemonic(
-                Some(MnemonicWithPassphrase::sample_device())
-            )
+            os.new_wallet_with_mnemonic(Some(
+                MnemonicWithPassphrase::sample_device(),
+            ))
             .await
             .unwrap();
 

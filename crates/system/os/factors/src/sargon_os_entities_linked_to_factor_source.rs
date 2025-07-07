@@ -312,8 +312,7 @@ mod tests {
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
-        let (mut profile, _) =
-            os.create_new_profile_with_bdfs(None).unwrap();
+        let (mut profile, _) = os.create_new_profile_with_bdfs(None).unwrap();
 
         let new_network = ProfileNetwork::new(
             NetworkID::Stokenet,

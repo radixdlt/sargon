@@ -240,7 +240,7 @@ mod tests {
 
         // ACT
         os.with_timeout(|x| {
-            x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
+            x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
         })
         .await
         .unwrap();
@@ -256,7 +256,7 @@ mod tests {
 
         // ACT
         os.with_timeout(|x| {
-            x.create_and_save_new_unnamed_mainnet_account_with_main_bdfs()
+            x.create_and_save_new_unnamed_mainnet_account_with_bdfs()
         })
         .await
         .unwrap();
