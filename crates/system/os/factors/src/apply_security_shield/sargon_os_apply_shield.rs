@@ -567,7 +567,7 @@ pub(crate) async fn add_unsafe_shield_with_matrix_with_fixed_metadata(
     os: &SargonOS,
     fixed_metadata: impl Into<Option<SecurityStructureMetadata>>,
 ) -> Result<SecurityStructureOfFactorSourceIDs> {
-    let bdfs = os.main_bdfs()?;
+    let bdfs = os.bdfs();
     let mut shield_of_ids = unsafe_shield_with_bdfs(&bdfs.into());
     if let Some(fixed_metadata) = fixed_metadata.into() {
         shield_of_ids.metadata = fixed_metadata;
@@ -1308,7 +1308,7 @@ mod tests {
         // - `ledger`: a ledger with keys in cache
         // - `arculus`: an arculusCard with keys in cache
         let os = SargonOS::fast_boot().await;
-        let device: FactorSource = os.main_bdfs().unwrap().into();
+        let device: FactorSource = os.bdfs().into();
         let ledger = FactorSource::sample_ledger();
         let arculus = FactorSource::sample_arculus();
 

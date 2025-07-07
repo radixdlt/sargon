@@ -11,13 +11,6 @@ pub enum DeviceFactorSourceType {
 }
 
 impl SargonOS {
-    /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
-    /// a `DeviceFactorSource`.
-    pub fn main_bdfs(&self) -> Result<DeviceFactorSource> {
-        self.profile_state_holder
-            .access_profile_with(|p| p.main_bdfs())
-    }
-
     /// Returns all the factor sources
     pub fn factor_sources(&self) -> Result<FactorSources> {
         self.profile_state_holder
@@ -545,7 +538,7 @@ mod tests {
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
         // ACT
-        let loaded = os.main_bdfs().unwrap();
+        let loaded = os.bdfs();
 
         // ASSERT
         assert_eq!(
@@ -642,7 +635,7 @@ mod tests {
         let mwp = MnemonicWithPassphrase::sample();
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
-        let bdfs = os.main_bdfs().unwrap();
+        let bdfs = os.bdfs();
 
         // ACT
         let inserted = os

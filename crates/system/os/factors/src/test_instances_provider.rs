@@ -375,7 +375,7 @@ impl AllHdFactorsFromRole for ConfirmationRoleWithFactorInstances {
 #[actix_rt::test]
 async fn cache_is_unchanged_in_case_of_failure() {
     let os = SargonOS::fast_boot().await;
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let factor_sources = os.profile().unwrap().factor_sources.clone();
     assert_eq!(
         factor_sources.clone().into_iter().collect_vec(),
@@ -511,7 +511,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
         c.serializable_snapshot(),
         cache_before_fail.serializable_snapshot()
     );
-    assert_eq!(os.main_bdfs().unwrap().id_from_hash(), bdfs.id_from_hash());
+    assert_eq!(os.bdfs().id_from_hash(), bdfs.id_from_hash());
 
     let res = os
         ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
@@ -550,7 +550,7 @@ async fn test_assert_factor_instances_invalid() {
         .await
         .unwrap();
 
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
 
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
@@ -691,7 +691,7 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
     );
 
-    let fs_device = FactorSource::from(os.main_bdfs().unwrap());
+    let fs_device = FactorSource::from(os.bdfs());
     let fs_arculus = FactorSource::sample_arculus();
     let fs_ledger = FactorSource::sample_ledger();
 
@@ -890,7 +890,7 @@ async fn test_securified_accounts() {
     let bob = os.create_and_save_new_mainnet_account("Bob").await.unwrap();
 
     assert_ne!(alice.address(), bob.address());
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
     let password = FactorSource::sample_password();
@@ -1180,7 +1180,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
     let os = SargonOS::fast_boot().await;
 
     let profile = os.profile().unwrap();
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let factor_sources = profile.factor_sources.clone();
     assert_eq!(
         factor_sources.clone().into_iter().collect_vec(),
@@ -1853,7 +1853,7 @@ async fn securified_personas() {
         .unwrap();
 
     assert_ne!(batman.address(), satoshi.address());
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
     let password = FactorSource::sample_password();
@@ -2158,7 +2158,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
     );
 
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let arculus = FactorSource::sample_arculus();
     let ledger = FactorSource::sample_ledger();
 

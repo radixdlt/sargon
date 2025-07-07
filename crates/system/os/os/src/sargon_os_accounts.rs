@@ -43,7 +43,7 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_and_save_new_account_with_factor_source(
             bdfs.into(),
             network_id,
@@ -184,7 +184,7 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<Account> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_unsaved_account_with_factor_source(
             bdfs.into(),
             network_id,

@@ -43,12 +43,6 @@ impl From<InternalHierarchicalDeterministicFactorInstance>
 
 #[uniffi::export]
 impl SargonOS {
-    /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
-    /// a `DeviceFactorSource`.
-    pub fn main_bdfs(&self) -> Result<DeviceFactorSource> {
-        self.wrapped.main_bdfs().into_result()
-    }
-
     /// Returns all the factor sources
     pub fn factor_sources(&self) -> Result<Vec<FactorSource>> {
         self.wrapped.factor_sources().into_iter_result()

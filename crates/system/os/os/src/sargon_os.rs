@@ -708,7 +708,7 @@ mod tests {
         os.new_wallet().await.unwrap();
 
         let profile = os.profile().unwrap();
-        let bdfs = profile.main_bdfs();
+        let bdfs = os.bdfs();
 
         assert!(os
             .clients
@@ -728,8 +728,8 @@ mod tests {
         os.import_wallet(&profile_to_import, false).await.unwrap();
 
         assert_eq!(
-            os.profile().unwrap().main_bdfs(),
-            profile_to_import.main_bdfs()
+            os.profile().unwrap().device_factor_sources(),
+            profile_to_import.device_factor_sources()
         );
     }
 
@@ -741,8 +741,8 @@ mod tests {
         os.import_wallet(&profile_to_import, true).await.unwrap();
 
         assert_ne!(
-            os.profile().unwrap().main_bdfs(),
-            profile_to_import.main_bdfs()
+            os.profile().unwrap().device_factor_sources(),
+            profile_to_import.device_factor_sources()
         );
     }
 
@@ -838,8 +838,7 @@ mod tests {
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
         os.new_wallet().await.unwrap();
-        let profile = os.profile().unwrap();
-        let bdfs = profile.main_bdfs();
+        let bdfs = os.bdfs();
 
         os.delete_wallet().await.unwrap();
 

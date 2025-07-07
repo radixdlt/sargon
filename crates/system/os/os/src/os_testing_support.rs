@@ -6,8 +6,17 @@ use crate::prelude::*;
 impl SargonOS {
     pub async fn with_bdfs() -> (Arc<Self>, FactorSource) {
         let os = Self::fast_boot().await;
-        let bdfs = os.main_bdfs().unwrap();
+        let bdfs = os.bdfs();
         (os, bdfs.into())
+    }
+
+    pub fn bdfs(&self) -> DeviceFactorSource {
+        self.profile()
+            .unwrap()
+            .device_factor_sources()
+            .first()
+            .unwrap()
+            .clone()
     }
 
     pub async fn create_and_save_new_mainnet_account_with_main_bdfs(
@@ -88,7 +97,7 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<(Account, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_and_save_new_mainnet_account_with_factor_source_with_derivation_outcome(
             bdfs.into(),
             name,
@@ -134,7 +143,7 @@ impl SargonOS {
     pub async fn create_unsaved_unnamed_mainnet_account_with_main_bdfs(
         &self,
     ) -> Result<Account> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_unsaved_unnamed_mainnet_account_with_factor_source(
             bdfs.into(),
         )
@@ -163,7 +172,7 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<Account> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_unsaved_mainnet_account_with_factor_source(
             bdfs.into(),
             name,
@@ -209,7 +218,7 @@ impl SargonOS {
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<(Accounts, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.batch_create_many_accounts_with_factor_source_with_derivation_outcome_then_save_once(
             bdfs.into(),
             count,
@@ -308,7 +317,7 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<(Accounts, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.batch_create_unsaved_accounts_with_factor_source(
             bdfs.into(),
             network_id,
@@ -409,7 +418,7 @@ impl SargonOS {
     pub async fn create_unsaved_unnamed_mainnet_persona_with_main_bdfs(
         &self,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_unsaved_unnamed_mainnet_persona_with_factor_source(
             bdfs.into(),
         )
@@ -438,7 +447,7 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_unsaved_mainnet_persona_with_factor_source(
             bdfs.into(),
             name,
@@ -478,7 +487,7 @@ impl SargonOS {
         network_id: NetworkID,
         name: DisplayName,
     ) -> Result<(Persona, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_unsaved_persona_with_factor_source(
             bdfs.into(),
             network_id,
@@ -520,7 +529,7 @@ impl SargonOS {
     pub async fn create_and_save_new_unnamed_mainnet_persona_with_main_bdfs(
         &self,
     ) -> Result<Persona> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_and_save_new_unnamed_mainnet_persona_with_factor_source(
             bdfs.into(),
         )
@@ -557,7 +566,7 @@ impl SargonOS {
         &self,
         name: DisplayName,
     ) -> Result<(Persona, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_and_save_new_mainnet_persona_with_factor_source_with_derivation_outcome(
             bdfs.into(),
             name,
@@ -614,7 +623,7 @@ impl SargonOS {
         network_id: NetworkID,
         name_prefix: String,
     ) -> Result<(Personas, FactorInstancesProviderOutcomeForFactor)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.batch_create_many_personas_with_factor_source_with_derivation_outcome_then_save_once(
             bdfs.into(),
             count,
@@ -688,7 +697,7 @@ impl SargonOS {
         count: u16,
         name_prefix: String,
     ) -> Result<(Personas, InstancesInCacheConsumer)> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.batch_create_unsaved_personas_with_factor_source(
             bdfs.into(),
             network_id,

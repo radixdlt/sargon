@@ -67,7 +67,7 @@ mod tests {
             SargonOS::boot_test_with_networking_driver(mock_networking_driver)
                 .await
                 .unwrap();
-        let bdfs = os.main_bdfs().unwrap();
+        let bdfs = os.bdfs();
         let ledger = FactorSource::sample_at(1);
         let arculus = FactorSource::sample_at(3);
         let password = FactorSource::sample_at(5);
@@ -373,7 +373,7 @@ mod tests {
 
         let addresses = arrange_entities(os.clone()).await;
 
-        let bdfs = os.main_bdfs().unwrap();
+        let bdfs = os.bdfs();
 
         let shield_builder = SecurityShieldBuilder::lenient();
 

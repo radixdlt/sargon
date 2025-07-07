@@ -29,7 +29,7 @@ impl SargonOS {
         name: DisplayName,
         persona_data: Option<PersonaData>,
     ) -> Result<Persona> {
-        let bdfs = self.main_bdfs()?;
+        let bdfs = self.bdfs();
         self.create_and_save_new_persona_with_factor_source(
             bdfs.into(),
             network_id,

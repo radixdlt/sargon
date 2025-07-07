@@ -16,19 +16,6 @@ pub trait ProfileFactorSourceQuerying {
     }
 
     fn device_factor_sources(&self) -> Vec<DeviceFactorSource>;
-
-    fn main_bdfs(&self) -> DeviceFactorSource {
-        let device_factor_sources = self.device_factor_sources();
-        device_factor_sources
-            .into_iter()
-            .filter(|x| x.common.supports_babylon())
-            .collect_vec()
-            .first()
-            .expect(
-                "A Profile should always contain Babylon DeviceFactorSource",
-            )
-            .clone()
-    }
 }
 
 impl ProfileFactorSourceQuerying for Profile {
@@ -200,36 +187,5 @@ mod tests {
                 bad_value: id.to_string()
             })
         );
-    }
-
-    #[test]
-    fn bdfs_success_without_explicit_main_flag() {
-        let profile =
-            Profile::sample_no_factor_source_explicitly_marked_as_main();
-        assert_eq!(profile.main_bdfs().id, DeviceFactorSource::sample().id);
-    }
-
-    #[test]
-    fn bdfs_success_with_explicit_main_flag() {
-        let profile = Profile::sample();
-        assert_eq!(profile.main_bdfs().id, DeviceFactorSource::sample().id);
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "A Profile should always contain Babylon DeviceFactorSource"
-    )]
-    fn bdfs_fail_for_invalid_profile_without_device_factor_source() {
-        let profile = Profile::sample_no_device_factor_source();
-        profile.main_bdfs();
-    }
-
-    #[test]
-    #[should_panic(
-        expected = "A Profile should always contain Babylon DeviceFactorSource"
-    )]
-    fn bdfs_fail_for_invalid_profile_without_babylon_device_factor_source() {
-        let profile = Profile::sample_no_babylon_device_factor_source();
-        profile.main_bdfs();
     }
 }
