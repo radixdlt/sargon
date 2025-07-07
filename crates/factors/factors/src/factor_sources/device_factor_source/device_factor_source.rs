@@ -211,7 +211,7 @@ mod tests {
                         "supportedCurves": ["curve25519"],
                         "supportedDerivationPathSchemes": ["cap26"]
                     },
-                    "flags": ["main"],
+                    "flags": [],
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {
@@ -248,7 +248,7 @@ mod tests {
                         "supportedCurves": ["curve25519"],
                         "supportedDerivationPathSchemes": ["cap26"]
                     },
-                    "flags": ["main"],
+                    "flags": [],
                     "lastUsedOn": "2023-09-11T16:05:56.000Z"
                 },
                 "hint": {

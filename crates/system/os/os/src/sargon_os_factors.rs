@@ -189,7 +189,7 @@ impl SargonOS {
         factor_type: DeviceFactorSourceType,
     ) -> DeviceFactorSource {
         let host_info = self.host_info();
-        let factor_source = match factor_type {
+        match factor_type {
             DeviceFactorSourceType::Olympia => DeviceFactorSource::olympia(
                 &mnemonic_with_passphrase,
                 &host_info,
@@ -198,8 +198,7 @@ impl SargonOS {
                 &mnemonic_with_passphrase,
                 &host_info,
             ),
-        };
-        factor_source
+        }
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
