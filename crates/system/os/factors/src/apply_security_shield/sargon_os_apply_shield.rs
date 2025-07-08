@@ -1147,7 +1147,7 @@ mod tests {
             ledger.clone(),
             arculus.clone(),
         ]);
-        assert_eq!(result, expected);
+        pretty_assertions::assert_eq!(result, expected);
     }
 
     #[actix_rt::test]
