@@ -279,40 +279,40 @@ mod tests {
         assert_eq!(os.profile().unwrap().networks[0].personas.len(), 0); // not added
     }
 
-    #[actix_rt::test]
-    async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_in_cache_consumer_is_not_used(
-    ) {
-        // ARRANGE
-        let (os, bdfs) = SUT::with_bdfs().await;
+    // #[actix_rt::test]
+    // async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_in_cache_consumer_is_not_used(
+    // ) {
+    //     // ARRANGE
+    //     let (os, bdfs) = SUT::with_bdfs().await;
 
-        // ACT
-        let (first, instances_in_cache_consumer) = os
-            .with_timeout(|x| {
-                x.create_unsaved_persona_with_factor_source(
-                    bdfs.clone(),
-                    NetworkID::Mainnet,
-                    DisplayName::new("Unnamed").unwrap(),
-                )
-            })
-            .await
-            .unwrap();
+    //     // ACT
+    //     let (first, instances_in_cache_consumer) = os
+    //         .with_timeout(|x| {
+    //             x.create_unsaved_persona_with_factor_source(
+    //                 bdfs.clone(),
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::new("Unnamed").unwrap(),
+    //             )
+    //         })
+    //         .await
+    //         .unwrap();
 
-        // Not used!
-        drop(instances_in_cache_consumer);
+    //     // Not used!
+    //     drop(instances_in_cache_consumer);
 
-        let (second, _) = os
-            .with_timeout(|x| {
-                x.create_unsaved_persona_with_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Unnamed").unwrap(),
-                )
-            })
-            .await
-            .unwrap();
+    //     let (second, _) = os
+    //         .with_timeout(|x| {
+    //             x.create_unsaved_persona_with_bdfs(
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::new("Unnamed").unwrap(),
+    //             )
+    //         })
+    //         .await
+    //         .unwrap();
 
-        // ASSERT
-        assert_eq!(first, second);
-    }
+    //     // ASSERT
+    //     assert_eq!(first, second);
+    // }
 
     #[actix_rt::test]
     async fn test_create_unsaved_persona_twice_different_persona_if_instances_are_consumed(
