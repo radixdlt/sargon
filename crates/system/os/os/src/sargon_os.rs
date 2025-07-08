@@ -351,9 +351,7 @@ impl SargonOS {
             Header::new(DeviceInfo::new_from_info(&self.host_id, &host_info)),
             FactorSources::with_bdfs(private_bdfs.factor_source.clone()),
             AppPreferences::default(),
-            ProfileNetworks::just(ProfileNetwork::new_empty_on(
-                NetworkID::Mainnet,
-            )),
+            ProfileNetworks::default(),
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
         Ok((profile, private_bdfs))
