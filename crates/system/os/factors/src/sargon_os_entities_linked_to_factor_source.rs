@@ -220,8 +220,12 @@ mod tests {
                 ProfileToCheck::Specific(profile),
             )
             .await
-            .expect_err("Expected an error");
-        assert_eq!(result, CommonError::Unknown);
+            .unwrap();
+        verify_device_integrity(result.integrity, true, true);
+        assert!(result.accounts.is_empty());
+        assert!(result.hidden_accounts.is_empty());
+        assert!(result.personas.is_empty());
+        assert!(result.hidden_personas.is_empty());
     }
 
     #[actix_rt::test]

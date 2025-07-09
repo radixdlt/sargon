@@ -47,7 +47,8 @@ impl SargonOS {
         let version = sargon_info.sargon_version;
         let ret_version = sargon_info.dependencies.radix_engine_toolkit;
         info!("Booting SargonOS {} (RET: {})", &version, &ret_version);
-        let host_info = clients.host.summary().await;
+        let host_info = Self::get_host_info(&clients).await;
+
         info!("Host: {}", host_info);
 
         let secure_storage = &clients.secure_storage;
@@ -76,7 +77,6 @@ impl SargonOS {
         }
 
         let host_id = Self::get_host_id(&clients).await;
-        let host_info = Self::get_host_info(&clients).await;
         let os = Arc::new(Self {
             clients,
             profile_state_holder: ProfileStateHolder::new(
@@ -422,6 +422,7 @@ impl SargonOS {
             Option<Arc<dyn AuthorizationInteractor>>,
         >,
         spot_check_interactor: impl Into<Option<Arc<dyn SpotCheckInteractor>>>,
+        should_pre_derive_instances: bool,
     ) -> Result<Arc<Self>> {
         let test_drivers =
             Drivers::with_file_system(InMemoryFileSystemDriver::new());
@@ -466,6 +467,16 @@ impl SargonOS {
         })
         .await?;
 
+        if should_pre_derive_instances {
+            #[cfg(debug_assertions)]
+            // only tests for now, need more work in hosts before we can do this in prod
+            os.pre_derive_and_fill_cache_with_instances_for_factor_source(
+                os.bdfs().into(),
+                NetworkID::Mainnet, // we care not about other networks here
+            )
+            .await?;
+        }
+
         Ok(os)
     }
 
@@ -476,14 +487,15 @@ impl SargonOS {
     pub async fn fast_boot_bdfs_and_interactor(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
         derivation_interactor: impl Into<Option<Arc<dyn KeyDerivationInteractor>>>,
+        should_pre_derive_instances: bool,
     ) -> Arc<Self> {
         let req = Self::boot_test_with_bdfs_mnemonic_and_interactors(
             bdfs_mnemonic,
             derivation_interactor,
             None,
             None,
+            should_pre_derive_instances,
         );
-
         actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
             .await
             .unwrap()
@@ -493,12 +505,12 @@ impl SargonOS {
     pub async fn fast_boot_bdfs(
         bdfs_mnemonic: impl Into<Option<MnemonicWithPassphrase>>,
     ) -> Arc<Self> {
-        Self::fast_boot_bdfs_and_interactor(bdfs_mnemonic, None).await
+        Self::fast_boot_bdfs_and_interactor(bdfs_mnemonic, None, true).await
     }
 
     pub async fn boot_test() -> Result<Arc<Self>> {
         Self::boot_test_with_bdfs_mnemonic_and_interactors(
-            None, None, None, None,
+            None, None, None, None, true
         )
         .await
     }

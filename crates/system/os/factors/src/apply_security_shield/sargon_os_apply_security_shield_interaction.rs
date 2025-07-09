@@ -210,6 +210,7 @@ mod tests {
             let os = SargonOS::fast_boot_bdfs_and_interactor(
                 MnemonicWithPassphrase::sample_device_other(),
                 None,
+                true
             )
             .await;
             let shield = add_unsafe_shield_with_matrix_with_fixed_metadata(
