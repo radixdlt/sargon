@@ -16,16 +16,6 @@ impl BlogPostsClient {
                     .collect()
             })
     }
-
-    pub async fn fetch_blog_posts_collection_details(
-        &self,
-    ) -> Result<BlogPostsCollectionDetails> {
-        let url = Url::from_str(BLOG_POSTS_DETAILS_URL).unwrap();
-        let request = NetworkRequest::new_get(url);
-        self.http_client
-            .execute_request_with_decoding(request)
-            .await
-    }
 }
 
 impl From<RemoteBlogPost> for BlogPost {
@@ -36,27 +26,6 @@ impl From<RemoteBlogPost> for BlogPost {
             value.field_data.image.url,
             Url::from_str(&format!("{BLOG_BASE_PATH}/{slug}")).unwrap(),
         )
-    }
-}
-
-#[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BlogPostsCollectionDetails {
-    #[serde(deserialize_with = "deserialize_timestamp_truncated_to_seconds")]
-    pub last_updated: Timestamp,
-}
-
-impl BlogPostsCollectionDetails {
-    pub fn new(last_updated: Timestamp) -> Self {
-        Self { last_updated }
-    }
-}
-
-impl Default for BlogPostsCollectionDetails {
-    fn default() -> Self {
-        Self {
-            last_updated: Timestamp::UNIX_EPOCH,
-        }
     }
 }
 
@@ -110,16 +79,6 @@ impl Image {
     fn new(url: Url) -> Self {
         Self { url }
     }
-}
-
-fn deserialize_timestamp_truncated_to_seconds<'de, D>(
-    deserializer: D,
-) -> Result<Timestamp, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let timestamp: Timestamp = Timestamp::deserialize(deserializer)?;
-    Ok(timestamp_truncated_to_seconds(timestamp))
 }
 
 #[cfg(test)]

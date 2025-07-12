@@ -19,14 +19,9 @@ impl BlogPostsClient {
         }
     }
 
-    pub async fn save_blog_posts_to_cache(
-        &self,
-        posts: &[BlogPost],
-        last_update: Timestamp,
-    ) {
+    pub async fn save_blog_posts_to_cache(&self, posts: &[BlogPost]) {
         let to_save = CachedBlogPosts {
             posts: posts.to_owned(),
-            last_update,
         };
         _ = self
             .file_system_client
@@ -43,11 +38,10 @@ impl BlogPostsClient {
 #[serde(rename_all = "camelCase")]
 pub struct CachedBlogPosts {
     pub posts: Vec<BlogPost>,
-    pub last_update: Timestamp,
 }
 
 impl CachedBlogPosts {
-    pub fn new(posts: Vec<BlogPost>, last_update: Timestamp) -> Self {
-        Self { posts, last_update }
+    pub fn new(posts: Vec<BlogPost>) -> Self {
+        Self { posts }
     }
 }
