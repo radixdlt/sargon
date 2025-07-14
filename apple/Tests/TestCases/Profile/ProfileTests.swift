@@ -122,7 +122,7 @@ final class ProfileTests: Test<Profile> {
 	func test_performance_json_encoding_string() throws {
 		let (sut, _) = vector
 		measure {
-			let _ = sut.toJSONString()
+			_ = sut.toJSONString()
 		}
 	}
 
@@ -130,7 +130,7 @@ final class ProfileTests: Test<Profile> {
 	func test_performance_json_decoding_string() throws {
 		let (_, jsonString) = vector
 		measure {
-			let _ = try! SUT(jsonString: jsonString)
+			_ = try! SUT(jsonString: jsonString)
 		}
 	}
 
