@@ -21,21 +21,13 @@ use crate::prelude::*;
 /// Some cards used in the past have been removed.
 /// - One example is `DiscoverRadixDapps` which is now a separate tab in home screen.1
 pub enum HomeCard {
-    /// Content: "Start RadQuest, learn about Radix, earn XRD and collectibles."
-    /// Action: Redirect user to RadQuest.
+    JoinRadixRewards,
     StartRadQuest,
-
-    /// Content: "Continue your Radix journey in your browser. Tap to dismiss."
-    /// Action: None.
     ContinueRadQuest,
-
-    /// Content: "You can now connect with your Radix Wallet. Tap to dismiss."
-    /// Action: None.
     #[display("Dapp {:?}", icon_url)]
-    Dapp { icon_url: Option<Url> },
-
-    /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
-    /// Action: None
+    Dapp {
+        icon_url: Option<Url>,
+    },
     Connector,
 }
 

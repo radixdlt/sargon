@@ -67,6 +67,7 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     pub async fn wallet_created(&self) -> Result<()> {
         let default_cards = HomeCards::from_iter([
+            HomeCard::JoinRadixRewards,
             HomeCard::Connector,
             HomeCard::StartRadQuest,
         ]);
@@ -377,6 +378,7 @@ mod tests {
             observer.clone(),
         );
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
@@ -408,6 +410,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_wallet_created_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
@@ -452,6 +455,7 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
@@ -494,6 +498,7 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
