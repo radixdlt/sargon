@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use serde::Deserializer;
 
 impl BlogPostsClient {
     pub async fn fetch_remote_blog_posts(&self) -> Result<Vec<BlogPost>> {
