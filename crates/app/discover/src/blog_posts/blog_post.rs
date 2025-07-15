@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BlogPosts {
-    /// All of the blog posts
+    /// All of the blog posts.
     pub posts: Vec<BlogPost>,
     /// The most recent new blog post.
     /// There might be more than one new blog post, but we'll inform the user

@@ -8,7 +8,7 @@ final class ThrowingHostInteractorTests: TestCase {
 
 	func testDeriveKeysThrows() async throws {
 		do {
-			let _ = try await SUT.shared.deriveKeys(
+			_ = try await SUT.shared.deriveKeys(
 				request: SargonUniFFI.KeyDerivationRequest(derivationPurpose: .creatingNewAccount, perFactorSource: [])
 			)
 		} catch {
@@ -18,7 +18,7 @@ final class ThrowingHostInteractorTests: TestCase {
 
 	func testSignAuthThrows() async throws {
 		do {
-			let _ = try await SUT.shared.signAuth(
+			_ = try await SUT.shared.signAuth(
 				request: SargonUniFFI.SignRequestOfAuthIntent(factorSourceKind: .device, perFactorSource: [])
 			)
 		} catch {
@@ -28,7 +28,7 @@ final class ThrowingHostInteractorTests: TestCase {
 
 	func testSignTransactionsThrows() async throws {
 		do {
-			let _ = try await SUT.shared.signTransactions(
+			_ = try await SUT.shared.signTransactions(
 				request: SargonUniFFI.SignRequestOfTransactionIntent(factorSourceKind: .device, perFactorSource: [])
 			)
 		} catch {
@@ -38,7 +38,7 @@ final class ThrowingHostInteractorTests: TestCase {
 
 	func testSignSubintentsThrows() async throws {
 		do {
-			let _ = try await SUT.shared.signSubintents(
+			_ = try await SUT.shared.signSubintents(
 				request: SargonUniFFI.SignRequestOfSubintent(factorSourceKind: .device, perFactorSource: [])
 			)
 		} catch {

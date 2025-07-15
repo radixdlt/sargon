@@ -22,7 +22,7 @@ final class FactorSourcesTests: CollectionTest<FactorSource> {
 	func omit_crash_if_empty() {
 		var profile = Profile.sample
 		profile.factorSources = [] // empty FactorSources is not allowed
-		let _ = profile.jsonData() // should crash
+		_ = profile.jsonData() // should crash
 	}
 
 	@available(*, deprecated)
