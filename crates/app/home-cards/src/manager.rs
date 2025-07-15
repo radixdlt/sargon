@@ -68,7 +68,7 @@ impl HomeCardsManager {
 
         let cards_to_add = cards_to_be_added_on_update
             .into_iter()
-            .filter(|card| !stored_dismissed_cards.contains_by_id(&card))
+            .filter(|card| !stored_dismissed_cards.contains_by_id(card))
             .collect_vec();
 
         let mut stored_cards = self.load_cards().await?;
