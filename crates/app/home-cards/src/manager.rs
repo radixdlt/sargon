@@ -63,7 +63,8 @@ impl HomeCardsManager {
         let cards_to_be_added_on_update =
             HomeCards::from_iter([HomeCard::JoinRadixRewards]);
 
-        let stored_dimissed_cards = self.load_dismissed_cards().await?;
+        let stored_dimissed_cards =
+            self.load_dismissed_cards().await.unwrap_or_default();
 
         let cards_to_add = cards_to_be_added_on_update
             .into_iter()
