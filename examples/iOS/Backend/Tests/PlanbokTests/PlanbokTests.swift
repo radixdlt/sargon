@@ -6,7 +6,7 @@ import XCTest
 class TestCase: XCTestCase {
 	override func setUp() async throws {
 		try await super.setUp()
-		let _ = try await SargonOS._creatingShared(bootingWith: BIOS.insecure(), isEmulatingFreshInstall: true)
+		_ = try await SargonOS._creatingShared(bootingWith: BIOS.insecure(), isEmulatingFreshInstall: true)
 	}
 }
 
@@ -23,7 +23,7 @@ final class PlanbokTests: TestCase {
 			isEmulatingFreshInstall: true
 		)
 		@SharedReader(.network) var network
-		let _ = try await os.changeCurrentGateway(to: .stokenet)
+		_ = try await os.changeCurrentGateway(to: .stokenet)
 		await Task.megaYield()
 		XCTAssertEqual(network, .stokenet)
 	}
@@ -37,7 +37,7 @@ final class PlanbokTests: TestCase {
 		let account = try await os.createAndSaveNewUnnamedMainnetAccount()
 		await Task.megaYield()
 		XCTAssertEqual(accountsForDisplay, [AccountForDisplay(account)])
-		let _ = try await os.changeCurrentGateway(to: .stokenet)
+		_ = try await os.changeCurrentGateway(to: .stokenet)
 		await Task.megaYield()
 		XCTAssertEqual(accountsForDisplay, [])
 	}
