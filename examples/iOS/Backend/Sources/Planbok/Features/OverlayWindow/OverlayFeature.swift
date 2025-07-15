@@ -8,7 +8,7 @@ struct OverlayFeature {
 	@Dependency(\.continuousClock) var clock
 
 	@Reducer(state: .equatable)
-	public enum Destination: Sendable {
+	enum Destination: Sendable {
 		case hud(HUDFeature)
 	}
 
@@ -21,13 +21,13 @@ struct OverlayFeature {
 		}
 
 		@Presents
-		public var destination: Destination.State?
+		var destination: Destination.State?
 	}
 
 	@CasePathable
-	public enum Action: ViewAction, Sendable {
+	enum Action: ViewAction, Sendable {
 		@CasePathable
-		public enum ViewAction {
+		enum ViewAction {
 			case task
 		}
 
@@ -41,7 +41,7 @@ struct OverlayFeature {
 		case destination(PresentationAction<Destination.Action>)
 	}
 
-	public var body: some ReducerOf<Self> {
+	var body: some ReducerOf<Self> {
 		Reduce { state, action in
 			switch action {
 			case .view(.task):
@@ -103,16 +103,16 @@ struct OverlayFeature {
 }
 
 extension OverlayFeature {
-	public typealias HostingFeature = Self
+	typealias HostingFeature = Self
 
 	@ViewAction(for: HostingFeature.self)
-	public struct View: SwiftUI.View {
-		@Bindable public var store: StoreOf<HostingFeature>
-		public init(store: StoreOf<HostingFeature>) {
+	struct View: SwiftUI.View {
+		@Bindable var store: StoreOf<HostingFeature>
+		init(store: StoreOf<HostingFeature>) {
 			self.store = store
 		}
 
-		public var body: some SwiftUI.View {
+		var body: some SwiftUI.View {
 			Color.clear
 				.task { send(.task) }
 				.fullScreenCover(
