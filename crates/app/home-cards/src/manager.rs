@@ -58,17 +58,17 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     pub async fn bootstrap(&self) -> Result<()> {
         // The cards that can be added on app update.
-        // Compared to other cards which are added explicitely only on wallet creation, these
+        // Compared to other cards which are added explicitly only on wallet creation, these
         // cards will be shown also for existing users which do have the wallet configured.
         let cards_to_be_added_on_update =
             HomeCards::from_iter([HomeCard::JoinRadixRewards]);
 
-        let stored_dimissed_cards =
+        let stored_dismissed_cards =
             self.load_dismissed_cards().await.unwrap_or_default();
 
         let cards_to_add = cards_to_be_added_on_update
             .into_iter()
-            .filter(|card| !stored_dimissed_cards.contains_by_id(&card))
+            .filter(|card| !stored_dismissed_cards.contains_by_id(&card))
             .collect_vec();
 
         let mut stored_cards = self.load_cards().await?;
@@ -79,7 +79,7 @@ impl HomeCardsManager {
         })
         .await?;
         self.update_dismissed_cards(|write_guard| {
-            Self::insert_cards(write_guard, stored_dimissed_cards)
+            Self::insert_cards(write_guard, stored_dismissed_cards)
         })
         .await?;
         Ok(())
