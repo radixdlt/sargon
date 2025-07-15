@@ -197,8 +197,8 @@ jobs:
         uses: RDXWorks-actions/cargo-install@v1
         with:
           crate: cargo-nextest
-          version: '0.9.100'
           locked: true
+          version: '0.9.100'
 
       - name: Install Rust Toolchain
         uses: RDXWorks-actions/toolchain@master
