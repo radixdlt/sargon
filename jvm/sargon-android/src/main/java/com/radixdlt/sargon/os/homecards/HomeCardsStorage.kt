@@ -24,7 +24,16 @@ internal class HomeCardsStorageImpl internal constructor(
         return dataStore.read(KEY_HOME_CARDS).getOrNull()?.toBagOfBytes()
     }
 
+    override suspend fun saveDismissedCards(encodedCards: BagOfBytes) {
+        dataStore.write(KEY_DISMISSED_HOME_CARDS, encodedCards.toByteArray())
+    }
+
+    override suspend fun loadDismissedCards(): BagOfBytes? {
+        return dataStore.read(KEY_DISMISSED_HOME_CARDS).getOrNull()?.toBagOfBytes()
+    }
+
     companion object {
         private val KEY_HOME_CARDS = byteArrayPreferencesKey("home_cards")
+        private val KEY_DISMISSED_HOME_CARDS = byteArrayPreferencesKey("dismissed_home_cards")
     }
 }

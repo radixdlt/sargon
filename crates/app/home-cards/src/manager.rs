@@ -14,6 +14,8 @@ pub struct HomeCardsManager {
     observer: Arc<dyn HomeCardsObserver>,
     /// In-memory storage of the current home cards.
     cards: RwLock<HomeCards>,
+    /// In-memory storage of the dismissed cards.
+    dismissed_cards: RwLock<HomeCards>,
 }
 
 impl HomeCardsManager {
@@ -27,6 +29,7 @@ impl HomeCardsManager {
             cards_storage,
             observer,
             cards: RwLock::new(HomeCards::new()),
+            dismissed_cards: RwLock::new(HomeCards::new()),
         }
     }
 }
@@ -54,9 +57,29 @@ impl HomeCardsManager {
     /// This function should be called before invoking any other public functions.
     /// Notifies `HomeCardsObserver`.
     pub async fn bootstrap(&self) -> Result<()> {
-        let stored_cars = self.load_cards().await?;
+        // The cards that can be added on app update.
+        // Compared to other cards which are added explicitly only on wallet creation, these
+        // cards will be shown also for existing users which do have the wallet configured.
+        let cards_to_be_added_on_update =
+            HomeCards::from_iter([HomeCard::JoinRadixRewards]);
+
+        let stored_dismissed_cards =
+            self.load_dismissed_cards().await.unwrap_or_default();
+
+        let cards_to_add = cards_to_be_added_on_update
+            .into_iter()
+            .filter(|card| !stored_dismissed_cards.contains_by_id(card))
+            .collect_vec();
+
+        let mut stored_cards = self.load_cards().await?;
+        stored_cards.extend(cards_to_add);
+
         self.update_cards(|write_guard| {
-            Self::insert_cards(write_guard, stored_cars)
+            Self::insert_cards(write_guard, stored_cards)
+        })
+        .await?;
+        self.update_dismissed_cards(|write_guard| {
+            Self::insert_cards(write_guard, stored_dismissed_cards)
         })
         .await?;
         Ok(())
@@ -67,6 +90,7 @@ impl HomeCardsManager {
     /// Notifies `HomeCardsObserver`.
     pub async fn wallet_created(&self) -> Result<()> {
         let default_cards = HomeCards::from_iter([
+            HomeCard::JoinRadixRewards,
             HomeCard::Connector,
             HomeCard::StartRadQuest,
         ]);
@@ -114,7 +138,14 @@ impl HomeCardsManager {
                 write_guard.remove_id(&card);
             })
             .await?;
-        self.save_cards(updated_cards).await
+        self.save_cards(updated_cards).await?;
+
+        let updated_dismissed_cards = self
+            .update_dismissed_cards(|write_guard| {
+                write_guard.insert(card);
+            })
+            .await?;
+        self.save_dismissed_cards(updated_dismissed_cards).await
     }
 
     /// Clears the home cards from the `HomeCardsStorage`.
@@ -167,6 +198,21 @@ impl HomeCardsManager {
             write_guard.remove_id(&HomeCard::StartRadQuest);
         }
     }
+
+    async fn update_dismissed_cards<F>(&self, f: F) -> Result<HomeCards>
+    where
+        F: FnOnce(&mut RwLockWriteGuard<HomeCards>),
+    {
+        let mut write_guard = self
+            .dismissed_cards
+            .write()
+            .map_err(|_| CommonError::FailedUpdatingHomeCards)?;
+
+        f(&mut write_guard);
+        let updated_cards = write_guard.clone();
+
+        Ok(updated_cards)
+    }
 }
 
 impl HomeCardsManager {
@@ -178,6 +224,21 @@ impl HomeCardsManager {
             .await?
             .ok_or(CommonError::HomeCardsNotFound)?;
 
+        Self::decode_cards(cards_bytes)
+    }
+
+    /// Loads the home cards from storage.
+    async fn load_dismissed_cards(&self) -> Result<HomeCards> {
+        let cards_bytes = self
+            .cards_storage
+            .load_dismissed_cards()
+            .await?
+            .ok_or(CommonError::HomeCardsNotFound)?;
+
+        Self::decode_cards(cards_bytes)
+    }
+
+    fn decode_cards(cards_bytes: BagOfBytes) -> Result<HomeCards> {
         // Needs special handling. Some HomeCard variants have been removed.
         // To ensure compatibility with old users, such cards need to be ignored.
         let slice = cards_bytes.bytes();
@@ -201,6 +262,14 @@ impl HomeCardsManager {
             .await
             .map_err(|_| CommonError::FailedSavingHomeCards)
     }
+
+    async fn save_dismissed_cards(&self, cards: HomeCards) -> Result<()> {
+        let bytes = cards.serialize_to_bytes()?;
+        self.cards_storage
+            .save_dismissed_cards(bytes.into())
+            .await
+            .map_err(|_| CommonError::FailedSavingHomeCards)
+    }
 }
 
 #[cfg(test)]
@@ -211,6 +280,8 @@ mod tests {
     struct MockHomeCardsStorage {
         stubbed_save_cards_result: Result<()>,
         stubbed_load_cards_result: Result<Option<BagOfBytes>>,
+        stubbed_save_dismissed_cards_result: Result<()>,
+        stubbed_load_dismissed_cards_result: Result<Option<BagOfBytes>>,
     }
 
     impl MockHomeCardsStorage {
@@ -218,6 +289,10 @@ mod tests {
             Self {
                 stubbed_save_cards_result: Ok(()),
                 stubbed_load_cards_result: Self::encode_cards(HomeCards::new()),
+                stubbed_save_dismissed_cards_result: Ok(()),
+                stubbed_load_dismissed_cards_result: Self::encode_cards(
+                    HomeCards::new(),
+                ),
             }
         }
 
@@ -225,6 +300,10 @@ mod tests {
             Self {
                 stubbed_save_cards_result: Ok(()),
                 stubbed_load_cards_result: Self::encode_cards(cards),
+                stubbed_save_dismissed_cards_result: Ok(()),
+                stubbed_load_dismissed_cards_result: Self::encode_cards(
+                    HomeCards::new(),
+                ),
             }
         }
 
@@ -235,6 +314,10 @@ mod tests {
             Self {
                 stubbed_save_cards_result: Ok(()),
                 stubbed_load_cards_result: Ok(Some(encoded)),
+                stubbed_save_dismissed_cards_result: Ok(()),
+                stubbed_load_dismissed_cards_result: Self::encode_cards(
+                    HomeCards::new(),
+                ),
             }
         }
 
@@ -242,6 +325,10 @@ mod tests {
             Self {
                 stubbed_save_cards_result: Ok(()),
                 stubbed_load_cards_result: Err(CommonError::HomeCardsNotFound),
+                stubbed_save_dismissed_cards_result: Ok(()),
+                stubbed_load_dismissed_cards_result: Self::encode_cards(
+                    HomeCards::new(),
+                ),
             }
         }
 
@@ -251,6 +338,10 @@ mod tests {
                     CommonError::FailedSavingHomeCards,
                 ),
                 stubbed_load_cards_result: Self::encode_cards(HomeCards::new()),
+                stubbed_save_dismissed_cards_result: Ok(()),
+                stubbed_load_dismissed_cards_result: Self::encode_cards(
+                    HomeCards::new(),
+                ),
             }
         }
 
@@ -268,6 +359,18 @@ mod tests {
 
         async fn load_cards(&self) -> Result<Option<BagOfBytes>> {
             self.stubbed_load_cards_result.clone()
+        }
+
+        async fn save_dismissed_cards(
+            &self,
+            encoded_cards: BagOfBytes,
+        ) -> Result<()> {
+            let _: HomeCards = encoded_cards.deserialize()?;
+            self.stubbed_save_dismissed_cards_result.clone()
+        }
+
+        async fn load_dismissed_cards(&self) -> Result<Option<BagOfBytes>> {
+            self.stubbed_load_dismissed_cards_result.clone()
         }
     }
 
@@ -328,7 +431,10 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             handled_cards,
-            Some(HomeCards::from_iter([HomeCard::Connector]))
+            Some(HomeCards::from_iter([
+                HomeCard::JoinRadixRewards,
+                HomeCard::Connector
+            ]))
         );
     }
 
@@ -349,7 +455,10 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             handled_cards,
-            Some(HomeCards::from_iter([HomeCard::Connector]))
+            Some(HomeCards::from_iter([
+                HomeCard::JoinRadixRewards,
+                HomeCard::Connector
+            ]))
         );
     }
 
@@ -377,6 +486,7 @@ mod tests {
             observer.clone(),
         );
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
@@ -408,6 +518,7 @@ mod tests {
     #[actix_rt::test]
     async fn test_wallet_created_with_stored_cards() {
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::StartRadQuest,
             HomeCard::Connector,
         ]);
@@ -452,6 +563,7 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
@@ -494,6 +606,7 @@ mod tests {
         manager.wallet_created().await.unwrap();
 
         let expected_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
             HomeCard::ContinueRadQuest,
             HomeCard::Dapp { icon_url: None },
             HomeCard::Connector,
@@ -533,7 +646,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_card_dismissed() {
-        let initial_cards = HomeCards::from_iter(vec![HomeCard::Connector]);
+        let initial_cards = HomeCards::from_iter(vec![
+            HomeCard::JoinRadixRewards,
+            HomeCard::Connector,
+        ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockNetworkingDriver::new_always_failing()),
@@ -550,12 +666,15 @@ mod tests {
         let handled_cards =
             observer.handled_cards.lock().unwrap().clone().unwrap();
 
-        assert_eq!(handled_cards.len(), 0);
+        assert_eq!(handled_cards.len(), 1);
     }
 
     #[actix_rt::test]
     async fn test_card_dismissed_does_nothing_if_card_does_not_exist() {
-        let initial_cards = HomeCards::from_iter([HomeCard::Connector]);
+        let initial_cards = HomeCards::from_iter([
+            HomeCard::JoinRadixRewards,
+            HomeCard::Connector,
+        ]);
         let observer = Arc::new(MockHomeCardsObserver::new());
         let manager = SUT::new(
             Arc::new(MockNetworkingDriver::new_always_failing()),
