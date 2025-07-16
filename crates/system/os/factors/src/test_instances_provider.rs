@@ -494,7 +494,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
     let os = SargonOS::fast_boot_bdfs_and_interactor(
         mnemonic_with_passphrase,
         fail_interactor,
-        true,
+        false,
     )
     .await;
     os.set_cache(cache_before_fail.serializable_snapshot())
