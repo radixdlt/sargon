@@ -51,7 +51,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+            arculusCsdkDriver: ArculusCSDKDriver(),
+            nfcTagDriver: NFCSessionClient()
 		)
 	}
 }

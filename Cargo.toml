@@ -77,6 +77,7 @@ members = [
     "crates/system/profile-state-holder",
     "crates/system/interactors",
     "crates/system/os/accounts",
+    "crates/system/os/arculus-card",
     "crates/system/os/derive-public-keys",
     "crates/system/os/factors",
     "crates/system/os/os",
@@ -173,6 +174,7 @@ default-members = [
     "crates/system/profile-state-holder",
     "crates/system/interactors",
     "crates/system/os/accounts",
+    "crates/system/os/arculus-card",
     "crates/system/os/derive-public-keys",
     "crates/system/os/factors",
     "crates/system/os/os",
@@ -286,6 +288,7 @@ sub-systems = { path = "crates/system/sub-systems" }
 profile-state-holder = { path = "crates/system/profile-state-holder" }
 interactors = { path = "crates/system/interactors" }
 sargon-os-accounts = { path = "crates/system/os/accounts" }
+sargon-os-arculus-card = { path = "crates/system/os/arculus-card" }
 sargon-os-derive-public-keys = { path = "crates/system/os/derive-public-keys" }
 sargon-os-factors = { path = "crates/system/os/factors" }
 sargon-os = { path = "crates/system/os/os" }
@@ -421,3 +424,6 @@ zeroize = { version = "1.7.0", default-features = false, features = [
     "zeroize_derive",
     "derive",
 ] }
+
+# mockall = "0.13.1"
+mockall = { git = "https://github.com/asomers/mockall", rev = "62f92cb84a042116eceb1f734c63e928072f1cef" }

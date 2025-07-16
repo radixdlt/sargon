@@ -1,3 +1,4 @@
+mod arculus_wallet_client;
 mod entropy_client;
 mod event_bus_client;
 mod factor_instances_cache_client;
@@ -7,6 +8,7 @@ mod profile_change_client;
 mod secure_storage_client;
 mod unsafe_storage_client;
 
+pub use arculus_wallet_client::*;
 pub use entropy_client::*;
 pub use event_bus_client::*;
 pub use factor_instances_cache_client::*;
