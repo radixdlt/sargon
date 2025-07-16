@@ -510,7 +510,7 @@ impl SargonOS {
 
     pub async fn boot_test() -> Result<Arc<Self>> {
         Self::boot_test_with_bdfs_mnemonic_and_interactors(
-            None, None, None, None, true
+            None, None, None, None, true,
         )
         .await
     }
