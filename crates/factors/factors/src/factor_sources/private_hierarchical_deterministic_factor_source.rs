@@ -166,7 +166,7 @@ impl HasSampleValues for PrivateHierarchicalDeterministicFactorSource {
             mwp.clone(),
             DeviceFactorSource::new(
                 FactorSourceIDFromHash::new_for_device(&mwp),
-                FactorSourceCommon::sample_main_babylon(),
+                FactorSourceCommon::sample_babylon(),
                 DeviceFactorSourceHint::sample_other(),
             ),
         )

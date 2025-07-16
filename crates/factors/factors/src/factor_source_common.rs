@@ -99,7 +99,7 @@ impl Default for FactorSourceCommon {
 impl HasSampleValues for FactorSourceCommon {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::sample_main_babylon()
+        Self::sample_babylon()
     }
 
     fn sample_other() -> Self {
@@ -109,13 +109,13 @@ impl HasSampleValues for FactorSourceCommon {
 
 impl FactorSourceCommon {
     /// A sample used to facilitate unit tests.
-    pub fn sample_main_babylon() -> Self {
+    pub fn sample_babylon() -> Self {
         let date = Timestamp::parse("2023-09-11T16:05:56.000Z").unwrap();
         FactorSourceCommon::with_values(
             FactorSourceCryptoParameters::babylon(),
             date,
             date,
-            [FactorSourceFlag::Main],
+            [],
         )
     }
 
