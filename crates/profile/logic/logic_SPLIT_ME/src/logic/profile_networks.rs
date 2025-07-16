@@ -389,7 +389,7 @@ mod profile_tests {
     }
 
     #[test]
-    fn new_from_main_bdfs_with_accounts() {
+    fn new_from_bdfs_with_accounts() {
         let accounts = Accounts::sample_mainnet();
         let profile = SUT::from_device_factor_source(
             DeviceFactorSource::sample(),

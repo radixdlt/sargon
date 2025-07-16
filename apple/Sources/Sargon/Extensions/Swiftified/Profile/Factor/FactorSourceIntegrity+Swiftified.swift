@@ -15,15 +15,4 @@ extension FactorSourceIntegrity {
 			offDeviceMnemonic.asGeneral
 		}
 	}
-
-	public var isExplicitMain: Bool {
-		switch self {
-		case let .device(device):
-			device.factorSource.isMainBDFS
-		case .ledger, .password, .offDeviceMnemonic, .arculusCard:
-			// TODO: Should we have the notion of "main" for
-			// other FactorSourceKinds than device?
-			false
-		}
-	}
 }

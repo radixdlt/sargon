@@ -168,7 +168,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         // ACT
         os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
@@ -197,7 +197,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         // ACT
         os.with_timeout(|x| x.change_current_gateway(Gateway::mainnet()))

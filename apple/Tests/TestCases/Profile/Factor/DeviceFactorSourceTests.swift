@@ -36,22 +36,6 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 		}
 	}
 
-	func test_new_babylon_is_main_true() {
-		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true, hostInfo: .sample)
-		XCTAssertTrue(sut.isMainBDFS)
-	}
-
-	func test_new_babylon_is_main_false() {
-		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: false, hostInfo: .sample)
-		XCTAssertFalse(sut.isMainBDFS)
-	}
-
-	func test_new_babylon() {
-		let sut = SUT.babylon(mnemonicWithPassphrase: .sample, isMain: true, hostInfo: .sample)
-		XCTAssertTrue(sut.supportsBabylon)
-		XCTAssertFalse(sut.supportsOlympia)
-	}
-
 	func test_new_olympia() {
 		let sut = SUT.olympia(mnemonicWithPassphrase: .sample, hostInfo: .sample)
 		XCTAssertTrue(sut.supportsOlympia)

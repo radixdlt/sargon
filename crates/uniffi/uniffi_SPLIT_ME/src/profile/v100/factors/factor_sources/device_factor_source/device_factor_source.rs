@@ -34,12 +34,10 @@ pub fn new_device_factor_source_sample_other() -> DeviceFactorSource {
 
 #[uniffi::export]
 pub fn new_device_factor_source_babylon(
-    is_main: bool,
     mnemonic_with_passphrase: &MnemonicWithPassphrase,
     host_info: &HostInfo,
 ) -> DeviceFactorSource {
     InternalDeviceFactorSource::babylon(
-        is_main,
         &mnemonic_with_passphrase.into_internal(),
         &host_info.into_internal(),
     )
@@ -56,11 +54,4 @@ pub fn new_device_factor_source_olympia(
         &host_info.into_internal(),
     )
     .into()
-}
-
-#[uniffi::export]
-pub fn device_factor_source_is_main_bdfs(
-    device_factor_source: &DeviceFactorSource,
-) -> bool {
-    device_factor_source.into_internal().is_main_bdfs()
 }

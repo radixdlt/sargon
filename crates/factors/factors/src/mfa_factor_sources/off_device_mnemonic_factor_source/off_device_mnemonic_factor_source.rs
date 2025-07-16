@@ -54,7 +54,7 @@ impl OffDeviceMnemonicFactorSource {
     ) -> Self {
         Self {
             id,
-            common: FactorSourceCommon::new_bdfs(false),
+            common: FactorSourceCommon::new_bdfs(),
             hint,
         }
     }

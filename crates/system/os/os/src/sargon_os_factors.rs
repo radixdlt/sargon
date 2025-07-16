@@ -6,18 +6,11 @@ use crate::prelude::*;
 /// a Babylon one, either main or not.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum DeviceFactorSourceType {
-    Babylon { is_main: bool },
+    Babylon,
     Olympia,
 }
 
 impl SargonOS {
-    /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
-    /// a `DeviceFactorSource`.
-    pub fn main_bdfs(&self) -> Result<DeviceFactorSource> {
-        self.profile_state_holder
-            .access_profile_with(|p| p.main_bdfs())
-    }
-
     /// Returns all the factor sources
     pub fn factor_sources(&self) -> Result<FactorSources> {
         self.profile_state_holder
@@ -190,26 +183,22 @@ impl SargonOS {
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
     /// either a "BDFS" or an "Olympia" one.
-    pub async fn create_device_factor_source(
+    pub fn create_device_factor_source(
         &self,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
-    ) -> Result<DeviceFactorSource> {
-        let host_info = self.host_info().await;
-        let factor_source = match factor_type {
+    ) -> DeviceFactorSource {
+        let host_info = self.host_info();
+        match factor_type {
             DeviceFactorSourceType::Olympia => DeviceFactorSource::olympia(
                 &mnemonic_with_passphrase,
                 &host_info,
             ),
-            DeviceFactorSourceType::Babylon { is_main } => {
-                DeviceFactorSource::babylon(
-                    is_main,
-                    &mnemonic_with_passphrase,
-                    &host_info,
-                )
-            }
-        };
-        Ok(factor_source)
+            DeviceFactorSourceType::Babylon => DeviceFactorSource::babylon(
+                &mnemonic_with_passphrase,
+                &host_info,
+            ),
+        }
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -277,10 +266,6 @@ impl SargonOS {
             })
             .collect::<FactorSources>();
 
-        let is_any_of_new_factors_main_bdfs =
-            new_factors_only.iter().any(|x| x.is_main_bdfs());
-        let id_of_old_bdfs = self.main_bdfs()?.factor_source_id();
-
         for factor_source in new_factors_only.iter() {
             if !factor_source.factor_source_id().is_hash() {
                 continue;
@@ -301,13 +286,6 @@ impl SargonOS {
             Ok(())
         })
         .await?;
-
-        if is_any_of_new_factors_main_bdfs {
-            self.update_factor_source_remove_flag_main(id_of_old_bdfs)
-                .await?;
-            assert!(ids_of_factors_to_add
-                .contains(&self.main_bdfs()?.factor_source_id()))
-        }
 
         Ok(ids_of_new_factor_sources.into_iter().collect_vec())
     }
@@ -368,57 +346,6 @@ impl SargonOS {
         self.event_bus
             .emit(EventNotification::profile_modified(
                 EventProfileModified::FactorSourceUpdated { id },
-            ))
-            .await;
-
-        Ok(())
-    }
-
-    /// Set the FactorSource with the given `factor_source_id` as the main factor source of its kind.
-    /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage.
-    ///
-    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    ///
-    /// If there is any main `FactorSource` of the given `FactorSourceKind`, such events are emitted also when
-    /// removing the flag from the old main factor source.
-    pub async fn set_main_factor_source(
-        &self,
-        factor_source_id: FactorSourceID,
-    ) -> Result<()> {
-        // Get current main factor source ID (if any)
-        let current_main_id =
-            self.profile_state_holder.access_profile_with(|p| {
-                p.main_factor_source_of_kind(
-                    factor_source_id.get_factor_source_kind(),
-                )
-            })?;
-
-        let updated_ids = match current_main_id {
-            Some(current_main_id) => vec![current_main_id, factor_source_id],
-            None => vec![factor_source_id],
-        };
-
-        self.update_profile_with(|p| {
-            // Remove main flag from current main (if any)
-            if let Some(current_main_id) = current_main_id {
-                p.update_factor_source_remove_flag_main(&current_main_id)
-                    .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)?;
-            }
-
-            // Add the flag to the new main factor source
-            p.update_factor_source_add_flag_main(&factor_source_id)
-                .map_err(|_| CommonError::UpdateFactorSourceMutateFailed)
-        })
-        .await?;
-
-        // Emit event
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::FactorSourcesUpdated { ids: updated_ids },
             ))
             .await;
 
@@ -610,7 +537,7 @@ mod tests {
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
         // ACT
-        let loaded = os.main_bdfs().unwrap();
+        let loaded = os.bdfs();
 
         // ASSERT
         assert_eq!(
@@ -702,56 +629,18 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_add_ledger_factor_source_new_bdfs_removes_main_from_existing_bdfs(
-    ) {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-
-        let old_bdfs_id = os.main_bdfs().unwrap().factor_source_id();
-        let new_bdfs = DeviceFactorSource::babylon(
-            true,
-            &MnemonicWithPassphrase::sample(),
-            &HostInfo::sample(),
-        );
-        assert_ne!(old_bdfs_id, new_bdfs.factor_source_id());
-
-        // ACT
-        let inserted = os
-            .with_timeout(|x| {
-                x.add_factor_source(FactorSource::from(new_bdfs.clone()))
-            })
-            .await
-            .unwrap();
-
-        // ASSERT
-        assert!(inserted);
-        assert_eq!(os.main_bdfs().unwrap(), new_bdfs);
-        let old_bdfs = os
-            .profile()
-            .unwrap()
-            .factor_sources
-            .get_id(old_bdfs_id)
-            .unwrap()
-            .clone()
-            .into_device()
-            .unwrap();
-        assert!(!old_bdfs.is_main_bdfs());
-    }
-
-    #[actix_rt::test]
     async fn test_add_existing_factor_source_is_noop() {
         // ARRANGE
         let mwp = MnemonicWithPassphrase::sample();
         let os = SUT::fast_boot_bdfs(mwp.clone()).await;
 
-        let bdfs = os.main_bdfs().unwrap();
+        let bdfs = os.bdfs();
 
         // ACT
         let inserted = os
             .with_timeout(|x| {
                 x.add_factor_source(
                     DeviceFactorSource::babylon(
-                        false,
                         &mwp,
                         &HostInfo::sample_other(),
                     )
@@ -770,44 +659,17 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn test_create_device_factor_source_babylon_main() {
+    async fn test_create_device_factor_source_babylon() {
         // ARRANGE
         let os = SUT::fast_boot().await;
 
         // ACT
-        let bdfs = os
-            .with_timeout(|x| {
-                x.create_device_factor_source(
-                    MnemonicWithPassphrase::sample(),
-                    DeviceFactorSourceType::Babylon { is_main: true },
-                )
-            })
-            .await
-            .unwrap();
+        let bdfs = os.create_device_factor_source(
+            MnemonicWithPassphrase::sample(),
+            DeviceFactorSourceType::Babylon,
+        );
 
         // ASSERT
-        assert!(bdfs.is_main_bdfs());
-    }
-
-    #[actix_rt::test]
-    async fn test_create_device_factor_source_babylon_not_main() {
-        // ARRANGE
-        let os = SUT::fast_boot().await;
-
-        // ACT
-        let bdfs = os
-            .with_timeout(|x| {
-                x.create_device_factor_source(
-                    MnemonicWithPassphrase::sample(),
-                    DeviceFactorSourceType::Babylon { is_main: false },
-                )
-            })
-            .await
-            .unwrap();
-
-        // ASSERT
-        assert!(!bdfs.is_main_bdfs());
-        assert!(!bdfs.common.is_main());
         assert!(bdfs.common.supports_babylon());
     }
 
@@ -817,18 +679,12 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         // ACT
-        let dfs = os
-            .with_timeout(|x| {
-                x.create_device_factor_source(
-                    MnemonicWithPassphrase::sample_device_12_words(),
-                    DeviceFactorSourceType::Olympia,
-                )
-            })
-            .await
-            .unwrap();
+        let dfs = os.create_device_factor_source(
+            MnemonicWithPassphrase::sample_device_12_words(),
+            DeviceFactorSourceType::Olympia,
+        );
 
         // ASSERT
-        assert!(!dfs.common.is_main());
         assert!(!dfs.common.supports_babylon());
         assert!(dfs.common.supports_olympia());
         assert_eq!(
@@ -853,7 +709,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         // ACT
         let ids = os
@@ -984,136 +840,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn set_main_factor_source_fails_if_factor_source_not_added() {
-        let os = SUT::fast_boot().await;
-
-        let error = os
-            .with_timeout(|x| {
-                x.set_main_factor_source(FactorSource::sample_password().id())
-            })
-            .await
-            .expect_err("Expected an error");
-
-        assert_eq!(error, CommonError::UpdateFactorSourceMutateFailed);
-    }
-
-    #[actix_rt::test]
-    async fn set_main_factor_source_with_previous_main() {
-        // Set up OS with `previous_main` as the main device factor source
-        let event_bus_driver = RustEventBusDriver::new();
-        let os = boot(event_bus_driver.clone()).await;
-
-        let previous_main = DeviceFactorSource::sample();
-        let new_main = DeviceFactorSource::sample_other();
-        let factor_sources = FactorSources::from_iter([
-            previous_main.clone().into(),
-            new_main.clone().into(),
-        ]);
-
-        os.with_timeout(|x| {
-            x.add_factor_sources_without_emitting_factor_sources_added(
-                factor_sources.clone(),
-            )
-        })
-        .await
-        .unwrap();
-
-        // Verify that `previous_main` is the main device factor source
-        assert!(os
-            .profile()
-            .unwrap()
-            .device_factor_source_by_id(&previous_main.id)
-            .unwrap()
-            .is_main_bdfs());
-
-        // Clear recorded events
-        event_bus_driver.clear_recorded();
-
-        // Set `new_main` as main
-        os.with_timeout(|x| {
-            x.set_main_factor_source(new_main.clone().factor_source_id())
-        })
-        .await
-        .unwrap();
-
-        // Verify previous is no longer main, while new is
-        let profile = os.profile().unwrap();
-        assert!(!profile
-            .device_factor_source_by_id(&previous_main.id)
-            .unwrap()
-            .common
-            .is_main());
-        assert!(profile
-            .device_factor_source_by_id(&new_main.id)
-            .unwrap()
-            .common
-            .is_main());
-
-        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourcesUpdated`
-        let events = event_bus_driver.recorded();
-        assert_eq!(events.len(), 2);
-        assert!(events.iter().any(|e| e.event == Event::ProfileSaved),);
-        assert!(events.iter().any(|e| e.event
-            == Event::ProfileModified {
-                change: EventProfileModified::FactorSourcesUpdated {
-                    ids: vec![
-                        previous_main.id.into(),
-                        new_main.factor_source_id()
-                    ],
-                }
-            }));
-    }
-
-    #[actix_rt::test]
-    async fn set_main_factor_source_without_previous_main() {
-        // Set up OS with no main arculus factor source
-        let event_bus_driver = RustEventBusDriver::new();
-        let os = boot(event_bus_driver.clone()).await;
-
-        let factor_source = ArculusCardFactorSource::sample();
-        os.with_timeout(|x| x.add_factor_source(factor_source.clone().into()))
-            .await
-            .unwrap();
-
-        // Verify that there is no main arculus factor source
-        assert!(!os
-            .profile()
-            .unwrap()
-            .factor_sources
-            .iter()
-            .any(|f| f.is_arculus_card() && f.common_properties().is_main()));
-
-        // Clear recorded events
-        event_bus_driver.clear_recorded();
-
-        // Set `factor_source` as main
-        os.with_timeout(|x| {
-            x.set_main_factor_source(factor_source.clone().factor_source_id())
-        })
-        .await
-        .unwrap();
-
-        // Verify we now have a main arculus factor source
-        assert!(os
-            .profile()
-            .unwrap()
-            .factor_sources
-            .iter()
-            .any(|f| f.is_arculus_card() && f.common_properties().is_main()));
-
-        // Verify 2 events are emitted: `ProfileSaved` and `FactorSourceUpdated`
-        let events = event_bus_driver.recorded();
-        assert_eq!(events.len(), 2);
-        assert!(events.iter().any(|e| e.event == Event::ProfileSaved));
-        assert!(events.iter().any(|e| e.event
-            == Event::ProfileModified {
-                change: EventProfileModified::FactorSourcesUpdated {
-                    ids: vec![factor_source.factor_source_id()],
-                }
-            }));
-    }
-
-    #[actix_rt::test]
     async fn trigger_spot_check_valid() {
         let clients = Clients::new(Bios::new(Drivers::test()));
         let interactors =
@@ -1202,7 +928,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
         os
     }
 }

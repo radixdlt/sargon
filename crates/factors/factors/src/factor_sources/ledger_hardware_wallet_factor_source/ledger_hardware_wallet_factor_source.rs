@@ -59,7 +59,7 @@ impl HasSampleValues for LedgerHardwareWalletFactorSource {
             new_ledger_with_mwp(
                 MnemonicWithPassphrase::sample_ledger(),
                 LedgerHardwareWalletHint::sample(),
-                FactorSourceCommon::new_bdfs(false),
+                FactorSourceCommon::new_bdfs(),
             )
         }
     }

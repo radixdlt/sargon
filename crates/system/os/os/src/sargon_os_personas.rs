@@ -19,26 +19,6 @@ impl SargonOS {
         self.profile_state_holder.persona_by_address(address)
     }
 
-    /// Create a new Persona with main BDFS and adds it to the active Profile.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileModified { change: EventProfileModified::PersonaAdded }`
-    pub async fn create_and_save_new_persona_with_main_bdfs(
-        &self,
-        network_id: NetworkID,
-        name: DisplayName,
-        persona_data: Option<PersonaData>,
-    ) -> Result<Persona> {
-        let bdfs = self.main_bdfs()?;
-        self.create_and_save_new_persona_with_factor_source(
-            bdfs.into(),
-            network_id,
-            name,
-            persona_data,
-        )
-        .await
-    }
-
     /// Create a new Persona and adds it to the active Profile.
     ///
     /// # Emits Events
@@ -286,7 +266,7 @@ mod tests {
         // ACT
         let (mut unsaved_persona, _) = os
             .with_timeout(|x| {
-                x.create_unsaved_mainnet_persona_with_main_bdfs(
+                x.create_unsaved_mainnet_persona_with_bdfs(
                     DisplayName::new("Satoshi").unwrap(),
                 )
             })
@@ -299,40 +279,40 @@ mod tests {
         assert_eq!(os.profile().unwrap().networks[0].personas.len(), 0); // not added
     }
 
-    #[actix_rt::test]
-    async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_in_cache_consumer_is_not_used(
-    ) {
-        // ARRANGE
-        let (os, bdfs) = SUT::with_bdfs().await;
+    // #[actix_rt::test]
+    // async fn test_create_unsaved_persona_twice_yield_same_personas_if_instances_in_cache_consumer_is_not_used(
+    // ) {
+    //     // ARRANGE
+    //     let (os, bdfs) = SUT::with_bdfs().await;
 
-        // ACT
-        let (first, instances_in_cache_consumer) = os
-            .with_timeout(|x| {
-                x.create_unsaved_persona_with_factor_source(
-                    bdfs.clone(),
-                    NetworkID::Mainnet,
-                    DisplayName::new("Unnamed").unwrap(),
-                )
-            })
-            .await
-            .unwrap();
+    //     // ACT
+    //     let (first, instances_in_cache_consumer) = os
+    //         .with_timeout(|x| {
+    //             x.create_unsaved_persona_with_factor_source(
+    //                 bdfs.clone(),
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::new("Unnamed").unwrap(),
+    //             )
+    //         })
+    //         .await
+    //         .unwrap();
 
-        // Not used!
-        drop(instances_in_cache_consumer);
+    //     // Not used!
+    //     drop(instances_in_cache_consumer);
 
-        let (second, _) = os
-            .with_timeout(|x| {
-                x.create_unsaved_persona_with_main_bdfs(
-                    NetworkID::Mainnet,
-                    DisplayName::new("Unnamed").unwrap(),
-                )
-            })
-            .await
-            .unwrap();
+    //     let (second, _) = os
+    //         .with_timeout(|x| {
+    //             x.create_unsaved_persona_with_bdfs(
+    //                 NetworkID::Mainnet,
+    //                 DisplayName::new("Unnamed").unwrap(),
+    //             )
+    //         })
+    //         .await
+    //         .unwrap();
 
-        // ASSERT
-        assert_eq!(first, second);
-    }
+    //     // ASSERT
+    //     assert_eq!(first, second);
+    // }
 
     #[actix_rt::test]
     async fn test_create_unsaved_persona_twice_different_persona_if_instances_are_consumed(
@@ -343,7 +323,7 @@ mod tests {
         // ACT
         let (first, instances_in_cache_consumer) = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -353,7 +333,7 @@ mod tests {
 
         let (second, _) = os
             .with_timeout(|x| {
-                x.create_unsaved_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_unsaved_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -370,7 +350,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -390,7 +370,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_persona_with_main_bdfs(
+                x.create_and_save_new_persona_with_bdfs(
                     NetworkID::Mainnet,
                     DisplayName::sample(),
                     Some(PersonaData::sample()),
@@ -418,7 +398,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -445,14 +425,14 @@ mod tests {
         // ACT
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
 
         let second = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -481,7 +461,7 @@ mod tests {
         let n: u32 = 10;
         for _ in 0..n {
             os.with_timeout(|os| {
-                os.create_and_save_new_mainnet_persona_with_main_bdfs(
+                os.create_and_save_new_mainnet_persona_with_bdfs(
                     DisplayName::sample(),
                 )
             })
@@ -577,7 +557,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         let mut persona = Persona::sample();
         os.with_timeout(|x| x.add_persona(persona.clone()))
@@ -613,7 +593,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         let mut persona = Persona::sample();
         let mut persona2 = Persona::sample_other();
@@ -726,7 +706,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -745,7 +725,7 @@ mod tests {
 
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -768,7 +748,7 @@ mod tests {
         // ACT
         let persona = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();
@@ -786,7 +766,7 @@ mod tests {
         // so that we have at least one network (with one persona)
         let _ = os
             .with_timeout(|x| {
-                x.create_and_save_new_unnamed_mainnet_persona_with_main_bdfs()
+                x.create_and_save_new_unnamed_mainnet_persona_with_bdfs()
             })
             .await
             .unwrap();

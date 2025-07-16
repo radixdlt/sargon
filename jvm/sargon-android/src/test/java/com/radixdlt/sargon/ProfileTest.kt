@@ -28,7 +28,6 @@ class ProfileTest : SampleTestable<Profile> {
         val hostId = HostId.sample.other()
         val hostInfo = HostInfo.sample.other()
         val hdFactorSource = PrivateHierarchicalDeterministicFactorSource.init(
-            isMainBDFS = true,
             entropy = NonEmptyMax32Bytes(bagOfBytes = randomBagOfBytes(byteCount = 32)),
             hostInfo = hostInfo
         )
