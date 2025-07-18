@@ -1,6 +1,6 @@
 [package]
 name = "numeric"
-version = "1.2.20"
+version = "1.2.24"
 edition = "2021"
 
 [dependencies]

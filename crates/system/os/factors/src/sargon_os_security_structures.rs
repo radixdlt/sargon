@@ -408,7 +408,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
@@ -533,7 +533,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
@@ -622,7 +622,7 @@ mod tests {
         )
         .await
         .unwrap();
-        os.with_timeout(|x| x.new_wallet(false)).await.unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
 
         os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
             .await
@@ -992,14 +992,14 @@ mod tests {
             let shield_id = add_unsafe_shield(&os).await.unwrap();
             let network = NetworkID::Mainnet;
             let account = os
-                .create_and_save_new_account_with_main_bdfs(
+                .create_and_save_new_account_with_bdfs(
                     network,
                     DisplayName::sample(),
                 )
                 .await
                 .unwrap();
             let persona = os
-                .create_and_save_new_persona_with_main_bdfs(
+                .create_and_save_new_persona_with_bdfs(
                     network,
                     DisplayName::sample_other(),
                     None,

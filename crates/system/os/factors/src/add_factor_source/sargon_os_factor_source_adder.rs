@@ -34,7 +34,7 @@ impl OsFactorSourceAdder for SargonOS {
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         name: String,
     ) -> Result<FactorSourceID> {
-        let host_info = self.resolve_host_info().await;
+        let host_info = self.resolve_host_info();
         let factor_source = FactorSource::with_mwp(
             factor_source_kind,
             mnemonic_with_passphrase.clone(),
@@ -198,10 +198,9 @@ mod tests {
             let os =
                 SUT::boot_with_clients_and_interactor(clients, interactors)
                     .await;
-            os.new_wallet_with_mnemonic(
-                Some(MnemonicWithPassphrase::sample_device()),
-                false,
-            )
+            os.new_wallet_with_mnemonic(Some(
+                MnemonicWithPassphrase::sample_device(),
+            ))
             .await
             .unwrap();
 
@@ -258,10 +257,9 @@ mod tests {
             let os =
                 SUT::boot_with_clients_and_interactor(clients, interactors)
                     .await;
-            os.new_wallet_with_mnemonic(
-                Some(MnemonicWithPassphrase::sample_device()),
-                false,
-            )
+            os.new_wallet_with_mnemonic(Some(
+                MnemonicWithPassphrase::sample_device(),
+            ))
             .await
             .unwrap();
 

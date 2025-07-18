@@ -25,7 +25,7 @@ final class AccountsTests: CollectionTest<Account> {
 		var b = a
 		b.displayName = "Diff name, also crash" // different value on the element does not affect duplicates check, since it is ID based
 		profile.networks[0].accounts = [a, b] // Duplicates (by ID), not allowed => crash
-		let _ = profile.jsonData() // should crash
+		_ = profile.jsonData() // should crash
 	}
 
 	@available(*, deprecated)

@@ -12,9 +12,7 @@ pub trait FactorSourcesWithBDFS {
 
 impl FactorSourcesWithBDFS for FactorSources {
     /// Panics if `device_factor_source` is not using Babylon crypto parameters
-    /// AND marked "main".
     fn with_bdfs(device_factor_source: DeviceFactorSource) -> Self {
-        assert!(device_factor_source.is_main_bdfs());
         Self::just(device_factor_source.into())
     }
 }
@@ -102,7 +100,7 @@ mod tests {
                             "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                         },
                         "common": {
-                            "flags": ["main"],
+                            "flags": [],
                             "addedOn": "2023-09-11T16:05:56.000Z",
                             "cryptoParameters": {
                                 "supportedCurves": ["curve25519"],

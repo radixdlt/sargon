@@ -10,11 +10,9 @@ import com.radixdlt.sargon.newPrivateHdFactorSourceOlympiaFromMnemonicWithPassph
 
 @Throws(SargonException::class)
 fun PrivateHierarchicalDeterministicFactorSource.Companion.init(
-    isMainBDFS: Boolean,
     entropy: NonEmptyMax32Bytes,
     hostInfo: HostInfo
 ) = newPrivateHdFactorSourceBabylon(
-    isMain = isMainBDFS,
     entropy = entropy,
     hostInfo = hostInfo
 )
@@ -29,11 +27,9 @@ fun PrivateHierarchicalDeterministicFactorSource.Companion.olympia(
 )
 
 fun PrivateHierarchicalDeterministicFactorSource.Companion.babylon(
-    isMain: Boolean,
     mnemonicWithPassphrase: MnemonicWithPassphrase,
     hostInfo: HostInfo
 ) = newPrivateHdFactorSourceBabylonFromMnemonicWithPassphrase(
-    isMain = isMain,
     mnemonicWithPassphrase = mnemonicWithPassphrase,
     hostInfo = hostInfo
 )

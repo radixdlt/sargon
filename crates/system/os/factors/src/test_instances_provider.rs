@@ -133,7 +133,7 @@ async fn create_accounts_when_last_is_used_cache_is_fill_only_with_account_vecis
         .assert_is_full(NetworkID::Mainnet, bdfs.id_from_hash());
     let prefix = "Acco";
     let (_, derivation_outcome) = os
-        .batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, NetworkID::Mainnet, prefix.to_owned())
+        .batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, NetworkID::Mainnet, prefix.to_owned())
             .await
             .unwrap();
     assert_eq!(derivation_outcome.debug_was_cached.len(), 0);
@@ -375,7 +375,7 @@ impl AllHdFactorsFromRole for ConfirmationRoleWithFactorInstances {
 #[actix_rt::test]
 async fn cache_is_unchanged_in_case_of_failure() {
     let os = SargonOS::fast_boot().await;
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let factor_sources = os.profile().unwrap().factor_sources.clone();
     assert_eq!(
         factor_sources.clone().into_iter().collect_vec(),
@@ -384,7 +384,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    let (_, derivation_outcome) = os.batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
     assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
 
     let all_accounts = os
@@ -512,7 +512,7 @@ async fn cache_is_unchanged_in_case_of_failure() {
         c.serializable_snapshot(),
         cache_before_fail.serializable_snapshot()
     );
-    assert_eq!(os.main_bdfs().unwrap().id_from_hash(), bdfs.id_from_hash());
+    assert_eq!(os.bdfs().id_from_hash(), bdfs.id_from_hash());
 
     let res = os
         ._provide_instances_using_shield_for_entities_by_address_without_consuming_cache(
@@ -539,19 +539,17 @@ async fn cache_is_unchanged_in_case_of_failure() {
 async fn test_assert_factor_instances_invalid() {
     let os = SargonOS::fast_boot().await;
     let alice = os
-        .create_and_save_new_mainnet_account_with_main_bdfs(
-            DisplayName::sample(),
-        )
+        .create_and_save_new_mainnet_account_with_bdfs(DisplayName::sample())
         .await
         .unwrap();
     let bob = os
-        .create_and_save_new_mainnet_account_with_main_bdfs(
+        .create_and_save_new_mainnet_account_with_bdfs(
             DisplayName::sample_other(),
         )
         .await
         .unwrap();
 
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
 
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
@@ -692,7 +690,7 @@ async fn adding_accounts_different_networks_different_factor_sources() {
         DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
     );
 
-    let fs_device = FactorSource::from(os.main_bdfs().unwrap());
+    let fs_device = FactorSource::from(os.bdfs());
     let fs_arculus = FactorSource::sample_arculus();
     let fs_ledger = FactorSource::sample_ledger();
 
@@ -891,7 +889,7 @@ async fn test_securified_accounts() {
     let bob = os.create_and_save_new_mainnet_account("Bob").await.unwrap();
 
     assert_ne!(alice.address(), bob.address());
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
     let password = FactorSource::sample_password();
@@ -1181,7 +1179,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
     let os = SargonOS::fast_boot().await;
 
     let profile = os.profile().unwrap();
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let factor_sources = profile.factor_sources.clone();
     assert_eq!(
         factor_sources.clone().into_iter().collect_vec(),
@@ -1190,7 +1188,7 @@ async fn securify_accounts_when_cache_is_half_full_single_factor_source() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    os.batch_create_many_accounts_with_main_bdfs_then_save_once(
+    os.batch_create_many_accounts_with_bdfs_then_save_once(
         3 * n as u16,
         NetworkID::Mainnet,
         "Acco".to_owned(),
@@ -1356,7 +1354,7 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
 
     let n = CACHE_FILLING_QUANTITY / 2;
 
-    let (_, derivation_outcome) = os.batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
 
     assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
 
@@ -1854,7 +1852,7 @@ async fn securified_personas() {
         .unwrap();
 
     assert_ne!(batman.address(), satoshi.address());
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let ledger = FactorSource::sample_ledger();
     let arculus = FactorSource::sample_arculus();
     let password = FactorSource::sample_password();
@@ -2159,7 +2157,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
         DerivationPreset::all().len() * CACHE_FILLING_QUANTITY
     );
 
-    let bdfs = FactorSource::from(os.main_bdfs().unwrap());
+    let bdfs = FactorSource::from(os.bdfs());
     let arculus = FactorSource::sample_arculus();
     let ledger = FactorSource::sample_ledger();
 
@@ -2186,7 +2184,7 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
 
     // first create CACHE_FILLING_QUANTITY many "unnamed" accounts
 
-    let (_, derivation_outcome) = os.batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, network, "Acco".to_owned()).await.unwrap();
+    let (_, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(CACHE_FILLING_QUANTITY as u16, network, "Acco".to_owned()).await.unwrap();
     assert!(derivation_outcome.debug_was_derived.is_empty());
 
     let unnamed_accounts = os
@@ -2829,7 +2827,7 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
 
     os.clear_cache().await; // CLEAR CACHE
 
-    let (more_unnamed_accounts, _) = os.batch_create_many_accounts_with_main_bdfs_with_derivation_outcome_then_save_once(2 * CACHE_FILLING_QUANTITY as u16, network, "more accounts".to_owned()).await.unwrap();
+    let (more_unnamed_accounts, _) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(2 * CACHE_FILLING_QUANTITY as u16, network, "more accounts".to_owned()).await.unwrap();
 
     let (more_unnamed_personas, _) = os.batch_create_many_personas_with_bdfs_with_derivation_outcome_then_save_once(2 * CACHE_FILLING_QUANTITY as u16, network, "more personas".to_owned()).await.unwrap();
 

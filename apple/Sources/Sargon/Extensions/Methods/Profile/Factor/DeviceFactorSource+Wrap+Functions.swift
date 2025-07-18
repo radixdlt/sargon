@@ -14,17 +14,11 @@ extension DeviceFactorSource {
 
 	public static func babylon(
 		mnemonicWithPassphrase: MnemonicWithPassphrase,
-		isMain: Bool,
 		hostInfo: HostInfo
 	) -> Self {
 		newDeviceFactorSourceBabylon(
-			isMain: isMain,
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
 			hostInfo: hostInfo
 		)
-	}
-
-	public var isMainBDFS: Bool {
-		deviceFactorSourceIsMainBdfs(deviceFactorSource: self)
 	}
 }

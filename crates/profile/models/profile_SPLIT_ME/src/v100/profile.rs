@@ -174,9 +174,6 @@ impl Profile {
         host_info: HostInfo,
         maybe_accounts: Option<impl Into<Accounts>>,
     ) -> Self {
-        if !device_factor_source.is_main_bdfs() {
-            panic!("DeviceFactorSource is not main BDFS");
-        }
         let bdfs = device_factor_source;
         let header =
             Header::new(DeviceInfo::new_from_info(&host_id, &host_info));
@@ -208,11 +205,8 @@ impl Profile {
         host_id: HostId,
         host_info: HostInfo,
     ) -> Self {
-        let bdfs = DeviceFactorSource::babylon(
-            true,
-            &mnemonic_with_passphrase,
-            &host_info,
-        );
+        let bdfs =
+            DeviceFactorSource::babylon(&mnemonic_with_passphrase, &host_info);
         Self::from_device_factor_source(
             bdfs,
             host_id,
@@ -472,21 +466,10 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "DeviceFactorSource is not main BDFS")]
-    fn new_from_non_main_bdfs_panics() {
-        let _ = SUT::from_device_factor_source(
-            DeviceFactorSource::sample_other(),
-            HostId::sample(),
-            HostInfo::sample(),
-            None::<Accounts>,
-        );
-    }
-
-    #[test]
     #[should_panic(
         expected = "Discrepancy, found an Account on other network than mainnet"
     )]
-    fn new_from_main_bdfs_with_stokenet_accounts_panics() {
+    fn new_from_bdfs_with_stokenet_accounts_panics() {
         let accounts = Accounts::sample_stokenet();
         SUT::from_device_factor_source(
             DeviceFactorSource::sample(),
@@ -712,9 +695,7 @@ mod tests {
 								},
 								"addedOn": "2023-09-11T16:05:56.000Z",
 								"lastUsedOn": "2023-09-11T16:05:56.000Z",
-								"flags": [
-									"main"
-								]
+								"flags": []
 							},
 							"hint": {
 								"name": "My precious",
