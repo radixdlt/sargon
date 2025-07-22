@@ -1,7 +1,4 @@
-use std::{
-    fmt::format,
-    future::{self, Future},
-};
+use std::future::Future;
 
 pub use crate::prelude::*;
 
@@ -24,52 +21,35 @@ impl ArculusWalletClient {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum ArculusCardState {
-    NotConfigured,
-    Configured(FactorSourceIDFromHash),
+pub struct ArculusCardInfo {
+    pub firmware_version: String,
+    pub gguid: String,
 }
 
-impl HasSampleValues for ArculusCardState {
+impl HasSampleValues for ArculusCardInfo {
     fn sample() -> Self {
-        ArculusCardState::NotConfigured
+        ArculusCardInfo {
+            firmware_version: "2.2.7.6".to_owned(),
+            gguid: "1234".to_owned(),
+        }
     }
 
     fn sample_other() -> Self {
-        ArculusCardState::Configured(FactorSourceIDFromHash::sample())
+        ArculusCardInfo {
+            firmware_version: "2.2.7.1".to_owned(),
+            gguid: "1234".to_owned(),
+        }
     }
 }
 
+// Client public API
 impl ArculusWalletClient {
-    pub async fn get_arculus_card_state(&self) -> Result<ArculusCardState> {
+    pub async fn get_arculus_card_info(&self) -> Result<ArculusCardInfo> {
         self.execute_card_operation(
             NFCTagDriverPurpose::Arculus(
                 NFCTagArculusInteractonPurpose::IdentifyingCard,
             ),
-            |wallet| self._get_arculus_card_state(wallet),
-        )
-        .await
-    }
-
-    pub async fn sign<S: Signable>(
-        &self,
-        factor_source_id: FactorSourceIDFromHash,
-        purpose: NFCTagArculusInteractonPurpose,
-        pin: String,
-        per_transaction: IndexSet<TransactionSignRequestInput<S>>,
-    ) -> Result<IndexSet<HDSignature<S::ID>>> {
-        self.execute_card_operation(
-            NFCTagDriverPurpose::Arculus(purpose),
-            |wallet| self._sign(wallet, factor_source_id, pin, per_transaction),
-        )
-        .await
-    }
-
-    pub async fn reset_wallet(&self) -> Result<()> {
-        self.execute_card_operation(
-            NFCTagDriverPurpose::Arculus(
-                NFCTagArculusInteractonPurpose::IdentifyingCard,
-            ),
-            |wallet| self.reset_wallet_io(wallet),
+            |wallet| self._get_arculus_card_info(wallet),
         )
         .await
     }
@@ -88,16 +68,26 @@ impl ArculusWalletClient {
         .await
     }
 
-    pub async fn configure_card(
-        &self,
-        pin: String,
-        word_count: i64,
-    ) -> Result<FactorSourceIDFromHash> {
+    pub async fn reset_wallet(&self) -> Result<()> {
         self.execute_card_operation(
             NFCTagDriverPurpose::Arculus(
-                NFCTagArculusInteractonPurpose::ConfiguringCardMnemonic,
+                NFCTagArculusInteractonPurpose::IdentifyingCard,
             ),
-            |wallet| self._create_wallet_seed(wallet, pin, word_count),
+            |wallet| self.reset_wallet_io(wallet),
+        )
+        .await
+    }
+
+    pub async fn sign<S: Signable>(
+        &self,
+        factor_source_id: FactorSourceIDFromHash,
+        purpose: NFCTagArculusInteractonPurpose,
+        pin: String,
+        per_transaction: IndexSet<TransactionSignRequestInput<S>>,
+    ) -> Result<IndexSet<HDSignature<S::ID>>> {
+        self.execute_card_operation(
+            NFCTagDriverPurpose::Arculus(purpose),
+            |wallet| self._sign(wallet, factor_source_id, pin, per_transaction),
         )
         .await
     }
@@ -188,28 +178,17 @@ impl ArculusWalletClient {
         Ok(signatures)
     }
 
-    async fn _get_arculus_card_state(
+    async fn _get_arculus_card_info(
         &self,
         wallet: ArculusWalletPointer,
-    ) -> Result<ArculusCardState> {
-        let id_result = self._get_factor_source_id(wallet).await;
-        match id_result {
-            Ok(id) => Ok(ArculusCardState::Configured(id)),
-            Err(CommonError::ArculusCSDKFailedToCreateGetPublicKeyByPathResponse) => Ok(ArculusCardState::NotConfigured),
-            Err(e) => Err(e)
-        }
-    }
+    ) -> Result<ArculusCardInfo> {
+        let firmware_version = self._get_firmware_version(wallet).await?;
+        let gguid = self._get_gguid(wallet).await?;
 
-    async fn _create_wallet_seed(
-        &self,
-        wallet: ArculusWalletPointer,
-        pin: String,
-        word_count: i64,
-    ) -> Result<FactorSourceIDFromHash> {
-        self.setup_seed(wallet, pin, word_count, || {
-            self.create_wallet_seed_io(wallet, word_count)
+        Ok(ArculusCardInfo {
+            firmware_version,
+            gguid,
         })
-        .await
     }
 
     async fn _restore_wallet_seed(
@@ -218,28 +197,6 @@ impl ArculusWalletClient {
         mnemonic: Mnemonic,
         pin: String,
     ) -> Result<FactorSourceIDFromHash> {
-        self.setup_seed(
-            wallet,
-            pin,
-            mnemonic.word_count.discriminant() as i64,
-            || future::ready(Ok(mnemonic.phrase().as_bytes().into())),
-        )
-        .await
-    }
-
-    /// Configures the given mnemonic on the card.
-    /// The mnemonic is either provided by the user on restore or it is generated by the card on create new seed.
-    async fn setup_seed<MnemonicProvider, Fut>(
-        &self,
-        wallet: ArculusWalletPointer,
-        pin: String,
-        word_count: i64,
-        mnemonic_provider: MnemonicProvider,
-    ) -> Result<FactorSourceIDFromHash>
-    where
-        MnemonicProvider: FnOnce() -> Fut,
-        Fut: Future<Output = Result<BagOfBytes>>,
-    {
         // First reset the Wallet to prepare it for a new seed
         self.reset_wallet_io(wallet).await?;
 
@@ -247,15 +204,17 @@ impl ArculusWalletClient {
         self.select_wallet(wallet).await?;
         self.store_pin_io(wallet, pin.clone()).await?;
 
-        // The
-        self.init_recover_wallet_io(wallet, word_count).await?;
+        // Start the recover flow
+        self.init_recover_wallet_io(
+            wallet,
+            mnemonic.word_count.discriminant() as i64,
+        )
+        .await?;
 
-        let mnemonic_sentence = mnemonic_provider().await?;
-
-        // Generate the seed with the CSDK from the Arculus Card generated words
+        // Geneate seed bytes that will be stored on the card
         let seed = self.csdk_driver.seed_phrase_from_mnemonic_sentence(
             wallet,
-            mnemonic_sentence,
+            mnemonic.phrase().as_bytes().into(),
             None,
         ).ok_or(CommonError::ArculusCSDKFailedToCreateSeedPhraseFromMnemonicSentence)?;
 
@@ -384,22 +343,35 @@ impl ArculusWalletClient {
         wallet: ArculusWalletPointer,
         factor_source_id: FactorSourceIDFromHash,
     ) -> Result<()> {
-        let card_state = self._get_arculus_card_state(wallet).await;
+        let card_fs_id = self._get_factor_source_id(wallet).await?;
 
-        match card_state {
-            Ok(ArculusCardState::NotConfigured) => {
-                return Err(CommonError::ArculusCardNotConfigured);
-            }
-            Ok(ArculusCardState::Configured(on_card_factor_source_id)) => {
-                if on_card_factor_source_id != factor_source_id {
-                    return Err(
-                        CommonError::ArculusCardFactorSourceIdMissmatch,
-                    );
-                }
-                Ok(())
-            }
-            Err(e) => Err(e),
+        if card_fs_id != factor_source_id {
+            return Err(CommonError::ArculusCardFactorSourceIdMissmatch);
         }
+        Ok(())
+    }
+
+    async fn _get_firmware_version(
+        &self,
+        wallet: ArculusWalletPointer,
+    ) -> Result<String> {
+        let version = self.get_firmware_version_io(wallet).await?;
+        Ok(version
+            .bytes()
+            .iter()
+            .map(|byte| byte.to_string())
+            .collect::<Vec<String>>()
+            .join("."))
+    }
+
+    async fn _get_gguid(&self, wallet: ArculusWalletPointer) -> Result<String> {
+        let gguid = self.get_gguid_io(wallet).await?;
+        Ok(gguid
+            .bytes()
+            .iter()
+            .map(|b| format!("{:02X}", b))
+            .collect::<Vec<String>>()
+            .join(""))
     }
 
     async fn _get_factor_source_id(

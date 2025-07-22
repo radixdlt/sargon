@@ -14,7 +14,9 @@ extension BIOS {
 			unsafeStorageKeyMapping: [:],
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
 				keychainService: "test"
-			)
+			),
+            arculuCSDKDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+            nftTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 }

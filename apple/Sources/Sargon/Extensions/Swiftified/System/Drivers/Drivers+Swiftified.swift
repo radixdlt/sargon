@@ -9,13 +9,17 @@ extension Drivers {
 		bundle: Bundle,
 		userDefaultsSuite: String,
 		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
-		secureStorageDriver: SecureStorageDriver
+		secureStorageDriver: SecureStorageDriver,
+        arculuCSDKDriver: ArculusCsdkDriver,
+        nftTagDriver: NfcTagDriver
 	) {
 		self.init(
 			appVersion: (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "Unknown",
 			userDefaultsSuite: userDefaultsSuite,
 			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
-			secureStorageDriver: secureStorageDriver
+			secureStorageDriver: secureStorageDriver,
+            arculuCSDKDriver: arculuCSDKDriver,
+            nftTagDriver: nftTagDriver
 		)
 	}
 
@@ -23,7 +27,9 @@ extension Drivers {
 		appVersion: String,
 		userDefaultsSuite: String,
 		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
-		secureStorageDriver: SecureStorageDriver
+		secureStorageDriver: SecureStorageDriver,
+        arculuCSDKDriver: ArculusCsdkDriver,
+        nftTagDriver: NfcTagDriver
 	) {
 		self.init(
 			secureStorage: secureStorageDriver,
@@ -31,7 +37,9 @@ extension Drivers {
 			unsafeStorage: UnsafeStorage(
 				userDefaults: .init(suiteName: userDefaultsSuite)!,
 				keyMapping: unsafeStorageKeyMapping
-			)
+			),
+            arculusCSDKDriver: arculuCSDKDriver,
+            nftTagDriver: nftTagDriver
 		)
 	}
 }
@@ -40,7 +48,9 @@ extension Drivers {
 	public convenience init(
 		secureStorage: SecureStorageDriver,
 		hostInfo: HostInfoDriver,
-		unsafeStorage: UnsafeStorage
+		unsafeStorage: UnsafeStorage,
+        arculusCSDKDriver: ArculusCsdkDriver,
+        nftTagDriver: NfcTagDriver
 	) {
 		self.init(
 			networking: .shared,
@@ -52,8 +62,8 @@ extension Drivers {
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
 			profileStateChangeDriver: .shared,
-            arculusCsdkDriver: ArculusCSDKDriver(),
-            nfcTagDriver: NFCSessionClient()
+            arculusCsdkDriver: arculusCSDKDriver,
+            nfcTagDriver: nftTagDriver
 		)
 	}
 }
