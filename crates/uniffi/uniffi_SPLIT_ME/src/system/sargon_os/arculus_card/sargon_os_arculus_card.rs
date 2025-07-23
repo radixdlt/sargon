@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use sargon::ArculusCardInfo as InternalArculusCardInfo;
+use sargon::ArculusMinFirmwareVersionRequirement as InternalArculusMinFirmwareVersionRequirement;
 use sargon::OsArculusCard;
 
 use sargon::AuthIntent as InternalAuthIntent;
@@ -9,16 +9,21 @@ use sargon::SubintentHash as InternalSubintentHash;
 use sargon::TransactionIntent as InternalTransactionIntent;
 use sargon::TransactionIntentHash as InternalTransactionIntentHash;
 
-#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
-pub struct ArculusCardInfo {
-    pub firmware_version: String,
-    pub gguid: String,
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Enum)]
+pub enum ArculusMinFirmwareVersionRequirement {
+    Valid,
+    Invalid(String),
 }
 
 #[uniffi::export]
 impl SargonOS {
-    async fn arculus_get_card_info(&self) -> Result<ArculusCardInfo> {
-        self.wrapped.arculus_get_card_info().await.into_result()
+    async fn validate_min_firmware_version(
+        &self,
+    ) -> Result<ArculusMinFirmwareVersionRequirement> {
+        self.wrapped
+            .validate_min_firmware_version()
+            .await
+            .into_result()
     }
 
     pub async fn arculus_configure_card_with_mnemonic(

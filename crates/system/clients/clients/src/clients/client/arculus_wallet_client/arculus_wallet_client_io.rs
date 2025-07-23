@@ -60,16 +60,18 @@ impl ArculusWalletClient {
         curve: CardCurve,
     ) -> Result<BagOfBytes> {
         self.do_card_io(
-            self.csdk_driver.get_public_key_by_path_request(
-                wallet,
-                path.to_string().into_bytes().into(),
-                curve.val(),
-            )
-            .ok_or(CommonError::ArculusCSDKFailedToCreateGetPublicKeyByPathRequest)?,
+            self.csdk_driver
+                .get_public_key_by_path_request(
+                    wallet,
+                    path.to_string().into_bytes().into(),
+                    curve.val(),
+                )
+                .expect("CSDK failed to create GetPublicKeyByPath request"),
             |response| {
-                self.csdk_driver
+                Ok(self
+                    .csdk_driver
                     .get_public_key_by_path_response(wallet, response)
-                    .ok_or(CommonError::ArculusCSDKFailedToCreateGetPublicKeyByPathResponse)
+                    .expect("CSDK failed to parse GetPublicKeyByPath response"))
             },
         )
         .await
@@ -82,15 +84,14 @@ impl ArculusWalletClient {
         aid: BagOfBytes,
     ) -> Result<BagOfBytes> {
         self.do_card_io(
-            self.csdk_driver.select_wallet_request(wallet, aid).ok_or(
-                CommonError::ArculusCSDKFailedToCreateSelectWalletRequest,
-            )?,
+            self.csdk_driver
+                .select_wallet_request(wallet, aid.clone())
+                .expect("CSDK failed to create SelectWallet request"),
             |response| {
-                self.csdk_driver
+                Ok(self
+                    .csdk_driver
                     .select_wallet_response(wallet, response)
-                    .ok_or(
-                    CommonError::ArculusCSDKFailedToCreateSelectWalletResponse,
-                )
+                    .expect("CSDK failed to parse SelectWallet response"))
             },
         )
         .await
@@ -104,11 +105,12 @@ impl ArculusWalletClient {
         self.do_card_io(
             self.csdk_driver
                 .get_gguid_request(wallet)
-                .ok_or(CommonError::ArculusCSDKFailedToCreateGetGGUIDRequest)?,
+                .expect("CSDK failed to create GetGGUID request"),
             |response| {
-                self.csdk_driver.get_gguid_response(wallet, response).ok_or(
-                    CommonError::ArculusCSDKFailedToCreateGetGGUIDResponse,
-                )
+                Ok(self
+                    .csdk_driver
+                    .get_gguid_response(wallet, response)
+                    .expect("CSDK failed to parse GetGGUID response"))
             },
         )
         .await
@@ -120,10 +122,14 @@ impl ArculusWalletClient {
         wallet: ArculusWalletPointer,
     ) -> Result<BagOfBytes> {
         self.do_card_io(
-            self.csdk_driver.get_firmware_version_request(wallet).ok_or(CommonError::ArculusCSDKFailedToCreateGetFirmwareVersionRequest)?,
+            self.csdk_driver
+                .get_firmware_version_request(wallet)
+                .expect("CSDK failed to create GetFirmwareVersion request"),
             |response| {
-                self.csdk_driver
-                    .get_firmware_version_response(wallet, response).ok_or(CommonError::ArculusCSDKFailedToCreateGetFirmwareVersionResponse)
+                Ok(self
+                    .csdk_driver
+                    .get_firmware_version_response(wallet, response)
+                    .expect("CSDK failed to parse GetFirmwareVersion response"))
             },
         )
         .await
@@ -184,11 +190,13 @@ impl ArculusWalletClient {
     ) -> Result<BagOfBytes> {
         self.do_card_io(
             self.csdk_driver
-                .create_wallet_seed_request(wallet, word_count).ok_or(CommonError::ArculusCSDKFailedToCreateWalletSeedRequest)?,
+                .create_wallet_seed_request(wallet, word_count)
+                .expect("CSDK failed to create CreateWalletSeed request"),
             |response| {
-                self.csdk_driver
+                Ok(self
+                    .csdk_driver
                     .create_wallet_seed_response(wallet, response)
-                    .ok_or(CommonError::ArculusCSDKFailedToCreateWalletSeedResponse)
+                    .expect("CSDK failed to parse CreateWalletSeed response"))
             },
         )
         .await
@@ -253,17 +261,20 @@ impl ArculusWalletClient {
     ) -> Result<Ed25519Signature> {
         let signature_bytes = self
             .do_chainned_card_io(
-                self.csdk_driver.sign_hash_path_request(
-                    wallet,
-                    path.to_string().into_bytes().into(),
-                    curve.val(),
-                    algorithm.val(),
-                    hash.bytes().into(),
-                )
-                .ok_or(CommonError::ArculusCSDKFailedToCreateSignHashPathRequest)?,
+                self.csdk_driver
+                    .sign_hash_path_request(
+                        wallet,
+                        path.to_string().into_bytes().into(),
+                        curve.val(),
+                        algorithm.val(),
+                        hash.bytes().into(),
+                    )
+                    .expect("CSDK failed to create SignHashPath request"),
                 |response| {
-                    self.csdk_driver.sign_hash_path_response(wallet, response)
-                    .ok_or(CommonError::ArculusCSDKFailedToCreateSignHashPathResponse)
+                    Ok(self
+                        .csdk_driver
+                        .sign_hash_path_response(wallet, response)
+                        .expect("CSDK failed to parse SignHashPath response"))
                 },
             )
             .await?;

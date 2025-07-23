@@ -1,10 +1,12 @@
 use crate::prelude::*;
 
 impl SargonOS {
-    pub async fn arculus_get_card_info(&self) -> Result<ArculusCardInfo> {
+    pub async fn arculus_validate_min_firmware_version(
+        &self,
+    ) -> Result<ArculusMinFirmwareVersionRequirement> {
         self.clients
             .arculus_wallet_client
-            .get_arculus_card_info()
+            .validate_min_firmware_version()
             .await
     }
 
