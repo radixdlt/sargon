@@ -10,9 +10,29 @@ pub enum NFCTagArculusInteractonPurpose {
     DerivingPublicKeys(ArculusCardFactorSource),
 }
 
+impl HasSampleValues for NFCTagArculusInteractonPurpose {
+    fn sample() -> Self {
+        Self::IdentifyingCard
+    }
+
+    fn sample_other() -> Self {
+        Self::ConfiguringCardMnemonic
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum NFCTagDriverPurpose {
     Arculus(NFCTagArculusInteractonPurpose),
+}
+
+impl HasSampleValues for NFCTagDriverPurpose {
+    fn sample() -> Self {
+        Self::Arculus(NFCTagArculusInteractonPurpose::sample())
+    }
+
+    fn sample_other() -> Self {
+        Self::Arculus(NFCTagArculusInteractonPurpose::sample_other())
+    }
 }
 
 #[cfg(any(test, feature = "mock"))]
