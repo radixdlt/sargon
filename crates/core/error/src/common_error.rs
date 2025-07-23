@@ -897,7 +897,7 @@ pub enum CommonError {
     ArculusCSDKFailedToCreateVerifyPINRequest = 10259,
 
     #[error("Arculus card failed to create init encrypted session request")]
-    ArculusCSDKFailedToCreateaInitEncryptedSessionRequest = 10260,
+    ArculusCSDKFailedToCreateInitEncryptedSessionRequest = 10260,
 
     #[error("Arculus card failed to create wallet seed request")]
     ArculusCSDKFailedToCreateWalletSeedRequest = 10261,
@@ -929,8 +929,8 @@ pub enum CommonError {
     #[error("Unknown SecurityStructureID {id}")]
     UnknownSecurityStructureID { id: String } = 10270,
 
-    #[error("Arculus Card FactorSourceID missmatch")]
-    ArculusCardFactorSourceIdMissmatch = 10271,
+    #[error("Arculus Card FactorSourceID mismatch")]
+    ArculusCardFactorSourceIdMismatch = 10271,
 
     #[error("NFC Session was cancelled either by user or by system after being inactive")]
     NFCSessionCancelled = 10272,

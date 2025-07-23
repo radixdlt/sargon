@@ -18,8 +18,8 @@ use crate::prelude::*;
 #define CSDK_ERR_WRONG_PIN                  -108     /** Wrong PIN */
 #define CSDK_ERR_INVALID_PARAM              -109     /** Invalid Parameter */
 #define CSDK_ERR_ENCRYPTION_NOT_INIT        -110     /** NFC Session encryption was not initialized */
-#define CSDK_ERR_EXT_OR_CHAIN_NOT_SUPORTED  -111     /** Card doesn't support extended APDUs or chaining */
-#define CSDK_ERR_API_CHAIN_NOT_SUPORTED     -112     /** API is deprecated and requires Chaining */
+#define CSDK_ERR_EXT_OR_CHAIN_NOT_SUPPORTED  -111     /** Card doesn't support extended APDUs or chaining */
+#define CSDK_ERR_API_CHAIN_NOT_SUPPORTED     -112     /** API is deprecated and requires Chaining */
 #define CSDK_ERR_UNKNOWN_ERROR              -113     /** An unknown error has occurred */
 #define CSDK_ERR_APDU_EXCEEDS_CHAIN_LENGTH  -114     /** APDU too big to do chaining */
 #define CSDK_ERR_EXTAPDU_SUPPORT_REQUIRED   -115     /** Extended APDU not supported but required */

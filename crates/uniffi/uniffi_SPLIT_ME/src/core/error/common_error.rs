@@ -89,7 +89,7 @@ pub enum CommonError {
         error_message: String,
     },
     FailedToExtractTransactionReceiptBytes,
-    ArculusCardFactorSourceIdMissmatch,
+    ArculusCardFactorSourceIdMismatch,
     NFCSessionCancelled,
     NFCSessionLostTagConnection,
     NFCSessionUnknownTag,
@@ -385,8 +385,8 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
-            CommonError::ArculusCardFactorSourceIdMissmatch => {
-                InternalCommonError::ArculusCardFactorSourceIdMissmatch
+            CommonError::ArculusCardFactorSourceIdMismatch => {
+                InternalCommonError::ArculusCardFactorSourceIdMismatch
             }
             CommonError::NFCSessionCancelled => {
                 InternalCommonError::NFCSessionCancelled
@@ -607,8 +607,8 @@ impl From<InternalCommonError> for CommonError {
                     underlying: underlying.clone(),
                 }
             }
-            InternalCommonError::ArculusCardFactorSourceIdMissmatch => {
-                CommonError::ArculusCardFactorSourceIdMissmatch
+            InternalCommonError::ArculusCardFactorSourceIdMismatch => {
+                CommonError::ArculusCardFactorSourceIdMismatch
             }
             InternalCommonError::NFCSessionCancelled => {
                 CommonError::NFCSessionCancelled

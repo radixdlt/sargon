@@ -17,11 +17,11 @@
 //        self.isoTag = tag
 //    }
 //
-//    func setSesssionStartTime(date: Date) async {
+//    func setSessionStartTime(date: Date) async {
 //        self.sessionStartTime = date
 //    }
 //
-//    func setSesssionRenewTime(date: Date) async {
+//    func setSessionRenewTime(date: Date) async {
 //        self.sessionRenewTime = date
 //    }
 // }
@@ -187,8 +187,8 @@
 //        self.delegate = delegate
 //        session.begin()
 //        print("======== Session begin called \(Date.now)========")
-//        await self.setSesssionStartTime(date: .now)
-//        await self.setSesssionRenewTime(date: .now)
+//        await self.setSessionStartTime(date: .now)
+//        await self.setSessionRenewTime(date: .now)
 //        print("======== Session begin connecting tag ========")
 //        let tag = try await connectTag()
 //        await self.setIsoTag(tag: tag)
@@ -199,7 +199,7 @@
 //        self.session!.restartPolling()
 //        let tag = try await connectTag()
 //        await self.setIsoTag(tag: tag)
-//        await self.setSesssionRenewTime(date: .now)
+//        await self.setSessionRenewTime(date: .now)
 //
 //    }
 //

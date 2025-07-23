@@ -609,7 +609,7 @@ mod tests {
     }
 
     #[test]
-    fn from_arculus_bytes_bad_reprsentation() {
+    fn from_arculus_bytes_bad_representation() {
         let non_utf8_bytes: Vec<u8> = vec![0x80, 0xFF, 0xC0, 0xC1];
         assert_eq!(
             SUT::from_arculus_bytes(non_utf8_bytes),

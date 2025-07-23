@@ -173,7 +173,7 @@ impl ArculusWalletClient {
         wallet: ArculusWalletPointer,
     ) -> Result<()> {
         self.do_card_io_validate_status(
-            self.csdk_driver.init_encrypted_session_request(wallet).ok_or(CommonError::ArculusCSDKFailedToCreateaInitEncryptedSessionRequest)?,
+            self.csdk_driver.init_encrypted_session_request(wallet).ok_or(CommonError::ArculusCSDKFailedToCreateInitEncryptedSessionRequest)?,
             |response| {
                 self.csdk_driver
                     .init_encrypted_session_response(wallet, response)

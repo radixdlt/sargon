@@ -150,7 +150,7 @@ impl ArculusWalletClient {
         )
         .await?;
 
-        // Geneate seed bytes that will be stored on the card
+        // Generate seed bytes that will be stored on the card
         let seed = self.csdk_driver.seed_phrase_from_mnemonic_sentence(
             wallet,
             mnemonic.phrase().as_bytes().into(),
@@ -321,7 +321,7 @@ impl ArculusWalletClient {
     ) -> Result<()> {
         let card_fs_id = self._get_factor_source_id(wallet).await?;
         if card_fs_id != factor_source_id {
-            return Err(CommonError::ArculusCardFactorSourceIdMissmatch);
+            return Err(CommonError::ArculusCardFactorSourceIdMismatch);
         }
         Ok(())
     }
@@ -654,7 +654,7 @@ mod tests {
 
         fn init_recover_wallet(&mut self, seed_words_count: i64) -> &mut Self {
             let request = BagOfBytes::random();
-            let nfc_card_reponse = BagOfBytes::random();
+            let nfc_card_response = BagOfBytes::random();
 
             self.csdk_driver
                 .expect_init_recover_wallet_request()
@@ -662,10 +662,10 @@ mod tests {
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
-            self.nfc_send_receive(request, nfc_card_reponse.clone());
+            self.nfc_send_receive(request, nfc_card_response.clone());
             self.csdk_driver
                 .expect_init_recover_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_reponse))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -675,17 +675,17 @@ mod tests {
 
         fn finish_recover_wallet(&mut self, seed: BagOfBytes) -> &mut Self {
             let request = BagOfBytes::random();
-            let nfc_card_reponse = BagOfBytes::random();
+            let nfc_card_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_finish_recover_wallet_request()
                 .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
-            self.nfc_send_receive(request, nfc_card_reponse.clone());
+            self.nfc_send_receive(request, nfc_card_response.clone());
             self.csdk_driver
                 .expect_finish_recover_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_reponse))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
