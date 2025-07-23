@@ -19,9 +19,7 @@ pub enum MnemonicValidationOutcome {
     Invalid { indices_in_mnemonic: Vec<u16> },
 }
 
-impl From<InternalMnemonicValidationOutcome>
-    for MnemonicValidationOutcome
-{
+impl From<InternalMnemonicValidationOutcome> for MnemonicValidationOutcome {
     fn from(value: InternalMnemonicValidationOutcome) -> Self {
         match value {
             InternalMnemonicValidationOutcome::Valid => {
@@ -51,19 +49,14 @@ impl MnemonicBuilder {
 }
 
 impl MnemonicBuilder {
-    fn get<R>(
-        &self,
-        access: impl Fn(&InternalMnemonicBuilder) -> R,
-    ) -> R {
+    fn get<R>(&self, access: impl Fn(&InternalMnemonicBuilder) -> R) -> R {
         let binding = self.wrapped.clone();
         access(&binding)
     }
 
     fn set(
         self: Arc<Self>,
-        write: impl Fn(
-            &Arc<InternalMnemonicBuilder>,
-        ) -> &InternalMnemonicBuilder,
+        write: impl Fn(&Arc<InternalMnemonicBuilder>) -> &InternalMnemonicBuilder,
     ) -> Arc<Self> {
         builder_arc_map(self, |builder| {
             _ = write(&builder.wrapped);
@@ -116,8 +109,13 @@ impl MnemonicBuilder {
 
     /// Returns the `FactorSourceID` from the mnemonic with passphrase
     /// Panics if the mnemonic with passphrase wasn't yet created
-    pub fn get_factor_source_id(self: Arc<Self>, kind: FactorSourceKind) -> FactorSourceID {
-        self.get(|builder| builder.get_factor_source_id(kind.into_internal()).into())
+    pub fn get_factor_source_id(
+        self: Arc<Self>,
+        kind: FactorSourceKind,
+    ) -> FactorSourceID {
+        self.get(|builder| {
+            builder.get_factor_source_id(kind.into_internal()).into()
+        })
     }
 }
 

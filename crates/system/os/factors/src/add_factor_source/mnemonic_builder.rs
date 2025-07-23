@@ -177,10 +177,12 @@ impl MnemonicBuilder {
         &self,
         kind: FactorSourceKind,
     ) -> FactorSourceID {
-        FactorSourceID::from(FactorSourceIDFromHash::from_mnemonic_with_passphrase(
-            kind,
-            &self.get_mnemonic_with_passphrase(),
-        ))
+        FactorSourceID::from(
+            FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+                kind,
+                &self.get_mnemonic_with_passphrase(),
+            ),
+        )
     }
 
     pub fn validate_words(

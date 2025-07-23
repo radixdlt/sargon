@@ -17,7 +17,7 @@ pub enum ArculusMinFirmwareVersionRequirement {
 
 #[uniffi::export]
 impl SargonOS {
-    async fn validate_min_firmware_version(
+    pub async fn arculus_card_validate_min_firmware_version(
         &self,
     ) -> Result<ArculusMinFirmwareVersionRequirement> {
         self.wrapped
@@ -26,7 +26,7 @@ impl SargonOS {
             .into_result()
     }
 
-    pub async fn arculus_configure_card_with_mnemonic(
+    pub async fn arculus_card_configure_with_mnemonic(
         &self,
         mnemonic: Mnemonic,
         pin: String,
