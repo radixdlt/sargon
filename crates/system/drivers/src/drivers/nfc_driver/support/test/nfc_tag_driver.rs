@@ -11,26 +11,26 @@ impl RustNFCTagDriver {
 
 #[async_trait::async_trait]
 impl NFCTagDriver for RustNFCTagDriver {
-    async fn start_session(&self, purpose: NFCTagDriverPurpose) -> Result<()> {
+    async fn start_session(&self, _purpose: NFCTagDriverPurpose) -> Result<()> {
         todo!()
     }
 
-    async fn end_session(&self, with_failure: Option<CommonError>) {
+    async fn end_session(&self, _with_failure: Option<CommonError>) {
         todo!()
     }
 
-    async fn send_receive(&self, command: BagOfBytes) -> Result<BagOfBytes> {
+    async fn send_receive(&self, _command: BagOfBytes) -> Result<BagOfBytes> {
         todo!()
     }
 
     async fn send_receive_command_chain(
         &self,
-        command: Vec<BagOfBytes>,
+        _command: Vec<BagOfBytes>,
     ) -> Result<BagOfBytes> {
         todo!()
     }
 
-    async fn set_message(&self, message: String) {
+    async fn set_message(&self, _message: String) {
         todo!()
     }
 }

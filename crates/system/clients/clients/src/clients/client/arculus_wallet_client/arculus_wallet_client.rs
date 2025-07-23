@@ -107,7 +107,7 @@ impl ArculusWalletClient {
 
         let result = {
             let wallet = wallet?;
-            let result = op(wallet.clone()).await;
+            let result = op(wallet).await;
             self.csdk_driver.wallet_free(wallet);
             result
         };
@@ -176,7 +176,7 @@ impl ArculusWalletClient {
         factor_source_id: FactorSourceIDFromHash,
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-        self.validate_factor_source(wallet, factor_source_id.clone())
+        self.validate_factor_source(wallet, factor_source_id)
             .await?;
 
         let mut keys = IndexSet::new();
@@ -197,7 +197,7 @@ impl ArculusWalletClient {
             ));
 
             let progress =
-                (keys.len() as f32 / number_of_total_paths as f32) * 100 as f32;
+                (keys.len() as f32 / number_of_total_paths as f32) * 100_f32;
             self.nfc_tag_driver
                 .set_message(format!(
                     "Deriving public keys, progress {:?}%",
@@ -248,7 +248,7 @@ impl ArculusWalletClient {
         for signature_input in signature_inputs {
             let signature = self
                 .sign_hash_path(
-                    wallet.clone(),
+                    wallet,
                     signature_input.payload_id.clone().into(),
                     signature_input
                         .owned_factor_instance
@@ -281,8 +281,8 @@ impl ArculusWalletClient {
         let public_key = self.derive_public_key(wallet, path).await?;
 
         Ok(SignatureWithPublicKey::Ed25519 {
-            public_key: public_key,
-            signature: signature,
+            public_key,
+            signature,
         })
     }
 }
@@ -518,6 +518,7 @@ mod tests {
             self
         }
 
+        #[allow(dead_code)]
         fn expect_read_card_gguid(
             &mut self,
             stubbed_response: Uuid,
@@ -607,6 +608,7 @@ mod tests {
             self
         }
 
+        #[allow(dead_code)]
         fn create_wallet_seed(
             &mut self,
             word_count: i64,
@@ -631,6 +633,7 @@ mod tests {
             self
         }
 
+        #[allow(dead_code)]
         fn recover_wallet_seed(&mut self, seed: BagOfBytes) -> &mut Self {
             let request = BagOfBytes::random();
             let nfc_response = BagOfBytes::random();

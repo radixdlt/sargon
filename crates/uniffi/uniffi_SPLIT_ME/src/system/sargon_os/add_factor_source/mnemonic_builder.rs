@@ -1,35 +1,35 @@
 use crate::prelude::*;
-use sargon::DeviceMnemonicBuilder as InternalDeviceMnemonicBuilder;
-use sargon::DeviceMnemonicValidationOutcome as InternalDeviceMnemonicValidationOutcome;
+use sargon::MnemonicBuilder as InternalMnemonicBuilder;
+use sargon::MnemonicValidationOutcome as InternalMnemonicValidationOutcome;
 
 /// A builder of `MnemonicWithPassphrase` required for a new `DeviceFactorSource` creation.
 /// Exposes functions to be called by hosts to be able to use the resulting `MnemonicWithPassphrase`.
 #[derive(Debug, Hash, PartialEq, Clone, uniffi::Object)]
 #[uniffi::export(Hash, Eq)]
-pub struct DeviceMnemonicBuilder {
-    wrapped: Arc<InternalDeviceMnemonicBuilder>,
+pub struct MnemonicBuilder {
+    wrapped: Arc<InternalMnemonicBuilder>,
 }
 
-/// The outcome of the `build` function from `DeviceMnemonicBuilder`.
+/// The outcome of the `build` function from `MnemonicBuilder`.
 #[derive(Debug, PartialEq, uniffi::Enum)]
-pub enum DeviceMnemonicValidationOutcome {
+pub enum MnemonicValidationOutcome {
     /// The mnemonic words were valid
     Valid,
     /// The mnemonic words were invalid
     Invalid { indices_in_mnemonic: Vec<u16> },
 }
 
-impl From<InternalDeviceMnemonicValidationOutcome>
-    for DeviceMnemonicValidationOutcome
+impl From<InternalMnemonicValidationOutcome>
+    for MnemonicValidationOutcome
 {
-    fn from(value: InternalDeviceMnemonicValidationOutcome) -> Self {
+    fn from(value: InternalMnemonicValidationOutcome) -> Self {
         match value {
-            InternalDeviceMnemonicValidationOutcome::Valid => {
-                DeviceMnemonicValidationOutcome::Valid
+            InternalMnemonicValidationOutcome::Valid => {
+                MnemonicValidationOutcome::Valid
             }
-            InternalDeviceMnemonicValidationOutcome::Invalid {
+            InternalMnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic,
-            } => DeviceMnemonicValidationOutcome::Invalid {
+            } => MnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: indices_in_mnemonic
                     .into_iter()
                     .map(|i| i as u16)
@@ -41,19 +41,19 @@ impl From<InternalDeviceMnemonicValidationOutcome>
 }
 
 #[uniffi::export]
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     #[uniffi::constructor]
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
-            wrapped: Arc::new(InternalDeviceMnemonicBuilder::default()),
+            wrapped: Arc::new(InternalMnemonicBuilder::default()),
         })
     }
 }
 
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     fn get<R>(
         &self,
-        access: impl Fn(&InternalDeviceMnemonicBuilder) -> R,
+        access: impl Fn(&InternalMnemonicBuilder) -> R,
     ) -> R {
         let binding = self.wrapped.clone();
         access(&binding)
@@ -62,8 +62,8 @@ impl DeviceMnemonicBuilder {
     fn set(
         self: Arc<Self>,
         write: impl Fn(
-            &Arc<InternalDeviceMnemonicBuilder>,
-        ) -> &InternalDeviceMnemonicBuilder,
+            &Arc<InternalMnemonicBuilder>,
+        ) -> &InternalMnemonicBuilder,
     ) -> Arc<Self> {
         builder_arc_map(self, |builder| {
             _ = write(&builder.wrapped);
@@ -73,8 +73,8 @@ impl DeviceMnemonicBuilder {
     fn set_from_result(
         self: Arc<Self>,
         write: impl Fn(
-            &Arc<InternalDeviceMnemonicBuilder>,
-        ) -> Result<&InternalDeviceMnemonicBuilder>,
+            &Arc<InternalMnemonicBuilder>,
+        ) -> Result<&InternalMnemonicBuilder>,
     ) -> Result<Arc<Self>> {
         builder_arc_map_result(self, |builder| {
             write(&builder.wrapped).map(|_| ())
@@ -86,7 +86,7 @@ impl DeviceMnemonicBuilder {
 // ==== GET / READ ====
 // ====================
 #[uniffi::export]
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     pub fn get_mnemonic_with_passphrase(
         self: Arc<Self>,
     ) -> MnemonicWithPassphrase {
@@ -116,8 +116,8 @@ impl DeviceMnemonicBuilder {
 
     /// Returns the `FactorSourceID` from the mnemonic with passphrase
     /// Panics if the mnemonic with passphrase wasn't yet created
-    pub fn get_factor_source_id(self: Arc<Self>) -> FactorSourceID {
-        self.get(|builder| builder.get_factor_source_id().into())
+    pub fn get_factor_source_id(self: Arc<Self>, kind: FactorSourceKind) -> FactorSourceID {
+        self.get(|builder| builder.get_factor_source_id(kind.into_internal()).into())
     }
 }
 
@@ -125,7 +125,7 @@ impl DeviceMnemonicBuilder {
 // ===== MUTATION =====
 // ====================
 #[uniffi::export]
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     /// Generates a new mnemonic
     pub fn generate_new_mnemonic(self: Arc<Self>) -> Arc<Self> {
         self.set(|builder| builder.generate_new_mnemonic())
@@ -145,14 +145,14 @@ impl DeviceMnemonicBuilder {
 }
 
 #[uniffi::export]
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     /// Verifies if the `words_to_confirm` contains the expected number of words.
     /// Verifies if the `words_to_confirm` are correct within the previously created `MnemonicWithPassphrase`.
     /// Returns unconfirmed words if not all of the words were confirmed or the `MnemonicWithPassphrase`.
     pub fn validate_words(
         self: Arc<Self>,
         words_to_confirm: HashMap<u16, String>,
-    ) -> DeviceMnemonicValidationOutcome {
+    ) -> MnemonicValidationOutcome {
         self.wrapped
             .validate_words(
                 &words_to_confirm
