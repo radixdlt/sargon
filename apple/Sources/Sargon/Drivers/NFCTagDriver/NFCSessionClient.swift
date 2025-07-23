@@ -1,10 +1,10 @@
-//import CoreNFC
-//import AVFoundation
-//import SargonUniFFI
+// import CoreNFC
+// import AVFoundation
+// import SargonUniFFI
 //
-//extension NFCTagReaderSession: @unchecked @retroactive Sendable {}
+// extension NFCTagReaderSession: @unchecked @retroactive Sendable {}
 //
-//public actor NFCSessionClient {
+// public actor NFCSessionClient {
 //    var delegate: NFCTagReaderSessionAsyncDelegate?
 //    var session: NFCTagReaderSession?
 //    var isoTag: NFCISO7816Tag?
@@ -24,9 +24,9 @@
 //    func setSesssionRenewTime(date: Date) async {
 //        self.sessionRenewTime = date
 //    }
-//}
+// }
 //
-//extension NFCSessionClient: SargonUniFFI.NfcTagDriver {
+// extension NFCSessionClient: SargonUniFFI.NfcTagDriver {
 //    public func startSession(purpose: NfcTagDriverPurpose) async throws {
 //        self.purpose = purpose
 //        try await self.beginSession()
@@ -106,7 +106,7 @@
 //        Updating Factor Config
 //
 //        \(message)
-//        
+//
 //        Tap and hold this Arculus Card to your phone. This may take up to a minute.
 //
 //        Card: \(arculusCardFactorSource.hint.label)
@@ -114,9 +114,9 @@
 //            }
 //        }
 //    }
-//}
+// }
 //
-//extension NFCSessionClient {
+// extension NFCSessionClient {
 //    private func refreshSessionIfNeed() async throws {
 //        if self.sessionStartTime.distance(to: .now) >= 40 {
 //            print("========= Restarting session \(Date.now) ========== ")
@@ -249,4 +249,4 @@
 //        delegate = nil
 //        isoTag = nil
 //    }
-//}
+// }

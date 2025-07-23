@@ -1,8 +1,8 @@
-//import CoreNFC
-//import AsyncExtensions
-//import SargonUniFFI
+// import CoreNFC
+// import AsyncExtensions
+// import SargonUniFFI
 //
-//final class NFCTagReaderSessionAsyncDelegate: NSObject {
+// final class NFCTagReaderSessionAsyncDelegate: NSObject {
 //    let onSessionDidBecomeActive: AsyncThrowingStream<Void, Error>
 //    private let onSessionDidBecomeActiveContinuation: AsyncThrowingStream<Void, Error>.Continuation
 //
@@ -14,16 +14,16 @@
 //        (onSessionDidBecomeActive, onSessionDidBecomeActiveContinuation) = AsyncThrowingStream.makeStream()
 //    }
 //
-//}
+// }
 //
-//extension NFCTag: @unchecked @retroactive Sendable {}
+// extension NFCTag: @unchecked @retroactive Sendable {}
 //
-//extension NFCTagReaderSessionAsyncDelegate: NFCTagReaderSessionDelegate {
+// extension NFCTagReaderSessionAsyncDelegate: NFCTagReaderSessionDelegate {
 //    func tagReaderSessionDidBecomeActive(_ session: NFCTagReaderSession) {
 //        print("======== Session did become active ========")
 //        onSessionDidBecomeActiveContinuation.yield()
 //    }
-//    
+//
 //    func tagReaderSession(_ session: NFCTagReaderSession, didInvalidateWithError error: any Error) {
 //        let cancellationErrorCodes: [NFCReaderError.Code] = [.readerSessionInvalidationErrorSessionTimeout,
 //                                            .readerSessionInvalidationErrorSessionTerminatedUnexpectedly,
@@ -40,9 +40,9 @@
 //            onSessionTagDetectedContinuation.finish(throwing: commonError)
 //        }
 //    }
-//    
+//
 //    func tagReaderSession(_ session: NFCTagReaderSession, didDetect tags: [NFCTag]) {
 //        onSessionTagDetectedContinuation.yield(tags)
 //    }
-//}
+// }
 //

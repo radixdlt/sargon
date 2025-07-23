@@ -1,7 +1,7 @@
 import Foundation
 import SargonUniFFI
 
-//extension ArculusCardFactorSource {
+// extension ArculusCardFactorSource {
 //	public init(
 //		mnemonicWithPassphrase mwp: MnemonicWithPassphrase,
 //		hint: ArculusCardHint
@@ -18,4 +18,4 @@ import SargonUniFFI
 //	) {
 //		self.init(mnemonicWithPassphrase: mwp, hint: .init(label: label, model: .arculusColdStorageWallet))
 //	}
-//}
+// }

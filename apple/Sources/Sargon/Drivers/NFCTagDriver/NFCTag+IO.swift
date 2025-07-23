@@ -1,6 +1,6 @@
-//import CoreNFC
+// import CoreNFC
 //
-//extension NFCISO7816Tag {
+// extension NFCISO7816Tag {
 //    public func sendCommand(data: Data, file: StaticString = #filePath, fun: StaticString = #function) async throws -> Data {
 //        guard let command = NFCISO7816APDU(data: data) else {
 //            throw NFCReaderError(.readerErrorInvalidParameterLength)
@@ -24,4 +24,4 @@
 //
 //        fatalError()
 //    }
-//}
+// }

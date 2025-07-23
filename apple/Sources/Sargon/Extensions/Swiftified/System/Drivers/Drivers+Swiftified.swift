@@ -10,16 +10,16 @@ extension Drivers {
 		userDefaultsSuite: String,
 		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
 		secureStorageDriver: SecureStorageDriver,
-        arculuCSDKDriver: ArculusCsdkDriver,
-        nftTagDriver: NfcTagDriver
+		arculuCSDKDriver: ArculusCsdkDriver,
+		nftTagDriver: NfcTagDriver
 	) {
 		self.init(
 			appVersion: (bundle.infoDictionary?["CFBundleShortVersionString"] as? String) ?? "Unknown",
 			userDefaultsSuite: userDefaultsSuite,
 			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
 			secureStorageDriver: secureStorageDriver,
-            arculuCSDKDriver: arculuCSDKDriver,
-            nftTagDriver: nftTagDriver
+			arculuCSDKDriver: arculuCSDKDriver,
+			nftTagDriver: nftTagDriver
 		)
 	}
 
@@ -28,8 +28,8 @@ extension Drivers {
 		userDefaultsSuite: String,
 		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
 		secureStorageDriver: SecureStorageDriver,
-        arculuCSDKDriver: ArculusCsdkDriver,
-        nftTagDriver: NfcTagDriver
+		arculuCSDKDriver: ArculusCsdkDriver,
+		nftTagDriver: NfcTagDriver
 	) {
 		self.init(
 			secureStorage: secureStorageDriver,
@@ -38,8 +38,8 @@ extension Drivers {
 				userDefaults: .init(suiteName: userDefaultsSuite)!,
 				keyMapping: unsafeStorageKeyMapping
 			),
-            arculusCSDKDriver: arculuCSDKDriver,
-            nftTagDriver: nftTagDriver
+			arculusCSDKDriver: arculuCSDKDriver,
+			nftTagDriver: nftTagDriver
 		)
 	}
 }
@@ -49,8 +49,8 @@ extension Drivers {
 		secureStorage: SecureStorageDriver,
 		hostInfo: HostInfoDriver,
 		unsafeStorage: UnsafeStorage,
-        arculusCSDKDriver: ArculusCsdkDriver,
-        nftTagDriver: NfcTagDriver
+		arculusCSDKDriver: ArculusCsdkDriver,
+		nftTagDriver: NfcTagDriver
 	) {
 		self.init(
 			networking: .shared,
@@ -62,8 +62,8 @@ extension Drivers {
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
 			profileStateChangeDriver: .shared,
-            arculusCsdkDriver: arculusCSDKDriver,
-            nfcTagDriver: nftTagDriver
+			arculusCsdkDriver: arculusCSDKDriver,
+			nfcTagDriver: nftTagDriver
 		)
 	}
 }

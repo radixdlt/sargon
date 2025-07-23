@@ -12,16 +12,16 @@ extension BIOS {
 		userDefaultsSuite: String,
 		unsafeStorageKeyMapping: UnsafeStorageKeyMapping,
 		secureStorageDriver: SecureStorageDriver,
-        arculuCSDKDriver: ArculusCsdkDriver,
-        nftTagDriver: NfcTagDriver
+		arculuCSDKDriver: ArculusCsdkDriver,
+		nftTagDriver: NfcTagDriver
 	) {
 		let drivers = Drivers(
 			bundle: bundle,
 			userDefaultsSuite: userDefaultsSuite,
 			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
 			secureStorageDriver: secureStorageDriver,
-            arculuCSDKDriver: arculuCSDKDriver,
-            nftTagDriver: nftTagDriver
+			arculuCSDKDriver: arculuCSDKDriver,
+			nftTagDriver: nftTagDriver
 		)
 		// https://en.wikipedia.org/wiki/Power-on_self-test
 		log.info("📬 BIOS POST (Power-On Self Test)")

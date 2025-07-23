@@ -15,8 +15,8 @@ extension BIOS {
 			userDefaultsSuite: userDefaultsSuite,
 			unsafeStorageKeyMapping: unsafeStorageKeyMapping,
 			secureStorageDriver: secureStorageDriver,
-            arculuCSDKDriver: ArculusCsdkDriverImpl(noPointer: .init()),
-            nftTagDriver: NfcTagDriverImpl(noPointer: .init())
+			arculuCSDKDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nftTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 }
