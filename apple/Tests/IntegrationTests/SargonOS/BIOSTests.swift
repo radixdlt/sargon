@@ -13,7 +13,7 @@ extension BIOS {
 			keychainService: "test"
 		)
 	) -> BIOS {
-		creatingShared(drivers: .init(bundle: bundle, userDefaultsSuite: userDefaultsSuite, unsafeStorageKeyMapping: unsafeStorageKeyMapping, secureStorageDriver: secureStorageDriver))
+		creatingShared(drivers: .init(bundle: bundle, userDefaultsSuite: userDefaultsSuite, unsafeStorageKeyMapping: unsafeStorageKeyMapping, secureStorageDriver: secureStorageDriver, arculuCSDKDriver: ArculusCsdkDriverImpl(noPointer: .init()), nftTagDriver: NfcTagDriverImpl(noPointer: .init())))
 	}
 }
 

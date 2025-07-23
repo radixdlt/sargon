@@ -23,7 +23,9 @@ extension TestOS {
 							suiteName: UUID().uuidString
 						)!
 					),
-					profileStateChangeDriver: .shared
+					profileStateChangeDriver: .shared,
+					arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+					nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 				)
 			)
 		)
