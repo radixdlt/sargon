@@ -177,7 +177,7 @@ impl MnemonicBuilder {
         &self,
         kind: FactorSourceKind,
     ) -> FactorSourceID {
-        FactorSourceID::from(FactorSourceIDFromHash::new(
+        FactorSourceID::from(FactorSourceIDFromHash::from_mnemonic_with_passphrase(
             kind,
             &self.get_mnemonic_with_passphrase(),
         ))
@@ -337,13 +337,13 @@ mod tests {
     )]
     fn get_factor_source_id_panics_if_mnemonic_not_created() {
         let sut = SUT::default();
-        let _ = sut.get_factor_source_id();
+        let _ = sut.get_factor_source_id(FactorSourceKind::Device);
     }
 
     #[test]
     fn get_factor_source_id() {
         let sut = SUT::sample();
-        let fsid = sut.get_factor_source_id();
+        let fsid = sut.get_factor_source_id(FactorSourceKind::Device);
         pretty_assertions::assert_eq!(
             fsid,
             FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
