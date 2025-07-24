@@ -14,9 +14,6 @@ pub enum SecureStorageKey {
         // while Android Host stores only one profile in the secure storage.
         profile_id: ProfileID,
     },
-    ArculusCardFactorSourcePIN {
-        factor_source_id: FactorSourceIDFromHash,
-    },
 }
 
 impl PartialEq<SecureStorageKey> for SecureStorageKey {
@@ -35,14 +32,6 @@ impl PartialEq<SecureStorageKey> for SecureStorageKey {
                 SecureStorageKey::ProfileSnapshot { .. },
                 SecureStorageKey::ProfileSnapshot { .. },
             ) => true, // Note: `profile_id` is not used for comparison, as it is only forwarded as additional payload to the iOS Host.
-            (
-                SecureStorageKey::ArculusCardFactorSourcePIN {
-                    factor_source_id: a,
-                },
-                SecureStorageKey::ArculusCardFactorSourcePIN {
-                    factor_source_id: b,
-                },
-            ) => a == b,
             _ => false,
         }
     }
@@ -64,12 +53,6 @@ impl Hash for SecureStorageKey {
             SecureStorageKey::ProfileSnapshot { .. } => {
                 "profile_snapshot".hash(state);
             }
-            SecureStorageKey::ArculusCardFactorSourcePIN {
-                factor_source_id,
-            } => {
-                "arculus_card_factor_source_pin".hash(state);
-                factor_source_id.hash(state);
-            }
         }
     }
 }
@@ -85,12 +68,6 @@ impl SecureStorageKey {
                 } => format!("device_factor_source_{}", factor_source_id),
                 SecureStorageKey::ProfileSnapshot { .. } =>
                     "profile_snapshot".to_owned(),
-                SecureStorageKey::ArculusCardFactorSourcePIN {
-                    factor_source_id,
-                } => format!(
-                    "arculus_card_factor_source_pin{}",
-                    factor_source_id
-                ),
             }
         )
     }

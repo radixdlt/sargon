@@ -74,16 +74,6 @@ impl HasSampleValues for Ed25519Signature {
     }
 }
 
-impl Ed25519Signature {
-    pub fn sample_another() -> Self {
-        "a3d5b2e5c1f9e478b64fcfd0a23b90a4e03fdc4e1a7c3b5d8f923bfc9bcb3d7862d4f6a9dfeab63c15d37c28f947f2a47e72cfc7741a90203eaa6b92c6e0cb42".parse().expect("Should produce a valid sample Ed25519Signature")
-    }
-
-    pub fn sample_extra() -> Self {
-        "d9a4e68b2b345a6c7e1e2f9c87653e14a9e4d98c5b2e3a7d90abcf51d7fe4b9c3d37fa4e8c9e5126b372cb4f4e9a7351d89ef2a4b7e4d31c8b923c7e5d9a6f08".parse().expect("Should produce a valid sample Ed25519Signature")
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::HasSampleValues;

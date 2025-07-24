@@ -116,6 +116,15 @@ impl FactorSourceIDFromHash {
         )
     }
 
+    pub fn new_for_arculus_with_mwp(
+        mnemonic_with_passphrase: &MnemonicWithPassphrase,
+    ) -> Self {
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
+            mnemonic_with_passphrase,
+        )
+    }
+
     pub fn new_for_off_device(
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
     ) -> Self {

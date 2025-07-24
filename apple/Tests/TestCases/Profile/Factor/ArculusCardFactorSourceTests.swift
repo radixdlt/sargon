@@ -12,18 +12,16 @@ final class ArculusCardFactorSourceTests: SpecificFactorSourceTest<ArculusCardFa
 	}
 
 	func test_new() {
-		// FIXME: ArculusCardFactorSource constructor from mnemonic is not available
-		// XCTAssertEqual(
-		//	SUT(
-		//		mnemonicWithPassphrase: .init(
-		//			mnemonic: .sampleArculus,
-		//			passphrase: ""
-		//		),
-		//		label: "Test"
-		//	).id,
-		//	SUT.sample.id
-		// )
-		XCTAssertEqual(SUT.sample.id, SUT.sample.id) // Placeholder test
+		XCTAssertEqual(
+			SUT(
+				mnemonicWithPassphrase: .init(
+					mnemonic: .sampleArculus,
+					passphrase: ""
+				),
+				label: "Test"
+			).id,
+			SUT.sample.id
+		)
 	}
 
 	func test_factor_source_id_is_id() {
