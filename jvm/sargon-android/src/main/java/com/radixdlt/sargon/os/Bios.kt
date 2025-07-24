@@ -18,8 +18,8 @@ import com.radixdlt.sargon.os.driver.AndroidNetworkingDriver
 import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import com.radixdlt.sargon.os.driver.AndroidStorageDriver
 import com.radixdlt.sargon.os.driver.BiometricsHandler
-import com.radixdlt.sargon.os.driver.ArculusCsdkDriver
-import com.radixdlt.sargon.os.driver.NfcTagDriver
+import com.radixdlt.sargon.os.driver.ArculusCSDKDriver
+import com.radixdlt.sargon.os.driver.NFCTagDriver
 import okhttp3.OkHttpClient
 import timber.log.Timber
 
@@ -33,8 +33,8 @@ fun Bios.Companion.from(
     deviceInfoDatastore: DataStore<Preferences>,
     eventBusDriver: AndroidEventBusDriver,
     profileStateChangeDriver: AndroidProfileStateChangeDriver,
-    arculusCsdkDriver: ArculusCsdkDriver,
-    nfcTagDriver: NfcTagDriver
+    arculusCsdkDriver: ArculusCSDKDriver,
+    nfcTagDriver: NFCTagDriver
 ): Bios {
     val storageDriver = AndroidStorageDriver(
         biometricAuthorizationDriver = AndroidBiometricAuthorizationDriver(
