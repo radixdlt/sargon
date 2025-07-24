@@ -14,9 +14,6 @@ pub enum SecureStorageKey {
         // while Android Host stores only one profile in the secure storage.
         profile_id: ProfileID,
     },
-    ArculusCardFactorSourcePIN {
-        factor_source_id: FactorSourceIDFromHash,
-    },
 }
 
 delegate_display_debug_into!(SecureStorageKey, InternalSecureStorageKey);
