@@ -34,11 +34,11 @@ pub fn new_arculus_card_factor_source_sample_other() -> ArculusCardFactorSource
     InternalArculusCardFactorSource::sample_other().into()
 }
 
-// #[uniffi::export]
-// fn new_arculus_card_factor_source_from_mnemonic_with_passphrase(
-//     mwp: MnemonicWithPassphrase,
-//     hint: ArculusCardHint,
-// ) -> ArculusCardFactorSource {
-//     let id = InternalFactorSourceIDFromHash::new_for_arculus(&mwp.into());
-//     InternalArculusCardFactorSource::new(id, hint.into()).into()
-// }
+#[uniffi::export]
+fn new_arculus_card_factor_source_from_mnemonic_with_passphrase(
+    mwp: MnemonicWithPassphrase,
+    hint: ArculusCardHint,
+) -> ArculusCardFactorSource {
+    let id = InternalFactorSourceIDFromHash::new_for_arculus(&mwp.into());
+    InternalArculusCardFactorSource::new(id, hint.into()).into()
+}
