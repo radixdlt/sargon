@@ -111,7 +111,9 @@ class SargonOsManagerTest {
             logging = FakeLoggingDriver(),
             eventBus = eventBusDriver,
             fileSystem = FakeFileSystemDriver(),
-            profileStateChangeDriver = profileStateChangeDriver
+            profileStateChangeDriver = profileStateChangeDriver,
+            arculusCsdkDriver = ArculusCsdkDriverImpl(NoPointer),
+            nfcTagDriver = NfcTagDriverImpl(NoPointer)
         )
     )
 }
