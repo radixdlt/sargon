@@ -195,6 +195,12 @@ impl BagOfBytes {
     }
 }
 
+impl BagOfBytes {
+    pub fn random() -> Self {
+        generate_32_bytes().into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

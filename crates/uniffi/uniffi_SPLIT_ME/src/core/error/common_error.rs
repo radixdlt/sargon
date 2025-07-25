@@ -89,6 +89,11 @@ pub enum CommonError {
         error_message: String,
     },
     FailedToExtractTransactionReceiptBytes,
+    ArculusCardFactorSourceIdMismatch,
+    NFCSessionCancelled,
+    NFCSessionLostTagConnection,
+    NFCSessionUnknownTag,
+    ArculusCardNotConfigured,
     MaxTransfersPerTransactionReached {
         amount: u64,
     },
@@ -380,6 +385,21 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
+            CommonError::ArculusCardFactorSourceIdMismatch => {
+                InternalCommonError::ArculusCardFactorSourceIdMismatch
+            }
+            CommonError::NFCSessionCancelled => {
+                InternalCommonError::NFCSessionCancelled
+            }
+            CommonError::NFCSessionLostTagConnection => {
+                InternalCommonError::NFCSessionLostTagConnection
+            }
+            CommonError::NFCSessionUnknownTag => {
+                InternalCommonError::NFCSessionUnknownTag
+            }
+            CommonError::ArculusCardNotConfigured => {
+                InternalCommonError::ArculusCardNotConfigured
+            }
             AddressInvalidEntityType {
                 address_kind,
                 entity_type,
@@ -586,6 +606,21 @@ impl From<InternalCommonError> for CommonError {
                 InvalidInstructionsString {
                     underlying: underlying.clone(),
                 }
+            }
+            InternalCommonError::ArculusCardFactorSourceIdMismatch => {
+                CommonError::ArculusCardFactorSourceIdMismatch
+            }
+            InternalCommonError::NFCSessionCancelled => {
+                CommonError::NFCSessionCancelled
+            }
+            InternalCommonError::NFCSessionLostTagConnection => {
+                CommonError::NFCSessionLostTagConnection
+            }
+            InternalCommonError::NFCSessionUnknownTag => {
+                CommonError::NFCSessionUnknownTag
+            }
+            InternalCommonError::ArculusCardNotConfigured => {
+                CommonError::ArculusCardNotConfigured
             }
             InternalCommonError::AddressInvalidEntityType {
                 address_kind,

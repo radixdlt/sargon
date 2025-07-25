@@ -31,9 +31,9 @@ pub struct BagOfBytes {
 
 delegate_display_debug_into!(BagOfBytes, InternalBagOfBytes);
 
-impl BagOfBytes {
-    pub fn into_internal(&self) -> InternalBagOfBytes {
-        self.clone().into()
+impl IntoInternal<BagOfBytes, InternalBagOfBytes> for BagOfBytes {
+    fn into_internal(self) -> InternalBagOfBytes {
+        self.into()
     }
 }
 
@@ -126,6 +126,7 @@ pub fn new_bag_of_bytes_sample_fade() -> BagOfBytes {
 #[uniffi::export]
 pub fn bag_of_bytes_prepend_deadbeef(in_front_of: &BagOfBytes) -> BagOfBytes {
     in_front_of
+        .clone()
         .into_internal()
         .prepending(vec![0xde, 0xad, 0xbe, 0xef])
         .into()
@@ -133,7 +134,8 @@ pub fn bag_of_bytes_prepend_deadbeef(in_front_of: &BagOfBytes) -> BagOfBytes {
 
 #[uniffi::export]
 pub fn bag_of_bytes_append_deadbeef(to: &BagOfBytes) -> BagOfBytes {
-    to.into_internal()
+    to.clone()
+        .into_internal()
         .appending(vec![0xde, 0xad, 0xbe, 0xef])
         .into()
 }
@@ -141,6 +143,7 @@ pub fn bag_of_bytes_append_deadbeef(to: &BagOfBytes) -> BagOfBytes {
 #[uniffi::export]
 pub fn bag_of_bytes_prepend_cafe(in_front_of: &BagOfBytes) -> BagOfBytes {
     in_front_of
+        .clone()
         .into_internal()
         .prepending(vec![0xca, 0xfe])
         .into()
@@ -148,7 +151,10 @@ pub fn bag_of_bytes_prepend_cafe(in_front_of: &BagOfBytes) -> BagOfBytes {
 
 #[uniffi::export]
 pub fn bag_of_bytes_append_cafe(to: &BagOfBytes) -> BagOfBytes {
-    to.into_internal().appending(vec![0xca, 0xfe]).into()
+    to.clone()
+        .into_internal()
+        .appending(vec![0xca, 0xfe])
+        .into()
 }
 
 decl_conversion_tests_for!(BagOfBytes);

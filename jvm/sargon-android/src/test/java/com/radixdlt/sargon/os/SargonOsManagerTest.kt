@@ -28,6 +28,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import com.radixdlt.sargon.NfcTagDriverImpl
+import com.radixdlt.sargon.ArculusCsdkDriverImpl
+import com.radixdlt.sargon.NoPointer
+
 
 class SargonOsManagerTest {
     private val okHttpClient = mockk<OkHttpClient>()
@@ -111,7 +115,9 @@ class SargonOsManagerTest {
             logging = FakeLoggingDriver(),
             eventBus = eventBusDriver,
             fileSystem = FakeFileSystemDriver(),
-            profileStateChangeDriver = profileStateChangeDriver
+            profileStateChangeDriver = profileStateChangeDriver,
+            arculusCsdkDriver = ArculusCsdkDriverImpl(NoPointer),
+            nfcTagDriver = NfcTagDriverImpl(NoPointer)
         )
     )
 }

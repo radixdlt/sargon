@@ -69,10 +69,17 @@ impl FactorSourceIDFromHash {
             seed.derive_ed25519_private_key(GetIDPath.to_hd_path());
         let public_key_bytes = private_key.public_key().to_bytes();
         // TODO: Impl Zeroize for `PrivateKey`!
-        let hash = hash_of(public_key_bytes);
+        Self::from_public_key_bytes(factor_source_kind, public_key_bytes)
+        // `BIP39Seed` implements `ZeroizeOnDrop` so `seed` should now be zeroized
+    }
+
+    pub fn from_public_key_bytes(
+        factor_source_kind: FactorSourceKind,
+        public_key_bytes: impl Into<Vec<u8>>,
+    ) -> Self {
+        let hash = hash_of(public_key_bytes.into());
         let body = Exactly32Bytes::from(hash);
         Self::new(factor_source_kind, body)
-        // `BIP39Seed` implements `ZeroizeOnDrop` so `seed` should now be zeroized
     }
 
     pub fn new_for_device(
@@ -102,7 +109,14 @@ impl FactorSourceIDFromHash {
         )
     }
 
-    pub fn new_for_arculus(
+    pub fn new_for_arculus(public_key_bytes: impl Into<Vec<u8>>) -> Self {
+        Self::from_public_key_bytes(
+            FactorSourceKind::ArculusCard,
+            public_key_bytes,
+        )
+    }
+
+    pub fn new_for_arculus_with_mwp(
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
     ) -> Self {
         Self::from_mnemonic_with_passphrase(
@@ -178,11 +192,17 @@ impl FactorSourceIDFromHash {
     }
 
     pub fn sample_arculus() -> Self {
-        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus())
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
+            &MnemonicWithPassphrase::sample_arculus(),
+        )
     }
 
     pub fn sample_arculus_other() -> Self {
-        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus_other())
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
+            &MnemonicWithPassphrase::sample_arculus_other(),
+        )
     }
 
     pub fn sample_off_device() -> Self {
@@ -288,7 +308,8 @@ mod tests {
         };
         test(SUT::sample());
         test(SUT::sample_other());
-        test(SUT::new_for_arculus(
+        test(SUT::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
             &MnemonicWithPassphrase::sample_arculus(),
         ));
         test(SUT::new_for_ledger(&MnemonicWithPassphrase::sample_ledger()));

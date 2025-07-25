@@ -3,12 +3,12 @@ use crate::prelude::*;
 /// A builder of `MnemonicWithPassphrase` required for a new `DeviceFactorSource` creation.
 /// Exposes functions to be called by hosts to be able to use the resulting `MnemonicWithPassphrase`.
 #[derive(Debug)]
-pub struct DeviceMnemonicBuilder {
+pub struct MnemonicBuilder {
     mnemonic_with_passphrase: RwLock<Option<MnemonicWithPassphrase>>,
 }
 
 #[derive(Debug, PartialEq)]
-pub enum DeviceMnemonicValidationOutcome {
+pub enum MnemonicValidationOutcome {
     /// The mnemonic words were valid
     Valid,
     /// The mnemonic words were invalid
@@ -17,13 +17,13 @@ pub enum DeviceMnemonicValidationOutcome {
     },
 }
 
-impl Default for DeviceMnemonicBuilder {
+impl Default for MnemonicBuilder {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl PartialEq for DeviceMnemonicBuilder {
+impl PartialEq for MnemonicBuilder {
     fn eq(&self, other: &Self) -> bool {
         let mnemonic_with_passphrase =
             self.mnemonic_with_passphrase.read().unwrap();
@@ -33,9 +33,9 @@ impl PartialEq for DeviceMnemonicBuilder {
     }
 }
 
-impl Eq for DeviceMnemonicBuilder {}
+impl Eq for MnemonicBuilder {}
 
-impl std::hash::Hash for DeviceMnemonicBuilder {
+impl std::hash::Hash for MnemonicBuilder {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         let mnemonic_with_passphrase =
             self.mnemonic_with_passphrase.read().unwrap();
@@ -43,7 +43,7 @@ impl std::hash::Hash for DeviceMnemonicBuilder {
     }
 }
 
-impl HasSampleValues for DeviceMnemonicBuilder {
+impl HasSampleValues for MnemonicBuilder {
     fn sample() -> Self {
         Self::with_mnemonic_with_passphrase(MnemonicWithPassphrase::sample())
     }
@@ -55,7 +55,7 @@ impl HasSampleValues for DeviceMnemonicBuilder {
     }
 }
 
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     fn new() -> Self {
         Self {
             mnemonic_with_passphrase: RwLock::new(None),
@@ -76,7 +76,7 @@ impl DeviceMnemonicBuilder {
 // ====================
 // ==== GET / READ ====
 // ====================
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     /// Returns the words of the mnemonic with passphrase.
     pub fn get_words(&self) -> Vec<BIP39Word> {
         self.get_mnemonic_with_passphrase().mnemonic.words
@@ -95,7 +95,7 @@ impl DeviceMnemonicBuilder {
 // ====================
 // ===== MUTATION =====
 // ====================
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     /// Generates a new mnemonic
     pub fn generate_new_mnemonic(&self) -> &Self {
         let mnemonic = Mnemonic::generate_new();
@@ -140,7 +140,7 @@ impl DeviceMnemonicBuilder {
     }
 }
 
-impl DeviceMnemonicBuilder {
+impl MnemonicBuilder {
     const NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM_EXCL_CHECKSUM:
         usize = 3;
     const NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM: usize =
@@ -173,16 +173,22 @@ impl DeviceMnemonicBuilder {
 
     /// Returns the `FactorSourceID` from the mnemonic with passphrase
     /// Panics if the mnemonic with passphrase wasn't yet created
-    pub fn get_factor_source_id(&self) -> FactorSourceID {
-        FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
-            &self.get_mnemonic_with_passphrase(),
-        ))
+    pub fn get_factor_source_id(
+        &self,
+        kind: FactorSourceKind,
+    ) -> FactorSourceID {
+        FactorSourceID::from(
+            FactorSourceIDFromHash::from_mnemonic_with_passphrase(
+                kind,
+                &self.get_mnemonic_with_passphrase(),
+            ),
+        )
     }
 
     pub fn validate_words(
         &self,
         words_to_confirm: &HashMap<usize, String>,
-    ) -> DeviceMnemonicValidationOutcome {
+    ) -> MnemonicValidationOutcome {
         if words_to_confirm.len()
             != Self::NUMBER_OF_WORDS_OF_MNEMONIC_USER_NEED_TO_CONFIRM
         {
@@ -201,9 +207,9 @@ impl DeviceMnemonicBuilder {
             .collect::<IndexSet<_>>();
 
         if unconfirmed_indices_in_mnemonic.is_empty() {
-            DeviceMnemonicValidationOutcome::Valid
+            MnemonicValidationOutcome::Valid
         } else {
-            DeviceMnemonicValidationOutcome::Invalid {
+            MnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: unconfirmed_indices_in_mnemonic,
             }
         }
@@ -229,7 +235,7 @@ mod tests {
     use radix_common::prelude::indexset;
 
     #[allow(clippy::upper_case_acronyms)]
-    type SUT = DeviceMnemonicBuilder;
+    type SUT = MnemonicBuilder;
 
     #[test]
     fn equality() {
@@ -333,13 +339,13 @@ mod tests {
     )]
     fn get_factor_source_id_panics_if_mnemonic_not_created() {
         let sut = SUT::default();
-        let _ = sut.get_factor_source_id();
+        let _ = sut.get_factor_source_id(FactorSourceKind::Device);
     }
 
     #[test]
     fn get_factor_source_id() {
         let sut = SUT::sample();
-        let fsid = sut.get_factor_source_id();
+        let fsid = sut.get_factor_source_id(FactorSourceKind::Device);
         pretty_assertions::assert_eq!(
             fsid,
             FactorSourceID::from(FactorSourceIDFromHash::new_for_device(
@@ -384,7 +390,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             sut.validate_words(&words_to_confirm),
-            DeviceMnemonicValidationOutcome::Invalid {
+            MnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: indexset![0, 1, 2, 3]
             }
         );
@@ -404,7 +410,7 @@ mod tests {
 
         pretty_assertions::assert_eq!(
             sut.validate_words(&words_to_confirm),
-            DeviceMnemonicValidationOutcome::Invalid {
+            MnemonicValidationOutcome::Invalid {
                 indices_in_mnemonic: indexset![7, 13]
             }
         );
@@ -424,9 +430,6 @@ mod tests {
 
         let result = sut.validate_words(&words_to_confirm);
 
-        pretty_assertions::assert_eq!(
-            result,
-            DeviceMnemonicValidationOutcome::Valid
-        );
+        pretty_assertions::assert_eq!(result, MnemonicValidationOutcome::Valid);
     }
 }

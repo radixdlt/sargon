@@ -915,6 +915,7 @@ mod tests {
         assert_eq!(result, error);
     }
 
+    #[allow(dead_code)]
     async fn boot(event_bus_driver: Arc<RustEventBusDriver>) -> Arc<SUT> {
         let drivers = Drivers::with_event_bus(event_bus_driver.clone());
         let mut clients = Clients::new(Bios::new(drivers));
