@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os"
-version = "1.2.24"
+version = "1.2.25"
 edition = "2021"
 
 [dependencies]
