@@ -107,7 +107,7 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> i32;
+    ) -> ArculusVerifyPINResponse;
 
     fn init_encrypted_session_request(
         &self,
@@ -151,10 +151,18 @@ pub struct ArculusCSDKDriverAdapter {
     pub wrapped: Arc<dyn ArculusCSDKDriver>,
 }
 
+use sargon::ArculusVerifyPINResponse as InternalArculusVerifyPINResponse;
 use sargon::ArculusWalletPointer as InternalArculusWalletPointer;
+
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct ArculusWalletPointer {
     pub pointer: u64,
+}
+
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+pub struct ArculusVerifyPINResponse {
+    pub status: i32,
+    pub number_of_tries_remaining: i8,
 }
 
 impl InternalArculusCSDKDriver for ArculusCSDKDriverAdapter {
@@ -295,9 +303,10 @@ impl InternalArculusCSDKDriver for ArculusCSDKDriverAdapter {
         &self,
         wallet: InternalArculusWalletPointer,
         response: sargon::BagOfBytes,
-    ) -> i32 {
+    ) -> InternalArculusVerifyPINResponse {
         self.wrapped
             .verify_pin_response(wallet.into(), response.into())
+            .into_internal()
     }
 
     fn init_encrypted_session_request(

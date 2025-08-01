@@ -26,6 +26,19 @@ pub trait OsArculusCard {
         per_transaction: IndexSet<TransactionSignRequestInput<S>>,
     ) -> Result<IndexSet<HDSignature<S::ID>>>;
 
+    async fn verify_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        pin: String,
+    ) -> Result<()>;
+
+    async fn set_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        old_pin: String,
+        new_pin: String,
+    ) -> Result<()>;
+
     async fn arculus_card_reset(&self) -> Result<()>;
 }
 
@@ -64,6 +77,23 @@ impl OsArculusCard for SargonOS {
     ) -> Result<IndexSet<HDSignature<S::ID>>> {
         self.arculus_card_sign(factor_source_id, purpose, pin, per_transaction)
             .await
+    }
+
+    async fn verify_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        pin: String,
+    ) -> Result<()> {
+        self.verify_card_pin(factor_source, pin).await
+    }
+
+    async fn set_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        old_pin: String,
+        new_pin: String,
+    ) -> Result<()> {
+        self.set_card_pin(factor_source, old_pin, new_pin).await
     }
 
     async fn arculus_card_reset(&self) -> Result<()> {

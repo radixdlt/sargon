@@ -8,6 +8,8 @@ pub enum NFCTagArculusInteractonPurpose {
     SignPreAuth(ArculusCardFactorSource),
     ProveOwnership(ArculusCardFactorSource),
     DerivingPublicKeys(ArculusCardFactorSource),
+    VerifyingPin(ArculusCardFactorSource),
+    ConfiguringCardPin(ArculusCardFactorSource),
 }
 
 impl HasSampleValues for NFCTagArculusInteractonPurpose {

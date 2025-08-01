@@ -113,6 +113,29 @@ impl SargonOS {
             .into_iter_result()
     }
 
+    async fn verify_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        pin: String,
+    ) -> Result<()> {
+        self.wrapped
+            .verify_card_pin(factor_source.into_internal(), pin)
+            .await
+            .into_result()
+    }
+
+    async fn set_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        old_pin: String,
+        new_pin: String,
+    ) -> Result<()> {
+        self.wrapped
+            .set_card_pin(factor_source.into_internal(), old_pin, new_pin)
+            .await
+            .into_result()
+    }
+
     pub async fn arculus_card_reset(&self) -> Result<()> {
         self.wrapped.arculus_card_reset().await.into_result()
     }
