@@ -386,9 +386,6 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
-            CommonError::ArculusCardFactorSourceIdMismatch => {
-                InternalCommonError::ArculusCardFactorSourceIdMismatch
-            }
             CommonError::NFCSessionCancelled => {
                 InternalCommonError::NFCSessionCancelled
             }
@@ -397,7 +394,6 @@ impl CommonError {
             }
             CommonError::NFCSessionUnknownTag => {
                 InternalCommonError::NFCSessionUnknownTag
-            }
             }
             AddressInvalidEntityType {
                 address_kind,
@@ -455,6 +451,9 @@ impl CommonError {
             }
             ArculusCardWrongPIN {
                 number_of_remaining_tries,
+            } => InternalCommonError::ArculusCardWrongPIN {
+                number_of_remaining_tries: *number_of_remaining_tries,
+            },
             _ => InternalCommonError::Unknown,
         }
     }
