@@ -319,7 +319,7 @@ impl ArculusWalletClient {
     ) -> Result<IndexSet<HDSignature<S::ID>>> {
         self.validate_factor_source(wallet, factor_source_id)
             .await?;
-        self.verify_pin_io(wallet, pin.clone()).await?;
+        self._verify_pin(wallet, pin.clone()).await?;
 
         let mut signatures = IndexSet::new();
 
