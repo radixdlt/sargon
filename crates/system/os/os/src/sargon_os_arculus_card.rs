@@ -47,6 +47,29 @@ impl SargonOS {
             .await
     }
 
+    pub async fn verify_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        pin: String,
+    ) -> Result<()> {
+        self.clients
+            .arculus_wallet_client
+            .verify_card_pin(factor_source, pin)
+            .await
+    }
+
+    pub async fn set_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        old_pin: String,
+        new_pin: String,
+    ) -> Result<()> {
+        self.clients
+            .arculus_wallet_client
+            .set_card_pin(factor_source, old_pin, new_pin)
+            .await
+    }
+
     pub async fn arculus_card_reset(&self) -> Result<()> {
         self.clients.arculus_wallet_client.reset_wallet().await
     }

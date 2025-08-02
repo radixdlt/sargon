@@ -89,11 +89,9 @@ pub enum CommonError {
         error_message: String,
     },
     FailedToExtractTransactionReceiptBytes,
-    ArculusCardFactorSourceIdMismatch,
     NFCSessionCancelled,
     NFCSessionLostTagConnection,
     NFCSessionUnknownTag,
-    ArculusCardNotConfigured,
     MaxTransfersPerTransactionReached {
         amount: u64,
     },
@@ -152,6 +150,9 @@ pub enum CommonError {
     },
     GWMissingResponseItem {
         item: String,
+    },
+    ArculusCardWrongPIN {
+        number_of_remaining_tries: i8,
     },
 }
 
@@ -385,9 +386,6 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
-            CommonError::ArculusCardFactorSourceIdMismatch => {
-                InternalCommonError::ArculusCardFactorSourceIdMismatch
-            }
             CommonError::NFCSessionCancelled => {
                 InternalCommonError::NFCSessionCancelled
             }
@@ -396,9 +394,6 @@ impl CommonError {
             }
             CommonError::NFCSessionUnknownTag => {
                 InternalCommonError::NFCSessionUnknownTag
-            }
-            CommonError::ArculusCardNotConfigured => {
-                InternalCommonError::ArculusCardNotConfigured
             }
             AddressInvalidEntityType {
                 address_kind,
@@ -454,6 +449,11 @@ impl CommonError {
                     item: item.clone(),
                 }
             }
+            ArculusCardWrongPIN {
+                number_of_remaining_tries,
+            } => InternalCommonError::ArculusCardWrongPIN {
+                number_of_remaining_tries: *number_of_remaining_tries,
+            },
             _ => InternalCommonError::Unknown,
         }
     }
@@ -607,9 +607,6 @@ impl From<InternalCommonError> for CommonError {
                     underlying: underlying.clone(),
                 }
             }
-            InternalCommonError::ArculusCardFactorSourceIdMismatch => {
-                CommonError::ArculusCardFactorSourceIdMismatch
-            }
             InternalCommonError::NFCSessionCancelled => {
                 CommonError::NFCSessionCancelled
             }
@@ -618,9 +615,6 @@ impl From<InternalCommonError> for CommonError {
             }
             InternalCommonError::NFCSessionUnknownTag => {
                 CommonError::NFCSessionUnknownTag
-            }
-            InternalCommonError::ArculusCardNotConfigured => {
-                CommonError::ArculusCardNotConfigured
             }
             InternalCommonError::AddressInvalidEntityType {
                 address_kind,
@@ -674,6 +668,11 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::GWMissingResponseItem { item } => {
                 GWMissingResponseItem { item: item.clone() }
             }
+            InternalCommonError::ArculusCardWrongPIN {
+                number_of_remaining_tries,
+            } => ArculusCardWrongPIN {
+                number_of_remaining_tries,
+            },
             _ => Self::erased(value),
         }
     }

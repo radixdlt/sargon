@@ -863,8 +863,8 @@ pub enum CommonError {
     #[error("Arculus card created invalid mnemonic words")]
     ArculusCardInvalidNonUtf8MnemonicPhrase = 10248,
 
-    #[error("Arculus card wrong PIN")]
-    ArculusCardWrongPIN = 10249,
+    #[error("Arculus card wrong PIN, number of remaining tries: {number_of_remaining_tries}")]
+    ArculusCardWrongPIN { number_of_remaining_tries: i8 } = 10249,
 
     #[error("Arculus card failed to create select wallet request")]
     ArculusCSDKFailedToCreateSelectWalletRequest = 10250,

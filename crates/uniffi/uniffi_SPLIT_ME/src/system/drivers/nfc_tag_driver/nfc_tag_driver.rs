@@ -14,6 +14,8 @@ pub enum NFCTagArculusInteractonPurpose {
     SignPreAuth(ArculusCardFactorSource),
     ProveOwnership(ArculusCardFactorSource),
     DerivingPublicKeys(ArculusCardFactorSource),
+    VerifyingPin(ArculusCardFactorSource),
+    ConfiguringCardPin(ArculusCardFactorSource),
 }
 
 #[derive(Debug, Clone, PartialEq, InternalConversion, uniffi::Enum)]

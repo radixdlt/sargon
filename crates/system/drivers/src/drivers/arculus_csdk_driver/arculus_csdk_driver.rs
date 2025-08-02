@@ -281,14 +281,14 @@ pub trait ArculusCSDKDriver: Send + Sync + std::fmt::Debug {
     /// Parse the response received from the card to the response status.
     ///
     /// * `wallet` - Pointer to the wallet instance.
-    /// * `response` - The response bytes received from the card.
+    /// * `response` - The response received from the card.
     ///
-    /// Returns the response status for verifying the PIN.
+    /// Returns the response status along with number of retries left for verifying the PIN.
     fn verify_pin_response(
         &self,
         wallet: ArculusWalletPointer,
         response: BagOfBytes,
-    ) -> i32;
+    ) -> ArculusVerifyPINResponse;
 
     /// Init encrypted session request.
     ///
@@ -403,5 +403,30 @@ impl HasSampleValues for ArculusWalletPointer {
 
     fn sample_other() -> Self {
         ArculusWalletPointer::new(1)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, derive_more::Debug)]
+pub struct ArculusVerifyPINResponse {
+    pub status: i32,
+    pub number_of_tries_remaining: i8,
+}
+
+impl ArculusVerifyPINResponse {
+    pub fn new(status: i32, number_of_tries_remaining: i8) -> Self {
+        Self {
+            status,
+            number_of_tries_remaining,
+        }
+    }
+}
+
+impl HasSampleValues for ArculusVerifyPINResponse {
+    fn sample() -> Self {
+        Self::new(0, 3)
+    }
+
+    fn sample_other() -> Self {
+        Self::new(-108, 0)
     }
 }

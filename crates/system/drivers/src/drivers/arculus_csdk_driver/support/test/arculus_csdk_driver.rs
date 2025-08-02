@@ -164,7 +164,7 @@ impl ArculusCSDKDriver for RustArculusCSDKDriver {
         &self,
         _wallet: ArculusWalletPointer,
         _response: BagOfBytes,
-    ) -> i32 {
+    ) -> ArculusVerifyPINResponse {
         todo!()
     }
 
