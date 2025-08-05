@@ -157,12 +157,14 @@ impl ArculusWalletClient {
         &self,
         wallet: ArculusWalletPointer,
         pin: String,
-    ) -> Result<()> {
-        self.do_card_io_validate_status(
+    ) -> Result<ArculusVerifyPINResponse> {
+        self.do_card_io(
             self.csdk_driver.verify_pin_request(wallet, pin).ok_or(
                 CommonError::ArculusCSDKFailedToCreateVerifyPINRequest,
             )?,
-            |response| self.csdk_driver.verify_pin_response(wallet, response),
+            |response| {
+                Ok(self.csdk_driver.verify_pin_response(wallet, response))
+            },
         )
         .await
     }

@@ -131,6 +131,21 @@ impl SargonOS {
         Ok(factor_source)
     }
 
+    /// Appends the provided `crypto_parameters` to the `factor_source`'s.
+    pub async fn append_crypto_parameters_to_factor_source(
+        &self,
+        factor_source_id: FactorSourceID,
+        crypto_parameters: FactorSourceCryptoParameters,
+    ) -> Result<()> {
+        self.update_profile_with(|p| {
+            p.update_factor_source_extend_crypto_parameters(
+                &factor_source_id,
+                crypto_parameters.clone(),
+            )
+        })
+        .await
+    }
+
     pub async fn debug_add_all_sample_factor_sources(
         &self,
     ) -> Result<Vec<FactorSourceID>> {
@@ -837,6 +852,69 @@ mod tests {
                 _ => false,
             }
         }));
+    }
+
+    #[actix_rt::test]
+    async fn test_append_crypto_parameters() {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        let factor_source = os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .first()
+            .cloned()
+            .unwrap();
+
+        let crypto_parameters = FactorSourceCryptoParameters::new(
+            [SLIP10Curve::Secp256k1, SLIP10Curve::Curve25519].into_iter(),
+            [
+                DerivationPathScheme::Bip44Olympia,
+                DerivationPathScheme::Cap26,
+            ]
+            .into_iter(),
+        )
+        .unwrap();
+
+        // ACT
+        os.with_timeout(|x| {
+            x.append_crypto_parameters_to_factor_source(
+                factor_source.id(),
+                crypto_parameters.clone(),
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let updated_fs = os
+            .profile()
+            .unwrap()
+            .factor_sources
+            .iter()
+            .find(|fs| fs.id() == factor_source.id())
+            .unwrap();
+
+        assert!(updated_fs
+            .common_properties()
+            .crypto_parameters
+            .supported_curves
+            .contains_by_id(&SLIP10Curve::Secp256k1));
+        assert!(updated_fs
+            .common_properties()
+            .crypto_parameters
+            .supported_curves
+            .contains_by_id(&SLIP10Curve::Curve25519));
+        assert!(updated_fs
+            .common_properties()
+            .crypto_parameters
+            .supported_derivation_path_schemes
+            .contains_by_id(&DerivationPathScheme::Bip44Olympia));
+        assert!(updated_fs
+            .common_properties()
+            .crypto_parameters
+            .supported_derivation_path_schemes
+            .contains_by_id(&DerivationPathScheme::Cap26));
     }
 
     #[actix_rt::test]

@@ -124,7 +124,6 @@ impl ArculusWalletCSDKResponseStatus {
     pub fn as_result(self) -> Result<()> {
         match self {
             Self::Ok => Ok(()),
-            Self::WrongPin => Err(CommonError::ArculusCardWrongPIN),
             _ => Err(CommonError::ArculusCSDKBadStatusCode {
                 status_code: self as i32,
             }),
@@ -227,10 +226,6 @@ mod tests {
         use super::*;
 
         assert_eq!(ArculusWalletCSDKResponseStatus::Ok.as_result(), Ok(()));
-        assert_eq!(
-            ArculusWalletCSDKResponseStatus::WrongPin.as_result(),
-            Err(CommonError::ArculusCardWrongPIN)
-        );
         assert_eq!(
             ArculusWalletCSDKResponseStatus::NullPointer.as_result(),
             Err(CommonError::ArculusCSDKBadStatusCode { status_code: -100 })

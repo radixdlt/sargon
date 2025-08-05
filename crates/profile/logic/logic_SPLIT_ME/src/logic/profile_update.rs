@@ -300,6 +300,25 @@ pub trait ProfileFactorSourceUpdating {
             common.flags.insert(FactorSourceFlag::Main);
         })
     }
+
+    fn update_factor_source_extend_crypto_parameters(
+        &mut self,
+        id: &FactorSourceID,
+        crypto_parameters: FactorSourceCryptoParameters,
+    ) -> Result<()> {
+        self.update_any_factor_source_common(id, |common| {
+            common
+                .crypto_parameters
+                .supported_curves
+                .extend(crypto_parameters.clone().supported_curves);
+            common
+                .crypto_parameters
+                .supported_derivation_path_schemes
+                .extend(
+                    crypto_parameters.clone().supported_derivation_path_schemes,
+                );
+        })
+    }
 }
 
 impl ProfileFactorSourceUpdating for Profile {

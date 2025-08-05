@@ -87,6 +87,41 @@ impl ArculusWalletClient {
         )
         .await
     }
+
+    pub async fn verify_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        pin: String,
+    ) -> Result<()> {
+        self.execute_card_operation(
+            NFCTagDriverPurpose::Arculus(
+                NFCTagArculusInteractonPurpose::VerifyingPin(
+                    factor_source.clone(),
+                ),
+            ),
+            |wallet| self._verify_card_pin(wallet, factor_source.id, pin),
+        )
+        .await
+    }
+
+    pub async fn set_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        old_pin: String,
+        new_pin: String,
+    ) -> Result<()> {
+        self.execute_card_operation(
+            NFCTagDriverPurpose::Arculus(
+                NFCTagArculusInteractonPurpose::ConfiguringCardPin(
+                    factor_source.clone(),
+                ),
+            ),
+            |wallet| {
+                self._set_card_pin(wallet, factor_source.id, old_pin, new_pin)
+            },
+        )
+        .await
+    }
 }
 
 impl ArculusWalletClient {
@@ -168,6 +203,54 @@ impl ArculusWalletClient {
     }
 }
 
+/// Pin management
+impl ArculusWalletClient {
+    async fn _set_card_pin(
+        &self,
+        wallet: ArculusWalletPointer,
+        factor_source_id: FactorSourceIDFromHash,
+        old_pin: String,
+        new_pin: String,
+    ) -> Result<()> {
+        self.validate_factor_source(wallet, factor_source_id)
+            .await?;
+        self._verify_pin(wallet, old_pin).await?;
+        self.store_pin_io(wallet, new_pin).await
+    }
+
+    async fn _verify_card_pin(
+        &self,
+        wallet: ArculusWalletPointer,
+        factor_source_id: FactorSourceIDFromHash,
+        pin: String,
+    ) -> Result<()> {
+        self.validate_factor_source(wallet, factor_source_id)
+            .await?;
+        self._verify_pin(wallet, pin).await
+    }
+
+    async fn _verify_pin(
+        &self,
+        wallet: ArculusWalletPointer,
+        pin: String,
+    ) -> Result<()> {
+        let response = self.verify_pin_io(wallet, pin).await?;
+        let status =
+            ArculusWalletCSDKResponseStatus::try_from(response.status)?;
+
+        match status {
+            ArculusWalletCSDKResponseStatus::Ok => Ok(()),
+            ArculusWalletCSDKResponseStatus::WrongPin => {
+                Err(CommonError::ArculusCardWrongPIN {
+                    number_of_remaining_tries: response
+                        .number_of_tries_remaining,
+                })
+            }
+            _ => status.as_result(),
+        }
+    }
+}
+
 /// Deriving public keys
 impl ArculusWalletClient {
     async fn _derive_public_keys(
@@ -236,7 +319,7 @@ impl ArculusWalletClient {
     ) -> Result<IndexSet<HDSignature<S::ID>>> {
         self.validate_factor_source(wallet, factor_source_id)
             .await?;
-        self.verify_pin_io(wallet, pin.clone()).await?;
+        self._verify_pin(wallet, pin.clone()).await?;
 
         let mut signatures = IndexSet::new();
 
@@ -603,7 +686,10 @@ mod tests {
                 .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
+                .return_const(ArculusVerifyPINResponse::new(
+                    ArculusWalletCSDKResponseStatus::Ok as i32,
+                    3,
+                ));
 
             self
         }
