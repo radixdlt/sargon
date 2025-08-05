@@ -149,12 +149,12 @@ impl SargonOS {
     /// Appends the provided `crypto_parameters` to the `factor_source` in Profile.
     pub async fn append_crypto_parameters_to_factor_source(
         &self,
-        factor_source: FactorSource,
+        factor_source_id: FactorSourceID,
         crypto_parameters: FactorSourceCryptoParameters,
-    ) -> Result<FactorSource> {
+    ) -> Result<()> {
         self.wrapped
             .append_crypto_parameters_to_factor_source(
-                factor_source.into_internal(),
+                factor_source_id.into_internal(),
                 crypto_parameters.into_internal(),
             )
             .await

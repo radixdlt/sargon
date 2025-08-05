@@ -134,19 +134,16 @@ impl SargonOS {
     /// Appends the provided `crypto_parameters` to the `factor_source`'s.
     pub async fn append_crypto_parameters_to_factor_source(
         &self,
-        factor_source: FactorSource,
+        factor_source_id: FactorSourceID,
         crypto_parameters: FactorSourceCryptoParameters,
-    ) -> Result<FactorSource> {
-        let mut factor_source = factor_source;
-        let mut updated = factor_source.common_properties().clone();
-        updated.crypto_parameters.supported_curves.extend(crypto_parameters.supported_curves);
-        updated.crypto_parameters.supported_derivation_path_schemes
-            .extend(crypto_parameters.supported_derivation_path_schemes);
-
-        factor_source.set_common_properties(updated);
-        self.update_factor_source(factor_source.clone()).await?;
-
-        Ok(factor_source)
+    ) -> Result<()> {
+        self.update_profile_with(|p| {
+            p.update_factor_source_extend_crypto_parameters(
+                &factor_source_id,
+                crypto_parameters.clone(),
+            )
+        })
+        .await
     }
 
     pub async fn debug_add_all_sample_factor_sources(
@@ -862,29 +859,29 @@ mod tests {
         // ARRANGE
         let os = SUT::fast_boot().await;
         let factor_source = os
-        .profile()
-        .unwrap()
-        .factor_sources
-        .first()
-        .cloned()
-        .unwrap();
+            .profile()
+            .unwrap()
+            .factor_sources
+            .first()
+            .cloned()
+            .unwrap();
 
         let crypto_parameters = FactorSourceCryptoParameters::new(
-            [
-                SLIP10Curve::Secp256k1,
-                SLIP10Curve::Curve25519,
-            ]
-            .into_iter(),
+            [SLIP10Curve::Secp256k1, SLIP10Curve::Curve25519].into_iter(),
             [
                 DerivationPathScheme::Bip44Olympia,
                 DerivationPathScheme::Cap26,
             ]
             .into_iter(),
-        ).unwrap();
+        )
+        .unwrap();
 
         // ACT
         os.with_timeout(|x| {
-            x.append_crypto_parameters_to_factor_source(factor_source.clone().into(), crypto_parameters.clone())
+            x.append_crypto_parameters_to_factor_source(
+                factor_source.id(),
+                crypto_parameters.clone(),
+            )
         })
         .await
         .unwrap();
@@ -918,7 +915,6 @@ mod tests {
             .crypto_parameters
             .supported_derivation_path_schemes
             .contains_by_id(&DerivationPathScheme::Cap26));
-
     }
 
     #[actix_rt::test]
