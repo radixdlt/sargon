@@ -21,7 +21,7 @@ impl SargonOS {
         &self,
     ) -> Result<ArculusMinFirmwareVersionRequirement> {
         self.wrapped
-            .validate_min_firmware_version()
+            .arculus_card_validate_min_firmware_version()
             .await
             .into_result()
     }

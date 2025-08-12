@@ -1,6 +1,6 @@
 [package]
 name = "profile-account-or-persona"
-version = "1.2.26"
+version = "1.2.28"
 edition = "2021"
 
 [dependencies]

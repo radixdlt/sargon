@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 #[async_trait::async_trait]
 pub trait OsArculusCard {
-    async fn validate_min_firmware_version(
+    async fn arculus_validate_min_firmware_version(
         &self,
     ) -> Result<ArculusMinFirmwareVersionRequirement>;
 
@@ -44,10 +44,10 @@ pub trait OsArculusCard {
 
 #[async_trait::async_trait]
 impl OsArculusCard for SargonOS {
-    async fn validate_min_firmware_version(
+    async fn arculus_validate_min_firmware_version(
         &self,
     ) -> Result<ArculusMinFirmwareVersionRequirement> {
-        self.validate_min_firmware_version().await
+        self.arculus_validate_min_firmware_version().await
     }
 
     async fn arculus_configure_card_with_mnemonic(

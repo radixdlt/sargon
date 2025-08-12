@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 impl SargonOS {
-    pub async fn arculus_validate_min_firmware_version(
+    pub async fn arculus_card_validate_min_firmware_version(
         &self,
     ) -> Result<ArculusMinFirmwareVersionRequirement> {
         self.clients
