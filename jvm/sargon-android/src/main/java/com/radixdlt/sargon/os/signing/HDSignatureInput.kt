@@ -19,19 +19,19 @@ data class HdSignatureInput<ID: Signable.ID> (
     val ownedFactorInstance: OwnedFactorInstance
 )
 
-internal fun HdSignatureInput<Signable.ID.Transaction>.intoSargon()
+fun HdSignatureInput<Signable.ID.Transaction>.intoSargon()
     = HdSignatureInputOfTransactionIntentHash(
         payloadId = payloadId.value,
         ownedFactorInstance = ownedFactorInstance
     )
 
-internal fun HdSignatureInput<Signable.ID.Subintent>.intoSargon()
+fun HdSignatureInput<Signable.ID.Subintent>.intoSargon()
         = HdSignatureInputOfSubintentHash(
     payloadId = payloadId.value,
     ownedFactorInstance = ownedFactorInstance
 )
 
-internal fun HdSignatureInput<Signable.ID.Auth>.intoSargon()
+fun HdSignatureInput<Signable.ID.Auth>.intoSargon()
         = HdSignatureInputOfAuthIntentHash(
     payloadId = payloadId.value,
     ownedFactorInstance = ownedFactorInstance
