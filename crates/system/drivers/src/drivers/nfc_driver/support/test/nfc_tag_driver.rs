@@ -30,7 +30,7 @@ impl NFCTagDriver for RustNFCTagDriver {
         todo!()
     }
 
-    async fn set_message(&self, _message: String) {
+    async fn set_progress(&self, _progress: u8) {
         todo!()
     }
 }

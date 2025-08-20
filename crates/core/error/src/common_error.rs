@@ -929,8 +929,8 @@ pub enum CommonError {
     #[error("Unknown SecurityStructureID {id}")]
     UnknownSecurityStructureID { id: String } = 10270,
 
-    #[error("Arculus Card FactorSourceID mismatch")]
-    ArculusCardFactorSourceIdMismatch = 10271,
+    #[error("Wrong Arculus card has been used")]
+    WrongArculusCard = 10271,
 
     #[error("NFC Session was cancelled either by user or by system after being inactive")]
     NFCSessionCancelled = 10272,
@@ -1062,6 +1062,37 @@ pub enum CommonError {
 
     #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
     UnableContributeToAcXrdVaultPersonaRequiresPayer = 10304,
+
+    #[error("Arculus CSDK failed to parse SelectWallet response")]
+    ArculusCSDKFailedToParseSelectWalletResponse = 10305,
+    #[error("Arculus CSDK failed to parse GetPublicKeyByPath response")]
+    ArculusCSDKFailedToParseGetPublicKeyByPathResponse = 10306,
+    #[error("Arculus CSDK failed to parse GetGGUID response")]
+    ArculusCSDKFailedToParseGetGguidResponse = 10307,
+    #[error("Arculus CSDK failed to parse GetFirmwareVersion response")]
+    ArculusCSDKFailedToParseGetFirmwareVersionResponse = 10308,
+    #[error("Arculus CSDK failed to parse StoreDataPin response")]
+    ArculusCSDKFailedToParseStoreDataPinResponse = 10309,
+    #[error("Arculus CSDK failed to parse InitEncryptedSession response")]
+    ArculusCSDKFailedToParseInitEncryptedSessionResponse = 10310,
+    #[error("Arculus CSDK failed to parse CreateWalletSeed response")]
+    ArculusCSDKFailedToParseCreateWalletSeedResponse = 10311,
+    #[error("Arculus CSDK failed to parse ResetWallet response")]
+    ArculusCSDKFailedToParseResetWalletResponse = 10312,
+    #[error("Arculus CSDK failed to parse InitRecoverWallet response")]
+    ArculusCSDKFailedToParseInitRecoverWalletResponse = 10313,
+    #[error("Arculus CSDK failed to parse FinishRecoverWallet response")]
+    ArculusCSDKFailedToParseFinishRecoverWalletResponse = 10314,
+    #[error("Arculus CSDK failed to parse SignHashPath response")]
+    ArculusCSDKFailedToParseSignHashPathResponse = 10315,
+    #[error("Arculus CSDK failed to create CreateWalletSeed request")]
+    ArculusCSDKFailedToCreateCreateWalletSeedRequest = 10316,
+    #[error("Arculus CSDK failed to create StoreDataPin request")]
+    ArculusCSDKFailedToCreateStoreDataPinRequest = 10317,
+    #[error("Arculus CSDK failed to create VerifyPin request")]
+    ArculusCSDKFailedToCreateVerifyPinRequest = 10318,
+    #[error("Arculus CSDK failed to create GetGguid request")]
+    ArculusCSDKFailedToCreateGetGguidRequest = 10319,
 }
 
 impl CommonError {

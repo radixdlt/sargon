@@ -4,6 +4,7 @@ use crate::prelude::*;
 pub enum NFCTagArculusInteractonPurpose {
     IdentifyingCard,
     ConfiguringCardMnemonic,
+    RestoringCardPin(ArculusCardFactorSource),
     SignTransaction(ArculusCardFactorSource),
     SignPreAuth(ArculusCardFactorSource),
     ProveOwnership(ArculusCardFactorSource),
@@ -59,5 +60,5 @@ pub trait NFCTagDriver: Send + Sync + std::fmt::Debug {
         commands: Vec<BagOfBytes>,
     ) -> Result<BagOfBytes>;
 
-    async fn set_message(&self, message: String);
+    async fn set_progress(&self, progress: u8);
 }

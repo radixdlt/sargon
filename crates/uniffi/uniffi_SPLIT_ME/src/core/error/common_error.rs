@@ -154,6 +154,7 @@ pub enum CommonError {
     ArculusCardWrongPIN {
         number_of_remaining_tries: i8,
     },
+    WrongArculusCard,
 }
 
 #[uniffi::export]
@@ -454,6 +455,7 @@ impl CommonError {
             } => InternalCommonError::ArculusCardWrongPIN {
                 number_of_remaining_tries: *number_of_remaining_tries,
             },
+            WrongArculusCard => InternalCommonError::WrongArculusCard,
             _ => InternalCommonError::Unknown,
         }
     }
@@ -673,6 +675,7 @@ impl From<InternalCommonError> for CommonError {
             } => ArculusCardWrongPIN {
                 number_of_remaining_tries,
             },
+            InternalCommonError::WrongArculusCard => WrongArculusCard,
             _ => Self::erased(value),
         }
     }

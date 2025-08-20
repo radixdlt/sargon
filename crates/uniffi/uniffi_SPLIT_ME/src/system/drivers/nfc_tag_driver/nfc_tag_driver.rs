@@ -10,6 +10,7 @@ use sargon::Result as InternalResult;
 pub enum NFCTagArculusInteractonPurpose {
     IdentifyingCard,
     ConfiguringCardMnemonic,
+    RestoringCardPin(ArculusCardFactorSource),
     SignTransaction(ArculusCardFactorSource),
     SignPreAuth(ArculusCardFactorSource),
     ProveOwnership(ArculusCardFactorSource),
@@ -35,7 +36,7 @@ pub trait NFCTagDriver: Send + Sync + std::fmt::Debug {
         commands: Vec<BagOfBytes>,
     ) -> Result<BagOfBytes>;
 
-    async fn set_message(&self, message: String);
+    async fn set_progress(&self, progress: u8);
 }
 
 #[derive(Debug)]
@@ -81,7 +82,7 @@ impl InternalNFCTagDriver for NFCTagDriverAdapter {
             .into_internal_result()
     }
 
-    async fn set_message(&self, message: String) {
-        self.wrapped.set_message(message).await
+    async fn set_progress(&self, progress: u8) {
+        self.wrapped.set_progress(progress).await;
     }
 }

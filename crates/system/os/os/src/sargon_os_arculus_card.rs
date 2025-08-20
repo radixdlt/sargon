@@ -15,12 +15,22 @@ impl SargonOS {
         mnemonic: Mnemonic,
         pin: String,
     ) -> Result<FactorSourceIDFromHash> {
-        let fs_id = self
-            .clients
+        self.clients
             .arculus_wallet_client
             .configure_card_with_mnemonic(mnemonic, pin.to_string())
-            .await?;
-        Ok(fs_id)
+            .await
+    }
+
+    pub async fn arculus_restore_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        mnemonic: Mnemonic,
+        pin: String,
+    ) -> Result<()> {
+        self.clients
+            .arculus_wallet_client
+            .restore_card_pin(factor_source, mnemonic, pin)
+            .await
     }
 
     pub async fn arculus_card_derive_public_keys(
