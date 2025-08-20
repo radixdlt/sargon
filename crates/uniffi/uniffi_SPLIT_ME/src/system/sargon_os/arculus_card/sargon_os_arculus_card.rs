@@ -37,6 +37,22 @@ impl SargonOS {
             .into_result()
     }
 
+    pub async fn arculus_card_restore_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        mnemonic: Mnemonic,
+        pin: String,
+    ) -> Result<()> {
+        self.wrapped
+            .arculus_restore_card_pin(
+                factor_source.into_internal(),
+                mnemonic.into_internal(),
+                pin,
+            )
+            .await
+            .into_result()
+    }
+
     pub async fn arculus_card_derive_public_keys(
         &self,
         factor_source: ArculusCardFactorSource,

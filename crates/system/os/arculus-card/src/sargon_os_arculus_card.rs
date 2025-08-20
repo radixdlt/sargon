@@ -12,6 +12,13 @@ pub trait OsArculusCard {
         pin: String,
     ) -> Result<FactorSourceIDFromHash>;
 
+    async fn arculus_restore_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        mnemonic: Mnemonic,
+        pin: String,
+    ) -> Result<()>;
+
     async fn arculus_card_derive_public_keys(
         &self,
         factor_source: ArculusCardFactorSource,
@@ -56,6 +63,16 @@ impl OsArculusCard for SargonOS {
         pin: String,
     ) -> Result<FactorSourceIDFromHash> {
         self.arculus_configure_card_with_mnemonic(mnemonic, pin)
+            .await
+    }
+
+    async fn arculus_restore_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        mnemonic: Mnemonic,
+        pin: String,
+    ) -> Result<()> {
+        self.arculus_restore_card_pin(factor_source, mnemonic, pin)
             .await
     }
 

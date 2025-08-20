@@ -1,11 +1,10 @@
-use std::future::Future;
-
 pub use crate::prelude::*;
+use std::future::Future;
 
 #[derive(Debug)]
 pub struct ArculusWalletClient {
     pub(crate) csdk_driver: Arc<dyn ArculusCSDKDriver>,
-    pub(crate) nfc_tag_driver: Arc<dyn NFCTagDriver>,
+    pub(crate) nfc_tag_driver: NFCTagDriverWithProgressReporting,
 }
 
 impl ArculusWalletClient {
@@ -15,7 +14,9 @@ impl ArculusWalletClient {
     ) -> Self {
         Self {
             csdk_driver,
-            nfc_tag_driver,
+            nfc_tag_driver: NFCTagDriverWithProgressReporting::new(
+                nfc_tag_driver,
+            ),
         }
     }
 }
@@ -25,13 +26,61 @@ impl ArculusWalletClient {
     pub async fn validate_min_firmware_version(
         &self,
     ) -> Result<ArculusMinFirmwareVersionRequirement> {
-        self.execute_card_operation(
-            NFCTagDriverPurpose::Arculus(
-                NFCTagArculusInteractonPurpose::IdentifyingCard,
-            ),
-            |wallet| self._validate_min_firmware_version(wallet),
-        )
+        let purpose = NFCTagDriverPurpose::Arculus(
+            NFCTagArculusInteractonPurpose::IdentifyingCard,
+        );
+
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose),
+        );
+
+        self.execute_card_operation(purpose, |wallet| {
+            self._validate_min_firmware_version(wallet)
+        })
         .await
+    }
+
+    pub async fn get_configured_factor_source_id(
+        &self,
+    ) -> Result<Option<FactorSourceIDFromHash>> {
+        let purpose = NFCTagDriverPurpose::Arculus(
+            NFCTagArculusInteractonPurpose::IdentifyingCard,
+        );
+
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose),
+        );
+
+        self.execute_card_operation(purpose, |wallet| async move {
+            let factor_source_id =
+                self._get_factor_source_id(wallet).await.ok();
+            Ok(factor_source_id)
+        })
+        .await
+    }
+
+    pub async fn restore_card_pin(
+        &self,
+        factor_source: ArculusCardFactorSource,
+        mnemonic: Mnemonic,
+        pin: String,
+    ) -> Result<()> {
+        let purpose = NFCTagDriverPurpose::Arculus(
+            NFCTagArculusInteractonPurpose::RestoringCardPin(
+                factor_source.clone(),
+            ),
+        );
+
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose),
+        );
+
+        self.execute_card_operation(purpose, |wallet| {
+            self._restore_wallet_pin(wallet, factor_source, mnemonic, pin)
+        })
+        .await?;
+
+        Ok(())
     }
 
     pub async fn configure_card_with_mnemonic(
@@ -39,6 +88,14 @@ impl ArculusWalletClient {
         mnemonic: Mnemonic,
         pin: String,
     ) -> Result<FactorSourceIDFromHash> {
+        let purpose = NFCTagDriverPurpose::Arculus(
+            NFCTagArculusInteractonPurpose::ConfiguringCardMnemonic,
+        );
+
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose),
+        );
+
         self.execute_card_operation(
             NFCTagDriverPurpose::Arculus(
                 NFCTagArculusInteractonPurpose::ConfiguringCardMnemonic,
@@ -65,10 +122,21 @@ impl ArculusWalletClient {
         pin: String,
         per_transaction: IndexSet<TransactionSignRequestInput<S>>,
     ) -> Result<IndexSet<HDSignature<S::ID>>> {
-        self.execute_card_operation(
-            NFCTagDriverPurpose::Arculus(purpose),
-            |wallet| self._sign(wallet, factor_source_id, pin, per_transaction),
-        )
+        let purpose = NFCTagDriverPurpose::Arculus(purpose);
+        let total_number_of_signatures = per_transaction
+            .iter()
+            .flat_map(|transaction| transaction.signature_inputs())
+            .collect::<Vec<_>>()
+            .len() as u8;
+
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose)
+                + total_number_of_signatures,
+        );
+
+        self.execute_card_operation(purpose, |wallet| {
+            self._sign(wallet, factor_source_id, pin, per_transaction)
+        })
         .await
     }
 
@@ -77,14 +145,18 @@ impl ArculusWalletClient {
         factor_source: ArculusCardFactorSource,
         paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
-        self.execute_card_operation(
-            NFCTagDriverPurpose::Arculus(
-                NFCTagArculusInteractonPurpose::DerivingPublicKeys(
-                    factor_source.clone(),
-                ),
+        let purpose = NFCTagDriverPurpose::Arculus(
+            NFCTagArculusInteractonPurpose::DerivingPublicKeys(
+                factor_source.clone(),
             ),
-            |wallet| self._derive_public_keys(wallet, factor_source.id, paths),
-        )
+        );
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose) + paths.len() as u8,
+        );
+
+        self.execute_card_operation(purpose, |wallet| {
+            self._derive_public_keys(wallet, factor_source.id, paths)
+        })
         .await
     }
 
@@ -93,14 +165,16 @@ impl ArculusWalletClient {
         factor_source: ArculusCardFactorSource,
         pin: String,
     ) -> Result<()> {
-        self.execute_card_operation(
-            NFCTagDriverPurpose::Arculus(
-                NFCTagArculusInteractonPurpose::VerifyingPin(
-                    factor_source.clone(),
-                ),
-            ),
-            |wallet| self._verify_card_pin(wallet, factor_source.id, pin),
-        )
+        let purpose = NFCTagDriverPurpose::Arculus(
+            NFCTagArculusInteractonPurpose::VerifyingPin(factor_source.clone()),
+        );
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose),
+        );
+
+        self.execute_card_operation(purpose, |wallet| {
+            self._verify_card_pin(wallet, factor_source.id, pin)
+        })
         .await
     }
 
@@ -110,16 +184,18 @@ impl ArculusWalletClient {
         old_pin: String,
         new_pin: String,
     ) -> Result<()> {
-        self.execute_card_operation(
-            NFCTagDriverPurpose::Arculus(
-                NFCTagArculusInteractonPurpose::ConfiguringCardPin(
-                    factor_source.clone(),
-                ),
+        let purpose = NFCTagDriverPurpose::Arculus(
+            NFCTagArculusInteractonPurpose::ConfiguringCardPin(
+                factor_source.clone(),
             ),
-            |wallet| {
-                self._set_card_pin(wallet, factor_source.id, old_pin, new_pin)
-            },
-        )
+        );
+        self.nfc_tag_driver.set_number_of_total_commands(
+            Self::number_of_commands_for_purpose(&purpose),
+        );
+
+        self.execute_card_operation(purpose, |wallet| {
+            self._set_card_pin(wallet, factor_source.id, old_pin, new_pin)
+        })
         .await
     }
 }
@@ -163,6 +239,18 @@ impl ArculusWalletClient {
     ) -> Result<ArculusMinFirmwareVersionRequirement> {
         let firmware_version = self._get_firmware_version(wallet).await?;
         Ok(ArculusMinFirmwareVersionRequirement::new(firmware_version))
+    }
+
+    async fn _restore_wallet_pin(
+        &self,
+        wallet: ArculusWalletPointer,
+        factor_source: ArculusCardFactorSource,
+        mnemonic: Mnemonic,
+        pin: String,
+    ) -> Result<FactorSourceIDFromHash> {
+        self.validate_factor_source(wallet, factor_source.id)
+            .await?;
+        self._restore_wallet_seed(wallet, mnemonic, pin).await
     }
 
     async fn _restore_wallet_seed(
@@ -263,10 +351,6 @@ impl ArculusWalletClient {
             .await?;
 
         let mut keys = IndexSet::new();
-        let number_of_total_paths = paths.len();
-        self.nfc_tag_driver
-            .set_message("Deriving public keys, progress 0%".to_string())
-            .await;
         for path in paths {
             let public_key =
                 self.derive_public_key(wallet, path.clone()).await?;
@@ -278,15 +362,6 @@ impl ArculusWalletClient {
                 factor_source_id,
                 key,
             ));
-
-            let progress =
-                (keys.len() as f32 / number_of_total_paths as f32) * 100_f32;
-            self.nfc_tag_driver
-                .set_message(format!(
-                    "Deriving public keys, progress {:?}%",
-                    progress.floor()
-                ))
-                .await;
         }
 
         Ok(keys)
@@ -404,7 +479,7 @@ impl ArculusWalletClient {
     ) -> Result<()> {
         let card_fs_id = self._get_factor_source_id(wallet).await?;
         if card_fs_id != factor_source_id {
-            return Err(CommonError::ArculusCardFactorSourceIdMismatch);
+            return Err(CommonError::WrongArculusCard);
         }
         Ok(())
     }
@@ -437,6 +512,32 @@ impl ArculusWalletClient {
         Ok(FactorSourceIDFromHash::new_for_arculus(
             public_key_bytes.to_vec(),
         ))
+    }
+}
+
+impl ArculusWalletClient {
+    fn session_start_number_of_commands() -> u8 {
+        2 // select wallet + init encrypted session
+    }
+
+    fn number_of_commands_for_purpose(purpose: &NFCTagDriverPurpose) -> u8 {
+        match purpose {
+            NFCTagDriverPurpose::Arculus(purpose) => match purpose {
+                NFCTagArculusInteractonPurpose::IdentifyingCard => Self::session_start_number_of_commands() + 1, // read firmware version
+                NFCTagArculusInteractonPurpose::RestoringCardPin(_) => Self::number_of_commands_for_purpose(
+                    &NFCTagDriverPurpose::Arculus(
+                        NFCTagArculusInteractonPurpose::ConfiguringCardMnemonic,
+                    ),
+                ) + 1, // derive factor source id
+                NFCTagArculusInteractonPurpose::ConfiguringCardMnemonic => Self::session_start_number_of_commands() + 7,
+                NFCTagArculusInteractonPurpose::SignTransaction(_) => Self::session_start_number_of_commands() + 2, // derive factor source id + verify pin
+                NFCTagArculusInteractonPurpose::SignPreAuth(_) => Self::session_start_number_of_commands() + 2, // derive factor source id + verify pin
+                NFCTagArculusInteractonPurpose::ProveOwnership(_) => Self::session_start_number_of_commands() + 2, // derive factor source id + verify pin
+                NFCTagArculusInteractonPurpose::DerivingPublicKeys(_) => Self::session_start_number_of_commands() + 1, // derive factor source id
+                NFCTagArculusInteractonPurpose::VerifyingPin(_) => Self::session_start_number_of_commands() + 2, // derive factor source id + read pin
+                NFCTagArculusInteractonPurpose::ConfiguringCardPin(_) => Self::session_start_number_of_commands() + 3, // derive factor source id + read pin + set pin
+            },
+        }
     }
 }
 
@@ -490,19 +591,28 @@ mod tests {
             self
         }
 
+        fn set_progress(&mut self) -> &mut Self {
+            self.nfc_tag_driver
+                .expect_set_progress()
+                .return_const(()) // always succeed
+                .times(..);
+
+            self
+        }
+
         fn init_encrypted_session(&mut self) -> &mut Self {
             let request = BagOfBytes::random();
-            let nfc_card_response = BagOfBytes::random();
+            let nfc_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_init_encrypted_session_request()
                 .with(eq(self.wallet_pointer.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
-            self.nfc_send_receive(request, nfc_card_response.clone());
+            self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_init_encrypted_session_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
+                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -516,6 +626,8 @@ mod tests {
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Ok(()));
+
+            self.set_progress();
 
             self
         }
@@ -801,17 +913,6 @@ mod tests {
             self
         }
 
-        fn expect_send_progress_message(&mut self) -> &mut Self {
-            self.nfc_tag_driver
-                .expect_set_message()
-                .with(always())
-                .once()
-                .in_sequence(&mut self.sequence)
-                .return_const(());
-
-            self
-        }
-
         fn expect_derive_public_key(
             &mut self,
             expected_derivation_path: HDPath,
@@ -1018,17 +1119,14 @@ mod tests {
 
         stub.initialize_session()
             .expect_read_factor_source_id(Some(factor_source_id_pub_key))
-            .expect_send_progress_message()
             .expect_derive_public_key(
                 path1.clone().to_hd_path(),
                 Some(pub_key1),
             )
-            .expect_send_progress_message()
             .expect_derive_public_key(
                 path2.clone().to_hd_path(),
                 Some(pub_key2),
             )
-            .expect_send_progress_message()
             .end_session();
 
         let sut = ArculusWalletClient::new(
