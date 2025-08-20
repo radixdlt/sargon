@@ -45,8 +45,6 @@ impl NFCTagDriverWithProgressReporting {
 impl NFCTagDriver for NFCTagDriverWithProgressReporting {
     async fn start_session(&self, purpose: NFCTagDriverPurpose) -> Result<()> {
         *self.number_of_executed_commands.write().unwrap() = 0;
-        *self.number_of_total_commands.write().unwrap() = 0;
-
         self.nfc_tag_driver.start_session(purpose).await
     }
 
