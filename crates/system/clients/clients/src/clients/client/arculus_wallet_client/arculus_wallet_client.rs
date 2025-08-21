@@ -131,7 +131,7 @@ impl ArculusWalletClient {
 
         self.nfc_tag_driver.set_number_of_total_commands(
             Self::number_of_commands_for_purpose(&purpose)
-                + total_number_of_signatures,
+                + total_number_of_signatures * 2,
         );
 
         self.execute_card_operation(purpose, |wallet| {

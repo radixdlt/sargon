@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 pub use crate::prelude::*;
 
 #[derive(Debug)]
@@ -22,22 +24,23 @@ impl NFCTagDriverWithProgressReporting {
     }
 
     async fn update_progress(&self) {
-        let progress = {
+        let progress: u8 = {
             let mut number_of_executed_commands =
                 self.number_of_executed_commands.write().unwrap();
             *number_of_executed_commands += 1;
             let number_of_total_commands =
                 *self.number_of_total_commands.read().unwrap();
             if number_of_total_commands == 0 {
-                100.0
+                100
             } else {
-                (*number_of_executed_commands as f32
+                let progress = (*number_of_executed_commands as f32
                     / number_of_total_commands as f32)
-                    * 100.0
+                    * 100.0;
+                min(progress as u8, 100)
             }
         };
 
-        self.nfc_tag_driver.set_progress(progress as u8).await;
+        self.nfc_tag_driver.set_progress(progress).await;
     }
 }
 
