@@ -1093,6 +1093,9 @@ pub enum CommonError {
     ArculusCSDKFailedToCreateVerifyPinRequest = 10318,
     #[error("Arculus CSDK failed to create GetGguid request")]
     ArculusCSDKFailedToCreateGetGguidRequest = 10319,
+
+    #[error("NFC Session renewed")]
+    NFCSessionRenewed = 10320,
 }
 
 impl CommonError {

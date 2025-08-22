@@ -155,6 +155,7 @@ pub enum CommonError {
         number_of_remaining_tries: i8,
     },
     WrongArculusCard,
+    NFCSessionRenewed,
 }
 
 #[uniffi::export]
@@ -456,6 +457,7 @@ impl CommonError {
                 number_of_remaining_tries: *number_of_remaining_tries,
             },
             WrongArculusCard => InternalCommonError::WrongArculusCard,
+            NFCSessionRenewed => InternalCommonError::NFCSessionRenewed,
             _ => InternalCommonError::Unknown,
         }
     }
@@ -676,6 +678,7 @@ impl From<InternalCommonError> for CommonError {
                 number_of_remaining_tries,
             },
             InternalCommonError::WrongArculusCard => WrongArculusCard,
+            InternalCommonError::NFCSessionRenewed => NFCSessionRenewed,
             _ => Self::erased(value),
         }
     }
