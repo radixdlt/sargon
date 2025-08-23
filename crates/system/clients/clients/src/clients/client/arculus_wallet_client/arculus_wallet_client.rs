@@ -404,7 +404,7 @@ impl ArculusWalletClient {
             .collect();
 
         for signature_input in signature_inputs {
-            let signature = self
+            let signature_result = self
                 .sign_hash_path(
                     wallet,
                     signature_input.payload_id.clone().into(),
@@ -413,9 +413,28 @@ impl ArculusWalletClient {
                         .factor_instance()
                         .derivation_path(),
                 )
-                .await?;
-            let signature = HDSignature::new(signature_input, signature)?;
-            signatures.insert(signature);
+                .await;
+            let signature = match signature_result {
+                Ok(signature) => signature,
+                Err(CommonError::NFCSessionRenewed) => {
+                    self._verify_pin(wallet, pin.clone()).await?;
+                    self.sign_hash_path(
+                        wallet,
+                        signature_input.payload_id.clone().into(),
+                        signature_input
+                            .owned_factor_instance
+                            .factor_instance()
+                            .derivation_path(),
+                    )
+                    .await?
+                }
+                Err(e) => {
+                    return Err(e);
+                }
+            };
+
+            let hd_signature = HDSignature::new(signature_input, signature)?;
+            signatures.insert(hd_signature);
         }
 
         Ok(signatures)
