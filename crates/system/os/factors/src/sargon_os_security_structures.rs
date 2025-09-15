@@ -207,28 +207,19 @@ impl OsSecurityStructuresQuerying for SargonOS {
             });
         }
 
-        let updated_id = self
-            .update_profile_with(|p| {
-                p.app_preferences
-                    .security
-                    .security_structures_of_factor_source_ids
-                    .try_update_with(&id, |s| {
-                        *s = structure_ids.clone();
-                    })
-                    .map_err(|_| CommonError::UnknownSecurityStructureID {
-                        id: id.to_string(),
-                    })?;
-                Ok(id)
-            })
-            .await?;
-
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::SecurityStructureUpdated {
-                    id: updated_id,
-                },
-            ))
-            .await;
+        self.update_profile_with(|p| {
+            p.app_preferences
+                .security
+                .security_structures_of_factor_source_ids
+                .try_update_with(&id, |s| {
+                    *s = structure_ids.clone();
+                })
+                .map_err(|_| CommonError::UnknownSecurityStructureID {
+                    id: id.to_string(),
+                })?;
+            Ok(())
+        })
+        .await?;
 
         Ok(())
     }
@@ -326,18 +317,7 @@ impl OsSecurityStructuresQuerying for SargonOS {
         self.update_profile_with(|p| {
             p.set_security_structure_name(&security_structure_id, name)
         })
-        .await?;
-
-        // Emit event
-        self.event_bus
-            .emit(EventNotification::profile_modified(
-                EventProfileModified::SecurityStructureUpdated {
-                    id: security_structure_id,
-                },
-            ))
-            .await;
-
-        Ok(())
+        .await
     }
 }
 
@@ -1298,11 +1278,6 @@ mod tests {
             .get_id(id)
             .unwrap();
         assert_eq!(updated.metadata.display_name, new_name);
-
-        assert!(event_bus_driver.recorded().iter().any(|e| e.event
-            == Event::ProfileModified {
-                change: EventProfileModified::SecurityStructureUpdated { id }
-            }));
     }
 
     #[actix_rt::test]
@@ -1374,11 +1349,6 @@ mod tests {
             .get_id(id)
             .unwrap();
         assert_eq!(updated.clone(), updated_structure_ids);
-
-        assert!(event_bus_driver.recorded().iter().any(|e| e.event
-            == Event::ProfileModified {
-                change: EventProfileModified::SecurityStructureUpdated { id }
-            }));
     }
 
     #[actix_rt::test]

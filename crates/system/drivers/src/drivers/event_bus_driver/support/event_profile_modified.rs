@@ -44,9 +44,6 @@ pub enum EventProfileModified {
 
     /// Security structures have been updated
     SecurityStructuresUpdated { ids: Vec<SecurityStructureID> },
-
-    /// Security structure has been updated
-    SecurityStructureUpdated { id: SecurityStructureID },
 }
 
 impl HasEventKind for EventProfileModified {
@@ -79,9 +76,6 @@ impl HasEventKind for EventProfileModified {
             }
             Self::SecurityStructuresUpdated { ids: _ } => {
                 EventKind::SecurityStructuresUpdated
-            }
-            Self::SecurityStructureUpdated { id: _ } => {
-                EventKind::SecurityStructureUpdated
             }
         }
     }
