@@ -164,6 +164,43 @@ impl SecurityShieldBuilder {
             created_on,
         }
     }
+
+    pub fn with_security_structure_of_factor_source_ids(
+        mode: SecurityShieldBuilderMode,
+        security_structure_of_factor_source_ids: SecurityStructureOfFactorSourceIds,
+    ) -> Self {
+        Self::with_details(
+            mode,
+            RwLock::new(unsafe {
+                MatrixBuilder::unbuilt_with_roles_and_days(
+                    security_structure_of_factor_source_ids
+                        .matrix_of_factors
+                        .primary_role,
+                    security_structure_of_factor_source_ids
+                        .matrix_of_factors
+                        .recovery_role,
+                    security_structure_of_factor_source_ids
+                        .matrix_of_factors
+                        .confirmation_role,
+                    security_structure_of_factor_source_ids
+                        .matrix_of_factors
+                        .time_until_delayed_confirmation_is_callable,
+                )
+            }),
+            RwLock::new(
+                security_structure_of_factor_source_ids
+                    .metadata
+                    .display_name
+                    .value(),
+            ),
+            RwLock::new(Some(
+                security_structure_of_factor_source_ids
+                    .authentication_signing_factor,
+            )),
+            security_structure_of_factor_source_ids.metadata.id,
+            security_structure_of_factor_source_ids.metadata.created_on,
+        )
+    }
 }
 
 impl HasSampleValues for SecurityShieldBuilder {

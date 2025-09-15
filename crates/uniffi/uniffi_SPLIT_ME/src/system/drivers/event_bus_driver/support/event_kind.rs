@@ -63,6 +63,9 @@ pub enum EventKind {
 
     /// Security structures have been updated
     SecurityStructuresUpdated,
+
+    /// Security structure has been updated
+    SecurityStructureUpdated,
 }
 
 #[uniffi::export]

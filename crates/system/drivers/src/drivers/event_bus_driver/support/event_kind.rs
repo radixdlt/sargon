@@ -62,6 +62,9 @@ pub enum EventKind {
 
     /// Security structures have been updated
     SecurityStructuresUpdated,
+
+    /// Security structure has been updated
+    SecurityStructureUpdated,
 }
 
 impl EventKind {
@@ -141,6 +144,7 @@ impl EventKind {
                 | ProfileImported
                 | SecurityStructureAdded
                 | SecurityStructuresUpdated
+                | SecurityStructureUpdated
         )
     }
 
@@ -210,6 +214,7 @@ mod tests {
                 | ProfileSaved
                 | SecurityStructureAdded
                 | SecurityStructuresUpdated
+                | SecurityStructureUpdated
                 | FactorSourceAdded
                 | FactorSourcesAdded
                 | FactorSourceUpdated
@@ -241,6 +246,7 @@ mod tests {
                 | ProfileSaved
                 | SecurityStructureAdded
                 | SecurityStructuresUpdated
+                | SecurityStructureUpdated
                 | FactorSourceAdded
                 | FactorSourcesAdded
                 | FactorSourceUpdated
@@ -272,6 +278,7 @@ mod tests {
                 | AccountAdded
                 | SecurityStructureAdded
                 | SecurityStructuresUpdated
+                | SecurityStructureUpdated
                 | FactorSourcesAdded
                 | AccountsAdded
                 | AccountUpdated
@@ -293,7 +300,8 @@ mod tests {
                 Booted
                 | ProfileImported
                 | SecurityStructureAdded
-                | SecurityStructuresUpdated => {
+                | SecurityStructuresUpdated
+                | SecurityStructureUpdated => {
                     assert!(affects)
                 }
                 ProfileUsedOnOtherDevice
@@ -333,6 +341,7 @@ mod tests {
                 | FactorSourcesAdded
                 | SecurityStructureAdded
                 | SecurityStructuresUpdated
+                | SecurityStructureUpdated
                 | AccountsAdded
                 | AccountUpdated
                 | AccountsUpdated
@@ -360,6 +369,7 @@ mod tests {
                 | ProfileSaved
                 | SecurityStructureAdded
                 | SecurityStructuresUpdated
+                | SecurityStructureUpdated
                 | AccountAdded
                 | AccountsAdded
                 | AccountUpdated
