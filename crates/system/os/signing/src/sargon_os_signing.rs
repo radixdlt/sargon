@@ -90,14 +90,10 @@ impl OsSigning for SargonOS {
         let payload_id = signable.get_id();
 
         if outcome.successful() {
-            let signatures_per_owner = outcome
-                .signatures_of_successful_transactions()
-                .iter()
-                .filter(|hd| hd.input.payload_id == payload_id)
-                .map(|hd| (hd.input.owned_factor_instance.owner, IntentSignature(hd.signature)))
-                .collect::<IndexMap<AddressOfAccountOrPersona, IntentSignature>>();
+            let signatures = outcome
+                .signatures_of_successful_transactions();
 
-            signable.signed(signatures_per_owner)
+            signable.signed(signatures)
         } else {
             Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
         }

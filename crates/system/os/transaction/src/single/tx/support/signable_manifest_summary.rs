@@ -77,10 +77,7 @@ impl Signable for SignableManifestSummary {
 
     fn signed(
         &self,
-        _signatures_per_owner: IndexMap<
-            AddressOfAccountOrPersona,
-            IntentSignature,
-        >,
+        _signatures: IndexSet<HDSignature<Self::ID>>,
     ) -> Result<Self::Signed> {
         panic!("Manifest summary cannot be actually signed")
     }
