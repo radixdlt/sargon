@@ -1372,4 +1372,28 @@ mod tests {
             })
         );
     }
+
+    #[actix_rt::test]
+    async fn update_structure_referencing_unknown_factors_returns_error() {
+        // ARRANGE: No factor sources added to the profile
+        let os = SargonOS::fast_boot().await;
+
+        // This structure references factor IDs that the profile doesn't know about
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
+
+        // ACT
+        let res = os
+            .with_timeout(|x| {
+                x.update_security_structure_of_factor_source_ids(&structure_ids)
+            })
+            .await;
+
+        // ASSERT
+        assert!(matches!(
+            res,
+            Err(CommonError::StructureReferencesUnknownFactorSource {
+                bad_value: _
+            })
+        ));
+    }
 }

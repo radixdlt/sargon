@@ -2442,4 +2442,74 @@ mod lenient {
             )
         );
     }
+
+    #[test]
+    fn with_security_structure_of_factor_source_ids_roundtrip() {
+        let shield = SUT::default();
+        let _ = shield
+            .set_name("Shield")
+            .set_authentication_signing_factor(Some(
+                FactorSourceID::sample_device(),
+            ))
+            .set_time_until_delayed_confirmation_is_callable(
+                TimePeriod::with_days(42),
+            )
+            // Primary
+            .add_factor_source_to_primary_threshold(
+                FactorSourceID::sample_device(),
+            )
+            .add_factor_source_to_primary_override(
+                FactorSourceID::sample_arculus(),
+            )
+            // Recovery
+            .add_factor_source_to_recovery_override(
+                FactorSourceID::sample_ledger(),
+            )
+            // Confirmation
+            .add_factor_source_to_confirmation_override(
+                FactorSourceID::sample_arculus_other(),
+            );
+
+        let original = shield.build().unwrap();
+
+        // Reconstruct the builder from the *existing* security structure
+        let reconstructed = SUT::with_security_structure_of_factor_source_ids(
+            SecurityShieldBuilderMode::Strict,
+            original.clone(),
+        );
+
+        // Mode is what we asked for when reconstructing
+        assert_eq!(reconstructed.mode, SecurityShieldBuilderMode::Strict);
+
+        // The getters reflect the same state carried over from `original`
+        assert_eq!(reconstructed.get_name(), "Shield");
+        assert_eq!(
+            reconstructed.get_authentication_signing_factor(),
+            Some(FactorSourceID::sample_device())
+        );
+        assert_eq!(
+            reconstructed.get_time_until_timed_confirmation_is_callable(),
+            TimePeriod::with_days(42)
+        );
+        assert_eq!(
+            reconstructed.get_primary_threshold_factors(),
+            vec![FactorSourceID::sample_device()]
+        );
+        assert_eq!(
+            reconstructed.get_primary_override_factors(),
+            vec![FactorSourceID::sample_arculus()]
+        );
+        assert_eq!(
+            reconstructed.get_recovery_factors(),
+            vec![FactorSourceID::sample_ledger()]
+        );
+        assert_eq!(
+            reconstructed.get_confirmation_factors(),
+            vec![FactorSourceID::sample_arculus_other()]
+        );
+
+        // Building again yields *the very same* SecurityStructureOfFactorSourceIds,
+        let rebuilt = reconstructed.build().unwrap();
+        assert_eq!(rebuilt, original);
+    }
 }
