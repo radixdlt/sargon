@@ -68,7 +68,7 @@ impl ProfileSecurityStructureUpdating for AppPreferences {
         name: DisplayName,
     ) -> Result<()> {
         self.security
-            .update_security_structure_name(security_structure_id, name)
+            .set_security_structure_name(security_structure_id, name)
     }
 }
 
