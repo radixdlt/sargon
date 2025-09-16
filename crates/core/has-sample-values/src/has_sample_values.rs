@@ -125,6 +125,16 @@ impl HasSampleValues for i64 {
     }
 }
 
+impl HasSampleValues for Url {
+    fn sample() -> Self {
+        "http://example.com".parse().unwrap()
+    }
+
+    fn sample_other() -> Self {
+        "http://example.org".parse().unwrap()
+    }
+}
+
 impl<T> HasSampleValues for Vec<T>
 where
     T: HasSampleValues,
@@ -166,16 +176,6 @@ where
         let mut map = HashMap::new();
         map.insert(Key::sample_other(), Value::sample_other());
         map
-    }
-}
-
-impl HasSampleValues for Url {
-    fn sample() -> Self {
-        "http://example.com".parse().unwrap()
-    }
-
-    fn sample_other() -> Self {
-        "http://example.org".parse().unwrap()
     }
 }
 

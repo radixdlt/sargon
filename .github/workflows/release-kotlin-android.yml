@@ -54,7 +54,7 @@ jobs:
         uses: RDXWorks-actions/setup-android@v2
 
       - name: Install cargo-ndk
-        run: cargo install cargo-ndk
+        run: cargo install cargo-ndk --version 3.5.4
 
       - name: Prune Tags
         run: git fetch --prune --tags

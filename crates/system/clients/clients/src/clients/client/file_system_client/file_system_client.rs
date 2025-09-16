@@ -3,12 +3,11 @@ use std::{fs, path::Path};
 
 #[derive(Debug)]
 pub struct FileSystemClient {
-    #[allow(dead_code)]
     driver: Arc<dyn FileSystemDriver>,
 }
 
 impl FileSystemClient {
-    pub(crate) fn new(driver: Arc<dyn FileSystemDriver>) -> Self {
+    pub fn new(driver: Arc<dyn FileSystemDriver>) -> Self {
         Self { driver }
     }
 }
@@ -23,51 +22,41 @@ pub(crate) fn path_to_string(path: impl AsRef<Path>) -> Result<String> {
         .map(|s| s.to_owned())
 }
 
-#[allow(dead_code)]
 impl FileSystemClient {
     pub async fn create_if_needed(
         &self,
-        path: impl AsRef<Path>,
+        relative_path: impl AsRef<Path>,
     ) -> Result<String> {
-        if self.load_from_file(path.as_ref()).await.is_ok() {
+        let path = self.full_path_for(relative_path).await?;
+        if self.load_from_file(&path).await.is_ok() {
             return path_to_string(path);
         }
-        let res = self
-            .save_to_file(path.as_ref(), BagOfBytes::default(), false)
-            .await;
+        let res = self.save_to_file(&path, BagOfBytes::default(), false).await;
 
-        let path_str = path.as_ref().to_string_lossy().to_string();
         match res {
             Ok(_) => {}
             Err(CommonError::FileAlreadyExists { .. }) => {}
             Err(e) => {
-                error!(
-                    "Failed to create path '{:?}', error: '{:?}'",
-                    path_str, e
-                );
+                error!("Failed to create path '{:?}', error: '{:?}'", path, e);
                 return Err(e);
             }
         }
-        fs::canonicalize(path.as_ref())
+        fs::canonicalize(&path)
             .map_err(|e| {
                 error!(
                     "Failed to canonicalize path: {:?}, error: {:?}",
-                    path_str, e
+                    path, e
                 );
-                CommonError::FailedToCanonicalize { path: path_str }
+                CommonError::FailedToCanonicalize { path }
             })
             .map(|p| p.to_string_lossy().to_string())
     }
 
-    pub async fn writable_app_dir_path(&self) -> Result<String> {
-        self.driver.writable_app_dir_path().await
-    }
-
     pub async fn load_from_file(
         &self,
-        path: impl AsRef<Path>,
+        relative_path: impl AsRef<Path>,
     ) -> Result<Option<BagOfBytes>> {
-        let path = path_to_string(path.as_ref())?;
+        let path = self.full_path_for(relative_path).await?;
         self.driver
             .load_from_file(path)
             // tarpaulin will incorrectly flag next line is missed
@@ -76,11 +65,11 @@ impl FileSystemClient {
 
     pub async fn save_to_file(
         &self,
-        path: impl AsRef<Path>,
+        relative_path: impl AsRef<Path>,
         data: impl AsRef<[u8]>,
         is_allowed_to_overwrite: bool,
     ) -> Result<()> {
-        let path = path_to_string(path.as_ref())?;
+        let path = self.full_path_for(relative_path).await?;
         let data = BagOfBytes::from(data.as_ref());
         self.driver
             .save_to_file(path, data, is_allowed_to_overwrite)
@@ -88,12 +77,25 @@ impl FileSystemClient {
             .await
     }
 
-    async fn delete_file(&self, path: impl AsRef<Path>) -> Result<()> {
-        let path = path_to_string(path.as_ref())?;
+    #[allow(dead_code)]
+    async fn delete_file(&self, relative_path: impl AsRef<Path>) -> Result<()> {
+        let path = self.full_path_for(relative_path).await?;
         self.driver
             .delete_file(path)
             // tarpaulin will incorrectly flag next line is missed
             .await
+    }
+}
+
+impl FileSystemClient {
+    async fn full_path_for(
+        &self,
+        relative_path: impl AsRef<Path>,
+    ) -> Result<String> {
+        let dir = self.driver.writable_app_dir_path().await?;
+        let path = Path::new(&dir).join(relative_path);
+
+        Ok(path.to_string_lossy().to_string())
     }
 }
 

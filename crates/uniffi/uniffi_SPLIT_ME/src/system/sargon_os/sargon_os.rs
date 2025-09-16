@@ -19,7 +19,7 @@ impl SargonOS {
     pub async fn boot(
         bios: Arc<Bios>,
         interactor: Arc<dyn HostInteractor>,
-    ) -> Arc<Self> {
+    ) -> Result<Arc<Self>> {
         let internal_sargon_os = InternalSargonOS::boot(
             Arc::new(bios.as_ref().clone().into()),
             Interactors::new(
@@ -34,19 +34,13 @@ impl SargonOS {
         )
         .await;
 
-        Arc::new(SargonOS {
+        Result::Ok(Arc::new(SargonOS {
             wrapped: internal_sargon_os,
-        })
+        }))
     }
 
-    pub async fn new_wallet(
-        &self,
-        should_pre_derive_instances: bool,
-    ) -> Result<()> {
-        self.wrapped
-            .new_wallet(should_pre_derive_instances)
-            .await
-            .into_result()
+    pub async fn new_wallet(&self) -> Result<()> {
+        self.wrapped.new_wallet().await.into_result()
     }
 
     pub async fn import_wallet(
@@ -82,13 +76,13 @@ impl SargonOS {
         self.wrapped.host_id().into()
     }
 
-    pub async fn resolve_host_info(&self) -> HostInfo {
-        self.wrapped.resolve_host_info().await.into()
+    pub fn resolve_host_info(&self) -> HostInfo {
+        self.wrapped.resolve_host_info().into()
     }
 
-    pub async fn claim_profile(&self, profile: Profile) -> Profile {
+    pub fn claim_profile(&self, profile: Profile) -> Profile {
         let mut internal_profile = profile.into_internal();
-        self.wrapped.claim_profile(&mut internal_profile).await;
+        self.wrapped.claim_profile(&mut internal_profile);
         internal_profile.into()
     }
 }

@@ -45,7 +45,7 @@ class MainViewModel @Inject constructor(
 
             state.copy(
                 info = HostInformation(
-                    id = osState.os.resolveHostId(),
+                    id = osState.os.hostId(),
                     info = osState.os.resolveHostInfo()
                 )
             )
@@ -62,7 +62,7 @@ class MainViewModel @Inject constructor(
         withContext(Dispatchers.Default) {
             val os = sargonOsManager.sargonOs
             runCatching {
-                os.newWallet()
+                os.newWallet(shouldPreDeriveInstances = false)
             }.onFailure { error ->
                 Timber.tag("sargon app").w(error)
             }
@@ -99,7 +99,7 @@ class MainViewModel @Inject constructor(
             val os = sargonOsManager.sargonOs
 
             runCatching {
-                os.createAndSaveNewAccount(
+                os.createAndSaveNewAccountWithMainBdfs(
                     networkId = networkId,
                     name = DisplayName(accountName)
                 )

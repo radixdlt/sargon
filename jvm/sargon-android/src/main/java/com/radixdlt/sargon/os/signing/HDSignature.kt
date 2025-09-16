@@ -22,17 +22,17 @@ data class HdSignature<ID: Signable.ID> (
     val signature: SignatureWithPublicKey
 )
 
-internal fun HdSignature<Signable.ID.Transaction>.intoSargon() = HdSignatureOfTransactionIntentHash(
+fun HdSignature<Signable.ID.Transaction>.intoSargon() = HdSignatureOfTransactionIntentHash(
     input = input.intoSargon(),
     signature = signature
 )
 
-internal fun HdSignature<Signable.ID.Subintent>.intoSargon() = HdSignatureOfSubintentHash(
+fun HdSignature<Signable.ID.Subintent>.intoSargon() = HdSignatureOfSubintentHash(
     input = input.intoSargon(),
     signature = signature
 )
 
-internal fun HdSignature<Signable.ID.Auth>.intoSargon() = HdSignatureOfAuthIntentHash(
+fun HdSignature<Signable.ID.Auth>.intoSargon() = HdSignatureOfAuthIntentHash(
     input = input.intoSargon(),
     signature = signature
 )

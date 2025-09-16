@@ -11,7 +11,6 @@ pub const CACHE_FILLING_QUANTITY_ACCOUNT_MFA: usize = CACHE_FILLING_QUANTITY;
 
 /// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::AccountRola`.
 pub const CACHE_FILLING_QUANTITY_ACCOUNT_ROLA: usize = CACHE_FILLING_QUANTITY;
-
 /// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::IdentityVeci`.
 pub const CACHE_FILLING_QUANTITY_IDENTITY_VECI: usize = CACHE_FILLING_QUANTITY;
 
@@ -20,7 +19,6 @@ pub const CACHE_FILLING_QUANTITY_IDENTITY_MFA: usize = CACHE_FILLING_QUANTITY;
 
 /// The quantity of DerivationPreset's to fill cache with for `DerivationPreset::IdentityRola`.
 pub const CACHE_FILLING_QUANTITY_IDENTITY_ROLA: usize = CACHE_FILLING_QUANTITY;
-
 impl DerivationPreset {
     /// The quantity of DerivationPreset's to fill cache with.
     pub fn cache_filling_quantity(&self) -> usize {

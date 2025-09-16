@@ -91,7 +91,7 @@ mod integration_tests {
         let transfers = PerRecipientAssetTransfers::new(
             from,
             [PerRecipientAssetTransfer::new(
-                AccountOrAddressOf::AddressOfExternalAccount { value: to },
+                TransferRecipient::AddressOfExternalAccount { value: to },
                 [PerRecipientFungibleTransfer::new(
                     resource, amount, true, None,
                 )],

@@ -2,7 +2,6 @@ package com.radixdlt.sargon.os.driver
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.SecureStorageDriver
@@ -10,12 +9,10 @@ import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.UnsafeStorageDriver
 import com.radixdlt.sargon.UnsafeStorageKey
 import com.radixdlt.sargon.extensions.then
-import com.radixdlt.sargon.os.storage.key.ByteArrayKeyMapping
 import com.radixdlt.sargon.os.storage.key.DeviceFactorSourceMnemonicKeyMapping
+import com.radixdlt.sargon.os.storage.key.FactorSourceUserHasWrittenDownKeyMapping
 import com.radixdlt.sargon.os.storage.key.HostIdKeyMapping
 import com.radixdlt.sargon.os.storage.key.ProfileSnapshotKeyMapping
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 
 internal class AndroidStorageDriver(
     private val biometricAuthorizationDriver: BiometricAuthorizationDriver,
@@ -86,10 +83,10 @@ internal class AndroidStorageDriver(
     }
 
     private fun UnsafeStorageKey.mapping() = when (this) {
-        UnsafeStorageKey.FACTOR_SOURCE_USER_HAS_WRITTEN_DOWN -> ByteArrayKeyMapping(
-            key = this,
-            storage = preferencesDatastore
-        )
+        UnsafeStorageKey.FACTOR_SOURCE_USER_HAS_WRITTEN_DOWN ->
+            FactorSourceUserHasWrittenDownKeyMapping(
+                storage = preferencesDatastore
+            )
     }.let { mapping ->
         Result.success(mapping)
     }

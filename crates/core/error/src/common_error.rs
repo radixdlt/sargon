@@ -854,16 +854,103 @@ pub enum CommonError {
     #[error("Not all signatures are produced with the same factor source.")]
     FactorOutcomeSignedFactorSourceIDMismatch = 10245,
 
+    #[error("Unknown response status code: {status_code}")]
+    ArculusCSDKUnknownResponseStatusCode { status_code: i32 } = 10246,
+
+    #[error("Unknown response status code: {status_code}")]
+    ArculusCSDKBadStatusCode { status_code: i32 } = 10247,
+
+    #[error("Arculus card created invalid mnemonic words")]
+    ArculusCardInvalidNonUtf8MnemonicPhrase = 10248,
+
+    #[error("Arculus card wrong PIN, number of remaining tries: {number_of_remaining_tries}")]
+    ArculusCardWrongPIN { number_of_remaining_tries: i8 } = 10249,
+
+    #[error("Arculus card failed to create select wallet request")]
+    ArculusCSDKFailedToCreateSelectWalletRequest = 10250,
+
+    #[error("Arculus card failed to create select wallet response")]
+    ArculusCSDKFailedToCreateSelectWalletResponse = 10251,
+
+    #[error("Arculus card failed to create get pub key by path request")]
+    ArculusCSDKFailedToCreateGetPublicKeyByPathRequest = 10252,
+
+    #[error("Arculus card failed to create get pub key by path response")]
+    ArculusCSDKFailedToCreateGetPublicKeyByPathResponse = 10253,
+
+    #[error("Arculus card failed to create get GGUID request")]
+    ArculusCSDKFailedToCreateGetGGUIDRequest = 10254,
+
+    #[error("Arculus card failed to create get GGUID response")]
+    ArculusCSDKFailedToCreateGetGGUIDResponse = 10255,
+
+    #[error("Arculus card failed to create get firmware version request")]
+    ArculusCSDKFailedToCreateGetFirmwareVersionRequest = 10256,
+
+    #[error("Arculus card failed to create get firmware version response")]
+    ArculusCSDKFailedToCreateGetFirmwareVersionResponse = 10257,
+
+    #[error("Arculus card failed to create store data PIN request")]
+    ArculusCSDKFailedToCreateStoreDataPINRequest = 10258,
+
+    #[error("Arculus card failed to create verify PIN request")]
+    ArculusCSDKFailedToCreateVerifyPINRequest = 10259,
+
+    #[error("Arculus card failed to create init encrypted session request")]
+    ArculusCSDKFailedToCreateInitEncryptedSessionRequest = 10260,
+
+    #[error("Arculus card failed to create wallet seed request")]
+    ArculusCSDKFailedToCreateWalletSeedRequest = 10261,
+
+    #[error("Arculus card failed to create wallet seed response")]
+    ArculusCSDKFailedToCreateWalletSeedResponse = 10262,
+
+    #[error("Arculus card failed to create reset wallet request")]
+    ArculusCSDKFailedToCreateResetWalletRequest = 10263,
+
+    #[error("Arculus card failed to create inint recover wallet request")]
+    ArculusCSDKFailedToCreateInitRecoverWalletRequest = 10264,
+
+    #[error("Arculus card failed to create finish recover wallet request")]
+    ArculusCSDKFailedToCreateFinishRecoverWalletRequest = 10265,
+
+    #[error("Arculus card failed to create sign hash path request")]
+    ArculusCSDKFailedToCreateSignHashPathRequest = 10266,
+
+    #[error("Arculus card failed to create sign hash path response")]
+    ArculusCSDKFailedToCreateSignHashPathResponse = 10267,
+
+    #[error("Arculus card failed to create seed phrase from mnemonic")]
+    ArculusCSDKFailedToCreateSeedPhraseFromMnemonicSentence = 10268,
+
+    #[error("Arculus card failed to init wallet")]
+    ArculusCSDKFailedToInitWallet = 10269,
+
     #[error("Unknown SecurityStructureID {id}")]
-    UnknownSecurityStructureID { id: String } = 10246,
+    UnknownSecurityStructureID { id: String } = 10270,
+
+    #[error("Wrong Arculus card has been used")]
+    WrongArculusCard = 10271,
+
+    #[error("NFC Session was cancelled either by user or by system after being inactive")]
+    NFCSessionCancelled = 10272,
+
+    #[error("NFC Session lost the connection with the tag")]
+    NFCSessionLostTagConnection = 10273,
+
+    #[error("NFC Session detected an unknown tag")]
+    NFCSessionUnknownTag = 10274,
+
+    #[error("Arculus Card not configured")]
+    ArculusCardNotConfigured = 10275,
 
     #[error("Signing failed due to too many factor sources were neglected.")]
-    SigningFailedTooManyFactorSourcesNeglected = 10247,
+    SigningFailedTooManyFactorSourcesNeglected = 10276,
 
     #[error(
         "SecurityStructure already exists in profile, FactorSourceID {bad_value}."
     )]
-    StructureAlreadyExists { bad_value: String } = 10248,
+    StructureAlreadyExists { bad_value: String } = 10277,
 
     #[error(
         "Tried to create {address_kind}Address with wrong entity type: {entity_type}, for node id: {node_id_as_hex}"
@@ -872,42 +959,42 @@ pub enum CommonError {
         address_kind: String,
         entity_type: u8,
         node_id_as_hex: String,
-    } = 10249,
+    } = 10278,
 
     #[error(
         "Tried to create an Address with node id: {node_id_as_hex} which does not have entity type"
     )]
-    AddressNodeIdNoEntityType { node_id_as_hex: String } = 10250,
+    AddressNodeIdNoEntityType { node_id_as_hex: String } = 10279,
 
     #[error(
         "Failed to find network id from Bech32m string: {bech32m_encoded_address}"
     )]
     FailedToFindNetworkIdFromBech32mString { bech32m_encoded_address: String } =
-        10251,
+        10280,
 
     #[error("Invalid NodeId length: {actual}, expected: {expected}")]
-    InvalidNodeIdLength { expected: usize, actual: usize } = 10252,
+    InvalidNodeIdLength { expected: usize, actual: usize } = 10281,
 
     #[error("No entity found with AccessController address {bad_value}")]
-    NoEntityFoundWithAccessControllerAddress { bad_value: String } = 10253,
+    NoEntityFoundWithAccessControllerAddress { bad_value: String } = 10282,
 
     #[error("Failed to cast Address to specific type '{expected_specific_type}', from value: '{got_value}'")]
     FailedToMapAddressToSpecificType {
         expected_specific_type: String,
         got_value: String,
-    } = 10254,
+    } = 10283,
 
     #[error("Payer cannot be in batch of entities applying shield")]
-    PayerCannotBeInBatchOfEntitiesApplyingShield = 10255,
+    PayerCannotBeInBatchOfEntitiesApplyingShield = 10284,
 
     #[error("No XRD balance fetched for entity applying shield (or XRD Vault of AC), address {address}")]
     NoXrdBalanceFetchedForEntityApplyingShieldOrItsVault { address: String } =
-        10256,
+        10285,
 
     #[error("No XRD balance fetched for payer of application of shield, address_of_payer {address_of_payer}")]
     NoXrdBalanceFetchedForPayerOfApplicationOfShield {
         address_of_payer: String,
-    } = 10257,
+    } = 10286,
 
     #[error("Unable to contribute to AccessControllers Xrd Vault, insufficient balance of payer {payer}, vault of entity {vault_of_entity}, payer balance {payer_balance}, needed balance {needed_balance}")]
     UnableContributeToAcXrdVaultInsufficientBalanceOfPayer {
@@ -915,42 +1002,100 @@ pub enum CommonError {
         vault_of_entity: String,
         payer_balance: String,
         needed_balance: String,
-    } = 10258,
-
-    #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
-    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10259,
+    } = 10287,
 
     #[error("Unable to top up Xrd Vault, payer is entity applying shield: {payer_is_entity_applying_shield}, can exercise primary role: {can_exercise_primary_role} for entity owning AccessController: {entity_owning_access_controller}")]
     UnableToTopUpXrdVault {
         entity_owning_access_controller: String,
         payer_is_entity_applying_shield: bool,
         can_exercise_primary_role: bool,
-    } = 10260,
+    } = 10288,
 
     #[error("Unsecurified Personas require an account fee payer, but none was provided, for persona with address: {identity_address}")]
     UnsecurifiedPersonasRequireAnAccountFeePayerButNoneWasProvided {
         identity_address: String,
-    } = 10261,
+    } = 10289,
 
     #[error("Named addresses are not supported")]
-    NamedAddressesAreNotSupported = 10262,
+    NamedAddressesAreNotSupported = 10290,
 
     #[error("Entity has no provisional security config set")]
-    EntityHasNoProvisionalSecurityConfigSet = 10263,
+    EntityHasNoProvisionalSecurityConfigSet = 10291,
 
     #[error("Entity's provisional config is wrong. It is expected to be in instances derived state.")]
-    ProvisionalConfigInWrongStateExpectedInstancesDerived = 10264,
+    ProvisionalConfigInWrongStateExpectedInstancesDerived = 10292,
 
     #[error("Entity {entity_bech32m_encoded_address} is not controller by access controller on ledger")]
     EntityIsNotControlledByAnAccessControllerOnLedger {
         entity_bech32m_encoded_address: String,
-    } = 10265,
+    } = 10293,
 
     #[error("Invalid mnemonic words")]
-    InvalidMnemonicWords { indices_in_mnemonic: Vec<usize> } = 10266,
+    InvalidMnemonicWords { indices_in_mnemonic: Vec<usize> } = 10294,
 
     #[error("Factor source already exists")]
-    FactorSourceAlreadyExists = 10267,
+    FactorSourceAlreadyExists = 10295,
+
+    #[error("Missing NFT Data field {field}")]
+    MissingNFTDataField { field: String } = 10296,
+
+    #[error("Unexpected NFT Data format")]
+    UnexpectedNFTDataFormat = 10297,
+
+    #[error("Invalid RNS domain")]
+    RnsInvalidDomain = 10298,
+
+    #[error("Unauthentic RNS domain: {reason}")]
+    RnsUnauthenticDomain { reason: String } = 10299,
+
+    #[error("Invalid RNS domain configuration: {reason}")]
+    RnsInvalidDomainConfiguration { reason: String } = 10300,
+
+    #[error("RNS unsupported network: {network}")]
+    RnsUnsupportedNetwork { network: u8 } = 10301,
+
+    #[error("Invalid RNS record context: {context}")]
+    RnsInvalidRecordContext { context: String } = 10302,
+
+    #[error("Gw missing response item: {item}")]
+    GWMissingResponseItem { item: String } = 10303,
+
+    #[error("Unable to contribute to AccessControllers Xrd Vault, persona requires payer")]
+    UnableContributeToAcXrdVaultPersonaRequiresPayer = 10304,
+
+    #[error("Arculus CSDK failed to parse SelectWallet response")]
+    ArculusCSDKFailedToParseSelectWalletResponse = 10305,
+    #[error("Arculus CSDK failed to parse GetPublicKeyByPath response")]
+    ArculusCSDKFailedToParseGetPublicKeyByPathResponse = 10306,
+    #[error("Arculus CSDK failed to parse GetGGUID response")]
+    ArculusCSDKFailedToParseGetGguidResponse = 10307,
+    #[error("Arculus CSDK failed to parse GetFirmwareVersion response")]
+    ArculusCSDKFailedToParseGetFirmwareVersionResponse = 10308,
+    #[error("Arculus CSDK failed to parse StoreDataPin response")]
+    ArculusCSDKFailedToParseStoreDataPinResponse = 10309,
+    #[error("Arculus CSDK failed to parse InitEncryptedSession response")]
+    ArculusCSDKFailedToParseInitEncryptedSessionResponse = 10310,
+    #[error("Arculus CSDK failed to parse CreateWalletSeed response")]
+    ArculusCSDKFailedToParseCreateWalletSeedResponse = 10311,
+    #[error("Arculus CSDK failed to parse ResetWallet response")]
+    ArculusCSDKFailedToParseResetWalletResponse = 10312,
+    #[error("Arculus CSDK failed to parse InitRecoverWallet response")]
+    ArculusCSDKFailedToParseInitRecoverWalletResponse = 10313,
+    #[error("Arculus CSDK failed to parse FinishRecoverWallet response")]
+    ArculusCSDKFailedToParseFinishRecoverWalletResponse = 10314,
+    #[error("Arculus CSDK failed to parse SignHashPath response")]
+    ArculusCSDKFailedToParseSignHashPathResponse = 10315,
+    #[error("Arculus CSDK failed to create CreateWalletSeed request")]
+    ArculusCSDKFailedToCreateCreateWalletSeedRequest = 10316,
+    #[error("Arculus CSDK failed to create StoreDataPin request")]
+    ArculusCSDKFailedToCreateStoreDataPinRequest = 10317,
+    #[error("Arculus CSDK failed to create VerifyPin request")]
+    ArculusCSDKFailedToCreateVerifyPinRequest = 10318,
+    #[error("Arculus CSDK failed to create GetGguid request")]
+    ArculusCSDKFailedToCreateGetGguidRequest = 10319,
+
+    #[error("NFC Session renewed")]
+    NFCSessionRenewed = 10320,
 }
 
 impl CommonError {

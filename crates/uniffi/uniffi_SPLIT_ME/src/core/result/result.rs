@@ -27,6 +27,17 @@ where
     }
 }
 
+impl<Type, InternalType> IntoInternalResult<Type, Vec<InternalType>>
+    for Result<Vec<Type>>
+where
+    Type: Into<InternalType>, // Ensures `Type` can be constructed from `InternalType`
+{
+    fn into_internal_result(self) -> InternalResult<Vec<InternalType>> {
+        self.map(|vec| vec.into_internal()) // Converts Ok variant using From trait
+            .map_err(Into::into) // Converts Err variant using Into
+    }
+}
+
 /// Utility trait to map `InternalResult` to `Result`
 pub trait FromInternalResult<InternalType, Type> {
     fn into_result(self) -> Result<Type>;

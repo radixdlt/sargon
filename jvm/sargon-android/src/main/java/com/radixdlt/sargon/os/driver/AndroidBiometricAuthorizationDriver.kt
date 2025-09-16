@@ -13,7 +13,6 @@ import com.radixdlt.sargon.CommonException
 import com.radixdlt.sargon.SecureStorageAccessErrorKind
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.secureStorageKeyIdentifier
-import com.radixdlt.sargon.secureStorageAccessErrorKindToString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
@@ -77,7 +76,10 @@ class BiometricsHandler(
     private val biometricRequestsChannel = Channel<Unit>()
     private val biometricsResultsChannel = Channel<Result<Unit>>()
 
-    fun register(activity: FragmentActivity) {
+    fun register(
+        activity: FragmentActivity,
+        callbacks: OnBiometricsLifecycleCallbacks? = null
+    ) {
         biometricRequestsChannel
             .receiveAsFlow()
             .flowWithLifecycle(
@@ -85,10 +87,12 @@ class BiometricsHandler(
                 minActiveState = Lifecycle.State.STARTED
             )
             .onEach {
+                callbacks?.onBeforeBiometricsRequest()
                 val result = requestBiometricsAuthorization(activity)
 
                 // Send back the result to sargon os
                 biometricsResultsChannel.send(result)
+                callbacks?.onAfterBiometricsResult()
             }
             .launchIn(activity.lifecycleScope)
     }
@@ -144,4 +148,20 @@ class BiometricsHandler(
         BiometricManager.Authenticators.BIOMETRIC_WEAK or
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL
     }
+}
+
+/**
+ * Callback functions called to notify the host about the lifecycle
+ * of a biometrics request
+ */
+interface OnBiometricsLifecycleCallbacks {
+    /**
+     * Called right before a biometrics request is about to be appeared.
+     */
+    fun onBeforeBiometricsRequest()
+
+    /**
+     * Called right after a biometrics request has ended with a result.
+     */
+    fun onAfterBiometricsResult()
 }

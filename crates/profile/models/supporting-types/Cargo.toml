@@ -1,6 +1,6 @@
 [package]
 name = "profile-supporting-types"
-version = "1.2.8"
+version = "1.2.32"
 edition = "2021"
 
 [dependencies]

@@ -1,7 +1,5 @@
 package com.radixdlt.cargo.desktop
 
-import org.gradle.configurationcache.extensions.capitalized
-
 enum class BuildType {
     DEBUG,
     RELEASE;
@@ -12,7 +10,7 @@ enum class BuildType {
         get() = name.lowercase()
 
     val capitalised: String
-        get() = lowercase.capitalized()
+        get() = lowercase.replaceFirstChar(Char::uppercase)
 
     companion object {
         fun from(property: String?) = property?.lowercase()?.let { propertyLowercased ->

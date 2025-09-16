@@ -1,3 +1,4 @@
+use core_utils::prelude::MapToFailedToDeserializeJSONToValue;
 use hash::hash_of;
 
 use crate::prelude::*;
@@ -68,10 +69,17 @@ impl FactorSourceIDFromHash {
             seed.derive_ed25519_private_key(GetIDPath.to_hd_path());
         let public_key_bytes = private_key.public_key().to_bytes();
         // TODO: Impl Zeroize for `PrivateKey`!
-        let hash = hash_of(public_key_bytes);
+        Self::from_public_key_bytes(factor_source_kind, public_key_bytes)
+        // `BIP39Seed` implements `ZeroizeOnDrop` so `seed` should now be zeroized
+    }
+
+    pub fn from_public_key_bytes(
+        factor_source_kind: FactorSourceKind,
+        public_key_bytes: impl Into<Vec<u8>>,
+    ) -> Self {
+        let hash = hash_of(public_key_bytes.into());
         let body = Exactly32Bytes::from(hash);
         Self::new(factor_source_kind, body)
-        // `BIP39Seed` implements `ZeroizeOnDrop` so `seed` should now be zeroized
     }
 
     pub fn new_for_device(
@@ -101,7 +109,14 @@ impl FactorSourceIDFromHash {
         )
     }
 
-    pub fn new_for_arculus(
+    pub fn new_for_arculus(public_key_bytes: impl Into<Vec<u8>>) -> Self {
+        Self::from_public_key_bytes(
+            FactorSourceKind::ArculusCard,
+            public_key_bytes,
+        )
+    }
+
+    pub fn new_for_arculus_with_mwp(
         mnemonic_with_passphrase: &MnemonicWithPassphrase,
     ) -> Self {
         Self::from_mnemonic_with_passphrase(
@@ -177,11 +192,17 @@ impl FactorSourceIDFromHash {
     }
 
     pub fn sample_arculus() -> Self {
-        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus())
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
+            &MnemonicWithPassphrase::sample_arculus(),
+        )
     }
 
     pub fn sample_arculus_other() -> Self {
-        Self::new_for_arculus(&MnemonicWithPassphrase::sample_arculus_other())
+        Self::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
+            &MnemonicWithPassphrase::sample_arculus_other(),
+        )
     }
 
     pub fn sample_off_device() -> Self {
@@ -213,6 +234,26 @@ impl FactorSourceIDFromHash {
     pub fn sample_password_other() -> Self {
         Self::new_for_password(&MnemonicWithPassphrase::sample_password_other())
     }
+}
+
+/// Exposed function to deserialize `BagOfBytes` into a `Vec<FactorSourceIDFromHash>` for
+/// uniffi crate
+pub fn new_vec_of_factor_source_id_from_hash_from_json(
+    json_bytes: BagOfBytes,
+) -> Result<Vec<FactorSourceIDFromHash>> {
+    serde_json::from_slice(json_bytes.as_slice())
+        .map_failed_to_deserialize_bytes::<Vec<FactorSourceIDFromHash>>(
+            json_bytes.as_slice(),
+        )
+}
+
+/// Exposed function to serialize `Vec<FactorSourceIDFromHash>` into `BagOfBytes` uniffi crate
+pub fn vec_of_factor_source_id_from_hash_to_json(
+    ids: Vec<FactorSourceIDFromHash>,
+) -> Result<BagOfBytes> {
+    serde_json::to_vec(&ids)
+        .map_err(|_| CommonError::FailedToSerializeToJSON)
+        .map(BagOfBytes::from)
 }
 
 #[cfg(test)]
@@ -267,7 +308,8 @@ mod tests {
         };
         test(SUT::sample());
         test(SUT::sample_other());
-        test(SUT::new_for_arculus(
+        test(SUT::from_mnemonic_with_passphrase(
+            FactorSourceKind::ArculusCard,
             &MnemonicWithPassphrase::sample_arculus(),
         ));
         test(SUT::new_for_ledger(&MnemonicWithPassphrase::sample_ledger()));
@@ -376,5 +418,20 @@ mod tests {
             ),
         ];
         vectors.into_iter().for_each(test_vector);
+    }
+
+    #[test]
+    fn test_vec_serde_roundtrip() {
+        let id1 = FactorSourceIDFromHash::sample_device();
+        let id2 = FactorSourceIDFromHash::sample_device_other();
+
+        let vec = vec![id1, id2];
+
+        let encoded =
+            vec_of_factor_source_id_from_hash_to_json(vec.clone()).unwrap();
+        let decoded =
+            new_vec_of_factor_source_id_from_hash_from_json(encoded).unwrap();
+
+        assert_eq!(vec, decoded);
     }
 }

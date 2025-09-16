@@ -28,47 +28,47 @@ sealed interface FactorOutcome<ID : Signable.ID> {
 }
 
 @Throws(CommonException::class)
-internal fun FactorOutcome<Signable.ID.Transaction>.intoSargon() = when (this) {
+fun FactorOutcome<Signable.ID.Transaction>.intoSargon() = when (this) {
     is FactorOutcome.Signed -> intoSargon()
     is FactorOutcome.Neglected -> intoSargon()
 }
 
 @Throws(CommonException::class)
-internal fun FactorOutcome<Signable.ID.Subintent>.intoSargon() = when (this) {
+fun FactorOutcome<Signable.ID.Subintent>.intoSargon() = when (this) {
     is FactorOutcome.Signed -> intoSargon()
     is FactorOutcome.Neglected -> intoSargon()
 }
 
 @Throws(CommonException::class)
-internal fun FactorOutcome<Signable.ID.Auth>.intoSargon() = when (this) {
+fun FactorOutcome<Signable.ID.Auth>.intoSargon() = when (this) {
     is FactorOutcome.Signed -> intoSargon()
     is FactorOutcome.Neglected -> intoSargon()
 }
 
 
 @Throws(CommonException::class)
-internal fun FactorOutcome.Signed<Signable.ID.Transaction>.intoSargon() =
+fun FactorOutcome.Signed<Signable.ID.Transaction>.intoSargon() =
     FactorOutcomeOfTransactionIntentHash.signed(
         producedSignatures = producedSignatures.map { it.intoSargon() }
     )
 
 @Throws(CommonException::class)
-internal fun FactorOutcome.Signed<Signable.ID.Subintent>.intoSargon() =
+fun FactorOutcome.Signed<Signable.ID.Subintent>.intoSargon() =
     FactorOutcomeOfSubintentHash.signed(
         producedSignatures = producedSignatures.map { it.intoSargon() }
     )
 
 
-internal fun FactorOutcome.Signed<Signable.ID.Auth>.intoSargon() =
+fun FactorOutcome.Signed<Signable.ID.Auth>.intoSargon() =
     FactorOutcomeOfAuthIntentHash.signed(
         producedSignatures = producedSignatures.map { it.intoSargon() }
     )
 
-internal fun FactorOutcome.Neglected<Signable.ID.Transaction>.intoSargon() =
+fun FactorOutcome.Neglected<Signable.ID.Transaction>.intoSargon() =
     FactorOutcomeOfTransactionIntentHash.Neglected(v1 = factor)
 
-internal fun FactorOutcome.Neglected<Signable.ID.Subintent>.intoSargon() =
+fun FactorOutcome.Neglected<Signable.ID.Subintent>.intoSargon() =
     FactorOutcomeOfSubintentHash.Neglected(v1 = factor)
 
-internal fun FactorOutcome.Neglected<Signable.ID.Auth>.intoSargon() =
+fun FactorOutcome.Neglected<Signable.ID.Auth>.intoSargon() =
     FactorOutcomeOfAuthIntentHash.Neglected(v1 = factor)

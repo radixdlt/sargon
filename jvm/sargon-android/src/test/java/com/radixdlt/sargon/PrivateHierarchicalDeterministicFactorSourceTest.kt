@@ -16,7 +16,6 @@ class PrivateHierarchicalDeterministicFactorSourceTest {
     @Test
     fun testNewBabylon() {
         val sut = PrivateHierarchicalDeterministicFactorSource.babylon(
-            isMain = true,
             mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
             hostInfo = HostInfo.sample()
         )
@@ -37,7 +36,6 @@ class PrivateHierarchicalDeterministicFactorSourceTest {
         assertEquals(
             FactorSourceKind.DEVICE,
             PrivateHierarchicalDeterministicFactorSource.babylon(
-                isMain = true,
                 mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
                 hostInfo = HostInfo.sample()
             ).factorSource.kind

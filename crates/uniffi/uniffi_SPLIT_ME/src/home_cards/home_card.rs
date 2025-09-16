@@ -6,6 +6,8 @@ use sargon::HomeCard as InternalHomeCard;
 /// An enum describing the different cards that Wallet can display on home page.
 /// Each card has an associated content and optional action.
 pub enum HomeCard {
+    JoinRadixRewards,
+
     /// Content: "Start RadQuest, learn about Radix, earn XRD and collectibles."
     /// Action: Redirect user to RadQuest.
     StartRadQuest,
@@ -16,13 +18,11 @@ pub enum HomeCard {
 
     /// Content: "You can now connect with your Radix Wallet. Tap to dismiss."
     /// Action: None.
-    Dapp { icon_url: Option<Url> },
+    Dapp {
+        icon_url: Option<Url>,
+    },
 
     /// Content: "To use Radix Wallet with desktop browsers, finish setup by visiting wallet.radixdlt.com"
     /// Action: None
     Connector,
-
-    /// Content: "Start digging into Web3 dApps on the Radix Ecosystem directory."
-    /// Action: Redirect user to Radix Ecosystem.
-    DiscoverRadixDapps,
 }

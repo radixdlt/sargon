@@ -339,17 +339,24 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                 )
                 perAssetTransfer.transfers.forEach {
                     when (val recipient = it.recipient) {
-                        is AccountOrAddressOf.AddressOfExternalAccount ->
+                        is TransferRecipient.AddressOfExternalAccount ->
                             assertTrue(
                                 contains(
                                     recipient.value
                                         .string
                                 )
                             )
-                        is AccountOrAddressOf.ProfileAccount ->
+                        is TransferRecipient.ProfileAccount ->
                             assertTrue(
                                 contains(
                                     recipient.value.address
+                                        .string
+                                )
+                            )
+                        is TransferRecipient.RnsDomain ->
+                            assertTrue(
+                                contains(
+                                    recipient.value.receiver
                                         .string
                                 )
                             )
@@ -373,7 +380,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
                     listOf(
                         PerRecipientAssetTransfer(
                             recipient =
-                            AccountOrAddressOf
+                            TransferRecipient
                                 .AddressOfExternalAccount(
                                     value =
                                     AccountAddress(

@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothClass.Device
 import com.radixdlt.sargon.extensions.asGeneral
 import com.radixdlt.sargon.extensions.babylon
 import com.radixdlt.sargon.extensions.id
-import com.radixdlt.sargon.extensions.isMain
 import com.radixdlt.sargon.extensions.kind
 import com.radixdlt.sargon.extensions.olympia
 import com.radixdlt.sargon.extensions.supportsBabylon
@@ -163,31 +162,8 @@ class FactorSourceTest : SampleTestable<FactorSource> {
     }
 
     @Test
-    fun testNewBabylonIsMain() {
-        assertTrue(
-            FactorSource.Device.babylon(
-                isMain = true,
-                mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
-                hostInfo = HostInfo.sample()
-            ).isMain
-        )
-    }
-
-    @Test
-    fun testNewBabylonIsNotMain() {
-        assertFalse(
-            FactorSource.Device.babylon(
-                isMain = false,
-                mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
-                hostInfo = HostInfo.sample()
-            ).isMain
-        )
-    }
-
-    @Test
     fun testNewBabylon() {
         val factorSource = FactorSource.Device.babylon(
-            isMain = false,
             mnemonicWithPassphrase = MnemonicWithPassphrase.sample(),
             hostInfo = HostInfo.sample()
         )

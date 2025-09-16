@@ -67,7 +67,7 @@ mod tests {
             SargonOS::boot_test_with_networking_driver(mock_networking_driver)
                 .await
                 .unwrap();
-        let bdfs = os.main_bdfs().unwrap();
+        let bdfs = os.bdfs();
         let ledger = FactorSource::sample_at(1);
         let arculus = FactorSource::sample_at(3);
         let password = FactorSource::sample_at(5);
@@ -100,7 +100,7 @@ mod tests {
 
         // Unsecurified Account
         let alice = os
-            .create_and_save_new_mainnet_account_with_main_bdfs(
+            .create_and_save_new_mainnet_account_with_bdfs(
                 DisplayName::new("Alice").unwrap(),
             )
             .await
@@ -108,7 +108,7 @@ mod tests {
 
         // Unsecurified Account
         let bob = os
-            .create_and_save_new_mainnet_account_with_main_bdfs(
+            .create_and_save_new_mainnet_account_with_bdfs(
                 DisplayName::new("Bob").unwrap(),
             )
             .await
@@ -116,7 +116,7 @@ mod tests {
 
         // Unsecurified Account 2
         let carla = os
-            .create_and_save_new_mainnet_account_with_main_bdfs(
+            .create_and_save_new_mainnet_account_with_bdfs(
                 DisplayName::new("Carla").unwrap(),
             )
             .await
@@ -124,7 +124,7 @@ mod tests {
 
         // Unsecurified account 3
         let peter = os
-            .create_and_save_new_mainnet_account_with_main_bdfs(
+            .create_and_save_new_mainnet_account_with_bdfs(
                 DisplayName::new("Peter").unwrap(),
             )
             .await
@@ -157,7 +157,7 @@ mod tests {
 
         // Unsecurified Persona
         let satoshi = os
-            .create_and_save_new_mainnet_persona_with_main_bdfs(
+            .create_and_save_new_mainnet_persona_with_bdfs(
                 DisplayName::new("satoshi").unwrap(),
             )
             .await
@@ -165,7 +165,7 @@ mod tests {
 
         // Unsecurified Persona 2
         let batman = os
-            .create_and_save_new_mainnet_persona_with_main_bdfs(
+            .create_and_save_new_mainnet_persona_with_bdfs(
                 DisplayName::new("Batman").unwrap(),
             )
             .await
@@ -373,7 +373,7 @@ mod tests {
 
         let addresses = arrange_entities(os.clone()).await;
 
-        let bdfs = os.main_bdfs().unwrap();
+        let bdfs = os.bdfs();
 
         let shield_builder = SecurityShieldBuilder::lenient();
 

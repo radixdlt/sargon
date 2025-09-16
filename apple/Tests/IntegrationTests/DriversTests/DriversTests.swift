@@ -13,7 +13,9 @@ extension Drivers {
 			unsafeStorageKeyMapping: [:],
 			secureStorageDriver: Insecure︕！TestOnly︕！Ephemeral︕！SecureStorage(
 				keychainService: "test"
-			)
+			),
+			arculuCSDKDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nftTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 }
@@ -28,7 +30,7 @@ final class DriversTests: TestCase {
 	}
 
 	func test_bios_insecure() async throws {
-		let _ = await SargonOS.boot(
+		_ = try! await SargonOS.boot(
 			bios: BIOS.insecure(),
 			interactor: ThrowingHostInteractor.shared
 		)

@@ -89,6 +89,9 @@ pub enum CommonError {
         error_message: String,
     },
     FailedToExtractTransactionReceiptBytes,
+    NFCSessionCancelled,
+    NFCSessionLostTagConnection,
+    NFCSessionUnknownTag,
     MaxTransfersPerTransactionReached {
         amount: u64,
     },
@@ -128,6 +131,31 @@ pub enum CommonError {
     InvalidMnemonicWords {
         indices_in_mnemonic: Vec<u8>,
     },
+    MissingNFTDataField {
+        field: String,
+    },
+    UnexpectedNFTDataFormat,
+    RnsInvalidDomain,
+    RnsUnauthenticDomain {
+        reason: String,
+    },
+    RnsInvalidDomainConfiguration {
+        reason: String,
+    },
+    RnsUnsupportedNetwork {
+        network: u8,
+    },
+    RnsInvalidRecordContext {
+        context: String,
+    },
+    GWMissingResponseItem {
+        item: String,
+    },
+    ArculusCardWrongPIN {
+        number_of_remaining_tries: i8,
+    },
+    WrongArculusCard,
+    NFCSessionRenewed,
 }
 
 #[uniffi::export]
@@ -360,6 +388,15 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
+            CommonError::NFCSessionCancelled => {
+                InternalCommonError::NFCSessionCancelled
+            }
+            CommonError::NFCSessionLostTagConnection => {
+                InternalCommonError::NFCSessionLostTagConnection
+            }
+            CommonError::NFCSessionUnknownTag => {
+                InternalCommonError::NFCSessionUnknownTag
+            }
             AddressInvalidEntityType {
                 address_kind,
                 entity_type,
@@ -382,6 +419,45 @@ impl CommonError {
                     .map(|i| *i as usize)
                     .collect::<Vec<_>>(),
             },
+            MissingNFTDataField { field } => {
+                InternalCommonError::MissingNFTDataField {
+                    field: field.clone(),
+                }
+            }
+            UnexpectedNFTDataFormat => {
+                InternalCommonError::UnexpectedNFTDataFormat
+            }
+            RnsInvalidDomain => InternalCommonError::RnsInvalidDomain,
+            RnsUnauthenticDomain { reason } => {
+                InternalCommonError::RnsUnauthenticDomain {
+                    reason: reason.clone(),
+                }
+            }
+            RnsInvalidDomainConfiguration { reason } => {
+                InternalCommonError::RnsInvalidDomainConfiguration {
+                    reason: reason.clone(),
+                }
+            }
+            RnsUnsupportedNetwork { network } => {
+                InternalCommonError::RnsUnsupportedNetwork { network: *network }
+            }
+            RnsInvalidRecordContext { context } => {
+                InternalCommonError::RnsInvalidRecordContext {
+                    context: context.clone(),
+                }
+            }
+            GWMissingResponseItem { item } => {
+                InternalCommonError::GWMissingResponseItem {
+                    item: item.clone(),
+                }
+            }
+            ArculusCardWrongPIN {
+                number_of_remaining_tries,
+            } => InternalCommonError::ArculusCardWrongPIN {
+                number_of_remaining_tries: *number_of_remaining_tries,
+            },
+            WrongArculusCard => InternalCommonError::WrongArculusCard,
+            NFCSessionRenewed => InternalCommonError::NFCSessionRenewed,
             _ => InternalCommonError::Unknown,
         }
     }
@@ -535,6 +611,15 @@ impl From<InternalCommonError> for CommonError {
                     underlying: underlying.clone(),
                 }
             }
+            InternalCommonError::NFCSessionCancelled => {
+                CommonError::NFCSessionCancelled
+            }
+            InternalCommonError::NFCSessionLostTagConnection => {
+                CommonError::NFCSessionLostTagConnection
+            }
+            InternalCommonError::NFCSessionUnknownTag => {
+                CommonError::NFCSessionUnknownTag
+            }
             InternalCommonError::AddressInvalidEntityType {
                 address_kind,
                 entity_type,
@@ -557,6 +642,43 @@ impl From<InternalCommonError> for CommonError {
                     .map(|i| i as u8)
                     .collect::<Vec<_>>(),
             },
+            InternalCommonError::MissingNFTDataField { field } => {
+                MissingNFTDataField {
+                    field: field.clone(),
+                }
+            }
+            InternalCommonError::UnexpectedNFTDataFormat => {
+                UnexpectedNFTDataFormat
+            }
+            InternalCommonError::RnsInvalidDomain => RnsInvalidDomain,
+            InternalCommonError::RnsUnauthenticDomain { reason } => {
+                RnsUnauthenticDomain {
+                    reason: reason.clone(),
+                }
+            }
+            InternalCommonError::RnsInvalidDomainConfiguration { reason } => {
+                RnsInvalidDomainConfiguration {
+                    reason: reason.clone(),
+                }
+            }
+            InternalCommonError::RnsUnsupportedNetwork { network } => {
+                RnsUnsupportedNetwork { network }
+            }
+            InternalCommonError::RnsInvalidRecordContext { context } => {
+                RnsInvalidRecordContext {
+                    context: context.clone(),
+                }
+            }
+            InternalCommonError::GWMissingResponseItem { item } => {
+                GWMissingResponseItem { item: item.clone() }
+            }
+            InternalCommonError::ArculusCardWrongPIN {
+                number_of_remaining_tries,
+            } => ArculusCardWrongPIN {
+                number_of_remaining_tries,
+            },
+            InternalCommonError::WrongArculusCard => WrongArculusCard,
+            InternalCommonError::NFCSessionRenewed => NFCSessionRenewed,
             _ => Self::erased(value),
         }
     }

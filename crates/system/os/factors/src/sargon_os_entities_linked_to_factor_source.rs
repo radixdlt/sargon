@@ -28,20 +28,33 @@ impl OsEntitiesLinkedToFactorSource for SargonOS {
         profile_to_check: ProfileToCheck,
     ) -> Result<EntitiesLinkedToFactorSource> {
         let integrity = self.integrity(factor_source.clone()).await?;
-        match profile_to_check {
-            ProfileToCheck::Current => self
-                .profile()?
-                .current_network()?
-                .entities_linked_to_factor_source(factor_source, integrity),
-            ProfileToCheck::Specific(specific_profile) => {
-                let profile_network = specific_profile
-                    .networks
-                    .get_id(NetworkID::Mainnet)
-                    .ok_or(CommonError::Unknown)?;
-                profile_network
-                    .entities_linked_to_factor_source(factor_source, integrity)
+        let entities_linked = match profile_to_check {
+            ProfileToCheck::Current => {
+                self.profile()?.current_network().ok().map(|network| {
+                    network.entities_linked_to_factor_source(
+                        factor_source,
+                        integrity.clone(),
+                    )
+                })
             }
-        }
+            ProfileToCheck::Specific(specific_profile) => specific_profile
+                .networks
+                .get_id(NetworkID::Mainnet)
+                .map(|network| {
+                    network.entities_linked_to_factor_source(
+                        factor_source,
+                        integrity.clone(),
+                    )
+                }),
+        };
+
+        entities_linked.unwrap_or(Ok(EntitiesLinkedToFactorSource::new(
+            integrity,
+            Accounts::new(),
+            Accounts::new(),
+            Personas::new(),
+            Personas::new(),
+        )))
     }
 
     async fn integrity(
@@ -207,8 +220,12 @@ mod tests {
                 ProfileToCheck::Specific(profile),
             )
             .await
-            .expect_err("Expected an error");
-        assert_eq!(result, CommonError::Unknown);
+            .unwrap();
+        verify_device_integrity(result.integrity, true, true);
+        assert!(result.accounts.is_empty());
+        assert!(result.hidden_accounts.is_empty());
+        assert!(result.personas.is_empty());
+        assert!(result.hidden_personas.is_empty());
     }
 
     #[actix_rt::test]
@@ -312,8 +329,7 @@ mod tests {
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
 
-        let (mut profile, _) =
-            os.create_new_profile_with_bdfs(None).await.unwrap();
+        let (mut profile, _) = os.create_new_profile_with_bdfs(None).unwrap();
 
         let new_network = ProfileNetwork::new(
             NetworkID::Stokenet,

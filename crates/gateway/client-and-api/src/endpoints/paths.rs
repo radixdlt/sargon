@@ -27,4 +27,5 @@ impl GatewayClient {
         "state/account/page/authorized-depositors";
     pub const PATH_STATE_NON_FUNGIBLE_LOCATION: &str =
         "/state/non-fungible/location";
+    pub const PATH_STATE_NON_FUNGIBLE_DATA: &str = "/state/non-fungible/data";
 }

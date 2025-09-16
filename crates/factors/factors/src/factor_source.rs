@@ -147,16 +147,6 @@ impl From<LedgerHardwareWalletFactorSource> for FactorSource {
 }
 
 impl FactorSource {
-    pub fn is_main_bdfs(&self) -> bool {
-        if let Some(dfs) = self.as_device() {
-            dfs.is_main_bdfs()
-        } else {
-            false
-        }
-    }
-}
-
-impl FactorSource {
     pub fn with_mwp(
         factor_source_kind: FactorSourceKind,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
@@ -172,14 +162,12 @@ impl FactorSource {
 
         match factor_source_kind {
             FactorSourceKind::Device => {
-                let is_main = false;
                 let hint = DeviceFactorSourceHint::with_info_and_label(
                     &host_info,
                     mnemonic_with_passphrase.mnemonic.word_count,
                     display_name.value(),
                 );
                 Ok(FactorSource::from(DeviceFactorSource::babylon_with_hint(
-                    is_main,
                     id_from_hash,
                     hint,
                 )))
@@ -624,7 +612,7 @@ mod tests {
                         "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                     },
                     "common": {
-                        "flags": ["main"],
+                        "flags": [],
                         "addedOn": "2023-09-11T16:05:56.000Z",
                         "cryptoParameters": {
                             "supportedCurves": ["curve25519"],
@@ -665,7 +653,7 @@ mod tests {
                         "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
                     },
                     "common": {
-                        "flags": ["main"],
+                        "flags": [],
                         "addedOn": "2023-09-11T16:05:56.000Z",
                         "cryptoParameters": {
                             "supportedCurves": ["curve25519"],

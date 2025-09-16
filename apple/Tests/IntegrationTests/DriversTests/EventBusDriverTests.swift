@@ -52,7 +52,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 
@@ -66,7 +68,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 
@@ -80,7 +84,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 
@@ -94,7 +100,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 
@@ -108,7 +116,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 
@@ -122,7 +132,9 @@ extension Drivers {
 			eventBus: eventBus,
 			fileSystem: .shared,
 			unsafeStorage: .shared,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 
@@ -136,7 +148,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: fileSystem,
 			unsafeStorage: .shared,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 
@@ -150,7 +164,9 @@ extension Drivers {
 			eventBus: .shared,
 			fileSystem: .shared,
 			unsafeStorage: unsafeStorage,
-			profileStateChangeDriver: .shared
+			profileStateChangeDriver: .shared,
+			arculusCsdkDriver: ArculusCsdkDriverImpl(noPointer: .init()),
+			nfcTagDriver: NfcTagDriverImpl(noPointer: .init())
 		)
 	}
 }

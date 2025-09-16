@@ -13,14 +13,9 @@ private fun Project.parseTomlVersion(): String {
     return toml.getString("package.version").orEmpty()
 }
 
-private fun Project.parseGitHash(): String {
-    val out = ByteArrayOutputStream()
-    exec {
-        commandLine("git", "rev-parse", "--short", "@")
-        standardOutput = out
-    }.assertNormalExitValue()
-    return String(out.toByteArray(), Charsets.UTF_8).trim()
-}
+private fun Project.parseGitHash(): String = providers.exec {
+    commandLine("git", "rev-parse", "--short", "@")
+}.standardOutput.asText.get().replace("\n", "")
 
 fun Project.sargonVersion(isDebug: Boolean): String {
     val customBuildName = System.getenv("CUSTOM_BUILD_NAME")?.takeIf {

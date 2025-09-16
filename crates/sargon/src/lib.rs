@@ -4,6 +4,7 @@ pub mod prelude {
 
     pub use build_info::prelude::*;
     pub use clients::prelude::*;
+    pub use discover::prelude::*;
     pub use factor_instances_provider::prelude::*;
     pub use home_cards::prelude::*;
     pub use interactors::prelude::*;
@@ -15,6 +16,7 @@ pub mod prelude {
     pub use radix_connect_models::prelude::*;
     pub use sargon_os::prelude::*;
     pub use sargon_os_accounts::prelude::*;
+    pub use sargon_os_arculus_card::prelude::*;
     pub use sargon_os_derive_public_keys::prelude::*;
     pub use sargon_os_factors::prelude::*;
     pub use sargon_os_security_center::prelude::*;

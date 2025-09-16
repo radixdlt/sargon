@@ -1,6 +1,6 @@
 [package]
 name = "sargon"
-version = "1.2.8"
+version = "1.2.32"
 edition = "2021"
 
 resolver = "2" # features enabled in integration test
@@ -34,6 +34,8 @@ gateway-models = { workspace = true }
 clients = { workspace = true }
 drivers = { workspace = true }
 home-cards = { workspace = true }
+discover = { workspace = true }
+radix-name-service = { workspace = true }
 security-center = { workspace = true }
 radix-connect = { workspace = true }
 radix-connect-models = { workspace = true }
@@ -45,6 +47,7 @@ interactors = { workspace = true }
 key-derivation-traits = { workspace = true }
 signing-traits = { workspace = true }
 sargon-os = { workspace = true }
+sargon-os-arculus-card = { workspace = true }
 sargon-os-transaction = { workspace = true }
 sargon-os-accounts = { workspace = true }
 sargon-os-derive-public-keys = { workspace = true }

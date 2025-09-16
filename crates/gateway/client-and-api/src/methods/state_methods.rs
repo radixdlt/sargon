@@ -541,6 +541,49 @@ impl GatewayClient {
     }
 }
 
+impl GatewayClient {
+    pub async fn fetch_non_fungible_data(
+        &self,
+        collection_address: NonFungibleResourceAddress,
+        id: NonFungibleLocalId,
+    ) -> Result<NonFungibleTokenData> {
+        let request = StateNonFungibleDataRequest::new(
+            collection_address,
+            [id.clone()],
+            None,
+        );
+        let response = self.state_non_fungible_data(request).await?;
+        let item = response.non_fungible_ids.first().ok_or(
+            CommonError::GWMissingResponseItem {
+                item: "StateNonFungibleDataResponseItem".to_owned(),
+            },
+        )?;
+        Ok(NonFungibleTokenData::new(
+            NonFungibleGlobalId::new(collection_address, id),
+            item.data.clone(),
+        ))
+    }
+
+    pub async fn fetch_non_fungible_location(
+        &self,
+        collection_address: NonFungibleResourceAddress,
+        id: NonFungibleLocalId,
+    ) -> Result<Option<Address>> {
+        let request = StateNonFungibleLocationRequest::new(
+            collection_address.0,
+            vec![id.clone()],
+            None,
+        );
+        let response = self.state_non_fungible_location(request).await?;
+        let item = response.non_fungible_ids.first().ok_or(
+            CommonError::GWMissingResponseItem {
+                item: "StateNonFungibleLocationResponseItem".to_owned(),
+            },
+        )?;
+        Ok(item.owning_vault_global_ancestor_address)
+    }
+}
+
 #[cfg(test)]
 mod fetch_all_resources_tests {
     use crate::prelude::*;

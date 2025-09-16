@@ -1,7 +1,7 @@
 import SargonUniFFI
 
 #if DEBUG
-extension AccountOrAddressOf {
+extension TransferRecipient {
 	public static let sample: Self = newAccountOrAddressOfSample()
 	public static let sampleOther: Self = newAccountOrAddressOfSampleOther()
 }

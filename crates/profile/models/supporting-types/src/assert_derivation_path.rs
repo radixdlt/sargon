@@ -9,8 +9,17 @@ pub struct AssertMatches {
 }
 
 impl AssertMatches {
+    /// Due to a legacy bug described in [VirtualEntityCreatingInstance::check_for_derivation_path_discrepancies]
+    /// this assertion regarding entity kind should become a warning and should not fail
+    /// any operation initiated by the user.
     pub fn matches(&self, path: &DerivationPath) -> DerivationPath {
-        assert_eq!(self.entity_kind, path.get_entity_kind());
+        if self.entity_kind != path.get_entity_kind() {
+            warn!(
+                "Expected path should be of entity kind {} but received {}.",
+                self.entity_kind,
+                path.get_entity_kind()
+            );
+        }
         assert_eq!(self.network_id, path.network_id());
         assert_eq!(self.key_kind, path.get_key_kind());
         assert_eq!(self.key_space, path.key_space());
@@ -128,5 +137,35 @@ impl HighestDerivationPathIndex for SecuredEntityControl {
             });
 
         committed.max(provisional)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AssertMatches;
+
+    #[test]
+    fn test_assert_matches_derivation_path_with_different_entity_kind_does_not_fail(
+    ) {
+        let sut = SUT {
+            network_id: NetworkID::Mainnet,
+            key_kind: CAP26KeyKind::TransactionSigning,
+            entity_kind: CAP26EntityKind::Identity,
+            key_space: KeySpace::Unsecurified { is_hardened: true },
+        };
+
+        let derivation_path_with_bug = AccountPath::new(
+            NetworkID::Mainnet,
+            CAP26KeyKind::TransactionSigning,
+            Hardened::from_local_key_space(0u32, IsSecurified(false)).unwrap(),
+        )
+        .derivation_path();
+
+        let verified_path = sut.matches(&derivation_path_with_bug);
+
+        assert_eq!(verified_path, derivation_path_with_bug)
     }
 }

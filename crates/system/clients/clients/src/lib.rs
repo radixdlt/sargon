@@ -9,6 +9,8 @@ pub mod prelude {
 
     pub use crate::clients::*;
 
+    pub(crate) use signing_traits::prelude::*;
+
     #[cfg(test)]
     pub(crate) use serde::Serializer;
 

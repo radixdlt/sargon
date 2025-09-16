@@ -13,12 +13,10 @@ extension PrivateHierarchicalDeterministicFactorSource {
 	}
 
 	public static func babylon(
-		isMainBDFS: Bool,
 		mnemonicWithPassphrase: MnemonicWithPassphrase,
 		hostInfo: HostInfo
 	) -> Self {
 		newPrivateHdFactorSourceBabylonFromMnemonicWithPassphrase(
-			isMain: isMainBDFS,
 			mnemonicWithPassphrase: mnemonicWithPassphrase,
 			hostInfo: hostInfo
 		)

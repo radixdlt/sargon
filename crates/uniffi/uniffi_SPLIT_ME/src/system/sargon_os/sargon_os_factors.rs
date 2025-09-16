@@ -8,7 +8,7 @@ use sargon::ToAgnosticPath;
 /// a Babylon one, either main or not.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum DeviceFactorSourceType {
-    Babylon { is_main: bool },
+    Babylon,
     Olympia,
 }
 
@@ -43,12 +43,6 @@ impl From<InternalHierarchicalDeterministicFactorInstance>
 
 #[uniffi::export]
 impl SargonOS {
-    /// Returns the "main Babylon" `DeviceFactorSource` of the current account as
-    /// a `DeviceFactorSource`.
-    pub fn main_bdfs(&self) -> Result<DeviceFactorSource> {
-        self.wrapped.main_bdfs().into_result()
-    }
-
     /// Returns all the factor sources
     pub fn factor_sources(&self) -> Result<Vec<FactorSource>> {
         self.wrapped.factor_sources().into_iter_result()
@@ -152,6 +146,21 @@ impl SargonOS {
             .into_result()
     }
 
+    /// Appends the provided `crypto_parameters` to the `factor_source` in Profile.
+    pub async fn append_crypto_parameters_to_factor_source(
+        &self,
+        factor_source_id: FactorSourceID,
+        crypto_parameters: FactorSourceCryptoParameters,
+    ) -> Result<()> {
+        self.wrapped
+            .append_crypto_parameters_to_factor_source(
+                factor_source_id.into_internal(),
+                crypto_parameters.into_internal(),
+            )
+            .await
+            .into_result()
+    }
+
     pub async fn debug_add_all_sample_factors(
         &self,
     ) -> Result<Vec<FactorSourceID>> {
@@ -163,18 +172,17 @@ impl SargonOS {
 
     /// Creates a new unsaved DeviceFactorSource from the provided `mnemonic_with_passphrase`,
     /// either a "BDFS" or an "Olympia" one.
-    pub async fn create_device_factor_source(
+    pub fn create_device_factor_source(
         &self,
         mnemonic_with_passphrase: MnemonicWithPassphrase,
         factor_type: DeviceFactorSourceType,
-    ) -> Result<DeviceFactorSource> {
+    ) -> DeviceFactorSource {
         self.wrapped
             .create_device_factor_source(
                 mnemonic_with_passphrase.into_internal(),
                 factor_type.into_internal(),
             )
-            .await
-            .into_result()
+            .into()
     }
 
     /// Loads a `MnemonicWithPassphrase` with the `id` of `device_factor_source`,
@@ -192,27 +200,6 @@ impl SargonOS {
     ) -> Result<PrivateHierarchicalDeterministicFactorSource> {
         self.wrapped
             .load_private_device_factor_source_by_id(&id.into_internal())
-            .await
-            .into_result()
-    }
-
-    /// Set the FactorSource with the given `factor_source_id` as the main factor source of its kind.
-    /// Throws `UpdateFactorSourceMutateFailed` error if the factor source is not found.
-    ///
-    /// # Emits Event
-    /// Emits `Event::ProfileSaved` after having successfully written the JSON
-    /// of the active profile to secure storage.
-    ///
-    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::FactorSourceUpdated { id } }`
-    ///
-    /// If there is any main `FactorSource` of the given `FactorSourceKind`, such events are emitted also when
-    /// removing the flag from the old main factor source.
-    pub async fn set_main_factor_source(
-        &self,
-        factor_source_id: FactorSourceID,
-    ) -> Result<()> {
-        self.wrapped
-            .set_main_factor_source(factor_source_id.into_internal())
             .await
             .into_result()
     }

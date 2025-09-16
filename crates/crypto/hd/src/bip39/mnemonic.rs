@@ -115,6 +115,15 @@ impl Mnemonic {
             .map(Self::from_internal)
     }
 
+    pub fn from_arculus_bytes(words: Vec<u8>) -> Result<Self> {
+        let null_terminated_phrase =
+            String::from_utf8(words).map_err(|_| {
+                CommonError::ArculusCardInvalidNonUtf8MnemonicPhrase
+            })?;
+        let phrase = null_terminated_phrase.trim_end_matches('\0');
+        Mnemonic::from_phrase(phrase)
+    }
+
     pub fn to_entropy(&self) -> NonEmptyMax32Bytes {
         let entropy = self.internal().to_entropy();
         NonEmptyMax32Bytes::try_from(entropy)
@@ -597,6 +606,15 @@ mod tests {
             ),
             Err(CommonError::InvalidMnemonicPhrase)
         );
+    }
+
+    #[test]
+    fn from_arculus_bytes_bad_representation() {
+        let non_utf8_bytes: Vec<u8> = vec![0x80, 0xFF, 0xC0, 0xC1];
+        assert_eq!(
+            SUT::from_arculus_bytes(non_utf8_bytes),
+            Err(CommonError::ArculusCardInvalidNonUtf8MnemonicPhrase)
+        )
     }
 
     #[test]

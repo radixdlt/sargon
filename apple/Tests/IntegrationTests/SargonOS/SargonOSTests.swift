@@ -13,7 +13,7 @@ final class SargonOSTests: OSTest {
 	}
 
 	func test() async throws {
-		let _ = await SUT.boot(
+		_ = try await SUT.boot(
 			bios: .init(
 				drivers: .test()
 			),
@@ -39,9 +39,9 @@ final class SargonOSTests: OSTest {
 				keychainService: "test"
 			)
 		)
-		let _ = try await SUT.creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared)
+		_ = try await SUT.creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared)
 		do {
-			let _ = try await SUT.creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared)
+			_ = try await SUT.creatingShared(bootingWith: bios, hostInteractor: ThrowingHostInteractor.shared)
 			XCTFail("Should have thrown")
 		} catch let err as SargonOSAlreadyBooted {
 			XCTAssertEqual(err.errorDescription, "Radix Wallet core already initialized, should not have been initialized twice. This is a Radix developer error.")
