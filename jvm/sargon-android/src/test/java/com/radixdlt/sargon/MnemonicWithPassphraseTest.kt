@@ -5,6 +5,9 @@ import com.radixdlt.sargon.extensions.derivePublicKey
 import com.radixdlt.sargon.extensions.derivePublicKeys
 import com.radixdlt.sargon.extensions.factorSourceId
 import com.radixdlt.sargon.extensions.fromJson
+import com.radixdlt.sargon.extensions.getAuthSignatures
+import com.radixdlt.sargon.extensions.getSubintentSignatures
+import com.radixdlt.sargon.extensions.getTransactionSignatures
 import com.radixdlt.sargon.extensions.hash
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.initForEntity
@@ -141,7 +144,8 @@ class MnemonicWithPassphraseTest {
     fun testDerivePublicKeysFactorInstances() {
         assertEquals(
             listOf(HierarchicalDeterministicFactorInstance.sample()),
-            MnemonicWithPassphrase.sample().derivePublicKeys(listOf(DerivationPath.sample()), FactorSourceIdFromHash.sample())
+            MnemonicWithPassphrase.sample()
+                .derivePublicKeys(listOf(DerivationPath.sample()), FactorSourceIdFromHash.sample())
         )
     }
 
@@ -250,6 +254,210 @@ class MnemonicWithPassphraseTest {
                 )
             ),
             hdSignatures
+        )
+    }
+
+    @Test
+    fun testGetTransactionSignatures() {
+        val mnemonic = MnemonicWithPassphrase.sample()
+        val fs = mnemonic.factorSourceId(kind = FactorSourceKind.DEVICE)
+
+        val tx1 = TransactionIntent.sample()
+        val tx2 = TransactionIntent.sample.other()
+
+        val acc1 = OwnedFactorInstance(
+            owner = AddressOfAccountOrPersona.Account(AccountAddress.sampleMainnet()),
+            factorInstance = HierarchicalDeterministicFactorInstance(
+                factorSourceId = fs,
+                publicKey = mnemonic.derivePublicKey(
+                    DerivationPath.initForEntity(
+                        kind = EntityKind.ACCOUNT,
+                        networkId = NetworkId.MAINNET,
+                        index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+                    )
+                )
+            )
+        )
+        val acc2 = OwnedFactorInstance(
+            owner = AddressOfAccountOrPersona.Account(AccountAddress.sampleMainnet.other()),
+            factorInstance = HierarchicalDeterministicFactorInstance(
+                factorSourceId = fs,
+                publicKey = mnemonic.derivePublicKey(
+                    DerivationPath.initForEntity(
+                        kind = EntityKind.ACCOUNT,
+                        networkId = NetworkId.MAINNET,
+                        index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(1u))
+                    )
+                )
+            )
+        )
+
+        val input = PerFactorSourceInputOfTransactionIntent(
+            factorSourceId = fs,
+            perTransaction = listOf(
+                TransactionSignRequestInputOfTransactionIntent(
+                    payload = tx1.compile(),
+                    factorSourceId = fs,
+                    ownedFactorInstances = listOf(acc1, acc2)
+                ),
+                TransactionSignRequestInputOfTransactionIntent(
+                    payload = tx2.compile(),
+                    factorSourceId = fs,
+                    ownedFactorInstances = listOf(acc1, acc2)
+                )
+            ),
+            invalidTransactionsIfNeglected = emptyList()
+        )
+
+        val hdSignatures = mnemonic.getTransactionSignatures(input)
+
+        assertEquals(
+            listOf(
+                HdSignatureOfTransactionIntentHash(
+                    input = HdSignatureInputOfTransactionIntentHash(
+                        payloadId = tx1.hash(),
+                        ownedFactorInstance = acc1
+                    ),
+                    signature = mnemonic.sign(
+                        tx1.hash().hash,
+                        acc1.factorInstance.publicKey.derivationPath
+                    )
+                ),
+                HdSignatureOfTransactionIntentHash(
+                    input = HdSignatureInputOfTransactionIntentHash(
+                        payloadId = tx1.hash(),
+                        ownedFactorInstance = acc2
+                    ),
+                    signature = mnemonic.sign(
+                        tx1.hash().hash,
+                        acc2.factorInstance.publicKey.derivationPath
+                    )
+                ),
+                HdSignatureOfTransactionIntentHash(
+                    input = HdSignatureInputOfTransactionIntentHash(
+                        payloadId = tx2.hash(),
+                        ownedFactorInstance = acc1
+                    ),
+                    signature = mnemonic.sign(
+                        tx2.hash().hash,
+                        acc1.factorInstance.publicKey.derivationPath
+                    )
+                ),
+                HdSignatureOfTransactionIntentHash(
+                    input = HdSignatureInputOfTransactionIntentHash(
+                        payloadId = tx2.hash(),
+                        ownedFactorInstance = acc2
+                    ),
+                    signature = mnemonic.sign(
+                        tx2.hash().hash,
+                        acc2.factorInstance.publicKey.derivationPath
+                    )
+                )
+            ),
+            hdSignatures
+        )
+    }
+
+    @Test
+    fun testGetSubintentSignatures() {
+        val mnemonic = MnemonicWithPassphrase.sample()
+        val fs = mnemonic.factorSourceId(kind = FactorSourceKind.DEVICE)
+
+        val sub = Subintent.sample()
+        val acc = OwnedFactorInstance(
+            owner = AddressOfAccountOrPersona.Account(AccountAddress.sampleMainnet()),
+            factorInstance = HierarchicalDeterministicFactorInstance(
+                factorSourceId = fs,
+                publicKey = mnemonic.derivePublicKey(
+                    DerivationPath.initForEntity(
+                        kind = EntityKind.ACCOUNT,
+                        networkId = NetworkId.MAINNET,
+                        index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+                    )
+                )
+            )
+        )
+
+        val input = PerFactorSourceInputOfSubintent(
+            factorSourceId = fs,
+            perTransaction = listOf(
+                TransactionSignRequestInputOfSubintent(
+                    payload = sub.compile(),
+                    factorSourceId = fs,
+                    ownedFactorInstances = listOf(acc)
+                )
+            ),
+            invalidTransactionsIfNeglected = emptyList()
+        )
+
+        val signatures = mnemonic.getSubintentSignatures(input)
+
+        assertEquals(
+            listOf(
+                HdSignatureOfSubintentHash(
+                    input = HdSignatureInputOfSubintentHash(
+                        payloadId = sub.hash(),
+                        ownedFactorInstance = acc
+                    ),
+                    signature = mnemonic.sign(
+                        hash = sub.hash().hash,
+                        path = acc.factorInstance.publicKey.derivationPath
+                    )
+                )
+            ),
+            signatures
+        )
+    }
+
+    @Test
+    fun testGetAuthSignatures() {
+        val mnemonic = MnemonicWithPassphrase.sample()
+        val fs = mnemonic.factorSourceId(kind = FactorSourceKind.DEVICE)
+
+        val auth = AuthIntent.sample()
+        val acc = OwnedFactorInstance(
+            owner = AddressOfAccountOrPersona.Account(AccountAddress.sampleMainnet()),
+            factorInstance = HierarchicalDeterministicFactorInstance(
+                factorSourceId = fs,
+                publicKey = mnemonic.derivePublicKey(
+                    DerivationPath.initForEntity(
+                        kind = EntityKind.ACCOUNT,
+                        networkId = NetworkId.MAINNET,
+                        index = Hardened.Unsecurified(UnsecurifiedHardened.initFromLocal(0u))
+                    )
+                )
+            )
+        )
+
+        val input = PerFactorSourceInputOfAuthIntent(
+            factorSourceId = fs,
+            perTransaction = listOf(
+                TransactionSignRequestInputOfAuthIntent(
+                    payload = auth,
+                    factorSourceId = fs,
+                    ownedFactorInstances = listOf(acc)
+                )
+            ),
+            invalidTransactionsIfNeglected = emptyList()
+        )
+
+        val signatures = mnemonic.getAuthSignatures(input)
+
+        val payloadId = auth.hash()
+        assertEquals(
+            listOf(
+                HdSignatureOfAuthIntentHash(
+                    input = HdSignatureInputOfAuthIntentHash(
+                        payloadId = payloadId,
+                        ownedFactorInstance = acc
+                    ),
+                    signature = mnemonic.sign(
+                        hash = payloadId.payload.hash(),
+                        path = acc.factorInstance.publicKey.derivationPath
+                    )
+                )
+            ),
+            signatures
         )
     }
 }

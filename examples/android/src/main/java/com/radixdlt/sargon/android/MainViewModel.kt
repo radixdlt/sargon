@@ -3,13 +3,17 @@ package com.radixdlt.sargon.android
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.radixdlt.sargon.Account
+import com.radixdlt.sargon.DeviceFactorSource
 import com.radixdlt.sargon.DisplayName
+import com.radixdlt.sargon.FactorSource
+import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.HostId
 import com.radixdlt.sargon.HostInfo
 import com.radixdlt.sargon.NetworkId
 import com.radixdlt.sargon.Profile
 import com.radixdlt.sargon.ProfileState
 import com.radixdlt.sargon.Timestamp
+import com.radixdlt.sargon.extensions.kind
 import com.radixdlt.sargon.os.SargonOsManager
 import com.radixdlt.sargon.os.SargonOsState
 import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
@@ -62,7 +66,7 @@ class MainViewModel @Inject constructor(
         withContext(Dispatchers.Default) {
             val os = sargonOsManager.sargonOs
             runCatching {
-                os.newWallet(shouldPreDeriveInstances = false)
+                os.newWallet()
             }.onFailure { error ->
                 Timber.tag("sargon app").w(error)
             }
@@ -97,11 +101,13 @@ class MainViewModel @Inject constructor(
     ) = viewModelScope.launch {
         withContext(Dispatchers.Default) {
             val os = sargonOsManager.sargonOs
+            val bdfs = os.factorSources().first { it.kind == FactorSourceKind.DEVICE }
 
             runCatching {
-                os.createAndSaveNewAccountWithMainBdfs(
+                os.createAndSaveNewAccountWithFactorSource(
                     networkId = networkId,
-                    name = DisplayName(accountName)
+                    name = DisplayName(accountName),
+                    factorSource = bdfs
                 )
             }.onFailure { error ->
                 Timber.tag("sargon app").w(error)

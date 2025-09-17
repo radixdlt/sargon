@@ -73,6 +73,21 @@ impl SargonOS {
             .into_result()
     }
 
+    /// Updates an existing `SecurityStructureOfFactorSourceIDs` in the Profile.
+    /// Returns an error if the structure does not exist or if it references unknown factors.
+    /// Emits `Event::ProfileSaved` and `Event::ProfileModified::SecurityStructuresUpdated { ids }` on success.
+    async fn update_security_structure_of_factor_source_ids(
+        &self,
+        structure_ids: &SecurityStructureOfFactorSourceIDs,
+    ) -> Result<()> {
+        self.wrapped
+            .update_security_structure_of_factor_source_ids(
+                &structure_ids.into_internal(),
+            )
+            .await
+            .into_result()
+    }
+
     /// Sets the Security Shield with the given `shield_id` as the main shield.
     /// If a main Security Shield already exists, it is removed and replaced with the new one.
     ///
@@ -114,5 +129,20 @@ impl SargonOS {
             .get_shields_for_display()
             .await
             .into_iter_result()
+    }
+
+    /// Renames the Security Shield with the given `shield_id`.
+    pub async fn rename_security_structure(
+        &self,
+        security_structure_id: SecurityStructureID,
+        name: DisplayName,
+    ) -> Result<()> {
+        self.wrapped
+            .rename_security_structure(
+                security_structure_id.into_internal(),
+                name.into_internal(),
+            )
+            .await
+            .into_result()
     }
 }
