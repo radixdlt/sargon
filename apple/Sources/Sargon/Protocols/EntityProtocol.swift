@@ -47,13 +47,23 @@ extension EntityBaseProtocol {
 	public var virtualHierarchicalDeterministicFactorInstances:
 		Set<HierarchicalDeterministicFactorInstance>
 	{
-		var factorInstances = Set<HierarchicalDeterministicFactorInstance>()
+		var factorInstances = [HierarchicalDeterministicFactorInstance]()
 
-		if let unsecuredControllingFactorInstance {
-			factorInstances.insert(unsecuredControllingFactorInstance)
-		}
+        switch securityState {
+        case let .unsecured(control):
+            factorInstances.append(control.transactionSigning)
+        case let .securified(control):
+            let instances = control.securityStructure.matrixOfFactors.primaryRole.thresholdFactors.map {
+                switch $0.badge {
+                case let .virtual(.hierarchicalDeterministic(key)):
+                    HierarchicalDeterministicFactorInstance(factorSourceId: try! $0.factorSourceId.extract(), publicKey: key)
+                }
+            }
+            
+            factorInstances.append(contentsOf: instances)
+        }
 
-		return factorInstances
+		return Set(factorInstances)
 	}
 
 	public var deviceFactorSourceID: FactorSourceIDFromHash? {
