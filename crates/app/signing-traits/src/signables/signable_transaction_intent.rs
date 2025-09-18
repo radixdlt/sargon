@@ -21,7 +21,10 @@ impl Signable for TransactionIntent {
         &self,
         signatures: IndexSet<HDSignature<Self::ID>>,
     ) -> Result<Self::Signed> {
-        let intent_signatures = signatures.into_iter().map(|hd| IntentSignature(hd.signature)).collect_vec();
+        let intent_signatures = signatures
+            .into_iter()
+            .map(|hd| IntentSignature(hd.signature))
+            .collect_vec();
         SignedIntent::new(
             self.clone(),
             IntentSignatures::new(intent_signatures),

@@ -63,7 +63,7 @@ impl ArculusWalletClient {
             .csdk_driver
             .get_public_key_by_path_request(
                 wallet,
-                path.to_string().into_bytes().into(),
+                path.to_bip32_string().into_bytes().into(),
                 curve.val(),
             )
             .ok_or(
@@ -267,7 +267,7 @@ impl ArculusWalletClient {
             .csdk_driver
             .sign_hash_path_request(
                 wallet,
-                path.to_string().into_bytes().into(),
+                path.to_bip32_string().into_bytes().into(),
                 curve.val(),
                 algorithm.val(),
                 hash.bytes().into(),

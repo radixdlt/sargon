@@ -90,8 +90,7 @@ impl OsSigning for SargonOS {
         let payload_id = signable.get_id();
 
         if outcome.successful() {
-            let signatures = outcome
-                .signatures_of_successful_transactions();
+            let signatures = outcome.signatures_of_successful_transactions();
 
             signable.signed(signatures)
         } else {

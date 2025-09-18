@@ -4077,6 +4077,7 @@ dependencies = [
  "futures",
  "interactors",
  "key-derivation-traits",
+ "keys-collector",
  "log",
  "manifests",
  "paste",

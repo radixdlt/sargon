@@ -18,6 +18,7 @@ pub mod prelude {
     pub use clients::prelude::*;
     pub use factor_instances_provider::prelude::*;
     pub use key_derivation_traits::prelude::*;
+    pub use keys_collector::prelude::*;
     pub use manifests::prelude::*;
     pub use profile_logic::prelude::*;
     pub use sargon_os::prelude::*;
