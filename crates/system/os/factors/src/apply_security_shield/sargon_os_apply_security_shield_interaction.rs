@@ -136,16 +136,15 @@ impl OsApplySecurityShieldInteraction for SargonOS {
         }
 
         // 5. Create manifest
-            TransactionManifest::apply_security_shield_for_unsecurified_entity(
-                AnyUnsecurifiedEntity::with_unsecured_entity_control(
-                    entity.clone(),
-                    entity.entity_security_state().into_unsecured().unwrap(),
-                ),
-                security_structure_of_factor_instances,
-            )
+        TransactionManifest::apply_security_shield_for_unsecurified_entity(
+            AnyUnsecurifiedEntity::with_unsecured_entity_control(
+                entity.clone(),
+                entity.entity_security_state().into_unsecured().unwrap(),
+            ),
+            security_structure_of_factor_instances,
+        )
     }
 }
-
 
 address_union!(
     enum EntityApplyingShieldAddress: accessController, account, identity

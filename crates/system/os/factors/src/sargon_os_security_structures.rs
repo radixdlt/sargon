@@ -49,6 +49,11 @@ pub trait OsSecurityStructuresQuerying {
     ) -> Result<EntitiesLinkedToSecurityStructure>;
 
     async fn get_shields_for_display(&self) -> Result<ShieldsForDisplay>;
+
+    fn security_structure_of_factor_sources_from_address_of_account_or_persona(
+        &self,
+        address_of_account_or_persona: &AddressOfAccountOrPersona,
+    ) -> Result<SecurityStructureOfFactorSources>;
 }
 
 #[async_trait::async_trait]
@@ -247,6 +252,24 @@ impl OsSecurityStructuresQuerying for SargonOS {
                     entities.into_iter().map(ShieldForDisplay::with_linked),
                 )
             })
+    }
+
+    fn security_structure_of_factor_sources_from_address_of_account_or_persona(
+        &self,
+        address_of_account_or_persona: &AddressOfAccountOrPersona,
+    ) -> Result<SecurityStructureOfFactorSources> {
+        self.profile().and_then(|p| {
+            let state = p
+                .entity_by_address(address_of_account_or_persona.clone())?
+                .security_state();
+            let instances = state
+                .as_securified()
+                .ok_or(CommonError::SecurityStateNotSecurified)?
+                .security_structure
+                .clone();
+            let ids = SecurityStructureOfFactorSourceIds::from(instances);
+            TryFrom::<(&SecurityStructureOfFactorSourceIds, &FactorSources)>::try_from((&ids, &p.factor_sources))
+        })
     }
 }
 
