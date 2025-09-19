@@ -45,7 +45,7 @@ pub struct ManifestSummary {
     pub classification: Vec<ManifestClass>,
 }
 
-use sargon::RetManifestClass as InternalManifestClass;
+use sargon::ManifestClassification as InternalManifestClass;
 
 /// The classification process classifies manifests into classes. The following
 /// are the classes that the Radix Engine Toolkit supports.
@@ -78,4 +78,5 @@ pub enum ManifestClass {
     ValidatorClaimXrd,
     /// A manifest that updated the deposit settings of the account.
     AccountDepositSettingsUpdate,
+    EntitySecurify(AddressOfAccountOrPersona)
 }

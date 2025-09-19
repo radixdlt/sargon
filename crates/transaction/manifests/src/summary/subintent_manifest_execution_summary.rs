@@ -46,7 +46,7 @@ mod test {
                 [AccountAddress::sample()],
                 [],
                 Vec::<_>::sample(),
-                [RetManifestClass::GeneralSubintent],
+                [ManifestClassification::GeneralSubintent],
             )
         );
     }
@@ -95,7 +95,7 @@ mod test {
                 [a],
                 [],
                 Vec::<_>::sample(),
-                [RetManifestClass::GeneralSubintent],
+                [ManifestClassification::GeneralSubintent],
             )
         );
     }

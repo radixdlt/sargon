@@ -41,7 +41,7 @@ pub struct ManifestSummary {
 
     /// The various classifications that this manifest matched against. Note
     /// that an empty set means that the manifest is non-conforming.
-    pub classification: IndexSet<RetManifestClass>,
+    pub classification: IndexSet<ManifestClassification>,
 }
 
 impl ManifestSummary {
@@ -58,7 +58,7 @@ impl ManifestSummary {
         accounts_requiring_auth: impl IntoIterator<Item = AccountAddress>,
         personas_requiring_auth: impl IntoIterator<Item = IdentityAddress>,
         reserved_instructions: impl IntoIterator<Item = ReservedInstruction>,
-        classification: impl IntoIterator<Item = RetManifestClass>,
+        classification: impl IntoIterator<Item = ManifestClassification>,
     ) -> Self {
         Self {
             account_withdrawals: account_withdraws.into(),
@@ -184,6 +184,33 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
                 ret.reserved_instructions_summary,
             );
 
+        let mut classifications = ret.manifest_classification
+        .into_iter()
+        .map(Into::into)
+        .collect::<Vec<ManifestClassification>>();
+
+        if classifications.is_empty() {
+            let address_of_securified_entity = if reserved_instructions.contains(&ReservedInstruction::AccountSecurify)
+            {
+                addresses_of_accounts_requiring_auth
+                    .first()
+                    .map(|address| AddressOfAccountOrPersona::from(*address))
+            } else if 
+                reserved_instructions
+                .contains(&ReservedInstruction::IdentitySecurify)
+            {
+                addresses_of_personas_requiring_auth
+                    .first()
+                    .map(|address| AddressOfAccountOrPersona::from(*address))
+            } else {
+                None
+            };
+
+            if let Some(address) = address_of_securified_entity { 
+                classifications.push(ManifestClassification::EntitySecurify(address));
+            }
+        }
+
         Self::new(
             account_withdraws,
             account_deposits,
@@ -194,10 +221,114 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
             addresses_of_accounts_requiring_auth,
             addresses_of_personas_requiring_auth,
             reserved_instructions,
-            ret.manifest_classification,
+            classifications
         )
     }
 }
+
+#[derive(Clone, Debug, Copy, Hash, PartialEq, Eq)]
+pub enum ManifestClassification {
+    /// A general manifest that has a number of arbitrary package and component
+    /// invocations.
+    General,
+    /// A general subintent manifest that has a number of arbitrary package and
+    /// component invocations. This manifest is guaranteed to be subintent since
+    /// we require that a yield to child is present in the manifest.
+    GeneralSubintent,
+    /// A manifest containing transfers between accounts only where resources
+    /// are withdrawn from one or more account(s) and deposited into one or more
+    /// account(s) without any calls to any other components.
+    Transfer,
+    /// A manifest where XRD is withdrawn from one or more account(s), staked
+    /// to one or more validator(s), and the LSUs deposited into one or more
+    /// account(s).
+    ValidatorStake,
+    /// A manifest where LSUs are withdrawn from one or more account(s),
+    /// unstaked from one or more validator(s), and the claim NFT(s) are
+    /// deposited into one or more account(s).
+    ValidatorUnstake,
+    /// A manifest where claim NFT(s) are withdrawn from one or more account(s),
+    /// get claimed from one or more validator(s), and then the XRD is deposited
+    /// into one or more account(s).
+    ValidatorClaimXrd,
+    /// A manifest where fungible resources are contributed to a pool of any
+    /// kind. In this class resources are withdrawn from one or more account(s),
+    /// get contributed to one or more pool(s), and then the pool units get
+    /// deposited into one or more account(s).
+    PoolContribution,
+    /// A manifest where pool units are redeemed from a pool of any kind. In
+    /// this class pool units are withdrawn from one or more account(s), get
+    /// contributed to one or more pool(s), and then the pool units get
+    /// deposited into one or more account(s).
+    PoolRedemption,
+    /// A manifest where account deposit settings get updated. In this manifest
+    /// class one of the account deposit settings methods are called.
+    AccountDepositSettingsUpdate,
+
+    EntitySecurify(AddressOfAccountOrPersona)
+}
+
+impl From<RetManifestClass> for ManifestClassification {
+    fn from(value: RetManifestClass) -> Self {
+        match value {
+            RetManifestClass::General => Self::General,
+            RetManifestClass::GeneralSubintent => Self::GeneralSubintent,
+            RetManifestClass::Transfer => Self::Transfer,
+            RetManifestClass::ValidatorStake => Self::ValidatorStake,
+            RetManifestClass::ValidatorUnstake => Self::ValidatorUnstake,
+            RetManifestClass::ValidatorClaimXrd => Self::ValidatorClaimXrd,
+            RetManifestClass::PoolContribution => Self::PoolContribution,
+            RetManifestClass::PoolRedemption => Self::PoolRedemption,
+            RetManifestClass::AccountDepositSettingsUpdate => Self::AccountDepositSettingsUpdate,
+        }
+    }
+}
+
+//     /// Responsible for identifying if the summary can be classified as a securify summary.
+//     pub fn classify_securify_entity_if_present<F>(
+//         &mut self,
+//     ) -> Result<()>
+//     {
+//         // Only try to classify if RET analysis didn't yield any classification
+//         if self.detailed_classification.is_some() {
+//             return Ok(());
+//         }
+
+//         /////// TEMPORARY solution until RET classifies it properly
+//         let entity_address_to_securify = if self
+//             .reserved_instructions
+//             .contains(&ReservedInstruction::AccountSecurify)
+//         {
+//             self.addresses_of_accounts_requiring_auth
+//                 .first()
+//                 .map(|address| AddressOfAccountOrPersona::from(*address))
+//         } else if self
+//             .reserved_instructions
+//             .contains(&ReservedInstruction::IdentitySecurify)
+//         {
+//             self.addresses_of_identities_requiring_auth
+//                 .first()
+//                 .map(|address| AddressOfAccountOrPersona::from(*address))
+//         } else {
+//             None
+//         };
+//         ///// END of temporary code
+
+//         if let Some(address) = entity_address_to_securify {
+//             let security_structure =
+//                 get_provisional_security_structure(address)?;
+
+//             self.detailed_classification =
+//                 Some(DetailedManifestClass::SecurifyEntity {
+//                     entity_address: address,
+//                     provisional_security_structure_metadata: security_structure
+//                         .metadata,
+//                 });
+//         }
+
+//         Ok(())
+//     }
+// }
 
 impl HasSampleValues for ManifestSummary {
     fn sample() -> Self {
@@ -211,7 +342,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample(),
             reserved_instructions: Vec::<_>::sample(),
-            classification: IndexSet::just(RetManifestClass::GeneralSubintent),
+            classification: IndexSet::just(ManifestClassification::GeneralSubintent),
         }
     }
 
@@ -226,7 +357,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample_other(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample_other(),
             reserved_instructions: Vec::<_>::sample_other(),
-            classification: IndexSet::just(RetManifestClass::Transfer),
+            classification: IndexSet::just(ManifestClassification::Transfer),
         }
     }
 }
