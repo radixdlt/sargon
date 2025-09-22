@@ -1185,4 +1185,68 @@ mod tests {
             0
         )
     }
+
+    // rust
+    #[actix_rt::test]
+    async fn security_structure_of_factor_sources_from_address_of_account_or_persona_when_securified(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+        os.add_factor_source(FactorSource::sample_device())
+            .await
+            .unwrap();
+
+        let account = Account::sample_securified_mainnet(
+            "Carla",
+            2,
+            HierarchicalDeterministicFactorInstance::sample_fi0(
+                CAP26EntityKind::Account,
+            ),
+            || {
+                let idx =
+                    Hardened::from_local_key_space(2u32, IsSecurified(true))
+                        .unwrap();
+                GeneralRoleWithHierarchicalDeterministicFactorInstances::r2(
+                    HierarchicalDeterministicFactorInstance::sample_id_to_instance(
+                        CAP26EntityKind::Account,
+                        idx,
+                    )
+                )
+            },
+        );
+        os.add_account(account.clone()).await.unwrap();
+
+        // ACT
+        let address: AddressOfAccountOrPersona = account.address().into();
+        let result = os
+            .security_structure_of_factor_sources_from_address_of_account_or_persona(&address);
+
+        // ASSERT
+        let _ = result.unwrap();
+    }
+
+    #[actix_rt::test]
+    async fn security_structure_of_factor_sources_from_address_of_account_or_persona_when_not_securified_errors(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // Create and persist an account but do NOT securify it
+        let account = os
+            .create_and_save_new_account_with_bdfs(
+                NetworkID::Mainnet,
+                DisplayName::sample(),
+            )
+            .await
+            .unwrap();
+
+        let address: AddressOfAccountOrPersona = account.address().into();
+
+        // ACT
+        let result = os
+            .security_structure_of_factor_sources_from_address_of_account_or_persona(&address);
+
+        // ASSERT
+        assert_eq!(result, Err(CommonError::SecurityStateNotSecurified));
+    }
 }
