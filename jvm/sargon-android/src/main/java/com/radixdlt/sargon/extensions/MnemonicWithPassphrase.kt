@@ -6,10 +6,19 @@ import com.radixdlt.sargon.DerivationPath
 import com.radixdlt.sargon.FactorSourceIdFromHash
 import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.Hash
+import com.radixdlt.sargon.HdSignatureInputOfAuthIntentHash
+import com.radixdlt.sargon.HdSignatureInputOfSubintentHash
+import com.radixdlt.sargon.HdSignatureInputOfTransactionIntentHash
+import com.radixdlt.sargon.HdSignatureOfAuthIntentHash
+import com.radixdlt.sargon.HdSignatureOfSubintentHash
+import com.radixdlt.sargon.HdSignatureOfTransactionIntentHash
 import com.radixdlt.sargon.HierarchicalDeterministicFactorInstance
 import com.radixdlt.sargon.HierarchicalDeterministicPublicKey
 import com.radixdlt.sargon.Mnemonic
 import com.radixdlt.sargon.MnemonicWithPassphrase
+import com.radixdlt.sargon.PerFactorSourceInputOfAuthIntent
+import com.radixdlt.sargon.PerFactorSourceInputOfSubintent
+import com.radixdlt.sargon.PerFactorSourceInputOfTransactionIntent
 import com.radixdlt.sargon.SignatureWithPublicKey
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.AndroidMnemonicWithPassphrase.Companion.toAndroid
@@ -23,7 +32,6 @@ import com.radixdlt.sargon.os.signing.PerFactorSourceInput
 import com.radixdlt.sargon.os.signing.Signable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Throws(SargonException::class)
@@ -103,11 +111,74 @@ fun MnemonicWithPassphrase.sign(
     }
 }.flatten()
 
-fun MnemonicWithPassphrase.factorSourceId(kind: FactorSourceKind): FactorSourceIdFromHash
-    = newFactorSourceIdFromHashFromMnemonicWithPassphrase(
+fun MnemonicWithPassphrase.factorSourceId(kind: FactorSourceKind): FactorSourceIdFromHash =
+    newFactorSourceIdFromHashFromMnemonicWithPassphrase(
         factorSourceKind = kind,
         mnemonicWithPassphrase = this
     )
+
+fun MnemonicWithPassphrase.getTransactionSignatures(
+    input: PerFactorSourceInputOfTransactionIntent
+): List<HdSignatureOfTransactionIntentHash> = input.perTransaction.map { transaction ->
+    val payloadId = transaction.payload.decompile().hash()
+
+    transaction.ownedFactorInstances.map { instance ->
+        val signatureWithPublicKey = sign(
+            hash = payloadId.hash,
+            path = instance.factorInstance.publicKey.derivationPath
+        )
+
+        HdSignatureOfTransactionIntentHash(
+            input = HdSignatureInputOfTransactionIntentHash(
+                payloadId = payloadId,
+                ownedFactorInstance = instance
+            ),
+            signature = signatureWithPublicKey
+        )
+    }
+}.flatten()
+
+fun MnemonicWithPassphrase.getSubintentSignatures(
+    input: PerFactorSourceInputOfSubintent
+): List<HdSignatureOfSubintentHash> = input.perTransaction.map { transaction ->
+    val payloadId = transaction.payload.decompile().hash()
+
+    transaction.ownedFactorInstances.map { instance ->
+        val signatureWithPublicKey = sign(
+            hash = payloadId.hash,
+            path = instance.factorInstance.publicKey.derivationPath
+        )
+
+        HdSignatureOfSubintentHash(
+            input = HdSignatureInputOfSubintentHash(
+                payloadId = payloadId,
+                ownedFactorInstance = instance
+            ),
+            signature = signatureWithPublicKey
+        )
+    }
+}.flatten()
+
+fun MnemonicWithPassphrase.getAuthSignatures(
+    input: PerFactorSourceInputOfAuthIntent
+): List<HdSignatureOfAuthIntentHash> = input.perTransaction.map { transaction ->
+    val payloadId = transaction.payload.hash()
+
+    transaction.ownedFactorInstances.map { instance ->
+        val signatureWithPublicKey = sign(
+            hash = payloadId.payload.hash(),
+            path = instance.factorInstance.publicKey.derivationPath
+        )
+
+        HdSignatureOfAuthIntentHash(
+            input = HdSignatureInputOfAuthIntentHash(
+                payloadId = payloadId,
+                ownedFactorInstance = instance
+            ),
+            signature = signatureWithPublicKey
+        )
+    }
+}.flatten()
 
 /**
  * Class needed for compatibility for Android Wallet version 1.*.

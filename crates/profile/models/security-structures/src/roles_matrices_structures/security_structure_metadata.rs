@@ -64,6 +64,10 @@ impl SecurityStructureMetadata {
     pub fn is_main(&self) -> bool {
         self.flags.contains_id(SecurityStructureFlag::Main)
     }
+
+    pub fn update_name(&mut self, name: DisplayName) {
+        self.display_name = name;
+    }
 }
 
 impl HasSampleValues for SecurityStructureMetadata {
