@@ -37,6 +37,11 @@ pub trait OsSecurityStructuresQuerying {
         structure_ids: &SecurityStructureOfFactorSourceIDs,
     ) -> Result<()>;
 
+    async fn update_security_structure_of_factor_source_ids(
+        &self,
+        structure_ids: &SecurityStructureOfFactorSourceIDs,
+    ) -> Result<()>;
+
     async fn set_main_security_structure(
         &self,
         shield_id: SecurityStructureID,
@@ -49,6 +54,12 @@ pub trait OsSecurityStructuresQuerying {
     ) -> Result<EntitiesLinkedToSecurityStructure>;
 
     async fn get_shields_for_display(&self) -> Result<ShieldsForDisplay>;
+
+    async fn rename_security_structure(
+        &self,
+        shield_id: SecurityStructureID,
+        name: DisplayName,
+    ) -> Result<()>;
 
     fn security_structure_of_factor_sources_from_address_of_account_or_persona(
         &self,
@@ -176,6 +187,48 @@ impl OsSecurityStructuresQuerying for SargonOS {
         Ok(())
     }
 
+    /// Updates an existing `SecurityStructureOfFactorSourceIDs` in the Profile.
+    /// Returns an error if the structure does not exist or if it references unknown factors.
+    /// Emits `Event::ProfileSaved` and `Event::ProfileModified::SecurityStructuresUpdated { ids }` on success.
+    async fn update_security_structure_of_factor_source_ids(
+        &self,
+        structure_ids: &SecurityStructureOfFactorSourceIDs,
+    ) -> Result<()> {
+        let id = structure_ids.metadata.id;
+        let ids_of_factors_in_profile = self.factor_source_ids()?;
+        let ids_in_structure = structure_ids
+            .all_factors()
+            .into_iter()
+            .cloned()
+            .collect::<HashSet<FactorSourceID>>();
+
+        let factors_only_in_structure =
+            ids_in_structure.difference(&ids_of_factors_in_profile);
+        let ids_of_missing_factors = factors_only_in_structure.collect_vec();
+
+        if let Some(unknown_factor_source_id) = ids_of_missing_factors.first() {
+            return Err(CommonError::StructureReferencesUnknownFactorSource {
+                bad_value: unknown_factor_source_id.to_string(),
+            });
+        }
+
+        self.update_profile_with(|p| {
+            p.app_preferences
+                .security
+                .security_structures_of_factor_source_ids
+                .try_update_with(&id, |s| {
+                    *s = structure_ids.clone();
+                })
+                .map_err(|_| CommonError::UnknownSecurityStructureID {
+                    id: id.to_string(),
+                })?;
+            Ok(())
+        })
+        .await?;
+
+        Ok(())
+    }
+
     /// Sets the Security Shield with the given `shield_id` as the main shield.
     /// If a main Security Shield already exists, it is removed and replaced with the new one.
     ///
@@ -252,6 +305,24 @@ impl OsSecurityStructuresQuerying for SargonOS {
                     entities.into_iter().map(ShieldForDisplay::with_linked),
                 )
             })
+    }
+
+    /// Renames the Security Shield with the given `security_structure_id`.
+    ///
+    /// # Emits Event
+    /// Emits `Event::ProfileSaved` after having successfully written the JSON
+    /// of the active profile to secure storage.
+    ///
+    /// Also emits `EventNotification::ProfileModified { change: EventProfileModified::SecurityStructuresUpdated { id } }`
+    async fn rename_security_structure(
+        &self,
+        security_structure_id: SecurityStructureID,
+        name: DisplayName,
+    ) -> Result<()> {
+        self.update_profile_with(|p| {
+            p.set_security_structure_name(&security_structure_id, name)
+        })
+        .await
     }
 
     fn security_structure_of_factor_sources_from_address_of_account_or_persona(
@@ -1184,6 +1255,169 @@ mod tests {
                 .number_of_linked_hidden_personas,
             0
         )
+    }
+
+    #[actix_rt::test]
+    async fn rename_structure_success() {
+        // ARRANGE
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = actix_rt::time::timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SargonOS::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        let structure = SecurityStructureOfFactorSourceIDs::sample();
+        let id = structure.metadata.id;
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure)
+        })
+        .await
+        .unwrap();
+
+        // ACT
+        let new_name = DisplayName::new("Renamed Shield").unwrap();
+        os.with_timeout(|x| x.rename_security_structure(id, new_name.clone()))
+            .await
+            .unwrap();
+
+        // ASSERT
+        let profile = os.profile().unwrap();
+        let updated = profile
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .get_id(id)
+            .unwrap();
+        assert_eq!(updated.metadata.display_name, new_name);
+    }
+
+    #[actix_rt::test]
+    async fn rename_structure_unknown_id_returns_error() {
+        // ARRANGE
+        let os = SargonOS::fast_boot().await;
+        let unknown_id = SecurityStructureID::sample_other();
+        let new_name = DisplayName::new("Should Fail").unwrap();
+
+        // ACT
+        let result = os.rename_security_structure(unknown_id, new_name).await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::InvalidSecurityStructureID {
+                bad_value: unknown_id.to_string()
+            })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn update_structure_success() {
+        // ARRANGE
+        let event_bus_driver = RustEventBusDriver::new();
+        let drivers = Drivers::with_event_bus(event_bus_driver.clone());
+        let mut clients = Clients::new(Bios::new(drivers));
+        clients.factor_instances_cache =
+            FactorInstancesCacheClient::in_memory();
+        let interactors = Interactors::new_from_clients(&clients);
+
+        let os = timeout(
+            SARGON_OS_TEST_MAX_ASYNC_DURATION,
+            SUT::boot_with_clients_and_interactor(clients, interactors),
+        )
+        .await
+        .unwrap();
+        os.with_timeout(|x| x.new_wallet()).await.unwrap();
+
+        os.with_timeout(|x| x.debug_add_all_sample_hd_factor_sources())
+            .await
+            .unwrap();
+
+        // ACT
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
+        let id = structure_ids.metadata.id;
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure_ids)
+        })
+        .await
+        .unwrap();
+        let mut updated_structure_ids =
+            SecurityStructureOfFactorSourceIDs::sample_other();
+        updated_structure_ids.metadata.id = id;
+        os.with_timeout(|x| {
+            x.update_security_structure_of_factor_source_ids(
+                &updated_structure_ids,
+            )
+        })
+        .await
+        .unwrap();
+
+        // ASSERT
+        let profile = os.profile().unwrap();
+        let updated = profile
+            .app_preferences
+            .security
+            .security_structures_of_factor_source_ids
+            .get_id(id)
+            .unwrap();
+        assert_eq!(updated.clone(), updated_structure_ids);
+    }
+
+    #[actix_rt::test]
+    async fn update_structure_unknown_id_returns_error() {
+        // ARRANGE
+        let os = SargonOS::fast_boot().await;
+        os.debug_add_all_sample_hd_factor_sources().await.unwrap();
+
+        let structure = SecurityStructureOfFactorSourceIDs::sample();
+
+        // ACT
+        let result = os
+            .update_security_structure_of_factor_source_ids(&structure)
+            .await;
+
+        // ASSERT
+        assert_eq!(
+            result,
+            Err(CommonError::UnknownSecurityStructureID {
+                id: structure.metadata.id.to_string()
+            })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn update_structure_referencing_unknown_factors_returns_error() {
+        // ARRANGE: No factor sources added to the profile
+        let os = SargonOS::fast_boot().await;
+
+        // This structure references factor IDs that the profile doesn't know about
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
+
+        // ACT
+        let res = os
+            .with_timeout(|x| {
+                x.update_security_structure_of_factor_source_ids(&structure_ids)
+            })
+            .await;
+
+        // ASSERT
+        assert!(matches!(
+            res,
+            Err(CommonError::StructureReferencesUnknownFactorSource {
+                bad_value: _
+            })
+        ));
     }
 
     // rust

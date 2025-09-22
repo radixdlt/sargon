@@ -3,6 +3,10 @@
 #![allow(unused_variables)]
 
 use crate::prelude::*;
+use profile_security_structures::prelude::{
+    MatrixBuilder, SecurityShieldBuilderMode,
+    SecurityStructureOfFactorSourceIds,
+};
 #[cfg(test)]
 use sargon::FactorSourceWithExtraSampleValues;
 use std::{borrow::Borrow, sync::Arc};
@@ -22,6 +26,18 @@ impl SecurityShieldBuilder {
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
             wrapped: Arc::new(sargon::SecurityShieldBuilder::lenient()),
+        })
+    }
+
+    #[uniffi::constructor]
+    pub fn with_security_structure_of_factor_source_ids(
+        security_structure_of_factor_source_ids: SecurityStructureOfFactorSourceIDs,
+    ) -> Arc<Self> {
+        Arc::new(Self {
+            wrapped: Arc::new(sargon::SecurityShieldBuilder::with_security_structure_of_factor_source_ids(
+                SecurityShieldBuilderMode::Lenient,
+                security_structure_of_factor_source_ids.into_internal()
+            )),
         })
     }
 }

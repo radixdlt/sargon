@@ -348,12 +348,7 @@ private fun ProfileContent(
                 is FactorSource.Password -> fs.value.hint.label
             }
 
-            val kind = if (fs is FactorSource.Device) {
-                val main = if (fs.isMain) "MAIN" else ""
-                "[${fs.kind} $main]"
-            } else {
-                "[${fs.kind}]"
-            }
+            val kind = "[${fs.kind}]"
             Text(text = "• $kind - $fsHint")
         }
         Text(
