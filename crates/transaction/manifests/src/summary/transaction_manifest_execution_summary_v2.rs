@@ -63,7 +63,10 @@ mod tests {
                 [AccountAddress::sample()],
                 [],
                 Vec::<_>::sample(),
-                [ManifestClassification::Transfer, ManifestClassification::General],
+                [
+                    ManifestClassification::Transfer,
+                    ManifestClassification::General
+                ],
             )
         );
     }
