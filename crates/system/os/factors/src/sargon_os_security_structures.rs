@@ -325,6 +325,8 @@ impl OsSecurityStructuresQuerying for SargonOS {
         .await
     }
 
+    /// Returns the `SecurityStructuresOfFactorSources` based on the security state of the
+    /// account or persona with given `address_of_account_or_persona`
     fn security_structure_of_factor_sources_from_address_of_account_or_persona(
         &self,
         address_of_account_or_persona: &AddressOfAccountOrPersona,
