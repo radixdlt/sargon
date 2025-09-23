@@ -63,7 +63,7 @@ mod tests {
                 [AccountAddress::sample()],
                 [],
                 Vec::<_>::sample(),
-                [RetManifestClass::Transfer, RetManifestClass::General],
+                [ManifestClassification::Transfer, ManifestClassification::General],
             )
         );
     }
@@ -112,7 +112,7 @@ mod tests {
                 [a],
                 [],
                 Vec::<_>::sample(),
-                [RetManifestClass::Transfer, RetManifestClass::General],
+                [ManifestClassification::Transfer, ManifestClassification::General],
             )
         );
     }

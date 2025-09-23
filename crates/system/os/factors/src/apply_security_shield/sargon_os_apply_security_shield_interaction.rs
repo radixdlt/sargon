@@ -45,7 +45,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
         // 1.1 Create ROLA derivation path
         let rola_factor =
             security_structure.clone().authentication_signing_factor;
-        let rola_idx_agnostic_path = DerivationPreset::AccountRola
+        let rola_idx_agnostic_path = DerivationPreset::rola_entity_kind(entity.get_entity_kind())
             .index_agnostic_path_on_network(network_id);
         let default_index_rola_index = HDPathComponent::from_local_key_space(
             0u32,
