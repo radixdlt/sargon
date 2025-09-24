@@ -196,7 +196,7 @@ mod basic_tests {
         )
         .unwrap();
 
-        let outcome = collector.collect_keys().await;
+        let outcome = collector.collect_keys().await.unwrap();
         let factors = outcome.all_factors().factor_instances();
         assert_eq!(
             factors.len(),

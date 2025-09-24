@@ -65,12 +65,11 @@ impl KeysCollector {
 // === PUBLIC ===
 impl KeysCollector {
     #[allow(unused)]
-    pub async fn collect_keys(self) -> KeyDerivationOutcome {
+    pub async fn collect_keys(self) -> Result<KeyDerivationOutcome> {
         _ = self
             .derive_with_factors() // in decreasing "friction order"
-            .await
-            .inspect_err(|e| error!("Failed to use factor sources: {:#?}", e));
-        self.state.into_inner().unwrap().outcome()
+            .await?;
+        Ok(self.state.into_inner().unwrap().outcome())
     }
 }
 

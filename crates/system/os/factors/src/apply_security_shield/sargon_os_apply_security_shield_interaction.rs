@@ -104,7 +104,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
             DerivationPurpose::SecurifyingAccount,
         )?;
 
-        let keys_output = collector.collect_keys().await;
+        let keys_output = collector.collect_keys().await?;
 
         let mut instances = keys_output
             .factors_by_source
