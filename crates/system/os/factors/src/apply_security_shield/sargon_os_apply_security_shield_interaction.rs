@@ -45,8 +45,9 @@ impl OsApplySecurityShieldInteraction for SargonOS {
         // 1.1 Create ROLA derivation path
         let rola_factor =
             security_structure.clone().authentication_signing_factor;
-        let rola_idx_agnostic_path = DerivationPreset::rola_entity_kind(entity.get_entity_kind())
-            .index_agnostic_path_on_network(network_id);
+        let rola_idx_agnostic_path =
+            DerivationPreset::rola_entity_kind(entity.get_entity_kind())
+                .index_agnostic_path_on_network(network_id);
         let default_index_rola_index = HDPathComponent::from_local_key_space(
             0u32,
             rola_idx_agnostic_path.key_space,
@@ -137,13 +138,13 @@ impl OsApplySecurityShieldInteraction for SargonOS {
         }
 
         // 5. Create manifest
-            TransactionManifest::apply_security_shield_for_unsecurified_entity(
-                AnyUnsecurifiedEntity::with_unsecured_entity_control(
-                    entity.clone(),
-                    entity.entity_security_state().into_unsecured().unwrap(),
-                ),
-                security_structure_of_factor_instances,
-            )
+        TransactionManifest::apply_security_shield_for_unsecurified_entity(
+            AnyUnsecurifiedEntity::with_unsecured_entity_control(
+                entity.clone(),
+                entity.entity_security_state().into_unsecured().unwrap(),
+            ),
+            security_structure_of_factor_instances,
+        )
     }
 }
 

@@ -184,19 +184,20 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
                 ret.reserved_instructions_summary,
             );
 
-        let mut classifications = ret.manifest_classification
-        .into_iter()
-        .map(Into::into)
-        .collect::<Vec<ManifestClassification>>();
+        let mut classifications = ret
+            .manifest_classification
+            .into_iter()
+            .map(Into::into)
+            .collect::<Vec<ManifestClassification>>();
 
         if classifications.is_empty() {
-            let address_of_securified_entity = if reserved_instructions.contains(&ReservedInstruction::AccountSecurify)
+            let address_of_securified_entity = if reserved_instructions
+                .contains(&ReservedInstruction::AccountSecurify)
             {
                 addresses_of_accounts_requiring_auth
                     .first()
                     .map(|address| AddressOfAccountOrPersona::from(*address))
-            } else if 
-                reserved_instructions
+            } else if reserved_instructions
                 .contains(&ReservedInstruction::IdentitySecurify)
             {
                 addresses_of_personas_requiring_auth
@@ -206,8 +207,9 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
                 None
             };
 
-            if let Some(address) = address_of_securified_entity { 
-                classifications.push(ManifestClassification::EntitySecurify(address));
+            if let Some(address) = address_of_securified_entity {
+                classifications
+                    .push(ManifestClassification::EntitySecurify(address));
             }
         }
 
@@ -221,7 +223,7 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
             addresses_of_accounts_requiring_auth,
             addresses_of_personas_requiring_auth,
             reserved_instructions,
-            classifications
+            classifications,
         )
     }
 }
@@ -265,7 +267,7 @@ pub enum ManifestClassification {
     /// class one of the account deposit settings methods are called.
     AccountDepositSettingsUpdate,
 
-    EntitySecurify(AddressOfAccountOrPersona)
+    EntitySecurify(AddressOfAccountOrPersona),
 }
 
 impl From<RetManifestClass> for ManifestClassification {
@@ -279,7 +281,9 @@ impl From<RetManifestClass> for ManifestClassification {
             RetManifestClass::ValidatorClaimXrd => Self::ValidatorClaimXrd,
             RetManifestClass::PoolContribution => Self::PoolContribution,
             RetManifestClass::PoolRedemption => Self::PoolRedemption,
-            RetManifestClass::AccountDepositSettingsUpdate => Self::AccountDepositSettingsUpdate,
+            RetManifestClass::AccountDepositSettingsUpdate => {
+                Self::AccountDepositSettingsUpdate
+            }
         }
     }
 }
@@ -342,7 +346,9 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample(),
             reserved_instructions: Vec::<_>::sample(),
-            classification: IndexSet::just(ManifestClassification::GeneralSubintent),
+            classification: IndexSet::just(
+                ManifestClassification::GeneralSubintent,
+            ),
         }
     }
 

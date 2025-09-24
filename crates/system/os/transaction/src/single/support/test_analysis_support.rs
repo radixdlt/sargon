@@ -89,7 +89,7 @@ pub(crate) fn prepare_xrd_transfer_transaction(
                 18u8,
             ),
             [PerAssetFungibleTransfer::new(
-                AccountOrAddressOf::AddressOfExternalAccount { value: to },
+                TransferRecipient::AddressOfExternalAccount { value: to },
                 false,
                 Decimal192::five(),
             )],

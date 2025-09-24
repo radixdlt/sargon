@@ -53,6 +53,16 @@ impl SecurityStructureMetadata {
         )
     }
 
+    pub fn empty() -> Self {
+        Self {
+            id: SecurityStructureID::from(Uuid::new_v4()),
+            display_name: DisplayName::empty(),
+            created_on: now(),
+            last_updated_on: now(),
+            flags: SecurityStructureFlags::new(),
+        }
+    }
+
     pub fn insert_flag(&mut self, flag: SecurityStructureFlag) {
         self.flags.insert(flag);
     }

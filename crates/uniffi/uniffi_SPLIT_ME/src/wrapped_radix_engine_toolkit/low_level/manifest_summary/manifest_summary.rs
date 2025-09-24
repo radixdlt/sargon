@@ -78,5 +78,5 @@ pub enum ManifestClass {
     ValidatorClaimXrd,
     /// A manifest that updated the deposit settings of the account.
     AccountDepositSettingsUpdate,
-    EntitySecurify(AddressOfAccountOrPersona)
+    EntitySecurify(AddressOfAccountOrPersona),
 }
