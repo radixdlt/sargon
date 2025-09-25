@@ -592,7 +592,7 @@ mod tests {
             let nfc_card_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_select_wallet_request()
-                .with(eq(self.wallet_pointer),eq(card_aid_to_select.clone()))
+                .with(eq(self.wallet_pointer), eq(card_aid_to_select.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
