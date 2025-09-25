@@ -1,6 +1,6 @@
 [package]
 name = "profile-app-preferences"
-version = "1.2.32"
+version = "1.2.33"
 edition = "2021"
 
 [dependencies]

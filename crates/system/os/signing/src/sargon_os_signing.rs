@@ -87,11 +87,9 @@ impl OsSigning for SargonOS {
         )?;
 
         let outcome = collector.collect_signatures().await?;
-        let payload_id = signable.get_id();
 
         if outcome.successful() {
             let signatures = outcome.signatures_of_successful_transactions();
-
             signable.signed(signatures)
         } else {
             Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
