@@ -263,8 +263,9 @@ mod key_derivation_tests {
         )
         .unwrap();
         let outcome = collector.collect_keys().await;
-        assert!(outcome.all_factors().factor_instances().is_empty())
+        assert!(outcome.is_err())
     }
+    
     mod multi_key {
 
         use super::*;
@@ -287,7 +288,7 @@ mod key_derivation_tests {
                 [(factor_source.id_from_hash(), paths.clone())],
                 DerivationPurpose::CreatingNewAccount,
             );
-            let outcome = collector.collect_keys().await;
+            let outcome = collector.collect_keys().await.unwrap();
             assert_eq!(
                 outcome
                     .all_factors()
@@ -319,7 +320,7 @@ mod key_derivation_tests {
                     .collect_vec(),
                 DerivationPurpose::CreatingNewAccount,
             );
-            let outcome = collector.collect_keys().await;
+            let outcome = collector.collect_keys().await.unwrap();
             assert_eq!(
                 outcome
                     .all_factors()
@@ -365,7 +366,7 @@ mod key_derivation_tests {
                     .collect_vec(),
                 DerivationPurpose::CreatingNewAccount,
             );
-            let outcome = collector.collect_keys().await;
+            let outcome = collector.collect_keys().await.unwrap();
 
             assert_eq!(
                 outcome
@@ -626,7 +627,7 @@ mod key_derivation_tests {
                     .collect_vec(),
                 DerivationPurpose::CreatingNewAccount,
             );
-            let outcome = collector.collect_keys().await;
+            let outcome = collector.collect_keys().await.unwrap();
 
             assert_eq!(
                 outcome
@@ -675,7 +676,7 @@ mod key_derivation_tests {
                 key_space,
             );
 
-            let outcome = collector.collect_keys().await;
+            let outcome = collector.collect_keys().await.unwrap();
             let factors = outcome.all_factors().factor_instances();
             assert_eq!(factors.len(), 1);
             let factor = factors.first().unwrap();
