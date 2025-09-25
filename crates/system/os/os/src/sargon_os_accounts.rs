@@ -615,12 +615,12 @@ mod tests {
 
         // ACT
         let first = os
-            .with_timeout(|os| create_unsaved_mainnet_account_with_bdfs(os))
+            .with_timeout(create_unsaved_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
         let second = os
-            .with_timeout(|os| create_unsaved_mainnet_account_with_bdfs(os))
+            .with_timeout(create_unsaved_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -635,7 +635,7 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -653,7 +653,7 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -678,12 +678,12 @@ mod tests {
 
         // ACT
         let _ = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
         let second = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -710,7 +710,7 @@ mod tests {
         // ACT
         let n: u32 = 10;
         for _ in 0..n {
-            os.with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            os.with_timeout(create_and_save_mainnet_account_with_bdfs)
                 .await
                 .unwrap();
         }
@@ -1031,7 +1031,7 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -1048,7 +1048,7 @@ mod tests {
         let os = SUT::fast_boot().await;
 
         let _ = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -1069,7 +1069,7 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -1087,7 +1087,7 @@ mod tests {
 
         // ACT
         let account = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 
@@ -1103,7 +1103,7 @@ mod tests {
         // ACT
         // so that we have at least one network (with one account)
         let _ = os
-            .with_timeout(|os| create_and_save_mainnet_account_with_bdfs(os))
+            .with_timeout(create_and_save_mainnet_account_with_bdfs)
             .await
             .unwrap();
 

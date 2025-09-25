@@ -66,7 +66,7 @@ impl KeysCollector {
 impl KeysCollector {
     #[allow(unused)]
     pub async fn collect_keys(self) -> Result<KeyDerivationOutcome> {
-        _ = self
+        self
             .derive_with_factors() // in decreasing "friction order"
             .await?;
         Ok(self.state.into_inner().unwrap().outcome())

@@ -197,8 +197,8 @@ mod tests {
             [per_requires_auth.clone()],
         );
         let manifest = prepare_manifest(
-            [fee_payer.address.clone(), acc_requires_auth.address.clone()],
-            [per_requires_auth.address.clone()],
+            [fee_payer.address, acc_requires_auth.address],
+            [per_requires_auth.address],
         );
 
         let modified = os

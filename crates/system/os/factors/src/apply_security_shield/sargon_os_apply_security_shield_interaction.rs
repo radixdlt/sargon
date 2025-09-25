@@ -85,7 +85,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
             .map(|index| {
                 DerivationPath::from_index_agnostic_path_and_component(
                     mfa_idx_agnostic_path,
-                    index.unwrap_or(default_index_mfa_index.clone()),
+                    index.unwrap_or(default_index_mfa_index),
                  )
             })?;
             Ok((factor.id_from_hash(), path))
@@ -133,7 +133,7 @@ impl OsApplySecurityShieldInteraction for SargonOS {
         self.update_entities_erased(vec![entity.clone()].into())
             .await?;
         for factor_source_id in instances.keys() {
-            self.update_last_used_of_factor_source(factor_source_id.clone())
+            self.update_last_used_of_factor_source(*factor_source_id)
                 .await?
         }
 

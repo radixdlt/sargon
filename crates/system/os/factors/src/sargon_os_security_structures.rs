@@ -333,7 +333,7 @@ impl OsSecurityStructuresQuerying for SargonOS {
     ) -> Result<SecurityStructureOfFactorSources> {
         self.profile().and_then(|p| {
             let state = p
-                .entity_by_address(address_of_account_or_persona.clone())?
+                .entity_by_address(*address_of_account_or_persona)?
                 .security_state();
             let instances = state
                 .as_securified()
@@ -1290,7 +1290,7 @@ mod tests {
 
         // ACT
         let new_name = DisplayName::new("Renamed Shield").unwrap();
-        os.with_timeout(|x| x.rename_security_structure(id, new_name.clone()))
+        os.with_timeout(|x| x.rename_security_structure(id, new_name))
             .await
             .unwrap();
 
