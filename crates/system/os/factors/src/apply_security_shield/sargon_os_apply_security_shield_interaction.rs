@@ -179,29 +179,9 @@ fn hacky_tmp_entities_applying_shield(
     ARRAY.get_or_init(|| Mutex::new(IndexMap::new()))
 }
 
-/// Called by `make_interaction_for_applying_security_shield` to set the entities
-fn hacky_tmp_set_entities_applying_shield(
-    entities: IndexMap<EntityApplyingShieldAddress, TransactionManifest>,
-) {
-    *hacky_tmp_entities_applying_shield().lock().unwrap() = entities;
-}
-
 pub fn hacky_tmp_get_entities_applying_shield(
 ) -> IndexMap<EntityApplyingShieldAddress, TransactionManifest> {
     hacky_tmp_entities_applying_shield().lock().unwrap().clone()
-}
-
-impl EntityApplyingShieldAddress {
-    fn from_unsecurified_entity(entity: &AnyUnsecurifiedEntity) -> Self {
-        match &entity.entity {
-            AccountOrPersona::AccountEntity(ref account) => {
-                Self::Account(account.address())
-            }
-            AccountOrPersona::PersonaEntity(ref persona) => {
-                Self::Identity(persona.address())
-            }
-        }
-    }
 }
 
 // TODO: when https://github.com/radixdlt/sargon/pull/373 and follow up PRs are merged and we can get those addresses from the manifest using RETs analysis

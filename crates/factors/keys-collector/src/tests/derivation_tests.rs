@@ -265,7 +265,7 @@ mod key_derivation_tests {
         let outcome = collector.collect_keys().await;
         assert!(outcome.is_err())
     }
-    
+
     mod multi_key {
 
         use super::*;
