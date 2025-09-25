@@ -1,6 +1,6 @@
 [package]
 name = "host-info"
-version = "1.2.33"
+version = "1.2.32"
 edition = "2021"
 
 [dependencies]
