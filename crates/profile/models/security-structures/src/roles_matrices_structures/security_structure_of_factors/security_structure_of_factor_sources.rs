@@ -74,6 +74,22 @@ impl From<SecurityStructureOfFactorSources>
     }
 }
 
+impl From<SecurityStructureOfFactorInstances>
+    for SecurityStructureOfFactorSourceIds
+{
+    fn from(value: SecurityStructureOfFactorInstances) -> Self {
+        Self {
+            metadata: SecurityStructureMetadata::empty(),
+            matrix_of_factors: value.matrix_of_factors.into(),
+            authentication_signing_factor: FactorSourceID::from(
+                value
+                    .authentication_signing_factor_instance
+                    .factor_source_id,
+            ),
+        }
+    }
+}
+
 impl<const ROLE: u8>
     From<AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSource>>
     for AbstractRoleBuilderOrBuilt<ROLE, IS_BUILT_ROLE, FactorSourceID>

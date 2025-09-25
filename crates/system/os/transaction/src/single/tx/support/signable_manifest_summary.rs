@@ -77,10 +77,7 @@ impl Signable for SignableManifestSummary {
 
     fn signed(
         &self,
-        _signatures_per_owner: IndexMap<
-            AddressOfAccountOrPersona,
-            IntentSignature,
-        >,
+        _signatures: IndexSet<HDSignature<Self::ID>>,
     ) -> Result<Self::Signed> {
         panic!("Manifest summary cannot be actually signed")
     }
@@ -134,7 +131,11 @@ mod tests {
             &persona.address.into(),
             vec![PublicKeyHash::sample()],
         )
-        .modify_add_lock_fee(&account.address, Some(Decimal192::one()));
+        .modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
+            account.address,
+            Decimal192::one(),
+        ))
+        .unwrap();
         let summary = manifest.summary().unwrap();
         let signable = SUT::new(summary.clone());
 

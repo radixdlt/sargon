@@ -33,11 +33,17 @@ impl Signable for AuthIntent {
 
     fn signed(
         &self,
-        signatures_per_owner: IndexMap<
-            AddressOfAccountOrPersona,
-            IntentSignature,
-        >,
+        signatures: IndexSet<HDSignature<Self::ID>>,
     ) -> Result<Self::Signed> {
+        let signatures_per_owner = signatures
+            .iter()
+            .map(|hd| {
+                (
+                    hd.input.owned_factor_instance.owner,
+                    IntentSignature(hd.signature),
+                )
+            })
+            .collect();
         SignedAuthIntent::new(self.clone(), signatures_per_owner)
     }
 }

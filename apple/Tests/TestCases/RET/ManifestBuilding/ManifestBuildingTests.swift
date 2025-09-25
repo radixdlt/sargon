@@ -163,41 +163,6 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		AccountAddress.sampleValues.forEach(doTest)
 	}
 
-	func test_modify_manifest_add_lock_fee() throws {
-		func doTest(_ addressOfFeePayer: AccountAddress) throws {
-			var manifest = try rtm("create_pool")
-			func hasLockFee() -> Bool {
-				manifest.description.contains("lock_fee")
-			}
-			XCTAssertFalse(hasLockFee())
-			let fee: Decimal192 = 531
-			manifest = manifest.modify(lockFee: fee, addressOfFeePayer: addressOfFeePayer)
-			XCTAssertTrue(hasLockFee())
-			XCTAssert(manifest.description.contains(addressOfFeePayer.address))
-		}
-
-		try [
-			AccountAddress.sampleStokenet,
-			AccountAddress.sampleStokenetOther,
-		].forEach(doTest)
-	}
-
-	func test_modify_manifest_add_guarantee() throws {
-		var manifest = try rtm("transfer_1to2_multiple_nf_and_f_tokens")
-
-		let guarantee = TransactionGuarantee(
-			amount: 642,
-			percentage: 0.9,
-			instructionIndex: 10,
-			resourceAddress: .sampleStokenetXRD,
-			resourceDivisibility: nil
-		)
-
-		XCTAssertFalse(manifest.description.contains(guarantee.amount.description))
-		manifest = try manifest.modify(addGuarantees: [guarantee])
-		XCTAssertTrue(manifest.description.contains(guarantee.amount.description))
-	}
-
 	func test_assets_transfers() throws {
 		let transfers = PerAssetTransfers.sample
 		let manifest = TransactionManifest.assetsTransfers(transfers: transfers)

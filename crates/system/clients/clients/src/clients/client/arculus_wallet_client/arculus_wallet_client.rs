@@ -562,7 +562,7 @@ impl ArculusWalletClient {
 
 #[cfg(test)]
 mod tests {
-    use mockall::predicate::{always, eq};
+    use mockall::predicate::eq;
     use mockall::Sequence;
 
     use super::*;
@@ -592,17 +592,14 @@ mod tests {
             let nfc_card_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_select_wallet_request()
-                .with(
-                    eq(self.wallet_pointer.clone()),
-                    eq(card_aid_to_select.clone()),
-                )
+                .with(eq(self.wallet_pointer), eq(card_aid_to_select.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_card_response.clone());
             self.csdk_driver
                 .expect_select_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
+                .with(eq(self.wallet_pointer), eq(nfc_card_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(card_aid_to_select));
@@ -624,14 +621,14 @@ mod tests {
             let nfc_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_init_encrypted_session_request()
-                .with(eq(self.wallet_pointer.clone()))
+                .with(eq(self.wallet_pointer))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_init_encrypted_session_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
+                .with(eq(self.wallet_pointer), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -664,7 +661,7 @@ mod tests {
         fn free_wallet(&mut self) -> &mut Self {
             self.csdk_driver
                 .expect_wallet_free()
-                .with(eq(self.wallet_pointer.clone()))
+                .with(eq(self.wallet_pointer))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(());
@@ -677,7 +674,7 @@ mod tests {
                 .expect_wallet_init()
                 .once()
                 .in_sequence(&mut self.sequence)
-                .return_const(self.wallet_pointer.clone());
+                .return_const(self.wallet_pointer);
 
             self
         }
@@ -717,14 +714,14 @@ mod tests {
 
             self.csdk_driver
                 .expect_get_firmware_version_request()
-                .with(eq(self.wallet_pointer.clone()))
+                .with(eq(self.wallet_pointer))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_get_firmware_version_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_response.clone()))
+                .with(eq(self.wallet_pointer), eq(nfc_response.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(stubbed_response_bytes.into()));
@@ -742,7 +739,7 @@ mod tests {
 
             self.csdk_driver
                 .expect_get_gguid_request()
-                .with(eq(self.wallet_pointer.clone()))
+                .with(eq(self.wallet_pointer))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
@@ -751,7 +748,7 @@ mod tests {
 
             self.csdk_driver
                 .expect_get_gguid_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
+                .with(eq(self.wallet_pointer), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(
@@ -766,14 +763,14 @@ mod tests {
             let nfc_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_reset_wallet_request()
-                .with(eq(self.wallet_pointer.clone()))
+                .with(eq(self.wallet_pointer))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_reset_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
+                .with(eq(self.wallet_pointer), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -786,14 +783,14 @@ mod tests {
             let nfc_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_store_data_pin_request()
-                .with(eq(self.wallet_pointer.clone()), eq(pin.clone()))
+                .with(eq(self.wallet_pointer), eq(pin.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_store_data_pin_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
+                .with(eq(self.wallet_pointer), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -807,14 +804,14 @@ mod tests {
 
             self.csdk_driver
                 .expect_verify_pin_request()
-                .with(eq(self.wallet_pointer.clone()), eq(pin.clone()))
+                .with(eq(self.wallet_pointer), eq(pin.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_verify_pin_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
+                .with(eq(self.wallet_pointer), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusVerifyPINResponse::new(
@@ -835,14 +832,14 @@ mod tests {
             let nfc_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_create_wallet_seed_request()
-                .with(eq(self.wallet_pointer.clone()), eq(word_count))
+                .with(eq(self.wallet_pointer), eq(word_count))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_create_wallet_seed_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_response))
+                .with(eq(self.wallet_pointer), eq(nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(seed));
@@ -857,14 +854,14 @@ mod tests {
 
             self.csdk_driver
                 .expect_finish_recover_wallet_request()
-                .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
+                .with(eq(self.wallet_pointer), eq(seed.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_response.clone());
             self.csdk_driver
                 .expect_finish_recover_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(BagOfBytes::sample()))
+                .with(eq(self.wallet_pointer), eq(BagOfBytes::sample()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -878,14 +875,14 @@ mod tests {
 
             self.csdk_driver
                 .expect_init_recover_wallet_request()
-                .with(eq(self.wallet_pointer.clone()), eq(seed_words_count))
+                .with(eq(self.wallet_pointer), eq(seed_words_count))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_card_response.clone());
             self.csdk_driver
                 .expect_init_recover_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
+                .with(eq(self.wallet_pointer), eq(nfc_card_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -898,14 +895,14 @@ mod tests {
             let nfc_card_response = BagOfBytes::random();
             self.csdk_driver
                 .expect_finish_recover_wallet_request()
-                .with(eq(self.wallet_pointer.clone()), eq(seed.clone()))
+                .with(eq(self.wallet_pointer), eq(seed.clone()))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(request.clone()));
             self.nfc_send_receive(request, nfc_card_response.clone());
             self.csdk_driver
                 .expect_finish_recover_wallet_response()
-                .with(eq(self.wallet_pointer.clone()), eq(nfc_card_response))
+                .with(eq(self.wallet_pointer), eq(nfc_card_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(ArculusWalletCSDKResponseStatus::Ok as i32);
@@ -921,7 +918,7 @@ mod tests {
             self.csdk_driver
                 .expect_seed_phrase_from_mnemonic_sentence()
                 .with(
-                    eq(self.wallet_pointer.clone()),
+                    eq(self.wallet_pointer),
                     eq(mnemonic_sentence.clone()),
                     eq(None),
                 )
@@ -943,7 +940,7 @@ mod tests {
             self.csdk_driver
                 .expect_get_public_key_by_path_request()
                 .with(
-                    eq(self.wallet_pointer.clone()),
+                    eq(self.wallet_pointer),
                     eq(BagOfBytes::from(
                         expected_derivation_path.to_string().into_bytes(),
                     )),
@@ -957,7 +954,7 @@ mod tests {
 
             self.csdk_driver
                 .expect_get_public_key_by_path_response()
-                .with(eq(self.wallet_pointer.clone()), eq(stub_nfc_response))
+                .with(eq(self.wallet_pointer), eq(stub_nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(
@@ -978,7 +975,7 @@ mod tests {
             self.csdk_driver
                 .expect_sign_hash_path_request()
                 .with(
-                    eq(self.wallet_pointer.clone()),
+                    eq(self.wallet_pointer),
                     eq(BagOfBytes::from(
                         expected_path.to_string().into_bytes(),
                     )),
@@ -997,7 +994,7 @@ mod tests {
 
             self.csdk_driver
                 .expect_sign_hash_path_response()
-                .with(eq(self.wallet_pointer.clone()), eq(stub_nfc_response))
+                .with(eq(self.wallet_pointer), eq(stub_nfc_response))
                 .once()
                 .in_sequence(&mut self.sequence)
                 .return_const(Some(
@@ -1132,7 +1129,7 @@ mod tests {
             factor_source_id_pub_key.to_bytes(),
         );
         let factor_source = ArculusCardFactorSource::new(
-            factor_source_id.clone(),
+            factor_source_id,
             ArculusCardHint::sample(),
         );
 
@@ -1156,11 +1153,11 @@ mod tests {
         let result = sut.derive_public_keys(factor_source, paths).await;
 
         let expect_key1 = HierarchicalDeterministicFactorInstance::new(
-            factor_source_id.clone(),
+            factor_source_id,
             HierarchicalDeterministicPublicKey::new(pub_key1, path1),
         );
         let expect_key2 = HierarchicalDeterministicFactorInstance::new(
-            factor_source_id.clone(),
+            factor_source_id,
             HierarchicalDeterministicPublicKey::new(pub_key2, path2),
         );
         pretty_assertions::assert_eq!(
@@ -1194,7 +1191,7 @@ mod tests {
             factor_source_id_pub_key.to_bytes(),
         );
         let factor_source = ArculusCardFactorSource::new(
-            factor_source_id.clone(),
+            factor_source_id,
             ArculusCardHint::sample(),
         );
         let pin = "123456".to_string();
@@ -1208,7 +1205,7 @@ mod tests {
             path1.clone(),
         );
         let hdfi1 = HierarchicalDeterministicFactorInstance::new(
-            factor_source_id.clone(),
+            factor_source_id,
             hdfk1,
         );
         let instance1 = OwnedFactorInstance::new(
@@ -1221,7 +1218,7 @@ mod tests {
             path2.clone(),
         );
         let hdfi2 = HierarchicalDeterministicFactorInstance::new(
-            factor_source_id.clone(),
+            factor_source_id,
             hdfk2,
         );
         let instance2 = OwnedFactorInstance::new(
@@ -1233,7 +1230,7 @@ mod tests {
         let sign_request =
             TransactionSignRequestInput::<TransactionIntent>::new(
                 transaction_intent.into(),
-                factor_source_id.clone(),
+                factor_source_id,
                 IndexSet::from([instance1.clone(), instance2.clone()]),
             );
 
@@ -1247,12 +1244,12 @@ mod tests {
             .expect_to_sign_hash(
                 sign_request.signature_inputs()[0].payload_id.clone().into(),
                 instance1.factor_instance().derivation_path(),
-                expected_signature_with_pub_key_1.clone(),
+                expected_signature_with_pub_key_1,
             )
             .expect_to_sign_hash(
                 sign_request.signature_inputs()[1].payload_id.clone().into(),
                 instance2.factor_instance().derivation_path(),
-                expected_signature_with_pub_key_2.clone(),
+                expected_signature_with_pub_key_2,
             )
             .end_session();
 

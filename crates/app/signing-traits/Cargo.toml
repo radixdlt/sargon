@@ -1,6 +1,6 @@
 [package]
 name = "signing-traits"
-version = "1.2.32"
+version = "1.2.34"
 edition = "2021"
 
 [dependencies]
@@ -14,6 +14,7 @@ bytes = { workspace = true }
 hash = { workspace = true }
 radix-connect-models = { workspace = true }
 transaction-models = { workspace = true }
+manifests = { workspace = true }
 entity-by-address = { workspace = true }
 profile-account-or-persona = { workspace = true }
 profile-persona = { workspace = true }

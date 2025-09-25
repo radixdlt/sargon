@@ -290,12 +290,19 @@ mod auth_intent_tests {
         let mnemonic_with_passphrase = MnemonicWithPassphrase::sample();
         let signature = mnemonic_with_passphrase
             .sign(&sut.auth_intent_hash().hash(), &DerivationPath::sample());
+        let hd_signature = HDSignature {
+            input: HDSignatureInput {
+                payload_id: sut.get_id(),
+                owned_factor_instance: OwnedFactorInstance::sample(),
+            },
+            signature,
+        };
         let intent_signatures = IndexMap::kv(
             AddressOfAccountOrPersona::sample(),
             IntentSignature(signature),
         );
 
-        let signed = sut.signed(intent_signatures.clone()).unwrap();
+        let signed = sut.signed(IndexSet::from([hd_signature])).unwrap();
 
         assert_eq!(
             signed,
@@ -310,12 +317,19 @@ mod auth_intent_tests {
         let mnemonic_with_passphrase = MnemonicWithPassphrase::sample();
         let signature = mnemonic_with_passphrase
             .sign(&sut.auth_intent_hash().hash(), &DerivationPath::sample());
+        let hd_signature = HDSignature {
+            input: HDSignatureInput {
+                payload_id: sut.get_id(),
+                owned_factor_instance: OwnedFactorInstance::sample(),
+            },
+            signature,
+        };
         let intent_signatures = IndexMap::kv(
             AddressOfAccountOrPersona::sample(),
             IntentSignature(signature),
         );
 
-        let signed = sut.signed(intent_signatures.clone()).unwrap();
+        let signed = sut.signed(IndexSet::from([hd_signature])).unwrap();
 
         assert_eq!(
             signed.into_iter().collect_vec(),

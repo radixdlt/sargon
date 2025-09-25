@@ -165,6 +165,16 @@ impl SecurityShieldBuilder {
         }
     }
 
+    pub fn with_security_structure_of_factor_sources(
+        mode: SecurityShieldBuilderMode,
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources,
+    ) -> Self {
+        Self::with_security_structure_of_factor_source_ids(
+            mode,
+            security_structure_of_factor_sources.into(),
+        )
+    }
+
     pub fn with_security_structure_of_factor_source_ids(
         mode: SecurityShieldBuilderMode,
         security_structure_of_factor_source_ids: SecurityStructureOfFactorSourceIds,

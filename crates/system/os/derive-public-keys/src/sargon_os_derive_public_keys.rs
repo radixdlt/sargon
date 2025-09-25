@@ -44,7 +44,7 @@ impl OsDerivePublicKeys for SargonOS {
                 )?;
 
                 let pf_derived =
-                    collector.collect_keys().await.factors_by_source;
+                    collector.collect_keys().await?.factors_by_source;
                 let result: Vec<HierarchicalDeterministicPublicKey> =
                     pf_derived
                         .get(&factor_source_id_from_hash)

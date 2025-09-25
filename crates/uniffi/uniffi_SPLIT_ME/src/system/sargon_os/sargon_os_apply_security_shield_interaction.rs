@@ -3,17 +3,15 @@ use sargon::OsApplySecurityShieldInteraction;
 
 #[uniffi::export]
 impl SargonOS {
-    pub async fn make_interaction_for_applying_security_shield(
+    pub async fn make_setup_security_shield_manifest(
         &self,
-        security_shield_id: SecurityStructureID,
-        addresses: Vec<AddressOfAccountOrPersona>,
-    ) -> Result<DappToWalletInteractionBatchOfTransactions> {
+        security_structure: SecurityStructureOfFactorSources,
+        address: AddressOfAccountOrPersona,
+    ) -> Result<TransactionManifest> {
         self.wrapped
-            .make_interaction_for_applying_security_shield(
-                security_shield_id.into(),
-                IndexSet::from_iter(
-                    addresses.iter().map(|a| a.into_internal()),
-                ),
+            .make_setup_security_shield_manifest(
+                security_structure.into(),
+                address.into(),
             )
             .await
             .into_result()

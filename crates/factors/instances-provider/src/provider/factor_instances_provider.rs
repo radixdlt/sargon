@@ -440,7 +440,7 @@ impl FactorInstancesProvider {
             derivation_purpose,
         )?;
 
-        let pf_derived = collector.collect_keys().await.factors_by_source;
+        let pf_derived = collector.collect_keys().await?.factors_by_source;
 
         for (k, v) in pf_derived.iter() {
             let requested = per_factor_paths.get(k).unwrap();

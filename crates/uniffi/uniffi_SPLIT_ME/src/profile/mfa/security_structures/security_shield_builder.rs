@@ -40,6 +40,18 @@ impl SecurityShieldBuilder {
             )),
         })
     }
+
+    #[uniffi::constructor]
+    pub fn with_security_structure_of_factor_sources(
+        security_structure_of_factor_sources: SecurityStructureOfFactorSources,
+    ) -> Arc<Self> {
+        Arc::new(Self {
+            wrapped: Arc::new(sargon::SecurityShieldBuilder::with_security_structure_of_factor_sources(
+                SecurityShieldBuilderMode::Lenient,
+                security_structure_of_factor_sources.into_internal()
+            )),
+        })
+    }
 }
 
 impl SecurityShieldBuilder {

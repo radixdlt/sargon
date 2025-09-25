@@ -59,6 +59,12 @@ impl DisplayName {
 
         ShortString::new(prefix_str(Self::MAX_LEN, value)).map(Self)
     }
+
+    pub fn empty() -> Self {
+        ShortString::new(prefix_str(Self::MAX_LEN, ""))
+            .map(Self)
+            .unwrap()
+    }
 }
 
 impl Default for DisplayName {

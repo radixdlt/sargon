@@ -1,6 +1,6 @@
 [package]
 name = "next-derivation-index-ephemeral"
-version = "1.2.32"
+version = "1.2.34"
 edition = "2021"
 
 [dependencies]

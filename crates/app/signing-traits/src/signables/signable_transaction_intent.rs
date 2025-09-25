@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use manifests::StaticallyAnalyzableManifest;
 
 impl Signable for TransactionIntent {
     type ID = TransactionIntentHash;
@@ -11,20 +12,19 @@ impl Signable for TransactionIntent {
         &self,
         entity_querying: &impl GetEntityByAddress,
     ) -> Result<IndexSet<AccountOrPersona>> {
-        let summary = self.manifest_summary()?;
+        let summary = self.manifest.summary()?;
 
         ExtractorOfEntitiesRequiringAuth::extract(entity_querying, summary)
     }
 
     fn signed(
         &self,
-        signatures_per_owner: IndexMap<
-            AddressOfAccountOrPersona,
-            IntentSignature,
-        >,
+        signatures: IndexSet<HDSignature<Self::ID>>,
     ) -> Result<Self::Signed> {
-        let intent_signatures =
-            signatures_per_owner.values().cloned().collect_vec();
+        let intent_signatures = signatures
+            .into_iter()
+            .map(|hd| IntentSignature(hd.signature))
+            .collect_vec();
         SignedIntent::new(
             self.clone(),
             IntentSignatures::new(intent_signatures),
@@ -73,7 +73,7 @@ mod test {
             identities.clone(),
         );
 
-        let summary = intent.manifest_summary().unwrap();
+        let summary = intent.manifest.summary().unwrap();
         assert_eq!(
             accounts.len(),
             HashSet::<AccountAddress>::from_iter(accounts.clone()).len()

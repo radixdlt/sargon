@@ -51,6 +51,21 @@ impl MatrixOfFactorSourceIds {
     }
 }
 
+impl From<MatrixOfFactorInstances> for MatrixOfFactorSourceIds {
+    fn from(value: MatrixOfFactorInstances) -> Self {
+        unsafe {
+            Self::unbuilt_with_roles_and_days(
+                PrimaryRoleWithFactorSourceIds::from(value.primary_role),
+                RecoveryRoleWithFactorSourceIds::from(value.recovery_role),
+                ConfirmationRoleWithFactorSourceIds::from(
+                    value.confirmation_role,
+                ),
+                value.time_until_delayed_confirmation_is_callable,
+            )
+        }
+    }
+}
+
 impl MatrixOfFactorSourceIds {
     fn sample_from_template(template: MatrixTemplate) -> Self {
         template

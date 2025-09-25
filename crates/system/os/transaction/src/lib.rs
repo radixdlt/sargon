@@ -1,13 +1,11 @@
 #![feature(let_chains)]
 
 mod batch_of_transactions;
-mod pre_auth;
-mod tx;
+mod single;
 
 pub mod prelude {
     pub use crate::batch_of_transactions::*;
-    pub use crate::pre_auth::*;
-    pub use crate::tx::*;
+    pub use crate::single::*;
 
     pub(crate) use entity_by_address::prelude::*;
     pub(crate) use gateway_client_and_api::prelude::*;

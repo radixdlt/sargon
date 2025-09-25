@@ -31,8 +31,6 @@ import com.radixdlt.sargon.manifestPerRecipientTransfers
 import com.radixdlt.sargon.manifestSetOwnerKeysHashes
 import com.radixdlt.sargon.manifestStakesClaim
 import com.radixdlt.sargon.manifestThirdPartyDepositUpdate
-import com.radixdlt.sargon.modifyManifestAddGuarantees
-import com.radixdlt.sargon.modifyManifestLockFee
 import com.radixdlt.sargon.newTransactionManifestFromInstructionsStringAndBlobs
 import com.radixdlt.sargon.transactionManifestBlobs
 import com.radixdlt.sargon.transactionManifestInstructionsString
@@ -150,25 +148,6 @@ fun TransactionManifest.Companion.thirdPartyDepositUpdate(
     from = from,
     to = to
 )
-
-/**
- * Modifies `manifest` by inserting transaction "guarantees", which is the wallet
- * term for `assert_worktop_contains`.
- *
- * Fails if any of the TransactionGuarantee's `instruction_index` is out of
- * bounds.
- *
- * Also fails if the number of TransactionGuarantee's is larger than the number
- * of instructions of `manifest` (does not make any sense).
- */
-fun TransactionManifest.modifyAddGuarantees(
-    guarantees: List<TransactionGuarantee>
-) = modifyManifestAddGuarantees(manifest = this, guarantees = guarantees)
-
-fun TransactionManifest.modifyLockFee(
-    addressOfFeePayer: AccountAddress,
-    fee: Decimal192?
-) = modifyManifestLockFee(manifest = this, addressOfFeePayer = addressOfFeePayer, fee = fee)
 
 val TransactionManifest.manifestString: String
     get() = transactionManifestString(manifest = this)

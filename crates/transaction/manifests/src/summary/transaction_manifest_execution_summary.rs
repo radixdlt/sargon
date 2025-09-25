@@ -1,35 +1,14 @@
 use crate::prelude::*;
 
-use radix_engine_toolkit::functions::transaction_v1::manifest::dynamically_analyze as RET_dynamically_analyze;
-
-impl TransactionManifest {
-    /// Creates the `ExecutionSummary` based on the `engine_toolkit_receipt`.
-    ///
-    /// Such value should be obtained from the Gateway `/transaction/preview` endpoint, under the `radix_engine_toolkit_receipt` field.
-    pub fn execution_summary(
-        &self,
-        engine_toolkit_receipt: ScryptoSerializableToolkitTransactionReceipt,
-    ) -> Result<ExecutionSummary> {
-        DynamicallyAnalyzableManifest::execution_summary(
-            self,
-            engine_toolkit_receipt,
-            self.network_id(),
-        )
+impl StaticallyAnalyzableManifest for TransactionManifest {
+    fn network_id(&self) -> NetworkID {
+        self.network_id()
     }
-}
 
-impl DynamicallyAnalyzableManifest for TransactionManifest {
-    fn ret_dynamically_analyze(
-        &self,
-        receipt: ScryptoRuntimeToolkitTransactionReceipt,
-    ) -> Result<RetDynamicAnalysis, RetManifestAnalysisError> {
-        RET_dynamically_analyze(&self.scrypto_manifest(), receipt)
-    }
-}
-
-impl Default for FeeLocks {
-    fn default() -> Self {
-        Self::new(0, 0)
+    fn summary(&self) -> Result<ManifestSummary> {
+        let summary = RET_statically_analyze_v1(&self.scrypto_manifest())
+            .map_err(map_static_analysis_error)?;
+        Ok(ManifestSummary::from((summary, self.network_id())))
     }
 }
 
@@ -206,10 +185,10 @@ mod tests {
                             )]),
                         )]),
                         deposit_mode_updates:
-                            HashMap::<AccountAddress, DepositRule>::from_iter([(
-                                acc_g2,
-                                DepositRule::DenyAll,
-                            )]),
+                        HashMap::<AccountAddress, DepositRule>::from_iter([(
+                            acc_g2,
+                            DepositRule::DenyAll,
+                        )]),
                         authorized_depositors_added: HashMap::new(),
                         authorized_depositors_removed: HashMap::new(),
                     }
@@ -295,62 +274,62 @@ mod tests {
         let non_fungible_address: ResourceAddress = "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl".parse().unwrap();
 
         pretty_assertions::assert_eq!(
-                sut,
-                SUT::new(
-                    [], // addresses_of_accounts_withdrawn_from
-                    [(
-                        acc,
-                        vec![
-                            ResourceIndicator::non_fungible(
-                                non_fungible_address,
-                                NonFungibleResourceIndicator::new_predicted(
-                                        [
-                                            NonFungibleLocalId::integer(0),
-                                            NonFungibleLocalId::integer(1),
-                                            NonFungibleLocalId::integer(2),
-                                            NonFungibleLocalId::integer(3),
-                                            NonFungibleLocalId::integer(4),
-                                            NonFungibleLocalId::integer(5),
-                                            NonFungibleLocalId::integer(6),
-                                            NonFungibleLocalId::integer(7),
-                                            NonFungibleLocalId::integer(8),
-                                            NonFungibleLocalId::integer(9),
-                                        ],
-                                        1
-                                )
-                            ),
-                        ]
-                    )], // addresses_of_accounts_deposited_into
-                    [], // addresses_of_accounts_requiring_auth
-                    [], // addresses_of_identities_requiring_auth
-                    [
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#0#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#1#", 
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#2#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#3#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#4#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#5#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#6#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#7#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#8#",
-                        "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#9#",
-                    ].into_iter().map(NonFungibleGlobalId::from_str).map(Result::unwrap).collect_vec(), // newly_created_non_fungibles
-                    [], // reserved_instructions
-                    [], // presented_proofs
-                    [], // encountered_component_addresses
-                    Some(DetailedManifestClass::General),
-                    FeeLocks::default(),
-                    FeeSummary::new(
-                        "0.18451315".parse::<Decimal>().unwrap(),
-                        "0.40604035".parse::<Decimal>().unwrap(),
-                        "0.96845625165".parse::<Decimal>().unwrap(),
-                        0,
-                    ),
-                    NewEntities::new([
-                        (non_fungible_address, NewlyCreatedResource::default())
-                    ])
-                )
-            );
+            sut,
+            SUT::new(
+                [], // addresses_of_accounts_withdrawn_from
+                [(
+                    acc,
+                    vec![
+                        ResourceIndicator::non_fungible(
+                            non_fungible_address,
+                            NonFungibleResourceIndicator::new_predicted(
+                                [
+                                    NonFungibleLocalId::integer(0),
+                                    NonFungibleLocalId::integer(1),
+                                    NonFungibleLocalId::integer(2),
+                                    NonFungibleLocalId::integer(3),
+                                    NonFungibleLocalId::integer(4),
+                                    NonFungibleLocalId::integer(5),
+                                    NonFungibleLocalId::integer(6),
+                                    NonFungibleLocalId::integer(7),
+                                    NonFungibleLocalId::integer(8),
+                                    NonFungibleLocalId::integer(9),
+                                ],
+                                1
+                            )
+                        ),
+                    ]
+                )], // addresses_of_accounts_deposited_into
+                [], // addresses_of_accounts_requiring_auth
+                [], // addresses_of_identities_requiring_auth
+                [
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#0#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#1#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#2#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#3#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#4#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#5#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#6#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#7#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#8#",
+                    "resource_tdx_2_1nfnyenkeznzwpnf0nufa6ajsahpu00quhm8xwfrzt8u3dqm2ltzzhl:#9#",
+                ].into_iter().map(NonFungibleGlobalId::from_str).map(Result::unwrap).collect_vec(), // newly_created_non_fungibles
+                [], // reserved_instructions
+                [], // presented_proofs
+                [], // encountered_component_addresses
+                Some(DetailedManifestClass::General),
+                FeeLocks::default(),
+                FeeSummary::new(
+                    "0.18451315".parse::<Decimal>().unwrap(),
+                    "0.40604035".parse::<Decimal>().unwrap(),
+                    "0.96845625165".parse::<Decimal>().unwrap(),
+                    0,
+                ),
+                NewEntities::new([
+                    (non_fungible_address, NewlyCreatedResource::default())
+                ])
+            )
+        );
     }
 
     #[test]
@@ -436,47 +415,47 @@ mod tests {
         let acc_ac: AccountAddress = "account_tdx_2_129qq7m9ttup2kn6t4g4s0dvazxplktj7vd7my76hfd7xh7ham5zeac".parse().unwrap();
 
         pretty_assertions::assert_eq!(
-                sut,
-                SUT::new(
-                    [
-                        (
-                            acc_ac,
-                            vec![
-                                ResourceIndicator::fungible(
-                                    "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
-                                    FungibleResourceIndicator::new_guaranteed(1)
-                                ),
-                            ]
-                        )
-                    ], // addresses_of_accounts_withdrawn_from
-                    [
-                        (
-                            acc_ac,
-                            vec![
-                                ResourceIndicator::fungible(
-                                    "resource_tdx_2_1thcmn5q5ww3fm0mx55zs9cj0n36qc0jtx956q7vh9ycxk3vh8553qc".parse::<ResourceAddress>().unwrap(),
-                                    FungibleResourceIndicator::new_predicted(40, 4),
-                                ),
-                            ]
-                        )
-                    ], // addresses_of_accounts_deposited_into
-                    [acc_ac], // addresses_of_accounts_requiring_auth
-                    [], // addresses_of_identities_requiring_auth
-                    [], // newly_created_non_fungibles
-                    [], // reserved_instructions
-                    [ResourceSpecifier::non_fungible("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(), vec!["<Member_83>".parse().unwrap()])], // presented_proofs
-                    ["component_tdx_2_1cr4pa9ex9xhwzfjzclv8vjnfylw93wvhkwcwc0xlahpkel0krxqedw".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
-                    Some(DetailedManifestClass::General),
-                    FeeLocks::default(),
-                    FeeSummary::new(
-                        "0.4943021".parse::<Decimal>().unwrap(),
-                        "0.0467589".parse::<Decimal>().unwrap(),
-                        "0.13551711803".parse::<Decimal>().unwrap(),
-                        0,
-                    ),
-                    NewEntities::default()
-                )
-            );
+            sut,
+            SUT::new(
+                [
+                    (
+                        acc_ac,
+                        vec![
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1t5dapa24l4xvwqtqe2jrdphtn7ga46gw67wr9fwn4gp532myfjqpck".parse::<ResourceAddress>().unwrap(),
+                                FungibleResourceIndicator::new_guaranteed(1)
+                            ),
+                        ]
+                    )
+                ], // addresses_of_accounts_withdrawn_from
+                [
+                    (
+                        acc_ac,
+                        vec![
+                            ResourceIndicator::fungible(
+                                "resource_tdx_2_1thcmn5q5ww3fm0mx55zs9cj0n36qc0jtx956q7vh9ycxk3vh8553qc".parse::<ResourceAddress>().unwrap(),
+                                FungibleResourceIndicator::new_predicted(40, 4),
+                            ),
+                        ]
+                    )
+                ], // addresses_of_accounts_deposited_into
+                [acc_ac], // addresses_of_accounts_requiring_auth
+                [], // addresses_of_identities_requiring_auth
+                [], // newly_created_non_fungibles
+                [], // reserved_instructions
+                [ResourceSpecifier::non_fungible("resource_tdx_2_1nfmxggm4plrrmc9ft9qn79g7uehqlhjaszv02dnuk85s0h9xnh3xue".parse::<ResourceAddress>().unwrap(), vec!["<Member_83>".parse().unwrap()])], // presented_proofs
+                ["component_tdx_2_1cr4pa9ex9xhwzfjzclv8vjnfylw93wvhkwcwc0xlahpkel0krxqedw".parse::<ManifestEncounteredComponentAddress>().unwrap()], // encountered_component_addresses
+                Some(DetailedManifestClass::General),
+                FeeLocks::default(),
+                FeeSummary::new(
+                    "0.4943021".parse::<Decimal>().unwrap(),
+                    "0.0467589".parse::<Decimal>().unwrap(),
+                    "0.13551711803".parse::<Decimal>().unwrap(),
+                    0,
+                ),
+                NewEntities::default()
+            )
+        );
     }
 
     #[test]
