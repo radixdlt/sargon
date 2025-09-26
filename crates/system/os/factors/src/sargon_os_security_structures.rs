@@ -65,6 +65,11 @@ pub trait OsSecurityStructuresQuerying {
         &self,
         address_of_account_or_persona: &AddressOfAccountOrPersona,
     ) -> Result<SecurityStructureOfFactorSources>;
+
+    fn sorted_factor_sources_from_security_structure(
+        &self,
+        structure: &SecurityStructureOfFactorSources,
+    ) -> IndexSet<FactorSource>;
 }
 
 #[async_trait::async_trait]
@@ -343,6 +348,25 @@ impl OsSecurityStructuresQuerying for SargonOS {
             let ids = SecurityStructureOfFactorSourceIds::from(instances);
             TryFrom::<(&SecurityStructureOfFactorSourceIds, &FactorSources)>::try_from((&ids, &p.factor_sources))
         })
+    }
+
+    /// Returns the `FactorSource` set used to build the security structure
+    /// in "decreasing friction" order
+    fn sorted_factor_sources_from_security_structure(
+        &self,
+        structure: &SecurityStructureOfFactorSources,
+    ) -> IndexSet<FactorSource> {
+        let mut factors = structure
+            .matrix_of_factors
+            .all_factors()
+            .into_iter()
+            .cloned()
+            .collect::<HashSet<FactorSource>>();
+        _ = factors.insert(structure.authentication_signing_factor.clone());
+        sort_group_factors(factors)
+            .into_iter()
+            .flat_map(|f| f.factor_sources())
+            .collect()
     }
 }
 
@@ -1484,5 +1508,57 @@ mod tests {
 
         // ASSERT
         assert_eq!(result, Err(CommonError::SecurityStateNotSecurified));
+    }
+
+    #[actix_rt::test]
+    async fn sorted_factor_sources_from_security_structure_sorts_dedups_and_includes_auth(
+    ) {
+        // ARRANGE
+        let os = SUT::fast_boot().await;
+
+        // Ensure all sample factor sources are present in the profile so the structure can be resolved at source level.
+        for fs in FactorSources::sample_values_all_hd().into_iter() {
+            os.add_factor_source(fs).await.unwrap();
+        }
+
+        // Create and persist a sample structure (ID level), then get its source-level counterpart.
+        let structure_ids = SecurityStructureOfFactorSourceIDs::sample();
+        os.with_timeout(|x| {
+            x.add_security_structure_of_factor_source_ids(&structure_ids)
+        })
+        .await
+        .unwrap();
+
+        let structure_id =
+            SecurityStructureOfFactorSourceIDs::from(structure_ids.clone());
+        let structure = os
+            .security_structure_of_factor_sources_from_security_structure_of_factor_source_ids(
+                &structure_id,
+            )
+            .unwrap();
+
+        // ACT
+        let sorted = os
+            .sorted_factor_sources_from_security_structure(&structure.clone());
+
+        // Build the expected set: union of all matrix factors + the authentication signing factor,
+        // then sorted using the same grouping/sorting logic the function promises.
+        let mut union = structure
+            .matrix_of_factors
+            .all_factors()
+            .into_iter()
+            .cloned()
+            .collect::<HashSet<FactorSource>>();
+        // Ensure the auth-signing factor is included even if not present in the matrix.
+        _ = union.insert(structure.authentication_signing_factor);
+
+        let expected: IndexSet<FactorSource> = sort_group_factors(union)
+            .into_iter()
+            .flat_map(|g| g.factor_sources())
+            .collect();
+
+        // ASSERT
+        // Exact sequence and contents should match the sorted expectation.
+        assert_eq!(sorted, expected);
     }
 }

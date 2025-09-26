@@ -154,4 +154,18 @@ impl SargonOS {
     ) -> Result<SecurityStructureOfFactorSources> {
         self.wrapped.security_structure_of_factor_sources_from_address_of_account_or_persona(&address_of_account_or_persona.into_internal()).into_result()
     }
+
+    /// Returns the `FactorSource` set used to build the security structure
+    pub fn sorted_factor_sources_from_security_structure(
+        &self,
+        structure: &SecurityStructureOfFactorSources,
+    ) -> Vec<FactorSource> {
+        self.wrapped
+            .sorted_factor_sources_from_security_structure(
+                &structure.into_internal(),
+            )
+            .into_iter()
+            .map(|f| f.into())
+            .collect_vec()
+    }
 }
