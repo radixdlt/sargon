@@ -1538,8 +1538,8 @@ mod tests {
             .unwrap();
 
         // ACT
-        let sorted =
-            os.sorted_factor_sources_from_security_structure(&structure.clone());
+        let sorted = os
+            .sorted_factor_sources_from_security_structure(&structure.clone());
 
         // Build the expected set: union of all matrix factors + the authentication signing factor,
         // then sorted using the same grouping/sorting logic the function promises.
