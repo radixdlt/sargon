@@ -82,7 +82,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         builder = builder.call_method(
             access_controller_address.scrypto(),
             init_method,
-            (init_input.deref(),),
+            init_input.deref(),
         );
 
         // QUICK CONFIRM RECOVERY - Only if we can exercise the confirmation role explicitly.
@@ -92,7 +92,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
             builder = builder.call_method(
                 access_controller_address.scrypto(),
                 confirm_method,
-                (confirm_input.deref(),),
+                confirm_input.deref(),
             );
         }
 

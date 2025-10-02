@@ -18,6 +18,8 @@ host-info = { workspace = true }
 key-derivation-traits = { workspace = true }
 signing-traits = { workspace = true }
 factor-instances-provider = { workspace = true }
+manifests = { workspace = true }
+keys-collector = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
