@@ -79,8 +79,10 @@ where
         blobs: Blobs,
     ) -> Self;
 
-    fn new_with_instructions(instructions: impl IntoIterator<Item = I>, blobs: Blobs)
-        -> Self;
+    fn new_with_instructions(
+        instructions: impl IntoIterator<Item = I>,
+        blobs: Blobs,
+    ) -> Self;
 
     fn build(self, network_id: NetworkID) -> Result<M>;
 
@@ -106,7 +108,10 @@ where
     }
 
     fn new_with_manifest(manifest: M) -> Self {
-        Self::new_with_instructions(manifest.instructions().clone(), manifest.blobs())
+        Self::new_with_instructions(
+            manifest.instructions().clone(),
+            manifest.blobs(),
+        )
     }
 }
 
@@ -118,13 +123,15 @@ impl IntoManifestBuilder<TransactionManifest, ScryptoInstruction>
         instructions: impl IntoIterator<Item = ScryptoInstruction>,
         blobs: Blobs,
     ) -> Self {
-        instructions.into_iter().fold(self, |builder, instruction| {
-            builder.add_instruction_advanced(instruction).0
-        })
-        .then(|mut builder| { 
-            builder.add_blob(blobs.into());
-            builder
-        })
+        instructions
+            .into_iter()
+            .fold(self, |builder, instruction| {
+                builder.add_instruction_advanced(instruction).0
+            })
+            .then(|mut builder| {
+                builder.add_blob(blobs.into());
+                builder
+            })
     }
 
     fn new_with_instructions(
@@ -134,7 +141,7 @@ impl IntoManifestBuilder<TransactionManifest, ScryptoInstruction>
         Self::extend_builder_with_instructions_and_blobs(
             ScryptoTransactionManifestBuilder::new(),
             instructions,
-            blobs
+            blobs,
         )
     }
 
@@ -171,14 +178,14 @@ impl IntoManifestBuilder<SubintentManifest, ScryptoInstructionV2>
         blobs: Blobs,
     ) -> Self {
         instructions
-        .into_iter()
-        .fold(self, |builder, instruction| {
-            builder.add_instruction_advanced(instruction).0
-        })
-        .then(|mut builder| { 
-            builder.add_blob(blobs.into());
-            builder
-        })
+            .into_iter()
+            .fold(self, |builder, instruction| {
+                builder.add_instruction_advanced(instruction).0
+            })
+            .then(|mut builder| {
+                builder.add_blob(blobs.into());
+                builder
+            })
     }
 
     fn new_with_instructions(
@@ -225,14 +232,14 @@ impl IntoManifestBuilder<TransactionManifestV2, ScryptoInstructionV2>
         blobs: Blobs,
     ) -> Self {
         instructions
-        .into_iter()
-        .fold(self, |builder, instruction| {
-            builder.add_instruction_advanced(instruction).0
-        })
-        .then(|mut builder| { 
-            builder.add_blob(blobs.into());
-            builder
-        })
+            .into_iter()
+            .fold(self, |builder, instruction| {
+                builder.add_instruction_advanced(instruction).0
+            })
+            .then(|mut builder| {
+                builder.add_blob(blobs.into());
+                builder
+            })
     }
 
     fn new_with_instructions(
@@ -242,7 +249,7 @@ impl IntoManifestBuilder<TransactionManifestV2, ScryptoInstructionV2>
         Self::extend_builder_with_instructions_and_blobs(
             ScryptoTransactionManifestV2Builder::new_v2(),
             instructions,
-            blobs
+            blobs,
         )
     }
 
