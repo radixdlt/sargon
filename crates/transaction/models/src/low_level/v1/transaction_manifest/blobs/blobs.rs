@@ -38,9 +38,9 @@ impl Default for Blobs {
 
 pub(crate) type ScryptoBlobsMap = IndexMap<ScryptoHash, Vec<u8>>;
 
-impl Into<Vec<u8>> for Blobs {
-    fn into(self) -> Vec<u8> {
-        self.blobs()
+impl From<Blobs> for Vec<u8> {
+    fn from(val: Blobs) -> Self {
+        val.blobs()
             .iter()
             .flat_map(|blob| Into::<Vec<u8>>::into(blob.clone()))
             .collect()

@@ -55,9 +55,9 @@ impl From<&Vec<u8>> for Blob {
     }
 }
 
-impl Into<Vec<u8>> for Blob {
-    fn into(self) -> Vec<u8> {
-        self.0.to_vec()
+impl From<Blob> for Vec<u8> {
+    fn from(val: Blob) -> Self {
+        val.0.to_vec()
     }
 }
 
