@@ -129,7 +129,9 @@ impl IntoManifestBuilder<TransactionManifest, ScryptoInstruction>
                 builder.add_instruction_advanced(instruction).0
             })
             .then(|mut builder| {
-                builder.add_blob(blobs.into());
+                if !blobs.blobs().is_empty() {
+                    builder.add_blob(blobs.into());
+                }
                 builder
             })
     }
