@@ -1,7 +1,28 @@
 use crate::prelude::*;
 
 impl SargonOS {
-    /// Derive the factor instances for the given matrix factors and rola factor if needed.
+    /// Derives HD factor instances for the provided matrix factors and optional
+    /// authentication (ROLA) factor, returning the fresh instances grouped by
+    /// factor source.
+    ///
+    /// The method analyses the profile to find the next available derivation
+    /// index per factor, reuses index `0` when a factor has not been seen before,
+    /// and guarantees that matrix and ROLA paths are produced in securified key
+    /// space. When a factor appears in both the matrix set and the ROLA slot, the
+    /// returned map contains a single entry whose `FactorInstances` include both
+    /// transaction- and authentication-signing paths, preventing duplicate map
+    /// keys. Existing usage of a factor (either on securified entities or cached
+    /// provisional configurations) increases the derived index accordingly.
+    ///
+    /// * `entity` - account or persona whose kind determines which derivation
+    ///   preset is used.
+    /// * `matrix_factors` - the factor sources that require transaction-signing
+    ///   instances for matrix roles.
+    /// * `rola_factor` - optional factor source that should yield an
+    ///   authentication-signing instance.
+    ///
+    /// Returns an `IndexMap` keyed by `FactorSourceIDFromHash` with the freshly
+    /// derived `FactorInstances` for every requested factor source.
     pub async fn derive_factor_instances(
         &self,
         entity: AccountOrPersona,
@@ -12,89 +33,73 @@ impl SargonOS {
         let network_id = profile_snapshot.current_network_id();
         let key_derivation_interactors = self.keys_derivation_interactor();
 
-        // Used to determine the next derivation index
+        // Used to determine the next derivation index for every factor source.
         let index_assigner =
-        NextDerivationEntityIndexProfileAnalyzingAssigner::new(
-            network_id,
-            Some(Arc::new(profile_snapshot)),
-        );
+            NextDerivationEntityIndexProfileAnalyzingAssigner::new(
+                network_id,
+                Some(Arc::new(profile_snapshot)),
+            );
 
-        // Collects all FactorSources used for derivation
-        let mut all_factor_sources = matrix_factors
-            .clone()
-            .into_iter()
-            .map(|x| x.to_owned())
-            .collect::<IndexSet<FactorSource>>();
+        // Collect all factor sources that will participate in derivation.
+        let mut all_factor_sources: IndexSet<FactorSource> = matrix_factors
+            .iter()
+            .map(|factor| (*factor).clone())
+            .collect();
 
-        // 1. Create per factor derivation paths
-
-        // Collects all derivation paths per factor.
-        // Usually all factors will have only one derivation path, even if it is used in more than one place in the security matrix.
-        // The only scenario when there could be 2 paths for the factor, is when the same factor is used in matrix and as rola factor.
+        // Collect derivation paths per factor source. Factors typically produce a
+        // single derivation path; the only case where two paths appear is when the
+        // same factor is used for both matrix and ROLA roles.
         let mut per_factor_paths =
             IndexMap::<FactorSourceIDFromHash, IndexSet<DerivationPath>>::new();
 
         if let Some(rola_factor) = rola_factor {
             all_factor_sources.insert(rola_factor.clone());
 
-            let rola_idx_agnostic_path =
+            let rola_index_agnostic_path =
                 DerivationPreset::rola_entity_kind(entity.get_entity_kind())
                     .index_agnostic_path_on_network(network_id);
-
-            let default_index_rola_index =
-                HDPathComponent::from_local_key_space(
-                    0u32,
-                    rola_idx_agnostic_path.key_space,
-                )?;
-
-            let rola_derivation_path = index_assigner
-                .next(rola_factor.id_from_hash(), rola_idx_agnostic_path)
-                .map(|index| {
-                    DerivationPath::from_index_agnostic_path_and_component(
-                        rola_idx_agnostic_path,
-                        index.unwrap_or(default_index_rola_index),
-                    )
-                })?;
+            let default_index = HDPathComponent::from_local_key_space(
+                0u32,
+                rola_index_agnostic_path.key_space,
+            )?;
+            let next_component = index_assigner
+                .next(rola_factor.id_from_hash(), rola_index_agnostic_path)
+                .map(|index| index.unwrap_or(default_index))?;
+            let rola_derivation_path =
+                DerivationPath::from_index_agnostic_path_and_component(
+                    rola_index_agnostic_path,
+                    next_component,
+                );
 
             per_factor_paths.append_or_insert_element_to(
                 rola_factor.id_from_hash(),
                 rola_derivation_path,
             );
-        };
-
-        let mfa_idx_agnostic_path =
-            DerivationPreset::mfa_entity_kind(entity.get_entity_kind())
-                .index_agnostic_path_on_network(network_id);
-
-        let default_index_mfa_index = HDPathComponent::from_local_key_space(
-            0u32,
-            mfa_idx_agnostic_path.key_space,
-        )?;
-
-        let matrix_paths = matrix_factors
-        .into_iter()
-        .map(|factor| {
-            let path = index_assigner
-            .next(
-                factor.id_from_hash(),
-                mfa_idx_agnostic_path
-            )
-            .map(|index| {
-                DerivationPath::from_index_agnostic_path_and_component(
-                    mfa_idx_agnostic_path,
-                    index.unwrap_or(default_index_mfa_index),
-                 )
-            })?;
-
-            Ok((factor.id_from_hash(), path))
-        })
-        .collect::<Result<IndexMap<FactorSourceIDFromHash, DerivationPath>>>()?;
-
-        for (id, path) in matrix_paths {
-            per_factor_paths.append_or_insert_element_to(id, path);
         }
 
-        // 2. Setup keys collector and derive the keys
+        let mfa_preset = DerivationPreset::mfa_entity_kind(entity.get_entity_kind());
+        for factor in matrix_factors {
+            let index_agnostic_path =
+                mfa_preset.index_agnostic_path_on_network(network_id);
+            let default_index = HDPathComponent::from_local_key_space(
+                0u32,
+                index_agnostic_path.key_space,
+            )?;
+            let next_component = index_assigner
+                .next(factor.id_from_hash(), index_agnostic_path)
+                .map(|index| index.unwrap_or(default_index))?;
+            let derivation_path = DerivationPath::from_index_agnostic_path_and_component(
+                index_agnostic_path,
+                next_component,
+            );
+
+            per_factor_paths.append_or_insert_element_to(
+                factor.id_from_hash(),
+                derivation_path,
+            );
+        }
+
+        // Derive all requested keys and translate them into FactorInstances.
         let collector = KeysCollector::new(
             all_factor_sources,
             per_factor_paths.clone(),
@@ -104,8 +109,7 @@ impl SargonOS {
 
         let keys_output = collector.collect_keys().await?;
 
-        Ok(
-            keys_output
+        Ok(keys_output
             .factors_by_source
             .into_iter()
             .map(|(id, factors)| {
