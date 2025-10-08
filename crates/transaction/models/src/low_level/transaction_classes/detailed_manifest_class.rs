@@ -98,11 +98,21 @@ pub enum DetailedManifestClass {
     /// to an entity
     SecurifyEntity {
         /// The entity address that is about to be securified
-        entity_address: AddressOfAccountOrPersona,
-
-        /// The provisional security structure's metadata that is about to be applied
-        /// into the entity address
-        provisional_security_structure_metadata: SecurityStructureMetadata,
+        entities: Vec<AddressOfAccountOrPersona>,
+    },
+    /// A manifest that starts the access controller recovery, it is either
+    /// confirmed in the same transaction, or it is a timed recovery, currently
+    /// the difference is not important.
+    AccessControllerRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
+    },
+    /// A manifest that stops the timed recovery.
+    /// It can as well contain instructions to cancel the given recovery proposal.
+    AccessControllerStopTimedRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
+    },
+    AccessControllerConfirmTimedRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
     },
 }
 
@@ -134,6 +144,15 @@ impl DetailedManifestClass {
             }
             Self::SecurifyEntity { .. } => {
                 DetailedManifestClassKind::SecurifyEntity
+            }
+            Self::AccessControllerRecovery { .. } => {
+                DetailedManifestClassKind::AccessControllerRecovery
+            }
+            Self::AccessControllerConfirmTimedRecovery { .. } => {
+                DetailedManifestClassKind::AccessControllerConfirmTimedRecovery
+            }
+            Self::AccessControllerStopTimedRecovery { .. } => {
+                DetailedManifestClassKind::AccessControllerStopTimedRecovery
             }
         }
     }
@@ -196,6 +215,22 @@ impl DetailedManifestClass {
             }
 
             RetDetailedManifestClass::GeneralSubintent => None,
+
+            RetDetailedManifestClass::EntitySecurify(output) => {
+                Some(Self::from((output, network_id)))
+            }
+
+            RetDetailedManifestClass::AccessControllerRecovery(output) => {
+                Some(Self::from((output, network_id)))
+            }
+
+            RetDetailedManifestClass::AccessControllerConfirmTimedRecovery(
+                output,
+            ) => Some(Self::from((output, network_id))),
+
+            RetDetailedManifestClass::AccessControllerStopTimedRecovery(
+                output,
+            ) => Some(Self::from((output, network_id))),
         }
     }
 }
@@ -363,6 +398,67 @@ impl From<(RetAccountSettingsUpdateOutput, NetworkID)>
     }
 }
 
+impl From<(RetEntitySecurifyOutput, NetworkID)> for DetailedManifestClass {
+    fn from((output, n): (RetEntitySecurifyOutput, NetworkID)) -> Self {
+        let accounts = filter_try_to_vec_network_aware::<_, AccountAddress>(
+            output.securified_accounts,
+            n,
+        )
+        .into_iter()
+        .map(AddressOfAccountOrPersona::from)
+        .collect::<Vec<_>>();
+
+        let mut identities = filter_try_to_vec_network_aware::<
+            _,
+            IdentityAddress,
+        >(output.securified_identities, n)
+        .into_iter()
+        .map(AddressOfAccountOrPersona::from)
+        .collect::<Vec<_>>();
+
+        let mut entities = accounts;
+        entities.append(&mut identities);
+
+        Self::SecurifyEntity { entities }
+    }
+}
+
+impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from(
+        (output, n): (RetAccessControllerRecoveryOutput, NetworkID),
+    ) -> Self {
+        Self::AccessControllerRecovery {
+            ac_addresses: to_vec_network_aware(output.access_controllers, n),
+        }
+    }
+}
+
+impl From<(RetAccessControllerConfirmTimedRecoveryOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from(
+        (output, n): (RetAccessControllerConfirmTimedRecoveryOutput, NetworkID),
+    ) -> Self {
+        Self::AccessControllerConfirmTimedRecovery {
+            ac_addresses: to_vec_network_aware(output.access_controllers, n),
+        }
+    }
+}
+
+impl From<(RetAccessControllerStopTimedRecoveryOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from(
+        (output, n): (RetAccessControllerStopTimedRecoveryOutput, NetworkID),
+    ) -> Self {
+        Self::AccessControllerStopTimedRecovery {
+            ac_addresses: to_vec_network_aware(output.access_controllers, n),
+        }
+    }
+}
+
 impl HasSampleValues for DetailedManifestClass {
     fn sample() -> Self {
         Self::General
@@ -458,11 +554,27 @@ mod tests {
         );
         test(
             SUT::SecurifyEntity {
-                entity_address: AddressOfAccountOrPersona::sample(),
-                provisional_security_structure_metadata:
-                    SecurityStructureMetadata::sample(),
+                entities: Vec::<_>::sample(),
             },
             DetailedManifestClassKind::SecurifyEntity,
+        );
+        test(
+            SUT::AccessControllerRecovery {
+                ac_addresses: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::AccessControllerRecovery,
+        );
+        test(
+            SUT::AccessControllerConfirmTimedRecovery {
+                ac_addresses: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::AccessControllerConfirmTimedRecovery,
+        );
+        test(
+            SUT::AccessControllerStopTimedRecovery {
+                ac_addresses: Vec::<_>::sample(),
+            },
+            DetailedManifestClassKind::AccessControllerStopTimedRecovery,
         );
     }
 }

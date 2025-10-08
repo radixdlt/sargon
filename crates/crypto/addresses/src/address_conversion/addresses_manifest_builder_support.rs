@@ -36,6 +36,7 @@ from_scrypto_component_address!(ComponentAddress);
 from_scrypto_component_address!(ValidatorAddress);
 from_scrypto_component_address!(PoolAddress);
 from_scrypto_component_address!(LockerAddress);
+from_scrypto_component_address!(AccessControllerAddress);
 
 macro_rules! is_dynamic_component_address {
     ($address_type: ty) => {

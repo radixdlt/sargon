@@ -1,3 +1,5 @@
+use radix_engine_toolkit::prelude::EntitySecurify;
+
 use crate::prelude::*;
 
 /// A summary of the manifest
@@ -190,29 +192,6 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
             .map(Into::into)
             .collect::<Vec<ManifestClassification>>();
 
-        if classifications.is_empty() {
-            let address_of_securified_entity = if reserved_instructions
-                .contains(&ReservedInstruction::AccountSecurify)
-            {
-                addresses_of_accounts_requiring_auth
-                    .first()
-                    .map(|address| AddressOfAccountOrPersona::from(*address))
-            } else if reserved_instructions
-                .contains(&ReservedInstruction::IdentitySecurify)
-            {
-                addresses_of_personas_requiring_auth
-                    .first()
-                    .map(|address| AddressOfAccountOrPersona::from(*address))
-            } else {
-                None
-            };
-
-            if let Some(address) = address_of_securified_entity {
-                classifications
-                    .push(ManifestClassification::EntitySecurify(address));
-            }
-        }
-
         Self::new(
             account_withdraws,
             account_deposits,
@@ -266,8 +245,20 @@ pub enum ManifestClassification {
     /// A manifest where account deposit settings get updated. In this manifest
     /// class one of the account deposit settings methods are called.
     AccountDepositSettingsUpdate,
-
-    EntitySecurify(AddressOfAccountOrPersona),
+    /// A manifest that securifies entities by moving their badge
+    /// to a newly created access controller. In this manifest class the entity
+    /// is securified, its owner_keys is updated and an access controller is
+    /// created.
+    EntitySecurify,
+    /// A manifest that starts the access controller recovery, it is either
+    /// confirmed in the same transaction, or it is a timed recovery, currently
+    /// the difference is not important.
+    AccessControllerRecovery,
+    /// A manifest that stops the timed recovery.
+    /// It can as well contain instructions to cancel the given recovery proposal.
+    AccessControllerStopTimedRecovery,
+    /// A manifest that confirms the timed recovery.
+    AccessControllerConfirmTimedRecovery,
 }
 
 impl From<RetManifestClass> for ManifestClassification {
@@ -284,55 +275,19 @@ impl From<RetManifestClass> for ManifestClassification {
             RetManifestClass::AccountDepositSettingsUpdate => {
                 Self::AccountDepositSettingsUpdate
             }
+            RetManifestClass::EntitySecurify => Self::EntitySecurify,
+            RetManifestClass::AccessControllerRecovery => {
+                Self::AccessControllerRecovery
+            }
+            RetManifestClass::AccessControllerConfirmTimedRecovery => {
+                Self::AccessControllerConfirmTimedRecovery
+            }
+            RetManifestClass::AccessControllerStopTimedRecovery => {
+                Self::AccessControllerStopTimedRecovery
+            }
         }
     }
 }
-
-//     /// Responsible for identifying if the summary can be classified as a securify summary.
-//     pub fn classify_securify_entity_if_present<F>(
-//         &mut self,
-//     ) -> Result<()>
-//     {
-//         // Only try to classify if RET analysis didn't yield any classification
-//         if self.detailed_classification.is_some() {
-//             return Ok(());
-//         }
-
-//         /////// TEMPORARY solution until RET classifies it properly
-//         let entity_address_to_securify = if self
-//             .reserved_instructions
-//             .contains(&ReservedInstruction::AccountSecurify)
-//         {
-//             self.addresses_of_accounts_requiring_auth
-//                 .first()
-//                 .map(|address| AddressOfAccountOrPersona::from(*address))
-//         } else if self
-//             .reserved_instructions
-//             .contains(&ReservedInstruction::IdentitySecurify)
-//         {
-//             self.addresses_of_identities_requiring_auth
-//                 .first()
-//                 .map(|address| AddressOfAccountOrPersona::from(*address))
-//         } else {
-//             None
-//         };
-//         ///// END of temporary code
-
-//         if let Some(address) = entity_address_to_securify {
-//             let security_structure =
-//                 get_provisional_security_structure(address)?;
-
-//             self.detailed_classification =
-//                 Some(DetailedManifestClass::SecurifyEntity {
-//                     entity_address: address,
-//                     provisional_security_structure_metadata: security_structure
-//                         .metadata,
-//                 });
-//         }
-
-//         Ok(())
-//     }
-// }
 
 impl HasSampleValues for ManifestSummary {
     fn sample() -> Self {

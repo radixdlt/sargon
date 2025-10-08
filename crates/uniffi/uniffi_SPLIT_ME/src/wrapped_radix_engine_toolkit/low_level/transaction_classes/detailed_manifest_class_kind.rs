@@ -14,6 +14,9 @@ pub enum DetailedManifestClassKind {
     PoolRedemption,
     DeleteAccounts,
     SecurifyEntity,
+    AccessControllerRecovery,
+    AccessControllerConfirmTimedRecovery,
+    AccessControllerStopTimedRecovery,
 }
 
 delegate_display_debug_into!(

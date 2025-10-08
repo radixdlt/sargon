@@ -17,7 +17,6 @@ SET_METADATA
 CALL_METHOD
     Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
     "initiate_recovery_as_primary"
-    Tuple(
         Tuple(
             Enum<2u8>(
                 Enum<1u8>(
@@ -88,16 +87,14 @@ CALL_METHOD
                     )
                 )
             )
-        ),
+        )
         Enum<1u8>(
             20160u32
         )
-    )
 ;
 CALL_METHOD
     Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
     "quick_confirm_primary_role_recovery_proposal"
-    Tuple(
         Tuple(
             Enum<2u8>(
                 Enum<1u8>(
@@ -168,11 +165,10 @@ CALL_METHOD
                     )
                 )
             )
-        ),
+        )
         Enum<1u8>(
             20160u32
         )
-    )
 ;
 CALL_METHOD
     Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")

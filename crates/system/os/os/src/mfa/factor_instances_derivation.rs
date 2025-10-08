@@ -77,7 +77,8 @@ impl SargonOS {
             );
         }
 
-        let mfa_preset = DerivationPreset::mfa_entity_kind(entity.get_entity_kind());
+        let mfa_preset =
+            DerivationPreset::mfa_entity_kind(entity.get_entity_kind());
         for factor in matrix_factors {
             let index_agnostic_path =
                 mfa_preset.index_agnostic_path_on_network(network_id);
@@ -88,10 +89,11 @@ impl SargonOS {
             let next_component = index_assigner
                 .next(factor.id_from_hash(), index_agnostic_path)
                 .map(|index| index.unwrap_or(default_index))?;
-            let derivation_path = DerivationPath::from_index_agnostic_path_and_component(
-                index_agnostic_path,
-                next_component,
-            );
+            let derivation_path =
+                DerivationPath::from_index_agnostic_path_and_component(
+                    index_agnostic_path,
+                    next_component,
+                );
 
             per_factor_paths.append_or_insert_element_to(
                 factor.id_from_hash(),
@@ -116,8 +118,7 @@ impl SargonOS {
                 let instances = FactorInstances::from(factors);
                 (id, instances)
             })
-            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>()
-        )
+            .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>())
     }
 }
 
@@ -136,10 +137,10 @@ mod tests {
         .await;
 
         let profile = os.profile().unwrap();
-        let matrix_factor = profile.factor_sources.iter().next().unwrap().clone();
+        let matrix_factor =
+            profile.factor_sources.iter().next().unwrap().clone();
         let factors = vec![matrix_factor.clone()];
-        let matrix_factors: HashSet<&FactorSource> =
-            factors.iter().collect();
+        let matrix_factors: HashSet<&FactorSource> = factors.iter().collect();
 
         let entity = AccountOrPersona::sample_mainnet();
 
@@ -182,7 +183,11 @@ mod tests {
         let entity = AccountOrPersona::sample_mainnet();
 
         let result = os
-            .derive_factor_instances(entity, matrix_factors, Some(rola_factor.clone()))
+            .derive_factor_instances(
+                entity,
+                matrix_factors,
+                Some(rola_factor.clone()),
+            )
             .await
             .unwrap();
 
@@ -247,7 +252,10 @@ mod tests {
             let instances = result.get(&factor.id_from_hash()).unwrap();
             assert_eq!(instances.len(), 1);
             let instance = instances.clone().into_iter().next().unwrap();
-            assert_eq!(instance.get_key_kind(), CAP26KeyKind::TransactionSigning);
+            assert_eq!(
+                instance.get_key_kind(),
+                CAP26KeyKind::TransactionSigning
+            );
             assert_eq!(instance.get_entity_kind(), CAP26EntityKind::Account);
             assert_eq!(instance.key_space(), KeySpace::Securified);
         }
@@ -255,7 +263,10 @@ mod tests {
         let rola_instances = result.get(&rola_factor.id_from_hash()).unwrap();
         assert_eq!(rola_instances.len(), 1);
         let rola_instance = rola_instances.clone().into_iter().next().unwrap();
-        assert_eq!(rola_instance.get_key_kind(), CAP26KeyKind::AuthenticationSigning);
+        assert_eq!(
+            rola_instance.get_key_kind(),
+            CAP26KeyKind::AuthenticationSigning
+        );
         assert_eq!(rola_instance.get_entity_kind(), CAP26EntityKind::Account);
         assert_eq!(rola_instance.key_space(), KeySpace::Securified);
     }
@@ -280,7 +291,11 @@ mod tests {
             .unwrap();
 
         let bdfs_factor: FactorSource = os.bdfs().into();
-        let matrix_sources = vec![bdfs_factor.clone(), ledger_factor.clone(), extra_matrix_factor.clone()];
+        let matrix_sources = vec![
+            bdfs_factor.clone(),
+            ledger_factor.clone(),
+            extra_matrix_factor.clone(),
+        ];
         let matrix_factors: HashSet<&FactorSource> =
             matrix_sources.iter().collect();
 
@@ -301,18 +316,25 @@ mod tests {
         let bdfs_instances = result.get(&bdfs_factor.id_from_hash()).unwrap();
         assert_eq!(bdfs_instances.len(), 1);
         let bdfs_instance = bdfs_instances.clone().into_iter().next().unwrap();
-        assert_eq!(bdfs_instance.get_key_kind(), CAP26KeyKind::TransactionSigning);
+        assert_eq!(
+            bdfs_instance.get_key_kind(),
+            CAP26KeyKind::TransactionSigning
+        );
 
         // Extra matrix factor also only yields transaction signing key
-        let extra_instances = result
-            .get(&extra_matrix_factor.id_from_hash())
-            .unwrap();
+        let extra_instances =
+            result.get(&extra_matrix_factor.id_from_hash()).unwrap();
         assert_eq!(extra_instances.len(), 1);
-        let extra_instance = extra_instances.clone().into_iter().next().unwrap();
-        assert_eq!(extra_instance.get_key_kind(), CAP26KeyKind::TransactionSigning);
+        let extra_instance =
+            extra_instances.clone().into_iter().next().unwrap();
+        assert_eq!(
+            extra_instance.get_key_kind(),
+            CAP26KeyKind::TransactionSigning
+        );
 
         // Shared factor contains both authentication and transaction signing keys
-        let shared_instances = result.get(&ledger_factor.id_from_hash()).unwrap();
+        let shared_instances =
+            result.get(&ledger_factor.id_from_hash()).unwrap();
         assert_eq!(shared_instances.len(), 2);
         let key_kinds = shared_instances
             .clone()
@@ -365,7 +387,10 @@ mod tests {
             let instances = result.get(&factor.id_from_hash()).unwrap();
             assert_eq!(instances.len(), 1);
             let instance = instances.clone().into_iter().next().unwrap();
-            assert_eq!(instance.get_key_kind(), CAP26KeyKind::TransactionSigning);
+            assert_eq!(
+                instance.get_key_kind(),
+                CAP26KeyKind::TransactionSigning
+            );
             assert_eq!(instance.get_entity_kind(), CAP26EntityKind::Identity);
             assert_eq!(instance.key_space(), KeySpace::Securified);
         }
@@ -373,7 +398,10 @@ mod tests {
         let rola_instances = result.get(&rola_factor.id_from_hash()).unwrap();
         assert_eq!(rola_instances.len(), 1);
         let rola_instance = rola_instances.clone().into_iter().next().unwrap();
-        assert_eq!(rola_instance.get_key_kind(), CAP26KeyKind::AuthenticationSigning);
+        assert_eq!(
+            rola_instance.get_key_kind(),
+            CAP26KeyKind::AuthenticationSigning
+        );
         assert_eq!(rola_instance.get_entity_kind(), CAP26EntityKind::Identity);
         assert_eq!(rola_instance.key_space(), KeySpace::Securified);
     }
@@ -413,30 +441,37 @@ mod tests {
 
         let initial_tx = first_instances
             .iter()
-            .find(|instance| instance.get_key_kind() == CAP26KeyKind::TransactionSigning)
+            .find(|instance| {
+                instance.get_key_kind() == CAP26KeyKind::TransactionSigning
+            })
             .unwrap()
             .clone();
         let initial_auth = first_instances
             .iter()
-            .find(|instance| instance.get_key_kind() == CAP26KeyKind::AuthenticationSigning)
+            .find(|instance| {
+                instance.get_key_kind() == CAP26KeyKind::AuthenticationSigning
+            })
             .unwrap()
             .clone();
 
-        let primary_role = PrimaryRoleWithFactorSources::with_factors_and_threshold(
-            Threshold::Specific(1),
-            [bdfs_factor.clone()],
-            Vec::<FactorSource>::new(),
-        );
-        let recovery_role = RecoveryRoleWithFactorSources::with_factors_and_threshold(
-            Threshold::All,
-            Vec::<FactorSource>::new(),
-            Vec::<FactorSource>::new(),
-        );
-        let confirmation_role = ConfirmationRoleWithFactorSources::with_factors_and_threshold(
-            Threshold::All,
-            Vec::<FactorSource>::new(),
-            Vec::<FactorSource>::new(),
-        );
+        let primary_role =
+            PrimaryRoleWithFactorSources::with_factors_and_threshold(
+                Threshold::Specific(1),
+                [bdfs_factor.clone()],
+                Vec::<FactorSource>::new(),
+            );
+        let recovery_role =
+            RecoveryRoleWithFactorSources::with_factors_and_threshold(
+                Threshold::All,
+                Vec::<FactorSource>::new(),
+                Vec::<FactorSource>::new(),
+            );
+        let confirmation_role =
+            ConfirmationRoleWithFactorSources::with_factors_and_threshold(
+                Threshold::All,
+                Vec::<FactorSource>::new(),
+                Vec::<FactorSource>::new(),
+            );
 
         let matrix_of_sources = unsafe {
             MatrixOfFactorSources::unbuilt_with_roles_and_days(
@@ -522,15 +557,23 @@ mod tests {
 
         let new_tx = second_instances
             .iter()
-            .find(|instance| instance.get_key_kind() == CAP26KeyKind::TransactionSigning)
+            .find(|instance| {
+                instance.get_key_kind() == CAP26KeyKind::TransactionSigning
+            })
             .unwrap();
         let new_auth = second_instances
             .iter()
-            .find(|instance| instance.get_key_kind() == CAP26KeyKind::AuthenticationSigning)
+            .find(|instance| {
+                instance.get_key_kind() == CAP26KeyKind::AuthenticationSigning
+            })
             .unwrap();
 
-        let initial_tx_index = initial_tx.derivation_path().index().map_to_global_key_space();
-        let new_tx_index = new_tx.derivation_path().index().map_to_global_key_space();
+        let initial_tx_index = initial_tx
+            .derivation_path()
+            .index()
+            .map_to_global_key_space();
+        let new_tx_index =
+            new_tx.derivation_path().index().map_to_global_key_space();
         assert_eq!(new_tx_index, initial_tx_index + 1);
         assert_ne!(new_tx.public_key(), initial_tx.public_key());
 
@@ -538,7 +581,8 @@ mod tests {
             .derivation_path()
             .index()
             .map_to_global_key_space();
-        let new_auth_index = new_auth.derivation_path().index().map_to_global_key_space();
+        let new_auth_index =
+            new_auth.derivation_path().index().map_to_global_key_space();
         assert_eq!(new_auth_index, initial_auth_index + 1);
         assert_ne!(new_auth.public_key(), initial_auth.public_key());
     }

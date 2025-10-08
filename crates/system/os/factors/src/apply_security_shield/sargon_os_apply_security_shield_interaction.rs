@@ -11,7 +11,6 @@ use addresses::address_union;
 //         address: AddressOfAccountOrPersona,
 //     ) -> Result<TransactionManifest>;
 
-   
 // }
 
 // #[async_trait::async_trait]
