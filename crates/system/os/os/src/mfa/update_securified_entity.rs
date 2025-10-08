@@ -79,6 +79,21 @@ impl SargonOS {
             &security_structure
         )?;
 
+        // 4. Set the security structure as provisional, this will be extracted on transaction analysis
+        let mut entity = entity;
+        entity.set_provisional(
+            ProvisionalSecurifiedConfig::FactorInstancesDerived {
+                value: security_structure_of_factor_instances.clone(),
+            },
+        );
+
+        self.update_entities_erased(vec![entity.clone()].into())
+            .await?;
+        for factor_source_id in factor_instances.keys() {
+            self.update_last_used_of_factor_source(*factor_source_id)
+                .await?
+        }
+
         // Create the transaction manifest next for R+T.
         // Hardcoded for now to unblock the work for implementing Timed Recovery flows.
         Ok(

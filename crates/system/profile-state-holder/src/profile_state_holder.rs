@@ -74,6 +74,15 @@ impl ProfileStateHolder {
         self.try_access_profile_with(|p| p.entity_by_address(entity_address))
     }
 
+    pub fn entity_by_access_controller_address(
+        &self,
+        address_of_access_controller: AccessControllerAddress,
+    ) -> Result<AccountOrPersona> {
+        self.try_access_profile_with(|p| {
+            p.entity_by_access_controller_address(address_of_access_controller)
+        })
+    }
+
     /// Looks up the account by account address, returns Err if the account is
     /// unknown, will return a hidden account if queried for.
     pub fn account_by_address(

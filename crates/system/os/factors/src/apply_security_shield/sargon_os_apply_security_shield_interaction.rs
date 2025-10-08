@@ -3,27 +3,7 @@ use std::sync::{Mutex, OnceLock};
 use crate::prelude::*;
 use addresses::address_union;
 
-// #[async_trait::async_trait]
-// pub trait OsApplySecurityShieldInteraction {
-//     async fn make_update_security_shiled_manifest(
-//         &self,
-//         security_structure: SecurityStructureOfFactorSources,
-//         address: AddressOfAccountOrPersona,
-//     ) -> Result<TransactionManifest>;
-
-// }
-
-// #[async_trait::async_trait]
-// impl OsApplySecurityShieldInteraction for SargonOS {
-//     async fn make_update_security_shiled_manifest(
-//         &self,
-//         security_structure: SecurityStructureOfFactorSources,
-//         address: AddressOfAccountOrPersona,
-//     ) -> Result<TransactionManifest> {
-
-//     }
-// }
-
+// TBD if this is needed, or just cleaned up.
 address_union!(
     enum EntityApplyingShieldAddress: accessController, account, identity
 );
