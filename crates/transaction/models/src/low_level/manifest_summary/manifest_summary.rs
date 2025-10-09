@@ -1,4 +1,3 @@
-use radix_engine_toolkit::prelude::EntitySecurify;
 
 use crate::prelude::*;
 
@@ -186,7 +185,7 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
                 ret.reserved_instructions_summary,
             );
 
-        let mut classifications = ret
+        let classifications = ret
             .manifest_classification
             .into_iter()
             .map(Into::into)

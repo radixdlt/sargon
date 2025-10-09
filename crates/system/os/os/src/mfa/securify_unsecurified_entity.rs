@@ -65,8 +65,8 @@ mod tests {
         .await;
 
         let bdfs_device = os.bdfs();
-        let bdfs_hash = bdfs_device.id.clone();
-        let bdfs_id: FactorSourceID = bdfs_hash.clone().into();
+        let bdfs_hash = bdfs_device.id;
+        let bdfs_id: FactorSourceID = bdfs_hash.into();
 
         let ledger_factor = FactorSource::sample_ledger();
         os.with_timeout(|sut: &SargonOS| {
@@ -95,34 +95,34 @@ mod tests {
 
         let ledger_id = ledger_factor.factor_source_id();
         let rola_id = rola_factor.factor_source_id();
-        let rola_hash = rola_id.as_hash().unwrap().clone();
+        let rola_hash = *rola_id.as_hash().unwrap();
 
         let mut matrix_builder = MatrixBuilder::new();
         matrix_builder
-            .add_factor_source_to_primary_threshold(bdfs_id.clone())
+            .add_factor_source_to_primary_threshold(bdfs_id)
             .unwrap();
         matrix_builder
-            .add_factor_source_to_primary_threshold(ledger_id.clone())
+            .add_factor_source_to_primary_threshold(ledger_id)
             .unwrap();
         matrix_builder
-            .add_factor_source_to_recovery_override(bdfs_id.clone())
+            .add_factor_source_to_recovery_override(bdfs_id)
             .unwrap();
         matrix_builder
-            .add_factor_source_to_confirmation_override(bdfs_id.clone())
+            .add_factor_source_to_confirmation_override(bdfs_id)
             .unwrap();
 
         assert_eq!(
             matrix_builder.get_primary_threshold_factors(),
-            &vec![bdfs_id.clone(), ledger_id.clone()]
+            &vec![bdfs_id, ledger_id]
         );
         assert!(matrix_builder.get_primary_override_factors().is_empty());
         assert_eq!(
             matrix_builder.get_recovery_factors(),
-            &vec![bdfs_id.clone()]
+            &vec![bdfs_id]
         );
         assert_eq!(
             matrix_builder.get_confirmation_factors(),
-            &vec![bdfs_id.clone()]
+            &vec![bdfs_id]
         );
 
         let matrix_ids = matrix_builder.build().unwrap();
@@ -168,7 +168,7 @@ mod tests {
         let derived = provisional.as_factor_instances_derived().unwrap();
 
         let expected_tx_ids: HashSet<FactorSourceID> =
-            HashSet::from([bdfs_id.clone(), ledger_id.clone()]);
+            HashSet::from([bdfs_id, ledger_id]);
 
         assert!(derived
             .unique_tx_signing_factor_instances()

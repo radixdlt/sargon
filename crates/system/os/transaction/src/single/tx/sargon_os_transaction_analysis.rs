@@ -624,7 +624,7 @@ mod tests {
         )
     }
 
-    use prelude::{fixture_rtm, fixture_tx};
+    
     use radix_common::math::Decimal as ScryptoDecimal192;
 
     #[actix_rt::test]
