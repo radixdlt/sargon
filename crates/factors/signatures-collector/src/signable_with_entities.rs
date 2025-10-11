@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct SignableWithEntities<S: Signable> {
-    pub(crate) signable: S,
+pub struct SignableWithEntities<S: Signable> {
+    pub signable: S,
     id: S::ID,
     entities_requiring_auth: IndexSet<AccountOrPersona>,
 }
@@ -16,7 +16,7 @@ impl<S: Signable> Identifiable for SignableWithEntities<S> {
 }
 
 impl<S: Signable> SignableWithEntities<S> {
-    pub(crate) fn with(
+    pub fn with(
         signable: S,
         entities_requiring_auth: impl IntoIterator<
             Item = impl Into<AccountOrPersona>,
@@ -33,11 +33,11 @@ impl<S: Signable> SignableWithEntities<S> {
         }
     }
 
-    pub(crate) fn entities_requiring_auth(&self) -> IndexSet<AccountOrPersona> {
+    pub fn entities_requiring_auth(&self) -> IndexSet<AccountOrPersona> {
         self.entities_requiring_auth.clone().into_iter().collect()
     }
 
-    pub(crate) fn extracting_from_profile(
+    pub fn extracting_from_profile(
         signable: &S,
         entity_querying: &impl GetEntityByAddress,
     ) -> Result<Self> {
@@ -50,7 +50,7 @@ impl<S: Signable> SignableWithEntities<S> {
 // -- Samples
 impl<S: Signable + ProvidesSamplesByBuildingManifest> SignableWithEntities<S> {
     #[allow(unused)]
-    pub(crate) fn sample(
+    pub fn sample(
         entities_requiring_auth: impl IntoIterator<
             Item = impl Into<AccountOrPersona>,
         >,

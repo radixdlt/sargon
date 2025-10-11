@@ -1,3 +1,8 @@
+use manifests::{
+    RolesExercisableInTransactionManifestCombination,
+    TransactionManifestSecurifySecurifiedEntity,
+};
+
 use crate::prelude::*;
 
 #[async_trait::async_trait]
@@ -17,14 +22,19 @@ pub trait OsSigning {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent>;
 
     async fn sign_subintent(
         &self,
         subintent: Subintent,
-        role_kind: RoleKind,
     ) -> Result<SignedSubintent>;
+
+    async fn sign_ac_recovery_transaction(
+        &self,
+        transaction_intent: TransactionIntent,
+        access_controller: AccessControllerAddress,
+    ) -> Result<SignedIntent>;
 }
 
 // ==================
@@ -47,25 +57,52 @@ impl OsSigning for SargonOS {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent> {
-        self.sign(
-            transaction_intent.clone(),
-            self.sign_transactions_interactor(),
-            SigningPurpose::sign_transaction(role_kind),
-        )
-        .await
+        match execution_summary.detailed_classification {
+            Some(DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: ac_addresses,
+            }) => {
+                let access_controller = ac_addresses.first().unwrap();
+                self.sign_ac_recovery_transaction(
+                    transaction_intent,
+                    access_controller.clone(),
+                )
+                .await
+            }
+            Some(
+                DetailedManifestClass::AccessControllerStopTimedRecovery {
+                    ac_addresses: _,
+                },
+            ) => {
+                // MFA - actually based on AC specs, the tx needs to be signed by the factor that proposed the recovery
+                self.sign(
+                    transaction_intent.clone(),
+                    self.sign_transactions_interactor(),
+                    SigningPurpose::sign_transaction(RoleKind::Primary),
+                )
+                .await
+            }
+            Some(_) | None => {
+                // Transactions exercising Primary role
+                self.sign(
+                    transaction_intent.clone(),
+                    self.sign_transactions_interactor(),
+                    SigningPurpose::sign_transaction(RoleKind::Primary),
+                )
+                .await
+            }
+        }
     }
 
     async fn sign_subintent(
         &self,
         subintent: Subintent,
-        role_kind: RoleKind,
     ) -> Result<SignedSubintent> {
         self.sign(
             subintent.clone(),
             self.sign_subintents_interactor(),
-            SigningPurpose::sign_transaction(role_kind),
+            SigningPurpose::sign_transaction(RoleKind::Primary),
         )
         .await
     }
@@ -94,6 +131,261 @@ impl OsSigning for SargonOS {
         } else {
             Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
         }
+    }
+
+    async fn sign_ac_recovery_transaction(
+        &self,
+        recovery_plus_confirmation_transaction_intent: TransactionIntent,
+        access_controller: AccessControllerAddress,
+    ) -> Result<SignedIntent> {
+        // Preparation:
+        // - Extract the entity from ac address.
+        // - Extract entity's secured control.
+        // - Extract the proposed security structure for recovery.
+        // - Prepare the transaction intents candidates.
+        let entity =
+            self.entity_by_access_controller_address(access_controller)?;
+        let security_control = entity.security_state().into_securified().unwrap();
+        let proposed_security_structure = security_control
+            .provisional_securified_config
+            .ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)?;
+        let controlling_security_structure =
+            security_control.security_structure;
+        let profile = &self.profile()?;
+        let signing_factor_sources: SecurityStructureOfFactorSources = controlling_security_structure.try_into()?;
+
+        // Need to prepare the intents to sign with R role, we do already have the R+C intent that was originally build.
+        let securified_entity =
+            AnySecurifiedEntity::with_securified_entity_control(
+                entity.clone(),
+                security_control,
+            );
+
+        let recovery_intents = AccessControllerRecoveryIntents::new(
+            recovery_plus_confirmation_transaction_intent.clone(), 
+            securified_entity.clone(),
+            proposed_security_structure.get_security_structure_of_factor_instances().clone(),
+        )?;
+       
+       let mut signatures: IndexSet<HDSignature<TransactionIntentHash>> = IndexSet::new();
+
+       // 1. Try signing with recovery role
+       let collector = SignaturesCollector::with(
+        SigningFinishEarlyStrategy::default(),
+         profile.factor_sources(),
+         recovery_intents.iniate_with_recovery_role_signable_intents(&profile),
+          self.sign_transactions_interactor(),
+          SigningPurpose::sign_transaction(RoleKind::Recovery)
+        );
+
+        // The intent that 
+        let mut per_intent_signatures: IndexMap<TransactionIntentHash, IndexSet<HDSignature<TransactionIntentHash>>> = IndexMap::new();
+
+        let outcome = collector.collect_signatures().await?;
+
+        if outcome.successful() {
+            // successfully signed with recovery
+            let produced_signatures = outcome.signatures_of_successful_transactions();
+            for signature in produced_signatures {
+                per_intent_signatures.append_or_insert_element_to(signature.input.payload_id, signature);
+            }
+
+            // Sign with confirmation
+            let collector = SignaturesCollector::with(
+                SigningFinishEarlyStrategy::default(),
+                 profile.factor_sources(),
+                 recovery_intents.iniate_with_recovery_role_signable_intents(&profile),
+                  self.sign_transactions_interactor(),
+                  SigningPurpose::sign_transaction(RoleKind::Confirmation)
+                );
+            let outcome = collector.collect_signatures().await?;
+
+            if outcome.successful() {
+                let produced_signatures = outcome.signatures_of_successful_transactions();
+                for signature in produced_signatures {
+                    per_intent_signatures.append_or_insert_element_to(signature.input.payload_id, signature);
+                }
+            } else {
+
+            }
+
+        } else {
+           // iniate with primary
+        }
+
+        signable.signed(signatures);
+
+        Err(CommonError::Unknown)
+    }
+}
+
+enum RecoverySignatureFSM {
+    SignInitiateWithRecoveryIntents,
+    SignInitiateWithRecoveryConfirmWithConfirmationIntent,
+    SignInitiateWithRecoveryConfirmWithPrimaryIntent,
+    SignInitiateWithPrimaryConfirmWithConfirmationIntent
+}
+
+struct ACRecoverySignaturesCollector {
+    factory: ACRecoverySignatureCollectorFactory
+}
+
+impl ACRecoverySignaturesCollector {
+    async fn sign(&self) -> Result<SignedIntent> {
+        let sign_with_recovery_outcome = self.factory.iniate_with_recovery_sign_with_recovery().collect_signatures().await?;
+        if sign_with_recovery_outcome.successful() {
+            let recovery_signatures = sign_with_recovery_outcome.all_signatures();
+
+            let sign_with_confirmation = self.factory.iniate_with_recovery_sign_with_confirmation().collect_signatures().await?;
+            if sign_with_confirmation.successful() {
+                let intent = self.factory.ac_recovery_intents.initiate_with_recovery_complete_with_confirmation.signable.clone();
+                let mut confirmation_signatures = sign_with_confirmation.all_signatures();
+                let r_plus_c_signature = recovery_signatures.iter().find(|s| s.payload_id() == &intent.get_id()).cloned().unwrap();
+                confirmation_signatures.insert(r_plus_c_signature.clone());
+                return intent.signed(confirmation_signatures)
+            } else {
+                let sign_with_primary = self.factory.iniate_with_recovery_sign_with_primary().collect_signatures().await?;
+                if sign_with_primary.successful() {
+                    let intent = self.factory.ac_recovery_intents.initiate_with_recovery_complete_with_primary.signable.clone();
+                    let mut primary_signatures = sign_with_primary.all_signatures();
+                    let r_plus_p_signature = recovery_signatures.iter().find(|s| s.payload_id() == &intent.get_id()).cloned().unwrap();
+                    primary_signatures.insert(r_plus_p_signature.clone());
+                    return intent.signed(primary_signatures)
+                } else {
+                    let intent = self.factory.ac_recovery_intents.initiate_with_recovery_delayed_completion.signable.clone();
+                    let r_plus_t_signature = recovery_signatures.iter().find(|s| s.payload_id() == &intent.get_id()).cloned().unwrap();
+                    return intent.signed(IndexSet::from([r_plus_t_signature]))
+                }
+            }
+        } else {
+            let sign_iniate_with_primary = self.factory.iniate_with_primary_sign_with_primary().collect_signatures().await?;
+
+            if sign_iniate_with_primary.successful() {
+                let sign_with_confirmation = self.factory.iniate_with_primary_sign_with_confirmation().collect_signatures().await?;
+                if sign_with_confirmation.successful() {
+                    let mut primary_signatures = sign_iniate_with_primary.all_signatures();
+                    let mut confirmation_signatures = sign_with_confirmation.all_signatures();
+
+                    primary_signatures.append(&mut confirmation_signatures);
+                    let intent = self.factory.ac_recovery_intents.initiate_with_primary_complete_with_confirmation.signable.clone();
+                    return intent.signed(primary_signatures)
+                } 
+            }
+        }
+
+        Err(CommonError::Unknown)
+    }
+}
+
+struct ACRecoverySignatureCollectorFactory {
+    profile: Profile,
+    signing_interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    ac_recovery_intents: AccessControllerRecoveryIntents
+}
+
+impl ACRecoverySignatureCollectorFactory {
+    fn iniate_with_recovery_sign_with_recovery(&self) -> SignaturesCollector<TransactionIntent> {
+        let intents = vec![
+            self.ac_recovery_intents.initiate_with_recovery_complete_with_confirmation.clone(),
+            self.ac_recovery_intents.initiate_with_recovery_complete_with_primary.clone(),
+            self.ac_recovery_intents.initiate_with_recovery_delayed_completion.clone(),
+        ];
+
+        self.signature_collector_for(intents, RoleKind::Recovery)
+    }
+
+    fn iniate_with_recovery_sign_with_confirmation(&self) -> SignaturesCollector<TransactionIntent> {
+        let intents = vec![
+            self.ac_recovery_intents.initiate_with_recovery_complete_with_confirmation.clone(),
+        ];
+
+        self.signature_collector_for(intents, RoleKind::Confirmation)
+    }
+
+    fn iniate_with_recovery_sign_with_primary(&self) -> SignaturesCollector<TransactionIntent> {
+        let intents = vec![
+            self.ac_recovery_intents.initiate_with_recovery_complete_with_primary.clone(),
+        ];
+
+        self.signature_collector_for(intents, RoleKind::Primary)
+    }
+
+    fn iniate_with_primary_sign_with_primary(&self) -> SignaturesCollector<TransactionIntent> {
+        let intents = vec![
+            self.ac_recovery_intents.initiate_with_primary_complete_with_confirmation.clone(),
+        ];
+
+        self.signature_collector_for(intents, RoleKind::Primary)
+    }
+
+    fn iniate_with_primary_sign_with_confirmation(&self) -> SignaturesCollector<TransactionIntent> {
+        let intents = vec![
+            self.ac_recovery_intents.initiate_with_primary_complete_with_confirmation.clone(),
+        ];
+
+       self.signature_collector_for(intents, RoleKind::Confirmation)
+    }
+
+    fn signature_collector_for(&self, intents: Vec<SignableWithEntities<TransactionIntent>>, role: RoleKind) -> SignaturesCollector<TransactionIntent> {
+        SignaturesCollector::with(
+            SigningFinishEarlyStrategy::default(),
+            self.profile.factor_sources().clone(),
+            intents.into(),
+            self.signing_interactor.clone(),
+              SigningPurpose::sign_transaction(role)
+            )
+    }
+}
+
+struct AccessControllerRecoveryIntents {
+    initiate_with_recovery_complete_with_confirmation: SignableWithEntities<TransactionIntent>,
+    initiate_with_recovery_complete_with_primary: SignableWithEntities<TransactionIntent>,
+    initiate_with_recovery_delayed_completion: SignableWithEntities<TransactionIntent>,
+    initiate_with_primary_complete_with_confirmation: SignableWithEntities<TransactionIntent>,
+}
+
+impl AccessControllerRecoveryIntents {
+    fn new(
+        intent: TransactionIntent,
+        securified_entity: AnySecurifiedEntity,
+        proposed_security_structure: SecurityStructureOfFactorInstances,
+    ) -> Result<Self> {
+        let r_plus_c_manifest =
+            TransactionManifest::apply_security_shield_for_securified_entity(
+                securified_entity.clone(),
+                proposed_security_structure.clone(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation,
+            );
+        let r_plus_p_manifest =
+            TransactionManifest::apply_security_shield_for_securified_entity(
+                securified_entity.clone(),
+                proposed_security_structure.clone(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary,
+            );
+        let r_plus_t_manifest =
+            TransactionManifest::apply_security_shield_for_securified_entity(
+                securified_entity.clone(),
+                proposed_security_structure.clone(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion,
+            );
+        let p_plus_c_manifest =
+            TransactionManifest::apply_security_shield_for_securified_entity(
+                securified_entity.clone(),
+                proposed_security_structure.clone(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation,
+            );
+
+        let r_plus_c_intent = TransactionIntent::new(intent.header, r_plus_c_manifest, intent.message.clone())?;
+        let r_plus_p_intent = TransactionIntent::new(intent.header, r_plus_p_manifest, intent.message.clone())?;
+        let r_plus_t_intent = TransactionIntent::new(intent.header, r_plus_t_manifest, intent.message.clone())?;
+        let p_plus_c_intent = TransactionIntent::new(intent.header, p_plus_c_manifest, intent.message.clone())?;
+
+        Ok(Self {
+            initiate_with_recovery_complete_with_confirmation: SignableWithEntities::with(r_plus_c_intent, vec![securified_entity.entity.clone()]),
+            initiate_with_recovery_complete_with_primary: SignableWithEntities::with(r_plus_p_intent, vec![securified_entity.entity.clone()]),
+            initiate_with_recovery_delayed_completion: SignableWithEntities::with(r_plus_t_intent, vec![securified_entity.entity.clone()]),
+            initiate_with_primary_complete_with_confirmation: SignableWithEntities::with(p_plus_c_intent, vec![securified_entity.entity.clone()]),
+        })
     }
 }
 

@@ -116,14 +116,8 @@ mod tests {
             &vec![bdfs_id, ledger_id]
         );
         assert!(matrix_builder.get_primary_override_factors().is_empty());
-        assert_eq!(
-            matrix_builder.get_recovery_factors(),
-            &vec![bdfs_id]
-        );
-        assert_eq!(
-            matrix_builder.get_confirmation_factors(),
-            &vec![bdfs_id]
-        );
+        assert_eq!(matrix_builder.get_recovery_factors(), &vec![bdfs_id]);
+        assert_eq!(matrix_builder.get_confirmation_factors(), &vec![bdfs_id]);
 
         let matrix_ids = matrix_builder.build().unwrap();
 
