@@ -1,3 +1,6 @@
+#[cfg(test)]
+use transaction_models::SignatureWithPublicKey;
+
 use crate::prelude::*;
 
 /// Advanced security control of an entity which has been "securified",
@@ -124,6 +127,40 @@ impl HasSampleValues for SecuredEntityControl {
 
     fn sample_other() -> Self {
         Self::new(HierarchicalDeterministicFactorInstance::sample_mainnet_account_device_factor_fs_10_unsecurified_at_index(0), AccessControllerAddress::sample_other(), SecurityStructureOfFactorInstances::sample_other()).unwrap()
+    }
+}
+
+#[cfg(debug_assertions)]
+impl SecuredEntityControl {
+    pub fn sign_with_first_recovery_role_factor(
+        &self,
+        hash: &Hash,
+    ) -> SignatureWithPublicKey {
+        let factor_instance = self.security_structure.matrix_of_factors.recovery().get_override_factors().first().expect("Security structure should have at least one factor in recovery role");
+        factor_instance.sign_hash(&hash)
+    }
+
+    pub fn sign_with_first_confirmation_role_factor(
+      &self,
+      hash: &Hash,
+    ) -> SignatureWithPublicKey {
+      let factor_instance = self.security_structure.matrix_of_factors.confirmation().get_override_factors().first().expect("Security structure should have at least one factor in recovery role");
+      factor_instance.sign_hash(&hash)
+    }
+
+    pub fn sign_with_primary_role_factors(
+      &self,
+      hash: &Hash,
+    ) -> Vec<SignatureWithPublicKey> {
+      self.security_structure
+      .matrix_of_factors
+      .primary()
+      .get_threshold_factors()
+      .into_iter()
+      .map(|instance| {
+        instance.sign_hash(&hash)
+      })
+      .collect()
     }
 }
 

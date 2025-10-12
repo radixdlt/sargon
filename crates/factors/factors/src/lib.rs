@@ -74,6 +74,8 @@ pub mod prelude {
     pub(crate) use serde_json::json;
     pub(crate) use std::collections::{HashMap, HashSet};
     pub(crate) use zeroize::*;
+    #[cfg(debug_assertions)]
+    pub(crate) use hash::Hash;
 }
 
 pub use prelude::*;

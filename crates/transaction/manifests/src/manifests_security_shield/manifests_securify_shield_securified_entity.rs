@@ -2,7 +2,7 @@
 use crate::prelude::*;
 use std::ops::Deref;
 
-use profile_supporting_types::AnySecurifiedEntity;
+use profile_supporting_types::{AnySecurifiedEntity, UnsecurifiedAccount};
 
 pub trait TransactionManifestSecurifySecurifiedEntity:
     TransactionManifestSetRolaKey
@@ -131,11 +131,12 @@ mod tests {
     #![allow(non_snake_case)]
 
     use prelude::fixture_rtm;
-    use profile_supporting_types::{SecurifiedAccount, SecurifiedPersona};
+    use profile_supporting_types::{AnyUnsecurifiedEntity, SecurifiedAccount, SecurifiedPersona};
     use radix_transactions::manifest::{
         CallMetadataMethod, CallMethod, ManifestInstruction,
     };
     use sbor::SborEnum;
+    use scrypto_test::prelude::{v2::AccessControllerV2Substate, FieldContentSource, FieldPayload, SubstateDatabaseExtensions};
 
     use super::*;
 
@@ -267,5 +268,56 @@ mod tests {
             vec![CallMethod::ID],
             "init with R complete with T should not set rola key - since we cannot"
         );
+    }
+
+    #[test]
+    fn iniate_with_recovery_complete_with_confirmation() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation);
+    }
+
+    #[test]
+    fn iniate_with_recovery_complete_with_primary() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary);
+    }
+
+    #[test]
+    fn iniate_with_primary_complete_with_confirmation() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation);
+    }
+
+    fn assert_recovery_with_quick_confirmation(roles_combination: RolesExercisableInTransactionManifestCombination) {
+        let sec_structure = SecurityStructureOfFactorInstances::sample_sim();
+        let unsecurified_acc = UnsecurifiedAccount::sample_sim_account();
+
+        let mut ledger = LedgerSimulatorBuilder::new().without_kernel_trace().build();
+
+        let ac_address = ledger.create_access_controller(unsecurified_acc.clone(), sec_structure.clone());
+
+        let secured_control = SecuredEntityControl::new(None, ac_address, sec_structure).unwrap();
+        let securified_account = AnySecurifiedEntity::with_securified_entity_control(unsecurified_acc.entity.into(), secured_control.clone());
+
+        let updated_sec_structure = SecurityStructureOfFactorInstances::sample_other_sim();
+
+        let mut manifest = TransactionManifest::apply_security_shield_for_securified_entity(
+            securified_account.clone(),
+            updated_sec_structure.clone(),
+            roles_combination
+        );
+
+        manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+            manifest, 
+            Decimal192::one(), 
+            securified_account,
+        );
+
+        ledger.execute_recovery_manifest(
+            manifest,
+            secured_control,
+            roles_combination
+        );
+
+        let rule_set = ledger.read_access_controller_rule_set(ac_address);
+        let expected_rule_set = updated_sec_structure.matrix_of_factors.into();
+        pretty_assertions::assert_eq!(rule_set, expected_rule_set);
     }
 }
