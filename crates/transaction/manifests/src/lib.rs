@@ -39,9 +39,8 @@ pub mod prelude {
     pub(crate) use radix_common::{
         math::Decimal as ScryptoDecimal192,
         prelude::{
-            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
+            ScryptoValue, ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
             IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE,
-            ScryptoValue
         },
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
     };

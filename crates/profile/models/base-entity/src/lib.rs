@@ -7,8 +7,8 @@ pub mod prelude {
     pub use crate::entity_flags::*;
     pub use crate::entity_security_state::*;
 
-    pub(crate) use ecc::prelude::*;
     pub(crate) use addresses::prelude::*;
+    pub(crate) use ecc::prelude::*;
     pub(crate) use factors::prelude::*;
     pub(crate) use has_sample_values::prelude::*;
     pub(crate) use identified_vec_of::prelude::*;
