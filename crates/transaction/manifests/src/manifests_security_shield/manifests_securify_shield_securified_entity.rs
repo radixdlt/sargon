@@ -307,6 +307,7 @@ mod tests {
             SecurityStructureOfFactorInstances::sample_other_sim();
         let proposed_recovery_rule_set: ScryptoRuleSet =
             proposed_sec_structure.matrix_of_factors.clone().into();
+
         let (_, _, _, recovery_role_recovery_attempt, _) = ac_substate.state;
         let expected_recovery_attempt =
             RecoveryRoleRecoveryAttemptState::RecoveryAttempt(
@@ -345,18 +346,8 @@ mod tests {
             LedgerSimulatorBuilder::new().without_kernel_trace().build();
 
         // Securify the account by creating the AC
-        let ac_address = ledger.create_access_controller(
-            unsecurified_acc.clone(),
-            sec_structure.clone(),
-        );
-
-        let secured_control =
-            SecuredEntityControl::new(None, ac_address, sec_structure).unwrap();
-        let securified_account =
-            AnySecurifiedEntity::with_securified_entity_control(
-                unsecurified_acc.entity.into(),
-                secured_control.clone(),
-            );
+        let securified_account = ledger
+            .securify_account(unsecurified_acc.clone(), sec_structure.clone());
 
         // Update the security structure by exercising the recovery roles
         let updated_sec_structure =
@@ -372,19 +363,22 @@ mod tests {
         manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
             manifest,
             Decimal192::one(),
-            securified_account,
+            securified_account.clone(),
         );
 
         ledger.execute_ac_recovery_manifest(
-            manifest,
-            secured_control,
+            manifest.clone(),
+            securified_account.securified_entity_control.clone(),
             roles_combination,
         );
 
         // Assert that the on ledger rule set matches the expected rule set
-        let rule_set =
-            ledger.read_access_controller_rule_set(ac_address.clone());
-        let state = ledger.read_access_controller_substate(ac_address);
+        let rule_set = ledger.read_access_controller_rule_set(
+            securified_account.access_controller_address().clone(),
+        );
+        let state = ledger.read_access_controller_substate(
+            securified_account.access_controller_address(),
+        );
         (state, rule_set)
     }
 

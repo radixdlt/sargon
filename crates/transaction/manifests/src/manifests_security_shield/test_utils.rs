@@ -1,4 +1,6 @@
 use crate::prelude::*;
+#[cfg(test)]
+use profile_supporting_types::SecurifiedAccount;
 use profile_supporting_types::UnsecurifiedAccount;
 use radix_engine::vm::*;
 use radix_engine::{
@@ -75,11 +77,11 @@ where
     }
 
     // Create an Access Controller on Ledger for the given account with the given security structure of factor instances
-    fn create_access_controller(
+    fn securify_account(
         &mut self,
         unsecurified_account: UnsecurifiedAccount,
         security_structure: SecurityStructureOfFactorInstances,
-    ) -> AccessControllerAddress {
+    ) -> SecurifiedAccount {
         let account_address =
             unsecurified_account.address().into_account().unwrap();
         // Preload account with free XRDz to use for fee payment.
@@ -88,7 +90,7 @@ where
         let mut securify_account_manifest =
             TransactionManifest::apply_security_shield_for_unsecurified_entity(
                 unsecurified_account.clone().into(),
-                security_structure,
+                security_structure.clone(),
             )
             .unwrap();
 
@@ -126,7 +128,17 @@ where
             .first()
             .copied()
             .unwrap();
-        (scrypto_ac_address, NetworkID::Simulator).into()
+        let ac_address: AccessControllerAddress =
+            (scrypto_ac_address, NetworkID::Simulator).into();
+
+        let secured_control =
+            SecuredEntityControl::new(None, ac_address, security_structure)
+                .unwrap();
+
+        SecurifiedAccount::with_securified_entity_control(
+            unsecurified_account.entity.into(),
+            secured_control,
+        )
     }
 
     // Executes the given AC recovery manifest and asserts that the transaction was successfully committed.
