@@ -39,7 +39,7 @@ pub mod prelude {
     pub(crate) use radix_common::{
         math::Decimal as ScryptoDecimal192,
         prelude::{
-            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
+            ScryptoValue, ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
             IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE,
         },
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
@@ -47,6 +47,11 @@ pub mod prelude {
 
     pub(crate) use radix_engine_toolkit::functions::transaction_v1::manifest::dynamically_analyze as RET_dynamically_analyze;
     pub(crate) use radix_engine_toolkit_common::receipt::RuntimeToolkitTransactionReceipt as ScryptoRuntimeToolkitTransactionReceipt;
+
+    #[cfg(test)]
+    pub(crate) use radix_engine::blueprints::access_controller::v2::*;
+    #[cfg(test)]
+    pub(crate) use sbor::versioned::*;
 
     pub(crate) use radix_engine_interface::{
         blueprints::{
@@ -70,6 +75,7 @@ pub mod prelude {
             UncheckedUrl as ScryptoUncheckedUrl,
         },
     };
+    pub(crate) use scrypto_test::ledger_simulator::*;
 
     pub(crate) use serde::{Deserialize, Serialize};
 

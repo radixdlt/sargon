@@ -64,6 +64,26 @@ impl ProfileAccountByAddress for Profile {
         }
         Err(CommonError::UnknownAccount)
     }
+
+    fn account_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<Account> {
+        for network in self.networks.iter() {
+            let account_match = network.accounts.iter().find(|acc| match &acc
+                .security_state
+            {
+                EntitySecurityState::Unsecured { value: _ } => false,
+                EntitySecurityState::Securified { value } => {
+                    value.access_controller_address == address
+                }
+            });
+            if let Some(account) = account_match {
+                return Ok(account);
+            }
+        }
+        Err(CommonError::UnknownAccount)
+    }
 }
 
 impl ProfilePersonaByAddress for Profile {
@@ -73,6 +93,26 @@ impl ProfilePersonaByAddress for Profile {
         for network in self.networks.iter() {
             if let Some(persona) = network.personas.get_id(address) {
                 return Ok(persona.clone());
+            }
+        }
+        Err(CommonError::UnknownPersona)
+    }
+
+    fn persona_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<Persona> {
+        for network in self.networks.iter() {
+            let persona_match = network.personas.iter().find(|persona| {
+                match &persona.security_state {
+                    EntitySecurityState::Unsecured { value: _ } => false,
+                    EntitySecurityState::Securified { value } => {
+                        value.access_controller_address == address
+                    }
+                }
+            });
+            if let Some(persona) = persona_match {
+                return Ok(persona);
             }
         }
         Err(CommonError::UnknownPersona)
@@ -92,6 +132,17 @@ impl ProfileEntityByAddress for Profile {
             } else {
                 CommonError::UnknownPersona
             })
+    }
+
+    fn entity_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<AccountOrPersona> {
+        self.account_by_access_controller_address(address)
+            .map(AccountOrPersona::from)
+            .or(self
+                .persona_by_access_controller_address(address)
+                .map(AccountOrPersona::from))
     }
 }
 

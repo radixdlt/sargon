@@ -317,12 +317,13 @@ radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "279c050a25543a0394fffe7818573a2d1d2d3acf" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "488c2b56a3d1d583cd0d3d4f4d8d20cdbb9d29ae" }
 radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
     "serde",
 ] }
 radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+scrypto-test = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 
 
@@ -424,6 +425,8 @@ zeroize = { version = "1.7.0", default-features = false, features = [
     "zeroize_derive",
     "derive",
 ] }
+
+extend = "1.2.0"
 
 # mockall = "0.13.1"
 mockall = { git = "https://github.com/asomers/mockall", rev = "62f92cb84a042116eceb1f734c63e928072f1cef" }

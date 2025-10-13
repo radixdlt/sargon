@@ -98,11 +98,21 @@ pub enum DetailedManifestClass {
     /// to an entity
     SecurifyEntity {
         /// The entity address that is about to be securified
-        entity_address: AddressOfAccountOrPersona,
-
-        /// The provisional security structure metadata that is about to be applied
-        /// into the entity address
-        provisional_security_structure_metadata: SecurityStructureMetadata,
+        entities: Vec<AddressOfAccountOrPersona>,
+    },
+    /// A manifest that starts the access controller recovery, it is either
+    /// confirmed in the same transaction, or it is a timed recovery, currently
+    /// the difference is not important.
+    AccessControllerRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
+    },
+    /// A manifest that stops the timed recovery.
+    /// It can as well contain instructions to cancel the given recovery proposal.
+    AccessControllerStopTimedRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
+    },
+    AccessControllerConfirmTimedRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
     },
 }
 

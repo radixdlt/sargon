@@ -66,6 +66,11 @@ pub trait OsSecurityStructuresQuerying {
         address_of_account_or_persona: &AddressOfAccountOrPersona,
     ) -> Result<SecurityStructureOfFactorSources>;
 
+    fn provisional_security_structure_of_factor_sources_from_address_of_account_or_persona(
+        &self,
+        address_of_account_or_persona: &AddressOfAccountOrPersona,
+    ) -> Result<SecurityStructureOfFactorSources>;
+
     fn sorted_factor_sources_from_security_structure(
         &self,
         structure: &SecurityStructureOfFactorSources,
@@ -344,6 +349,26 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 .as_securified()
                 .ok_or(CommonError::SecurityStateNotSecurified)?
                 .security_structure
+                .clone();
+            let ids = SecurityStructureOfFactorSourceIds::from(instances);
+            TryFrom::<(&SecurityStructureOfFactorSourceIds, &FactorSources)>::try_from((&ids, &p.factor_sources))
+        })
+    }
+
+    /// Returns the `SecurityStructuresOfFactorSources` based on the security state of the
+    /// account or persona with given `address_of_account_or_persona`
+    fn provisional_security_structure_of_factor_sources_from_address_of_account_or_persona(
+        &self,
+        address_of_account_or_persona: &AddressOfAccountOrPersona,
+    ) -> Result<SecurityStructureOfFactorSources> {
+        self.profile().and_then(|p| {
+            let state = p
+                .entity_by_address(*address_of_account_or_persona)?
+                .security_state();
+            let instances = state
+                .get_provisional()
+                .ok_or(CommonError::ProvisionalConfigInWrongStateExpectedInstancesDerived)?
+                .get_security_structure_of_factor_instances()
                 .clone();
             let ids = SecurityStructureOfFactorSourceIds::from(instances);
             TryFrom::<(&SecurityStructureOfFactorSourceIds, &FactorSources)>::try_from((&ids, &p.factor_sources))

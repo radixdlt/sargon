@@ -359,6 +359,10 @@ impl Account {
         Self::sample_stokenet_paige()
     }
 
+    pub fn sample_sim() -> Self {
+        Self::sample_at_index_name_network(NetworkID::Simulator, 0, "Sim", None)
+    }
+
     /// A sample used to facilitate unit tests.
     pub fn sample_nebunet() -> Self {
         Self::sample_with_values(

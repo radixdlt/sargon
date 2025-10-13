@@ -34,6 +34,14 @@ impl SargonOS {
         self.profile_state_holder.entity_by_address(entity_address)
     }
 
+    pub fn entity_by_access_controller_address(
+        &self,
+        address_of_access_controller: AccessControllerAddress,
+    ) -> Result<AccountOrPersona> {
+        self.profile_state_holder
+            .entity_by_access_controller_address(address_of_access_controller)
+    }
+
     /// Create a new Account and adds it to the active Profile.
     ///
     /// # Emits Event

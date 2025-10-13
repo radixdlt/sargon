@@ -30,6 +30,7 @@ radix-engine-toolkit = { workspace = true }
 radix-engine-toolkit-common = { workspace = true }
 radix-rust = { workspace = true }
 radix-transactions = { workspace = true }
+scrypto-test = { workspace = true }
 sbor = { workspace = true }
 
 # === EXTERNAL DEPENDENCIES ===
@@ -41,6 +42,7 @@ paste = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+extend = { workspace = true }
 
 [build-dependencies]
 cargo_toml = { workspace = true }
