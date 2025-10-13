@@ -106,6 +106,21 @@ impl HasSampleValues for FactorInstance {
     }
 }
 
+#[cfg(debug_assertions)]
+impl FactorInstance {
+    pub fn sign_hash(&self, hash: &Hash) -> SignatureWithPublicKey {
+        let mwp = self
+            .factor_source_id
+            .into_hash()
+            .unwrap()
+            .sample_associated_mnemonic();
+        mwp.sign(
+            &hash,
+            &self.try_as_hd_factor_instances().unwrap().derivation_path(),
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::prelude::*;

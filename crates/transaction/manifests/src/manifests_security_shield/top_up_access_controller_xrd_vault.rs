@@ -84,40 +84,9 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         can_exercise_primary_role: bool,
         can_quick_confirm: bool,
     ) -> Result<TransactionManifest> {
+        let mut builder = ScryptoTransactionManifestBuilder::new();
         let payer = payer.into();
         let address_of_paying_account = payer.address();
-
-        {
-            // Try to eagerly identify invalid manifest.
-            // We dont _need_ this and might remove it.
-            // but I think this will work.
-
-            let payer_is_entity_applying_shield =
-                entity_applying_shield.address() == payer.address().into();
-            if payer_is_entity_applying_shield {
-                // If user can quick confirm they can sign with NEW factors. If manifest
-                // is not quick confirming and user has access to primary she can use old factors
-                // and exercise the primary role.
-                let is_unable_to_top_up_xrd_vault = !(can_exercise_primary_role
-                    || can_quick_confirm)
-                    && payer_is_entity_applying_shield;
-                if is_unable_to_top_up_xrd_vault {
-                    // The payer is the entity applying the shield, but the manifest is not classified as
-                    // to be able to exercise the primary role. Thus we will not be able to
-                    // top up the XRD vault of the access controller.
-                    return Err(CommonError::UnableToTopUpXrdVault {
-                        entity_owning_access_controller: entity_applying_shield
-                            .address()
-                            .to_string(),
-                        payer_is_entity_applying_shield,
-                        can_exercise_primary_role,
-                    });
-                }
-            }
-        }
-
-        let mut builder =
-            ScryptoTransactionManifestBuilder::new_with_manifest(manifest);
 
         let address_of_access_controller_to_top_up =
             match entity_applying_shield.security_state() {
@@ -171,6 +140,8 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             XRD,
             top_up_amount,
         );
+
+        builder = builder.extend_builder_with_manifest(manifest);
 
         // Deposit XRD into the access controllers XRD vault
         // ... by first taking the XRD from the work top
