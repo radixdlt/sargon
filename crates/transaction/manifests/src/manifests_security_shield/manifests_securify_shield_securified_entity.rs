@@ -2,7 +2,7 @@
 use crate::prelude::*;
 use std::ops::Deref;
 
-use profile_supporting_types::AnySecurifiedEntity;
+use profile_supporting_types::{AnySecurifiedEntity, UnsecurifiedAccount};
 
 pub trait TransactionManifestSecurifySecurifiedEntity:
     TransactionManifestSetRolaKey
@@ -131,11 +131,19 @@ mod tests {
     #![allow(non_snake_case)]
 
     use prelude::fixture_rtm;
-    use profile_supporting_types::{SecurifiedAccount, SecurifiedPersona};
+    use profile_supporting_types::{
+        AnyUnsecurifiedEntity, SecurifiedAccount, SecurifiedPersona,
+    };
     use radix_transactions::manifest::{
         CallMetadataMethod, CallMethod, ManifestInstruction,
     };
     use sbor::SborEnum;
+    use scrypto_test::prelude::{
+        v2::AccessControllerV2Substate, FieldContentSource, FieldPayload,
+        RecoveryProposal, RecoveryRoleBadgeWithdrawAttemptState,
+        RecoveryRoleRecoveryAttemptState, RecoveryRoleRecoveryState,
+        SubstateDatabaseExtensions,
+    };
 
     use super::*;
 
@@ -267,5 +275,122 @@ mod tests {
             vec![CallMethod::ID],
             "init with R complete with T should not set rola key - since we cannot"
         );
+    }
+
+    #[test]
+    fn iniate_with_recovery_complete_with_confirmation() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation);
+    }
+
+    #[test]
+    fn iniate_with_recovery_complete_with_primary() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary);
+    }
+
+    #[test]
+    fn iniate_with_primary_complete_with_confirmation() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation);
+    }
+
+    #[test]
+    fn iniate_with_recovery_delayed_completion() {
+        let (ac_substate, ac_rule_set) = execute_recovery_transaction(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion);
+
+        // Expect rule set to not change. The AC is initially configured with `sample_sim`, and recovery is proposed with `sample_sim_other`
+        let expected_rule_set =
+            SecurityStructureOfFactorInstances::sample_sim()
+                .matrix_of_factors
+                .into();
+        pretty_assertions::assert_eq!(ac_rule_set, expected_rule_set);
+
+        let proposed_sec_structure =
+            SecurityStructureOfFactorInstances::sample_other_sim();
+        let proposed_recovery_rule_set: ScryptoRuleSet =
+            proposed_sec_structure.matrix_of_factors.clone().into();
+
+        let (_, _, _, recovery_role_recovery_attempt, _) = ac_substate.state;
+        let expected_recovery_attempt =
+            RecoveryRoleRecoveryAttemptState::RecoveryAttempt(
+                RecoveryRoleRecoveryState::TimedRecovery {
+                    proposal: RecoveryProposal {
+                        rule_set: proposed_recovery_rule_set,
+                        timed_recovery_delay_in_minutes: Some(
+                            proposed_sec_structure
+                                .timed_recovery_delay_in_minutes(),
+                        ),
+                    },
+                    // just the sec structure delay, since the ledger epoch in seconds is zero, it wasn't `advanced in execute_recovery_transaction``
+                    timed_recovery_allowed_after: ScryptoInstant::new(
+                        i64::from(
+                            proposed_sec_structure
+                                .timed_recovery_delay_in_minutes()
+                                * 60,
+                        ),
+                    ),
+                },
+            );
+
+        pretty_assertions::assert_eq!(
+            recovery_role_recovery_attempt,
+            expected_recovery_attempt
+        );
+    }
+
+    fn execute_recovery_transaction(
+        roles_combination: RolesExercisableInTransactionManifestCombination,
+    ) -> (AccessControllerV2StateV2, ScryptoRuleSet) {
+        let sec_structure = SecurityStructureOfFactorInstances::sample_sim();
+        let unsecurified_acc = UnsecurifiedAccount::sample_sim_account();
+
+        let mut ledger =
+            LedgerSimulatorBuilder::new().without_kernel_trace().build();
+
+        // Securify the account by creating the AC
+        let securified_account = ledger
+            .securify_account(unsecurified_acc.clone(), sec_structure.clone());
+
+        // Update the security structure by exercising the recovery roles
+        let updated_sec_structure =
+            SecurityStructureOfFactorInstances::sample_other_sim();
+
+        let mut manifest =
+            TransactionManifest::apply_security_shield_for_securified_entity(
+                securified_account.clone(),
+                updated_sec_structure.clone(),
+                roles_combination,
+            );
+
+        manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+            manifest,
+            Decimal192::one(),
+            securified_account.clone(),
+        );
+
+        ledger.execute_ac_recovery_manifest(
+            manifest.clone(),
+            securified_account.securified_entity_control.clone(),
+            roles_combination,
+        );
+
+        // Assert that the on ledger rule set matches the expected rule set
+        let rule_set = ledger.read_access_controller_rule_set(
+            securified_account.access_controller_address().clone(),
+        );
+        let state = ledger.read_access_controller_substate(
+            securified_account.access_controller_address(),
+        );
+        (state, rule_set)
+    }
+
+    fn assert_recovery_with_quick_confirmation(
+        roles_combination: RolesExercisableInTransactionManifestCombination,
+    ) {
+        let (_, rule_set) = execute_recovery_transaction(roles_combination);
+
+        let expected_rule_set =
+            SecurityStructureOfFactorInstances::sample_other_sim()
+                .matrix_of_factors
+                .into();
+        pretty_assertions::assert_eq!(rule_set, expected_rule_set);
     }
 }

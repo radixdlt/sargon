@@ -65,6 +65,8 @@ pub mod prelude {
     pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
 
     pub(crate) use enum_as_inner::EnumAsInner;
+    #[cfg(debug_assertions)]
+    pub(crate) use hash::Hash;
     pub(crate) use indexmap::{IndexMap, IndexSet};
     pub(crate) use serde::{
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,

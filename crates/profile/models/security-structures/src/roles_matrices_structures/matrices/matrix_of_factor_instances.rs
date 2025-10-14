@@ -93,12 +93,13 @@ pub trait HasFactorInstances {
 
 impl MatrixOfFactorInstances {
     fn sample_from_matrix_of_sources(
+        network_id: NetworkID,
         matrix_of_sources: MatrixOfFactorSources,
         entity_kind: CAP26EntityKind,
     ) -> Self {
         let mut consuming_instances =
             MnemonicWithPassphrase::derive_instances_for_factor_sources(
-                NetworkID::Mainnet,
+                network_id,
                 1,
                 [if entity_kind == CAP26EntityKind::Account {
                     DerivationPreset::AccountMfa
@@ -190,6 +191,7 @@ impl HasSampleValues for MatrixOfFactorInstances {
     /// Account
     fn sample() -> Self {
         Self::sample_from_matrix_of_sources(
+            NetworkID::Mainnet,
             MatrixOfFactorSources::sample(),
             CAP26EntityKind::Account,
         )
@@ -198,8 +200,27 @@ impl HasSampleValues for MatrixOfFactorInstances {
     /// Persona
     fn sample_other() -> Self {
         Self::sample_from_matrix_of_sources(
+            NetworkID::Mainnet,
             MatrixOfFactorSources::sample_other(),
             CAP26EntityKind::Identity,
+        )
+    }
+}
+
+impl MatrixOfFactorInstances {
+    pub fn sample_sim() -> Self {
+        Self::sample_from_matrix_of_sources(
+            NetworkID::Simulator,
+            MatrixOfFactorSources::sample(),
+            CAP26EntityKind::Account,
+        )
+    }
+
+    pub fn sample_other_sim() -> Self {
+        Self::sample_from_matrix_of_sources(
+            NetworkID::Simulator,
+            MatrixOfFactorSources::sample_other(),
+            CAP26EntityKind::Account,
         )
     }
 }

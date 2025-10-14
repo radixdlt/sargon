@@ -119,6 +119,26 @@ impl HasSampleValues for SecurityStructureOfFactorInstances {
     }
 }
 
+impl SecurityStructureOfFactorInstances {
+    pub fn sample_sim() -> Self {
+        Self::new(
+      SecurityStructureID::sample(),
+      MatrixOfFactorInstances::sample_sim(),
+      HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(NetworkID::Simulator, CAP26KeyKind::AuthenticationSigning, CAP26EntityKind::Account, Hardened::Securified(SecurifiedU30::ZERO))
+  )
+  .unwrap()
+    }
+
+    pub fn sample_other_sim() -> Self {
+        Self::new(
+      SecurityStructureID::sample(),
+      MatrixOfFactorInstances::sample_other_sim(),
+      HierarchicalDeterministicFactorInstance::sample_with_key_kind_entity_kind_on_network_and_hardened_index(NetworkID::Simulator, CAP26KeyKind::AuthenticationSigning, CAP26EntityKind::Account, Hardened::Securified(SecurifiedU30::ZERO))
+  )
+  .unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

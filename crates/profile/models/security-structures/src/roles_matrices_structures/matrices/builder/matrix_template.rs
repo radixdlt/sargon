@@ -126,10 +126,7 @@ impl MatrixTemplate {
                 FactorSourceTemplate::device(),
                 FactorSourceTemplate::ledger(),
             ]),
-            RecoveryRoleTemplate::new([
-                FactorSourceTemplate::device(),
-                FactorSourceTemplate::ledger(),
-            ]),
+            RecoveryRoleTemplate::new([FactorSourceTemplate::arculus()]),
             ConfirmationRoleTemplate::new([FactorSourceTemplate::password()]),
         )
     }
