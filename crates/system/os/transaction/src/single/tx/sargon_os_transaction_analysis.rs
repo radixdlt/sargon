@@ -624,6 +624,7 @@ mod tests {
         )
     }
 
+    
     use radix_common::math::Decimal as ScryptoDecimal192;
 
     #[actix_rt::test]

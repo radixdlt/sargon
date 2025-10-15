@@ -4275,7 +4275,6 @@ dependencies = [
  "interactors",
  "key-derivation-traits",
  "log",
- "manifests",
  "prelude",
  "profile",
  "profile-logic",

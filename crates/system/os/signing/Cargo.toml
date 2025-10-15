@@ -15,7 +15,6 @@ profile-security-structures = { workspace = true }
 radix-connect-models = { workspace = true }
 profile = { workspace = true }
 profile-logic = { workspace = true }
-manifests = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
