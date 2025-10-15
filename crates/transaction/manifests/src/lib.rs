@@ -12,7 +12,6 @@ mod summary;
 mod third_party_deposit_update;
 
 pub mod prelude {
-
     pub(crate) use crate::bucket_factory;
 
     pub use crate::delete_account::*;
@@ -39,7 +38,7 @@ pub mod prelude {
     pub(crate) use radix_common::{
         math::Decimal as ScryptoDecimal192,
         prelude::{
-            ScryptoValue, ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
+            ACCOUNT_OWNER_BADGE as SCRYPTO_ACCOUNT_OWNER_BADGE,
             IDENTITY_OWNER_BADGE as SCRYPTO_IDENTITY_OWNER_BADGE,
         },
         ManifestSbor as ScryptoManifestSbor, ScryptoSbor,
