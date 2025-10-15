@@ -72,6 +72,14 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
         self.failed_transactions.is_empty()
     }
 
+    pub fn success_or(&self, or: Self) -> Self {
+        if self.successful() {
+            self.clone()
+        } else {
+            or
+        }
+    }
+
     pub fn signatures_of_successful_transactions(
         &self,
     ) -> IndexSet<HDSignature<ID>> {

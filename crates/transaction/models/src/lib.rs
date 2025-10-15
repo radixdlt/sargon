@@ -204,7 +204,7 @@ pub mod prelude {
     };
 
     pub(crate) use enum_as_inner::EnumAsInner;
-    
+
     pub(crate) use serde::{Deserialize, Serialize};
 
     #[cfg(test)]

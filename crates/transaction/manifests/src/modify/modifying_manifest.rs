@@ -74,6 +74,7 @@ fn default_fee() -> Decimal192 {
     Decimal192::from(25)
 }
 
+#[derive(Clone, PartialEq)]
 pub struct LockFeeData {
     pub fee_payer_address: AccountAddress,
     pub access_controller_address: Option<AccessControllerAddress>,

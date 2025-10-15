@@ -17,7 +17,8 @@ pub trait OsSigning {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        summary: ExecutionSummary,
+        lock_fee_data: LockFeeData,
     ) -> Result<SignedIntent>;
 
     async fn sign_subintent(
@@ -47,14 +48,36 @@ impl OsSigning for SargonOS {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        summary: ExecutionSummary,
+        lock_fee_data: LockFeeData,
     ) -> Result<SignedIntent> {
-        self.sign(
-            transaction_intent.clone(),
-            self.sign_transactions_interactor(),
-            SigningPurpose::sign_transaction(role_kind),
-        )
-        .await
+        match summary.detailed_classification {
+            Some(DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses,
+            }) => {
+                todo!() // recovery singning,
+            }
+            Some(
+                DetailedManifestClass::AccessControllerStopTimedRecovery {
+                    ac_addresses,
+                },
+            ) => {
+                self.sign(
+                    transaction_intent.clone(),
+                    self.sign_transactions_interactor(),
+                    SigningPurpose::sign_transaction(RoleKind::Recovery), // Stop timed recovery can be done only by recovery role? Wrong, could be singed by any factor? TBD
+                )
+                .await
+            }
+            Some(_) | None => {
+                self.sign(
+                    transaction_intent.clone(),
+                    self.sign_transactions_interactor(),
+                    SigningPurpose::sign_transaction(RoleKind::Primary),
+                )
+                .await
+            }
+        }
     }
 
     async fn sign_subintent(
