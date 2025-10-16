@@ -75,6 +75,7 @@ pub mod prelude {
             UncheckedUrl as ScryptoUncheckedUrl,
         },
     };
+    #[cfg(test)]
     pub(crate) use scrypto_test::ledger_simulator::*;
 
     pub(crate) use serde::{Deserialize, Serialize};
