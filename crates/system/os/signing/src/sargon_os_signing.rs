@@ -17,7 +17,8 @@ pub trait OsSigning {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        execution_summary: ExecutionSummary,
+        lock_fee_data: LockFeeData,
     ) -> Result<SignedIntent>;
 
     async fn sign_subintent(
@@ -47,12 +48,26 @@ impl OsSigning for SargonOS {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        execution_summary: ExecutionSummary,
+        lock_fee_data: LockFeeData,
     ) -> Result<SignedIntent> {
+        if matches!(
+            execution_summary.detailed_classification.as_ref(),
+            Some(DetailedManifestClass::AccessControllerRecovery { .. })
+        ) {
+            return sign_access_controller_recovery_transaction(
+                self,
+                transaction_intent,
+                execution_summary,
+                lock_fee_data,
+            )
+            .await;
+        }
+
         self.sign(
             transaction_intent.clone(),
             self.sign_transactions_interactor(),
-            SigningPurpose::sign_transaction(role_kind),
+            SigningPurpose::sign_transaction(RoleKind::Primary),
         )
         .await
     }
@@ -97,12 +112,71 @@ impl OsSigning for SargonOS {
     }
 }
 
+async fn sign_access_controller_recovery_transaction(
+    os: &SargonOS,
+    base_transaction_intent: TransactionIntent,
+    execution_summary: ExecutionSummary,
+    lock_fee_data: LockFeeData,
+) -> Result<SignedIntent> {
+    let profile = os.profile()?;
+
+    let access_controller_address =
+        access_controller_address_from_summary(&execution_summary)?;
+
+    let entity = profile
+        .entity_by_access_controller_address(access_controller_address)?;
+    let securified_entity = AnySecurifiedEntity::try_from(entity)?;
+    let securified_control = securified_entity.securified_entity_control();
+    let security_structure = securified_control.security_structure.clone();
+
+    let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
+        base_transaction_intent,
+        lock_fee_data,
+        securified_entity,
+        security_structure,
+    )
+    .build()?;
+
+    let factory = SignaturesCollectorFactory::new(
+        SigningFinishEarlyStrategy::default(),
+        profile.factor_sources(),
+        os.sign_transactions_interactor(),
+        recovery_intents,
+    );
+
+    SignaturesCollectorOrchestrator::new(factory).sign().await
+}
+
+fn access_controller_address_from_summary(
+    execution_summary: &ExecutionSummary,
+) -> Result<AccessControllerAddress> {
+    match &execution_summary.detailed_classification {
+        Some(DetailedManifestClass::AccessControllerRecovery {
+            ac_addresses,
+        }) => ac_addresses
+            .first()
+            .cloned()
+            .ok_or(CommonError::EntityNotFound),
+        _ => Err(CommonError::EntityNotFound),
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    fn default_sign_transaction_args() -> (ExecutionSummary, LockFeeData) {
+        (
+            ExecutionSummary::sample(),
+            LockFeeData::new_with_unsecurified_fee_payer(
+                AccountAddress::sample(),
+                Decimal192::one(),
+            ),
+        )
+    }
 
     #[actix_rt::test]
     async fn test_sign_auth_success() {
@@ -177,8 +251,15 @@ mod test {
             TransactionIntent,
         >(&sut.profile().unwrap());
 
+        let (execution_summary, lock_fee_data) =
+            default_sign_transaction_args();
+
         let signed = sut
-            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .sign_transaction(
+                signable.clone(),
+                execution_summary,
+                lock_fee_data,
+            )
             .await
             .unwrap();
 
@@ -217,8 +298,11 @@ mod test {
             vec![],
         );
 
+        let (execution_summary, lock_fee_data) =
+            default_sign_transaction_args();
+
         let outcome = sut
-            .sign_transaction(transaction, RoleKind::Primary)
+            .sign_transaction(transaction, execution_summary, lock_fee_data)
             .await
             .unwrap();
 
@@ -237,8 +321,11 @@ mod test {
             vec![],
         );
 
+        let (execution_summary, lock_fee_data) =
+            default_sign_transaction_args();
+
         let outcome = sut
-            .sign_transaction(transaction, RoleKind::Primary)
+            .sign_transaction(transaction, execution_summary, lock_fee_data)
             .await
             .unwrap();
 
@@ -261,8 +348,15 @@ mod test {
             &sut.profile().unwrap(),
         );
 
+        let (execution_summary, lock_fee_data) =
+            default_sign_transaction_args();
+
         let outcome = sut
-            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .sign_transaction(
+                signable.clone(),
+                execution_summary,
+                lock_fee_data,
+            )
             .await;
 
         assert_eq!(
@@ -340,8 +434,15 @@ mod test {
                 [],
             );
 
+        let (execution_summary, lock_fee_data) =
+            default_sign_transaction_args();
+
         let outcome = sut
-            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .sign_transaction(
+                signable.clone(),
+                execution_summary,
+                lock_fee_data,
+            )
             .await;
 
         assert_eq!(
@@ -391,8 +492,12 @@ mod test {
                 vec![],
             );
 
-        let outcome =
-            sut.sign_transaction(transaction, RoleKind::Primary).await;
+        let (execution_summary, lock_fee_data) =
+            default_sign_transaction_args();
+
+        let outcome = sut
+            .sign_transaction(transaction, execution_summary, lock_fee_data)
+            .await;
 
         assert_eq!(
             outcome,

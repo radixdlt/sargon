@@ -5,6 +5,10 @@ pub struct SignaturesCollectorOrchestrator {
 }
 
 impl SignaturesCollectorOrchestrator {
+    pub fn new(factory: SignaturesCollectorFactory) -> Self {
+        Self { factory }
+    }
+
     pub async fn sign(&self) -> Result<SignedIntent> {
         let outcome = self
             .iniate_with_recovery_flow()
