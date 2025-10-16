@@ -2,26 +2,22 @@ use crate::prelude::*;
 
 use profile_supporting_types::AnySecurifiedEntity;
 use radix_engine_interface::blueprints::access_controller::{
+    AccessControllerCancelRecoveryRoleRecoveryProposalManifestInput as ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput,
     AccessControllerTimedConfirmRecoveryInput as ScryptoAccessControllerTimedConfirmRecoveryInput,
-    ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT,
+    ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+    ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
 };
 
-pub trait TransactionManifestConfirmTimedRecovery {
-    /// TBD
-    /// TODO: Figure out how to do this...
-    /// since `AccessControllerTimedConfirmRecoveryInput` need the input of
-    /// the factors and time which was used to start recovery - which could not
-    /// be quick confirmed. We need to figure out how we best represent this
-    /// in Profile. Perhaps a new variant on ProvisionalSecurityConfig? Something
-    /// like:
-    /// `WaitingForTimedRecovery(SecurityStructureOfFactorInstances)`
-    fn confirm_timed_recovery(
+pub trait TransactionManifestCancelTimedRecovery {
+    /// Cancels the timed recovery for the given `securified_entity`
+    /// The `securified_entity` must have a `provisional_securified_config` set up.
+    fn cancel_timed_recovery(
         securified_entity: impl Into<AnySecurifiedEntity>,
     ) -> TransactionManifest;
 }
 
-impl TransactionManifestConfirmTimedRecovery for TransactionManifest {
-    fn confirm_timed_recovery(
+impl TransactionManifestCancelTimedRecovery for TransactionManifest {
+    fn cancel_timed_recovery(
         securified_entity: impl Into<AnySecurifiedEntity>,
     ) -> Self {
         let securified_entity = securified_entity.into();
@@ -34,7 +30,6 @@ impl TransactionManifestConfirmTimedRecovery for TransactionManifest {
             .provisional_securified_config
             .expect("The provisional config must be present")
             .get_security_structure_of_factor_instances();
-
         let factors_and_time = AccessControllerFactorsAndTimeInput::new(
             &security_structure_of_factor_instances,
         );
@@ -42,10 +37,14 @@ impl TransactionManifestConfirmTimedRecovery for TransactionManifest {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         builder = builder.call_method(
             access_controller_address.scrypto(),
-            SCRYPTO_ACCESS_CONTROLLER_TIMED_CONFIRM_RECOVERY_IDENT,
+            SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
             ScryptoAccessControllerTimedConfirmRecoveryInput::from(
                 &factors_and_time,
             ),
+        ).call_method(
+            access_controller_address.scrypto(),
+            SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+            ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput {},
         );
 
         TransactionManifest::sargon_built(
@@ -59,36 +58,29 @@ impl TransactionManifestConfirmTimedRecovery for TransactionManifest {
 mod tests {
     #![allow(non_snake_case)]
 
-    use prelude::fixture_rtm;
-    use profile_supporting_types::{
-        SecurifiedAccount, SecurifiedPersona, UnsecurifiedAccount,
-    };
-    use radix_transactions::manifest::{
-        CallMetadataMethod, CallMethod, ManifestInstruction,
-    };
-    use sbor::SborEnum;
-    use scrypto_test::prelude::{
-        RecoveryProposal, RecoveryRoleRecoveryAttemptState,
-        RecoveryRoleRecoveryState,
-    };
-
     use super::*;
+    use prelude::fixture_rtm;
+    use profile_supporting_types::{SecurifiedAccount, UnsecurifiedAccount};
+    use radix_engine::blueprints::access_controller::{
+        RecoveryRoleRecoveryAttemptState, RecoveryRoleRecoveryState,
+    };
+    use radix_engine_interface::blueprints::access_controller::RecoveryProposal;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
 
     #[test]
-    fn confirm_timed_recovery() {
+    fn cancel_timed_recovery() {
         let mut securified_account = SecurifiedAccount::sample();
         assert_eq!(securified_account.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
 
+        // Add provisional securified config
         securified_account
             .entity
             .security_state
             .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
-        securified_account
-            .securified_entity_control
-            .set_provisional(ProvisionalSecurifiedConfig::sample());
+        securified_account =
+            SecurifiedAccount::new(securified_account.entity).unwrap();
         pretty_assertions::assert_eq!(
             securified_account
                 .clone()
@@ -99,28 +91,29 @@ mod tests {
             SecurityStructureOfFactorInstances::sample()
         );
 
-        let manifest = SUT::confirm_timed_recovery(securified_account.clone());
+        let manifest = SUT::cancel_timed_recovery(securified_account.clone());
 
         let expected_manifest_str =
-            fixture_rtm!("confirm_shield_of_account_timed_recovery");
+            fixture_rtm!("cancel_account_shield_timed_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
         assert!(expected_manifest_str.contains("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g"));
 
         let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(securified_account.clone(), securified_account.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
 
         let expected_manifest_str =
-            fixture_rtm!("confirm_shield_of_account_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
+            fixture_rtm!("cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
 
         let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_account);
+        println!("{:#?}", manifest.manifest_string());
 
         let expected_manifest_str =
-            fixture_rtm!("confirm_shield_of_account_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
+            fixture_rtm!("cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
         manifest_eq(manifest, expected_manifest_str);
     }
 
     #[test]
-    fn confirm_timed_recovery_transaction() {
+    fn cancel_timed_recovery_transaction() {
         let mut ledger =
             LedgerSimulatorBuilder::new().without_kernel_trace().build();
 
@@ -187,17 +180,8 @@ mod tests {
             updated_sec_structure.clone()
         );
 
-        // Advance time by 14 days (+1 ms) by moving to the next consensus round
-        let now_ms = ledger.get_current_proposer_timestamp_ms();
-        let current_round = ledger.get_consensus_manager_state().round;
-        let target_ts = now_ms + (14 * 24 * 60 * 60_000) + 1;
-        let next_round = radix_engine_interface::prelude::Round::of(
-            current_round.number() + 1,
-        );
-        ledger.advance_to_round_at_timestamp(next_round, target_ts);
-
-        // Confirm timed recovery
-        let mut manifest = TransactionManifest::confirm_timed_recovery(
+        // Cancel timed recovery
+        let mut manifest = TransactionManifest::cancel_timed_recovery(
             securified_account.clone(),
         );
 
@@ -215,7 +199,7 @@ mod tests {
             .execute_notarized_transaction(notarized_tx)
             .expect_commit_success();
 
-        // Assert that the on ledger rule set matches the expected rule set
+        // Assert that the on ledger rule set matches the rule set before starting recovery
         let rule_set = ledger.read_access_controller_rule_set(
             securified_account.access_controller_address().clone(),
         );
@@ -224,7 +208,7 @@ mod tests {
         );
 
         let expected_rule_set =
-            SecurityStructureOfFactorInstances::sample_other_sim()
+            SecurityStructureOfFactorInstances::sample_sim()
                 .matrix_of_factors
                 .into();
         let (_, _, _, recovery_role_recovery_attempt_new_state, _) =

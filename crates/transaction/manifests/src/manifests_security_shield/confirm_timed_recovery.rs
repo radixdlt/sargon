@@ -7,14 +7,8 @@ use radix_engine_interface::blueprints::access_controller::{
 };
 
 pub trait TransactionManifestConfirmTimedRecovery {
-    /// TBD
-    /// TODO: Figure out how to do this...
-    /// since `AccessControllerTimedConfirmRecoveryInput` need the input of
-    /// the factors and time which was used to start recovery - which could not
-    /// be quick confirmed. We need to figure out how we best represent this
-    /// in Profile. Perhaps a new variant on ProvisionalSecurityConfig? Something
-    /// like:
-    /// `WaitingForTimedRecovery(SecurityStructureOfFactorInstances)`
+    /// Confirms the timed recovery for the given `securified_entity`
+    /// The `securified_entity` must have a `provisional_securified_config` set up.
     fn confirm_timed_recovery(
         securified_entity: impl Into<AnySecurifiedEntity>,
     ) -> TransactionManifest;
@@ -60,13 +54,7 @@ mod tests {
     #![allow(non_snake_case)]
 
     use prelude::fixture_rtm;
-    use profile_supporting_types::{
-        SecurifiedAccount, SecurifiedPersona, UnsecurifiedAccount,
-    };
-    use radix_transactions::manifest::{
-        CallMetadataMethod, CallMethod, ManifestInstruction,
-    };
-    use sbor::SborEnum;
+    use profile_supporting_types::{SecurifiedAccount, UnsecurifiedAccount};
     use scrypto_test::prelude::{
         RecoveryProposal, RecoveryRoleRecoveryAttemptState,
         RecoveryRoleRecoveryState,
@@ -82,13 +70,13 @@ mod tests {
         let mut securified_account = SecurifiedAccount::sample();
         assert_eq!(securified_account.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
 
+        // Add provisional securified config
         securified_account
             .entity
             .security_state
             .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
-        securified_account
-            .securified_entity_control
-            .set_provisional(ProvisionalSecurifiedConfig::sample());
+        securified_account =
+            SecurifiedAccount::new(securified_account.entity).unwrap();
         pretty_assertions::assert_eq!(
             securified_account
                 .clone()
@@ -102,20 +90,20 @@ mod tests {
         let manifest = SUT::confirm_timed_recovery(securified_account.clone());
 
         let expected_manifest_str =
-            fixture_rtm!("confirm_shield_of_account_timed_recovery");
+            fixture_rtm!("confirm_account_shield_timed_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
         assert!(expected_manifest_str.contains("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g"));
 
         let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(securified_account.clone(), securified_account.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
 
         let expected_manifest_str =
-            fixture_rtm!("confirm_shield_of_account_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
+            fixture_rtm!("confirm_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
 
         let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_account);
 
         let expected_manifest_str =
-            fixture_rtm!("confirm_shield_of_account_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
+            fixture_rtm!("confirm_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
         manifest_eq(manifest, expected_manifest_str);
     }
 
