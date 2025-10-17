@@ -391,7 +391,7 @@ jobs:
         uses: RDXWorks-actions/cargo-install@main
         with:
           crate: cargo-tarpaulin
-          tag: 0.30.0
+          tag: 0.33.0
           locked: true
 
       - name: Code Coverage - Generate
