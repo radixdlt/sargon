@@ -47,7 +47,7 @@ impl AccessControllerRecoveryIntentsBuilder {
                 role_combination,
             );
 
-        manifest.modify_add_lock_fee(self.lock_fee_data.clone())?;
+            manifest = manifest.modify_add_lock_fee(self.lock_fee_data.clone())?;
 
         let intent = TransactionIntent::new(
             self.base_intent.header,
