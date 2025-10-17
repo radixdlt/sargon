@@ -50,15 +50,17 @@ impl NetworkingDriver for RustNetworkingDriver {
             .build()
             .unwrap();
 
-        let response = self
-            .client
-            .execute(request)
-            .await
-            .map_err(|_| CommonError::Unknown)?;
+        let response = self.client.execute(request).await.map_err(|_| {
+            CommonError::Unknown {
+                error_message: "Failed to execute request".to_string(),
+            }
+        })?;
 
         let status_code = response.status().as_u16();
         let body_bytes =
-            response.bytes().await.map_err(|_| CommonError::Unknown)?;
+            response.bytes().await.map_err(|_| CommonError::Unknown {
+                error_message: "Failed reading response bytes".to_string(),
+            })?;
         let body = BagOfBytes::from(body_bytes.to_vec());
 
         Ok(NetworkResponse { status_code, body })

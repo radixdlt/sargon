@@ -38,7 +38,9 @@ impl FromStr for KeySpace {
             {
                 Ok(Self::Unsecurified { is_hardened: true })
             }
-            _ => Err(CommonError::Unknown),
+            _ => Err(CommonError::Unknown {
+                error_message: "Unable to init KeySpace".to_string(),
+            }),
         }
     }
 }
