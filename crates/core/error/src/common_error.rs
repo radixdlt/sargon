@@ -6,7 +6,7 @@ pub type Result<T, E = CommonError> = std::result::Result<T, E>;
 #[repr(u32)]
 #[derive(Clone, Debug, Eq, ThisError, PartialEq)]
 pub enum CommonError {
-    #[error("Unknown Error")]
+    #[error("Unknown Error: {error_message}")]
     Unknown { error_message: String } = 10000,
 
     #[error("Failed to create Ed25519 Private key from bytes {bad_value:?}")]
