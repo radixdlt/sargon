@@ -129,11 +129,24 @@ async fn sign_access_controller_recovery_transaction(
     let securified_control = securified_entity.securified_entity_control();
     let security_structure = securified_control.security_structure.clone();
 
+    let fee_payer_account =
+        match profile.account_by_address(lock_fee_data.fee_payer_address) {
+            Ok(account)
+                if Into::<AddressOfAccountOrPersona>::into(account.address)
+                    != securified_entity.entity.address() =>
+            {
+                Some(account)
+            }
+            Ok(_) => None,
+            Err(err) => return Err(err),
+        };
+
     let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
         base_transaction_intent,
         lock_fee_data,
         securified_entity,
         security_structure,
+        fee_payer_account,
     )
     .build()?;
 

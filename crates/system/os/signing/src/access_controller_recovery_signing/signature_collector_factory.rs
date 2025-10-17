@@ -86,7 +86,27 @@ impl SignaturesCollectorFactory {
         )
     }
 
-    // Sign for the fee payer? TBD
+    pub fn fee_payer_sign_with_primary_role_collector_for(
+        &self,
+        intent_hash: &TransactionIntentHash,
+    ) -> Option<SignaturesCollector<TransactionIntent>> {
+        let fee_payer_account =
+            self.recovery_intents.fee_payer_account()?.clone();
+        let original_signable =
+            self.recovery_intents.signable_for_hash(intent_hash)?;
+        let fee_payer_signable = SignableWithEntities::with(
+            original_signable.signable,
+            vec![fee_payer_account],
+        );
+
+        Some(SignaturesCollector::with(
+            self.finish_early_strategy.clone(),
+            self.profile_factor_sources.clone(),
+            IdentifiedVecOf::just(fee_payer_signable),
+            self.interactor.clone(),
+            SigningPurpose::sign_transaction(RoleKind::Primary),
+        ))
+    }
 
     fn signature_collector_for_recovery_signing(
         &self,

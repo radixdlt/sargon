@@ -10,18 +10,33 @@ impl SignaturesCollectorOrchestrator {
     }
 
     pub async fn sign(&self) -> Result<SignedIntent> {
-        let outcome = { 
-            let iniate_with_recovery_result = self.iniate_with_recovery_flow().await?;
+        let outcome = {
+            let iniate_with_recovery_result =
+                self.iniate_with_recovery_flow().await?;
             match iniate_with_recovery_result {
                 Some(value) => Some(value),
-                None => self.iniate_with_primary_flow().await?
+                None => self.iniate_with_primary_flow().await?,
             }
         };
 
         match outcome {
-            Some(signatures) => {
-                let intent_hash = signatures.first().unwrap().payload_id();
-                let intent = self.factory.intent_for_hash(intent_hash).unwrap();
+            Some(mut signatures) => {
+                let intent_hash = signatures
+                    .first()
+                    .map(|sig| sig.payload_id().clone())
+                    .ok_or(CommonError::TooFewFactorInstancesDerived)?;
+
+                let fee_payer_signatures =
+                    self.collect_fee_payer_signatures(&intent_hash).await?;
+
+                fee_payer_signatures.into_iter().for_each(|signature| {
+                    signatures.insert(signature);
+                });
+
+                let intent = self
+                    .factory
+                    .intent_for_hash(&intent_hash)
+                    .ok_or(CommonError::TooFewFactorInstancesDerived)?;
                 let intent_signatures = signatures
                     .into_iter()
                     .map(|hd| IntentSignature(hd.signature))
@@ -36,6 +51,31 @@ impl SignaturesCollectorOrchestrator {
         }
     }
 
+    async fn collect_fee_payer_signatures(
+        &self,
+        intent_hash: &TransactionIntentHash,
+    ) -> Result<IndexSet<HDSignature<TransactionIntentHash>>> {
+        let Some(collector) = self
+            .factory
+            .fee_payer_sign_with_primary_role_collector_for(intent_hash)
+        else {
+            return Ok(IndexSet::new());
+        };
+
+        let outcome = collector.collect_signatures().await?;
+
+        if !outcome.successful() {
+            return Err(CommonError::TooFewFactorInstancesDerived);
+        }
+
+        let signatures = outcome.signatures_of_successful_transactions();
+        if signatures.is_empty() {
+            return Err(CommonError::TooFewFactorInstancesDerived);
+        }
+
+        Ok(signatures)
+    }
+
     async fn iniate_with_recovery_flow(
         &self,
     ) -> Result<Option<IndexSet<HDSignature<TransactionIntentHash>>>> {
@@ -48,13 +88,14 @@ impl SignaturesCollectorOrchestrator {
         if recovery_role_signatures_outcome.successful() {
             let recovery_role_signatures =
                 recovery_role_signatures_outcome.all_signatures();
-            
+
             let confirmation_role_outcome = self.factory.initiate_recovery_with_recovery_sign_with_confirmation_role_collector().collect_signatures().await?;
             if confirmation_role_outcome.successful() {
-                let mut confirmation_role_signatures = confirmation_role_outcome.all_signatures();
+                let mut confirmation_role_signatures =
+                    confirmation_role_outcome.all_signatures();
 
                 let intent_hash =
-                confirmation_role_signatures.first().unwrap().payload_id();
+                    confirmation_role_signatures.first().unwrap().payload_id();
                 let recovery_signature = recovery_role_signatures
                     .iter()
                     .find(|sig| *sig.payload_id() == *intent_hash)
@@ -66,10 +107,11 @@ impl SignaturesCollectorOrchestrator {
 
             let primary_role_signatures_outcome = self.factory.initiate_recovery_with_recovery_sign_with_primary_role_collector().collect_signatures().await?;
             if primary_role_signatures_outcome.successful() {
-                let mut primary_role_signatures = primary_role_signatures_outcome.all_signatures();
+                let mut primary_role_signatures =
+                    primary_role_signatures_outcome.all_signatures();
 
                 let intent_hash =
-                primary_role_signatures.first().unwrap().payload_id();
+                    primary_role_signatures.first().unwrap().payload_id();
                 let recovery_signature = recovery_role_signatures
                     .iter()
                     .find(|sig| *sig.payload_id() == *intent_hash)
@@ -78,15 +120,15 @@ impl SignaturesCollectorOrchestrator {
                 primary_role_signatures.insert(recovery_signature);
                 return Ok(Some(primary_role_signatures));
             }
-           
-                let signature = recovery_role_signatures
-                    .into_iter()
-                    .find(|sig| {
-                        *sig.payload_id()
-                            == self.factory.intent_hash_of_timed_recovery()
-                    })
-                    .unwrap();
-                return Ok(Some(IndexSet::from_iter(vec![signature])));
+
+            let signature = recovery_role_signatures
+                .into_iter()
+                .find(|sig| {
+                    *sig.payload_id()
+                        == self.factory.intent_hash_of_timed_recovery()
+                })
+                .unwrap();
+            return Ok(Some(IndexSet::from_iter(vec![signature])));
         }
 
         Ok(None)
@@ -179,8 +221,9 @@ mod tests {
         let securified_entity: AnySecurifiedEntity = securified_account.into();
 
         let base_intent = TransactionIntent::sample();
+        let fee_payer_account = Account::sample_mainnet_other();
         let lock_fee_data = LockFeeData::new_with_unsecurified_fee_payer(
-            AccountAddress::sample_mainnet(),
+            fee_payer_account.address,
             Decimal192::from(0),
         );
 
@@ -189,6 +232,7 @@ mod tests {
             lock_fee_data,
             securified_entity,
             security_structure.clone(),
+            Some(fee_payer_account),
         )
         .build()
         .expect("fixture: build intents");
@@ -325,8 +369,8 @@ mod tests {
             metadata.recovery_confirmation_hash
         );
         assert!(
-            !signed.intent_signatures.signatures.is_empty(),
-            "should capture signatures from recovery and confirmation roles"
+            signed.intent_signatures.signatures.len() >= 3,
+            "should capture signatures from recovery, confirmation, and fee payer primary roles"
         );
     }
 
@@ -359,6 +403,10 @@ mod tests {
             signed.intent.transaction_intent_hash(),
             metadata.recovery_confirmation_hash
         );
+        assert!(
+            signed.intent_signatures.signatures.len() >= 3,
+            "should include fee payer signature even on primary flow"
+        );
     }
 
     #[actix_rt::test]
@@ -389,7 +437,10 @@ mod tests {
             signed.intent.transaction_intent_hash(),
             metadata.recovery_delayed_hash
         );
-        assert_eq!(signed.intent_signatures.signatures.len(), 1);
+        assert!(
+            signed.intent_signatures.signatures.len() >= 2,
+            "should combine timed recovery and fee payer signatures"
+        );
     }
 
     #[actix_rt::test]
