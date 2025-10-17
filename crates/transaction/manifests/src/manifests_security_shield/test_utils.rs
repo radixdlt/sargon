@@ -134,11 +134,52 @@ where
         let secured_control =
             SecuredEntityControl::new(None, ac_address, security_structure)
                 .unwrap();
+        let mut updated_entity = unsecurified_account.entity.clone();
+        updated_entity
+            .set_security_state(EntitySecurityState::Securified {
+                value: secured_control.clone(),
+            })
+            .unwrap();
 
         SecurifiedAccount::with_securified_entity_control(
-            unsecurified_account.entity.into(),
+            updated_entity,
             secured_control,
         )
+    }
+
+    fn execute_recovery_transaction(
+        &mut self,
+        securified_account: SecurifiedAccount,
+        new_security_structure: SecurityStructureOfFactorInstances,
+        roles_combination: RolesExercisableInTransactionManifestCombination,
+    ) -> (AccessControllerV2StateV2, ScryptoRuleSet) {
+        let mut manifest =
+            TransactionManifest::apply_security_shield_for_securified_entity(
+                securified_account.clone(),
+                new_security_structure.clone(),
+                roles_combination,
+            );
+
+        manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+            manifest,
+            Decimal192::one(),
+            securified_account.clone(),
+        );
+
+        self.execute_ac_recovery_manifest(
+            manifest.clone(),
+            securified_account.securified_entity_control.clone(),
+            roles_combination,
+        );
+
+        // Assert that the on ledger rule set matches the expected rule set
+        let rule_set = self.read_access_controller_rule_set(
+            securified_account.access_controller_address().clone(),
+        );
+        let state = self.read_access_controller_substate(
+            securified_account.access_controller_address(),
+        );
+        (state, rule_set)
     }
 
     // Executes the given AC recovery manifest and asserts that the transaction was successfully committed.
@@ -195,7 +236,7 @@ where
 
 #[cfg(test)]
 #[extend::ext]
-impl SecuredEntityControl {
+pub impl SecuredEntityControl {
     fn sign_intent_with_roles(
         &self,
         intent: TransactionIntent,
