@@ -17,7 +17,9 @@ impl SecureStorageDriver for AlwaysFailSecureStorage {
         _key: SecureStorageKey,
         _data: BagOfBytes,
     ) -> Result<()> {
-        Err(CommonError::Unknown)
+        Err(CommonError::Unknown {
+            error_message: "Failed saving data".to_string(),
+        })
     }
 
     async fn delete_data_for_key(&self, _key: SecureStorageKey) -> Result<()> {
