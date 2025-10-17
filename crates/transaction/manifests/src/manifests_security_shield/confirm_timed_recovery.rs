@@ -54,7 +54,9 @@ mod tests {
     #![allow(non_snake_case)]
 
     use prelude::fixture_rtm;
-    use profile_supporting_types::{SecurifiedAccount, UnsecurifiedAccount};
+    use profile_supporting_types::{
+        SecurifiedAccount, UnsecurifiedAccount, UnsecurifiedPersona,
+    };
     use scrypto_test::prelude::{
         RecoveryProposal, RecoveryRoleRecoveryAttemptState,
         RecoveryRoleRecoveryState,

@@ -7,17 +7,22 @@ use radix_engine_interface::blueprints::access_controller::{
     ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
     ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
 };
+use radix_transactions::builder::TransactionManifestV1Builder;
 
 pub trait TransactionManifestCancelTimedRecovery {
-    /// Cancels the timed recovery for the given `securified_entity`
+    /// Stops timed recovery and cancels recovery attempt for the given `securified_entity`
     /// The `securified_entity` must have a `provisional_securified_config` set up.
-    fn cancel_timed_recovery(
+    fn stop_and_cancel_timed_recovery(
+        securified_entity: impl Into<AnySecurifiedEntity>,
+    ) -> TransactionManifest;
+
+    fn stop_timed_recovery(
         securified_entity: impl Into<AnySecurifiedEntity>,
     ) -> TransactionManifest;
 }
 
 impl TransactionManifestCancelTimedRecovery for TransactionManifest {
-    fn cancel_timed_recovery(
+    fn stop_and_cancel_timed_recovery(
         securified_entity: impl Into<AnySecurifiedEntity>,
     ) -> Self {
         let securified_entity = securified_entity.into();
@@ -52,6 +57,38 @@ impl TransactionManifestCancelTimedRecovery for TransactionManifest {
             securified_entity.network_id(),
         )
     }
+
+    fn stop_timed_recovery(
+        securified_entity: impl Into<AnySecurifiedEntity>,
+    ) -> TransactionManifest {
+        let securified_entity = securified_entity.into();
+        let securified_control =
+            securified_entity.securified_entity_control.clone();
+
+        let access_controller_address =
+            securified_control.access_controller_address;
+        let security_structure_of_factor_instances = securified_control
+            .provisional_securified_config
+            .expect("The provisional config must be present")
+            .get_security_structure_of_factor_instances();
+        let factors_and_time = AccessControllerFactorsAndTimeInput::new(
+            &security_structure_of_factor_instances,
+        );
+
+        let mut builder = ScryptoTransactionManifestBuilder::new();
+        builder = builder.call_method(
+            access_controller_address.scrypto(),
+            SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
+            ScryptoAccessControllerTimedConfirmRecoveryInput::from(
+                &factors_and_time,
+            ),
+        );
+
+        TransactionManifest::sargon_built(
+            builder,
+            securified_entity.network_id(),
+        )
+    }
 }
 
 #[cfg(test)]
@@ -60,7 +97,10 @@ mod tests {
 
     use super::*;
     use prelude::fixture_rtm;
-    use profile_supporting_types::{SecurifiedAccount, UnsecurifiedAccount};
+    use profile_supporting_types::{
+        SecurifiedAccount, SecurifiedPersona, UnsecurifiedAccount,
+        UnsecurifiedPersona,
+    };
     use radix_engine::blueprints::access_controller::{
         RecoveryRoleRecoveryAttemptState, RecoveryRoleRecoveryState,
     };
@@ -70,7 +110,7 @@ mod tests {
     type SUT = TransactionManifest;
 
     #[test]
-    fn cancel_timed_recovery() {
+    fn stop_and_cancel_timed_recovery() {
         let mut securified_account = SecurifiedAccount::sample();
         assert_eq!(securified_account.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
 
@@ -91,29 +131,72 @@ mod tests {
             SecurityStructureOfFactorInstances::sample()
         );
 
-        let manifest = SUT::cancel_timed_recovery(securified_account.clone());
+        let manifest =
+            SUT::stop_and_cancel_timed_recovery(securified_account.clone());
 
         let expected_manifest_str =
-            fixture_rtm!("cancel_account_shield_timed_recovery");
+            fixture_rtm!("stop_and_cancel_account_shield_timed_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
         assert!(expected_manifest_str.contains("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g"));
 
         let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(securified_account.clone(), securified_account.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
 
         let expected_manifest_str =
-            fixture_rtm!("cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
+            fixture_rtm!("stop_and_cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
 
         let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_account);
-        println!("{:#?}", manifest.manifest_string());
 
         let expected_manifest_str =
-            fixture_rtm!("cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
+            fixture_rtm!("stop_and_cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
         manifest_eq(manifest, expected_manifest_str);
     }
 
     #[test]
-    fn cancel_timed_recovery_transaction() {
+    fn stop_timed_recovery() {
+        let mut securified_persona = SecurifiedPersona::sample();
+        assert_eq!(securified_persona.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm");
+
+        // Add provisional securified config
+        securified_persona
+            .entity
+            .security_state
+            .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
+        securified_persona =
+            SecurifiedPersona::new(securified_persona.entity).unwrap();
+        pretty_assertions::assert_eq!(
+            securified_persona
+                .clone()
+                .securified_entity_control
+                .provisional_securified_config
+                .unwrap()
+                .get_security_structure_of_factor_instances(),
+            SecurityStructureOfFactorInstances::sample()
+        );
+
+        let manifest = SUT::stop_timed_recovery(securified_persona.clone());
+
+        let expected_manifest_str =
+            fixture_rtm!("stop_persona_shield_timed_recovery");
+        manifest_eq(manifest.clone(), expected_manifest_str);
+        assert!(expected_manifest_str.contains("accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm"));
+
+        let fee_payer_account = Account::sample();
+        let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(fee_payer_account, securified_persona.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
+
+        let expected_manifest_str =
+            fixture_rtm!("stop_persona_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
+        manifest_eq(manifest.clone(), expected_manifest_str);
+
+        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_persona);
+
+        let expected_manifest_str =
+            fixture_rtm!("stop_persona_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
+        manifest_eq(manifest, expected_manifest_str);
+    }
+
+    #[test]
+    fn stop_and_cancel_timed_recovery_transaction() {
         let mut ledger =
             LedgerSimulatorBuilder::new().without_kernel_trace().build();
 
@@ -181,7 +264,7 @@ mod tests {
         );
 
         // Cancel timed recovery
-        let mut manifest = TransactionManifest::cancel_timed_recovery(
+        let mut manifest = TransactionManifest::stop_and_cancel_timed_recovery(
             securified_account.clone(),
         );
 

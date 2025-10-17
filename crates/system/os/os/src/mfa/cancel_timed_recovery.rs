@@ -8,7 +8,7 @@ impl SargonOS {
         let profile_snapshot = self.profile()?;
         let entity = profile_snapshot.entity_by_address(address)?;
 
-        Ok(TransactionManifest::cancel_timed_recovery(
+        Ok(TransactionManifest::stop_and_cancel_timed_recovery(
             AnySecurifiedEntity::new(entity.clone())?,
         ))
     }
