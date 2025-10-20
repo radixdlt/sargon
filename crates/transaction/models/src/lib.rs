@@ -107,10 +107,15 @@ pub mod prelude {
             },
         },
         manifest_analysis::{
+            AccessControllerConfirmTimedRecoveryOutput as RetAccessControllerConfirmTimedRecoveryOutput,
+            AccessControllerRecoveryOutput as RetAccessControllerRecoveryOutput,
+            AccessControllerStopTimedRecoveryAnalyzerOutput as RetAccessControllerStopTimedRecoveryOutput,
             AccountSettingsUpdateOutput as RetAccountSettingsUpdateOutput,
             AccountStaticResourceMovementsOutput as RetAccountStaticResourceMovementsOutput,
             DetailedManifestClassification as RetDetailedManifestClass,
-            DynamicAnalysis as RetDynamicAnalysis, FeeSummary as RetFeeSummary,
+            DynamicAnalysis as RetDynamicAnalysis,
+            EntitySecurifyOutput as RetEntitySecurifyOutput,
+            FeeSummary as RetFeeSummary,
             ManifestAnalysisError as RetManifestAnalysisError,
             ManifestClassification as RetManifestClass,
             NewEntitiesOutput as RetNewEntitiesOutput,
@@ -199,7 +204,7 @@ pub mod prelude {
     };
 
     pub(crate) use enum_as_inner::EnumAsInner;
-    pub(crate) use profile_security_structures::prelude::*;
+
     pub(crate) use serde::{Deserialize, Serialize};
 
     #[cfg(test)]

@@ -155,6 +155,15 @@ impl SargonOS {
         self.wrapped.security_structure_of_factor_sources_from_address_of_account_or_persona(&address_of_account_or_persona.into_internal()).into_result()
     }
 
+    /// Returns the `SecurityStructuresOfFactorSources` based on the security state of the
+    /// account or persona with given `address_of_account_or_persona`
+    pub fn provisional_security_structure_of_factor_sources_from_address_of_account_or_persona(
+        &self,
+        address_of_account_or_persona: &AddressOfAccountOrPersona,
+    ) -> Result<SecurityStructureOfFactorSources> {
+        self.wrapped.provisional_security_structure_of_factor_sources_from_address_of_account_or_persona(&address_of_account_or_persona.into_internal()).into_result()
+    }
+
     /// Returns the `FactorSource` set used to build the security structure
     pub fn sorted_factor_sources_from_security_structure(
         &self,
