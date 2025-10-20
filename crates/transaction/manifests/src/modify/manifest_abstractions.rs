@@ -14,6 +14,8 @@ where
     fn network_id(&self) -> NetworkID;
 
     fn instructions(&self) -> Vec<I>;
+
+    fn blobs(&self) -> Blobs;
 }
 
 impl IntoManifest<ScryptoInstruction> for TransactionManifest {
@@ -23,6 +25,10 @@ impl IntoManifest<ScryptoInstruction> for TransactionManifest {
 
     fn instructions(&self) -> Vec<ScryptoInstruction> {
         self.instructions.instructions.clone()
+    }
+
+    fn blobs(&self) -> Blobs {
+        self.blobs.clone()
     }
 }
 
@@ -34,6 +40,10 @@ impl IntoManifest<ScryptoInstructionV2> for SubintentManifest {
     fn instructions(&self) -> Vec<ScryptoInstructionV2> {
         self.instructions.instructions.clone()
     }
+
+    fn blobs(&self) -> Blobs {
+        self.blobs.clone()
+    }
 }
 
 impl IntoManifest<ScryptoInstructionV2> for TransactionManifestV2 {
@@ -43,6 +53,10 @@ impl IntoManifest<ScryptoInstructionV2> for TransactionManifestV2 {
 
     fn instructions(&self) -> Vec<ScryptoInstructionV2> {
         self.instructions.instructions.clone()
+    }
+
+    fn blobs(&self) -> Blobs {
+        self.blobs.clone()
     }
 }
 
@@ -59,13 +73,16 @@ where
     M: IntoManifest<I>,
     I: IntoInstruction + Clone,
 {
-    fn extend_builder_with_instructions(
+    fn extend_builder_with_instructions_and_blobs(
         self,
         instructions: impl IntoIterator<Item = I>,
+        blobs: Blobs,
     ) -> Self;
 
-    fn new_with_instructions(instructions: impl IntoIterator<Item = I>)
-        -> Self;
+    fn new_with_instructions(
+        instructions: impl IntoIterator<Item = I>,
+        blobs: Blobs,
+    ) -> Self;
 
     fn build(self, network_id: NetworkID) -> Result<M>;
 
@@ -83,35 +100,50 @@ where
     ) -> Self;
 
     fn extend_builder_with_manifest(self, manifest: M) -> Self {
-        Self::extend_builder_with_instructions(
+        Self::extend_builder_with_instructions_and_blobs(
             self,
             manifest.instructions().clone(),
+            manifest.blobs().clone(),
         )
     }
 
     fn new_with_manifest(manifest: M) -> Self {
-        Self::new_with_instructions(manifest.instructions().clone())
+        Self::new_with_instructions(
+            manifest.instructions().clone(),
+            manifest.blobs(),
+        )
     }
 }
 
 impl IntoManifestBuilder<TransactionManifest, ScryptoInstruction>
     for ScryptoTransactionManifestBuilder
 {
-    fn extend_builder_with_instructions(
+    fn extend_builder_with_instructions_and_blobs(
         self,
         instructions: impl IntoIterator<Item = ScryptoInstruction>,
+        blobs: Blobs,
     ) -> Self {
-        instructions.into_iter().fold(self, |builder, instruction| {
-            builder.add_instruction_advanced(instruction).0
-        })
+        instructions
+            .into_iter()
+            .fold(self, |builder, instruction| {
+                builder.add_instruction_advanced(instruction).0
+            })
+            .then(|mut builder| {
+                if !blobs.blobs().is_empty() {
+                    builder.add_blob(blobs.into());
+                }
+                builder
+            })
     }
 
     fn new_with_instructions(
         instructions: impl IntoIterator<Item = ScryptoInstruction>,
+        blobs: Blobs,
     ) -> Self {
-        Self::extend_builder_with_instructions(
+        Self::extend_builder_with_instructions_and_blobs(
             ScryptoTransactionManifestBuilder::new(),
             instructions,
+            blobs,
         )
     }
 
@@ -142,21 +174,30 @@ impl IntoManifestBuilder<TransactionManifest, ScryptoInstruction>
 impl IntoManifestBuilder<SubintentManifest, ScryptoInstructionV2>
     for ScryptoSubintentManifestV2Builder
 {
-    fn extend_builder_with_instructions(
+    fn extend_builder_with_instructions_and_blobs(
         self,
         instructions: impl IntoIterator<Item = ScryptoInstructionV2>,
+        blobs: Blobs,
     ) -> Self {
-        instructions.into_iter().fold(self, |builder, instruction| {
-            builder.add_instruction_advanced(instruction).0
-        })
+        instructions
+            .into_iter()
+            .fold(self, |builder, instruction| {
+                builder.add_instruction_advanced(instruction).0
+            })
+            .then(|mut builder| {
+                builder.add_blob(blobs.into());
+                builder
+            })
     }
 
     fn new_with_instructions(
         instructions: impl IntoIterator<Item = ScryptoInstructionV2>,
+        blobs: Blobs,
     ) -> Self {
-        Self::extend_builder_with_instructions(
+        Self::extend_builder_with_instructions_and_blobs(
             ScryptoSubintentManifestV2Builder::new_subintent_v2(),
             instructions,
+            blobs,
         )
     }
 
@@ -187,21 +228,30 @@ impl IntoManifestBuilder<SubintentManifest, ScryptoInstructionV2>
 impl IntoManifestBuilder<TransactionManifestV2, ScryptoInstructionV2>
     for ScryptoTransactionManifestV2Builder
 {
-    fn extend_builder_with_instructions(
+    fn extend_builder_with_instructions_and_blobs(
         self,
         instructions: impl IntoIterator<Item = ScryptoInstructionV2>,
+        blobs: Blobs,
     ) -> Self {
-        instructions.into_iter().fold(self, |builder, instruction| {
-            builder.add_instruction_advanced(instruction).0
-        })
+        instructions
+            .into_iter()
+            .fold(self, |builder, instruction| {
+                builder.add_instruction_advanced(instruction).0
+            })
+            .then(|mut builder| {
+                builder.add_blob(blobs.into());
+                builder
+            })
     }
 
     fn new_with_instructions(
         instructions: impl IntoIterator<Item = ScryptoInstructionV2>,
+        blobs: Blobs,
     ) -> Self {
-        Self::extend_builder_with_instructions(
+        Self::extend_builder_with_instructions_and_blobs(
             ScryptoTransactionManifestV2Builder::new_v2(),
             instructions,
+            blobs,
         )
     }
 

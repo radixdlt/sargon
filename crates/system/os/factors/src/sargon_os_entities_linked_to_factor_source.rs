@@ -69,7 +69,10 @@ impl OsEntitiesLinkedToFactorSource for SargonOS {
             FactorSource::OffDeviceMnemonic { value } => Ok(value.into()),
             FactorSource::ArculusCard { value } => Ok(value.into()),
             FactorSource::Password { value } => Ok(value.into()),
-            _ => Err(CommonError::Unknown),
+            _ => Err(CommonError::Unknown {
+                error_message: "Failed checking factor source integrity"
+                    .to_string(),
+            }),
         }
     }
 

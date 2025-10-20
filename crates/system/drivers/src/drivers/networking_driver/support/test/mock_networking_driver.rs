@@ -215,7 +215,9 @@ impl NetworkingDriver for MockNetworkingDriver {
             if let Some(lazy_responder) = self.lazy_responder.as_ref() {
                 Ok(lazy_responder.provide_response_for(request.clone(), *count))
             } else {
-                Err(CommonError::Unknown)
+                Err(CommonError::Unknown {
+                    error_message: "Responder must be set".to_string(),
+                })
             }
         } else {
             let response = responses.remove(0);
