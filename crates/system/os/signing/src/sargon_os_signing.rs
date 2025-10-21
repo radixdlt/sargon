@@ -126,8 +126,12 @@ async fn sign_access_controller_recovery_transaction(
     let entity = profile
         .entity_by_access_controller_address(access_controller_address)?;
     let securified_entity = AnySecurifiedEntity::try_from(entity)?;
-    let securified_control = securified_entity.securified_entity_control();
-    let security_structure = securified_control.security_structure.clone();
+    let securified_control =
+        securified_entity.securified_entity_control.clone();
+    let security_structure = securified_control
+        .provisional_securified_config
+        .unwrap()
+        .get_security_structure_of_factor_instances();
 
     let fee_payer_account =
         match profile.account_by_address(lock_fee_data.fee_payer_address) {
@@ -144,8 +148,8 @@ async fn sign_access_controller_recovery_transaction(
     let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
         base_transaction_intent,
         lock_fee_data,
-        securified_entity,
-        security_structure,
+        securified_entity.clone(),
+        security_structure.clone(),
         fee_payer_account,
     )
     .build()?;
@@ -155,6 +159,8 @@ async fn sign_access_controller_recovery_transaction(
         profile.factor_sources(),
         os.sign_transactions_interactor(),
         recovery_intents,
+        securified_entity,
+        security_structure,
     );
 
     SignaturesCollectorOrchestrator::new(factory).sign().await

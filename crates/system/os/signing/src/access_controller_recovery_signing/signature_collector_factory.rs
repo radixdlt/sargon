@@ -5,6 +5,8 @@ pub struct SignaturesCollectorFactory {
     profile_factor_sources: IndexSet<FactorSource>,
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
     recovery_intents: AccessControllerRecoveryIntents,
+    securified_entity: AnySecurifiedEntity,
+    proposed_security_structure: SecurityStructureOfFactorInstances,
 }
 
 impl SignaturesCollectorFactory {
@@ -13,12 +15,16 @@ impl SignaturesCollectorFactory {
         profile_factor_sources: IndexSet<FactorSource>,
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         recovery_intents: AccessControllerRecoveryIntents,
+        securified_entity: AnySecurifiedEntity,
+        proposed_security_structure: SecurityStructureOfFactorInstances,
     ) -> Self {
         Self {
             finish_early_strategy,
             profile_factor_sources,
             interactor,
             recovery_intents,
+            securified_entity,
+            proposed_security_structure,
         }
     }
 
@@ -106,6 +112,38 @@ impl SignaturesCollectorFactory {
             self.interactor.clone(),
             SigningPurpose::sign_transaction(RoleKind::Primary),
         ))
+    }
+
+    pub fn sign_with_new_primary_if_needed(
+        &self,
+        intent_hash: &TransactionIntentHash,
+    ) -> Option<SignaturesCollector<TransactionIntent>> {
+        let securified_entity = self.securified_entity.entity.clone();
+
+        let intent_to_sign =
+            self.recovery_intents.signable_for_hash(intent_hash)?;
+        let role_combination = self
+            .recovery_intents
+            .role_combination_used_for_transaction(intent_hash);
+
+        let signable = SignableWithEntities::with(
+            intent_to_sign.signable,
+            vec![securified_entity],
+        );
+
+        if !role_combination.can_exercise_primary_role()
+            && role_combination.can_quick_confirm()
+        {
+            Some(SignaturesCollector::with(
+                self.finish_early_strategy.clone(),
+                self.profile_factor_sources.clone(),
+                IdentifiedVecOf::just(signable),
+                self.interactor.clone(),
+                SigningPurpose::sign_transaction(RoleKind::Primary),
+            ))
+        } else {
+            None
+        }
     }
 
     fn signature_collector_for_recovery_signing(

@@ -55,7 +55,10 @@ pub mod prelude {
 
     pub(crate) use radix_engine_interface::{
         blueprints::{
-            access_controller::RuleSet as ScryptoRuleSet,
+            access_controller::{
+                RuleSet as ScryptoRuleSet,
+                ACCESS_CONTROLLER_CREATE_PROOF_IDENT as SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
+            },
             account::{
                 DefaultDepositRule as ScryptoDefaultDepositRule,
                 ACCOUNT_SECURIFY_IDENT as SCRYPTO_ACCOUNT_SECURIFY_IDENT,

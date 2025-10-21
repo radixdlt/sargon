@@ -150,6 +150,21 @@ impl AccessControllerRecoveryIntents {
         .find(|signable| signable.id == *id)
         .map(|signable| signable.clone())
     }
+
+    pub fn role_combination_used_for_transaction(
+        &self,
+        id: &TransactionIntentHash,
+    ) -> RolesExercisableInTransactionManifestCombination {
+        if self.initiate_with_recovery_complete_with_confirmation.id == *id {
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation
+        } else if self.initiate_with_recovery_complete_with_primary.id == *id {
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary
+        } else if self.initiate_with_recovery_delayed_completion.id == *id {
+            RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion
+        } else {
+            RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation
+        }
+    }
 }
 
 #[cfg(test)]

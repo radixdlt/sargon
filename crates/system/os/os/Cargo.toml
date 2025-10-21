@@ -16,7 +16,7 @@ interactors = { workspace = true }
 sub-systems = { workspace = true }
 host-info = { workspace = true }
 key-derivation-traits = { workspace = true }
-signing-traits = { workspace = true }
+signing-traits = { workspace = true, features = ["mock"] }
 factor-instances-provider = { workspace = true }
 manifests = { workspace = true }
 keys-collector = { workspace = true }

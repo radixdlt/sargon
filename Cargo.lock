@@ -4842,6 +4842,7 @@ dependencies = [
 name = "signing-traits"
 version = "1.2.35"
 dependencies = [
+ "actix-rt",
  "async-trait",
  "bytes 1.2.35",
  "core-collections",
@@ -4854,6 +4855,7 @@ dependencies = [
  "indexmap 2.7.0",
  "manifests",
  "metadata",
+ "mockall",
  "prelude",
  "pretty_assertions",
  "profile-account",
