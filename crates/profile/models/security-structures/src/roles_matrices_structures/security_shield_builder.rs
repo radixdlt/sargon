@@ -2533,6 +2533,10 @@ mod lenient {
     fn with_security_structure_of_factor_sources_roundtrip() {
         let mut original = SecurityStructureOfFactorSources::sample_other();
         original.metadata.update_name(DisplayName::empty());
+        pretty_assertions::assert_eq!(
+            original.metadata.display_name,
+            DisplayName::empty()
+        );
 
         // Reconstruct the builder from the *existing* security structure
         let reconstructed = SUT::with_security_structure_of_factor_sources(
