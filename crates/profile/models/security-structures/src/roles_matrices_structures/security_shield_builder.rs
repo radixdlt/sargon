@@ -483,9 +483,7 @@ impl SecurityShieldBuilder {
         time_period: TimePeriod,
     ) -> &Self {
         self.set(|builder| {
-            builder.set_time_until_delayed_confirmation_is_callable(
-                time_period.days(),
-            )
+            builder.set_time_until_delayed_confirmation_is_callable(time_period)
         })
     }
 

@@ -7,6 +7,8 @@ use crate::prelude::*;
     PartialEq, Eq, Clone, Copy, Debug, StdHash, Serialize, Deserialize,
 )]
 pub enum TimePeriodUnit {
+    #[serde(rename = "minutes")]
+    Minutes,
     #[serde(rename = "days")]
     Days,
     #[serde(rename = "weeks")]

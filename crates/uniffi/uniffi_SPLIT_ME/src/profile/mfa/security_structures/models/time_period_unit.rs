@@ -7,6 +7,7 @@ use sargon::TimePeriodUnit as InternalTimePeriodUnit;
     Clone, Copy, Debug, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum,
 )]
 pub enum TimePeriodUnit {
+    Minutes,
     Days,
     Weeks,
 }
