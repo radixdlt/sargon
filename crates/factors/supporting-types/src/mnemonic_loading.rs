@@ -17,6 +17,8 @@ impl MnemonicLoading for FailingMnemonicLoader {
         &self,
         _id: FactorSourceIDFromHash,
     ) -> Result<MnemonicWithPassphrase> {
-        Err(CommonError::Unknown)
+        Err(CommonError::Unknown {
+            error_message: "Failed loading mnemonic".to_string(),
+        })
     }
 }

@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "account-for-display"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "derive_more",
@@ -49,10 +49,10 @@ dependencies = [
 
 [[package]]
 name = "addresses"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "cap26-models",
  "core-utils",
  "derive_more",
@@ -252,7 +252,7 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "assert-json"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json-diff",
  "error",
@@ -552,7 +552,7 @@ dependencies = [
 
 [[package]]
 name = "build-info"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "cargo_toml",
@@ -579,7 +579,7 @@ checksum = "5ce89b21cab1437276d2650d57e971f9d548a2d9037cc231abdc0562b97498ce"
 
 [[package]]
 name = "bytes"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "delegate",
@@ -613,7 +613,7 @@ dependencies = [
 
 [[package]]
 name = "cap26-models"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -756,7 +756,7 @@ checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "clients"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -838,7 +838,7 @@ checksum = "0d8a42181e0652c2997ae4d217f25b63c5337a52fd2279736e97b832fa0a3cff"
 
 [[package]]
 name = "core-collections"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "has-sample-values",
  "indexmap 2.7.0",
@@ -865,7 +865,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "core-misc"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "core-utils",
@@ -885,7 +885,7 @@ dependencies = [
 
 [[package]]
 name = "core-utils"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "error",
  "iso8601-timestamp",
@@ -1156,7 +1156,7 @@ dependencies = [
 
 [[package]]
 name = "discover"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "clients",
@@ -1194,7 +1194,7 @@ checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
 name = "drivers"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1219,10 +1219,10 @@ dependencies = [
 
 [[package]]
 name = "ecc"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "derive_more",
  "enum-as-inner",
  "error",
@@ -1321,11 +1321,11 @@ dependencies = [
 
 [[package]]
 name = "encryption"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "aes-gcm",
  "assert-json",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "derive_more",
  "error",
  "has-sample-values",
@@ -1342,7 +1342,7 @@ dependencies = [
 
 [[package]]
 name = "entity-by-address"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "error",
@@ -1354,7 +1354,7 @@ dependencies = [
 
 [[package]]
 name = "entity-foundation"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -1429,7 +1429,7 @@ dependencies = [
 
 [[package]]
 name = "error"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "derive_more",
  "log",
@@ -1488,7 +1488,7 @@ dependencies = [
 
 [[package]]
 name = "factor-instances-provider"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1514,9 +1514,9 @@ dependencies = [
 
 [[package]]
 name = "factors"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -1551,7 +1551,7 @@ dependencies = [
 
 [[package]]
 name = "factors-supporting-types"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "async-trait",
  "error",
@@ -1726,7 +1726,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-client-and-api"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1748,7 +1748,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-models"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "assert-json",
@@ -1859,7 +1859,7 @@ dependencies = [
 
 [[package]]
 name = "has-sample-values"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "error",
  "indexmap 2.7.0",
@@ -1870,9 +1870,9 @@ dependencies = [
 
 [[package]]
 name = "hash"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "derive_more",
  "prelude",
  "radix-common",
@@ -1936,11 +1936,11 @@ dependencies = [
 
 [[package]]
 name = "hierarchical-deterministic"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "bip39",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "cap26-models",
  "derive_more",
  "ecc",
@@ -1983,13 +1983,13 @@ dependencies = [
 
 [[package]]
 name = "home-cards"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
  "async-trait",
  "base64",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "core-utils",
  "derive_more",
  "drivers",
@@ -2009,7 +2009,7 @@ dependencies = [
 
 [[package]]
 name = "host-info"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -2056,10 +2056,10 @@ dependencies = [
 
 [[package]]
 name = "http-client"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "core-utils",
  "drivers",
  "error",
@@ -2284,7 +2284,7 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "identified-vec-of"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -2357,7 +2357,7 @@ dependencies = [
 
 [[package]]
 name = "interactors"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "async-trait",
  "derive_more",
@@ -2495,7 +2495,7 @@ dependencies = [
 
 [[package]]
 name = "key-derivation-traits"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "async-trait",
@@ -2513,7 +2513,7 @@ dependencies = [
 
 [[package]]
 name = "keys-collector"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -2611,7 +2611,7 @@ dependencies = [
 
 [[package]]
 name = "manifests"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "account-for-display",
  "addresses",
@@ -2657,7 +2657,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
 name = "metadata"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "derive_more",
  "has-sample-values",
@@ -2781,7 +2781,7 @@ dependencies = [
 
 [[package]]
 name = "network"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
  "enum-iterator",
@@ -2797,7 +2797,7 @@ dependencies = [
 
 [[package]]
 name = "next-derivation-index-ephemeral"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "assert-json",
@@ -2873,9 +2873,9 @@ dependencies = [
 
 [[package]]
 name = "numeric"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "delegate",
  "derive_more",
  "enum-iterator",
@@ -3145,7 +3145,7 @@ dependencies = [
 
 [[package]]
 name = "prelude"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "radix-engine",
  "radix-engine-toolkit",
@@ -3206,7 +3206,7 @@ dependencies = [
 
 [[package]]
 name = "profile"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "account-for-display",
  "addresses",
@@ -3250,7 +3250,7 @@ dependencies = [
 
 [[package]]
 name = "profile-account"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "account-for-display",
  "addresses",
@@ -3270,7 +3270,7 @@ dependencies = [
 
 [[package]]
 name = "profile-account-or-persona"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "cap26-models",
  "derive_more",
@@ -3287,7 +3287,7 @@ dependencies = [
 
 [[package]]
 name = "profile-app-preferences"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "core-misc",
@@ -3310,7 +3310,7 @@ dependencies = [
 
 [[package]]
 name = "profile-base-entity"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3335,7 +3335,7 @@ dependencies = [
 
 [[package]]
 name = "profile-gateway"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "assert-json",
@@ -3359,7 +3359,7 @@ dependencies = [
 
 [[package]]
 name = "profile-logic"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3381,7 +3381,7 @@ dependencies = [
 
 [[package]]
 name = "profile-persona"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "cap26-models",
@@ -3402,7 +3402,7 @@ dependencies = [
 
 [[package]]
 name = "profile-persona-data"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "assert-json",
@@ -3421,7 +3421,7 @@ dependencies = [
 
 [[package]]
 name = "profile-security-structures"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "cap26-models",
@@ -3449,7 +3449,7 @@ dependencies = [
 
 [[package]]
 name = "profile-state-holder"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "derive_more",
  "error",
@@ -3464,7 +3464,7 @@ dependencies = [
 
 [[package]]
 name = "profile-supporting-types"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3553,14 +3553,14 @@ dependencies = [
 
 [[package]]
 name = "radix-connect"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
  "assert-json",
  "async-trait",
  "base64",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "core-misc",
  "core-utils",
  "derive_more",
@@ -3589,10 +3589,10 @@ dependencies = [
 
 [[package]]
 name = "radix-connect-models"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "core-misc",
  "derive_more",
  "error",
@@ -3716,11 +3716,11 @@ dependencies = [
 
 [[package]]
 name = "radix-name-service"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "core-utils",
  "drivers",
  "gateway-client-and-api",
@@ -4055,7 +4055,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4123,7 +4123,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -4152,7 +4152,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-accounts"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4178,7 +4178,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-arculus-card"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "async-trait",
  "ecc",
@@ -4193,7 +4193,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-derive-public-keys"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -4212,7 +4212,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-factors"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4247,7 +4247,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-security-center"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "derive_more",
@@ -4263,7 +4263,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-signing"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -4289,7 +4289,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-transaction"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "async-std",
@@ -4324,7 +4324,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4381,7 +4381,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi-conversion-macros"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4597,7 +4597,7 @@ dependencies = [
 
 [[package]]
 name = "security-center"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
  "assert-json",
@@ -4765,7 +4765,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "short-string"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "arraystring",
  "assert-json",
@@ -4800,13 +4800,13 @@ dependencies = [
 
 [[package]]
 name = "signatures-collector"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "actix-rt",
  "addresses",
  "assert-json",
  "async-trait",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -4838,10 +4838,10 @@ dependencies = [
 
 [[package]]
 name = "signing-traits"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "async-trait",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "core-collections",
  "derive_more",
  "ecc",
@@ -5007,7 +5007,7 @@ dependencies = [
 
 [[package]]
 name = "sub-systems"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "derive_more",
  "drivers",
@@ -5172,7 +5172,7 @@ dependencies = [
 
 [[package]]
 name = "time-utils"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "iso8601-timestamp",
  "prelude",
@@ -5322,10 +5322,10 @@ dependencies = [
 
 [[package]]
 name = "transaction-foundation"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "assert-json",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "derive_more",
  "has-sample-values",
  "paste",
@@ -5337,10 +5337,10 @@ dependencies = [
 
 [[package]]
 name = "transaction-models"
-version = "1.2.35"
+version = "1.2.37"
 dependencies = [
  "addresses",
- "bytes 1.2.35",
+ "bytes 1.2.37",
  "cargo_toml",
  "core-collections",
  "core-misc",

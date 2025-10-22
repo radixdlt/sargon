@@ -114,7 +114,9 @@ impl ProfileEntityByAddress for ProtoProfile {
                 .map(AccountOrPersona::PersonaEntity);
         }
 
-        Err(CommonError::Unknown)
+        Err(CommonError::Unknown {
+            error_message: "Entity not found".to_string(),
+        })
     }
 
     fn entity_by_access_controller_address(

@@ -83,12 +83,17 @@ impl OSPollPreAuthorizationStatusWithDelays for SargonOS {
             match subintent_status {
                 SubintentStatus::CommittedSuccess => {
                     // If it has been committed, we consider it a `Success`.
-                    let intent_hash = match transaction_intent_hash {
-                        Some(hash) => {
-                            TransactionIntentHash::from_bech32(&hash)?
-                        }
-                        None => return Err(CommonError::Unknown),
-                    };
+                    let intent_hash =
+                        match transaction_intent_hash {
+                            Some(hash) => {
+                                TransactionIntentHash::from_bech32(&hash)?
+                            }
+                            None => return Err(CommonError::Unknown {
+                                error_message:
+                                    "Failed mapping sub-intent transaction hash"
+                                        .to_string(),
+                            }),
+                        };
                     return Ok((
                         PreAuthorizationStatus::Success { intent_hash },
                         delays,
@@ -227,7 +232,13 @@ mod poll_pre_authorization_status_with_delays {
             .expect_err("Expected an error");
 
         // The result an Unknown error
-        assert_eq!(result, CommonError::Unknown);
+        assert_eq!(
+            result,
+            CommonError::Unknown {
+                error_message: "Failed mapping sub-intent transaction hash"
+                    .to_string()
+            }
+        );
     }
 
     #[actix_rt::test]

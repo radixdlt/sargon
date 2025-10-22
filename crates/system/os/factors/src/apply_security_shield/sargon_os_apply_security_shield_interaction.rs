@@ -53,7 +53,10 @@ fn __hacky_tmp_using_local_global_state_extract_address_of_entity_updating_shiel
             None
         }
     });
-    address.ok_or(CommonError::Unknown)
+    address.ok_or(CommonError::Unknown {
+        error_message: "Failed extracting address of entity updating shield"
+            .to_string(),
+    })
 }
 
 // TODO: when https://github.com/radixdlt/sargon/pull/373 and follow up PRs are merged

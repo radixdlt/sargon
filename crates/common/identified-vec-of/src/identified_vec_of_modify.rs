@@ -179,7 +179,10 @@ impl<V: Debug + PartialEq + Eq + Clone + Identifiable> IdentifiedVecOf<V> {
             IdentifiableVecOfUpdateItemsOutcome::NoNewItemInserted => Ok(()),
             IdentifiableVecOfUpdateItemsOutcome::NewItemInserted => {
                 *self = backup;
-                Err(CommonError::Unknown)
+                Err(CommonError::Unknown {
+                    error_message: "Unexpected outcome: new item inserted"
+                        .to_string(),
+                })
             }
         }
     }
@@ -233,7 +236,13 @@ mod tests {
         let mut sut = SUT::sample_other();
         let sut_backup = sut.clone();
         let res = sut.update_items(vec![User::carol(), User::david()]);
-        assert_eq!(res, Err(CommonError::Unknown));
+        assert_eq!(
+            res,
+            Err(CommonError::Unknown {
+                error_message: "Unexpected outcome: new item inserted"
+                    .to_string()
+            })
+        );
         assert_eq!(sut, sut_backup); // not changed
     }
 

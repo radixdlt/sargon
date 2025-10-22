@@ -55,6 +55,12 @@ impl From<&Vec<u8>> for Blob {
     }
 }
 
+impl From<Blob> for Vec<u8> {
+    fn from(val: Blob) -> Self {
+        val.0.to_vec()
+    }
+}
+
 impl HasSampleValues for Blob {
     fn sample() -> Self {
         BagOfBytes::sample_aced().into()

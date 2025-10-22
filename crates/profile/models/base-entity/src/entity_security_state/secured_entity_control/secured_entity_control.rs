@@ -137,7 +137,7 @@ impl SecuredEntityControl {
         hash: &Hash,
     ) -> SignatureWithPublicKey {
         let factor_instance = self.security_structure.matrix_of_factors.recovery().get_override_factors().first().expect("Security structure should have at least one factor in recovery role");
-        factor_instance.sign_hash(&hash)
+        factor_instance.sign_hash(hash)
     }
 
     pub fn sign_with_first_confirmation_role_factor(
@@ -145,7 +145,7 @@ impl SecuredEntityControl {
         hash: &Hash,
     ) -> SignatureWithPublicKey {
         let factor_instance = self.security_structure.matrix_of_factors.confirmation().get_override_factors().first().expect("Security structure should have at least one factor in recovery role");
-        factor_instance.sign_hash(&hash)
+        factor_instance.sign_hash(hash)
     }
 
     pub fn sign_with_primary_role_factors(
@@ -156,8 +156,8 @@ impl SecuredEntityControl {
             .matrix_of_factors
             .primary()
             .get_threshold_factors()
-            .into_iter()
-            .map(|instance| instance.sign_hash(&hash))
+            .iter()
+            .map(|instance| instance.sign_hash(hash))
             .collect()
     }
 }
