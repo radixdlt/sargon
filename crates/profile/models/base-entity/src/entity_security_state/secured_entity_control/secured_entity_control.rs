@@ -33,6 +33,13 @@ impl SecuredEntityControl {
     pub fn access_controller_address(&self) -> AccessControllerAddress {
         self.access_controller_address
     }
+
+    pub fn commit_provisional(&mut self) -> Result<()> {
+      let provisional = self.get_provisional().ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)?;
+      self.security_structure = provisional.get_security_structure_of_factor_instances();
+      self.set_provisional(None);
+      Ok(())
+    }
 }
 
 impl HasProvisionalSecurifiedConfig for SecuredEntityControl {

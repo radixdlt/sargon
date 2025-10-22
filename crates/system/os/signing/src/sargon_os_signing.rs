@@ -123,45 +123,43 @@ async fn sign_access_controller_recovery_transaction(
     let access_controller_address =
         access_controller_address_from_summary(&execution_summary)?;
 
-    let entity = profile
-        .entity_by_access_controller_address(access_controller_address)?;
-    let securified_entity = AnySecurifiedEntity::try_from(entity)?;
-    let securified_control =
-        securified_entity.securified_entity_control.clone();
-    let security_structure = securified_control
-        .provisional_securified_config
-        .unwrap()
-        .get_security_structure_of_factor_instances();
+    // let entity = profile
+    //     .entity_by_access_controller_address(access_controller_address)?;
+    // let securified_entity = AnySecurifiedEntity::try_from(entity)?;
+    // let securified_control =
+    //     securified_entity.securified_entity_control.clone();
+    // let security_structure = securified_control
+    //     .provisional_securified_config
+    //     .unwrap()
+    //     .get_security_structure_of_factor_instances();
 
-    let fee_payer_account =
-        match profile.account_by_address(lock_fee_data.fee_payer_address) {
-            Ok(account)
-                if Into::<AddressOfAccountOrPersona>::into(account.address)
-                    != securified_entity.entity.address() =>
-            {
-                Some(account)
-            }
-            Ok(_) => None,
-            Err(err) => return Err(err),
-        };
+    // let fee_payer_account =
+    //     match profile.account_by_address(lock_fee_data.fee_payer_address) {
+    //         Ok(account)
+    //             if Into::<AddressOfAccountOrPersona>::into(account.address)
+    //                 != securified_entity.entity.address() =>
+    //         {
+    //             Some(account)
+    //         }
+    //         Ok(_) => None,
+    //         Err(err) => return Err(err),
+    //     };
 
-    let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
-        base_transaction_intent,
-        lock_fee_data,
-        securified_entity.clone(),
-        security_structure.clone(),
-        fee_payer_account,
-    )
-    .build()?;
+    // let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
+    //     base_transaction_intent,
+    //     lock_fee_data,
+    //     securified_entity.clone(),
+    //     security_structure.clone(),
+    // )
+    // .build()?;
 
     let factory = SignaturesCollectorFactory::new(
-        SigningFinishEarlyStrategy::default(),
-        profile.factor_sources(),
+        base_transaction_intent,
         os.sign_transactions_interactor(),
-        recovery_intents,
-        securified_entity,
-        security_structure,
-    );
+        profile,
+        access_controller_address,
+        lock_fee_data,
+    )?;
 
     SignaturesCollectorOrchestrator::new(factory).sign().await
 }

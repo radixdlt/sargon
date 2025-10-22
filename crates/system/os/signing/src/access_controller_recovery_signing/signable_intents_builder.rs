@@ -6,7 +6,6 @@ pub struct AccessControllerRecoveryIntentsBuilder {
     lock_fee_data: LockFeeData,
     securified_entity: AnySecurifiedEntity,
     proposed_security_structure: SecurityStructureOfFactorInstances,
-    fee_payer_account: Option<Account>,
 }
 
 impl AccessControllerRecoveryIntentsBuilder {
@@ -15,14 +14,12 @@ impl AccessControllerRecoveryIntentsBuilder {
         lock_fee_data: LockFeeData,
         securified_entity: AnySecurifiedEntity,
         proposed_security_structure: SecurityStructureOfFactorInstances,
-        fee_payer_account: Option<Account>,
     ) -> Self {
         Self {
             base_intent,
             lock_fee_data,
             securified_entity,
             proposed_security_structure,
-            fee_payer_account,
         }
     }
 }
@@ -52,7 +49,6 @@ impl AccessControllerRecoveryIntentsBuilder {
             with_recovery_primary,
             with_recovery_delayed,
             with_primary_confirmation,
-            self.fee_payer_account.clone(),
         ))
     }
 
@@ -91,7 +87,6 @@ pub struct AccessControllerRecoveryIntents {
         SignableWithEntities<TransactionIntent>,
     pub initiate_with_primary_complete_with_confirmation:
         SignableWithEntities<TransactionIntent>,
-    fee_payer_account: Option<Account>,
 }
 
 impl AccessControllerRecoveryIntents {
@@ -108,14 +103,12 @@ impl AccessControllerRecoveryIntents {
         initiate_with_primary_complete_with_confirmation: SignableWithEntities<
             TransactionIntent,
         >,
-        fee_payer_account: Option<Account>,
     ) -> Self {
         Self {
             initiate_with_recovery_complete_with_confirmation,
             initiate_with_recovery_complete_with_primary,
             initiate_with_recovery_delayed_completion,
             initiate_with_primary_complete_with_confirmation,
-            fee_payer_account,
         }
     }
 
@@ -130,10 +123,6 @@ impl AccessControllerRecoveryIntents {
             self.initiate_with_primary_complete_with_confirmation
                 .clone(),
         ])
-    }
-
-    pub fn fee_payer_account(&self) -> Option<&Account> {
-        self.fee_payer_account.as_ref()
     }
 
     pub fn signable_for_hash(
@@ -164,87 +153,5 @@ impl AccessControllerRecoveryIntents {
         } else {
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn sample_builder_inputs() -> (
-        TransactionIntent,
-        LockFeeData,
-        AnySecurifiedEntity,
-        SecurityStructureOfFactorInstances,
-    ) {
-        let base_intent = TransactionIntent::sample();
-        let securified_entity = AnySecurifiedEntity::sample_account();
-        let security_structure = securified_entity
-            .securified_entity_control()
-            .security_structure
-            .clone();
-        let lock_fee_data = LockFeeData::new_with_unsecurified_fee_payer(
-            AccountAddress::sample_mainnet_other(),
-            Decimal192::one(),
-        );
-
-        (
-            base_intent,
-            lock_fee_data,
-            securified_entity,
-            security_structure,
-        )
-    }
-
-    #[test]
-    fn no_fee_payer_account_produces_none() {
-        let (base_intent, lock_fee_data, securified_entity, security_structure) =
-            sample_builder_inputs();
-
-        let intents = AccessControllerRecoveryIntentsBuilder::new(
-            base_intent,
-            lock_fee_data,
-            securified_entity,
-            security_structure,
-            None,
-        )
-        .build()
-        .expect("builder should succeed");
-
-        assert!(intents.fee_payer_account().is_none());
-        let hash = intents
-            .initiate_with_recovery_complete_with_confirmation
-            .id
-            .clone();
-        assert!(intents.signable_for_hash(&hash).is_some());
-    }
-
-    #[test]
-    fn fee_payer_account_is_preserved_and_signables_lookup() {
-        let (base_intent, lock_fee_data, securified_entity, security_structure) =
-            sample_builder_inputs();
-        let fee_payer_account = Account::sample_mainnet_third();
-
-        let intents = AccessControllerRecoveryIntentsBuilder::new(
-            base_intent,
-            lock_fee_data,
-            securified_entity,
-            security_structure,
-            Some(fee_payer_account.clone()),
-        )
-        .build()
-        .expect("builder should succeed");
-
-        let stored_account = intents.fee_payer_account().unwrap();
-        assert_eq!(stored_account.address, fee_payer_account.address);
-
-        let hash = intents
-            .initiate_with_primary_complete_with_confirmation
-            .id
-            .clone();
-        let signable = intents
-            .signable_for_hash(&hash)
-            .expect("signable for hash should exist");
-        assert_eq!(signable.id, hash);
     }
 }

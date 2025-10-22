@@ -26,16 +26,9 @@ impl SignaturesCollectorOrchestrator {
                     .map(|sig| sig.payload_id().clone())
                     .ok_or(CommonError::TooFewFactorInstancesDerived)?;
 
-                let fee_payer_signatures =
-                    self.collect_fee_payer_signatures(&intent_hash).await?;
-
-                fee_payer_signatures.into_iter().for_each(|signature| {
-                    signatures.insert(signature);
-                });
-
-                let new_primary_signatures =
-                    self.collect_new_primary_signatures(&intent_hash).await?;
-                new_primary_signatures.into_iter().for_each(|signature| {
+                let post_processing_signatures = self.collect_post_processing_signatures(&intent_hash).await?;
+               
+                post_processing_signatures.into_iter().for_each(|signature| {
                     signatures.insert(signature);
                 });
 
@@ -53,59 +46,32 @@ impl SignaturesCollectorOrchestrator {
                     IntentSignatures::new(intent_signatures),
                 )
             }
-            None => Err(CommonError::TooFewFactorInstancesDerived),
+            None => Err(CommonError::SigningFailedTooManyFactorSourcesNeglected),
         }
     }
 
-    async fn collect_fee_payer_signatures(
+    /// Collects additional signatures if needed after the final intent candidate was determined.
+    /// Additional signatures could be required for:
+    /// - Fee payer.
+    /// - Rola key configuration.
+    /// 
+    /// These will need to exercise the Primary role.
+    async fn collect_post_processing_signatures(
         &self,
         intent_hash: &TransactionIntentHash,
     ) -> Result<IndexSet<HDSignature<TransactionIntentHash>>> {
-        let Some(collector) = self
-            .factory
-            .fee_payer_sign_with_primary_role_collector_for(intent_hash)
-        else {
-            return Ok(IndexSet::new());
-        };
-
-        let outcome = collector.collect_signatures().await?;
-
-        if !outcome.successful() {
-            return Err(CommonError::TooFewFactorInstancesDerived);
+        if let Some(collector) = self.factory.signature_collector_for_post_processing_signatures(intent_hash)? {
+            let signatures_otucome = collector.collect_signatures().await?;
+            if signatures_otucome.successful() {
+                Ok(signatures_otucome.all_signatures())
+            } else {
+                Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
+            }
+        } else {
+        Ok(IndexSet::new())
         }
-
-        let signatures = outcome.signatures_of_successful_transactions();
-        if signatures.is_empty() {
-            return Err(CommonError::TooFewFactorInstancesDerived);
-        }
-
-        Ok(signatures)
     }
-
-    async fn collect_new_primary_signatures(
-        &self,
-        intent_hash: &TransactionIntentHash,
-    ) -> Result<IndexSet<HDSignature<TransactionIntentHash>>> {
-        let Some(collector) =
-            self.factory.sign_with_new_primary_if_needed(intent_hash)
-        else {
-            return Ok(IndexSet::new());
-        };
-
-        let outcome = collector.collect_signatures().await?;
-
-        if !outcome.successful() {
-            return Err(CommonError::TooFewFactorInstancesDerived);
-        }
-
-        let signatures = outcome.signatures_of_successful_transactions();
-        if signatures.is_empty() {
-            return Err(CommonError::TooFewFactorInstancesDerived);
-        }
-
-        Ok(signatures)
-    }
-
+   
     async fn iniate_with_recovery_flow(
         &self,
     ) -> Result<Option<IndexSet<HDSignature<TransactionIntentHash>>>> {
@@ -193,30 +159,72 @@ impl SignaturesCollectorOrchestrator {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
 
-    use std::sync::Arc;
+//     use std::sync::Arc;
 
-    // #[actix_rt::test]
-    // async fn proper_signature_requests_are_made_while_user_skips_all_factors() {
-    //     let interactor = MockSignInteractor::<TransactionIntent>::new();
+//     #[actix_rt::test]
+//     async fn proper_signature_requests_are_made_while_user_skips_all_factors() {
+//         let interactor = MockSignInteractor::<TransactionIntent>::new();
 
-    //     let intents = AccessControllerRecoveryIntentsBuilder::new(
-    //         base_intent,
-    //         lock_fee_data,
-    //         securified_entity,
-    //         proposed_security_structure,
-    //         fee_payer_account
-    //     ).build().unwrap()
-    //     // let interactor = SignInteractor
-    //     let factory = SignaturesCollectorFactory::new(
-    //         SigningFinishEarlyStrategy::default(),
-    //         Profile::sample().factor_sources,
-    //         Arc::new(interactor),
-    //         recovery_intents
-    //     );
-    //     let sut = SignaturesCollectorOrchestrator::new(factory);
-    // }
-}
+//         let profile = Profile::sample();
+
+//         let base_intent = TransactionIntent::sample();
+//         let lock_fee_data = LockFeeData::new_with_securified_fee_payer(AccountAddress::sample_frank(), AccessControllerAddress::sample_mainnet(), Decimal192::eight());
+//         let existing_security_structure = SecurityStructureOfFactorInstances::sample_sim();
+//         let proposed_security_structure = SecurityStructureOfFactorInstances::sample_other_sim();
+//         let securified_entity = AnySecurifiedEntity::with_securified_entity_control(
+//             Account::sample_sim().into(), 
+//             SecuredEntityControl::new(
+//             None, 
+//             AccessControllerAddress::sample_mainnet(), 
+//             existing_security_structure
+//         )
+//         .unwrap()
+//     );
+
+//         let fee_payer_account = None;
+
+//         let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
+//             base_intent,
+//             lock_fee_data,
+//             securified_entity.clone(),
+//             proposed_security_structure.clone(),
+//             fee_payer_account
+//         ).build().unwrap();
+
+//         let sign_request = SignRequest::<TransactionIntent>::new(
+//             existing_security_structure.matrix_of_factors.recovery().all_factors().first().unwrap().factor_source_id.get_factor_source_kind(), 
+//             IndexMap::from([
+//                 (
+//                     existing_security_structure.matrix_of_factors.recovery().all_factors().first().unwrap().factor_source_id,
+//                     PerFactorSourceInput::<TransactionIntent>::new(
+//                         existing_security_structure.matrix_of_factors.recovery().all_factors().first().unwrap().factor_source_id,,
+//                         per_transaction,
+//                         invalid_transactions_if_neglected
+//                     )
+//                 )
+//             ])
+//         );
+//         interactor
+//         .expect_sign(eq(SignRequest<TransactionIntent>::))
+//         .with(eq())
+//                 .once()
+//                 .return_const(Some(request.clone()));
+
+//         let factory = SignaturesCollectorFactory::new(
+//             SigningFinishEarlyStrategy::default(),
+//             FactorSource::sample_all(),
+//             Arc::new(interactor),
+//             recovery_intents,
+//             securified_entity,
+//             proposed_security_structure
+//         );
+
+//         let sut = SignaturesCollectorOrchestrator::new(factory);
+
+//         sut.sign().await.unwrap();
+//     }
+// }
