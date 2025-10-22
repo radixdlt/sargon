@@ -24,7 +24,9 @@ impl ShortString {
 
     pub fn new(value: impl AsRef<str>) -> Result<Self> {
         arraystring::MaxString::try_from_str(value.as_ref())
-            .map_err(|_| CommonError::Unknown)
+            .map_err(|_| CommonError::Unknown {
+                error_message: "Unable to init MaxString".to_string(),
+            })
             .map(Self)
     }
 }

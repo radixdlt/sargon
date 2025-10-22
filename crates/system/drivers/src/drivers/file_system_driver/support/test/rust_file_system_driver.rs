@@ -16,9 +16,13 @@ impl RustFileSystemDriver {
 
 #[allow(dead_code)]
 pub(crate) fn path_from_str(str: String, require: bool) -> Result<PathBuf> {
-    let path = PathBuf::from_str(&str).map_err(|_| CommonError::Unknown)?;
+    let path = PathBuf::from_str(&str).map_err(|_| CommonError::Unknown {
+        error_message: "Failed to construct path".to_string(),
+    })?;
     if require {
-        path.try_exists().map_err(|_| CommonError::Unknown)?;
+        path.try_exists().map_err(|_| CommonError::Unknown {
+            error_message: "Failed to confirm path existence".to_string(),
+        })?;
     }
     Ok(path)
 }

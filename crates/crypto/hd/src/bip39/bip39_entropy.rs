@@ -53,7 +53,7 @@ macro_rules! entropy_with_byte_counts {
                 impl TryFrom<NonEmptyMax32Bytes> for [< Entropy $byte_count Bytes >] {
                     type Error = CommonError;
                     fn try_from(value: NonEmptyMax32Bytes) -> Result<Self> {
-                        let b: &[u8; $byte_count] = value.as_ref().try_into().map_err(|_| CommonError::Unknown)?;
+                        let b: &[u8; $byte_count] = value.as_ref().try_into().map_err(|_| CommonError::Unknown { error_message: "Failed retrieving bytes from entropy".to_string() })?;
                         Ok(Self::from([< Entropy $byte_count Bytes >]::new(*b)))
                     }
                 }
@@ -62,7 +62,7 @@ macro_rules! entropy_with_byte_counts {
             impl TryFrom<NonEmptyMax32Bytes> for $enum_name {
                 type Error = CommonError;
                 fn try_from(value: NonEmptyMax32Bytes) -> Result<$enum_name> {
-                    Err(CommonError::Unknown)
+                    Err(CommonError::Unknown { error_message: "Failed initializing entropy".to_string() })
                         $(
                             .or([< Entropy $byte_count Bytes >]::try_from(value.clone()).map(Self::from))
                         )+

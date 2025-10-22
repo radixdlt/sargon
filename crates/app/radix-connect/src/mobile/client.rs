@@ -510,7 +510,9 @@ mod tests {
     // Test that the in flight session will not be saved to session storage if the first wallet interacion is failure
     #[actix_rt::test]
     async fn test_happy_path_no_prior_session_failed_to_send_response() {
-        let response_send_error = Err(CommonError::Unknown);
+        let response_send_error = Err(CommonError::Unknown {
+            error_message: "Error".to_string(),
+        });
         let mock_transport =
             Arc::new(MockWalletInteractionTransport::new(response_send_error));
         let mock_session_storage = Arc::new(MockSessionStorage::new());

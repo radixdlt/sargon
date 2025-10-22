@@ -421,7 +421,9 @@ mod tests {
             where
                 S: Serializer,
             {
-                Err(serde::ser::Error::custom(CommonError::Unknown))
+                Err(serde::ser::Error::custom(CommonError::Unknown {
+                    error_message: "Failed to serialize".to_string(),
+                }))
             }
         }
 

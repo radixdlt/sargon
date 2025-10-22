@@ -62,6 +62,8 @@ pub enum SecureStorageAccessErrorKind {
 
     /// The device does not have pin, pattern, or password set up.
     NoDeviceCredential,
+
+    Unknown,
 }
 
 impl SecureStorageAccessErrorKind {

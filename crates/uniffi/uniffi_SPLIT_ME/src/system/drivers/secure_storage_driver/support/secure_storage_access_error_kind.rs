@@ -63,6 +63,8 @@ pub enum SecureStorageAccessErrorKind {
 
     /// The device does not have pin, pattern, or password set up.
     NoDeviceCredential,
+
+    Unknown,
 }
 
 delegate_display_debug_into!(
