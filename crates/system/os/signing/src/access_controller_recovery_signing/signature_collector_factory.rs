@@ -115,7 +115,7 @@ impl SignaturesCollectorFactory {
         &self,
         intent_hash: &TransactionIntentHash,
     ) -> Result<Option<SignaturesCollector<TransactionIntent>>> { 
-        let fee_payer_is_securified_account = self.lock_fee_data.fee_payer_address.scrypto() != self.securified_entity.address().scrypto();
+        let fee_payer_is_securified_account = self.lock_fee_data.fee_payer_address.scrypto() == self.securified_entity.address().scrypto();
         let used_role_combination = self.recovery_intents.role_combination_used_for_transaction(intent_hash);
         let intent = self.recovery_intents.signable_for_hash(intent_hash).expect("Programmer error: Signable should exist").signable;
         let authentication_role_is_updated = self.securified_entity.current_authentication_signing_factor_instance() != self.proposed_security_structure.authentication_signing_factor_instance;

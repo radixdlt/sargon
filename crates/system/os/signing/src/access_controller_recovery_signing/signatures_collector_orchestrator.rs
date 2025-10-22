@@ -24,7 +24,7 @@ impl SignaturesCollectorOrchestrator {
                 let intent_hash = signatures
                     .first()
                     .map(|sig| sig.payload_id().clone())
-                    .ok_or(CommonError::TooFewFactorInstancesDerived)?;
+                    .unwrap();
 
                 let post_processing_signatures = self.collect_post_processing_signatures(&intent_hash).await?;
                
@@ -35,7 +35,7 @@ impl SignaturesCollectorOrchestrator {
                 let intent = self
                     .factory
                     .intent_for_hash(&intent_hash)
-                    .ok_or(CommonError::TooFewFactorInstancesDerived)?;
+                    .unwrap();
                 let intent_signatures = signatures
                     .into_iter()
                     .map(|hd| IntentSignature(hd.signature))
