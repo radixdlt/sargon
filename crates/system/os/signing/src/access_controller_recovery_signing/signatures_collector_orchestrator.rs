@@ -26,16 +26,18 @@ impl SignaturesCollectorOrchestrator {
                     .map(|sig| sig.payload_id().clone())
                     .unwrap();
 
-                let post_processing_signatures = self.collect_post_processing_signatures(&intent_hash).await?;
-               
-                post_processing_signatures.into_iter().for_each(|signature| {
-                    signatures.insert(signature);
-                });
+                let post_processing_signatures = self
+                    .collect_post_processing_signatures(&intent_hash)
+                    .await?;
 
-                let intent = self
-                    .factory
-                    .intent_for_hash(&intent_hash)
-                    .unwrap();
+                post_processing_signatures
+                    .into_iter()
+                    .for_each(|signature| {
+                        signatures.insert(signature);
+                    });
+
+                let intent =
+                    self.factory.intent_for_hash(&intent_hash).unwrap();
                 let intent_signatures = signatures
                     .into_iter()
                     .map(|hd| IntentSignature(hd.signature))
@@ -46,7 +48,9 @@ impl SignaturesCollectorOrchestrator {
                     IntentSignatures::new(intent_signatures),
                 )
             }
-            None => Err(CommonError::SigningFailedTooManyFactorSourcesNeglected),
+            None => {
+                Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
+            }
         }
     }
 
@@ -54,13 +58,16 @@ impl SignaturesCollectorOrchestrator {
     /// Additional signatures could be required for:
     /// - Fee payer.
     /// - Rola key configuration.
-    /// 
+    ///
     /// These will need to exercise the Primary role.
     async fn collect_post_processing_signatures(
         &self,
         intent_hash: &TransactionIntentHash,
     ) -> Result<IndexSet<HDSignature<TransactionIntentHash>>> {
-        if let Some(collector) = self.factory.signature_collector_for_post_processing_signatures(intent_hash)? {
+        if let Some(collector) = self
+            .factory
+            .signature_collector_for_post_processing_signatures(intent_hash)?
+        {
             let signatures_otucome = collector.collect_signatures().await?;
             if signatures_otucome.successful() {
                 Ok(signatures_otucome.all_signatures())
@@ -68,10 +75,10 @@ impl SignaturesCollectorOrchestrator {
                 Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
             }
         } else {
-        Ok(IndexSet::new())
+            Ok(IndexSet::new())
         }
     }
-   
+
     async fn iniate_with_recovery_flow(
         &self,
     ) -> Result<Option<IndexSet<HDSignature<TransactionIntentHash>>>> {
@@ -176,10 +183,10 @@ impl SignaturesCollectorOrchestrator {
 //         let existing_security_structure = SecurityStructureOfFactorInstances::sample_sim();
 //         let proposed_security_structure = SecurityStructureOfFactorInstances::sample_other_sim();
 //         let securified_entity = AnySecurifiedEntity::with_securified_entity_control(
-//             Account::sample_sim().into(), 
+//             Account::sample_sim().into(),
 //             SecuredEntityControl::new(
-//             None, 
-//             AccessControllerAddress::sample_mainnet(), 
+//             None,
+//             AccessControllerAddress::sample_mainnet(),
 //             existing_security_structure
 //         )
 //         .unwrap()
@@ -196,7 +203,7 @@ impl SignaturesCollectorOrchestrator {
 //         ).build().unwrap();
 
 //         let sign_request = SignRequest::<TransactionIntent>::new(
-//             existing_security_structure.matrix_of_factors.recovery().all_factors().first().unwrap().factor_source_id.get_factor_source_kind(), 
+//             existing_security_structure.matrix_of_factors.recovery().all_factors().first().unwrap().factor_source_id.get_factor_source_kind(),
 //             IndexMap::from([
 //                 (
 //                     existing_security_structure.matrix_of_factors.recovery().all_factors().first().unwrap().factor_source_id,

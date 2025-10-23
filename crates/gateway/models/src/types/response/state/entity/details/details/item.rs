@@ -277,8 +277,10 @@ mod tests {
             }
         }"#;
 
-        let parsed: SUT = serde_json::from_str(json).expect("valid component json");
-        let StateEntityDetailsResponseItemDetails::Component(details) = parsed else {
+        let parsed: SUT =
+            serde_json::from_str(json).expect("valid component json");
+        let StateEntityDetailsResponseItemDetails::Component(details) = parsed
+        else {
             panic!("expected Component variant");
         };
 
@@ -287,12 +289,15 @@ mod tests {
 
         // Compare normalized JSON values to avoid whitespace/order issues
         let full: Value = serde_json::from_str(json).unwrap();
-        let expected_state: Value = full.get("state").cloned().expect("state present");
-        let stored_state: Value = serde_json::from_str(state_raw).expect("stored state parses");
+        let expected_state: Value =
+            full.get("state").cloned().expect("state present");
+        let stored_state: Value =
+            serde_json::from_str(state_raw).expect("stored state parses");
         assert_eq!(stored_state, expected_state);
 
         // And try_decode_state should yield the same JSON Value
-        let decoded: Option<Value> = details.try_decode_state().expect("decode ok");
+        let decoded: Option<Value> =
+            details.try_decode_state().expect("decode ok");
         assert_eq!(decoded.unwrap(), expected_state);
     }
 }

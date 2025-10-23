@@ -7,13 +7,11 @@ impl SargonOS {
         &self,
         transaction_intent: TransactionIntent,
         execution_summary: ExecutionSummary,
-        lock_fee_data: LockFeeData,
     ) -> Result<SignedIntent> {
         self.wrapped
             .sign_transaction(
                 transaction_intent.into(),
                 execution_summary.into(),
-                lock_fee_data.into_internal(),
             )
             .await
             .into_result()

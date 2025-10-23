@@ -43,9 +43,6 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 extend = { workspace = true }
 
-[dev-dependencies]
-scrypto-test = { workspace = true }
-
 [build-dependencies]
 cargo_toml = { workspace = true }
 

@@ -31,8 +31,8 @@ impl StateEntityDetailsResponseComponentDetails {
 
 // Serialize/deserialize Option<String> as arbitrary JSON, keeping the raw text
 mod stringified_json {
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
     use serde::ser::Error as _; // bring `custom` into scope for Serializer::Error
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
     use serde_json::Value;
 
     pub fn serialize<S>(v: &Option<String>, s: S) -> Result<S::Ok, S::Error>
@@ -41,8 +41,8 @@ mod stringified_json {
     {
         match v {
             Some(raw) => {
-                let val: Value = serde_json::from_str(raw)
-                    .map_err(S::Error::custom)?;
+                let val: Value =
+                    serde_json::from_str(raw).map_err(S::Error::custom)?;
                 val.serialize(s)
             }
             None => s.serialize_none(),

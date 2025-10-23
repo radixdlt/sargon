@@ -18,7 +18,6 @@ pub trait OsSigning {
         &self,
         transaction_intent: TransactionIntent,
         execution_summary: ExecutionSummary,
-        lock_fee_data: LockFeeData,
     ) -> Result<SignedIntent>;
 
     async fn sign_subintent(
@@ -49,7 +48,6 @@ impl OsSigning for SargonOS {
         &self,
         transaction_intent: TransactionIntent,
         execution_summary: ExecutionSummary,
-        lock_fee_data: LockFeeData,
     ) -> Result<SignedIntent> {
         if matches!(
             execution_summary.detailed_classification.as_ref(),
@@ -59,7 +57,6 @@ impl OsSigning for SargonOS {
                 self,
                 transaction_intent,
                 execution_summary,
-                lock_fee_data,
             )
             .await;
         }
@@ -116,9 +113,15 @@ async fn sign_access_controller_recovery_transaction(
     os: &SargonOS,
     base_transaction_intent: TransactionIntent,
     execution_summary: ExecutionSummary,
-    lock_fee_data: LockFeeData,
 ) -> Result<SignedIntent> {
     let profile = os.profile()?;
+
+    let (fee_paying_account_address, fee) = base_transaction_intent
+        .extract_fee_payer_info()
+        .expect("Shoud have a fee payer configured");
+    let fee_payer_account =
+        profile.account_by_address(fee_paying_account_address)?;
+    let lock_fee_data = LockFeeData::new_with_account(fee_payer_account, fee);
 
     let access_controller_address =
         access_controller_address_from_summary(&execution_summary)?;
@@ -238,15 +241,8 @@ mod test {
             TransactionIntent,
         >(&sut.profile().unwrap());
 
-        let (execution_summary, lock_fee_data) =
-            default_sign_transaction_args();
-
         let signed = sut
-            .sign_transaction(
-                signable.clone(),
-                execution_summary,
-                lock_fee_data,
-            )
+            .sign_transaction(signable.clone(), ExecutionSummary::sample())
             .await
             .unwrap();
 
@@ -285,11 +281,8 @@ mod test {
             vec![],
         );
 
-        let (execution_summary, lock_fee_data) =
-            default_sign_transaction_args();
-
         let outcome = sut
-            .sign_transaction(transaction, execution_summary, lock_fee_data)
+            .sign_transaction(transaction, ExecutionSummary::sample())
             .await
             .unwrap();
 
@@ -308,11 +301,8 @@ mod test {
             vec![],
         );
 
-        let (execution_summary, lock_fee_data) =
-            default_sign_transaction_args();
-
         let outcome = sut
-            .sign_transaction(transaction, execution_summary, lock_fee_data)
+            .sign_transaction(transaction, ExecutionSummary::sample())
             .await
             .unwrap();
 
@@ -335,15 +325,8 @@ mod test {
             &sut.profile().unwrap(),
         );
 
-        let (execution_summary, lock_fee_data) =
-            default_sign_transaction_args();
-
         let outcome = sut
-            .sign_transaction(
-                signable.clone(),
-                execution_summary,
-                lock_fee_data,
-            )
+            .sign_transaction(signable.clone(), ExecutionSummary::sample())
             .await;
 
         assert_eq!(
@@ -421,15 +404,8 @@ mod test {
                 [],
             );
 
-        let (execution_summary, lock_fee_data) =
-            default_sign_transaction_args();
-
         let outcome = sut
-            .sign_transaction(
-                signable.clone(),
-                execution_summary,
-                lock_fee_data,
-            )
+            .sign_transaction(signable.clone(), ExecutionSummary::sample())
             .await;
 
         assert_eq!(
@@ -483,7 +459,7 @@ mod test {
             default_sign_transaction_args();
 
         let outcome = sut
-            .sign_transaction(transaction, execution_summary, lock_fee_data)
+            .sign_transaction(transaction, ExecutionSummary::sample())
             .await;
 
         assert_eq!(

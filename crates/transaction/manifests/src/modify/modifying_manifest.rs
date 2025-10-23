@@ -82,6 +82,19 @@ pub struct LockFeeData {
 }
 
 impl LockFeeData {
+    pub fn new_with_account(account: Account, fee: Decimal192) -> Self {
+        let maybe_ac = account
+            .security_state()
+            .as_securified()
+            .map(|sec| sec.access_controller_address);
+
+        Self {
+            fee_payer_address: account.address,
+            access_controller_address: maybe_ac,
+            fee: Some(fee),
+        }
+    }
+
     pub fn new_with_unsecurified_fee_payer(
         fee_payer_address: AccountAddress,
         fee: Decimal192,

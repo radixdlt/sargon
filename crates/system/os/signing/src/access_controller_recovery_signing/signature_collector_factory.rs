@@ -18,21 +18,22 @@ impl SignaturesCollectorFactory {
         access_controller_address: AccessControllerAddress,
         lock_fee_data: LockFeeData,
     ) -> Result<Self> {
-        let entity = profile.entity_by_access_controller_address(access_controller_address)?;
+        let entity = profile
+            .entity_by_access_controller_address(access_controller_address)?;
         let securified_entity = AnySecurifiedEntity::try_from(entity)?;
 
         let proposed_security_structure = securified_entity
-        .securified_entity_control
-        .provisional_securified_config
-        .clone()
-        .ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)?
-        .get_security_structure_of_factor_instances();
+            .securified_entity_control
+            .provisional_securified_config
+            .clone()
+            .ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)?
+            .get_security_structure_of_factor_instances();
 
         let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
             base_intent,
-            lock_fee_data.clone(), 
-            securified_entity.clone(), 
-            proposed_security_structure.clone()
+            lock_fee_data.clone(),
+            securified_entity.clone(),
+            proposed_security_structure.clone(),
         )
         .build()?;
 
@@ -114,25 +115,44 @@ impl SignaturesCollectorFactory {
     pub fn signature_collector_for_post_processing_signatures(
         &self,
         intent_hash: &TransactionIntentHash,
-    ) -> Result<Option<SignaturesCollector<TransactionIntent>>> { 
-        let fee_payer_is_securified_account = self.lock_fee_data.fee_payer_address.scrypto() == self.securified_entity.address().scrypto();
-        let used_role_combination = self.recovery_intents.role_combination_used_for_transaction(intent_hash);
-        let intent = self.recovery_intents.signable_for_hash(intent_hash).expect("Programmer error: Signable should exist").signable;
-        let authentication_role_is_updated = self.securified_entity.current_authentication_signing_factor_instance() != self.proposed_security_structure.authentication_signing_factor_instance;
+    ) -> Result<Option<SignaturesCollector<TransactionIntent>>> {
+        let fee_payer_is_securified_account =
+            self.lock_fee_data.fee_payer_address.scrypto()
+                == self.securified_entity.address().scrypto();
+        let used_role_combination = self
+            .recovery_intents
+            .role_combination_used_for_transaction(intent_hash);
+        let intent = self
+            .recovery_intents
+            .signable_for_hash(intent_hash)
+            .expect("Programmer error: Signable should exist")
+            .signable;
+        let authentication_role_is_updated = self
+            .securified_entity
+            .current_authentication_signing_factor_instance()
+            != self
+                .proposed_security_structure
+                .authentication_signing_factor_instance;
 
         let mut signable_entities: Vec<Account> = Vec::<_>::new();
 
         // First handle the the case when the fee payer is another account
         if !fee_payer_is_securified_account {
             // Fee payer is some other account;
-            let fee_payer_account = self.profile.account_by_address(self.lock_fee_data.fee_payer_address.clone())?;
+            let fee_payer_account = self.profile.account_by_address(
+                self.lock_fee_data.fee_payer_address.clone(),
+            )?;
             signable_entities.push(fee_payer_account);
         }
 
         // Second, handle the scenarios when it is needed to sign with the new Primary Role
-        if self.securified_entity.entity.is_account_entity() && used_role_combination.can_quick_confirm() && !used_role_combination.can_exercise_primary_role() {
+        if self.securified_entity.entity.is_account_entity()
+            && used_role_combination.can_quick_confirm()
+            && !used_role_combination.can_exercise_primary_role()
+        {
             // The recovery was quick confirmed, but the current Primary role was not used, so try to use the new Primary role if needed.
-            if fee_payer_is_securified_account || authentication_role_is_updated {
+            if fee_payer_is_securified_account || authentication_role_is_updated
+            {
                 // Need to create a copy of the securified entity and commit the provisional security structure,
                 // so the SignaturesCollector can use it when signing with Primary role.
                 let mut securified_entity = self.securified_entity.clone();
@@ -151,17 +171,18 @@ impl SignaturesCollectorFactory {
         if signable_entities.is_empty() {
             Ok(None)
         } else {
-            Ok(Some(
-                SignaturesCollector::with(
+            Ok(Some(SignaturesCollector::with(
                 self.finish_early_strategy.clone(),
                 IndexSet::from_iter(self.profile.factor_sources.iter()),
-                IdentifiedVecOf::from(vec![SignableWithEntities::with(intent, signable_entities)]),
+                IdentifiedVecOf::from(vec![SignableWithEntities::with(
+                    intent,
+                    signable_entities,
+                )]),
                 self.interactor.clone(),
                 SigningPurpose::SignTX {
                     role_kind: RoleKind::Primary,
                 },
-            )
-        ))
+            )))
         }
     }
 
