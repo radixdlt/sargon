@@ -1,5 +1,10 @@
 use crate::prelude::*;
 
+#[cfg(any(test, feature = "mock"))]
+use mockall::automock;
+
+/// Driver to interact with natice Arculus CSDK library
+#[cfg_attr(any(test, feature = "mock"), automock)]
 /// An "interactor" which can sign signables (transaction intents & subintents) .
 ///
 /// By "interactor" we mean a bridge between Sargon and Host application,

@@ -45,6 +45,12 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         let mut builder = ScryptoTransactionManifestBuilder::new();
 
         let set_rola = |builder: ScryptoTransactionManifestBuilder| -> ScryptoTransactionManifestBuilder {
+            let mut builder = builder;
+            builder = builder.call_method(
+                ScryptoGlobalAddress::from(securified_entity.access_controller_address().clone()),
+                SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
+                (),
+            );
             TransactionManifest::set_rola_key(
                 builder,
                 &security_structure_of_factor_instances
