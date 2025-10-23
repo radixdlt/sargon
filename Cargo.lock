@@ -1761,6 +1761,7 @@ dependencies = [
  "radix-engine-toolkit-common",
  "radix-transactions",
  "serde",
+ "serde_json",
  "transaction-models",
 ]
 

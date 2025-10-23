@@ -1,3 +1,16 @@
+use radix_transactions::manifest::CallMethod;
+
+use radix_engine_interface::blueprints::access_controller::{
+    AccessControllerInitiateRecoveryAsPrimaryInput as ScryptoAccessControllerInitiateRecoveryAsPrimaryInput,
+    AccessControllerInitiateRecoveryAsRecoveryInput as ScryptoAccessControllerInitiateRecoveryAsRecoveryInput,
+    AccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput as ScryptoAccessControllerQuickConfirmPrimaryRoleRecoveryProposalInput,
+    AccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput as ScryptoAccessControllerQuickConfirmRecoveryRoleRecoveryProposalInput,
+    ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
+    ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
+    ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT,
+    ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+};
+
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
@@ -29,6 +42,31 @@ impl TransactionManifest {
             instructions,
             blobs,
         }
+    }
+
+    pub fn is_access_controller_timed_recovery_manifest(&self) -> bool {
+        let has_iniate_recovery_method = self.has_method_for_ident(SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT) ||
+        self.has_method_for_ident(SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT);
+
+        let has_recovery_quick_cofirmation = self.has_method_for_ident(SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT) ||
+        self.has_method_for_ident(SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT);
+
+        has_iniate_recovery_method && !has_recovery_quick_cofirmation
+    }
+
+    pub fn has_method_for_ident(&self, ident: &str) -> bool {
+        self.instructions().iter().find(|inst| {
+            match inst {
+                ScryptoInstruction::CallMethod(method) => {
+                    if method.method_name == ident {
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+                _ => return false
+            }
+        }).is_some()
     }
 }
 
