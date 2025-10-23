@@ -18,6 +18,7 @@ impl TimePeriod {
 
     pub fn in_minutes(&self) -> u32 {
         match self.unit {
+            TimePeriodUnit::Minutes => self.value as u32,
             TimePeriodUnit::Days => self.value as u32 * MINUTES_PER_DAY,
             TimePeriodUnit::Weeks => {
                 self.value as u32 * DAYS_PER_WEEK as u32 * MINUTES_PER_DAY
@@ -39,10 +40,30 @@ impl TimePeriod {
         }
     }
 
+    pub const fn with_minutes(value: u16) -> Self {
+        if (value % DAYS_PER_WEEK) == 0 {
+            Self {
+                value: value / DAYS_PER_WEEK,
+                unit: TimePeriodUnit::Weeks,
+            }
+        } else if (value % MINUTES_PER_DAY as u16) == 0 {
+            Self {
+                value,
+                unit: TimePeriodUnit::Days,
+            }
+        } else {
+            Self {
+                value,
+                unit: TimePeriodUnit::Minutes,
+            }
+        }
+    }
+
     pub fn days(&self) -> u16 {
         match self.unit {
             TimePeriodUnit::Days => self.value,
             TimePeriodUnit::Weeks => self.value * DAYS_PER_WEEK,
+            TimePeriodUnit::Minutes => panic!("Cannot convert minutes to days"),
         }
     }
 }

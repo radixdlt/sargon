@@ -115,7 +115,7 @@ impl FactorInstance {
             .unwrap()
             .sample_associated_mnemonic();
         mwp.sign(
-            &hash,
+            hash,
             &self.try_as_hd_factor_instances().unwrap().derivation_path(),
         )
     }

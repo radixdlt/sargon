@@ -284,22 +284,22 @@ mod tests {
     }
 
     #[test]
-    fn iniate_with_recovery_complete_with_confirmation() {
+    fn initiate_with_recovery_complete_with_confirmation() {
         assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation);
     }
 
     #[test]
-    fn iniate_with_recovery_complete_with_primary() {
+    fn initiate_with_recovery_complete_with_primary() {
         assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary);
     }
 
     #[test]
-    fn iniate_with_primary_complete_with_confirmation() {
+    fn initiate_with_primary_complete_with_confirmation() {
         assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation);
     }
 
     #[test]
-    fn iniate_with_recovery_delayed_completion() {
+    fn initiate_with_recovery_delayed_completion() {
         let (ac_substate, ac_rule_set) = execute_recovery_transaction(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion);
 
         // Expect rule set to not change. The AC is initially configured with `sample_sim`, and recovery is proposed with `sample_sim_other`
@@ -359,33 +359,11 @@ mod tests {
         let updated_sec_structure =
             SecurityStructureOfFactorInstances::sample_other_sim();
 
-        let mut manifest =
-            TransactionManifest::apply_security_shield_for_securified_entity(
-                securified_account.clone(),
-                updated_sec_structure.clone(),
-                roles_combination,
-            );
-
-        manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
-            manifest,
-            Decimal192::one(),
-            securified_account.clone(),
-        );
-
-        ledger.execute_ac_recovery_manifest(
-            manifest.clone(),
-            securified_account.securified_entity_control.clone(),
+        ledger.execute_recovery_transaction(
+            securified_account,
+            updated_sec_structure,
             roles_combination,
-        );
-
-        // Assert that the on ledger rule set matches the expected rule set
-        let rule_set = ledger.read_access_controller_rule_set(
-            securified_account.access_controller_address().clone(),
-        );
-        let state = ledger.read_access_controller_substate(
-            securified_account.access_controller_address(),
-        );
-        (state, rule_set)
+        )
     }
 
     fn assert_recovery_with_quick_confirmation(

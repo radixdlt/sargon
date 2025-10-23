@@ -48,3 +48,6 @@ scrypto-test = { workspace = true }
 
 [build-dependencies]
 cargo_toml = { workspace = true }
+
+[dev-dependencies]
+scrypto-test = { workspace = true }
