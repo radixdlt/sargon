@@ -1,0 +1,225 @@
+use crate::prelude::*;
+
+pub struct SignaturesCollectorFactory {
+    finish_early_strategy: SigningFinishEarlyStrategy,
+    profile: Profile,
+    interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    recovery_intents: AccessControllerRecoveryIntents,
+    securified_entity: AnySecurifiedEntity,
+    proposed_security_structure: SecurityStructureOfFactorInstances,
+    lock_fee_data: LockFeeData,
+}
+
+impl SignaturesCollectorFactory {
+    pub fn new(
+        base_intent: TransactionIntent,
+        interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+        profile: Profile,
+        access_controller_address: AccessControllerAddress,
+        lock_fee_data: LockFeeData,
+    ) -> Result<Self> {
+        let entity = profile.entity_by_access_controller_address(access_controller_address)?;
+        let securified_entity = AnySecurifiedEntity::try_from(entity)?;
+
+        let proposed_security_structure = securified_entity
+        .securified_entity_control
+        .provisional_securified_config
+        .clone()
+        .ok_or(CommonError::EntityHasNoProvisionalSecurityConfigSet)?
+        .get_security_structure_of_factor_instances();
+
+        let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
+            base_intent,
+            lock_fee_data.clone(), 
+            securified_entity.clone(), 
+            proposed_security_structure.clone()
+        )
+        .build()?;
+
+        Ok(Self {
+            finish_early_strategy: SigningFinishEarlyStrategy::default(),
+            profile: profile,
+            interactor: interactor,
+            recovery_intents,
+            securified_entity,
+            proposed_security_structure,
+            lock_fee_data,
+        })
+    }
+
+    pub fn intent_for_hash(
+        &self,
+        hash: &TransactionIntentHash,
+    ) -> Option<TransactionIntent> {
+        self.recovery_intents
+            .all_signables()
+            .into_iter()
+            .find(|signable| signable.id == *hash)
+            .map(|signable| signable.signable.clone())
+    }
+
+    pub fn intent_hash_of_timed_recovery(&self) -> TransactionIntentHash {
+        self.recovery_intents
+            .initiate_with_recovery_delayed_completion
+            .id()
+    }
+}
+
+impl SignaturesCollectorFactory {
+    pub fn initiate_recovery_with_recovery_sign_with_recovery_role_collector(
+        &self,
+    ) -> SignaturesCollector<TransactionIntent> {
+        self.signature_collector_for_recovery_signing(
+            RoleKind::Recovery,
+            RoleKind::Recovery,
+        )
+    }
+
+    pub fn initiate_recovery_with_recovery_sign_with_confirmation_role_collector(
+        &self,
+    ) -> SignaturesCollector<TransactionIntent> {
+        self.signature_collector_for_recovery_signing(
+            RoleKind::Recovery,
+            RoleKind::Confirmation,
+        )
+    }
+
+    pub fn initiate_recovery_with_recovery_sign_with_primary_role_collector(
+        &self,
+    ) -> SignaturesCollector<TransactionIntent> {
+        self.signature_collector_for_recovery_signing(
+            RoleKind::Recovery,
+            RoleKind::Primary,
+        )
+    }
+
+    pub fn initiate_recovery_with_primary_sign_with_primary_role_collector(
+        &self,
+    ) -> SignaturesCollector<TransactionIntent> {
+        self.signature_collector_for_recovery_signing(
+            RoleKind::Primary,
+            RoleKind::Primary,
+        )
+    }
+
+    pub fn initiate_recovery_with_primary_sign_with_confirmation_role_collector(
+        &self,
+    ) -> SignaturesCollector<TransactionIntent> {
+        self.signature_collector_for_recovery_signing(
+            RoleKind::Primary,
+            RoleKind::Confirmation,
+        )
+    }
+
+    pub fn signature_collector_for_post_processing_signatures(
+        &self,
+        intent_hash: &TransactionIntentHash,
+    ) -> Result<Option<SignaturesCollector<TransactionIntent>>> { 
+        let fee_payer_is_securified_account = self.lock_fee_data.fee_payer_address.scrypto() == self.securified_entity.address().scrypto();
+        let used_role_combination = self.recovery_intents.role_combination_used_for_transaction(intent_hash);
+        let intent = self.recovery_intents.signable_for_hash(intent_hash).expect("Programmer error: Signable should exist").signable;
+        let authentication_role_is_updated = self.securified_entity.current_authentication_signing_factor_instance() != self.proposed_security_structure.authentication_signing_factor_instance;
+
+        let mut signable_entities: Vec<Account> = Vec::<_>::new();
+
+        // First handle the the case when the fee payer is another account
+        if !fee_payer_is_securified_account {
+            // Fee payer is some other account;
+            let fee_payer_account = self.profile.account_by_address(self.lock_fee_data.fee_payer_address.clone())?;
+            signable_entities.push(fee_payer_account);
+        }
+
+        // Second, handle the scenarios when it is needed to sign with the new Primary Role
+        if self.securified_entity.entity.is_account_entity() && used_role_combination.can_quick_confirm() && !used_role_combination.can_exercise_primary_role() {
+            // The recovery was quick confirmed, but the current Primary role was not used, so try to use the new Primary role if needed.
+            if fee_payer_is_securified_account || authentication_role_is_updated {
+                // Need to create a copy of the securified entity and commit the provisional security structure,
+                // so the SignaturesCollector can use it when signing with Primary role.
+                let mut securified_entity = self.securified_entity.clone();
+                securified_entity.commit_provisional()?;
+
+                signable_entities.push(
+                    securified_entity
+                    .entity
+                    .as_account_entity()
+                    .expect("Safey to unwrap, since we do check earlier if the entity is account")
+                    .clone()
+                );
+            }
+        }
+
+        if signable_entities.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(
+                SignaturesCollector::with(
+                self.finish_early_strategy.clone(),
+                IndexSet::from_iter(self.profile.factor_sources.iter()),
+                IdentifiedVecOf::from(vec![SignableWithEntities::with(intent, signable_entities)]),
+                self.interactor.clone(),
+                SigningPurpose::SignTX {
+                    role_kind: RoleKind::Primary,
+                },
+            )
+        ))
+        }
+    }
+
+    fn signature_collector_for_recovery_signing(
+        &self,
+        recovery_proposer_kind: RoleKind,
+        signing_kind: RoleKind,
+    ) -> SignaturesCollector<TransactionIntent> {
+        SignaturesCollector::with(
+            self.finish_early_strategy.clone(),
+            IndexSet::from_iter(self.profile.factor_sources.iter()),
+            self.transaction_intents_for_recovery_signing(
+                recovery_proposer_kind,
+                signing_kind,
+            ),
+            self.interactor.clone(),
+            SigningPurpose::SignTX {
+                role_kind: signing_kind,
+            },
+        )
+    }
+}
+
+impl SignaturesCollectorFactory {
+    fn transaction_intents_for_recovery_signing(
+        &self,
+        recovery_proposer_kind: RoleKind,
+        signing_kind: RoleKind,
+    ) -> IdentifiedVecOf<SignableWithEntities<TransactionIntent>> {
+        match recovery_proposer_kind {
+            RoleKind::Recovery => match signing_kind {
+                RoleKind::Recovery => IdentifiedVecOf::from(vec![
+                    self.recovery_intents
+                        .initiate_with_recovery_complete_with_confirmation
+                        .clone(),
+                    self.recovery_intents
+                        .initiate_with_recovery_complete_with_primary
+                        .clone(),
+                    self.recovery_intents
+                        .initiate_with_recovery_delayed_completion
+                        .clone(),
+                ]),
+                RoleKind::Primary => IdentifiedVecOf::from(vec![self
+                    .recovery_intents
+                    .initiate_with_recovery_complete_with_primary
+                    .clone()]),
+                RoleKind::Confirmation => IdentifiedVecOf::from(vec![self
+                    .recovery_intents
+                    .initiate_with_recovery_complete_with_confirmation
+                    .clone()]),
+            },
+            RoleKind::Primary => IdentifiedVecOf::from(vec![self
+                .recovery_intents
+                .initiate_with_primary_complete_with_confirmation
+                .clone()]),
+            RoleKind::Confirmation => {
+                panic!("Confirmation role cannot iniate recovery")
+            }
+        }
+    }
+}

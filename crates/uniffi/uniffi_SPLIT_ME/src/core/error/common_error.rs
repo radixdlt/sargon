@@ -46,7 +46,9 @@ pub enum CommonError {
     InvalidBIP39WordCount {
         bad_value: u64,
     },
-    Unknown,
+    Unknown {
+        error_message: String,
+    },
     FileAlreadyExists {
         path: String,
     },
@@ -265,7 +267,9 @@ impl CommonError {
                     bad_value: *bad_value,
                 }
             }
-            Unknown => InternalCommonError::Unknown,
+            Unknown { error_message } => InternalCommonError::Unknown {
+                error_message: error_message.clone(),
+            },
             FileAlreadyExists { path } => {
                 InternalCommonError::FileAlreadyExists { path: path.clone() }
             }
@@ -388,15 +392,11 @@ impl CommonError {
                     underlying: underlying.clone(),
                 }
             }
-            CommonError::NFCSessionCancelled => {
-                InternalCommonError::NFCSessionCancelled
-            }
-            CommonError::NFCSessionLostTagConnection => {
+            NFCSessionCancelled => InternalCommonError::NFCSessionCancelled,
+            NFCSessionLostTagConnection => {
                 InternalCommonError::NFCSessionLostTagConnection
             }
-            CommonError::NFCSessionUnknownTag => {
-                InternalCommonError::NFCSessionUnknownTag
-            }
+            NFCSessionUnknownTag => InternalCommonError::NFCSessionUnknownTag,
             AddressInvalidEntityType {
                 address_kind,
                 entity_type,
@@ -458,7 +458,9 @@ impl CommonError {
             },
             WrongArculusCard => InternalCommonError::WrongArculusCard,
             NFCSessionRenewed => InternalCommonError::NFCSessionRenewed,
-            _ => InternalCommonError::Unknown,
+            ErasedError { error_message, .. } => InternalCommonError::Unknown {
+                error_message: error_message.clone(),
+            },
         }
     }
 }
@@ -514,7 +516,9 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::InvalidBIP39WordCount { bad_value } => {
                 InvalidBIP39WordCount { bad_value }
             }
-            InternalCommonError::Unknown => Unknown,
+            InternalCommonError::Unknown { error_message } => {
+                Unknown { error_message }
+            }
             InternalCommonError::FileAlreadyExists { path } => {
                 FileAlreadyExists { path }
             }

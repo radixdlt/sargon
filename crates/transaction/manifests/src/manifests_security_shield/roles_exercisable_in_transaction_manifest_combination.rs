@@ -146,18 +146,10 @@ impl RolesExercisableInTransactionManifestCombination {
             return OrderOfInstructionSettingRolaKey::MustSetInFutureTxForConfirmRecovery;
         }
 
-        match self.role_initiating_recovery() {
-            RoleInitiatingRecovery::Primary => {
-                // We can exercise the Primary Role => no need
-                // to set the ROLA key after recovery and use new factors, instead
-                // we can use existing factors
-                OrderOfInstructionSettingRolaKey::BeforeInitRecovery
-            }
-            RoleInitiatingRecovery::Recovery => {
-                // we can quick confirm so we can always set the ROLA key using
-                // the NEW factors - disregarding of which role initiated recovery.
-                OrderOfInstructionSettingRolaKey::AfterQuickConfirm
-            }
+        if self.can_exercise_primary_role() {
+            OrderOfInstructionSettingRolaKey::BeforeInitRecovery
+        } else {
+            OrderOfInstructionSettingRolaKey::AfterQuickConfirm
         }
     }
 

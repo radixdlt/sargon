@@ -79,7 +79,7 @@ class SargonOsManagerTest {
         mockkObject(SargonOs)
         coEvery {
             SargonOs.boot(bios, hostInteractor)
-        } throws(CommonException.Unknown())
+        } throws(CommonException.Unknown("Boot failed"))
 
         val manager = SargonOsManager.factory(
             bios = bios,

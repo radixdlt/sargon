@@ -46,20 +46,7 @@ impl<S: Signable> SignaturesCollector<S> {
         )
     }
 
-    pub async fn collect_signatures(self) -> Result<SignaturesOutcome<S::ID>> {
-        self.sign_with_factors() // in decreasing "friction order"
-            .await
-            .inspect_err(|e| {
-                error!("Failed to use factor sources: {:#?}", e)
-            })?;
-
-        Ok(self.outcome())
-    }
-}
-
-// === INTERNAL ===
-impl<S: Signable> SignaturesCollector<S> {
-    pub(crate) fn with(
+    pub fn with(
         finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<S>>,
@@ -84,6 +71,19 @@ impl<S: Signable> SignaturesCollector<S> {
         }
     }
 
+    pub async fn collect_signatures(self) -> Result<SignaturesOutcome<S::ID>> {
+        self.sign_with_factors() // in decreasing "friction order"
+            .await
+            .inspect_err(|e| {
+                error!("Failed to use factor sources: {:#?}", e)
+            })?;
+
+        Ok(self.outcome())
+    }
+}
+
+// === INTERNAL ===
+impl<S: Signable> SignaturesCollector<S> {
     pub(crate) fn with_signers_extraction<F>(
         finish_early_strategy: SigningFinishEarlyStrategy,
         all_factor_sources_in_profile: IndexSet<FactorSource>,

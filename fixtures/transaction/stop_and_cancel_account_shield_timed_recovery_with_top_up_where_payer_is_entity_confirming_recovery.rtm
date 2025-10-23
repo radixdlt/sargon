@@ -1,0 +1,99 @@
+CALL_METHOD
+    Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
+    "create_proof"
+;
+CALL_METHOD
+    Address("account_rdx12xq83qxwf09eqquqfdj8rv004attq5tgxejkn59rwu588jprdy0xcg")
+    "withdraw"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("10")
+;
+CALL_METHOD
+    Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
+    "stop_timed_recovery"
+    Tuple(
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            2u8,
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
+                                ),
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
+                                )
+                            )
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>()
+                        )
+                    )
+                )
+            )
+        ),
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[ffb6ce6e00a61ad41a596a2e01b2b1ee18863bbe1be5fed50d6c289218]")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        ),
+        Enum<2u8>(
+            Enum<1u8>(
+                Array<Enum>(
+                    Enum<0u8>(
+                        Enum<2u8>(
+                            0u8,
+                            Array<Enum>()
+                        )
+                    ),
+                    Enum<0u8>(
+                        Enum<4u8>(
+                            Array<Enum>(
+                                Enum<0u8>(
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[31262cc8dc5e9a49d1fe0ea8e60a17ef36d1ea857db94cca3e1e2a52dd]")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    Enum<1u8>(
+        20160u32
+    )
+;
+CALL_METHOD
+    Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
+    "cancel_recovery_role_recovery_proposal"
+;
+TAKE_FROM_WORKTOP
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("10")
+    Bucket("bucket1")
+;
+CALL_METHOD
+    Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
+    "contribute_recovery_fee"
+    Bucket("bucket1")
+;

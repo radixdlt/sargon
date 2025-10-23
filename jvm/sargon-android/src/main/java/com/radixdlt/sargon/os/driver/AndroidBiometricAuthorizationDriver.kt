@@ -53,9 +53,9 @@ class BiometricsFailure(
             BiometricPrompt.ERROR_UNABLE_TO_PROCESS -> SecureStorageAccessErrorKind.UNABLE_TO_PROCESS
             BiometricPrompt.ERROR_USER_CANCELED -> SecureStorageAccessErrorKind.USER_CANCELLED
             BiometricPrompt.ERROR_VENDOR -> SecureStorageAccessErrorKind.VENDOR
-            else -> throw CommonException.Unknown()
+            else -> SecureStorageAccessErrorKind.UNKNOWN
         },
-        errorMessage = errorMessage.orEmpty()
+        errorMessage = message.orEmpty()
     )
 
 }

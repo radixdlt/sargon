@@ -46,7 +46,9 @@ impl TestDerivationInteractor {
         derivation_paths: IndexSet<DerivationPath>,
     ) -> Result<IndexSet<HierarchicalDeterministicFactorInstance>> {
         if self.always_fail {
-            return Err(CommonError::Unknown);
+            return Err(CommonError::Unknown {
+                error_message: "Always fail".to_string(),
+            });
         }
 
         let cloned_mnemonic_loading = self.mnemonic_loading.clone();

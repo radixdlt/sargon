@@ -286,7 +286,9 @@ impl OsSecurityStructuresQuerying for SargonOS {
                 let profile_network = specific_profile
                     .networks
                     .get_id(NetworkID::Mainnet)
-                    .ok_or(CommonError::Unknown)?;
+                    .ok_or(CommonError::Unknown {
+                        error_message: "Mainnet network is missing".to_string(),
+                    })?;
                 profile_network.entities_linked_to_security_structure(metadata)
             }
         }
@@ -1198,7 +1200,12 @@ mod tests {
             )
             .await
             .expect_err("Expected an error");
-        assert_eq!(result, CommonError::Unknown);
+        assert_eq!(
+            result,
+            CommonError::Unknown {
+                error_message: "Mainnet network is missing".to_string()
+            }
+        );
     }
 
     #[actix_rt::test]

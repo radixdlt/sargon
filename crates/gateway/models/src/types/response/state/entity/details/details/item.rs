@@ -253,4 +253,46 @@ mod tests {
 
         assert!(matches!(result, SUT::NonFungibleResource(_)));
     }
+
+    #[test]
+    fn component_state_is_stored_as_string() {
+        use serde_json::Value;
+
+        let json = r#"{
+            "type": "Component",
+            "state": {
+                "xrd_fee_vault": null,
+                "controlled_vault": {
+                    "is_global": false,
+                    "entity_type": "InternalNonFungibleVault",
+                    "entity_address": "internal_vault_tdx_2_1nrs3a0qw5qfsx83hvkn8h6l6pfsc703gr8k5wz24gup97zxjsct0t7"
+                },
+                "is_primary_role_locked": false,
+                "timed_recovery_delay_minutes": 20160,
+                "primary_role_recovery_attempt": null,
+                "recovery_role_recovery_attempt": null,
+                "recovery_badge_resource_address": "resource_tdx_2_1n2tf2eyhphq7r9q2kcejnrvnevl2v2hl97rtddjzv5kfs8jvcsx6as",
+                "has_primary_role_badge_withdraw_attempt": false,
+                "has_recovery_role_badge_withdraw_attempt": false
+            }
+        }"#;
+
+        let parsed: SUT = serde_json::from_str(json).expect("valid component json");
+        let StateEntityDetailsResponseItemDetails::Component(details) = parsed else {
+            panic!("expected Component variant");
+        };
+
+        // state should be stored as a raw JSON string
+        let state_raw = details.state.as_ref().expect("state should be Some");
+
+        // Compare normalized JSON values to avoid whitespace/order issues
+        let full: Value = serde_json::from_str(json).unwrap();
+        let expected_state: Value = full.get("state").cloned().expect("state present");
+        let stored_state: Value = serde_json::from_str(state_raw).expect("stored state parses");
+        assert_eq!(stored_state, expected_state);
+
+        // And try_decode_state should yield the same JSON Value
+        let decoded: Option<Value> = details.try_decode_state().expect("decode ok");
+        assert_eq!(decoded.unwrap(), expected_state);
+    }
 }

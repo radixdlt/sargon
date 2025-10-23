@@ -74,6 +74,7 @@ fn default_fee() -> Decimal192 {
     Decimal192::from(25)
 }
 
+#[derive(Clone, PartialEq)]
 pub struct LockFeeData {
     pub fee_payer_address: AccountAddress,
     pub access_controller_address: Option<AccessControllerAddress>,
@@ -160,7 +161,7 @@ where
             .map(|(_, ac)| *ac)
             .collect::<IndexSet<_>>();
 
-        let mut builder = B::new_with_instructions([]);
+        let mut builder = B::new_with_instructions([], Blobs::new(vec![]));
 
         if let Some(lock_fee_data) = lock_fee_data.into() {
             if let Some(access_controller_of_fee_payer) =
