@@ -4284,6 +4284,7 @@ dependencies = [
  "profile-security-structures",
  "profile-supporting-types",
  "radix-connect-models",
+ "radix-engine-interface",
  "sargon-os",
  "serde",
  "signatures-collector",

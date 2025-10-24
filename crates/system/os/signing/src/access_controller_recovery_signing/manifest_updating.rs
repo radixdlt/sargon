@@ -1,4 +1,9 @@
 use crate::prelude::*;
+use manifests::IntoManifestBuilder;
+use radix_engine_interface::blueprints::access_controller::{
+    AccessControllerCancelRecoveryRoleRecoveryProposalManifestInput as ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput,
+    ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+};
 
 #[extend::ext]
 impl TransactionManifest {
@@ -72,6 +77,47 @@ impl TransactionManifest {
 
         manifest
     }
+
+    /// Ensures that any pending recovery proposal initiated by the recovery role is
+    /// cancelled before the manifest executes other recovery-related instructions.
+    /// The cancellation is prepended only when the Access Controller state reports an
+    /// outstanding recovery attempt and the manifest will initiate recovery using the
+    /// recovery role (any `InitiateWithRecovery*` combination).
+    fn apply_cancel_recovery_proposal_instruction(
+        &self,
+        ac_state_details: &AccessControllerStateDetails,
+        role_combination: RolesExercisableInTransactionManifestCombination,
+    ) -> Self {
+        let recovery_attempt_exists = ac_state_details
+            .state
+            .recovery_role_recovery_attempt
+            .is_some();
+
+        let initiates_with_recovery_role = matches!(
+            role_combination,
+            RolesExercisableInTransactionManifestCombination::
+                InitiateWithRecoveryCompleteWithPrimary
+                | RolesExercisableInTransactionManifestCombination::
+                    InitiateWithRecoveryCompleteWithConfirmation
+                | RolesExercisableInTransactionManifestCombination::
+                    InitiateWithRecoveryDelayedCompletion
+        );
+
+        if !recovery_attempt_exists || !initiates_with_recovery_role {
+            return self.clone();
+        }
+
+        let mut builder = ScryptoTransactionManifestBuilder::new();
+        builder = builder.call_method(
+            ac_state_details.address.scrypto(),
+            SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+            ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput {},
+        );
+
+        builder = builder.extend_builder_with_manifest(self.clone());
+
+        TransactionManifest::sargon_built(builder, self.network_id())
+    }
 }
 
 #[cfg(test)]
@@ -87,6 +133,7 @@ mod tests {
         address: AccessControllerAddress,
         balance: Decimal192,
         is_primary_role_locked: bool,
+        include_recovery_attempt: bool,
     ) -> AccessControllerStateDetails {
         AccessControllerStateDetails::new(
             address,
@@ -102,11 +149,24 @@ mod tests {
                 is_primary_role_locked,
                 primary_role_recovery_attempt: None,
                 has_primary_role_badge_withdraw_attempt: false,
-                recovery_role_recovery_attempt: None,
+                recovery_role_recovery_attempt: include_recovery_attempt
+                    .then_some(sample_recovery_attempt()),
                 has_recovery_role_badge_withdraw_attempt: false,
             },
             balance,
         )
+    }
+
+    fn sample_recovery_attempt() -> RecoveryRoleRecoveryAttempt {
+        RecoveryRoleRecoveryAttempt {
+            recovery_proposal: RecoveryProposal {
+                primary_role: AccessRule::AllowAll,
+                recovery_role: AccessRule::AllowAll,
+                confirmation_role: AccessRule::AllowAll,
+                timed_recovery_delay_minutes: None,
+            },
+            allow_timed_recovery_after: None,
+        }
     }
 
     fn decimal(value: &str) -> Decimal192 {
@@ -132,6 +192,7 @@ mod tests {
         let ac_state_details = sample_ac_state_details(
             AccessControllerAddress::sample_mainnet_other(),
             Decimal192::ten(),
+            false,
             false,
         );
 
@@ -175,6 +236,7 @@ mod tests {
         let ac_state_details = sample_ac_state_details(
             ac_address.clone(),
             Decimal192::one(),
+            false,
             false,
         );
 
@@ -234,7 +296,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("15"));
 
         let securified_entity_address = Address::from(fee_payer);
-        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::one(), false);
+        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::one(), false, false);
 
         let updated_manifest = manifest.apply_lock_fee_instruction(
             securified_entity_address,
@@ -300,7 +362,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("15"));
 
         let securified_entity_address = Address::from(fee_payer);
-        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), true);
+        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), true, false);
 
         let updated_manifest = manifest.apply_lock_fee_instruction(
             securified_entity_address,
@@ -340,7 +402,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("10"));
 
         let securified_entity_address = Address::from(fee_payer);
-        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), false);
+        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), false, false);
 
         let updated_manifest = manifest.apply_lock_fee_instruction(
             securified_entity_address,
@@ -402,7 +464,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("10"));
 
         let securified_entity_address = Address::from(fee_payer);
-        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), false);
+        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), false, false);
 
         let updated_manifest = manifest.apply_lock_fee_instruction(
             securified_entity_address,
@@ -442,7 +504,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(Decimal192::one());
 
         let securified_entity_address = Address::from(fee_payer);
-        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), false);
+        let ac_state_details = sample_ac_state_details(ac_address.clone(), Decimal192::ten(), false, false);
 
         let updated_manifest = manifest.apply_lock_fee_instruction(
             securified_entity_address,
@@ -482,7 +544,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("10"));
 
         let securified_entity_address = Address::from(fee_payer);
-        let ac_state_details = sample_ac_state_details(ac_address, Decimal192::one(), false);
+        let ac_state_details = sample_ac_state_details(ac_address, Decimal192::one(), false, false);
 
         let updated_manifest = manifest.apply_lock_fee_instruction(
             securified_entity_address,
@@ -493,5 +555,129 @@ mod tests {
         );
 
         assert_eq!(updated_manifest, manifest);
+    }
+
+    #[test]
+    fn prepends_cancel_recovery_when_attempt_exists_and_recovery_role_initiates() {
+        let ac_address = AccessControllerAddress::sample_mainnet();
+        let manifest_str = format!(
+            r#"
+            CALL_METHOD
+                Address("{ac}")
+                "stop_timed_recovery"
+                Tuple()
+            ;
+            "#,
+            ac = ac_address,
+        );
+        let manifest = TransactionManifest::new(
+            &manifest_str,
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+
+        let ac_state_details = sample_ac_state_details(
+            ac_address.clone(),
+            Decimal192::ten(),
+            false,
+            true,
+        );
+
+        let updated_manifest = manifest.apply_cancel_recovery_proposal_instruction(
+            &ac_state_details,
+            RolesExercisableInTransactionManifestCombination::
+                InitiateWithRecoveryCompleteWithConfirmation,
+        );
+
+        manifest_eq(
+            updated_manifest,
+            format!(
+                r#"
+                CALL_METHOD
+                    Address("{ac}")
+                    "cancel_recovery_role_recovery_proposal"
+                ;
+                CALL_METHOD
+                    Address("{ac}")
+                    "stop_timed_recovery"
+                    Tuple()
+                ;
+                "#,
+                ac = ac_address,
+            ),
+        );
+    }
+
+    #[test]
+    fn skips_cancel_when_attempt_missing() {
+        let ac_address = AccessControllerAddress::sample_mainnet();
+        let manifest_str = format!(
+            r#"
+            CALL_METHOD
+                Address("{ac}")
+                "stop_timed_recovery"
+                Tuple()
+            ;
+            "#,
+            ac = ac_address,
+        );
+        let manifest = TransactionManifest::new(
+            &manifest_str,
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+
+        let ac_state_details = sample_ac_state_details(
+            ac_address.clone(),
+            Decimal192::ten(),
+            false,
+            false,
+        );
+
+        let updated_manifest = manifest.apply_cancel_recovery_proposal_instruction(
+            &ac_state_details,
+            RolesExercisableInTransactionManifestCombination::
+                InitiateWithRecoveryCompleteWithConfirmation,
+        );
+
+        manifest_eq(updated_manifest, manifest_str);
+    }
+
+    #[test]
+    fn skips_cancel_when_primary_role_initiates() {
+        let ac_address = AccessControllerAddress::sample_mainnet();
+        let manifest_str = format!(
+            r#"
+            CALL_METHOD
+                Address("{ac}")
+                "stop_timed_recovery"
+                Tuple()
+            ;
+            "#,
+            ac = ac_address,
+        );
+        let manifest = TransactionManifest::new(
+            &manifest_str,
+            NetworkID::Mainnet,
+            Blobs::default(),
+        )
+        .unwrap();
+
+        let ac_state_details = sample_ac_state_details(
+            ac_address.clone(),
+            Decimal192::ten(),
+            false,
+            true,
+        );
+
+        let updated_manifest = manifest.apply_cancel_recovery_proposal_instruction(
+            &ac_state_details,
+            RolesExercisableInTransactionManifestCombination::
+                InitiateWithPrimaryCompleteWithConfirmation,
+        );
+
+        manifest_eq(updated_manifest, manifest_str);
     }
 }

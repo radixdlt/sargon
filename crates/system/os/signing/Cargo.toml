@@ -17,6 +17,7 @@ profile = { workspace = true }
 profile-logic = { workspace = true }
 manifests = { workspace = true }
 profile-supporting-types = { workspace = true }
+radix-engine-interface = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
