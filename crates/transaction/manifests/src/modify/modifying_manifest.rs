@@ -71,7 +71,7 @@ where
 /// Used by development, in production we SHOULD use the fee given by analyzing
 /// the manifest.
 fn default_fee() -> Decimal192 {
-    Decimal192::from(25)
+    Decimal192::from(10)
 }
 
 #[derive(Clone, PartialEq)]
@@ -79,10 +79,11 @@ pub struct LockFeeData {
     pub fee_payer_address: AccountAddress,
     pub access_controller_address: Option<AccessControllerAddress>,
     fee: Option<Decimal192>,
+    pub fee_payer_xrd_balance: Option<Decimal192>,
 }
 
 impl LockFeeData {
-    pub fn new_with_account(account: Account, fee: Decimal192) -> Self {
+    pub fn new_with_account(account: Account, fee: Decimal192, fee_payer_xrd_balance: Decimal192) -> Self {
         let maybe_ac = account
             .security_state()
             .as_securified()
@@ -92,6 +93,7 @@ impl LockFeeData {
             fee_payer_address: account.address,
             access_controller_address: maybe_ac,
             fee: Some(fee),
+            fee_payer_xrd_balance: Some(fee_payer_xrd_balance),
         }
     }
 
@@ -103,6 +105,7 @@ impl LockFeeData {
             fee_payer_address,
             access_controller_address: None,
             fee: Some(fee),
+            fee_payer_xrd_balance: None,
         }
     }
 
@@ -115,6 +118,7 @@ impl LockFeeData {
             fee_payer_address,
             access_controller_address: Some(access_controller_address),
             fee: Some(fee),
+            fee_payer_xrd_balance: None,
         }
     }
 
@@ -126,6 +130,7 @@ impl LockFeeData {
             fee_payer_address,
             access_controller_address: None,
             fee: None,
+            fee_payer_xrd_balance: None,
         }
     }
 

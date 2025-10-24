@@ -49,14 +49,13 @@ impl OsSigning for SargonOS {
         transaction_intent: TransactionIntent,
         execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent> {
-        if matches!(
-            execution_summary.detailed_classification.as_ref(),
-            Some(DetailedManifestClass::AccessControllerRecovery { .. })
-        ) {
+        if let Some(DetailedManifestClass::AccessControllerRecovery { ac_addresses }) = 
+            execution_summary.detailed_classification.as_ref()
+        {
             return sign_access_controller_recovery_transaction(
                 self,
                 transaction_intent,
-                execution_summary,
+                ac_addresses[0],
             )
             .await;
         }
@@ -112,26 +111,29 @@ impl OsSigning for SargonOS {
 async fn sign_access_controller_recovery_transaction(
     os: &SargonOS,
     base_transaction_intent: TransactionIntent,
-    execution_summary: ExecutionSummary,
+    ac_address: AccessControllerAddress,
 ) -> Result<SignedIntent> {
     let profile = os.profile()?;
+    let gw_client = os.gateway_client()?;
 
     let (fee_paying_account_address, fee) = base_transaction_intent
-        .extract_fee_payer_info()
-        .expect("Shoud have a fee payer configured");
-    let fee_payer_account =
-        profile.account_by_address(fee_paying_account_address)?;
-    let lock_fee_data = LockFeeData::new_with_account(fee_payer_account, fee);
+    .extract_fee_payer_info()
+    .expect("Shoud have a fee payer configured");
 
-    let access_controller_address =
-        access_controller_address_from_summary(&execution_summary)?;
+    let fee_payer_xrd_balance = gw_client.xrd_balance_of_account_or_zero(fee_paying_account_address).await?;
+let fee_payer_account =
+    profile.account_by_address(fee_paying_account_address)?;
+let lock_fee_data = LockFeeData::new_with_account(fee_payer_account, fee, fee_payer_xrd_balance);
+
+    let ac_state_details = gw_client.fetch_access_controller_details(ac_address).await?;
+
 
     let factory = SignaturesCollectorFactory::new(
         base_transaction_intent,
         os.sign_transactions_interactor(),
         profile,
-        access_controller_address,
         lock_fee_data,
+        ac_state_details,
     )?;
 
     SignaturesCollectorOrchestrator::new(factory).sign().await

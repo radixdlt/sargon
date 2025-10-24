@@ -584,6 +584,42 @@ impl GatewayClient {
     }
 }
 
+impl GatewayClient {
+    pub async fn fetch_access_controller_details(
+        &self,
+        ac_address: AccessControllerAddress
+    ) -> Result<AccessControllerStateDetails> {
+        let ledger_state = self.gateway_status().await?.ledger_state;
+        let request = StateEntityDetailsRequest::address_ledger_state(ac_address.into(), ledger_state.into());
+
+        let response = self.state_entity_details(request).await?;
+
+        let item = response.items.iter().find(|item| item.address == ac_address.into()).unwrap();
+
+        let raw_maybe_ac_state = item.details.clone()
+        .and_then(|detail| detail.as_component().cloned())
+        .and_then(|component| component.state.clone())
+        .unwrap();
+
+        let ac_state: AccessControllerFieldStateValue = serde_json::from_str(&raw_maybe_ac_state).unwrap();
+        let xrd_amount = item.fungible_resources.clone().and_then(|fungibles| {
+            fungibles.items.iter().find(|resource| {
+                resource.resource_address().is_xrd_on_network(ac_address.network_id())
+            })
+            .map(|xrd| xrd.amount())
+        })
+        .unwrap_or(Decimal192::zero());
+
+        Ok(
+            AccessControllerStateDetails {
+                address: ac_address,
+                state: ac_state,
+                xrd_balance: xrd_amount,
+            }
+        )
+    }
+}
+
 #[cfg(test)]
 mod fetch_all_resources_tests {
     use crate::prelude::*;

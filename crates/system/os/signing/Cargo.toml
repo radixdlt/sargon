@@ -27,6 +27,7 @@ async-trait = { workspace = true }
 derive_more = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true }
+extend = { workspace = true }
 
 [dev-dependencies]
 # === SARGON CRATES ===

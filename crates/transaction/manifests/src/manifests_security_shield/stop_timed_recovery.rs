@@ -145,7 +145,7 @@ mod tests {
             fixture_rtm!("stop_persona_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
 
-        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_persona);
+        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_persona.access_controller_address().clone());
 
         let expected_manifest_str =
             fixture_rtm!("stop_persona_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
@@ -188,7 +188,7 @@ mod tests {
             fixture_rtm!("stop_and_cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
 
-        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_account);
+        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_account.access_controller_address().clone());
 
         let expected_manifest_str =
             fixture_rtm!("stop_and_cancel_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
@@ -271,7 +271,7 @@ mod tests {
         manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
             manifest,
             Decimal192::one(),
-            securified_account.clone(),
+            securified_account.access_controller_address().clone(),
         );
 
         let notarized_tx =

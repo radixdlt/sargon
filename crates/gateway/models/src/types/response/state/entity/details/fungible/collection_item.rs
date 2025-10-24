@@ -44,6 +44,12 @@ impl FungibleResourcesCollectionItem {
             Self::Global(item) => item.resource_address,
         }
     }
+    
+    pub fn amount(&self) -> Decimal192 {
+        match self {
+            Self::Global(item) => item.amount,
+        }
+    }
 }
 
 #[cfg(test)]

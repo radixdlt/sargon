@@ -1,3 +1,5 @@
+use std::f32::consts::E;
+
 use profile_supporting_types::{AnySecurifiedEntity, AnyUnsecurifiedEntity};
 use radix_common::prelude::ManifestGlobalAddress;
 use radix_engine_interface::blueprints::access_controller::{
@@ -73,6 +75,75 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             manifest_variant.can_exercise_primary_role(),
             manifest_variant.can_quick_confirm(),
         )
+    }
+
+    fn modify_manifest_top_up_ac_from_securified_account(
+        manifest: TransactionManifest,
+        ac_address_to_topup: ManifestGlobalAddress,
+        fee_payer_address: AccountAddress,
+        fee_payer_access_controller_address: Option<AccessControllerAddress>,
+        fee_amount: Decimal192,
+        can_exercise_primary_role: bool,
+    ) -> Result<TransactionManifest> {
+        let network_id = manifest.network_id();
+        let mut builder = ScryptoTransactionManifestBuilder::new();
+
+        let top_up_amount = ScryptoDecimal192::from(fee_amount);
+
+        let add_withdraw_instruction = |builder: ScryptoTransactionManifestBuilder| -> ScryptoTransactionManifestBuilder {
+            let mut builder = builder;
+            if let Some(address_of_access_controller_of_payer) = fee_payer_access_controller_address
+            {
+                builder = builder.call_method(
+                    address_of_access_controller_of_payer.scrypto(),
+                    SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
+                    (),
+                );
+            }
+        
+            // Add withdraw XRD instruction
+            builder.withdraw_from_account(
+                fee_payer_address.scrypto(),
+                XRD,
+                top_up_amount,
+            )
+        };
+
+        if can_exercise_primary_role {
+            builder = add_withdraw_instruction(builder);
+            builder = builder.extend_builder_with_manifest(manifest);
+        } else {
+            builder = builder.extend_builder_with_manifest(manifest);
+            builder = add_withdraw_instruction(builder);
+        }
+
+        // Deposit XRD into the access controllers XRD vault
+        // ... by first taking the XRD from the work top
+        let xrd_to_top_up_ac_vault_bucket_name =
+            "xrd_to_top_up_ac_vault_bucket";
+        builder = builder.take_from_worktop(
+            XRD,
+            top_up_amount,
+            xrd_to_top_up_ac_vault_bucket_name,
+        );
+        let xrd_to_top_up_ac_vault_bucket =
+            builder.bucket(xrd_to_top_up_ac_vault_bucket_name);
+
+        // ... then deposit to XRD vault of access controller
+        builder = builder.call_method(
+            ac_address_to_topup,
+            SCRYPTO_ACCESS_CONTROLLER_CONTRIBUTE_RECOVERY_FEE_IDENT,
+            AccessControllerContributeRecoveryFeeManifestInput {
+                bucket: xrd_to_top_up_ac_vault_bucket,
+            },
+        );
+
+        let manifest = TransactionManifest::sargon_built(
+            builder,
+            network_id,
+        );
+
+        Ok(manifest)
     }
 
     fn _modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(

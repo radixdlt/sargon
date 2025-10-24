@@ -4272,6 +4272,7 @@ dependencies = [
  "derive_more",
  "drivers",
  "error",
+ "extend",
  "factor-instances-provider",
  "interactors",
  "key-derivation-traits",

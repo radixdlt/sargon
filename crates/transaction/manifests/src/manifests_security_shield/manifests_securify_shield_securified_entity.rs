@@ -179,7 +179,7 @@ mod tests {
         fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C_with_top_up_where_payer_is_entity_applying_shield");
         manifest_eq(manifest.clone(), expected_manifest_str);
 
-        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), entity_applying_shield);
+        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), entity_applying_shield.access_controller_address().clone());
 
         let expected_manifest_str =
         fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C_with_top_up_where_payer_is_entity_applying_shield_with_xrd_lock");

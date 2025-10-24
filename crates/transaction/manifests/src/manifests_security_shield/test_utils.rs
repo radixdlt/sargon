@@ -163,7 +163,7 @@ where
         manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
             manifest,
             Decimal192::one(),
-            securified_account.clone(),
+            securified_account.access_controller_address().clone(),
         );
 
         self.execute_ac_recovery_manifest(

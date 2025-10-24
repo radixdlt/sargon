@@ -6,6 +6,7 @@ pub struct AccessControllerRecoveryIntentsBuilder {
     lock_fee_data: LockFeeData,
     securified_entity: AnySecurifiedEntity,
     proposed_security_structure: SecurityStructureOfFactorInstances,
+    ac_state_details: AccessControllerStateDetails,
 }
 
 impl AccessControllerRecoveryIntentsBuilder {
@@ -14,12 +15,14 @@ impl AccessControllerRecoveryIntentsBuilder {
         lock_fee_data: LockFeeData,
         securified_entity: AnySecurifiedEntity,
         proposed_security_structure: SecurityStructureOfFactorInstances,
+        ac_state_details: AccessControllerStateDetails,
     ) -> Self {
         Self {
             base_intent,
             lock_fee_data,
             securified_entity,
             proposed_security_structure,
+            ac_state_details,
         }
     }
 }

@@ -8,6 +8,7 @@ pub struct SignaturesCollectorFactory {
     securified_entity: AnySecurifiedEntity,
     proposed_security_structure: SecurityStructureOfFactorInstances,
     lock_fee_data: LockFeeData,
+    ac_state_details: AccessControllerStateDetails,
 }
 
 impl SignaturesCollectorFactory {
@@ -15,11 +16,11 @@ impl SignaturesCollectorFactory {
         base_intent: TransactionIntent,
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         profile: Profile,
-        access_controller_address: AccessControllerAddress,
         lock_fee_data: LockFeeData,
+        ac_state_details: AccessControllerStateDetails,
     ) -> Result<Self> {
         let entity = profile
-            .entity_by_access_controller_address(access_controller_address)?;
+            .entity_by_access_controller_address(ac_state_details.address)?;
         let securified_entity = AnySecurifiedEntity::try_from(entity)?;
 
         let proposed_security_structure = securified_entity
@@ -34,17 +35,19 @@ impl SignaturesCollectorFactory {
             lock_fee_data.clone(),
             securified_entity.clone(),
             proposed_security_structure.clone(),
+            ac_state_details.clone(),
         )
         .build()?;
 
         Ok(Self {
             finish_early_strategy: SigningFinishEarlyStrategy::default(),
-            profile: profile,
-            interactor: interactor,
+            profile,
+            interactor,
             recovery_intents,
             securified_entity,
             proposed_security_structure,
             lock_fee_data,
+            ac_state_details,
         })
     }
 
