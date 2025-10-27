@@ -1,8 +1,10 @@
 mod access_controller_recovery_signing;
+mod access_controller_stop_timed_recovery_signing;
 mod sargon_os_signing;
 
 pub mod prelude {
     pub(crate) use crate::access_controller_recovery_signing::*;
+    pub(crate) use crate::access_controller_stop_timed_recovery_signing::*;
     pub use crate::sargon_os_signing::*;
 
     pub(crate) use error::prelude::*;

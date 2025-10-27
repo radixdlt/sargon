@@ -83,7 +83,11 @@ pub struct LockFeeData {
 }
 
 impl LockFeeData {
-    pub fn new_with_account(account: Account, fee: Decimal192, fee_payer_xrd_balance: Decimal192) -> Self {
+    pub fn new_with_account(
+        account: Account,
+        fee: Decimal192,
+        fee_payer_xrd_balance: Decimal192,
+    ) -> Self {
         let maybe_ac = account
             .security_state()
             .as_securified()

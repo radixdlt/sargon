@@ -49,23 +49,38 @@ impl OsSigning for SargonOS {
         transaction_intent: TransactionIntent,
         execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent> {
-        if let Some(DetailedManifestClass::AccessControllerRecovery { ac_addresses }) = 
-            execution_summary.detailed_classification.as_ref()
-        {
-            return sign_access_controller_recovery_transaction(
-                self,
-                transaction_intent,
-                ac_addresses[0],
-            )
-            .await;
+        match execution_summary.detailed_classification {
+            Some(DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses,
+            }) => {
+                return sign_access_controller_recovery_transaction(
+                    self,
+                    transaction_intent,
+                    ac_addresses[0],
+                )
+                .await;
+            }
+            Some(
+                DetailedManifestClass::AccessControllerStopTimedRecovery {
+                    ac_addresses,
+                },
+            ) => {
+                return sign_access_controller_stop_timed_recovery_transaction(
+                    self,
+                    transaction_intent,
+                    ac_addresses[0],
+                )
+                .await;
+            }
+            _ => {
+                self.sign(
+                    transaction_intent.clone(),
+                    self.sign_transactions_interactor(),
+                    SigningPurpose::sign_transaction(RoleKind::Primary),
+                )
+                .await
+            }
         }
-
-        self.sign(
-            transaction_intent.clone(),
-            self.sign_transactions_interactor(),
-            SigningPurpose::sign_transaction(RoleKind::Primary),
-        )
-        .await
     }
 
     async fn sign_subintent(
@@ -117,16 +132,23 @@ async fn sign_access_controller_recovery_transaction(
     let gw_client = os.gateway_client()?;
 
     let (fee_paying_account_address, fee) = base_transaction_intent
-    .extract_fee_payer_info()
-    .expect("Shoud have a fee payer configured");
+        .extract_fee_payer_info()
+        .expect("Shoud have a fee payer configured");
 
-    let fee_payer_xrd_balance = gw_client.xrd_balance_of_account_or_zero(fee_paying_account_address).await?;
-let fee_payer_account =
-    profile.account_by_address(fee_paying_account_address)?;
-let lock_fee_data = LockFeeData::new_with_account(fee_payer_account, fee, fee_payer_xrd_balance);
+    let fee_payer_xrd_balance = gw_client
+        .xrd_balance_of_account_or_zero(fee_paying_account_address)
+        .await?;
+    let fee_payer_account =
+        profile.account_by_address(fee_paying_account_address)?;
+    let lock_fee_data = LockFeeData::new_with_account(
+        fee_payer_account,
+        fee,
+        fee_payer_xrd_balance,
+    );
 
-    let ac_state_details = gw_client.fetch_access_controller_details(ac_address).await?;
-
+    let ac_state_details = gw_client
+        .fetch_access_controller_details(ac_address)
+        .await?;
 
     let factory = SignaturesCollectorFactory::new(
         base_transaction_intent,
@@ -139,18 +161,44 @@ let lock_fee_data = LockFeeData::new_with_account(fee_payer_account, fee, fee_pa
     SignaturesCollectorOrchestrator::new(factory).sign().await
 }
 
-fn access_controller_address_from_summary(
-    execution_summary: &ExecutionSummary,
-) -> Result<AccessControllerAddress> {
-    match &execution_summary.detailed_classification {
-        Some(DetailedManifestClass::AccessControllerRecovery {
-            ac_addresses,
-        }) => ac_addresses
-            .first()
-            .cloned()
-            .ok_or(CommonError::EntityNotFound),
-        _ => Err(CommonError::EntityNotFound),
-    }
+async fn sign_access_controller_stop_timed_recovery_transaction(
+    os: &SargonOS,
+    base_transaction_intent: TransactionIntent,
+    ac_address: AccessControllerAddress,
+) -> Result<SignedIntent> {
+    let profile = os.profile()?;
+    let gw_client = os.gateway_client()?;
+
+    let (fee_paying_account_address, fee) = base_transaction_intent
+        .extract_fee_payer_info()
+        .expect("Shoud have a fee payer configured");
+
+    let fee_payer_xrd_balance = gw_client
+        .xrd_balance_of_account_or_zero(fee_paying_account_address)
+        .await?;
+    let fee_payer_account =
+        profile.account_by_address(fee_paying_account_address)?;
+    let lock_fee_data = LockFeeData::new_with_account(
+        fee_payer_account,
+        fee,
+        fee_payer_xrd_balance,
+    );
+
+    let ac_state_details = gw_client
+        .fetch_access_controller_details(ac_address)
+        .await?;
+
+    let factory = crate::access_controller_stop_timed_recovery_signing::StopTimedRecoverySignaturesCollectorFactory::new(
+        base_transaction_intent,
+        os.sign_transactions_interactor(),
+        profile,
+        lock_fee_data,
+        ac_state_details,
+    )?;
+
+    crate::access_controller_stop_timed_recovery_signing::StopTimedRecoverySignaturesCollectorOrchestrator::new(factory)
+        .sign()
+        .await
 }
 
 #[cfg(test)]

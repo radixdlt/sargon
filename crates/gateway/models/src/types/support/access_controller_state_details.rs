@@ -4,7 +4,7 @@ use crate::prelude::*;
 pub struct AccessControllerStateDetails {
     pub address: AccessControllerAddress,
     pub state: AccessControllerFieldStateValue,
-    pub xrd_balance: Decimal192
+    pub xrd_balance: Decimal192,
 }
 
 impl AccessControllerStateDetails {
