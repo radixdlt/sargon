@@ -188,7 +188,7 @@ async fn sign_access_controller_stop_timed_recovery_transaction(
         .fetch_access_controller_details(ac_address)
         .await?;
 
-    let factory = crate::access_controller_stop_timed_recovery_signing::StopTimedRecoverySignaturesCollectorFactory::new(
+    let factory = StopTimedRecoverySignaturesCollectorFactory::new(
         base_transaction_intent,
         os.sign_transactions_interactor(),
         profile,
@@ -196,7 +196,7 @@ async fn sign_access_controller_stop_timed_recovery_transaction(
         ac_state_details,
     )?;
 
-    crate::access_controller_stop_timed_recovery_signing::StopTimedRecoverySignaturesCollectorOrchestrator::new(factory)
+    StopTimedRecoverySignaturesCollectorOrchestrator::new(factory)
         .sign()
         .await
 }

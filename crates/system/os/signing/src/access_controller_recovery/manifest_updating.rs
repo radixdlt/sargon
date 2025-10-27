@@ -6,7 +6,7 @@ use radix_engine_interface::blueprints::access_controller::{
 };
 
 #[extend::ext]
-impl TransactionManifest {
+pub impl TransactionManifest {
     /// Mutates the manifest so that the transaction fee is covered according to the
     /// current Access Controller state and the roles that can be exercised for the
     /// recovery flow. The logic is intentionally conservative:
@@ -22,7 +22,7 @@ impl TransactionManifest {
     ///   situation from being offered to the user in the first place.
     fn apply_lock_fee_instruction(
         &self,
-        securified_entity_address: Address,
+        securified_entity_address: AddressOfAccountOrPersona,
         lock_fee_data: &LockFeeData,
         ac_state_details: &AccessControllerStateDetails,
         role_combination: RolesExercisableInTransactionManifestCombination,
@@ -202,7 +202,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(Decimal192::ten());
 
         let securified_entity_address =
-            Address::from(AccountAddress::sample_mainnet());
+        AddressOfAccountOrPersona::from(AccountAddress::sample_mainnet());
         let ac_state_details = sample_ac_state_details(
             AccessControllerAddress::sample_mainnet_other(),
             Decimal192::ten(),
@@ -246,7 +246,7 @@ mod tests {
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("15"));
 
         let securified_entity_address =
-            Address::from(AccountAddress::sample_mainnet());
+        AddressOfAccountOrPersona::from(AccountAddress::sample_mainnet());
         let ac_address = AccessControllerAddress::sample_mainnet_other();
         let ac_state_details = sample_ac_state_details(
             ac_address.clone(),
@@ -310,7 +310,7 @@ mod tests {
         );
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("15"));
 
-        let securified_entity_address = Address::from(fee_payer);
+        let securified_entity_address = AddressOfAccountOrPersona::from(fee_payer);
         let ac_state_details = sample_ac_state_details(
             ac_address.clone(),
             Decimal192::one(),
@@ -381,7 +381,7 @@ mod tests {
         );
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("15"));
 
-        let securified_entity_address = Address::from(fee_payer);
+        let securified_entity_address = AddressOfAccountOrPersona::from(fee_payer);
         let ac_state_details = sample_ac_state_details(
             ac_address.clone(),
             Decimal192::ten(),
@@ -427,7 +427,7 @@ mod tests {
         );
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("10"));
 
-        let securified_entity_address = Address::from(fee_payer);
+        let securified_entity_address = AddressOfAccountOrPersona::from(fee_payer);
         let ac_state_details = sample_ac_state_details(
             ac_address.clone(),
             Decimal192::ten(),
@@ -494,7 +494,7 @@ mod tests {
         );
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("10"));
 
-        let securified_entity_address = Address::from(fee_payer);
+        let securified_entity_address = AddressOfAccountOrPersona::from(fee_payer);
         let ac_state_details = sample_ac_state_details(
             ac_address.clone(),
             Decimal192::ten(),
@@ -539,7 +539,7 @@ mod tests {
         );
         lock_fee_data.fee_payer_xrd_balance = Some(Decimal192::one());
 
-        let securified_entity_address = Address::from(fee_payer);
+        let securified_entity_address = AddressOfAccountOrPersona::from(fee_payer);
         let ac_state_details = sample_ac_state_details(
             ac_address.clone(),
             Decimal192::ten(),
@@ -584,7 +584,7 @@ mod tests {
         );
         lock_fee_data.fee_payer_xrd_balance = Some(decimal("10"));
 
-        let securified_entity_address = Address::from(fee_payer);
+        let securified_entity_address = AddressOfAccountOrPersona::from(fee_payer);
         let ac_state_details = sample_ac_state_details(
             ac_address,
             Decimal192::one(),

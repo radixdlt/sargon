@@ -3,6 +3,9 @@ name = "sargon-os-signing"
 version = "1.2.37"
 edition = "2021"
 
+[features]
+mock = ["mockall"]
+
 [dependencies]
 # === SARGON CRATES ===
 prelude = { workspace = true }
@@ -29,6 +32,7 @@ derive_more = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true }
 extend = { workspace = true }
+mockall = { workspace = true, optional = true }
 
 [dev-dependencies]
 # === SARGON CRATES ===
@@ -38,3 +42,4 @@ interactors = { workspace = true }
 clients = { workspace = true }
 factor-instances-provider = { workspace = true }
 key-derivation-traits = { workspace = true }
+mockall = { workspace = true }

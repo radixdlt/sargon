@@ -4278,6 +4278,7 @@ dependencies = [
  "key-derivation-traits",
  "log",
  "manifests",
+ "mockall",
  "prelude",
  "profile",
  "profile-logic",
