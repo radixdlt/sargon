@@ -115,3 +115,51 @@ impl StopTimedRecoverySignaturesCollectorOrchestrator {
         }
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use crate::prelude::*;
+//     use clients::TransactionIntent;
+//     use mockall::predicate::eq;
+
+//     use crate::{MockTransactionIntentSignaturesCollectorBuilder, SignaturesCollectorFactory, StopTimedRecoverySignaturesCollectorFactory};
+
+//     #[actix_rt::test]
+//     async fn skipping_all_factor_sources_results_in_error() { 
+//         let signatures_collector_builder = MockTransactionIntentSignaturesCollectorBuilder::new();
+//         let signatures_collector = MockTransactionIntentSignaturesCollectorBuilder::new();
+
+
+//         let intent = TransactionIntent::sample();
+//         let profile = Profile::sample();
+//         let all_profile_factor_sources = IndexSet::from_iter(profile.factor_sources.iter());
+//         let lock_fee_data = LockFeeData::sample();
+//         let ac_state_details = AccessControllerStateDetails::sample();
+       
+//         let factory = StopTimedRecoverySignaturesCollectorFactory::with_collector_builder(
+//             intent,
+//             profile,
+//             lock_fee_data,
+//             ac_state_details,
+//             Arc::new(signatures_collector_builder),
+//         ).unwrap();
+
+//         signatures_collector_builder
+//         .expect_build()
+//         .with(eq(all_profile_factor_sources), eq(IdentifiedVecOf::from(vec![factory.intents.stop_and_cancel.clone()])), eq(SigningPurpose::SignTX { role_kind: RoleKind::Recovery }))
+//         .return_const(Box::new(signatures_collector.clone()));
+
+//         signatures_collector
+//             .expect_collect_signatures()
+//             .returning(|| async {
+//                 Ok(SignaturesOutcome::new(
+//                     IndexSet::new(),
+//                     IndexSet::new(),
+//                 ))
+//             });
+
+//         let orchestrator = StopTimedRecoverySignaturesCollectorOrchestrator::new(factory);
+
+//         orchestrator.sign().await.unwrap_err();
+//     }
+// }

@@ -72,6 +72,17 @@ impl OsSigning for SargonOS {
                 )
                 .await;
             }
+            Some(
+                DetailedManifestClass::SecurifyEntity { entities }
+            ) => {
+                let entity_address = entities.first().unwrap();
+                return sign_entity_securify(
+                    self,
+                    transaction_intent,
+                    *entity_address,
+                )
+                .await;
+            }
             _ => {
                 self.sign(
                     transaction_intent.clone(),
@@ -121,84 +132,6 @@ impl OsSigning for SargonOS {
             Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
         }
     }
-}
-
-async fn sign_access_controller_recovery_transaction(
-    os: &SargonOS,
-    base_transaction_intent: TransactionIntent,
-    ac_address: AccessControllerAddress,
-) -> Result<SignedIntent> {
-    let profile = os.profile()?;
-    let gw_client = os.gateway_client()?;
-
-    let (fee_paying_account_address, fee) = base_transaction_intent
-        .extract_fee_payer_info()
-        .expect("Shoud have a fee payer configured");
-
-    let fee_payer_xrd_balance = gw_client
-        .xrd_balance_of_account_or_zero(fee_paying_account_address)
-        .await?;
-    let fee_payer_account =
-        profile.account_by_address(fee_paying_account_address)?;
-    let lock_fee_data = LockFeeData::new_with_account(
-        fee_payer_account,
-        fee,
-        fee_payer_xrd_balance,
-    );
-
-    let ac_state_details = gw_client
-        .fetch_access_controller_details(ac_address)
-        .await?;
-
-    let factory = SignaturesCollectorFactory::new(
-        base_transaction_intent,
-        os.sign_transactions_interactor(),
-        profile,
-        lock_fee_data,
-        ac_state_details,
-    )?;
-
-    SignaturesCollectorOrchestrator::new(factory).sign().await
-}
-
-async fn sign_access_controller_stop_timed_recovery_transaction(
-    os: &SargonOS,
-    base_transaction_intent: TransactionIntent,
-    ac_address: AccessControllerAddress,
-) -> Result<SignedIntent> {
-    let profile = os.profile()?;
-    let gw_client = os.gateway_client()?;
-
-    let (fee_paying_account_address, fee) = base_transaction_intent
-        .extract_fee_payer_info()
-        .expect("Shoud have a fee payer configured");
-
-    let fee_payer_xrd_balance = gw_client
-        .xrd_balance_of_account_or_zero(fee_paying_account_address)
-        .await?;
-    let fee_payer_account =
-        profile.account_by_address(fee_paying_account_address)?;
-    let lock_fee_data = LockFeeData::new_with_account(
-        fee_payer_account,
-        fee,
-        fee_payer_xrd_balance,
-    );
-
-    let ac_state_details = gw_client
-        .fetch_access_controller_details(ac_address)
-        .await?;
-
-    let factory = StopTimedRecoverySignaturesCollectorFactory::new(
-        base_transaction_intent,
-        os.sign_transactions_interactor(),
-        profile,
-        lock_fee_data,
-        ac_state_details,
-    )?;
-
-    StopTimedRecoverySignaturesCollectorOrchestrator::new(factory)
-        .sign()
-        .await
 }
 
 #[cfg(test)]

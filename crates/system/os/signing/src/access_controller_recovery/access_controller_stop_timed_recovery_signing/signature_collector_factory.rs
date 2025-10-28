@@ -1,10 +1,8 @@
 use crate::prelude::*;
 
 pub struct StopTimedRecoverySignaturesCollectorFactory {
-    finish_early_strategy: SigningFinishEarlyStrategy,
     profile: Profile,
-    interactor: Arc<dyn SignInteractor<TransactionIntent>>,
-    intents: AccessControllerStopTimedRecoveryIntents,
+    pub(crate) intents: AccessControllerStopTimedRecoveryIntents,
     collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder>,
 }
 
@@ -18,17 +16,15 @@ impl StopTimedRecoverySignaturesCollectorFactory {
     ) -> Result<Self> {
         Self::with_collector_builder(
             base_intent,
-            interactor,
             profile,
             lock_fee_data,
             ac_state_details,
-            Arc::new(DefaultTransactionIntentSignaturesCollectorBuilder::default()),
+            Arc::new(DefaultTransactionIntentSignaturesCollectorBuilder::new(interactor)),
         )
     }
 
     pub fn with_collector_builder(
         base_intent: TransactionIntent,
-        interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         profile: Profile,
         lock_fee_data: LockFeeData,
         ac_state_details: AccessControllerStateDetails,
@@ -46,9 +42,7 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         .build()?;
 
         Ok(Self {
-            finish_early_strategy: SigningFinishEarlyStrategy::default(),
             profile,
-            interactor,
             intents,
             collector_builder,
         })
@@ -78,10 +72,8 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         &self,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         self.collector_builder.build(
-            self.finish_early_strategy.clone(),
             IndexSet::from_iter(self.profile.factor_sources.iter()),
             IdentifiedVecOf::from(vec![self.intents.stop_and_cancel.clone()]),
-            self.interactor.clone(),
             SigningPurpose::SignTX {
                 role_kind: RoleKind::Recovery,
             },
@@ -92,10 +84,8 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         &self,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         self.collector_builder.build(
-            self.finish_early_strategy.clone(),
             IndexSet::from_iter(self.profile.factor_sources.iter()),
             IdentifiedVecOf::from(vec![self.intents.stop.clone()]),
-            self.interactor.clone(),
             SigningPurpose::SignTX {
                 role_kind: RoleKind::Primary,
             },
@@ -106,10 +96,8 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         &self,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         self.collector_builder.build(
-            self.finish_early_strategy.clone(),
             IndexSet::from_iter(self.profile.factor_sources.iter()),
             IdentifiedVecOf::from(vec![self.intents.stop.clone()]),
-            self.interactor.clone(),
             SigningPurpose::SignTX {
                 role_kind: RoleKind::Confirmation,
             },

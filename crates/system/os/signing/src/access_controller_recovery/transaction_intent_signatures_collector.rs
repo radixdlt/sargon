@@ -17,16 +17,23 @@ pub trait TransactionIntentSignaturesCollector: Send {
 pub trait TransactionIntentSignaturesCollectorBuilder: Send + Sync {
     fn build(
         &self,
-        finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
-        interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         purpose: SigningPurpose,
     ) -> Box<dyn TransactionIntentSignaturesCollector>;
 }
 
-#[derive(Default)]
-pub struct DefaultTransactionIntentSignaturesCollectorBuilder;
+pub struct DefaultTransactionIntentSignaturesCollectorBuilder {
+    interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+}
+
+impl DefaultTransactionIntentSignaturesCollectorBuilder {
+    pub fn new(
+        interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    ) -> Self {
+        Self { interactor }
+    }
+}
 
 pub struct DefaultTransactionIntentSignaturesCollector {
     inner: SignaturesCollector<TransactionIntent>,
@@ -48,18 +55,16 @@ impl TransactionIntentSignaturesCollectorBuilder
 {
     fn build(
         &self,
-        finish_early_strategy: SigningFinishEarlyStrategy,
         profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
-        interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         purpose: SigningPurpose,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         Box::new(DefaultTransactionIntentSignaturesCollector {
             inner: SignaturesCollector::with(
-                finish_early_strategy,
+                SigningFinishEarlyStrategy::default(),
                 profile_factor_sources,
                 transactions,
-                interactor,
+                self.interactor.clone(),
                 purpose,
             ),
         })
