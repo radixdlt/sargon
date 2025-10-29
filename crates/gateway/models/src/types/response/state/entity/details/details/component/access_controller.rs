@@ -18,12 +18,52 @@ pub struct AccessControllerFieldStateValue {
     pub has_recovery_role_badge_withdraw_attempt: bool,
 }
 
+impl AccessControllerFieldStateValue {
+    pub fn new(
+        controlled_vault: EntityReference,
+        xrd_fee_vault: Option<EntityReference>,
+        timed_recovery_delay_minutes: Option<u32>,
+        recovery_badge_resource_address: ResourceAddress,
+        is_primary_role_locked: bool,
+        primary_role_recovery_attempt: Option<PrimaryRoleRecoveryAttempt>,
+        has_primary_role_badge_withdraw_attempt: bool,
+        recovery_role_recovery_attempt: Option<RecoveryRoleRecoveryAttempt>,
+        has_recovery_role_badge_withdraw_attempt: bool,
+    ) -> Self {
+        Self {
+            controlled_vault,
+            xrd_fee_vault,
+            timed_recovery_delay_minutes,
+            recovery_badge_resource_address,
+            is_primary_role_locked,
+            primary_role_recovery_attempt,
+            has_primary_role_badge_withdraw_attempt,
+            recovery_role_recovery_attempt,
+            has_recovery_role_badge_withdraw_attempt,
+        }
+    }
+}
+
 /// Reference to an entity (global or internal) returned by the Core API.
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct EntityReference {
     pub entity_type: CoreApiEntityType,
     pub is_global: bool,
     pub entity_address: String,
+}
+
+impl EntityReference {
+    pub fn new(
+        entity_type: CoreApiEntityType,
+        is_global: bool,
+        entity_address: String,
+    ) -> Self {
+        Self {
+            entity_type,
+            is_global,
+            entity_address,
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]

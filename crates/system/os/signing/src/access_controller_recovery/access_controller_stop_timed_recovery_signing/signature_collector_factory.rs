@@ -1,7 +1,6 @@
 use crate::prelude::*;
 
 pub struct StopTimedRecoverySignaturesCollectorFactory {
-    profile: Profile,
     pub(crate) intents: AccessControllerStopTimedRecoveryIntents,
     collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder>,
 }
@@ -9,31 +8,11 @@ pub struct StopTimedRecoverySignaturesCollectorFactory {
 impl StopTimedRecoverySignaturesCollectorFactory {
     pub fn new(
         base_intent: TransactionIntent,
-        interactor: Arc<dyn SignInteractor<TransactionIntent>>,
-        profile: Profile,
-        lock_fee_data: LockFeeData,
-        ac_state_details: AccessControllerStateDetails,
-    ) -> Result<Self> {
-        Self::with_collector_builder(
-            base_intent,
-            profile,
-            lock_fee_data,
-            ac_state_details,
-            Arc::new(DefaultTransactionIntentSignaturesCollectorBuilder::new(interactor)),
-        )
-    }
-
-    pub fn with_collector_builder(
-        base_intent: TransactionIntent,
-        profile: Profile,
+        securified_entity: AnySecurifiedEntity,
         lock_fee_data: LockFeeData,
         ac_state_details: AccessControllerStateDetails,
         collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder>,
     ) -> Result<Self> {
-        let entity = profile
-            .entity_by_access_controller_address(ac_state_details.address)?;
-        let securified_entity = AnySecurifiedEntity::try_from(entity)?;
-
         let intents = AccessControllerStopTimedRecoveryIntentsBuilder::new(
             base_intent,
             lock_fee_data.clone(),
@@ -42,7 +21,6 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         .build()?;
 
         Ok(Self {
-            profile,
             intents,
             collector_builder,
         })
@@ -72,7 +50,6 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         &self,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         self.collector_builder.build(
-            IndexSet::from_iter(self.profile.factor_sources.iter()),
             IdentifiedVecOf::from(vec![self.intents.stop_and_cancel.clone()]),
             SigningPurpose::SignTX {
                 role_kind: RoleKind::Recovery,
@@ -84,7 +61,6 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         &self,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         self.collector_builder.build(
-            IndexSet::from_iter(self.profile.factor_sources.iter()),
             IdentifiedVecOf::from(vec![self.intents.stop.clone()]),
             SigningPurpose::SignTX {
                 role_kind: RoleKind::Primary,
@@ -96,7 +72,6 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         &self,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         self.collector_builder.build(
-            IndexSet::from_iter(self.profile.factor_sources.iter()),
             IdentifiedVecOf::from(vec![self.intents.stop.clone()]),
             SigningPurpose::SignTX {
                 role_kind: RoleKind::Confirmation,

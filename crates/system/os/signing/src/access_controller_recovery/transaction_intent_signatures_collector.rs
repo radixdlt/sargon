@@ -17,7 +17,6 @@ pub trait TransactionIntentSignaturesCollector: Send {
 pub trait TransactionIntentSignaturesCollectorBuilder: Send + Sync {
     fn build(
         &self,
-        profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
         purpose: SigningPurpose,
     ) -> Box<dyn TransactionIntentSignaturesCollector>;
@@ -25,13 +24,18 @@ pub trait TransactionIntentSignaturesCollectorBuilder: Send + Sync {
 
 pub struct DefaultTransactionIntentSignaturesCollectorBuilder {
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+    all_profile_factor_sources: IndexSet<FactorSource>,
 }
 
 impl DefaultTransactionIntentSignaturesCollectorBuilder {
     pub fn new(
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
+        all_profile_factor_sources: IndexSet<FactorSource>
     ) -> Self {
-        Self { interactor }
+        Self { 
+            interactor,
+            all_profile_factor_sources 
+        }
     }
 }
 
@@ -55,14 +59,13 @@ impl TransactionIntentSignaturesCollectorBuilder
 {
     fn build(
         &self,
-        profile_factor_sources: IndexSet<FactorSource>,
         transactions: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
         purpose: SigningPurpose,
     ) -> Box<dyn TransactionIntentSignaturesCollector> {
         Box::new(DefaultTransactionIntentSignaturesCollector {
             inner: SignaturesCollector::with(
                 SigningFinishEarlyStrategy::default(),
-                profile_factor_sources,
+                self.all_profile_factor_sources.clone(),
                 transactions,
                 self.interactor.clone(),
                 purpose,

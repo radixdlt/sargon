@@ -116,50 +116,115 @@ impl StopTimedRecoverySignaturesCollectorOrchestrator {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::prelude::*;
-//     use clients::TransactionIntent;
-//     use mockall::predicate::eq;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::VecDeque;
+    use std::sync::{Arc, Mutex};
 
-//     use crate::{MockTransactionIntentSignaturesCollectorBuilder, SignaturesCollectorFactory, StopTimedRecoverySignaturesCollectorFactory};
+    type CollectorResult = Result<SignaturesOutcome<TransactionIntentHash>>;
 
-//     #[actix_rt::test]
-//     async fn skipping_all_factor_sources_results_in_error() { 
-//         let signatures_collector_builder = MockTransactionIntentSignaturesCollectorBuilder::new();
-//         let signatures_collector = MockTransactionIntentSignaturesCollectorBuilder::new();
+    struct StubCollectorBuilder {
+        outcomes: Mutex<VecDeque<CollectorResult>>,
+    }
 
+    impl StubCollectorBuilder {
+        fn new(outcomes: Vec<CollectorResult>) -> Self {
+            Self {
+                outcomes: Mutex::new(VecDeque::from(outcomes)),
+            }
+        }
+    }
 
-//         let intent = TransactionIntent::sample();
-//         let profile = Profile::sample();
-//         let all_profile_factor_sources = IndexSet::from_iter(profile.factor_sources.iter());
-//         let lock_fee_data = LockFeeData::sample();
-//         let ac_state_details = AccessControllerStateDetails::sample();
-       
-//         let factory = StopTimedRecoverySignaturesCollectorFactory::with_collector_builder(
-//             intent,
-//             profile,
-//             lock_fee_data,
-//             ac_state_details,
-//             Arc::new(signatures_collector_builder),
-//         ).unwrap();
+    impl TransactionIntentSignaturesCollectorBuilder for StubCollectorBuilder {
+        fn build(
+            &self,
+            _: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
+            _: SigningPurpose,
+        ) -> Box<dyn TransactionIntentSignaturesCollector> {
+            let outcome = self
+                .outcomes
+                .lock()
+                .expect("collector outcomes mutex poisoned")
+                .pop_front()
+                .expect("unexpected build call");
 
-//         signatures_collector_builder
-//         .expect_build()
-//         .with(eq(all_profile_factor_sources), eq(IdentifiedVecOf::from(vec![factory.intents.stop_and_cancel.clone()])), eq(SigningPurpose::SignTX { role_kind: RoleKind::Recovery }))
-//         .return_const(Box::new(signatures_collector.clone()));
+            Box::new(StubCollector { outcome })
+        }
+    }
 
-//         signatures_collector
-//             .expect_collect_signatures()
-//             .returning(|| async {
-//                 Ok(SignaturesOutcome::new(
-//                     IndexSet::new(),
-//                     IndexSet::new(),
-//                 ))
-//             });
+    struct StubCollector {
+        outcome: CollectorResult,
+    }
 
-//         let orchestrator = StopTimedRecoverySignaturesCollectorOrchestrator::new(factory);
+    #[async_trait::async_trait]
+    impl TransactionIntentSignaturesCollector for StubCollector {
+        async fn collect_signatures(
+            self: Box<Self>,
+        ) -> Result<SignaturesOutcome<TransactionIntentHash>> {
+            let this = *self;
+            this.outcome
+        }
+    }
 
-//         orchestrator.sign().await.unwrap_err();
-//     }
-// }
+    #[actix_rt::test]
+    async fn skipping_all_factor_sources_results_in_error() {
+        let failure_outcome = SignaturesOutcome::<TransactionIntentHash>::with_failed_transactions_due_to_skipped_factors(vec![
+            FactorSourceIDFromHash::sample(),
+        ]);
+
+        let collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder> =
+            Arc::new(StubCollectorBuilder::new(vec![
+                Ok(failure_outcome.clone()),
+                Ok(failure_outcome.clone()),
+                Ok(failure_outcome),
+            ]));
+
+        let base_intent = TransactionIntent::sample();
+        let lock_fee_data = LockFeeData::new_with_unsecurified_fee_payer(
+            AccountAddress::sample(),
+            Decimal192::one(),
+        );
+        let ac_state_details = AccessControllerStateDetails::new(
+            AccessControllerAddress::sample_mainnet(),
+            AccessControllerFieldStateValue::new(
+                EntityReference::new(
+                    CoreApiEntityType::GlobalAccessController,
+                    false,
+                    "".to_string(),
+                ),
+                None,
+                None,
+                ResourceAddress::sample_mainnet(),
+                false,
+                None,
+                false,
+                None,
+                false,
+            ),
+            Decimal192::zero(),
+        );
+        let mut securified_entity = AnySecurifiedEntity::sample_account();
+        securified_entity
+            .securified_entity_control
+            .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
+
+        let factory = StopTimedRecoverySignaturesCollectorFactory::new(
+            base_intent,
+            securified_entity,
+            lock_fee_data,
+            ac_state_details,
+            collector_builder,
+        )
+        .expect("failed to construct collector factory");
+
+        let orchestrator =
+            StopTimedRecoverySignaturesCollectorOrchestrator::new(factory);
+
+        let error = orchestrator.sign().await.unwrap_err();
+        assert_eq!(
+            error,
+            CommonError::SigningFailedTooManyFactorSourcesNeglected,
+        );
+    }
+}

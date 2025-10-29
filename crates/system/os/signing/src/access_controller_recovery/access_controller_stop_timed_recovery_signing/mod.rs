@@ -36,12 +36,17 @@ pub async fn sign_access_controller_stop_timed_recovery_transaction(
         .fetch_access_controller_details(ac_address)
         .await?;
 
+    let securified_entity = profile.entity_by_access_controller_address(ac_address)?;
+
     let factory = StopTimedRecoverySignaturesCollectorFactory::new(
         base_transaction_intent,
-        os.sign_transactions_interactor(),
-        profile,
+        AnySecurifiedEntity::new(securified_entity)?,
         lock_fee_data,
         ac_state_details,
+        Arc::new(DefaultTransactionIntentSignaturesCollectorBuilder::new(
+            os.sign_transactions_interactor(),
+            IndexSet::from_iter(profile.factor_sources.iter()),
+        ))
     )?;
 
     StopTimedRecoverySignaturesCollectorOrchestrator::new(factory)
