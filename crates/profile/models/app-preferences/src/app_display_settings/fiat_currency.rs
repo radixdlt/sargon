@@ -15,11 +15,11 @@ use crate::prelude::*;
 )]
 pub enum FiatCurrency {
     /// American dollars.
-    #[serde(rename = "usd")]
+    #[serde(rename = "USD")]
     USD,
 
     /// Swedish krona.
-    #[serde(rename = "sek")]
+    #[serde(rename = "SEK")]
     SEK,
 }
 

@@ -756,6 +756,7 @@ dependencies = [
  "derive_more",
  "drivers",
  "enum-as-inner",
+ "extend",
  "factors-supporting-types",
  "gateway-client-and-api",
  "hierarchical-deterministic",

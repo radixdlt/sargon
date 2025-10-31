@@ -6,7 +6,7 @@ mod file_system_client;
 mod host_info_client;
 mod profile_change_client;
 mod secure_storage_client;
-mod token_pricing_service;
+mod token_pricing_client;
 mod unsafe_storage_client;
 
 pub use arculus_wallet_client::*;
@@ -17,5 +17,5 @@ pub use file_system_client::*;
 pub use host_info_client::*;
 pub use profile_change_client::*;
 pub use secure_storage_client::*;
-pub use token_pricing_service::*;
+pub(crate) use token_pricing_client::*;
 pub use unsafe_storage_client::*;
