@@ -70,7 +70,7 @@ fn make_client_with_responses(
                 .push(request.clone());
 
             // Check which endpoint is being called
-            if request.url.as_str().contains("liquidity-recipe") {
+            if request.url.as_str().contains("liquidity-reciept") {
                 let body = serde_json::to_vec(&liquidity_receipts_clone).unwrap();
                 NetworkResponse::new(200, body)
             } else if request.url.as_str().contains("token-price-service") {

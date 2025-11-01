@@ -13,6 +13,7 @@ pub struct Clients {
     pub profile_state_change: ProfileStateChangeClient,
     pub factor_instances_cache: FactorInstancesCacheClient,
     pub arculus_wallet_client: ArculusWalletClient,
+    pub nft_prices_client: NonFungiblePricesClient,
 }
 
 impl Clients {
@@ -36,6 +37,10 @@ impl Clients {
             drivers.arculus_csdk_driver.clone(),
             drivers.nfc_tag_driver.clone(),
         );
+        let nft_prices_client = NonFungiblePricesClient::new(
+            Arc::new(http_client.clone()),
+            file_system.clone(),
+        );
         Self {
             host,
             secure_storage,
@@ -47,6 +52,7 @@ impl Clients {
             profile_state_change: profile_change,
             factor_instances_cache,
             arculus_wallet_client,
+            nft_prices_client,
         }
     }
 }

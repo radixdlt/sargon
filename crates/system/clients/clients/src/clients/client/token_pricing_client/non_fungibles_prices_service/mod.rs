@@ -6,5 +6,5 @@ mod remote_fetcher;
 mod tests;
 
 pub(crate) use caching::*;
-pub(crate) use non_fungibles_prices_client::*;
+pub use non_fungibles_prices_client::*;
 pub(crate) use remote_fetcher::*;

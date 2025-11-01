@@ -142,9 +142,15 @@ impl NonFungiblePricesClient {
         let cached_snapshot = self.load_cached_snapshot().await.ok().flatten();
 
         if let Some(cached_receipts) = cached_snapshot {
-            let all_non_fungibles_in_cache = cached_receipts.iter().all(|receipt| addresses.is_superset(&receipt.all_non_fungible_ids()));
-            if all_non_fungibles_in_cache
-            {
+            // Collect all NFT IDs from all cached receipts
+            let all_cached_ids: HashSet<_> = cached_receipts
+                .iter()
+                .flat_map(|receipt| receipt.all_non_fungible_ids())
+                .collect();
+
+            // Check if cache contains all requested NFT IDs
+            let all_non_fungibles_in_cache = all_cached_ids.is_superset(&addresses);
+            if all_non_fungibles_in_cache {
                 return Ok(cached_receipts);
             }
         };
