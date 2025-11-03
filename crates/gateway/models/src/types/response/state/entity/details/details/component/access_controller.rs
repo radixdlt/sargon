@@ -18,6 +18,76 @@ pub struct AccessControllerFieldStateValue {
     pub has_recovery_role_badge_withdraw_attempt: bool,
 }
 
+impl HasSampleValues for AccessControllerFieldStateValue {
+    fn sample() -> Self {
+        Self {
+            controlled_vault: EntityReference {
+                entity_type: CoreApiEntityType::InternalNonFungibleVault,
+                is_global: false,
+                entity_address: "internal_vault_rdx1nqutf8slj3qyasr8jepflggtycdxjzvnkawm8zahmax5xs0eetyehf".to_string(),
+            },
+            xrd_fee_vault: None,
+            timed_recovery_delay_minutes: Some(20160),
+            recovery_badge_resource_address: "resource_rdx1nfs0la98ht4fz0pjkd62ep0uulmljwdhztsfvehz0gkwp3drqu2hyx".parse().unwrap(),
+            is_primary_role_locked: false,
+            primary_role_recovery_attempt: None,
+            has_primary_role_badge_withdraw_attempt: false,
+            recovery_role_recovery_attempt: None,
+            has_recovery_role_badge_withdraw_attempt: false,
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            controlled_vault: EntityReference {
+                entity_type: CoreApiEntityType::InternalNonFungibleVault,
+                is_global: false,
+                entity_address: "internal_vault_tdx_2_1nrs3a0qw5qfsx83hvkn8h6l6pfsc703gr8k5wz24gup97zxjsct0t7".to_string(),
+            },
+            xrd_fee_vault: Some(EntityReference {
+                entity_type: CoreApiEntityType::InternalNonFungibleVault,
+                is_global: false,
+                entity_address: "internal_vault_tdx_2_1ny42z9ly8zw4e8wqzkcazqthq52j8qre6xtydsz7qgkzy8wp3v48sp".to_string(),
+            }),
+            timed_recovery_delay_minutes: Some(120),
+            recovery_badge_resource_address: "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc".parse().unwrap(),
+            is_primary_role_locked: true,
+            primary_role_recovery_attempt: Some(PrimaryRoleRecoveryAttempt {
+                recovery_proposal: RecoveryProposal {
+                    primary_role: AccessRule::AllowAll,
+                    recovery_role: AccessRule::Protected {
+                        access_rule: CompositeRequirement::AnyOf { access_rules: vec![] },
+                    },
+                    confirmation_role: AccessRule::Protected {
+                        access_rule: CompositeRequirement::ProofRule {
+                            proof_rule: BasicRequirement::Require {
+                                requirement: Requirement::Resource {
+                                    resource: "resource_tdx_2_1ng6aanl0nw98dgqxtja3mx4kpa8rzwhyt4q22sy9uul0vf9frs528x".parse().unwrap(),
+                                },
+                            },
+                        },
+                    },
+                    timed_recovery_delay_minutes: Some(45),
+                },
+            }),
+            has_primary_role_badge_withdraw_attempt: true,
+            recovery_role_recovery_attempt: Some(RecoveryRoleRecoveryAttempt {
+                recovery_proposal: RecoveryProposal {
+                    primary_role: AccessRule::DenyAll,
+                    recovery_role: AccessRule::AllowAll,
+                    confirmation_role: AccessRule::AllowAll,
+                    timed_recovery_delay_minutes: None,
+                },
+                allow_timed_recovery_after: Some(ScryptoInstantDto {
+                    unix_timestamp_seconds: "1730999831".to_string(),
+                    date_time: Some("2024-11-07T11:17:11Z".to_string()),
+                }),
+            }),
+            has_recovery_role_badge_withdraw_attempt: true,
+        }
+    }
+}
+
 /// Reference to an entity (global or internal) returned by the Core API.
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct EntityReference {
@@ -145,7 +215,20 @@ pub enum Requirement {
     #[serde(rename = "Resource")]
     Resource { resource: ResourceAddress },
     #[serde(rename = "NonFungible")]
-    NonFungible { non_fungible: NonFungibleGlobalId },
+    NonFungible { non_fungible: NonFungible },
+}
+
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
+pub struct NonFungible {
+    resource_address: ResourceAddress,
+    local_id: NonFungibleLocalIdId,
+}
+
+#[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
+pub struct NonFungibleLocalIdId {
+    id_type: String,
+    sbor_hex: String,
+    simple_rep: String,
 }
 
 /// DTO for the `ScryptoInstant` type from the Core API schema.

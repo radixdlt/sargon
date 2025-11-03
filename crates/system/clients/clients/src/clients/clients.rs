@@ -13,6 +13,8 @@ pub struct Clients {
     pub profile_state_change: ProfileStateChangeClient,
     pub factor_instances_cache: FactorInstancesCacheClient,
     pub arculus_wallet_client: ArculusWalletClient,
+    pub access_controller_state_repository_client:
+        AccessControllerStateRepositoryClient,
 }
 
 impl Clients {
@@ -36,6 +38,13 @@ impl Clients {
             drivers.arculus_csdk_driver.clone(),
             drivers.nfc_tag_driver.clone(),
         );
+        let access_controller_cache_client =
+            AccessControllerDetailsCacheClient::new(file_system.clone());
+        let access_controller_state_repository_client =
+            AccessControllerStateRepositoryClient::new(
+                http_client.clone(),
+                access_controller_cache_client,
+            );
         Self {
             host,
             secure_storage,
@@ -47,6 +56,7 @@ impl Clients {
             profile_state_change: profile_change,
             factor_instances_cache,
             arculus_wallet_client,
+            access_controller_state_repository_client,
         }
     }
 }
