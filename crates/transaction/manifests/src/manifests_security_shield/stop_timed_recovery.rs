@@ -9,86 +9,84 @@ use radix_engine_interface::blueprints::access_controller::{
 };
 
 pub trait TransactionManifestCancelTimedRecovery {
-    /// Stops timed recovery for the given `securified_entity`
-    /// The `securified_entity` must have a `provisional_securified_config` set up.
+    /// Stops timed recovery for the given `ac_address` based on the given `recovery_proposal`
     fn stop_timed_recovery(
-        securified_entity: impl Into<AnySecurifiedEntity>,
+        ac_address: AccessControllerAddress,
+        recovery_proposal: RecoveryProposal,
     ) -> TransactionManifest;
 
-    /// Stops timed recovery and cancels recovery attempt for the given `securified_entity`
-    /// The `securified_entity` must have a `provisional_securified_config` set up.
+    /// Stops timed recovery for the given `ac_address` and cancels the recovery attempt based on
+    /// the given `recovery_proposal`
     fn stop_and_cancel_timed_recovery(
-        securified_entity: impl Into<AnySecurifiedEntity>,
+        ac_address: AccessControllerAddress,
+        recovery_proposal: RecoveryProposal,
+    ) -> TransactionManifest;
+
+    /// Stops timed recovery for the given `ac_address` and cancels the recovery attempt based on
+    /// the given `input`
+    fn stop_and_cancel_timed_recovery_with_scrypto_input(
+        ac_address: AccessControllerAddress,
+        input: ScryptoAccessControllerTimedConfirmRecoveryInput,
     ) -> TransactionManifest;
 }
 
 impl TransactionManifestCancelTimedRecovery for TransactionManifest {
     fn stop_timed_recovery(
-        securified_entity: impl Into<AnySecurifiedEntity>,
+        ac_address: AccessControllerAddress,
+        recovery_proposal: RecoveryProposal,
     ) -> TransactionManifest {
-        let securified_entity = securified_entity.into();
-        let securified_control =
-            securified_entity.securified_entity_control.clone();
-
-        let access_controller_address =
-            securified_control.access_controller_address;
-        let security_structure_of_factor_instances = securified_control
-            .provisional_securified_config
-            .expect("The provisional config must be present")
-            .get_security_structure_of_factor_instances();
-        let factors_and_time = AccessControllerFactorsAndTimeInput::new(
-            &security_structure_of_factor_instances,
-        );
+        let factors_and_time =
+            AccessControllerFactorsAndTimeInput::with_recovery_proposal(
+                recovery_proposal,
+            );
 
         let mut builder = ScryptoTransactionManifestBuilder::new();
         builder = builder.call_method(
-            access_controller_address.scrypto(),
+            ac_address.scrypto(),
             SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
             ScryptoAccessControllerTimedConfirmRecoveryInput::from(
                 &factors_and_time,
             ),
         );
 
-        TransactionManifest::sargon_built(
-            builder,
-            securified_entity.network_id(),
-        )
+        TransactionManifest::sargon_built(builder, ac_address.network_id())
     }
 
     fn stop_and_cancel_timed_recovery(
-        securified_entity: impl Into<AnySecurifiedEntity>,
+        ac_address: AccessControllerAddress,
+        recovery_proposal: RecoveryProposal,
     ) -> Self {
-        let securified_entity = securified_entity.into();
-        let securified_control =
-            securified_entity.securified_entity_control.clone();
+        let factors_and_time =
+            AccessControllerFactorsAndTimeInput::with_recovery_proposal(
+                recovery_proposal,
+            );
 
-        let access_controller_address =
-            securified_control.access_controller_address;
-        let security_structure_of_factor_instances = securified_control
-            .provisional_securified_config
-            .expect("The provisional config must be present")
-            .get_security_structure_of_factor_instances();
-        let factors_and_time = AccessControllerFactorsAndTimeInput::new(
-            &security_structure_of_factor_instances,
-        );
-
-        let mut builder = ScryptoTransactionManifestBuilder::new();
-        builder = builder.call_method(
-            access_controller_address.scrypto(),
-            SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
+        Self::stop_and_cancel_timed_recovery_with_scrypto_input(
+            ac_address,
             ScryptoAccessControllerTimedConfirmRecoveryInput::from(
                 &factors_and_time,
             ),
-        ).call_method(
-            access_controller_address.scrypto(),
-            SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
-            ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput {},
-        );
-
-        TransactionManifest::sargon_built(
-            builder,
-            securified_entity.network_id(),
         )
+    }
+
+    fn stop_and_cancel_timed_recovery_with_scrypto_input(
+        ac_address: AccessControllerAddress,
+        input: ScryptoAccessControllerTimedConfirmRecoveryInput,
+    ) -> Self {
+        let mut builder = ScryptoTransactionManifestBuilder::new();
+        builder = builder
+            .call_method(
+                ac_address.scrypto(),
+                SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
+                input,
+            )
+            .call_method(
+                ac_address.scrypto(),
+                SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+                ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput {},
+            );
+
+        TransactionManifest::sargon_built(builder, ac_address.network_id())
     }
 }
 
@@ -97,46 +95,53 @@ mod tests {
     #![allow(non_snake_case)]
 
     use super::*;
-    use prelude::fixture_rtm;
+    use prelude::{fixture_gw_model, fixture_rtm};
     use profile_supporting_types::{
         SecurifiedAccount, SecurifiedPersona, UnsecurifiedAccount,
     };
     use radix_engine::blueprints::access_controller::{
         RecoveryRoleRecoveryAttemptState, RecoveryRoleRecoveryState,
     };
-    use radix_engine_interface::blueprints::access_controller::RecoveryProposal;
+    use radix_engine_interface::blueprints::access_controller::RecoveryProposal as ScryptoRecoveryProposal;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = TransactionManifest;
 
     #[test]
     fn stop_timed_recovery() {
-        let mut securified_persona = SecurifiedPersona::sample();
-        assert_eq!(securified_persona.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm");
-
-        // Add provisional securified config
-        securified_persona
-            .entity
-            .security_state
-            .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
-        securified_persona =
-            SecurifiedPersona::new(securified_persona.entity).unwrap();
-        pretty_assertions::assert_eq!(
+        let ac_address_str = "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a";
+        let ac_address =
+            AccessControllerAddress::try_from_bech32(ac_address_str).unwrap();
+        let mut securified_persona = SecurifiedPersona::sample().clone();
+        let mut new_securified_entity_control =
+            securified_persona.securified_entity_control.clone();
+        new_securified_entity_control.access_controller_address =
+            ac_address.clone();
+        securified_persona.securified_entity_control =
+            new_securified_entity_control;
+        assert_eq!(
             securified_persona
-                .clone()
                 .securified_entity_control
-                .provisional_securified_config
-                .unwrap()
-                .get_security_structure_of_factor_instances(),
-            SecurityStructureOfFactorInstances::sample()
+                .access_controller_address()
+                .to_string(),
+            ac_address_str
         );
 
-        let manifest = SUT::stop_timed_recovery(securified_persona.clone());
+        let recovery_attempt = fixture_and_json::<RecoveryRoleRecoveryAttempt>(
+            fixture_gw_model!("state/ac_state_details_recovery_attempt"),
+        )
+        .unwrap()
+        .0;
+
+        let manifest = SUT::stop_timed_recovery(
+            ac_address,
+            recovery_attempt.recovery_proposal.clone(),
+        );
 
         let expected_manifest_str =
             fixture_rtm!("stop_persona_shield_timed_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
-        assert!(expected_manifest_str.contains("accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm"));
+        assert!(expected_manifest_str.contains(ac_address_str));
 
         let fee_payer_account = Account::sample();
         let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(fee_payer_account, securified_persona.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
@@ -154,33 +159,39 @@ mod tests {
 
     #[test]
     fn stop_and_cancel_timed_recovery() {
+        let ac_address_str = "accesscontroller_rdx1c0duj4lq0dc3cpl8qd420fpn5eckh8ljeysvjm894lyl5ja5yq6y5a";
+        let ac_address =
+            AccessControllerAddress::try_from_bech32(ac_address_str).unwrap();
         let mut securified_account = SecurifiedAccount::sample();
-        assert_eq!(securified_account.securified_entity_control.access_controller_address().to_string(), "accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g");
-
-        // Add provisional securified config
-        securified_account
-            .entity
-            .security_state
-            .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
-        securified_account =
-            SecurifiedAccount::new(securified_account.entity).unwrap();
-        pretty_assertions::assert_eq!(
+        let mut new_securified_entity_control =
+            securified_account.securified_entity_control.clone();
+        new_securified_entity_control.access_controller_address =
+            ac_address.clone();
+        securified_account.securified_entity_control =
+            new_securified_entity_control;
+        assert_eq!(
             securified_account
-                .clone()
                 .securified_entity_control
-                .provisional_securified_config
-                .unwrap()
-                .get_security_structure_of_factor_instances(),
-            SecurityStructureOfFactorInstances::sample()
+                .access_controller_address()
+                .to_string(),
+            ac_address_str
         );
 
-        let manifest =
-            SUT::stop_and_cancel_timed_recovery(securified_account.clone());
+        let recovery_attempt = fixture_and_json::<RecoveryRoleRecoveryAttempt>(
+            fixture_gw_model!("state/ac_state_details_recovery_attempt"),
+        )
+        .unwrap()
+        .0;
+
+        let manifest = SUT::stop_and_cancel_timed_recovery(
+            ac_address,
+            recovery_attempt.recovery_proposal.clone(),
+        );
 
         let expected_manifest_str =
             fixture_rtm!("stop_and_cancel_account_shield_timed_recovery");
         manifest_eq(manifest.clone(), expected_manifest_str);
-        assert!(expected_manifest_str.contains("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g"));
+        assert!(expected_manifest_str.contains(ac_address_str));
 
         let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(securified_account.clone(), securified_account.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
 
@@ -222,7 +233,7 @@ mod tests {
         let expected_recovery_attempt =
             RecoveryRoleRecoveryAttemptState::RecoveryAttempt(
                 RecoveryRoleRecoveryState::TimedRecovery {
-                    proposal: RecoveryProposal {
+                    proposal: ScryptoRecoveryProposal {
                         rule_set: proposed_recovery_rule_set,
                         timed_recovery_delay_in_minutes: Some(
                             updated_sec_structure
@@ -245,27 +256,17 @@ mod tests {
             expected_recovery_attempt
         );
 
-        // Set provisional config on account
-        securified_account.entity.set_provisional(Some(
-            ProvisionalSecurifiedConfig::FactorInstancesDerived {
-                value: updated_sec_structure.clone(),
-            },
-        ));
-        securified_account =
-            SecurifiedAccount::new(securified_account.entity).unwrap();
-        pretty_assertions::assert_eq!(
-            securified_account
-                .clone()
-                .securified_entity_control
-                .provisional_securified_config
-                .unwrap()
-                .get_security_structure_of_factor_instances(),
-            updated_sec_structure.clone()
-        );
+        let factors_and_time =
+            AccessControllerFactorsAndTimeInput::new(&updated_sec_structure);
+        let scrypto_input =
+            ScryptoAccessControllerTimedConfirmRecoveryInput::from(
+                &factors_and_time,
+            );
 
         // Cancel timed recovery
-        let mut manifest = TransactionManifest::stop_and_cancel_timed_recovery(
-            securified_account.clone(),
+        let mut manifest = TransactionManifest::stop_and_cancel_timed_recovery_with_scrypto_input(
+            securified_account.access_controller_address(),
+            scrypto_input
         );
 
         manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(

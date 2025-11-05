@@ -23,6 +23,7 @@ impl StopTimedRecoverySignaturesCollectorFactory {
             base_intent,
             lock_fee_data.clone(),
             securified_entity.clone(),
+            ac_state_details,
         )
         .build()?;
 

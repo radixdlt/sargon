@@ -66,6 +66,18 @@ pub mod prelude {
         de, ser::SerializeStruct, Deserialize, Deserializer, Serialize,
         Serializer,
     };
+
+    pub(crate) use radix_engine_interface::{
+        blueprints::{
+            access_controller::RuleSet as ScryptoRuleSet,
+            resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
+        },
+        prelude::{
+            AccessRule as ScryptoAccessRule,
+            BasicRequirement as ScryptoBasicRequirement,
+            CompositeRequirement as ScryptoCompositeRequirement,
+        },
+    };
 }
 
 pub use prelude::*;

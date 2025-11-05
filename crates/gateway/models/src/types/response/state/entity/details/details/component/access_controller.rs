@@ -220,15 +220,15 @@ pub enum Requirement {
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct NonFungible {
-    resource_address: ResourceAddress,
-    local_id: NonFungibleLocalIdId,
+    pub resource_address: ResourceAddress,
+    pub local_id: NonFungibleLocalIdId,
 }
 
 #[derive(Deserialize, Serialize, Clone, PartialEq, Eq, Debug)]
 pub struct NonFungibleLocalIdId {
-    id_type: String,
-    sbor_hex: String,
-    simple_rep: String,
+    pub id_type: String,
+    pub sbor_hex: String,
+    pub simple_rep: String,
 }
 
 /// DTO for the `ScryptoInstant` type from the Core API schema.
