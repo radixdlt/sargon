@@ -4145,6 +4145,7 @@ dependencies = [
  "profile",
  "profile-logic",
  "profile-state-holder",
+ "radix-engine-interface",
  "serde",
  "serde_json",
  "signing-traits",

@@ -22,7 +22,7 @@ manifests = { workspace = true }
 keys-collector = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
-# None
+radix-engine-interface = { workspace = true }
 
 # ==== EXTERNAL DEPENDENCIES ====
 async-trait = { workspace = true }

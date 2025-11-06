@@ -49,6 +49,18 @@ pub mod prelude {
     pub(crate) use signing_traits::prelude::*;
     pub(crate) use sub_systems::prelude::*;
 
+    pub(crate) use radix_engine_interface::{
+        blueprints::{
+            access_controller::RuleSet as ScryptoRuleSet,
+            resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
+        },
+        prelude::{
+            AccessRule as ScryptoAccessRule,
+            BasicRequirement as ScryptoBasicRequirement,
+            CompositeRequirement as ScryptoCompositeRequirement,
+        },
+    };
+
     #[cfg(test)]
     mod testing {}
 }

@@ -10,4 +10,14 @@ impl SargonOS {
             .await
             .into_iter_result()
     }
+
+    pub async fn is_recovery_proposal_unknown(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<bool> {
+        self.wrapped
+            .is_recovery_proposal_unknown(entity_address.into_internal())
+            .await
+            .into_result()
+    }
 }
