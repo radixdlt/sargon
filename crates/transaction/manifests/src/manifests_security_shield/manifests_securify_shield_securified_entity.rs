@@ -2,7 +2,7 @@
 use crate::prelude::*;
 use std::ops::Deref;
 
-use profile_supporting_types::{AnySecurifiedEntity, UnsecurifiedAccount};
+use profile_supporting_types::AnySecurifiedEntity;
 
 pub trait TransactionManifestSecurifySecurifiedEntity:
     TransactionManifestSetRolaKey

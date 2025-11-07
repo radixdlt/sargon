@@ -1,6 +1,5 @@
 use crate::prelude::*;
 
-use profile_supporting_types::AnySecurifiedEntity;
 use radix_engine_interface::blueprints::access_controller::{
     AccessControllerCancelRecoveryRoleRecoveryProposalManifestInput as ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput,
     AccessControllerTimedConfirmRecoveryInput as ScryptoAccessControllerTimedConfirmRecoveryInput,
