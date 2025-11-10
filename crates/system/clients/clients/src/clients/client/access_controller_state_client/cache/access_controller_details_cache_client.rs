@@ -24,7 +24,7 @@ impl AccessControllerDetailsCacheClient {
         Ok(out)
     }
 
-    async fn access_cache_init_if_needed<R>(
+    async fn access_cache<R>(
         &self,
         access: impl FnOnce(&AccessControllerDetailsCache) -> Result<R>,
     ) -> Result<R> {
@@ -59,11 +59,9 @@ impl AccessControllerDetailsCacheClient {
     }
 
     async fn path(&self) -> Result<String> {
-        let path_str = self
-            .file_system_client
+        self.file_system_client
             .create_if_needed(Self::CACHE_FILE)
-            .await?;
-        Ok(path_str)
+            .await
     }
 
     async fn save_to_file(
@@ -102,8 +100,7 @@ impl AccessControllerDetailsCacheClient {
     }
 
     pub async fn snapshot(&self) -> Result<AccessControllerDetailsCache> {
-        self.access_cache_init_if_needed(|cache| Ok(cache.clone_snapshot()))
-            .await
+        self.access_cache(|cache| Ok(cache.clone())).await
     }
 }
 

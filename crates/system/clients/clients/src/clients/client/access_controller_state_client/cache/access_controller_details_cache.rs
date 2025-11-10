@@ -16,7 +16,7 @@ impl AccessControllerDetailsCache {
         }
     }
 
-    pub fn clone_snapshot(&self) -> Self {
+    pub fn clone(&self) -> Self {
         Self {
             map: RwLock::new(self.map.read().unwrap().clone()),
         }
@@ -31,7 +31,12 @@ impl AccessControllerDetailsCache {
     }
 
     pub fn insert(&self, details: &AccessControllerStateDetails) -> Result<()> {
-        let mut binding = self.map.write().unwrap();
+        let mut binding =
+            self.map.write().map_err(|_| CommonError::Unknown {
+                error_message:
+                    "Insert AC details into cache write lock failure"
+                        .to_string(),
+            })?;
         binding.insert(details.address, details.clone());
         Ok(())
     }

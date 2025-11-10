@@ -59,7 +59,6 @@ impl ProfileUpdateEntitySecurifiedState for Profile {
         entity.set_security_state(EntitySecurityState::Securified {
             value: secured_entity_control,
         })?;
-        self.update_entities_erased(IdentifiedVecOf::just(entity.clone()))?;
-        Ok(())
+        self.update_entities_erased(IdentifiedVecOf::just(entity.clone()))
     }
 }

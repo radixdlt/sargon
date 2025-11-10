@@ -650,7 +650,6 @@ impl GatewayClient {
         let ac_state: AccessControllerFieldStateValue =
             serde_json::from_str(&raw_maybe_ac_state).map_err(|e| {
                 // Helpful diagnostic: prints the offending JSON fragment for debugging.
-                // Remove or change to proper logging in production.
                 CommonError::Unknown {
                     error_message: format!(
                         "Deserialization error: {}\nState JSON snippet:\n{}",
@@ -660,7 +659,6 @@ impl GatewayClient {
                     ),
                 }
             })?;
-        // .unwrap();
 
         let xrd_amount = item
             .fungible_resources
