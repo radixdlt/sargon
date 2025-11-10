@@ -5,6 +5,11 @@ pub trait ProfileUpdateEntitySecurifiedState {
         &mut self,
         entity_address: AddressOfAccountOrPersona,
     ) -> Result<AccountOrPersona>;
+
+    fn remove_provisional_security_state(
+        &mut self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<()>;
 }
 
 impl ProfileUpdateEntitySecurifiedState for Profile {
@@ -38,5 +43,22 @@ impl ProfileUpdateEntitySecurifiedState for Profile {
         self.update_entities_erased(IdentifiedVecOf::just(entity.clone()))?;
 
         Ok(entity)
+    }
+
+    fn remove_provisional_security_state(
+        &mut self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<()> {
+        let mut entity = self.entity_by_address(entity_address)?;
+        let mut secured_entity_control = entity
+            .security_state()
+            .as_securified()
+            .ok_or(CommonError::SecurityStateNotSecurified)?
+            .clone();
+        secured_entity_control.set_provisional(None);
+        entity.set_security_state(EntitySecurityState::Securified {
+            value: secured_entity_control,
+        })?;
+        self.update_entities_erased(IdentifiedVecOf::just(entity.clone()))
     }
 }

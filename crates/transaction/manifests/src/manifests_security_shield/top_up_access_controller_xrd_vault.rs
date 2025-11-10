@@ -100,7 +100,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
                     (),
                 );
             }
-        
+
             // Add withdraw XRD instruction
             builder.withdraw_from_account(
                 fee_payer_address.scrypto(),

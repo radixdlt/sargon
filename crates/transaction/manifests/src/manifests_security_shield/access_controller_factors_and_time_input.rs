@@ -38,6 +38,19 @@ impl AccessControllerFactorsAndTimeInput {
             timed_recovery_delay_in_minutes,
         }
     }
+
+    pub fn with_recovery_proposal(recovery_proposal: RecoveryProposal) -> Self {
+        let rule_set = ScryptoRuleSet::from(recovery_proposal.clone());
+
+        let timed_recovery_delay_in_minutes = recovery_proposal
+            .timed_recovery_delay_minutes
+            .expect("Recovery proposal must have timed recovery delay minutes");
+
+        Self {
+            rule_set,
+            timed_recovery_delay_in_minutes,
+        }
+    }
 }
 
 impl From<&AccessControllerFactorsAndTimeInput>

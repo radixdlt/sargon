@@ -49,11 +49,11 @@ impl TransactionManifest {
         let add_top_up_instructions =
             |manifest: TransactionManifest| -> TransactionManifest {
                 TransactionManifest::modify_manifest_top_up_ac_from_securified_account(
-                manifest, 
-                manifest_ac_address, 
-                lock_fee_data.fee_payer_address.clone(), 
-                lock_fee_data.access_controller_address.clone(), 
-                required_lock_fee, 
+                manifest,
+                manifest_ac_address,
+                lock_fee_data.fee_payer_address.clone(),
+                lock_fee_data.access_controller_address.clone(),
+                required_lock_fee,
                 can_use_primary_role,
             ).unwrap()
             };

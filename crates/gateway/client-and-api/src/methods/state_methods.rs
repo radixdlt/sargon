@@ -585,6 +585,36 @@ impl GatewayClient {
 }
 
 impl GatewayClient {
+    pub async fn fetch_access_controllers_details(
+        &self,
+        ac_addresses: Vec<AccessControllerAddress>,
+    ) -> Result<Vec<AccessControllerStateDetails>> {
+        let ledger_state = self.gateway_status().await?.ledger_state;
+        let request = StateEntityDetailsRequest::new(
+            ac_addresses
+                .clone()
+                .into_iter()
+                .map(|ac| ac.into())
+                .collect(),
+            Some(ledger_state.into()),
+            None,
+        );
+
+        let response = self.state_entity_details(request).await?;
+
+        let mut result = Vec::with_capacity(ac_addresses.len());
+        for ac_address in ac_addresses.into_iter() {
+            let item = response
+                .items
+                .iter()
+                .find(|item| item.address == ac_address.into())
+                .unwrap();
+            result.push(Self::parse_access_controller_item(item, ac_address)?);
+        }
+
+        Ok(result)
+    }
+
     pub async fn fetch_access_controller_details(
         &self,
         ac_address: AccessControllerAddress,
@@ -603,6 +633,13 @@ impl GatewayClient {
             .find(|item| item.address == ac_address.into())
             .unwrap();
 
+        Self::parse_access_controller_item(item, ac_address)
+    }
+
+    fn parse_access_controller_item(
+        item: &StateEntityDetailsResponseItem,
+        ac_address: AccessControllerAddress,
+    ) -> Result<AccessControllerStateDetails> {
         let raw_maybe_ac_state = item
             .details
             .clone()
@@ -611,7 +648,18 @@ impl GatewayClient {
             .unwrap();
 
         let ac_state: AccessControllerFieldStateValue =
-            serde_json::from_str(&raw_maybe_ac_state).unwrap();
+            serde_json::from_str(&raw_maybe_ac_state).map_err(|e| {
+                // Helpful diagnostic: prints the offending JSON fragment for debugging.
+                CommonError::Unknown {
+                    error_message: format!(
+                        "Deserialization error: {}\nState JSON snippet:\n{}",
+                        e,
+                        serde_json::to_string_pretty(&raw_maybe_ac_state)
+                            .unwrap_or_default()
+                    ),
+                }
+            })?;
+
         let xrd_amount = item
             .fungible_resources
             .clone()

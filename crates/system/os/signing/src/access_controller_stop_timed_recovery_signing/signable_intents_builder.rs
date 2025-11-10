@@ -10,6 +10,7 @@ pub struct AccessControllerStopTimedRecoveryIntentsBuilder {
     base_intent: TransactionIntent,
     lock_fee_data: LockFeeData,
     securified_entity: AnySecurifiedEntity,
+    ac_state_details: AccessControllerStateDetails,
 }
 
 impl AccessControllerStopTimedRecoveryIntentsBuilder {
@@ -17,11 +18,13 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
         base_intent: TransactionIntent,
         lock_fee_data: LockFeeData,
         securified_entity: AnySecurifiedEntity,
+        ac_state_details: AccessControllerStateDetails,
     ) -> Self {
         Self {
             base_intent,
             lock_fee_data,
             securified_entity,
+            ac_state_details,
         }
     }
 }
@@ -42,15 +45,25 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
         &self,
         kind: StopTimedRecoveryIntentKind,
     ) -> Result<SignableWithEntities<TransactionIntent>> {
+        let recovery_proposal = self
+            .ac_state_details
+            .state
+            .recovery_role_recovery_attempt
+            .clone()
+            .expect("The recovery proposal must be present")
+            .recovery_proposal;
+
         let manifest = match kind {
             StopTimedRecoveryIntentKind::StopAndCancel => {
                 TransactionManifest::stop_and_cancel_timed_recovery(
-                    self.securified_entity.clone(),
+                    self.ac_state_details.address,
+                    recovery_proposal,
                 )
             }
             StopTimedRecoveryIntentKind::Stop => {
                 TransactionManifest::stop_timed_recovery(
-                    self.securified_entity.clone(),
+                    self.ac_state_details.address,
+                    recovery_proposal,
                 )
             }
         };
@@ -112,9 +125,14 @@ mod tests {
             Decimal192::one(),
         );
         let securified_entity = AnySecurifiedEntity::sample_account();
+        let ac_state_details = AccessControllerStateDetails::sample();
 
-        let builder =
-            SUT::new(base_intent, lock_fee_data, securified_entity.clone());
+        let builder = SUT::new(
+            base_intent,
+            lock_fee_data,
+            securified_entity.clone(),
+            ac_state_details,
+        );
 
         let intents = builder.build().expect("intents");
         assert_ne!(intents.stop_and_cancel.id, intents.stop.id);

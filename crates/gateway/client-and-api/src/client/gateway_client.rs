@@ -32,6 +32,17 @@ impl GatewayClient {
         }
     }
 
+    /// Constructs a new `GatewayClient` with a `HttpClient` for a specified network
+    pub fn with_http_client(
+        http_client: HttpClient,
+        network_id: NetworkID,
+    ) -> Self {
+        Self {
+            http_client,
+            gateway: Gateway::from(network_id),
+        }
+    }
+
     /// Constructs a new `GatewayClient` with a NetworkingDriver for a specified
     /// network, by looking up an Radix DLT provided Gateway on that network.
     ///
