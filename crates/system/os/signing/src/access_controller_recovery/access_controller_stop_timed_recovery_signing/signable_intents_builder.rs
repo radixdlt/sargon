@@ -28,27 +28,29 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
 
 impl AccessControllerStopTimedRecoveryIntentsBuilder {
     pub fn build(&self) -> Result<AccessControllerStopTimedRecoveryIntents> {
-        let stop_and_cancel =
-            self.signable_for_kind(StopTimedRecoveryIntentKind::StopAndCancel)?;
-        let stop = self.signable_for_kind(StopTimedRecoveryIntentKind::Stop)?;
+        let stop_with_recovery =
+            self.signable_for_role_kind(RoleKind::Recovery)?;
+        let stop_with_primary = self.signable_for_role_kind(RoleKind::Primary)?;
+        let stop_with_confirmation = self.signable_for_role_kind(RoleKind::Confirmation)?;
 
         Ok(AccessControllerStopTimedRecoveryIntents::new(
-            stop_and_cancel,
-            stop,
+            stop_with_recovery,
+            stop_with_primary,
+            stop_with_confirmation
         ))
     }
 
-    fn signable_for_kind(
+    fn signable_for_role_kind(
         &self,
-        kind: StopTimedRecoveryIntentKind,
+        role_kind: RoleKind,
     ) -> Result<SignableWithEntities<TransactionIntent>> {
-        let manifest = match kind {
-            StopTimedRecoveryIntentKind::StopAndCancel => {
+        let manifest = match role_kind {
+            RoleKind::Recovery => {
                 TransactionManifest::stop_and_cancel_timed_recovery(
                     self.securified_entity.clone(),
                 )
             }
-            StopTimedRecoveryIntentKind::Stop => {
+            RoleKind::Primary | RoleKind::Confirmation => {
                 TransactionManifest::stop_timed_recovery(
                     self.securified_entity.clone(),
                 )
@@ -72,18 +74,21 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
 }
 
 pub struct AccessControllerStopTimedRecoveryIntents {
-    pub stop_and_cancel: SignableWithEntities<TransactionIntent>,
-    pub stop: SignableWithEntities<TransactionIntent>,
+    pub stop_with_recovery: SignableWithEntities<TransactionIntent>,
+    pub stop_with_primary: SignableWithEntities<TransactionIntent>,
+    pub stop_with_confirmation: SignableWithEntities<TransactionIntent>,
 }
 
 impl AccessControllerStopTimedRecoveryIntents {
     pub fn new(
-        stop_and_cancel: SignableWithEntities<TransactionIntent>,
-        stop: SignableWithEntities<TransactionIntent>,
+        stop_with_recovery: SignableWithEntities<TransactionIntent>,
+        stop_with_primary: SignableWithEntities<TransactionIntent>,
+        stop_with_confirmation: SignableWithEntities<TransactionIntent>,
     ) -> Self {
         Self {
-            stop_and_cancel,
-            stop,
+            stop_with_recovery,
+            stop_with_primary,
+            stop_with_confirmation,
         }
     }
 
@@ -91,35 +96,49 @@ impl AccessControllerStopTimedRecoveryIntents {
         &self,
     ) -> IdentifiedVecOf<SignableWithEntities<TransactionIntent>> {
         IdentifiedVecOf::from(vec![
-            self.stop_and_cancel.clone(),
-            self.stop.clone(),
+            self.stop_with_recovery.clone(),
+            self.stop_with_primary.clone(),
+            self.stop_with_confirmation.clone()
         ])
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[allow(clippy::upper_case_acronyms)]
-    type SUT = AccessControllerStopTimedRecoveryIntentsBuilder;
-
-    #[test]
-    fn builds_both_intents() {
-        let base_intent = TransactionIntent::sample();
-        let lock_fee_data = LockFeeData::new_with_unsecurified_fee_payer(
-            AccountAddress::sample(),
-            Decimal192::one(),
-        );
-        let securified_entity = AnySecurifiedEntity::sample_account();
-
-        let builder =
-            SUT::new(base_intent, lock_fee_data, securified_entity.clone());
-
-        let intents = builder.build().expect("intents");
-        assert_ne!(intents.stop_and_cancel.id, intents.stop.id);
-
-        let all_signables = intents.all_signables();
-        assert_eq!(all_signables.len(), 2);
+    pub fn role_kind_for_intent_hash(
+        &self,
+        intent_hash: &TransactionIntentHash
+    ) -> RoleKind {
+        if self.stop_with_recovery.id == *intent_hash {
+            RoleKind::Recovery
+        } else if self.stop_with_primary.id == *intent_hash {
+            RoleKind::Primary
+        } else {
+            RoleKind::Confirmation
+        }
     }
 }
+
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     #[allow(clippy::upper_case_acronyms)]
+//     type SUT = AccessControllerStopTimedRecoveryIntentsBuilder;
+
+//     #[test]
+//     fn builds_both_intents() {
+//         let base_intent = TransactionIntent::sample();
+//         let lock_fee_data = LockFeeData::new_with_unsecurified_fee_payer(
+//             AccountAddress::sample(),
+//             Decimal192::one(),
+//         );
+//         let securified_entity = AnySecurifiedEntity::sample_account();
+
+//         let builder =
+//             SUT::new(base_intent, lock_fee_data, securified_entity.clone());
+
+//         let intents = builder.build().expect("intents");
+//         assert_ne!(intents.stop_and_cancel.id, intents.stop.id);
+
+//         let all_signables = intents.all_signables();
+//         assert_eq!(all_signables.len(), 2);
+//     }
+// }

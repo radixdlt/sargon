@@ -26,10 +26,13 @@ pub async fn sign_access_controller_stop_timed_recovery_transaction(
         .await?;
     let fee_payer_account =
         profile.account_by_address(fee_paying_account_address)?;
-    let lock_fee_data = LockFeeData::new_with_account(
-        fee_payer_account,
-        fee,
-        fee_payer_xrd_balance,
+    let lock_fee_data =  LockFeeDataWithResolvedAccount::new(
+        fee_payer_account.clone(),
+        LockFeeData::new_with_account(
+            fee_payer_account,
+            fee,
+            fee_payer_xrd_balance,
+        ),
     );
 
     let ac_state_details = gw_client

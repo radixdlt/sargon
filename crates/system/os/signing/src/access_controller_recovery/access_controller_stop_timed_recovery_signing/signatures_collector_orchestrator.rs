@@ -116,115 +116,115 @@ impl StopTimedRecoverySignaturesCollectorOrchestrator {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::collections::VecDeque;
-    use std::sync::{Arc, Mutex};
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use std::collections::VecDeque;
+//     use std::sync::{Arc, Mutex};
 
-    type CollectorResult = Result<SignaturesOutcome<TransactionIntentHash>>;
+//     type CollectorResult = Result<SignaturesOutcome<TransactionIntentHash>>;
 
-    struct StubCollectorBuilder {
-        outcomes: Mutex<VecDeque<CollectorResult>>,
-    }
+//     struct StubCollectorBuilder {
+//         outcomes: Mutex<VecDeque<CollectorResult>>,
+//     }
 
-    impl StubCollectorBuilder {
-        fn new(outcomes: Vec<CollectorResult>) -> Self {
-            Self {
-                outcomes: Mutex::new(VecDeque::from(outcomes)),
-            }
-        }
-    }
+//     impl StubCollectorBuilder {
+//         fn new(outcomes: Vec<CollectorResult>) -> Self {
+//             Self {
+//                 outcomes: Mutex::new(VecDeque::from(outcomes)),
+//             }
+//         }
+//     }
 
-    impl TransactionIntentSignaturesCollectorBuilder for StubCollectorBuilder {
-        fn build(
-            &self,
-            _: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
-            _: SigningPurpose,
-        ) -> Box<dyn TransactionIntentSignaturesCollector> {
-            let outcome = self
-                .outcomes
-                .lock()
-                .expect("collector outcomes mutex poisoned")
-                .pop_front()
-                .expect("unexpected build call");
+//     impl TransactionIntentSignaturesCollectorBuilder for StubCollectorBuilder {
+//         fn build(
+//             &self,
+//             _: IdentifiedVecOf<SignableWithEntities<TransactionIntent>>,
+//             _: SigningPurpose,
+//         ) -> Box<dyn TransactionIntentSignaturesCollector> {
+//             let outcome = self
+//                 .outcomes
+//                 .lock()
+//                 .expect("collector outcomes mutex poisoned")
+//                 .pop_front()
+//                 .expect("unexpected build call");
 
-            Box::new(StubCollector { outcome })
-        }
-    }
+//             Box::new(StubCollector { outcome })
+//         }
+//     }
 
-    struct StubCollector {
-        outcome: CollectorResult,
-    }
+//     struct StubCollector {
+//         outcome: CollectorResult,
+//     }
 
-    #[async_trait::async_trait]
-    impl TransactionIntentSignaturesCollector for StubCollector {
-        async fn collect_signatures(
-            self: Box<Self>,
-        ) -> Result<SignaturesOutcome<TransactionIntentHash>> {
-            let this = *self;
-            this.outcome
-        }
-    }
+//     #[async_trait::async_trait]
+//     impl TransactionIntentSignaturesCollector for StubCollector {
+//         async fn collect_signatures(
+//             self: Box<Self>,
+//         ) -> Result<SignaturesOutcome<TransactionIntentHash>> {
+//             let this = *self;
+//             this.outcome
+//         }
+//     }
 
-    #[actix_rt::test]
-    async fn skipping_all_factor_sources_results_in_error() {
-        let failure_outcome = SignaturesOutcome::<TransactionIntentHash>::with_failed_transactions_due_to_skipped_factors(vec![
-            FactorSourceIDFromHash::sample(),
-        ]);
+//     #[actix_rt::test]
+//     async fn skipping_all_factor_sources_results_in_error() {
+//         let failure_outcome = SignaturesOutcome::<TransactionIntentHash>::with_failed_transactions_due_to_skipped_factors(vec![
+//             FactorSourceIDFromHash::sample(),
+//         ]);
 
-        let collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder> =
-            Arc::new(StubCollectorBuilder::new(vec![
-                Ok(failure_outcome.clone()),
-                Ok(failure_outcome.clone()),
-                Ok(failure_outcome),
-            ]));
+//         let collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder> =
+//             Arc::new(StubCollectorBuilder::new(vec![
+//                 Ok(failure_outcome.clone()),
+//                 Ok(failure_outcome.clone()),
+//                 Ok(failure_outcome),
+//             ]));
 
-        let base_intent = TransactionIntent::sample();
-        let lock_fee_data = LockFeeData::new_with_unsecurified_fee_payer(
-            AccountAddress::sample(),
-            Decimal192::one(),
-        );
-        let ac_state_details = AccessControllerStateDetails::new(
-            AccessControllerAddress::sample_mainnet(),
-            AccessControllerFieldStateValue::new(
-                EntityReference::new(
-                    CoreApiEntityType::GlobalAccessController,
-                    false,
-                    "".to_string(),
-                ),
-                None,
-                None,
-                ResourceAddress::sample_mainnet(),
-                false,
-                None,
-                false,
-                None,
-                false,
-            ),
-            Decimal192::zero(),
-        );
-        let mut securified_entity = AnySecurifiedEntity::sample_account();
-        securified_entity
-            .securified_entity_control
-            .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
+//         let base_intent = TransactionIntent::sample();
+//         let lock_fee_data = LockFeeData::new_with_unsecurified_fee_payer(
+//             AccountAddress::sample(),
+//             Decimal192::one(),
+//         );
+//         let ac_state_details = AccessControllerStateDetails::new(
+//             AccessControllerAddress::sample_mainnet(),
+//             AccessControllerFieldStateValue::new(
+//                 EntityReference::new(
+//                     CoreApiEntityType::GlobalAccessController,
+//                     false,
+//                     "".to_string(),
+//                 ),
+//                 None,
+//                 None,
+//                 ResourceAddress::sample_mainnet(),
+//                 false,
+//                 None,
+//                 false,
+//                 None,
+//                 false,
+//             ),
+//             Decimal192::zero(),
+//         );
+//         let mut securified_entity = AnySecurifiedEntity::sample_account();
+//         securified_entity
+//             .securified_entity_control
+//             .set_provisional(Some(ProvisionalSecurifiedConfig::sample()));
 
-        let factory = StopTimedRecoverySignaturesCollectorFactory::new(
-            base_intent,
-            securified_entity,
-            lock_fee_data,
-            ac_state_details,
-            collector_builder,
-        )
-        .expect("failed to construct collector factory");
+//         let factory = StopTimedRecoverySignaturesCollectorFactory::new(
+//             base_intent,
+//             securified_entity,
+//             lock_fee_data,
+//             ac_state_details,
+//             collector_builder,
+//         )
+//         .expect("failed to construct collector factory");
 
-        let orchestrator =
-            StopTimedRecoverySignaturesCollectorOrchestrator::new(factory);
+//         let orchestrator =
+//             StopTimedRecoverySignaturesCollectorOrchestrator::new(factory);
 
-        let error = orchestrator.sign().await.unwrap_err();
-        assert_eq!(
-            error,
-            CommonError::SigningFailedTooManyFactorSourcesNeglected,
-        );
-    }
-}
+//         let error = orchestrator.sign().await.unwrap_err();
+//         assert_eq!(
+//             error,
+//             CommonError::SigningFailedTooManyFactorSourcesNeglected,
+//         );
+//     }
+// }

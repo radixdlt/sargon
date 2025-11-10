@@ -75,6 +75,21 @@ fn default_fee() -> Decimal192 {
 }
 
 #[derive(Clone, PartialEq)]
+pub struct LockFeeDataWithResolvedAccount {
+    pub account: Account,
+    pub lock_fee_data: LockFeeData,
+}
+
+impl LockFeeDataWithResolvedAccount {
+    pub fn new(
+    account: Account,
+    lock_fee_data: LockFeeData,
+    ) -> Self {
+        Self { account, lock_fee_data }
+    }
+}
+
+#[derive(Clone, PartialEq)]
 pub struct LockFeeData {
     pub fee_payer_address: AccountAddress,
     pub access_controller_address: Option<AccessControllerAddress>,
