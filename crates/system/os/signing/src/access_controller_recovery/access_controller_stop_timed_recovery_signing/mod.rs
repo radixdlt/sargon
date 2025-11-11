@@ -6,7 +6,6 @@ pub use signable_intents_builder::*;
 pub use signature_collector_factory::*;
 pub use signatures_collector_orchestrator::*;
 
-
 use crate::prelude::*;
 
 pub async fn sign_access_controller_stop_timed_recovery_transaction(
@@ -26,7 +25,7 @@ pub async fn sign_access_controller_stop_timed_recovery_transaction(
         .await?;
     let fee_payer_account =
         profile.account_by_address(fee_paying_account_address)?;
-    let lock_fee_data =  LockFeeDataWithResolvedAccount::new(
+    let lock_fee_data = LockFeeDataWithResolvedAccount::new(
         fee_payer_account.clone(),
         LockFeeData::new_with_account(
             fee_payer_account,
@@ -39,7 +38,8 @@ pub async fn sign_access_controller_stop_timed_recovery_transaction(
         .fetch_access_controller_details(ac_address)
         .await?;
 
-    let securified_entity = profile.entity_by_access_controller_address(ac_address)?;
+    let securified_entity =
+        profile.entity_by_access_controller_address(ac_address)?;
 
     let factory = StopTimedRecoverySignaturesCollectorFactory::new(
         base_transaction_intent,
@@ -49,7 +49,7 @@ pub async fn sign_access_controller_stop_timed_recovery_transaction(
         Arc::new(DefaultTransactionIntentSignaturesCollectorBuilder::new(
             os.sign_transactions_interactor(),
             IndexSet::from_iter(profile.factor_sources.iter()),
-        ))
+        )),
     )?;
 
     StopTimedRecoverySignaturesCollectorOrchestrator::new(factory)

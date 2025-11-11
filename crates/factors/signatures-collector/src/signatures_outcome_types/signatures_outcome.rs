@@ -162,17 +162,19 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
 }
 
 #[cfg(debug_assertions)]
-impl<ID: SignableID> SignaturesOutcome<ID> { 
+impl<ID: SignableID> SignaturesOutcome<ID> {
     pub fn with_skipped_factors(factors: Vec<FactorSourceIDFromHash>) -> Self {
         Self::new(
             MaybeSignedTransactions::empty(),
             MaybeSignedTransactions::empty(),
             factors
                 .into_iter()
-                .map(|f| NeglectedFactor::new(
-                    NeglectFactorReason::UserExplicitlySkipped,
-                    f,
-                ))
+                .map(|f| {
+                    NeglectedFactor::new(
+                        NeglectFactorReason::UserExplicitlySkipped,
+                        f,
+                    )
+                })
                 .collect_vec(),
         )
     }

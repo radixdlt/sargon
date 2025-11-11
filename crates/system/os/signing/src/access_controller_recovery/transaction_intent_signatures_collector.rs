@@ -30,11 +30,11 @@ pub struct DefaultTransactionIntentSignaturesCollectorBuilder {
 impl DefaultTransactionIntentSignaturesCollectorBuilder {
     pub fn new(
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
-        all_profile_factor_sources: IndexSet<FactorSource>
+        all_profile_factor_sources: IndexSet<FactorSource>,
     ) -> Self {
-        Self { 
+        Self {
             interactor,
-            all_profile_factor_sources 
+            all_profile_factor_sources,
         }
     }
 }

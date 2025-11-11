@@ -66,8 +66,16 @@ impl AccessControllerRecoveryIntentsBuilder {
                 role_combination,
             );
 
-        manifest = manifest.apply_cancel_recovery_proposal_instruction(&self.ac_state_details, role_combination);
-        manifest = manifest.apply_lock_fee_instruction(self.securified_entity.address(), &self.lock_fee_data, &self.ac_state_details, role_combination);
+        manifest = manifest.apply_cancel_recovery_proposal_instruction(
+            &self.ac_state_details,
+            role_combination,
+        );
+        manifest = manifest.apply_lock_fee_instruction(
+            self.securified_entity.address(),
+            &self.lock_fee_data,
+            &self.ac_state_details,
+            role_combination,
+        );
 
         let intent = TransactionIntent::new(
             self.base_intent.header,

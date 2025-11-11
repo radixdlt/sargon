@@ -72,9 +72,7 @@ impl OsSigning for SargonOS {
                 )
                 .await;
             }
-            Some(
-                DetailedManifestClass::SecurifyEntity { entities }
-            ) => {
+            Some(DetailedManifestClass::SecurifyEntity { entities }) => {
                 let entity_address = entities.first().unwrap();
                 return sign_entity_securify(
                     self,

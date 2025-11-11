@@ -10,6 +10,7 @@ pub struct AccessControllerStopTimedRecoveryIntentsBuilder {
     base_intent: TransactionIntent,
     lock_fee_data: LockFeeData,
     securified_entity: AnySecurifiedEntity,
+    ac_state_details: AccessControllerStateDetails,
 }
 
 impl AccessControllerStopTimedRecoveryIntentsBuilder {
@@ -17,11 +18,13 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
         base_intent: TransactionIntent,
         lock_fee_data: LockFeeData,
         securified_entity: AnySecurifiedEntity,
+        ac_state_details: AccessControllerStateDetails,
     ) -> Self {
         Self {
             base_intent,
             lock_fee_data,
             securified_entity,
+            ac_state_details,
         }
     }
 }
@@ -30,13 +33,15 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
     pub fn build(&self) -> Result<AccessControllerStopTimedRecoveryIntents> {
         let stop_with_recovery =
             self.signable_for_role_kind(RoleKind::Recovery)?;
-        let stop_with_primary = self.signable_for_role_kind(RoleKind::Primary)?;
-        let stop_with_confirmation = self.signable_for_role_kind(RoleKind::Confirmation)?;
+        let stop_with_primary =
+            self.signable_for_role_kind(RoleKind::Primary)?;
+        let stop_with_confirmation =
+            self.signable_for_role_kind(RoleKind::Confirmation)?;
 
         Ok(AccessControllerStopTimedRecoveryIntents::new(
             stop_with_recovery,
             stop_with_primary,
-            stop_with_confirmation
+            stop_with_confirmation,
         ))
     }
 
@@ -44,15 +49,25 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
         &self,
         role_kind: RoleKind,
     ) -> Result<SignableWithEntities<TransactionIntent>> {
+        let recovery_proposal = self
+            .ac_state_details
+            .state
+            .recovery_role_recovery_attempt
+            .clone()
+            .expect("The recovery proposal must be present")
+            .recovery_proposal;
+
         let manifest = match role_kind {
             RoleKind::Recovery => {
                 TransactionManifest::stop_and_cancel_timed_recovery(
-                    self.securified_entity.clone(),
+                    self.ac_state_details.address,
+                    recovery_proposal,
                 )
             }
             RoleKind::Primary | RoleKind::Confirmation => {
                 TransactionManifest::stop_timed_recovery(
-                    self.securified_entity.clone(),
+                    self.ac_state_details.address,
+                    recovery_proposal,
                 )
             }
         };
@@ -98,13 +113,13 @@ impl AccessControllerStopTimedRecoveryIntents {
         IdentifiedVecOf::from(vec![
             self.stop_with_recovery.clone(),
             self.stop_with_primary.clone(),
-            self.stop_with_confirmation.clone()
+            self.stop_with_confirmation.clone(),
         ])
     }
 
     pub fn role_kind_for_intent_hash(
         &self,
-        intent_hash: &TransactionIntentHash
+        intent_hash: &TransactionIntentHash,
     ) -> RoleKind {
         if self.stop_with_recovery.id == *intent_hash {
             RoleKind::Recovery

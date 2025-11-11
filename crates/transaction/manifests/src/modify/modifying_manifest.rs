@@ -81,11 +81,11 @@ pub struct LockFeeDataWithResolvedAccount {
 }
 
 impl LockFeeDataWithResolvedAccount {
-    pub fn new(
-    account: Account,
-    lock_fee_data: LockFeeData,
-    ) -> Self {
-        Self { account, lock_fee_data }
+    pub fn new(account: Account, lock_fee_data: LockFeeData) -> Self {
+        Self {
+            account,
+            lock_fee_data,
+        }
     }
 }
 

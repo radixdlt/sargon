@@ -138,10 +138,7 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
             },
         );
 
-        let manifest = TransactionManifest::sargon_built(
-            builder,
-            network_id,
-        );
+        let manifest = TransactionManifest::sargon_built(builder, network_id);
 
         Ok(manifest)
     }
