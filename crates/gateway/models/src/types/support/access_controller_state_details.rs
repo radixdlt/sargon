@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
 pub struct AccessControllerStateDetails {
     pub address: AccessControllerAddress,
     pub state: AccessControllerFieldStateValue,
@@ -18,5 +18,23 @@ impl AccessControllerStateDetails {
             state,
             xrd_balance: xrd_balance.into(),
         }
+    }
+}
+
+impl HasSampleValues for AccessControllerStateDetails {
+    fn sample() -> Self {
+        AccessControllerStateDetails::new(
+            AccessControllerAddress::sample(),
+            AccessControllerFieldStateValue::sample(),
+            Decimal192::zero(),
+        )
+    }
+
+    fn sample_other() -> Self {
+        AccessControllerStateDetails::new(
+            AccessControllerAddress::sample_other(),
+            AccessControllerFieldStateValue::sample_other(),
+            Decimal192::zero(),
+        )
     }
 }

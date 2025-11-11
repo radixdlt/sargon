@@ -6,6 +6,11 @@ pub trait OsCommitProvisionalSecurityState {
         &self,
         entity_address: AddressOfAccountOrPersona,
     ) -> Result<()>;
+
+    async fn remove_provisional_security_state(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<()>;
 }
 
 #[async_trait::async_trait]
@@ -47,6 +52,17 @@ impl OsCommitProvisionalSecurityState for SargonOS {
                 )?;
             }
 
+            Ok(())
+        })
+        .await
+    }
+
+    async fn remove_provisional_security_state(
+        &self,
+        entity_address: AddressOfAccountOrPersona,
+    ) -> Result<()> {
+        self.update_profile_with(|profile| {
+            profile.remove_provisional_security_state(entity_address)?;
             Ok(())
         })
         .await
