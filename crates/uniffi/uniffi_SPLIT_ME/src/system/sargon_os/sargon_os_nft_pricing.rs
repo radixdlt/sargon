@@ -34,15 +34,11 @@ impl SargonOS {
             .map(|id| id.into_internal())
             .collect();
 
-        self.wrapped
+        let result = self.wrapped
             .fetch_nft_prices(nft_ids_set, currency.into_internal())
-            .await
-            .into_result()
-            .map(|prices| {
-                prices
-                    .into_iter()
-                    .map(|(k, v)| (k.into(), v.into()))
-                    .collect()
-            })
+            .await?;
+        Ok(
+            result.into_hash_map()
+        )
     }
 }

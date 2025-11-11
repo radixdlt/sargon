@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 /// The URL endpoint for the NFT liquidity receipt service API
 pub const FETCH_URL: &str =
-    "https://nft-pricing-dev.rdx-works-main.extratools.works/liquidity-reciept";
+    "https://nft-pricing-dev.rdx-works-main.extratools.works/liquidity-receipt";
 
 impl NonFungiblePricesClient {
     pub(crate) async fn fetch_remote_liquidity_receipts(
