@@ -65,7 +65,7 @@ impl LiquidityReceiptRequestBody {
             .into_iter()
             .map(|(resource_address, local_ids)| {
                 LiquidityReceiptRequestItem::new(
-                    resource_address.into(),
+                    resource_address,
                     local_ids,
                 )
             })
@@ -147,28 +147,39 @@ mod tests {
             Arc::new(Mutex::new(Vec::<NetworkRequest>::new()));
         let captured_requests_clone = captured_requests.clone();
 
-        let response_payload: Value = serde_json::from_str(r#"
-        [
-  {
-    "resourceManagerAddress": "resource_rdx1ngsnjtypwayhkwnyu0swmh2ryu398xtq6gt5lz82n4tyyvs6qyd4wn",
-    "items": [
-      {
-        "localId": "{410c43777ae29890-75fb67848fdb2c27-b9d4bce503f0c3c0-39e899816dfeba0c}",
-        "resources": [
-          {
-            "address": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
-            "amount": "62.972752563044215746"
-          },
-          {
-            "address": "resource_rdx1thxj9m87sn5cc9ehgp9qxp6vzeqxtce90xm5cp33373tclyp4et4gv",
-            "amount": "0.000000000000000000"
-          }
-        ]
-      }
-    ]
-  }
-]
-        "#).unwrap();
+        let response_payload = serde_json::json!([
+            {
+                "resourceManagerAddress": resource_a.to_string(),
+                "items": [
+                    {
+                        "localId": local_a_1.to_string(),
+                        "resources": [{
+                            "address": ResourceAddress::sample_mainnet_xrd().to_string(),
+                            "amount": Decimal192::one().to_string()
+                        }]
+                    },
+                    {
+                        "localId": local_a_2.to_string(),
+                        "resources": [{
+                            "address": ResourceAddress::sample_mainnet_candy().to_string(),
+                            "amount": Decimal192::two().to_string()
+                        }]
+                    }
+                ]
+            },
+            {
+                "resourceManagerAddress": resource_b.to_string(),
+                "items": [
+                    {
+                        "localId": local_b.to_string(),
+                        "resources": [{
+                            "address": ResourceAddress::sample_mainnet_nft_gc_membership().to_string(),
+                            "amount": Decimal192::three().to_string()
+                        }]
+                    }
+                ]
+            }
+        ]);
 
         let driver = Arc::new(MockNetworkingDriver::with_lazy_responses(
             move |request, _| {
@@ -187,7 +198,7 @@ mod tests {
         let receipts = client
             .fetch_remote_liquidity_receipts(0, addresses.clone())
             .await
-            .expect("fetch succeeds");
+            .unwrap();
 
         let receipts_map: HashMap<_, _> = receipts
             .into_iter()

@@ -157,14 +157,13 @@ async fn test_fetch_non_fungibles_prices_calculates_value_correctly() {
         .await;
 
     // Assert
-    pretty_assertions::assert_eq!(result, Ok(HashMap::new()));
-    // assert!(result.is_ok());
-    // let prices = result.unwrap();
-    // assert_eq!(prices.len(), 1);
+    assert!(result.is_ok());
+    let prices = result.unwrap();
+    assert_eq!(prices.len(), 1);
 
-    // // Value should be: (100 * $1.0) + (50 * $2.0) = $100 + $100 = $200
-    // let value = prices.get(&nft_global_id).unwrap();
-    // assert_eq!(*value, Decimal192::from(100.0) + Decimal192::from(100.0));
+    // Value should be: (100 * $1.0) + (50 * $2.0) = $100 + $100 = $200
+    let value = prices.get(&nft_global_id).unwrap();
+    assert_eq!(*value, Decimal192::from(100.0) + Decimal192::from(100.0));
 }
 
 #[actix_rt::test]

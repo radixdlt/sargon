@@ -7,4 +7,3 @@ mod tests;
 
 pub(crate) use caching::*;
 pub use non_fungibles_prices_client::*;
-pub(crate) use remote_fetcher::*;
