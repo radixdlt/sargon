@@ -13,26 +13,21 @@ pub const CACHE_TTL_SECONDS: i64 = 5 * 60;
 impl FungiblesPricesClient {
     pub async fn load_cached_prices(&self) -> Result<Option<Vec<TokenPrice>>> {
         let bytes = self
-        .file_system_client
-        .load_from_file(Path::new(ALL_TOKEN_PRICES_PATH))
-        .await?;
+            .file_system_client
+            .load_from_file(Path::new(ALL_TOKEN_PRICES_PATH))
+            .await?;
 
-    if let Some(bytes) = bytes {
+        if let Some(bytes) = bytes {
             let snapshot: AllTokenPricesSnapshot = bytes.deserialize()?;
             let now = Timestamp::now_utc();
 
-            // Cache is valid if:
-            // 1. It was fetched in the past (not from the future)
-            // 2. It's not older than the TTL
-            if snapshot.fetched_at <= now {
-                let age = now.duration_since(snapshot.fetched_at);
-                if age.whole_seconds() <= CACHE_TTL_SECONDS {
-                    return Ok(Some(snapshot.prices));
-                }
+            let age = now.duration_since(snapshot.fetched_at);
+            if age.whole_seconds() <= CACHE_TTL_SECONDS {
+                return Ok(Some(snapshot.prices));
             }
-    };
+        };
 
-    return Ok(None)
+        return Ok(None);
     }
 
     pub async fn store_prices(&self, prices: Vec<TokenPrice>) -> Result<()> {

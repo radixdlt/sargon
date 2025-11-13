@@ -37,31 +37,26 @@ impl SargonOS {
     /// * Network requests fail
     /// * Response data cannot be deserialized
     /// * Cache operations fail
-    pub async fn fetch_nft_prices(
+    pub async fn fetch_nft_fiat_values(
         &self,
         nft_ids: HashSet<NonFungibleGlobalId>,
         currency: FiatCurrency,
+        force_fetch: bool,
     ) -> Result<HashMap<NonFungibleGlobalId, Decimal192>> {
-        info!(
-            "Fetching NFT prices for {} NFTs in {:?}",
-            nft_ids.len(),
-            currency
-        );
+        let gateway_client = self.gateway_client()?;
+        let state_version = gateway_client
+            .gateway_status()
+            .await?
+            .ledger_state
+            .state_version;
 
-        let result = self
-            .nft_prices_client
-            .fetch_non_fungibles_prices(nft_ids, currency)
-            .await;
-
-        match &result {
-            Ok(prices) => {
-                info!("Successfully fetched prices for {} NFTs", prices.len());
-            }
-            Err(e) => {
-                error!("Failed to fetch NFT prices: {:?}", e);
-            }
-        }
-
-        result
+        self.nft_prices_client
+            .fetch_nft_fiat_values(
+                state_version,
+                nft_ids,
+                currency,
+                force_fetch,
+            )
+            .await
     }
 }

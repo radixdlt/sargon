@@ -6,13 +6,17 @@ type SUT = FungiblesPricesClient;
 
 // Test helper functions
 
-fn make_http_client_with_responses(responses: Vec<Vec<TokenPrice>>) -> Arc<HttpClient> {
+fn make_http_client_with_responses(
+    responses: Vec<Vec<TokenPrice>>,
+) -> Arc<HttpClient> {
     Arc::new(HttpClient::new(Arc::new(
         MockNetworkingDriver::with_responses(responses),
     )))
 }
 
-fn make_http_client_with_single_response(prices: Vec<TokenPrice>) -> Arc<HttpClient> {
+fn make_http_client_with_single_response(
+    prices: Vec<TokenPrice>,
+) -> Arc<HttpClient> {
     make_http_client_with_responses(vec![prices])
 }
 
@@ -325,7 +329,8 @@ async fn test_get_token_prices_uses_cache_when_available() {
 async fn test_get_token_prices_fetches_remote_on_cache_miss() {
     // Arrange - no cache, but HTTP will succeed
     let remote_prices = sample_token_prices_usd();
-    let http_client = make_http_client_with_single_response(remote_prices.clone());
+    let http_client =
+        make_http_client_with_single_response(remote_prices.clone());
     let file_system = Arc::new(FileSystemClient::in_memory());
     let sut = SUT::new(http_client, file_system.clone());
 
@@ -343,7 +348,8 @@ async fn test_get_token_prices_fetches_remote_on_cache_miss() {
 }
 
 #[actix_rt::test]
-async fn test_get_token_prices_returns_error_when_cache_miss_and_remote_fails() {
+async fn test_get_token_prices_returns_error_when_cache_miss_and_remote_fails()
+{
     // Arrange - no cache AND HTTP fails
     let http_client = make_http_client_failing();
     let file_system = Arc::new(FileSystemClient::in_memory());
@@ -385,10 +391,7 @@ async fn test_get_token_prices_prefers_cache_over_remote() {
         "resource_rdx1t45js47zxtau85v0tlyayerzrgfpmguftlfwfr5fxzu42qtu72tnt0",
     )
     .unwrap();
-    assert_eq!(
-        prices.get(&addr).unwrap(),
-        &Decimal192::from(99.99f32)
-    );
+    assert_eq!(prices.get(&addr).unwrap(), &Decimal192::from(99.99f32));
 }
 
 #[actix_rt::test]
@@ -491,4 +494,66 @@ async fn test_multiple_calls_use_cache() {
     // Third call should also use cache
     let result3 = sut.get_prices_for_currency(FiatCurrency::SEK).await;
     assert!(result3.is_ok());
+}
+
+#[test]
+fn test_token_price_decoding() {
+    let raw_json = r#"
+        [
+  {
+    "id": 2,
+    "resource_address": "resource_rdx1t45js47zxtau85v0tlyayerzrgfpmguftlfwfr5fxzu42qtu72tnt0",
+    "symbol": "$BOBBY",
+    "name": "Bobby",
+    "price": 0.04134813463690507,
+    "currency": "USD"
+  },
+  {
+    "id": 102,
+    "resource_address": "resource_rdx1t5u04cs3u2yxqkcwku7jdvdvv9cu739jsx0rdwu97682lr0rn92qdh",
+    "symbol": "$MRD",
+    "name": "Memerad",
+    "price": 0.000004698356561816775,
+    "currency": "USD"
+  },
+  {
+    "id": 133,
+    "resource_address": "resource_rdx1t4kc5ljyrwlxvg54s6gnctt7nwwgx89h9r2gvrpm369s23yhzyyzlx",
+    "symbol": "$WOWO",
+    "name": "WOWO",
+    "price": 0.00007746121946503883,
+    "currency": "USD"
+  }
+  ]
+        "#;
+
+    let decoded: Vec<TokenPrice> = serde_json::from_str(raw_json).unwrap();
+    let expected_tokens = vec![
+            TokenPrice {
+                resource_address: ResourceAddress::from_str(
+                    "resource_rdx1t45js47zxtau85v0tlyayerzrgfpmguftlfwfr5fxzu42qtu72tnt0",
+                )
+                .unwrap(),
+                price: 0.04134813463690507,
+                currency: FiatCurrency::USD,
+            },
+            TokenPrice {
+                resource_address: ResourceAddress::from_str(
+                    "resource_rdx1t5u04cs3u2yxqkcwku7jdvdvv9cu739jsx0rdwu97682lr0rn92qdh",
+                )
+                .unwrap(),
+                price: 0.000004698356561816775,
+                currency: FiatCurrency::USD,
+            },
+            TokenPrice {
+                resource_address: ResourceAddress::from_str(
+                    "resource_rdx1t4kc5ljyrwlxvg54s6gnctt7nwwgx89h9r2gvrpm369s23yhzyyzlx",
+                )
+                .unwrap(),
+                price: 0.00007746121946503883,
+                currency: FiatCurrency::USD,
+            },
+        ];
+
+    pretty_assertions::assert_eq!(decoded, expected_tokens);
 }

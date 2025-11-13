@@ -18,7 +18,7 @@ impl FungiblesPricesClient {
 /// This structure is returned by the remote token pricing API and used internally
 /// for price calculations. The price is stored as f32 from the API but converted
 /// to Decimal192 for precise calculations.
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
 pub struct TokenPrice {
     /// The on-ledger address of the token resource
     pub resource_address: ResourceAddress,
@@ -64,5 +64,33 @@ mod test {
         "#;
 
         let decoded: Vec<TokenPrice> = serde_json::from_str(raw_json).unwrap();
+        let expected_tokens = vec![
+            TokenPrice {
+                resource_address: ResourceAddress::from_str(
+                    "resource_rdx1t45js47zxtau85v0tlyayerzrgfpmguftlfwfr5fxzu42qtu72tnt0",
+                )
+                .unwrap(),
+                price: 0.04134813463690507,
+                currency: FiatCurrency::USD,
+            },
+            TokenPrice {
+                resource_address: ResourceAddress::from_str(
+                    "resource_rdx1t5u04cs3u2yxqkcwku7jdvdvv9cu739jsx0rdwu97682lr0rn92qdh",
+                )
+                .unwrap(),
+                price: 0.000004698356561816775,
+                currency: FiatCurrency::USD,
+            },
+            TokenPrice {
+                resource_address: ResourceAddress::from_str(
+                    "resource_rdx1t4kc5ljyrwlxvg54s6gnctt7nwwgx89h9r2gvrpm369s23yhzyyzlx",
+                )
+                .unwrap(),
+                price: 0.00007746121946503883,
+                currency: FiatCurrency::USD,
+            },
+        ];
+
+        pretty_assertions::assert_eq!(decoded, expected_tokens);
     }
 }

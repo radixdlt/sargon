@@ -23,18 +23,13 @@ impl NonFungiblePricesClient {
             let snapshot: LiquidityReceiptsSnapshot = bytes.deserialize()?;
             let now = Timestamp::now_utc();
 
-            // Cache is valid if:
-            // 1. It was fetched in the past (not from the future)
-            // 2. It's not older than the TTL
-            if snapshot.fetched_at <= now {
-                let age = now.duration_since(snapshot.fetched_at);
-                if age.whole_seconds() <= CACHE_TTL_SECONDS {
-                    return Ok(Some(snapshot.receipts));
-                }
+            let age = now.duration_since(snapshot.fetched_at);
+            if age.whole_seconds() <= CACHE_TTL_SECONDS {
+                return Ok(Some(snapshot.receipts));
             }
         };
 
-        return Ok(None)
+        return Ok(None);
     }
 
     pub async fn cache_snapshot(
@@ -48,7 +43,6 @@ impl NonFungiblePricesClient {
             .await
     }
 }
-
 
 /// A cached snapshot of liquidity receipts with timestamp for TTL validation.
 ///

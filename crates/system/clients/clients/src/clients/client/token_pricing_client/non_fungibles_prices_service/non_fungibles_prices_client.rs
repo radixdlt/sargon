@@ -93,13 +93,16 @@ impl NonFungiblePricesClient {
     /// // E.g., if NFT contains 100 XRD ($1 each) + 50 CANDY ($2 each):
     /// // value = (100 * $1) + (50 * $2) = $200
     /// ```
-    pub async fn fetch_non_fungibles_prices(
+    pub async fn fetch_nft_fiat_values(
         &self,
+        state_version: u64,
         addresses: HashSet<NonFungibleGlobalId>,
         currency: FiatCurrency,
+        force_fetch: bool,
     ) -> Result<NonFungibleTokenPricesTable> {
-        let liquidity_receipts =
-            self.fetch_liquidity_receipts(addresses).await?;
+        let liquidity_receipts = self
+            .fetch_liquidity_receipts(state_version, addresses, force_fetch)
+            .await?;
         let fungible_prices = self
             .fungibles_prices_client
             .get_prices_for_currency(currency)
@@ -111,7 +114,7 @@ impl NonFungiblePricesClient {
             for liquidity_receipt_item in liquidity_receipt.items {
                 let mut item_value: Decimal192 = Decimal192::zero();
                 for resource in liquidity_receipt_item.resources {
-                    if let Some(price) = fungible_prices.get(&resource.resource)
+                    if let Some(price) = fungible_prices.get(&resource.address)
                     {
                         // Calculate value by multiplying token price by amount
                         let resource_value = *price * resource.amount;
@@ -119,12 +122,9 @@ impl NonFungiblePricesClient {
                     }
                 }
                 // Convert resource address to NFT resource address safely
-                let nft_resource_address = match NonFungibleResourceAddress::new(
+                let nft_resource_address = NonFungibleResourceAddress::new(
                     liquidity_receipt.resource_manager_address,
-                ) {
-                    Ok(addr) => addr,
-                    Err(_) => continue, // Skip invalid resource addresses
-                };
+                )?;
                 let global_id = NonFungibleGlobalId::new(
                     nft_resource_address,
                     liquidity_receipt_item.local_id,
@@ -137,26 +137,33 @@ impl NonFungiblePricesClient {
 
     async fn fetch_liquidity_receipts(
         &self,
+        state_version: u64,
         addresses: HashSet<NonFungibleGlobalId>,
+        force_fetch: bool,
     ) -> Result<Vec<NonFungibleLiquidityReceipt>> {
-        let cached_snapshot = self.load_cached_snapshot().await.ok().flatten();
+        if !force_fetch {
+            let cached_snapshot =
+                self.load_cached_snapshot().await.ok().flatten();
 
-        if let Some(cached_receipts) = cached_snapshot {
-            // Collect all NFT IDs from all cached receipts
-            let all_cached_ids: HashSet<_> = cached_receipts
-                .iter()
-                .flat_map(|receipt| receipt.all_non_fungible_ids())
-                .collect();
+            if let Some(cached_receipts) = cached_snapshot {
+                // Collect all NFT IDs from all cached receipts
+                let all_cached_ids: HashSet<_> = cached_receipts
+                    .iter()
+                    .flat_map(|receipt| receipt.all_non_fungible_ids())
+                    .collect();
 
-            // Check if cache contains all requested NFT IDs
-            let all_non_fungibles_in_cache = all_cached_ids.is_superset(&addresses);
-            if all_non_fungibles_in_cache {
-                return Ok(cached_receipts);
-            }
-        };
+                // Check if cache contains all requested NFT IDs
+                let all_non_fungibles_in_cache =
+                    all_cached_ids.is_superset(&addresses);
+                if all_non_fungibles_in_cache {
+                    return Ok(cached_receipts);
+                }
+            };
+        }
 
-        let remote_receipts =
-            self.fetch_remote_liquidity_receipts(addresses).await?;
+        let remote_receipts = self
+            .fetch_remote_liquidity_receipts(state_version, addresses)
+            .await?;
         let new_cache_snapshot = LiquidityReceiptsSnapshot::new(
             Timestamp::now_utc(),
             remote_receipts.clone(),
@@ -172,6 +179,7 @@ impl NonFungiblePricesClient {
 /// A liquidity receipt describes the fungible tokens that back one or more liquidity
 /// position NFTs. Each NFT in the collection is represented by a `LiquidityReceiptItem`.
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct NonFungibleLiquidityReceipt {
     /// The resource address of the NFT collection
     pub resource_manager_address: ResourceAddress,
@@ -198,6 +206,7 @@ impl NonFungibleLiquidityReceipt {
 /// Contains the NFT's local ID and the list of fungible tokens (with amounts) that
 /// back this specific NFT.
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct LiquidityReceiptItem {
     /// The local ID of the NFT within its collection
     pub local_id: NonFungibleLocalId,
@@ -211,7 +220,7 @@ pub struct LiquidityReceiptItem {
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct LiquidityReceiptItemResource {
     /// The address of the fungible token resource
-    pub resource: ResourceAddress,
+    pub address: ResourceAddress,
     /// The amount of this token backing the NFT
     pub amount: Decimal192,
 }
