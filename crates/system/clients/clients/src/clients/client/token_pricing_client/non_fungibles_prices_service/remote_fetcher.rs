@@ -64,10 +64,7 @@ impl LiquidityReceiptRequestBody {
         let items = per_resource_local_ids
             .into_iter()
             .map(|(resource_address, local_ids)| {
-                LiquidityReceiptRequestItem::new(
-                    resource_address,
-                    local_ids,
-                )
+                LiquidityReceiptRequestItem::new(resource_address, local_ids)
             })
             .collect::<Vec<LiquidityReceiptRequestItem>>();
 
