@@ -3,6 +3,21 @@ use crate::prelude::*;
 /// A mapping from resource addresses to their prices in a specific fiat currency.
 pub type PerTokenPrices = HashMap<ResourceAddress, Decimal192>;
 
+/// Represents a token's price in a specific fiat currency.
+///
+/// This structure is returned by the remote token pricing API and used internally
+/// for price calculations. The price is stored as f32 from the API but converted
+/// to Decimal192 for precise calculations.
+#[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
+pub struct TokenPrice {
+    /// The on-ledger address of the token resource
+    pub resource_address: ResourceAddress,
+    /// The price per unit of the token in the specified currency
+    pub price: f32,
+    /// The fiat currency this price is denominated in
+    pub currency: FiatCurrency,
+}
+
 /// Client for fetching and caching fungible token prices.
 ///
 /// This client provides access to real-time token pricing data from the Radix token price service.

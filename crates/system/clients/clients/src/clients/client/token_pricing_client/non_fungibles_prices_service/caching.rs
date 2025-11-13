@@ -29,7 +29,7 @@ impl NonFungiblePricesClient {
             }
         };
 
-        return Ok(None);
+        Ok(None)
     }
 
     pub async fn cache_snapshot(

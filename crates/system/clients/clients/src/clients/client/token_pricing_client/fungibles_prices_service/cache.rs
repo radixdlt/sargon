@@ -27,7 +27,7 @@ impl FungiblesPricesClient {
             }
         };
 
-        return Ok(None);
+        Ok(None)
     }
 
     pub async fn store_prices(&self, prices: Vec<TokenPrice>) -> Result<()> {

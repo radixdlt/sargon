@@ -86,7 +86,7 @@ impl NonFungiblePricesClient {
     /// ]);
     ///
     /// let prices = client
-    ///     .fetch_non_fungibles_prices(nft_ids, FiatCurrency::USD)
+    ///     .fetch_nft_fiat_values(nft_ids, FiatCurrency::USD)
     ///     .await?;
     ///
     /// // NFT value is sum of all token values

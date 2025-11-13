@@ -22,11 +22,6 @@ extension URLSession: NetworkingDriver {
 			throw SargonError.NetworkRequestGenericFailure(
 				underlying: String(describing: error))
 		}
-        do {
-            return try NetworkResponse(response: response)
-        } catch {
-            throw error
-        }
-		
+        return try NetworkResponse(response: response)
 	}
 }

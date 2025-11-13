@@ -56,8 +56,8 @@ impl LiquidityReceiptRequestBody {
 
         for global_id in addresses {
             per_resource_local_ids
-                .entry(global_id.resource_address.clone())
-                .or_insert_with(Vec::new)
+                .entry(global_id.resource_address)
+                .or_default()
                 .push(global_id.non_fungible_local_id.clone());
         }
 
