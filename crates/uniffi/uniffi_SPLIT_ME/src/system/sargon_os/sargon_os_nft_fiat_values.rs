@@ -41,9 +41,6 @@ impl SargonOS {
                 force_fetch,
             )
             .await?;
-        if result.is_empty() {
-            panic!("Empty result from wrapped sargon")
-        }
         Ok(result.into_hash_map())
     }
 }
