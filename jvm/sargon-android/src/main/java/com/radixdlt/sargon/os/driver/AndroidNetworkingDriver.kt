@@ -30,9 +30,7 @@ class AndroidNetworkingDriver(
         val requestBody = request.body
             .toUByteArray()
             .toByteArray()
-            .takeIf {
-                it.isNotEmpty()
-            }?.toRequestBody(contentType = mediaType)
+            .toRequestBody(contentType = mediaType)
 
         val okHttpRequest = Request.Builder()
             .url(url = request.url)
