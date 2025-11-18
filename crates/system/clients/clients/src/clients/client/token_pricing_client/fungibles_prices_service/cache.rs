@@ -12,10 +12,12 @@ pub const CACHE_TTL_SECONDS: i64 = 5 * 60;
 
 impl FungiblesPricesClient {
     pub async fn load_cached_prices(&self) -> Result<Option<Vec<TokenPrice>>> {
-        let bytes = self
+        let path = self
             .file_system_client
-            .load_from_file(Path::new(ALL_TOKEN_PRICES_PATH))
+            .create_if_needed(ALL_TOKEN_PRICES_PATH)
             .await?;
+
+        let bytes = self.file_system_client.load_from_file(path).await?;
 
         if let Some(bytes) = bytes {
             let snapshot: AllTokenPricesSnapshot = bytes.deserialize()?;

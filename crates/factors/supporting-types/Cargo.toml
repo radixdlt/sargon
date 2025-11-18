@@ -1,6 +1,6 @@
 [package]
 name = "factors-supporting-types"
-version = "1.2.38"
+version = "1.2.39"
 edition = "2021"
 
 [dependencies]
