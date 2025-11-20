@@ -96,12 +96,35 @@ impl SargonOS {
 
         // Create the transaction manifest next for R+T.
         // Hardcoded for now to unblock the work for implementing Timed Recovery flows.
-        Ok(
+        let role_combination = RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion;
+
+        let securified_entity_control =
+            entity.security_state().into_securified().unwrap();
+        let ac_address =
+            securified_entity_control.access_controller_address.clone();
+
+        // Fetch the current Access Controller state to check for existing recovery attempts
+        let ac_state_details = self
+            .access_controller_state_repository_client
+            .get_cached_access_controller_details(&ac_address)
+            .await?;
+
+        let mut manifest =
             TransactionManifest::apply_security_shield_for_securified_entity(
-                AnySecurifiedEntity::with_securified_entity_control(entity.clone(), entity.security_state().into_securified().unwrap()),
+                AnySecurifiedEntity::with_securified_entity_control(
+                    entity.clone(),
+                    securified_entity_control,
+                ),
                 security_structure_of_factor_instances,
-                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion
-            )
-        )
+                role_combination,
+            );
+
+        // Cancel any existing recovery proposal before initiating a new one
+        manifest = manifest.apply_cancel_recovery_proposal_instruction(
+            &ac_state_details,
+            role_combination,
+        );
+
+        Ok(manifest)
     }
 }

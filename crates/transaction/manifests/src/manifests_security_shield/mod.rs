@@ -1,4 +1,5 @@
 mod access_controller_factors_and_time_input;
+mod cancel_recovery_proposal;
 mod confirm_timed_recovery;
 mod lock_fee_against_xrd_vault_of_access_controller;
 mod manifests_securify_shield_securified_entity;
@@ -13,6 +14,7 @@ mod stop_timed_recovery;
 mod test_utils;
 
 pub use access_controller_factors_and_time_input::*;
+pub use cancel_recovery_proposal::*;
 pub use confirm_timed_recovery::*;
 pub use stop_timed_recovery::*;
 pub use lock_fee_against_xrd_vault_of_access_controller::*;
