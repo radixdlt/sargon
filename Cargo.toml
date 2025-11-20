@@ -317,7 +317,7 @@ radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "488c2b56a3d1d583cd0d3d4f4d8d20cdbb9d29ae" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "89ebf30287ddc425ab232dbc3f651b1a8ecef2e2" }
 radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
 radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
     "serde",
