@@ -79,6 +79,5 @@ internal class DeviceFactorSourceMnemonicKeyMapping(
                     KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth -> args
                 }
             }
-
     }
 }
