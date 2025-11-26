@@ -31,7 +31,7 @@ internal class ByteArrayKeyMapping private constructor(
 
     internal constructor(
         key: SecureStorageKey,
-        keystoreAccessRequest: KeystoreAccessRequest<Unit, Unit>,
+        keystoreAccessRequest: KeystoreAccessRequest,
         storage: DataStore<Preferences>
     ) : this(
         ByteArrayKeyMappingInput.Secure(
@@ -91,7 +91,7 @@ internal class ByteArrayKeyMapping private constructor(
 
         data class Secure(
             val key: SecureStorageKey,
-            val keystoreAccessRequest: KeystoreAccessRequest<Unit, Unit>,
+            val keystoreAccessRequest: KeystoreAccessRequest,
             override val storage: DataStore<Preferences>,
         ) : ByteArrayKeyMappingInput
     }

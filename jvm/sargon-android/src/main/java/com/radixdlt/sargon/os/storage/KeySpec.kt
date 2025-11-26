@@ -7,6 +7,7 @@ import android.security.keystore.KeyProperties
 import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.then
+import com.radixdlt.sargon.extensions.toUnit
 import com.radixdlt.sargon.os.storage.KeySpec.Companion.KEY_ALIAS_MNEMONIC
 import com.radixdlt.sargon.os.storage.KeystoreAccessRequest.AuthorizationArgs
 import com.radixdlt.sargon.os.storage.KeystoreAccessRequest.Purpose
@@ -23,43 +24,47 @@ import javax.crypto.SecretKey
  * operations. [requestAuthorization] is only invoked for [KeySpec]s that are defined with
  * [KeyGenParameterSpec#Builder#setUserAuthenticationRequired] to true
  */
-sealed interface KeystoreAccessRequest<Purpose, AuthorizationArgs> {
+sealed interface KeystoreAccessRequest {
 
     val keySpec: KeySpec
 
-    suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs>
+    suspend fun requestAuthorization(): Result<Unit>
 
-    data object ForProfile : KeystoreAccessRequest<Unit, Unit> {
+    data object ForProfile : KeystoreAccessRequest {
 
         override val keySpec: KeySpec = KeySpec.Profile()
 
-        override suspend fun requestAuthorization(purpose: Unit): Result<Unit> = Result.success(Unit)
+        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
     }
 
-    data object ForRadixConnect : KeystoreAccessRequest<Unit, Unit> {
+    data object ForRadixConnect : KeystoreAccessRequest {
 
         override val keySpec: KeySpec = KeySpec.RadixConnect()
 
-        override suspend fun requestAuthorization(purpose: Unit): Result<Unit> = Result.success(Unit)
+        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
     }
 
-    data class ForCache(private val alias: String) : KeystoreAccessRequest<Unit, Unit> {
+    data class ForCache(private val alias: String) : KeystoreAccessRequest {
 
         override val keySpec: KeySpec = KeySpec.Cache(alias)
 
-        override suspend fun requestAuthorization(purpose: Unit): Result<Unit> = Result.success(Unit)
+        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
     }
 
     data class ForMnemonic(
         private val hasStrongAuthenticator: Boolean,
         private val authorize: suspend (AuthorizationArgs) -> Result<AuthorizationArgs>
-    ) : KeystoreAccessRequest<Purpose, AuthorizationArgs> {
+    ) : KeystoreAccessRequest {
 
         private val mnemonicKeySpec = KeySpec.Mnemonic(hasStrongAuthenticator = hasStrongAuthenticator)
 
         override val keySpec: KeySpec = mnemonicKeySpec
 
-        override suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> {
+        override suspend fun requestAuthorization(): Result<Unit> {
+            return authorize(AuthorizationArgs.TimeWindowAuth).toUnit()
+        }
+
+        suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> {
             return if (!hasStrongAuthenticator) {
                 authorize(AuthorizationArgs.TimeWindowAuth)
             } else {
