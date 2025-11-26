@@ -6,10 +6,15 @@ import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.annotation.KoverIgnore
+import com.radixdlt.sargon.extensions.then
+import com.radixdlt.sargon.os.storage.KeySpec.Companion.KEY_ALIAS_MNEMONIC
+import com.radixdlt.sargon.os.storage.KeystoreAccessRequest.AuthorizationArgs
+import com.radixdlt.sargon.os.storage.KeystoreAccessRequest.Purpose
 import timber.log.Timber
 import java.security.KeyStore
 import java.security.KeyStoreException
 import java.security.ProviderException
+import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
@@ -18,37 +23,104 @@ import javax.crypto.SecretKey
  * operations. [requestAuthorization] is only invoked for [KeySpec]s that are defined with
  * [KeyGenParameterSpec#Builder#setUserAuthenticationRequired] to true
  */
-sealed interface KeystoreAccessRequest {
+sealed interface KeystoreAccessRequest<Purpose, AuthorizationArgs> {
 
     val keySpec: KeySpec
 
-    suspend fun requestAuthorization(): Result<Unit>
+    suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs>
 
-    data object ForProfile: KeystoreAccessRequest {
+    data object ForProfile : KeystoreAccessRequest<Unit, Unit> {
+
         override val keySpec: KeySpec = KeySpec.Profile()
 
-        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
+        override suspend fun requestAuthorization(purpose: Unit): Result<Unit> = Result.success(Unit)
     }
 
-    data object ForRadixConnect: KeystoreAccessRequest {
+    data object ForRadixConnect : KeystoreAccessRequest<Unit, Unit> {
+
         override val keySpec: KeySpec = KeySpec.RadixConnect()
 
-        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
+        override suspend fun requestAuthorization(purpose: Unit): Result<Unit> = Result.success(Unit)
     }
 
-    data class ForCache(private val alias: String): KeystoreAccessRequest {
+    data class ForCache(private val alias: String) : KeystoreAccessRequest<Unit, Unit> {
+
         override val keySpec: KeySpec = KeySpec.Cache(alias)
 
-        override suspend fun requestAuthorization(): Result<Unit> = Result.success(Unit)
+        override suspend fun requestAuthorization(purpose: Unit): Result<Unit> = Result.success(Unit)
     }
 
     data class ForMnemonic(
-        private val onRequestAuthorization: suspend () -> Result<Unit>
-    ): KeystoreAccessRequest {
-        override val keySpec: KeySpec = KeySpec.Mnemonic()
+        private val hasStrongAuthenticator: Boolean,
+        private val authorize: suspend (AuthorizationArgs) -> Result<AuthorizationArgs>
+    ) : KeystoreAccessRequest<Purpose, AuthorizationArgs> {
 
-        override suspend fun requestAuthorization(): Result<Unit> = onRequestAuthorization()
+        private val mnemonicKeySpec = KeySpec.Mnemonic(hasStrongAuthenticator = hasStrongAuthenticator)
 
+        override val keySpec: KeySpec = mnemonicKeySpec
+
+        override suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> {
+            return if (!hasStrongAuthenticator) {
+                authorize(AuthorizationArgs.TimeWindowAuth)
+            } else {
+                keySpec.getOrGenerateSecretKey()
+                    .then { secretKey ->
+                        when (purpose) {
+                            is Purpose.OneTimeDecrypt -> EncryptionHelper.initDecryptCipher(
+                                encryptedValue = purpose.encryptedValue,
+                                secretKey = secretKey
+                            ).map { cipher ->
+                                AuthorizationArgs.Decrypt(
+                                    cipher = cipher
+                                )
+                            }
+
+                            Purpose.OneTimeEncrypt -> EncryptionHelper.initEncryptCipher(
+                                secretKey = secretKey
+                            ).map { cipherAndIvBytes ->
+                                AuthorizationArgs.Encrypt(
+                                    cipher = cipherAndIvBytes.first,
+                                    ivBytes = cipherAndIvBytes.second
+                                )
+                            }
+                        }
+                    }.then { args ->
+                        authorize(args)
+                    }
+            }
+        }
+    }
+
+    sealed interface Purpose {
+
+        data object OneTimeEncrypt : Purpose
+
+        data class OneTimeDecrypt(
+            val encryptedValue: ByteArray
+        ) : Purpose
+    }
+
+    sealed class AuthorizationArgs(
+        open val cipher: Cipher?
+    ) {
+
+        data class Encrypt(
+            override val cipher: Cipher,
+            val ivBytes: ByteArray
+        ) : AuthorizationArgs(cipher)
+
+        data class Decrypt(
+            override val cipher: Cipher
+        ) : AuthorizationArgs(cipher)
+
+        data object TimeWindowAuth : AuthorizationArgs(null)
+    }
+
+    companion object {
+
+        private const val AES_GCM_NOPADDING = "AES/GCM/NoPadding"
+        private const val GCM_IV_LENGTH = 12
+        private const val AUTH_TAG_LENGTH = 128 // bit
     }
 }
 
@@ -73,7 +145,7 @@ sealed class KeySpec(val alias: String) {
 
     internal fun getSecretKey(): Result<SecretKey?> = runCatching {
         val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
-        (keyStore.getEntry(alias, null) as? KeyStore.SecretKeyEntry)?.secretKey
+        keyStore.getKey(alias, null) as? SecretKey
     }
 
     @KoverIgnore
@@ -83,7 +155,7 @@ sealed class KeySpec(val alias: String) {
     }
 
     @KoverIgnore
-    class RadixConnect(alias: String = KEY_ALIAS_RADIX_CONNECT): KeySpec(alias) {
+    class RadixConnect(alias: String = KEY_ALIAS_RADIX_CONNECT) : KeySpec(alias) {
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
             .build()
     }
@@ -91,10 +163,32 @@ sealed class KeySpec(val alias: String) {
     @KoverIgnore
     class Mnemonic(
         alias: String = KEY_ALIAS_MNEMONIC,
-        private val authenticationTimeoutSeconds: Int = KEY_AUTHORIZATION_TIMEOUT_SECONDS
+        private val authenticationTimeoutSeconds: Int? = KEY_AUTHORIZATION_TIMEOUT_SECONDS
     ) : KeySpec(alias) {
+
+        constructor(
+            alias: String = KEY_ALIAS_MNEMONIC,
+            hasStrongAuthenticator: Boolean
+        ) : this(
+            alias,
+            if (hasStrongAuthenticator) {
+                // If there is a strong authenticator, we can prevent timeout usage
+                // which results in invoking crypto-based authentication,
+                // i.e. passing CryptoObject to BiometricPrompt
+                null
+            } else {
+                // If there is no strong authenticator, we cannot use crypto-based authentication
+                // so we set a timeout and allow using the key many times within the specified time window
+                KEY_AUTHORIZATION_TIMEOUT_SECONDS
+            }
+        )
+
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
-            .setAuthenticationRequired(authenticationTimeout = authenticationTimeoutSeconds)
+            .apply {
+                authenticationTimeoutSeconds?.let {
+                    setAuthenticationTimeoutSeconds(authenticationTimeout = it)
+                }
+            }
             .build()
 
         fun checkIfPermanentlyInvalidated(): Boolean {
@@ -112,7 +206,7 @@ sealed class KeySpec(val alias: String) {
     }
 
     @KoverIgnore
-    class Cache(alias: String): KeySpec(alias) {
+    class Cache(alias: String) : KeySpec(alias) {
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
             .build()
     }
@@ -123,13 +217,21 @@ sealed class KeySpec(val alias: String) {
     ) {
         private var authenticationTimeoutSeconds: Int? = null
 
-        fun setAuthenticationRequired(
+        /**
+         * Sets whether the generated key is authorized to be used only if the user has been authenticated
+         * within the given [authenticationTimeout] in seconds.
+         */
+        fun setAuthenticationTimeoutSeconds(
             authenticationTimeout: Int
         ) = apply {
             require(authenticationTimeout > 0) { "Authentication timeout seconds must be > 0" }
             authenticationTimeoutSeconds = authenticationTimeout
         }
 
+        /**
+         * If authenticationTimeoutSeconds is not set, the key will require user authentication for every use.
+         * This is recommended for highly sensitive data such as mnemonic storage.
+         */
         fun build(): Result<SecretKey> = runCatching {
             val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER)
             val keygenParameterSpecBuilder = KeyGenParameterSpec.Builder(

@@ -97,7 +97,7 @@ internal class AndroidStorageDriver(
         throw when (error) {
             is BiometricsFailure -> error.toCommonException(key)
             is CommonException -> error
-            else -> CommonException.SecureStorageReadException()
+            else -> CommonException.SecureStorageReadException(error.toString())
         }
     }
 
@@ -107,7 +107,7 @@ internal class AndroidStorageDriver(
         throw when (error) {
             is BiometricsFailure -> error.toCommonException(key)
             is CommonException -> error
-            else -> CommonException.SecureStorageWriteException()
+            else -> CommonException.SecureStorageWriteException(error.toString())
         }
     }
 

@@ -20,12 +20,15 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.withContext
 import timber.log.Timber
+import javax.crypto.Cipher
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 internal interface BiometricAuthorizationDriver {
 
-    suspend fun authorize(): Result<Unit>
+    val hasStrongAuthenticator: Boolean
+
+    suspend fun authorize(cipher: Cipher?): Result<Cipher?>
 
 }
 
@@ -64,8 +67,11 @@ internal class AndroidBiometricAuthorizationDriver(
     private val biometricsHandler: BiometricsHandler
 ) : BiometricAuthorizationDriver {
 
+    override val hasStrongAuthenticator: Boolean
+        get() = biometricsHandler.hasStrongAuthenticator
 
-    override suspend fun authorize(): Result<Unit> = biometricsHandler.askForBiometrics()
+
+    override suspend fun authorize(cipher: Cipher?): Result<Cipher?> = biometricsHandler.askForBiometrics(cipher)
 
 }
 
@@ -73,13 +79,26 @@ class BiometricsHandler(
     internal val biometricsSystemDialogTitle: String
 ) {
 
-    private val biometricRequestsChannel = Channel<Unit>()
-    private val biometricsResultsChannel = Channel<Result<Unit>>()
+    private val biometricRequestsChannel = Channel<Cipher?>()
+    private val biometricsResultsChannel = Channel<Result<Cipher?>>()
+
+    private val allowedAuthenticators = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        BiometricManager.Authenticators.BIOMETRIC_STRONG or
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    } else {
+        BiometricManager.Authenticators.BIOMETRIC_WEAK or
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    }
+
+    private var _hasStrongAuthenticator: Boolean = false
+    val hasStrongAuthenticator: Boolean
+        get() = _hasStrongAuthenticator
 
     fun register(
         activity: FragmentActivity,
         callbacks: OnBiometricsLifecycleCallbacks? = null
     ) {
+        _hasStrongAuthenticator = hasStrongAuthenticator(activity)
         biometricRequestsChannel
             .receiveAsFlow()
             .flowWithLifecycle(
@@ -88,7 +107,7 @@ class BiometricsHandler(
             )
             .onEach {
                 callbacks?.onBeforeBiometricsRequest()
-                val result = requestBiometricsAuthorization(activity)
+                val result = requestBiometricsAuthorization(activity, it)
 
                 // Send back the result to sargon os
                 biometricsResultsChannel.send(result)
@@ -97,9 +116,9 @@ class BiometricsHandler(
             .launchIn(activity.lifecycleScope)
     }
 
-    suspend fun askForBiometrics(): Result<Unit> {
+    suspend fun askForBiometrics(cipher: Cipher? = null): Result<Cipher?> {
         // Suspend until an activity is subscribed to this channel and is at least started
-        biometricRequestsChannel.send(Unit)
+        biometricRequestsChannel.send(cipher)
 
         // If an activity is already registered, then we need to wait until the user provides
         // the response from the biometrics prompt
@@ -107,12 +126,13 @@ class BiometricsHandler(
     }
 
     private suspend fun requestBiometricsAuthorization(
-        activity: FragmentActivity
-    ): Result<Unit> = withContext(Dispatchers.Main) {
+        activity: FragmentActivity,
+        cipher: Cipher?
+    ): Result<Cipher?> = withContext(Dispatchers.Main) {
         suspendCoroutine { continuation ->
             val authCallback = object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    continuation.resume(Result.success(Unit))
+                    continuation.resume(Result.success(result.cryptoObject?.cipher))
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -137,16 +157,27 @@ class BiometricsHandler(
                 authCallback
             )
 
-            biometricPrompt.authenticate(promptInfo)
+            if (cipher != null && hasStrongAuthenticator) {
+                biometricPrompt.authenticate(
+                    promptInfo,
+                    BiometricPrompt.CryptoObject(cipher)
+                )
+            } else {
+                biometricPrompt.authenticate(promptInfo)
+            }
         }
     }
 
-    private val allowedAuthenticators = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
-    } else {
-        BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+    private fun hasStrongAuthenticator(activity: FragmentActivity): Boolean {
+        val biometricManager = BiometricManager.from(activity)
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            biometricManager.canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG
+            ) == BiometricManager.BIOMETRIC_SUCCESS
+        } else {
+            false
+        }
     }
 }
 
