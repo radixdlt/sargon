@@ -24,7 +24,9 @@ impl SecureStorageDriver for EphemeralSecureStorage {
     ) -> Result<Option<BagOfBytes>> {
         self.storage
             .try_read()
-            .map_err(|_| CommonError::SecureStorageReadError)
+            .map_err(|_| CommonError::SecureStorageReadError {
+                underlying: "Failed to read storage".to_string(),
+            })
             .map(|s| s.get(&key).cloned())
     }
 
@@ -33,20 +35,22 @@ impl SecureStorageDriver for EphemeralSecureStorage {
         key: SecureStorageKey,
         value: BagOfBytes,
     ) -> Result<()> {
-        let mut storage = self
-            .storage
-            .try_write()
-            .map_err(|_| CommonError::SecureStorageWriteError)?;
+        let mut storage = self.storage.try_write().map_err(|_| {
+            CommonError::SecureStorageWriteError {
+                underlying: "Failed to write storage".to_string(),
+            }
+        })?;
 
         storage.insert(key, value);
         Ok(())
     }
 
     async fn delete_data_for_key(&self, key: SecureStorageKey) -> Result<()> {
-        let mut storage = self
-            .storage
-            .try_write()
-            .map_err(|_| CommonError::SecureStorageWriteError)?;
+        let mut storage = self.storage.try_write().map_err(|_| {
+            CommonError::SecureStorageWriteError {
+                underlying: "Failed to write storage".to_string(),
+            }
+        })?;
 
         storage.remove_entry(&key);
         Ok(())
@@ -58,7 +62,9 @@ impl SecureStorageDriver for EphemeralSecureStorage {
     ) -> Result<bool> {
         self.storage
             .try_read()
-            .map_err(|_| CommonError::SecureStorageReadError)
+            .map_err(|_| CommonError::SecureStorageReadError {
+                underlying: "Failed to read storage".to_string(),
+            })
             .map(|s| s.contains_key(&key))
     }
 }

@@ -233,14 +233,14 @@ pub enum CommonError {
     #[error("Unknown account.")]
     UnknownAccount = 10065,
 
-    #[error("Failed to read from secure storage.")]
-    SecureStorageReadError = 10066,
+    #[error("Failed to read from secure storage: {underlying}")]
+    SecureStorageReadError { underlying: String } = 10066,
 
     #[error("Failed to load DeviceFactorSource from secure storage")]
     UnableToLoadDeviceFactorSourceFromSecureStorage = 10067,
 
-    #[error("Failed to write to secure storage.")]
-    SecureStorageWriteError = 10068,
+    #[error("Failed to write to secure storage: {underlying}")]
+    SecureStorageWriteError { underlying: String } = 10068,
 
     #[error("Failed Serialize value to JSON.")]
     FailedToSerializeToJSON = 10069,

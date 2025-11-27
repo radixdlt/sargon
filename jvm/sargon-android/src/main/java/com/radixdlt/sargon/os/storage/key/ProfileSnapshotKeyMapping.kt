@@ -4,7 +4,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.radixdlt.sargon.BagOfBytes
-import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.extensions.bagOfBytes
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.then

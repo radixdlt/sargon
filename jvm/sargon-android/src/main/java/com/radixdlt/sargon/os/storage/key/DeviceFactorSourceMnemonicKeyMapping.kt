@@ -13,20 +13,18 @@ import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.mnemonicWithPassphraseToJsonBytes
 import com.radixdlt.sargon.newMnemonicWithPassphraseFromJsonBytes
 import com.radixdlt.sargon.os.driver.BiometricAuthorizationDriver
-import com.radixdlt.sargon.os.storage.KeySpec
 import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
 import com.radixdlt.sargon.os.storage.read
 import com.radixdlt.sargon.os.storage.remove
 import com.radixdlt.sargon.os.storage.write
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import timber.log.Timber
 
 internal class DeviceFactorSourceMnemonicKeyMapping(
     key: SecureStorageKey.DeviceFactorSourceMnemonic,
     private val encryptedStorage: DataStore<Preferences>,
     private val biometricAuthorizationDriver: BiometricAuthorizationDriver
-): DatastoreKeyMapping {
+) : DatastoreKeyMapping {
 
     private val preferencesKey = stringPreferencesKey("mnemonic${key.factorSourceId.body.hex}")
 
@@ -37,7 +35,8 @@ internal class DeviceFactorSourceMnemonicKeyMapping(
             key = preferencesKey,
             value = json,
             keystoreAccessRequest = KeystoreAccessRequest.ForMnemonic(
-                onRequestAuthorization = { biometricAuthorizationDriver.authorize() }
+                hasStrongAuthenticator = biometricAuthorizationDriver.hasStrongAuthenticator,
+                authorize = ::authorize
             )
         )
     }
@@ -45,7 +44,8 @@ internal class DeviceFactorSourceMnemonicKeyMapping(
     override suspend fun read(): Result<BagOfBytes?> = encryptedStorage.read(
         key = preferencesKey,
         keystoreAccessRequest = KeystoreAccessRequest.ForMnemonic(
-            onRequestAuthorization = { biometricAuthorizationDriver.authorize() }
+            hasStrongAuthenticator = biometricAuthorizationDriver.hasStrongAuthenticator,
+            authorize = ::authorize
         )
     ).mapCatching { androidCompatibleJson ->
         if (androidCompatibleJson != null) {
@@ -62,5 +62,22 @@ internal class DeviceFactorSourceMnemonicKeyMapping(
         return encryptedStorage.data.map { preference ->
             preference.contains(preferencesKey)
         }.first()
+    }
+
+    private suspend fun authorize(args: KeystoreAccessRequest.AuthorizationArgs): Result<KeystoreAccessRequest.AuthorizationArgs> {
+        return biometricAuthorizationDriver.authorize(args.cipher)
+            .mapCatching { cipher ->
+                when (args) {
+                    is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> args.copy(
+                        cipher = requireNotNull(cipher)
+                    )
+
+                    is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> args.copy(
+                        cipher = requireNotNull(cipher)
+                    )
+
+                    KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth -> args
+                }
+            }
     }
 }

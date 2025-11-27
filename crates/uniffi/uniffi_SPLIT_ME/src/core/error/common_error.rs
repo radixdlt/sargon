@@ -52,8 +52,12 @@ pub enum CommonError {
     FileAlreadyExists {
         path: String,
     },
-    SecureStorageReadError,
-    SecureStorageWriteError,
+    SecureStorageReadError {
+        underlying: String,
+    },
+    SecureStorageWriteError {
+        underlying: String,
+    },
     UnsafeStorageReadError,
     UnsafeStorageWriteError,
     FailedToDecodeAddressFromBech32 {
@@ -273,11 +277,15 @@ impl CommonError {
             FileAlreadyExists { path } => {
                 InternalCommonError::FileAlreadyExists { path: path.clone() }
             }
-            SecureStorageReadError => {
-                InternalCommonError::SecureStorageReadError
+            SecureStorageReadError { underlying } => {
+                InternalCommonError::SecureStorageReadError {
+                    underlying: underlying.clone(),
+                }
             }
-            SecureStorageWriteError => {
-                InternalCommonError::SecureStorageWriteError
+            SecureStorageWriteError { underlying } => {
+                InternalCommonError::SecureStorageWriteError {
+                    underlying: underlying.clone(),
+                }
             }
             UnsafeStorageReadError => {
                 InternalCommonError::UnsafeStorageReadError
@@ -522,11 +530,11 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::FileAlreadyExists { path } => {
                 FileAlreadyExists { path }
             }
-            InternalCommonError::SecureStorageReadError => {
-                SecureStorageReadError
+            InternalCommonError::SecureStorageReadError { underlying } => {
+                SecureStorageReadError { underlying }
             }
-            InternalCommonError::SecureStorageWriteError => {
-                SecureStorageWriteError
+            InternalCommonError::SecureStorageWriteError { underlying } => {
+                SecureStorageWriteError { underlying }
             }
             InternalCommonError::UnsafeStorageReadError => {
                 UnsafeStorageReadError
