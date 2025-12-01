@@ -158,11 +158,14 @@ class BiometricsHandler(
             )
 
             if (cipher != null && hasStrongAuthenticator) {
+                // Invokes crypto based authentication
                 biometricPrompt.authenticate(
                     promptInfo,
                     BiometricPrompt.CryptoObject(cipher)
                 )
             } else {
+                // Crypto based authentication is incompatible with Class 2 (formerly Weak) biometrics
+                // and (prior to Android 11) device credential.
                 biometricPrompt.authenticate(promptInfo)
             }
         }

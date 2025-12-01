@@ -88,7 +88,7 @@ suspend fun <T> DataStore<Preferences>.read(
         }
 
         keystoreAccessRequest.requestAuthorization(
-            purpose = KeystoreAccessRequest.Purpose.OneTimeDecrypt(
+            purpose = KeystoreAccessRequest.Purpose.Decrypt(
                 encryptedValue = encryptedValueByteArray
             )
         ).then { args ->
@@ -116,7 +116,7 @@ suspend fun <T> DataStore<Preferences>.write(
     keystoreAccessRequest: KeystoreAccessRequest.ForMnemonic
 ): Result<Unit> = if (value != null) {
     keystoreAccessRequest.requestAuthorization(
-        purpose = KeystoreAccessRequest.Purpose.OneTimeEncrypt
+        purpose = KeystoreAccessRequest.Purpose.Encrypt
     ).then { args ->
         when (args) {
             is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> value.encrypt(

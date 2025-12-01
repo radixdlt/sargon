@@ -2,6 +2,7 @@ package com.radixdlt.sargon.os.storage
 
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyInfo
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
 import com.radixdlt.sargon.Uuid
@@ -9,8 +10,6 @@ import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.extensions.toUnit
 import com.radixdlt.sargon.os.storage.KeySpec.Companion.KEY_ALIAS_MNEMONIC
-import com.radixdlt.sargon.os.storage.KeystoreAccessRequest.AuthorizationArgs
-import com.radixdlt.sargon.os.storage.KeystoreAccessRequest.Purpose
 import timber.log.Timber
 import java.security.KeyStore
 import java.security.KeyStoreException
@@ -18,6 +17,7 @@ import java.security.ProviderException
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.SecretKeyFactory
 
 /**
  * A request to the keystore that describes which [KeySpec] should be used for cryptographic
@@ -56,7 +56,7 @@ sealed interface KeystoreAccessRequest {
         private val authorize: suspend (AuthorizationArgs) -> Result<AuthorizationArgs>
     ) : KeystoreAccessRequest {
 
-        private val mnemonicKeySpec = KeySpec.Mnemonic(hasStrongAuthenticator = hasStrongAuthenticator)
+        private val mnemonicKeySpec = KeySpec.Mnemonic()
 
         override val keySpec: KeySpec = mnemonicKeySpec
 
@@ -64,14 +64,34 @@ sealed interface KeystoreAccessRequest {
             return authorize(AuthorizationArgs.TimeWindowAuth).toUnit()
         }
 
+        /**
+         * Request authorization for the provided [purpose] and return the resolved authorization arguments.
+         *
+         * Behavior:
+         * - Time-window flow: If the existing key is a legacy time-window key (see [KeySpec.Mnemonic.isLegacyTimedWindowKey])
+         *   or a strong authenticator is not available, this method enables the time-window flow by setting an authentication
+         *   timeout on the mnemonic key and invoking the `authorize` callback with [AuthorizationArgs.TimeWindowAuth].
+         * - Per-operation flow: If the key is not legacy and a strong authenticator is available, the method obtains (or
+         *   generates) the secret key, initializes a cipher for the requested purpose (encrypt/decrypt) and invokes the
+         *   `authorize` callback with either [AuthorizationArgs.Encrypt] or [AuthorizationArgs.Decrypt].
+         *
+         * Notes:
+         * - Cipher initialization failures or key access errors are propagated as failures in the returned [Result].
+         * - The [AuthorizationArgs] containing [Cipher] is to be used for the specific encrypt/decrypt operation.
+         *
+         * @param purpose the operation requiring authorization: [Purpose.Encrypt] or [Purpose.Decrypt] (contains the encrypted bytes).
+         * @return a [Result] containing the resolved [AuthorizationArgs] on success, or an exception describing the failure.
+         */
+
         suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> {
-            return if (!hasStrongAuthenticator) {
+            return if (mnemonicKeySpec.isLegacyTimedWindowKey() || !hasStrongAuthenticator) {
+                mnemonicKeySpec.setAuthenticationTimeout()
                 authorize(AuthorizationArgs.TimeWindowAuth)
             } else {
                 keySpec.getOrGenerateSecretKey()
                     .then { secretKey ->
                         when (purpose) {
-                            is Purpose.OneTimeDecrypt -> EncryptionHelper.initDecryptCipher(
+                            is Purpose.Decrypt -> EncryptionHelper.initDecryptCipher(
                                 encryptedValue = purpose.encryptedValue,
                                 secretKey = secretKey
                             ).map { cipher ->
@@ -80,7 +100,7 @@ sealed interface KeystoreAccessRequest {
                                 )
                             }
 
-                            Purpose.OneTimeEncrypt -> EncryptionHelper.initEncryptCipher(
+                            Purpose.Encrypt -> EncryptionHelper.initEncryptCipher(
                                 secretKey = secretKey
                             ).map { cipherAndIvBytes ->
                                 AuthorizationArgs.Encrypt(
@@ -98,9 +118,9 @@ sealed interface KeystoreAccessRequest {
 
     sealed interface Purpose {
 
-        data object OneTimeEncrypt : Purpose
+        data object Encrypt : Purpose
 
-        data class OneTimeDecrypt(
+        data class Decrypt(
             val encryptedValue: ByteArray
         ) : Purpose
     }
@@ -119,13 +139,6 @@ sealed interface KeystoreAccessRequest {
         ) : AuthorizationArgs(cipher)
 
         data object TimeWindowAuth : AuthorizationArgs(null)
-    }
-
-    companion object {
-
-        private const val AES_GCM_NOPADDING = "AES/GCM/NoPadding"
-        private const val GCM_IV_LENGTH = 12
-        private const val AUTH_TAG_LENGTH = 128 // bit
     }
 }
 
@@ -167,26 +180,10 @@ sealed class KeySpec(val alias: String) {
 
     @KoverIgnore
     class Mnemonic(
-        alias: String = KEY_ALIAS_MNEMONIC,
-        private val authenticationTimeoutSeconds: Int? = KEY_AUTHORIZATION_TIMEOUT_SECONDS
+        alias: String = KEY_ALIAS_MNEMONIC
     ) : KeySpec(alias) {
 
-        constructor(
-            alias: String = KEY_ALIAS_MNEMONIC,
-            hasStrongAuthenticator: Boolean
-        ) : this(
-            alias,
-            if (hasStrongAuthenticator) {
-                // If there is a strong authenticator, we can prevent timeout usage
-                // which results in invoking crypto-based authentication,
-                // i.e. passing CryptoObject to BiometricPrompt
-                null
-            } else {
-                // If there is no strong authenticator, we cannot use crypto-based authentication
-                // so we set a timeout and allow using the key many times within the specified time window
-                KEY_AUTHORIZATION_TIMEOUT_SECONDS
-            }
-        )
+        private var authenticationTimeoutSeconds: Int? = null
 
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
             .apply {
@@ -195,6 +192,14 @@ sealed class KeySpec(val alias: String) {
                 }
             }
             .build()
+
+        /**
+         * Sets whether the generated key is authorized to be used only if the user has been authenticated
+         * within [KEY_AUTHORIZATION_TIMEOUT_SECONDS].
+         */
+        fun setAuthenticationTimeout() {
+            authenticationTimeoutSeconds = KEY_AUTHORIZATION_TIMEOUT_SECONDS
+        }
 
         fun checkIfPermanentlyInvalidated(): Boolean {
             // on pixel 6 pro when lock screen is removed, key entry for an alias is null
@@ -208,6 +213,20 @@ sealed class KeySpec(val alias: String) {
             // automatically deleted from the keystore
             return result.exceptionOrNull() is KeyPermanentlyInvalidatedException
         }
+
+        fun isLegacyTimedWindowKey(): Boolean {
+            val secretKey = getSecretKey().getOrNull()
+
+            if (secretKey == null) return false
+
+            val factory = SecretKeyFactory.getInstance(secretKey.algorithm, PROVIDER)
+
+            val spec = factory.getKeySpec(secretKey, KeyInfo::class.java)
+            val info = spec as? KeyInfo ?: return false
+
+            return info.isUserAuthenticationRequired && info.userAuthenticationValidityDurationSeconds > 0
+        }
+
     }
 
     @KoverIgnore
