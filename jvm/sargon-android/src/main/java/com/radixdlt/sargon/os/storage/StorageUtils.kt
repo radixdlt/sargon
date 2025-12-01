@@ -1,11 +1,11 @@
 package com.radixdlt.sargon.os.storage
 
+import android.util.Base64
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.preferencesOf
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.extensions.toUnit
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.retryWhen
 
 private suspend fun KeystoreAccessRequest?.requestAuthorizationIfNeeded() =
-    this?.requestAuthorization() ?: Result.success(Unit)
+    this?.requestAuthorization() ?: Result.success(null)
 
 /**
  * Reads the contents associated with the given [key] from the data store.
@@ -56,6 +56,83 @@ suspend fun <T> DataStore<Preferences>.write(
     } else {
         Result.success(value)
     }
+}.mapCatching { modified ->
+    edit { preferences ->
+        preferences[key] = modified
+    }
+}.toUnit()
+
+/**
+ * Reads the contents associated with the given [key] from the data store,
+ * decrypting it using the provided [KeystoreAccessRequest.ForMnemonic].
+ */
+suspend fun <T> DataStore<Preferences>.read(
+    key: Preferences.Key<T>,
+    keystoreAccessRequest: KeystoreAccessRequest.ForMnemonic,
+    retryWhen: suspend ((Throwable, Long) -> Boolean) = { _, _ -> false }
+): Result<T?> = data
+    .retryWhen { cause, attempt -> retryWhen(cause, attempt) }
+    .catchIOException()
+    .map { preferences -> preferences[key] }
+    .firstOrNull()
+    ?.let { encryptedValue ->
+        val encryptedValueByteArray = when (encryptedValue) {
+            is String -> Base64.decode(encryptedValue, Base64.DEFAULT)
+
+            is ByteArray -> encryptedValue
+            else -> return@let Result.failure(
+                IllegalArgumentException(
+                    "Attempted to decrypt unsupported type ${this::class.java}"
+                )
+            )
+        }
+
+        keystoreAccessRequest.requestAuthorization(
+            purpose = KeystoreAccessRequest.Purpose.Decrypt(
+                encryptedValue = encryptedValueByteArray
+            )
+        ).then { args ->
+            when (args) {
+                is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> encryptedValue.decrypt(
+                    keySpec = keystoreAccessRequest.keySpec
+                )
+
+                is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> error("Unexpected encrypt args for decryption")
+
+                KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth -> encryptedValue.decrypt(
+                    keySpec = keystoreAccessRequest.keySpec
+                )
+            }
+        }
+    } ?: Result.success(null)
+
+/**
+ * Associates the [value] with the given [key] to the data store,
+ * encrypting it using the provided [KeystoreAccessRequest.ForMnemonic].
+ */
+suspend fun <T> DataStore<Preferences>.write(
+    key: Preferences.Key<T>,
+    value: T,
+    keystoreAccessRequest: KeystoreAccessRequest.ForMnemonic
+): Result<Unit> = if (value != null) {
+    keystoreAccessRequest.requestAuthorization(
+        purpose = KeystoreAccessRequest.Purpose.Encrypt
+    ).then { args ->
+        when (args) {
+            is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> value.encrypt(
+                cipher = args.cipher,
+                ivBytes = args.ivBytes
+            )
+
+            is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> error("Unexpected decrypt args for encryption")
+
+            KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth -> value.encrypt(
+                keySpec = keystoreAccessRequest.keySpec
+            )
+        }
+    }
+} else {
+    Result.success(value)
 }.mapCatching { modified ->
     edit { preferences ->
         preferences[key] = modified

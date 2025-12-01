@@ -3,10 +3,10 @@ package com.radixdlt.sargon.os
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.radixdlt.sargon.ArculusCsdkDriver
 import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.Drivers
-import com.radixdlt.sargon.EventBusDriver
-import com.radixdlt.sargon.ProfileStateChangeDriver
+import com.radixdlt.sargon.NfcTagDriver
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.os.driver.AndroidBiometricAuthorizationDriver
 import com.radixdlt.sargon.os.driver.AndroidEntropyProviderDriver
@@ -18,10 +18,7 @@ import com.radixdlt.sargon.os.driver.AndroidNetworkingDriver
 import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import com.radixdlt.sargon.os.driver.AndroidStorageDriver
 import com.radixdlt.sargon.os.driver.BiometricsHandler
-import com.radixdlt.sargon.ArculusCsdkDriver
-import com.radixdlt.sargon.NfcTagDriver
 import okhttp3.OkHttpClient
-import timber.log.Timber
 
 @KoverIgnore
 fun Bios.Companion.from(
