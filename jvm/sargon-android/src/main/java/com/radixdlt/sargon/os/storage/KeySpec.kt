@@ -82,7 +82,6 @@ sealed interface KeystoreAccessRequest {
          * @param purpose the operation requiring authorization: [Purpose.Encrypt] or [Purpose.Decrypt] (contains the encrypted bytes).
          * @return a [Result] containing the resolved [AuthorizationArgs] on success, or an exception describing the failure.
          */
-
         suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> {
             return if (mnemonicKeySpec.isLegacyTimedWindowKey() || !hasStrongAuthenticator) {
                 mnemonicKeySpec.setAuthenticationTimeout()

@@ -206,8 +206,8 @@ class StorageUtilsTest {
 
         val mockAccessRequest = mockk<KeystoreAccessRequest.ForMnemonic>()
         every { mockAccessRequest.keySpec } returns mockKeySpec
-        coEvery { mockAccessRequest.requestAuthorization() } returns if (onAuthorizeWhenRequested) {
-            Result.success(Unit)
+        coEvery { mockAccessRequest.requestAuthorization(any()) } returns if (onAuthorizeWhenRequested) {
+            Result.success(KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth)
         } else {
             Result.failure(RuntimeException("Not allowed to authorized in this unit test"))
         }
