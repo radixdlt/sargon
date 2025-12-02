@@ -3,7 +3,6 @@ package com.radixdlt.sargon.os.storage.key
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.radixdlt.sargon.Exactly32Bytes
-import com.radixdlt.sargon.FactorSourceId
 import com.radixdlt.sargon.FactorSourceIdFromHash
 import com.radixdlt.sargon.FactorSourceKind
 import com.radixdlt.sargon.MnemonicWithPassphrase
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
 class DeviceFactorSourceMnemonicKeyMappingTest {
@@ -101,8 +101,11 @@ class DeviceFactorSourceMnemonicKeyMappingTest {
     private class TestBiometricAuthorizationDriver(
         private val shouldAuthorize: Boolean
     ): BiometricAuthorizationDriver {
-        override suspend fun authorize(): Result<Unit> = if (shouldAuthorize) {
-            Result.success(Unit)
+
+        override val hasStrongAuthenticator: Boolean = false
+
+        override suspend fun authorize(cipher: Cipher?): Result<Cipher?> = if (shouldAuthorize) {
+            Result.success(null)
         } else {
             Result.failure(RuntimeException("Authorization denied in this unit test"))
         }
@@ -121,7 +124,7 @@ class DeviceFactorSourceMnemonicKeyMappingTest {
 
         val mockAccessRequest = mockk<KeystoreAccessRequest.ForMnemonic>()
         every { mockAccessRequest.keySpec } returns mockKeySpec
-        coEvery { mockAccessRequest.requestAuthorization() } coAnswers { driver.authorize() }
+        coEvery { mockAccessRequest.requestAuthorization(any()) } coAnswers { driver.authorize(null).map { KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth } }
         return mockAccessRequest
     }
 }
