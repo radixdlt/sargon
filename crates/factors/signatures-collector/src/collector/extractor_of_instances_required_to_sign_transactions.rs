@@ -71,6 +71,13 @@ impl ProfileAccountByAddress for ProtoProfile {
             .cloned()
             .ok_or(CommonError::UnknownAccount)
     }
+
+    fn account_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<Account> {
+        todo!()
+    }
 }
 #[cfg(test)]
 impl ProfilePersonaByAddress for ProtoProfile {
@@ -80,6 +87,13 @@ impl ProfilePersonaByAddress for ProtoProfile {
             .find(|p| p.address == address)
             .cloned()
             .ok_or(CommonError::UnknownPersona)
+    }
+
+    fn persona_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<Persona> {
+        todo!()
     }
 }
 #[cfg(test)]
@@ -103,6 +117,13 @@ impl ProfileEntityByAddress for ProtoProfile {
         Err(CommonError::Unknown {
             error_message: "Entity not found".to_string(),
         })
+    }
+
+    fn entity_by_access_controller_address(
+        &self,
+        address: AccessControllerAddress,
+    ) -> Result<AccountOrPersona> {
+        todo!()
     }
 }
 #[cfg(test)]

@@ -281,20 +281,20 @@ impl SargonOS {
             })
             .collect::<FactorSources>();
 
-        for factor_source in new_factors_only.iter() {
-            if !factor_source.factor_source_id().is_hash() {
-                continue;
-            }
-            // Use FactorInstancesProvider to eagerly fill cache...
-            // only test for now, need to do more integration work in hosts before enabling this
-            #[cfg(debug_assertions)]
-            let _ = self
-                .pre_derive_and_fill_cache_with_instances_for_factor_source(
-                    factor_source,
-                    NetworkID::Mainnet, // we care not about other networks here
-                )
-                .await?;
-        }
+        // for factor_source in new_factors_only.iter() {
+        //     if !factor_source.factor_source_id().is_hash() {
+        //         continue;
+        //     }
+        //     // Use FactorInstancesProvider to eagerly fill cache...
+        //     // only test for now, need to do more integration work in hosts before enabling this
+        //     #[cfg(debug_assertions)]
+        //     let _ = self
+        //         .pre_derive_and_fill_cache_with_instances_for_factor_source(
+        //             factor_source,
+        //             NetworkID::Mainnet, // we care not about other networks here
+        //         )
+        //         .await?;
+        // }
 
         self.update_profile_with(|p| {
             p.factor_sources.extend(new_factors_only.clone());

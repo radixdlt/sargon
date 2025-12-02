@@ -11,6 +11,16 @@ impl TryFrom<AccountOrPersona> for AnySecurifiedEntity {
 }
 
 impl AnySecurifiedEntity {
+    pub fn commit_provisional(&mut self) -> Result<()> {
+        self.securified_entity_control.commit_provisional()?;
+        self.entity
+            .set_security_state(EntitySecurityState::Securified {
+                value: self.securified_entity_control.clone(),
+            })
+    }
+}
+
+impl AnySecurifiedEntity {
     pub fn sample_account() -> Self {
         SecurifiedAccount::sample().into()
     }

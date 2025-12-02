@@ -483,9 +483,7 @@ impl SecurityShieldBuilder {
         time_period: TimePeriod,
     ) -> &Self {
         self.set(|builder| {
-            builder.set_time_until_delayed_confirmation_is_callable(
-                time_period.days(),
-            )
+            builder.set_time_until_delayed_confirmation_is_callable(time_period)
         })
     }
 
@@ -907,10 +905,16 @@ impl SecurityShieldBuilder {
         let matrix_of_factors = matrix_result.unwrap();
 
         let name = self.get_name();
-        let display_name = DisplayName::new(name).map_err(|e| {
-            error!("Invalid DisplayName {:?}", e);
-            SecurityShieldBuilderRuleViolation::ShieldNameInvalid
-        })?;
+        // The name can be empty when the builder is being used for a shield that is not saved as a template in profile
+        // For example to update the shield that is already applied to an entity
+        let display_name = if name.is_empty() {
+            Ok(DisplayName::empty())
+        } else {
+            DisplayName::new(name).map_err(|e| {
+                error!("Invalid DisplayName {:?}", e);
+                SecurityShieldBuilderRuleViolation::ShieldNameInvalid
+            })
+        }?;
 
         let metadata = SecurityStructureMetadata::with_details(
             self.shield_id,
@@ -2521,5 +2525,25 @@ mod lenient {
         // Building again yields *the very same* SecurityStructureOfFactorSourceIds,
         let rebuilt = reconstructed.build().unwrap();
         assert_eq!(rebuilt, original);
+    }
+
+    #[test]
+    fn with_security_structure_of_factor_sources_roundtrip() {
+        let mut original = SecurityStructureOfFactorSources::sample_other();
+        original.metadata.update_name(DisplayName::empty());
+        pretty_assertions::assert_eq!(
+            original.metadata.display_name,
+            DisplayName::empty()
+        );
+
+        // Reconstruct the builder from the *existing* security structure
+        let reconstructed = SUT::with_security_structure_of_factor_sources(
+            SecurityShieldBuilderMode::Strict,
+            original.clone(),
+        );
+
+        // Building again yields *the very same* SecurityStructureOfFactorSourceIds,
+        let rebuilt = reconstructed.build().unwrap();
+        pretty_assertions::assert_eq!(rebuilt, original.into());
     }
 }

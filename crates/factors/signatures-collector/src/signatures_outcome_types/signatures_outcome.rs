@@ -72,6 +72,14 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
         self.failed_transactions.is_empty()
     }
 
+    pub fn success_or(&self, or: Self) -> Self {
+        if self.successful() {
+            self.clone()
+        } else {
+            or
+        }
+    }
+
     pub fn signatures_of_successful_transactions(
         &self,
     ) -> IndexSet<HDSignature<ID>> {
@@ -150,6 +158,46 @@ impl<ID: SignableID> SignaturesOutcome<ID> {
             .union(&self.signatures_of_failed_transactions())
             .cloned()
             .collect()
+    }
+}
+
+#[cfg(debug_assertions)]
+impl<ID: SignableID> SignaturesOutcome<ID> {
+    pub fn with_skipped_factors(factors: Vec<FactorSourceIDFromHash>) -> Self {
+        Self::new(
+            MaybeSignedTransactions::empty(),
+            MaybeSignedTransactions::empty(),
+            factors
+                .into_iter()
+                .map(|f| {
+                    NeglectedFactor::new(
+                        NeglectFactorReason::UserExplicitlySkipped,
+                        f,
+                    )
+                })
+                .collect_vec(),
+        )
+    }
+
+    pub fn with_failed_transactions_due_to_skipped_factors(
+        factors: Vec<FactorSourceIDFromHash>,
+    ) -> Self
+    where
+        ID: HasSampleValues,
+    {
+        Self::new(
+            MaybeSignedTransactions::empty(),
+            MaybeSignedTransactions::sample(),
+            factors
+                .into_iter()
+                .map(|f| {
+                    NeglectedFactor::new(
+                        NeglectFactorReason::UserExplicitlySkipped,
+                        f,
+                    )
+                })
+                .collect_vec(),
+        )
     }
 }
 

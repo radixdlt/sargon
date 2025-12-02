@@ -191,6 +191,12 @@ impl HasSampleValues for AnyUnsecurifiedEntity {
     }
 }
 
+impl UnsecurifiedAccount {
+    pub fn sample_sim_account() -> Self {
+        Self::new(Account::sample_sim()).unwrap()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

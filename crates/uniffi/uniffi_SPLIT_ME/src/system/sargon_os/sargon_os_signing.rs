@@ -6,10 +6,13 @@ impl SargonOS {
     pub async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent> {
         self.wrapped
-            .sign_transaction(transaction_intent.into(), role_kind.into())
+            .sign_transaction(
+                transaction_intent.into(),
+                execution_summary.into(),
+            )
             .await
             .into_result()
     }

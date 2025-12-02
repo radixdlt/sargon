@@ -1,0 +1,114 @@
+{
+  "recovery_proposal": {
+    "primary_role": {
+      "type": "Protected",
+      "access_rule": {
+        "type": "AnyOf",
+        "access_rules": [
+          {
+            "type": "ProofRule",
+            "proof_rule": {
+              "list": [
+                {
+                  "type": "NonFungible",
+                  "non_fungible": {
+                    "local_id": {
+                      "id_type": "Bytes",
+                      "sbor_hex": "5cc0021dfd424ccd73932f5314ae6b2029c736ef52e14030ae6d128ae218448f51",
+                      "simple_rep": "[fd424ccd73932f5314ae6b2029c736ef52e14030ae6d128ae218448f51]"
+                    },
+                    "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                  }
+                }
+              ],
+              "type": "CountOf",
+              "count": 1
+            }
+          },
+          {
+            "type": "ProofRule",
+            "proof_rule": {
+              "list": [],
+              "type": "AnyOf"
+            }
+          }
+        ]
+      }
+    },
+    "recovery_role": {
+      "type": "Protected",
+      "access_rule": {
+        "type": "AnyOf",
+        "access_rules": [
+          {
+            "type": "ProofRule",
+            "proof_rule": {
+              "list": [],
+              "type": "CountOf",
+              "count": 0
+            }
+          },
+          {
+            "type": "ProofRule",
+            "proof_rule": {
+              "list": [
+                {
+                  "type": "NonFungible",
+                  "non_fungible": {
+                    "local_id": {
+                      "id_type": "Bytes",
+                      "sbor_hex": "5cc0021d7001036c1833feab6d2c0cb07378a33a76b8d3cc3ca57ce767a40948f6",
+                      "simple_rep": "[7001036c1833feab6d2c0cb07378a33a76b8d3cc3ca57ce767a40948f6]"
+                    },
+                    "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                  }
+                }
+              ],
+              "type": "AnyOf"
+            }
+          }
+        ]
+      }
+    },
+    "confirmation_role": {
+      "type": "Protected",
+      "access_rule": {
+        "type": "AnyOf",
+        "access_rules": [
+          {
+            "type": "ProofRule",
+            "proof_rule": {
+              "list": [],
+              "type": "CountOf",
+              "count": 0
+            }
+          },
+          {
+            "type": "ProofRule",
+            "proof_rule": {
+              "list": [
+                {
+                  "type": "NonFungible",
+                  "non_fungible": {
+                    "local_id": {
+                      "id_type": "Bytes",
+                      "sbor_hex": "5cc0021dabd4ce7ae4cfd0d3f830cc06fd0189933f2ddd100353cc70fd596c2b01",
+                      "simple_rep": "[abd4ce7ae4cfd0d3f830cc06fd0189933f2ddd100353cc70fd596c2b01]"
+                    },
+                    "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                  }
+                }
+              ],
+              "type": "AnyOf"
+            }
+          }
+        ]
+      }
+    },
+    "timed_recovery_delay_minutes": 5
+  },
+  "allow_timed_recovery_after": {
+    "date_time": "2025-10-29T12:11:00Z",
+    "unix_timestamp_seconds": "1761739860"
+  }
+}

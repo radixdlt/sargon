@@ -14,6 +14,8 @@ pub struct Clients {
     pub factor_instances_cache: FactorInstancesCacheClient,
     pub arculus_wallet_client: ArculusWalletClient,
     pub nft_prices_client: NonFungiblePricesClient,
+    pub access_controller_state_repository_client:
+        AccessControllerStateRepositoryClient,
 }
 
 impl Clients {
@@ -41,6 +43,13 @@ impl Clients {
             Arc::new(http_client.clone()),
             file_system.clone(),
         );
+        let access_controller_cache_client =
+            AccessControllerDetailsCacheClient::new(file_system.clone());
+        let access_controller_state_repository_client =
+            AccessControllerStateRepositoryClient::new(
+                http_client.clone(),
+                access_controller_cache_client,
+            );
         Self {
             host,
             secure_storage,
@@ -53,6 +62,7 @@ impl Clients {
             factor_instances_cache,
             arculus_wallet_client,
             nft_prices_client,
+            access_controller_state_repository_client,
         }
     }
 }

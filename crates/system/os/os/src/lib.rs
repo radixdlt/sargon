@@ -4,6 +4,7 @@
 
 mod bios;
 mod entity_creating_with_factor_source_and_derivation_outcome;
+mod mfa;
 mod os_testing_support;
 mod sargon_os;
 mod sargon_os_accounts;
@@ -19,6 +20,7 @@ mod testing_interactors;
 pub mod prelude {
     pub use crate::bios::*;
     pub use crate::entity_creating_with_factor_source_and_derivation_outcome::*;
+    pub use crate::mfa::*;
     pub use crate::os_testing_support::*;
     pub use crate::sargon_os::*;
     pub use crate::sargon_os_accounts::*;
@@ -41,11 +43,25 @@ pub mod prelude {
     pub(crate) use host_info::prelude::*;
     pub(crate) use interactors::prelude::*;
     pub(crate) use key_derivation_traits::prelude::*;
+    pub(crate) use keys_collector::prelude::*;
+    pub(crate) use manifests::prelude::*;
     pub use prelude::prelude::*;
     pub(crate) use profile_logic::prelude::*;
     pub(crate) use profile_state_holder::prelude::*;
     pub(crate) use signing_traits::prelude::*;
     pub(crate) use sub_systems::prelude::*;
+
+    pub(crate) use radix_engine_interface::{
+        blueprints::{
+            access_controller::RuleSet as ScryptoRuleSet,
+            resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
+        },
+        prelude::{
+            AccessRule as ScryptoAccessRule,
+            BasicRequirement as ScryptoBasicRequirement,
+            CompositeRequirement as ScryptoCompositeRequirement,
+        },
+    };
 
     #[cfg(test)]
     mod testing {}

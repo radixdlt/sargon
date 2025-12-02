@@ -66,6 +66,14 @@ impl FactorSourceTemplate {
         Self::ledger_id(1)
     }
 
+    pub fn arculus() -> Self {
+        Self::new(FactorSourceKind::ArculusCard, 0)
+    }
+
+    pub fn arculus_other() -> Self {
+        Self::new(FactorSourceKind::ArculusCard, 1)
+    }
+
     fn password_id(id: u8) -> Self {
         Self::new(FactorSourceKind::Password, id)
     }

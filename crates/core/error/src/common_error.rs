@@ -1096,6 +1096,9 @@ pub enum CommonError {
 
     #[error("NFC Session renewed")]
     NFCSessionRenewed = 10320,
+
+    #[error("Access controller must be in timed recovery state")]
+    AccessControllerNotInRecoveryState = 10321,
 }
 
 impl CommonError {

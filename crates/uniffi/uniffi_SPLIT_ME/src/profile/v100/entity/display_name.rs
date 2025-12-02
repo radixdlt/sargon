@@ -42,7 +42,11 @@ impl From<InternalDisplayName> for DisplayName {
 }
 impl From<DisplayName> for InternalDisplayName {
     fn from(display_name: DisplayName) -> Self {
-        Self::new(display_name.value.as_str()).unwrap()
+        if display_name.value.is_empty() {
+            Self::empty()
+        } else {
+            Self::new(display_name.value.as_str()).unwrap()
+        }
     }
 }
 

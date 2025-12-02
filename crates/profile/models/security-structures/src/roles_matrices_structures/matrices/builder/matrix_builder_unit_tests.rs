@@ -117,8 +117,10 @@ fn set_number_of_days_42() {
     )
     .unwrap();
 
-    sut.set_time_until_delayed_confirmation_is_callable(42)
-        .unwrap();
+    sut.set_time_until_delayed_confirmation_is_callable(TimePeriod::with_days(
+        42,
+    ))
+    .unwrap();
 
     // Build
     assert!(sut.validate().is_ok());

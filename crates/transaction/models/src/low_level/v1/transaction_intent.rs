@@ -52,6 +52,16 @@ impl TransactionIntent {
             self.header.network_id,
         )
     }
+
+    pub fn is_access_controller_timed_recovery_manifest(&self) -> bool {
+        self.manifest.is_access_controller_timed_recovery_manifest()
+    }
+
+    pub fn extract_fee_payer_info(
+        &self,
+    ) -> Option<(AccountAddress, Decimal192)> {
+        self.manifest.extract_fee_payer_info()
+    }
 }
 
 impl From<TransactionIntent> for ScryptoIntent {

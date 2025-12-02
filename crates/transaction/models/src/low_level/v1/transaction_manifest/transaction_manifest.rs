@@ -1,3 +1,17 @@
+use radix_common::prelude::ManifestCustomValue;
+use radix_transactions::data::to_decimal;
+use radix_transactions::manifest::CallMethod;
+
+use radix_engine_interface::blueprints::access_controller::{
+    ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
+    ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
+    ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT,
+    ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
+};
+
+use radix_engine_interface::blueprints::account::ACCOUNT_LOCK_FEE_IDENT as SCRYPTO_ACCOUNT_LOCK_FEE_IDENT;
+use sbor::Value;
+
 use crate::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
@@ -29,6 +43,63 @@ impl TransactionManifest {
             instructions,
             blobs,
         }
+    }
+}
+
+impl TransactionManifest {
+    pub fn is_access_controller_timed_recovery_manifest(&self) -> bool {
+        let has_initiate_recovery_method = self.has_method_for_ident(
+            SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
+        ) || self.has_method_for_ident(
+            SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
+        );
+
+        let has_recovery_quick_confirmation = self.has_method_for_ident(SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT) ||
+        self.has_method_for_ident(SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT);
+
+        has_initiate_recovery_method && !has_recovery_quick_confirmation
+    }
+
+    pub fn extract_fee_payer_info(
+        &self,
+    ) -> Option<(AccountAddress, Decimal192)> {
+        for instruction in self.instructions().iter() {
+            print!("{:?}", instruction.clone());
+            if let ScryptoInstruction::CallMethod(CallMethod {
+                address,
+                method_name,
+                args: Value::Tuple { fields },
+            }) = instruction
+            {
+                if method_name == SCRYPTO_ACCOUNT_LOCK_FEE_IDENT {
+                    if let Some(Value::Custom {
+                        value: ManifestCustomValue::Decimal(decimal),
+                    }) = fields.first()
+                    {
+                        return Some((
+                            AccountAddress::try_from((
+                                *address,
+                                self.network_id(),
+                            ))
+                            .expect(
+                                "Should be able decode the account address",
+                            ),
+                            to_decimal(decimal.clone()).into(),
+                        ));
+                    }
+                }
+            }
+        }
+        None
+    }
+
+    fn has_method_for_ident(&self, ident: &str) -> bool {
+        self.instructions().iter().any(|inst| match inst {
+            ScryptoInstruction::CallMethod(method) => {
+                method.method_name == ident
+            }
+            _ => false,
+        })
     }
 }
 
@@ -402,6 +473,28 @@ DROP_AUTH_ZONE_PROOFS;
                 found_in_instructions: NetworkID::Mainnet.to_string(),
                 specified_to_instructions_ctor: NetworkID::Stokenet.to_string()
             })
+        );
+    }
+
+    #[test]
+    fn extract_fee_payer_info() {
+        let instructions_str = r#"CALL_METHOD
+        Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+        "lock_fee"
+        Decimal("500");
+                "#;
+
+        let sut =
+            SUT::new(instructions_str, NetworkID::Mainnet, Blobs::default())
+                .unwrap();
+        assert_eq!(
+            sut.extract_fee_payer_info(),
+            Some(
+                (
+                    AccountAddress::from_str("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr").unwrap(),
+                    Decimal192::new("500".to_string()).unwrap(),
+                )
+            )
         );
     }
 
