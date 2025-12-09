@@ -9,16 +9,18 @@ pub struct AccessControllerDetailsCache {
 pub type ACDCStorage =
     IndexMap<AccessControllerAddress, AccessControllerStateDetails>;
 
+impl Clone for AccessControllerDetailsCache {
+    fn clone(&self) -> Self {
+        Self {
+            map: RwLock::new(self.map.read().unwrap().clone()),
+        }
+    }
+}
+
 impl AccessControllerDetailsCache {
     pub fn with_storage(storage: ACDCStorage) -> Self {
         Self {
             map: RwLock::new(storage),
-        }
-    }
-
-    pub fn clone(&self) -> Self {
-        Self {
-            map: RwLock::new(self.map.read().unwrap().clone()),
         }
     }
 

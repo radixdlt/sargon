@@ -101,7 +101,7 @@ impl SargonOS {
         let securified_entity_control =
             entity.security_state().into_securified().unwrap();
         let ac_address =
-            securified_entity_control.access_controller_address.clone();
+            securified_entity_control.access_controller_address;
 
         // Fetch the current Access Controller state to check for existing recovery attempts
         let ac_state_details = self

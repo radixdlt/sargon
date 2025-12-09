@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use manifests::IntoManifestBuilder;
 
 #[extend::ext]
 pub impl TransactionManifest {
@@ -47,8 +46,8 @@ pub impl TransactionManifest {
                 TransactionManifest::modify_manifest_top_up_ac_from_securified_account(
                 manifest,
                 manifest_ac_address,
-                lock_fee_data.fee_payer_address.clone(),
-                lock_fee_data.access_controller_address.clone(),
+                lock_fee_data.fee_payer_address,
+                lock_fee_data.access_controller_address,
                 required_lock_fee,
                 can_use_primary_role,
             ).unwrap()
@@ -63,24 +62,22 @@ pub impl TransactionManifest {
             // and no need to lock against the access controller vault, nor to top up the AC vault since XRDs from AC were not consumed.
             manifest =
                 manifest.modify_add_lock_fee(lock_fee_data.clone()).unwrap();
-        } else {
-            if ac_vault_xrd_balance >= required_lock_fee {
-                // The fee payer has enough XRD in AC vault to cover the lock fee and it is possible to quick confirm, so users can sign with the new Primary role the withdrawal of XRDs for the lock fee.
-                if !primary_role_locked
-                    && fee_payer_xrd_balance >= required_lock_fee
-                    && role_combination.can_quick_confirm()
-                {
-                    manifest = add_top_up_instructions(manifest);
-                }
-
-                manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
-                    manifest,
-                    required_lock_fee,
-                    ac_state_details.address,
-                );
-            } else {
-                // This should not happen: the host should have validated that the AC vault can cover the fee.
+        } else if ac_vault_xrd_balance >= required_lock_fee {
+            // The fee payer has enough XRD in AC vault to cover the lock fee and it is possible to quick confirm, so users can sign with the new Primary role the withdrawal of XRDs for the lock fee.
+            if !primary_role_locked
+                && fee_payer_xrd_balance >= required_lock_fee
+                && role_combination.can_quick_confirm()
+            {
+                manifest = add_top_up_instructions(manifest);
             }
+
+            manifest = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+                manifest,
+                required_lock_fee,
+                ac_state_details.address,
+            );
+        } else {
+            // This should not happen: the host should have validated that the AC vault can cover the fee.
         };
 
         manifest

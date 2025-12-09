@@ -1,5 +1,3 @@
-use std::f32::consts::E;
-
 use profile_supporting_types::{AnySecurifiedEntity, AnyUnsecurifiedEntity};
 use radix_common::prelude::ManifestGlobalAddress;
 use radix_engine_interface::blueprints::access_controller::{
@@ -149,8 +147,8 @@ pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
         entity_applying_shield: AccountOrPersona,
         manifest: TransactionManifest,
         top_up_amount: impl Into<Option<Decimal192>>,
-        can_exercise_primary_role: bool,
-        can_quick_confirm: bool,
+        _can_exercise_primary_role: bool,
+        _can_quick_confirm: bool,
     ) -> Result<TransactionManifest> {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let payer = payer.into();

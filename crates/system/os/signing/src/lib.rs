@@ -10,7 +10,6 @@ pub mod prelude {
     pub(crate) use error::prelude::*;
     pub(crate) use manifests::prelude::*;
     pub use prelude::prelude::*;
-    pub(crate) use profile::prelude::*;
     pub(crate) use profile_supporting_types::prelude::*;
     pub(crate) use sargon_os::prelude::*;
     pub(crate) use signatures_collector::prelude::*;

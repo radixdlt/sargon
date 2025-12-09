@@ -149,7 +149,7 @@ impl AccessControllerRecoveryIntents {
         ]
         .into_iter()
         .find(|signable| signable.id == *id)
-        .map(|signable| signable.clone())
+        .cloned()
     }
 
     pub fn role_combination_used_for_transaction(

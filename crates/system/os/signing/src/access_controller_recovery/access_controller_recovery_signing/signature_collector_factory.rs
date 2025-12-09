@@ -153,7 +153,7 @@ impl SignaturesCollectorFactory {
         if !fee_payer_is_securified_account {
             // Fee payer is some other account;
             let fee_payer_account = self.profile.account_by_address(
-                self.lock_fee_data.fee_payer_address.clone(),
+                self.lock_fee_data.fee_payer_address,
             )?;
             signable_entities.push(fee_payer_account);
         }
@@ -185,7 +185,7 @@ impl SignaturesCollectorFactory {
             Ok(None)
         } else {
             Ok(Some(SignaturesCollector::with(
-                self.finish_early_strategy.clone(),
+                self.finish_early_strategy,
                 IndexSet::from_iter(self.profile.factor_sources.iter()),
                 IdentifiedVecOf::from(vec![SignableWithEntities::with(
                     intent,
@@ -205,7 +205,7 @@ impl SignaturesCollectorFactory {
         signing_kind: RoleKind,
     ) -> SignaturesCollector<TransactionIntent> {
         SignaturesCollector::with(
-            self.finish_early_strategy.clone(),
+            self.finish_early_strategy,
             IndexSet::from_iter(self.profile.factor_sources.iter()),
             self.transaction_intents_for_recovery_signing(
                 recovery_proposer_kind,

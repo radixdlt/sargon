@@ -75,7 +75,7 @@ impl SargonOS {
                 entity
                     .security_state()
                     .as_securified()
-                    .map(|s| s.access_controller_address.clone())
+                    .map(|s| s.access_controller_address)
             })
             .collect()
     }

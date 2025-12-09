@@ -25,7 +25,7 @@ impl OsCommitProvisionalSecurityState for SargonOS {
         let badge_owner_per_entity = gateway_client
             .fetch_entities_badge_owners(
                 network_id,
-                vec![entity_address.clone()],
+                vec![entity_address],
             )
             .await?;
 

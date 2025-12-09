@@ -2,7 +2,7 @@
 use crate::prelude::*;
 use std::ops::Deref;
 
-use profile_supporting_types::{AnySecurifiedEntity, UnsecurifiedAccount};
+use profile_supporting_types::AnySecurifiedEntity;
 
 pub trait TransactionManifestSecurifySecurifiedEntity:
     TransactionManifestSetRolaKey
@@ -47,7 +47,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         let set_rola = |builder: ScryptoTransactionManifestBuilder| -> ScryptoTransactionManifestBuilder {
             let mut builder = builder;
             builder = builder.call_method(
-                ScryptoGlobalAddress::from(securified_entity.access_controller_address().clone()),
+                ScryptoGlobalAddress::from(securified_entity.access_controller_address()),
                 SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
                 (),
             );
