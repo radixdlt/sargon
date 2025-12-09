@@ -11,16 +11,16 @@ impl SignaturesCollectorOrchestrator {
 
     pub async fn sign(&self) -> Result<SignedIntent> {
         let outcome = {
-            let iniate_with_recovery_result =
-                self.iniate_with_recovery_flow().await?;
-            match iniate_with_recovery_result {
+            let initiate_with_recovery_result =
+                self.initiate_with_recovery_flow().await?;
+            match initiate_with_recovery_result {
                 Some(value) => Some(value),
                 None => {
                     // Only try primary flow if there's no existing recovery attempt
                     // to cancel. If there is one, only Recovery role can cancel it,
                     // so attempting Primary-initiated flow will fail on-chain.
                     if !self.factory.has_existing_recovery_attempt() {
-                        self.iniate_with_primary_flow().await?
+                        self.initiate_with_primary_flow().await?
                     } else {
                         None
                     }
@@ -88,7 +88,7 @@ impl SignaturesCollectorOrchestrator {
         }
     }
 
-    async fn iniate_with_recovery_flow(
+    async fn initiate_with_recovery_flow(
         &self,
     ) -> Result<Option<IndexSet<HDSignature<TransactionIntentHash>>>> {
         let recovery_role_signatures_outcome = self
@@ -146,7 +146,7 @@ impl SignaturesCollectorOrchestrator {
         Ok(None)
     }
 
-    async fn iniate_with_primary_flow(
+    async fn initiate_with_primary_flow(
         &self,
     ) -> Result<Option<IndexSet<HDSignature<TransactionIntentHash>>>> {
         let primary_role_signatures_outcome = self

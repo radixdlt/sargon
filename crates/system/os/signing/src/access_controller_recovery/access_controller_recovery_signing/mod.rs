@@ -18,7 +18,7 @@ pub async fn sign_access_controller_recovery_transaction(
 
     let (fee_paying_account_address, fee) = base_transaction_intent
         .extract_fee_payer_info()
-        .expect("Shoud have a fee payer configured");
+        .expect("Should have a fee payer configured");
 
     let fee_payer_xrd_balance = gw_client
         .xrd_balance_of_account_or_zero(fee_paying_account_address)

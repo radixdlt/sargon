@@ -9,7 +9,7 @@ pub async fn sign_entity_securify(
 
     let (fee_paying_account_address, fee) = transaction_intent
         .extract_fee_payer_info()
-        .expect("Shoud have a fee payer configured");
+        .expect("Should have a fee payer configured");
 
     let fee_payer_account =
         profile.account_by_address(fee_paying_account_address)?;

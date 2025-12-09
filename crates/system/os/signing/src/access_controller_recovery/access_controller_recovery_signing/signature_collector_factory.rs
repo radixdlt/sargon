@@ -252,7 +252,7 @@ impl SignaturesCollectorFactory {
                 .initiate_with_primary_complete_with_confirmation
                 .clone()]),
             RoleKind::Confirmation => {
-                panic!("Confirmation role cannot iniate recovery")
+                panic!("Confirmation role cannot initiate recovery")
             }
         }
     }
