@@ -3,6 +3,7 @@
 package com.radixdlt.sargon.os.driver
 
 import com.radixdlt.sargon.CommonException
+import com.radixdlt.sargon.NetworkMethod
 import com.radixdlt.sargon.NetworkRequest
 import com.radixdlt.sargon.NetworkResponse
 import com.radixdlt.sargon.NetworkingDriver
@@ -31,7 +32,8 @@ class AndroidNetworkingDriver(
             .toUByteArray()
             .toByteArray()
             .takeIf {
-                it.isNotEmpty()
+                // Method GET must not have a request body
+                request.method != NetworkMethod.GET
             }?.toRequestBody(contentType = mediaType)
 
         val okHttpRequest = Request.Builder()
