@@ -15,7 +15,16 @@ impl SignaturesCollectorOrchestrator {
                 self.iniate_with_recovery_flow().await?;
             match iniate_with_recovery_result {
                 Some(value) => Some(value),
-                None => self.iniate_with_primary_flow().await?,
+                None => {
+                    // Only try primary flow if there's no existing recovery attempt
+                    // to cancel. If there is one, only Recovery role can cancel it,
+                    // so attempting Primary-initiated flow will fail on-chain.
+                    if !self.factory.has_existing_recovery_attempt() {
+                        self.iniate_with_primary_flow().await?
+                    } else {
+                        None
+                    }
+                }
             }
         };
 

@@ -1,9 +1,5 @@
 use crate::prelude::*;
 use manifests::IntoManifestBuilder;
-use radix_engine_interface::blueprints::access_controller::{
-    AccessControllerCancelRecoveryRoleRecoveryProposalManifestInput as ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput,
-    ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
-};
 
 #[extend::ext]
 pub impl TransactionManifest {
@@ -88,47 +84,6 @@ pub impl TransactionManifest {
         };
 
         manifest
-    }
-
-    /// Ensures that any pending recovery proposal initiated by the recovery role is
-    /// cancelled before the manifest executes other recovery-related instructions.
-    /// The cancellation is prepended only when the Access Controller state reports an
-    /// outstanding recovery attempt and the manifest will initiate recovery using the
-    /// recovery role (any `InitiateWithRecovery*` combination).
-    fn apply_cancel_recovery_proposal_instruction(
-        &self,
-        ac_state_details: &AccessControllerStateDetails,
-        role_combination: RolesExercisableInTransactionManifestCombination,
-    ) -> Self {
-        let recovery_attempt_exists = ac_state_details
-            .state
-            .recovery_role_recovery_attempt
-            .is_some();
-
-        let initiates_with_recovery_role = matches!(
-            role_combination,
-            RolesExercisableInTransactionManifestCombination::
-                InitiateWithRecoveryCompleteWithPrimary
-                | RolesExercisableInTransactionManifestCombination::
-                    InitiateWithRecoveryCompleteWithConfirmation
-                | RolesExercisableInTransactionManifestCombination::
-                    InitiateWithRecoveryDelayedCompletion
-        );
-
-        if !recovery_attempt_exists || !initiates_with_recovery_role {
-            return self.clone();
-        }
-
-        let mut builder = ScryptoTransactionManifestBuilder::new();
-        builder = builder.call_method(
-            ac_state_details.address.scrypto(),
-            SCRYPTO_ACCESS_CONTROLLER_CANCEL_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
-            ScryptoAccessControllerCancelRecoveryRoleRecoveryProposalManifestInput {},
-        );
-
-        builder = builder.extend_builder_with_manifest(self.clone());
-
-        TransactionManifest::sargon_built(builder, self.network_id())
     }
 }
 
@@ -607,130 +562,5 @@ mod tests {
         );
 
         assert_eq!(updated_manifest, manifest);
-    }
-
-    #[test]
-    fn prepends_cancel_recovery_when_attempt_exists_and_recovery_role_initiates(
-    ) {
-        let ac_address = AccessControllerAddress::sample_mainnet();
-        let manifest_str = format!(
-            r#"
-            CALL_METHOD
-                Address("{ac}")
-                "stop_timed_recovery"
-                Tuple()
-            ;
-            "#,
-            ac = ac_address,
-        );
-        let manifest = TransactionManifest::new(
-            &manifest_str,
-            NetworkID::Mainnet,
-            Blobs::default(),
-        )
-        .unwrap();
-
-        let ac_state_details = sample_ac_state_details(
-            ac_address.clone(),
-            Decimal192::ten(),
-            false,
-            true,
-        );
-
-        let updated_manifest = manifest.apply_cancel_recovery_proposal_instruction(
-            &ac_state_details,
-            RolesExercisableInTransactionManifestCombination::
-                InitiateWithRecoveryCompleteWithConfirmation,
-        );
-
-        manifest_eq(
-            updated_manifest,
-            format!(
-                r#"
-                CALL_METHOD
-                    Address("{ac}")
-                    "cancel_recovery_role_recovery_proposal"
-                ;
-                CALL_METHOD
-                    Address("{ac}")
-                    "stop_timed_recovery"
-                    Tuple()
-                ;
-                "#,
-                ac = ac_address,
-            ),
-        );
-    }
-
-    #[test]
-    fn skips_cancel_when_attempt_missing() {
-        let ac_address = AccessControllerAddress::sample_mainnet();
-        let manifest_str = format!(
-            r#"
-            CALL_METHOD
-                Address("{ac}")
-                "stop_timed_recovery"
-                Tuple()
-            ;
-            "#,
-            ac = ac_address,
-        );
-        let manifest = TransactionManifest::new(
-            &manifest_str,
-            NetworkID::Mainnet,
-            Blobs::default(),
-        )
-        .unwrap();
-
-        let ac_state_details = sample_ac_state_details(
-            ac_address.clone(),
-            Decimal192::ten(),
-            false,
-            false,
-        );
-
-        let updated_manifest = manifest.apply_cancel_recovery_proposal_instruction(
-            &ac_state_details,
-            RolesExercisableInTransactionManifestCombination::
-                InitiateWithRecoveryCompleteWithConfirmation,
-        );
-
-        manifest_eq(updated_manifest, manifest_str);
-    }
-
-    #[test]
-    fn skips_cancel_when_primary_role_initiates() {
-        let ac_address = AccessControllerAddress::sample_mainnet();
-        let manifest_str = format!(
-            r#"
-            CALL_METHOD
-                Address("{ac}")
-                "stop_timed_recovery"
-                Tuple()
-            ;
-            "#,
-            ac = ac_address,
-        );
-        let manifest = TransactionManifest::new(
-            &manifest_str,
-            NetworkID::Mainnet,
-            Blobs::default(),
-        )
-        .unwrap();
-
-        let ac_state_details = sample_ac_state_details(
-            ac_address.clone(),
-            Decimal192::ten(),
-            false,
-            true,
-        );
-
-        let updated_manifest = manifest.apply_cancel_recovery_proposal_instruction(
-            &ac_state_details,
-            RolesExercisableInTransactionManifestCombination::
-                InitiateWithPrimaryCompleteWithConfirmation,
-        );
-
-        manifest_eq(updated_manifest, manifest_str);
     }
 }

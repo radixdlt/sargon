@@ -67,6 +67,16 @@ impl SignaturesCollectorFactory {
             .initiate_with_recovery_delayed_completion
             .id()
     }
+
+    /// Returns true if there's an existing recovery attempt that must be cancelled.
+    /// When this is true, the Primary-initiated flow cannot succeed and should be skipped,
+    /// because only the Recovery role can cancel an existing recovery proposal.
+    pub fn has_existing_recovery_attempt(&self) -> bool {
+        self.ac_state_details
+            .state
+            .recovery_role_recovery_attempt
+            .is_some()
+    }
 }
 
 impl SignaturesCollectorFactory {
@@ -245,5 +255,78 @@ impl SignaturesCollectorFactory {
                 panic!("Confirmation role cannot iniate recovery")
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn has_existing_recovery_attempt_returns_true_when_attempt_exists() {
+        let ac_state_details = AccessControllerStateDetails::new(
+            AccessControllerAddress::sample_mainnet(),
+            AccessControllerFieldStateValue {
+                controlled_vault: EntityReference {
+                    entity_type: CoreApiEntityType::InternalFungibleVault,
+                    is_global: false,
+                    entity_address: "internal_vault".to_owned(),
+                },
+                xrd_fee_vault: None,
+                timed_recovery_delay_minutes: None,
+                recovery_badge_resource_address:
+                    ResourceAddress::sample_mainnet(),
+                is_primary_role_locked: false,
+                primary_role_recovery_attempt: None,
+                has_primary_role_badge_withdraw_attempt: false,
+                recovery_role_recovery_attempt: Some(
+                    RecoveryRoleRecoveryAttempt {
+                        recovery_proposal: RecoveryProposal {
+                            primary_role: AccessRule::AllowAll,
+                            recovery_role: AccessRule::AllowAll,
+                            confirmation_role: AccessRule::AllowAll,
+                            timed_recovery_delay_minutes: None,
+                        },
+                        allow_timed_recovery_after: None,
+                    },
+                ),
+                has_recovery_role_badge_withdraw_attempt: false,
+            },
+            Decimal192::ten(),
+        );
+
+        assert!(ac_state_details
+            .state
+            .recovery_role_recovery_attempt
+            .is_some());
+    }
+
+    #[test]
+    fn has_existing_recovery_attempt_returns_false_when_no_attempt() {
+        let ac_state_details = AccessControllerStateDetails::new(
+            AccessControllerAddress::sample_mainnet(),
+            AccessControllerFieldStateValue {
+                controlled_vault: EntityReference {
+                    entity_type: CoreApiEntityType::InternalFungibleVault,
+                    is_global: false,
+                    entity_address: "internal_vault".to_owned(),
+                },
+                xrd_fee_vault: None,
+                timed_recovery_delay_minutes: None,
+                recovery_badge_resource_address:
+                    ResourceAddress::sample_mainnet(),
+                is_primary_role_locked: false,
+                primary_role_recovery_attempt: None,
+                has_primary_role_badge_withdraw_attempt: false,
+                recovery_role_recovery_attempt: None,
+                has_recovery_role_badge_withdraw_attempt: false,
+            },
+            Decimal192::ten(),
+        );
+
+        assert!(ac_state_details
+            .state
+            .recovery_role_recovery_attempt
+            .is_none());
     }
 }
