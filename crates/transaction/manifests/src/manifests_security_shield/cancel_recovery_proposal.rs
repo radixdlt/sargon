@@ -27,9 +27,8 @@ impl TransactionManifestCancelRecoveryProposal for TransactionManifest {
         ac_state_details: &AccessControllerStateDetails,
         role_combination: RolesExercisableInTransactionManifestCombination,
     ) -> Self {
-        let recovery_attempt = &ac_state_details
-            .state
-            .recovery_role_recovery_attempt;
+        let recovery_attempt =
+            &ac_state_details.state.recovery_role_recovery_attempt;
 
         let initiates_with_recovery_role = matches!(
             role_combination,
@@ -46,19 +45,23 @@ impl TransactionManifestCancelRecoveryProposal for TransactionManifest {
         }
 
         let recovery_attempt = recovery_attempt.as_ref().unwrap();
-        let is_timed_recovery = recovery_attempt.allow_timed_recovery_after.is_some();
+        let is_timed_recovery =
+            recovery_attempt.allow_timed_recovery_after.is_some();
 
         let mut builder = ScryptoTransactionManifestBuilder::new();
 
         // If timed recovery is in progress, stop it first
         if is_timed_recovery {
-            let factors_and_time = AccessControllerFactorsAndTimeInput::with_recovery_proposal(
-                recovery_attempt.recovery_proposal.clone(),
-            );
+            let factors_and_time =
+                AccessControllerFactorsAndTimeInput::with_recovery_proposal(
+                    recovery_attempt.recovery_proposal.clone(),
+                );
             builder = builder.call_method(
                 ac_state_details.address.scrypto(),
                 SCRYPTO_ACCESS_CONTROLLER_STOP_TIMED_RECOVERY_IDENT,
-                ScryptoAccessControllerTimedConfirmRecoveryInput::from(&factors_and_time),
+                ScryptoAccessControllerTimedConfirmRecoveryInput::from(
+                    &factors_and_time,
+                ),
             );
         }
 
@@ -88,7 +91,11 @@ mod tests {
         address: AccessControllerAddress,
         include_recovery_attempt: bool,
     ) -> AccessControllerStateDetails {
-        sample_ac_state_details_with_timed(address, include_recovery_attempt, false)
+        sample_ac_state_details_with_timed(
+            address,
+            include_recovery_attempt,
+            false,
+        )
     }
 
     fn sample_ac_state_details_with_timed(
@@ -125,7 +132,11 @@ mod tests {
                 primary_role: AccessRule::AllowAll,
                 recovery_role: AccessRule::AllowAll,
                 confirmation_role: AccessRule::AllowAll,
-                timed_recovery_delay_minutes: if is_timed { Some(1440) } else { None },
+                timed_recovery_delay_minutes: if is_timed {
+                    Some(1440)
+                } else {
+                    None
+                },
             },
             allow_timed_recovery_after: if is_timed {
                 Some(ScryptoInstantDto {
@@ -283,11 +294,15 @@ mod tests {
         // Should prepend both stop_timed_recovery and cancel instructions
         let manifest_string = updated_manifest.to_string();
         assert!(manifest_string.contains("stop_timed_recovery"));
-        assert!(manifest_string.contains("cancel_recovery_role_recovery_proposal"));
+        assert!(
+            manifest_string.contains("cancel_recovery_role_recovery_proposal")
+        );
 
         // Stop should come before cancel
         let stop_pos = manifest_string.find("stop_timed_recovery").unwrap();
-        let cancel_pos = manifest_string.find("cancel_recovery_role_recovery_proposal").unwrap();
+        let cancel_pos = manifest_string
+            .find("cancel_recovery_role_recovery_proposal")
+            .unwrap();
         assert!(stop_pos < cancel_pos, "stop_timed_recovery should come before cancel_recovery_role_recovery_proposal");
     }
 }
