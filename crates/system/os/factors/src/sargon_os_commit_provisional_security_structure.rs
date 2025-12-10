@@ -23,10 +23,7 @@ impl OsCommitProvisionalSecurityState for SargonOS {
 
         // Fetch ancestor addresses
         let badge_owner_per_entity = gateway_client
-            .fetch_entities_badge_owners(
-                network_id,
-                vec![entity_address],
-            )
+            .fetch_entities_badge_owners(network_id, vec![entity_address])
             .await?;
 
         let maybe_badge_owner =

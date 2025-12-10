@@ -1,3 +1,7 @@
+CALL_METHOD
+    Address("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g")
+    "create_proof"
+;
 SET_METADATA
     Address("account_rdx12xq83qxwf09eqquqfdj8rv004attq5tgxejkn59rwu588jprdy0xcg")
     "owner_keys"
@@ -50,10 +54,7 @@ CALL_METHOD
                             Enum<4u8>(
                                 Array<Enum>(
                                     Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
-                                    ),
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
+                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[ffb6ce6e00a61ad41a596a2e01b2b1ee18863bbe1be5fed50d6c289218]")
                                     )
                                 )
                             )
@@ -128,10 +129,7 @@ CALL_METHOD
                             Enum<4u8>(
                                 Array<Enum>(
                                     Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
-                                    ),
-                                    Enum<0u8>(
-                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
+                                        NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[ffb6ce6e00a61ad41a596a2e01b2b1ee18863bbe1be5fed50d6c289218]")
                                     )
                                 )
                             )

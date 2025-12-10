@@ -1,5 +1,20 @@
 CALL_METHOD
     Address("accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm")
+    "create_proof"
+;
+SET_METADATA
+    Address("identity_rdx12fczzwcn62phgf099l2d2l2huz7rag7zglujrvc5cc0z9szs2dzevj")
+    "owner_keys"
+    Enum<143u8>(
+        Array<Enum>(
+            Enum<1u8>(
+                Bytes("675506ad8d7ce4c602cb06c593c0f10e1cc4dcdf2c4144360ef33ebeef")
+            )
+        )
+    )
+;
+CALL_METHOD
+    Address("accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm")
     "initiate_recovery_as_recovery"
         Tuple(
             Enum<2u8>(
@@ -141,15 +156,4 @@ CALL_METHOD
         Enum<1u8>(
             20160u32
         )
-;
-SET_METADATA
-    Address("identity_rdx12fczzwcn62phgf099l2d2l2huz7rag7zglujrvc5cc0z9szs2dzevj")
-    "owner_keys"
-    Enum<143u8>(
-        Array<Enum>(
-            Enum<1u8>(
-                Bytes("675506ad8d7ce4c602cb06c593c0f10e1cc4dcdf2c4144360ef33ebeef")
-            )
-        )
-    )
 ;

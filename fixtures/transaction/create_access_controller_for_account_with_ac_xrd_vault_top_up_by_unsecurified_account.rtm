@@ -1,4 +1,10 @@
 CALL_METHOD
+    Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
+    "withdraw"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("100")
+;
+CALL_METHOD
     Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")
     "securify"
 ;
@@ -72,10 +78,7 @@ CREATE_ACCESS_CONTROLLER
                         Enum<4u8>(
                             Array<Enum>(
                                 Enum<0u8>(
-                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[2dabcc6872c45a625bccc21be9e666bfbc62b1f87a16f3848dd877ba22]")
-                                ),
-                                Enum<0u8>(
-                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[7225b29de13d7d06e0e9f406fe15165677573c9106ee036ad52bee2864]")
+                                    NonFungibleGlobalId("resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[ffb6ce6e00a61ad41a596a2e01b2b1ee18863bbe1be5fed50d6c289218]")
                                 )
                             )
                         )
@@ -111,12 +114,6 @@ CREATE_ACCESS_CONTROLLER
     Enum<1u8>(
         AddressReservation("reservation1")
     )
-;
-CALL_METHOD
-    Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
-    "withdraw"
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("100")
 ;
 TAKE_FROM_WORKTOP
     Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")

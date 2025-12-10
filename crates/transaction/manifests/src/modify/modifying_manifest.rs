@@ -258,7 +258,7 @@ mod tests {
             CALL_METHOD
                 Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
                 "lock_fee"
-                Decimal("25")
+                Decimal("10")
             ;
             CALL_METHOD
                 Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")

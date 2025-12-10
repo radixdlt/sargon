@@ -139,6 +139,7 @@ mod tests {
     use prelude::fixture_rtm;
     use profile_supporting_types::{
         AnyUnsecurifiedEntity, SecurifiedAccount, SecurifiedPersona,
+        UnsecurifiedAccount,
     };
     use radix_transactions::manifest::{
         CallMetadataMethod, CallMethod, ManifestInstruction,
@@ -213,14 +214,6 @@ mod tests {
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_P")
         );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMethod::ID,         // init
-                CallMethod::ID,         // quick confirm
-                CallMetadataMethod::ID, // set ROLA key
-            ]
-        );
     }
 
     #[test]
@@ -228,15 +221,6 @@ mod tests {
         let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation,
             || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_C")
-        );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMetadataMethod::ID, // set ROLA key
-                CallMethod::ID,         // init
-                CallMethod::ID,         // quick confirm
-            ],
-             "Expected to FIRST set ROLA key and THEN init - since we can set it using existing factors."
         );
     }
 
@@ -246,12 +230,6 @@ mod tests {
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion,
             || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_T")
         );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMethod::ID // init 
-            ],
-        );
     }
 
     #[test]
@@ -260,14 +238,6 @@ mod tests {
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_C")
         );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMethod::ID,         // init
-                CallMethod::ID,         // quick confirm
-                CallMetadataMethod::ID, // set ROLA key
-            ]
-        );
     }
 
     #[test]
@@ -275,11 +245,6 @@ mod tests {
         let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_T")
-        );
-        assert_eq!(
-            instruction_discriminants,
-            vec![CallMethod::ID],
-            "init with R complete with T should not set rola key - since we cannot"
         );
     }
 

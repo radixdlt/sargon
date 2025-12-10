@@ -152,9 +152,9 @@ impl SignaturesCollectorFactory {
         // First handle the the case when the fee payer is another account
         if !fee_payer_is_securified_account {
             // Fee payer is some other account;
-            let fee_payer_account = self.profile.account_by_address(
-                self.lock_fee_data.fee_payer_address,
-            )?;
+            let fee_payer_account = self
+                .profile
+                .account_by_address(self.lock_fee_data.fee_payer_address)?;
             signable_entities.push(fee_payer_account);
         }
 

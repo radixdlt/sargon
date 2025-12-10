@@ -142,6 +142,10 @@ CALL_METHOD
             20160u32
         )
 ;
+CALL_METHOD
+    Address("accesscontroller_rdx1cdf8qgfmz0fgxap9u5haf4ta2lstc04rcfrljgdnznrpugkqv2wudm")
+    "create_proof"
+;
 SET_METADATA
     Address("identity_rdx12fczzwcn62phgf099l2d2l2huz7rag7zglujrvc5cc0z9szs2dzevj")
     "owner_keys"
