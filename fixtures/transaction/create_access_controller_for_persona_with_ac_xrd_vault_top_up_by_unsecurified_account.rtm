@@ -1,4 +1,10 @@
 CALL_METHOD
+    Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
+    "withdraw"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("100")
+;
+CALL_METHOD
     Address("identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw")
     "securify"
 ;
@@ -105,12 +111,6 @@ CREATE_ACCESS_CONTROLLER
     Enum<1u8>(
         AddressReservation("reservation1")
     )
-;
-CALL_METHOD
-    Address("account_rdx12y02nen8zjrq0k0nku98shjq7n05kvl3j9m5d3a6cpduqwzgmenjq7")
-    "withdraw"
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("100")
 ;
 TAKE_FROM_WORKTOP
     Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")

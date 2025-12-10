@@ -17,7 +17,7 @@ pub trait OsSigning {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent>;
 
     async fn sign_subintent(
@@ -47,14 +47,49 @@ impl OsSigning for SargonOS {
     async fn sign_transaction(
         &self,
         transaction_intent: TransactionIntent,
-        role_kind: RoleKind,
+        execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent> {
-        self.sign(
-            transaction_intent.clone(),
-            self.sign_transactions_interactor(),
-            SigningPurpose::sign_transaction(role_kind),
-        )
-        .await
+        match execution_summary.detailed_classification {
+            Some(DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses,
+            }) => {
+                return sign_access_controller_recovery_transaction(
+                    self,
+                    transaction_intent,
+                    ac_addresses[0],
+                )
+                .await;
+            }
+            Some(
+                DetailedManifestClass::AccessControllerStopTimedRecovery {
+                    ac_addresses,
+                },
+            ) => {
+                return sign_access_controller_stop_timed_recovery_transaction(
+                    self,
+                    transaction_intent,
+                    ac_addresses[0],
+                )
+                .await;
+            }
+            Some(DetailedManifestClass::SecurifyEntity { entities }) => {
+                let entity_address = entities.first().unwrap();
+                return sign_entity_securify(
+                    self,
+                    transaction_intent,
+                    *entity_address,
+                )
+                .await;
+            }
+            _ => {
+                self.sign(
+                    transaction_intent.clone(),
+                    self.sign_transactions_interactor(),
+                    SigningPurpose::sign_transaction(RoleKind::Primary),
+                )
+                .await
+            }
+        }
     }
 
     async fn sign_subintent(
@@ -103,6 +138,16 @@ mod test {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    fn default_sign_transaction_args() -> (ExecutionSummary, LockFeeData) {
+        (
+            ExecutionSummary::sample(),
+            LockFeeData::new_with_unsecurified_fee_payer(
+                AccountAddress::sample(),
+                Decimal192::one(),
+            ),
+        )
+    }
 
     #[actix_rt::test]
     async fn test_sign_auth_success() {
@@ -178,7 +223,7 @@ mod test {
         >(&sut.profile().unwrap());
 
         let signed = sut
-            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .sign_transaction(signable.clone(), ExecutionSummary::sample())
             .await
             .unwrap();
 
@@ -218,7 +263,7 @@ mod test {
         );
 
         let outcome = sut
-            .sign_transaction(transaction, RoleKind::Primary)
+            .sign_transaction(transaction, ExecutionSummary::sample())
             .await
             .unwrap();
 
@@ -238,7 +283,7 @@ mod test {
         );
 
         let outcome = sut
-            .sign_transaction(transaction, RoleKind::Primary)
+            .sign_transaction(transaction, ExecutionSummary::sample())
             .await
             .unwrap();
 
@@ -262,7 +307,7 @@ mod test {
         );
 
         let outcome = sut
-            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .sign_transaction(signable.clone(), ExecutionSummary::sample())
             .await;
 
         assert_eq!(
@@ -341,7 +386,7 @@ mod test {
             );
 
         let outcome = sut
-            .sign_transaction(signable.clone(), RoleKind::Primary)
+            .sign_transaction(signable.clone(), ExecutionSummary::sample())
             .await;
 
         assert_eq!(
@@ -391,8 +436,12 @@ mod test {
                 vec![],
             );
 
-        let outcome =
-            sut.sign_transaction(transaction, RoleKind::Primary).await;
+        let (execution_summary, lock_fee_data) =
+            default_sign_transaction_args();
+
+        let outcome = sut
+            .sign_transaction(transaction, ExecutionSummary::sample())
+            .await;
 
         assert_eq!(
             outcome,

@@ -34,6 +34,15 @@ pub enum DetailedManifestClassKind {
 
     #[display("SecurifyEntity")]
     SecurifyEntity,
+
+    #[display("AccessControllerRecovery")]
+    AccessControllerRecovery,
+
+    #[display("AccessControllerConfirmTimedRecovery")]
+    AccessControllerConfirmTimedRecovery,
+
+    #[display("AccessControllerStopTimedRecovery")]
+    AccessControllerStopTimedRecovery,
 }
 
 impl DetailedManifestClassKind {

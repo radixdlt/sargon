@@ -71,16 +71,51 @@ where
 /// Used by development, in production we SHOULD use the fee given by analyzing
 /// the manifest.
 fn default_fee() -> Decimal192 {
-    Decimal192::from(25)
+    Decimal192::from(10)
 }
 
+#[derive(Clone, PartialEq)]
+pub struct LockFeeDataWithResolvedAccount {
+    pub account: Account,
+    pub lock_fee_data: LockFeeData,
+}
+
+impl LockFeeDataWithResolvedAccount {
+    pub fn new(account: Account, lock_fee_data: LockFeeData) -> Self {
+        Self {
+            account,
+            lock_fee_data,
+        }
+    }
+}
+
+#[derive(Clone, PartialEq)]
 pub struct LockFeeData {
     pub fee_payer_address: AccountAddress,
     pub access_controller_address: Option<AccessControllerAddress>,
     fee: Option<Decimal192>,
+    pub fee_payer_xrd_balance: Option<Decimal192>,
 }
 
 impl LockFeeData {
+    pub fn new_with_account(
+        account: Account,
+        fee: Decimal192,
+        fee_payer_xrd_balance: Decimal192,
+    ) -> Self {
+        let maybe_ac = account
+            .security_state()
+            .as_securified()
+            .map(|sec| sec.access_controller_address);
+
+        Self {
+            fee_payer_address: account.address,
+            access_controller_address: maybe_ac,
+            fee: Some(fee),
+            fee_payer_xrd_balance: Some(fee_payer_xrd_balance),
+        }
+    }
+
     pub fn new_with_unsecurified_fee_payer(
         fee_payer_address: AccountAddress,
         fee: Decimal192,
@@ -89,6 +124,7 @@ impl LockFeeData {
             fee_payer_address,
             access_controller_address: None,
             fee: Some(fee),
+            fee_payer_xrd_balance: None,
         }
     }
 
@@ -101,6 +137,7 @@ impl LockFeeData {
             fee_payer_address,
             access_controller_address: Some(access_controller_address),
             fee: Some(fee),
+            fee_payer_xrd_balance: None,
         }
     }
 
@@ -112,6 +149,7 @@ impl LockFeeData {
             fee_payer_address,
             access_controller_address: None,
             fee: None,
+            fee_payer_xrd_balance: None,
         }
     }
 
@@ -220,7 +258,7 @@ mod tests {
             CALL_METHOD
                 Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
                 "lock_fee"
-                Decimal("25")
+                Decimal("10")
             ;
             CALL_METHOD
                 Address("account_rdx128dtethfy8ujrsfdztemyjk0kvhnah6dafr57frz85dcw2c8z0td87")

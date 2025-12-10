@@ -17,6 +17,16 @@ pub enum ProvisionalSecurifiedConfig {
     },
 }
 
+impl ProvisionalSecurifiedConfig {
+    pub fn get_security_structure_of_factor_instances(
+        &self,
+    ) -> SecurityStructureOfFactorInstances {
+        match self {
+            Self::FactorInstancesDerived { value } => value.clone(),
+        }
+    }
+}
+
 impl HasSampleValues for ProvisionalSecurifiedConfig {
     fn sample() -> Self {
         Self::FactorInstancesDerived {

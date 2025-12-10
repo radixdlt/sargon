@@ -82,7 +82,7 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
             TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
                 m,
                 estimated_xrd_fee,
-                entity_applying_shield
+                entity_applying_shield.access_controller_address(),
             )
         })
     }
@@ -99,7 +99,7 @@ impl ApplyShieldTransactionsManifestTxFeeModifier
             TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
                 m,
                 estimated_xrd_fee,
-                entity_applying_shield
+                entity_applying_shield.access_controller_address(),
             )
         })
     }

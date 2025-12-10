@@ -1,3 +1,4 @@
+mod access_controller_state_client;
 mod arculus_wallet_client;
 mod entropy_client;
 mod event_bus_client;
@@ -9,6 +10,7 @@ mod secure_storage_client;
 mod token_pricing_client;
 mod unsafe_storage_client;
 
+pub use access_controller_state_client::*;
 pub use arculus_wallet_client::*;
 pub use entropy_client::*;
 pub use event_bus_client::*;

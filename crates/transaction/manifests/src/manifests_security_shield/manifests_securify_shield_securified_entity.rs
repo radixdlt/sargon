@@ -45,6 +45,12 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         let mut builder = ScryptoTransactionManifestBuilder::new();
 
         let set_rola = |builder: ScryptoTransactionManifestBuilder| -> ScryptoTransactionManifestBuilder {
+            let mut builder = builder;
+            builder = builder.call_method(
+                ScryptoGlobalAddress::from(securified_entity.access_controller_address()),
+                SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
+                (),
+            );
             TransactionManifest::set_rola_key(
                 builder,
                 &security_structure_of_factor_instances
@@ -82,7 +88,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
         builder = builder.call_method(
             access_controller_address.scrypto(),
             init_method,
-            (init_input.deref(),),
+            init_input.deref(),
         );
 
         // QUICK CONFIRM RECOVERY - Only if we can exercise the confirmation role explicitly.
@@ -92,7 +98,7 @@ impl TransactionManifestSecurifySecurifiedEntity for TransactionManifest {
             builder = builder.call_method(
                 access_controller_address.scrypto(),
                 confirm_method,
-                (confirm_input.deref(),),
+                confirm_input.deref(),
             );
         }
 
@@ -131,11 +137,20 @@ mod tests {
     #![allow(non_snake_case)]
 
     use prelude::fixture_rtm;
-    use profile_supporting_types::{SecurifiedAccount, SecurifiedPersona};
+    use profile_supporting_types::{
+        AnyUnsecurifiedEntity, SecurifiedAccount, SecurifiedPersona,
+        UnsecurifiedAccount,
+    };
     use radix_transactions::manifest::{
         CallMetadataMethod, CallMethod, ManifestInstruction,
     };
     use sbor::SborEnum;
+    use scrypto_test::prelude::{
+        v2::AccessControllerV2Substate, FieldContentSource, FieldPayload,
+        RecoveryProposal, RecoveryRoleBadgeWithdrawAttemptState,
+        RecoveryRoleRecoveryAttemptState, RecoveryRoleRecoveryState,
+        SubstateDatabaseExtensions,
+    };
 
     use super::*;
 
@@ -165,7 +180,7 @@ mod tests {
         fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C_with_top_up_where_payer_is_entity_applying_shield");
         manifest_eq(manifest.clone(), expected_manifest_str);
 
-        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), entity_applying_shield);
+        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), entity_applying_shield.access_controller_address().clone());
 
         let expected_manifest_str =
         fixture_rtm!("update_shield_of_account_init_with_P_confirm_with_C_with_top_up_where_payer_is_entity_applying_shield_with_xrd_lock");
@@ -199,14 +214,6 @@ mod tests {
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_P")
         );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMethod::ID,         // init
-                CallMethod::ID,         // quick confirm
-                CallMetadataMethod::ID, // set ROLA key
-            ]
-        );
     }
 
     #[test]
@@ -214,15 +221,6 @@ mod tests {
         let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation,
             || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_C")
-        );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMetadataMethod::ID, // set ROLA key
-                CallMethod::ID,         // init
-                CallMethod::ID,         // quick confirm
-            ],
-             "Expected to FIRST set ROLA key and THEN init - since we can set it using existing factors."
         );
     }
 
@@ -232,12 +230,6 @@ mod tests {
             RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryDelayedCompletion,
             || fixture_rtm!("update_shield_of_persona_init_with_P_confirm_with_T")
         );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMethod::ID // init 
-            ],
-        );
     }
 
     #[test]
@@ -245,14 +237,6 @@ mod tests {
         let instruction_discriminants = test_update_shield_of_securified_persona(
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_C")
-        );
-        assert_eq!(
-            instruction_discriminants,
-            vec![
-                CallMethod::ID,         // init
-                CallMethod::ID,         // quick confirm
-                CallMetadataMethod::ID, // set ROLA key
-            ]
         );
     }
 
@@ -262,10 +246,100 @@ mod tests {
             RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion,
             || fixture_rtm!("update_shield_of_persona_init_with_R_confirm_with_T")
         );
-        assert_eq!(
-            instruction_discriminants,
-            vec![CallMethod::ID],
-            "init with R complete with T should not set rola key - since we cannot"
+    }
+
+    #[test]
+    fn initiate_with_recovery_complete_with_confirmation() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithConfirmation);
+    }
+
+    #[test]
+    fn initiate_with_recovery_complete_with_primary() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryCompleteWithPrimary);
+    }
+
+    #[test]
+    fn initiate_with_primary_complete_with_confirmation() {
+        assert_recovery_with_quick_confirmation(RolesExercisableInTransactionManifestCombination::InitiateWithPrimaryCompleteWithConfirmation);
+    }
+
+    #[test]
+    fn initiate_with_recovery_delayed_completion() {
+        let (ac_substate, ac_rule_set) = execute_recovery_transaction(RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion);
+
+        // Expect rule set to not change. The AC is initially configured with `sample_sim`, and recovery is proposed with `sample_sim_other`
+        let expected_rule_set =
+            SecurityStructureOfFactorInstances::sample_sim()
+                .matrix_of_factors
+                .into();
+        pretty_assertions::assert_eq!(ac_rule_set, expected_rule_set);
+
+        let proposed_sec_structure =
+            SecurityStructureOfFactorInstances::sample_other_sim();
+        let proposed_recovery_rule_set: ScryptoRuleSet =
+            proposed_sec_structure.matrix_of_factors.clone().into();
+
+        let (_, _, _, recovery_role_recovery_attempt, _) = ac_substate.state;
+        let expected_recovery_attempt =
+            RecoveryRoleRecoveryAttemptState::RecoveryAttempt(
+                RecoveryRoleRecoveryState::TimedRecovery {
+                    proposal: RecoveryProposal {
+                        rule_set: proposed_recovery_rule_set,
+                        timed_recovery_delay_in_minutes: Some(
+                            proposed_sec_structure
+                                .timed_recovery_delay_in_minutes(),
+                        ),
+                    },
+                    // just the sec structure delay, since the ledger epoch in seconds is zero, it wasn't `advanced in execute_recovery_transaction``
+                    timed_recovery_allowed_after: ScryptoInstant::new(
+                        i64::from(
+                            proposed_sec_structure
+                                .timed_recovery_delay_in_minutes()
+                                * 60,
+                        ),
+                    ),
+                },
+            );
+
+        pretty_assertions::assert_eq!(
+            recovery_role_recovery_attempt,
+            expected_recovery_attempt
         );
+    }
+
+    fn execute_recovery_transaction(
+        roles_combination: RolesExercisableInTransactionManifestCombination,
+    ) -> (AccessControllerV2StateV2, ScryptoRuleSet) {
+        let sec_structure = SecurityStructureOfFactorInstances::sample_sim();
+        let unsecurified_acc = UnsecurifiedAccount::sample_sim_account();
+
+        let mut ledger =
+            LedgerSimulatorBuilder::new().without_kernel_trace().build();
+
+        // Securify the account by creating the AC
+        let securified_account = ledger
+            .securify_account(unsecurified_acc.clone(), sec_structure.clone());
+
+        // Update the security structure by exercising the recovery roles
+        let updated_sec_structure =
+            SecurityStructureOfFactorInstances::sample_other_sim();
+
+        ledger.execute_recovery_transaction(
+            securified_account,
+            updated_sec_structure,
+            roles_combination,
+        )
+    }
+
+    fn assert_recovery_with_quick_confirmation(
+        roles_combination: RolesExercisableInTransactionManifestCombination,
+    ) {
+        let (_, rule_set) = execute_recovery_transaction(roles_combination);
+
+        let expected_rule_set =
+            SecurityStructureOfFactorInstances::sample_other_sim()
+                .matrix_of_factors
+                .into();
+        pretty_assertions::assert_eq!(rule_set, expected_rule_set);
     }
 }

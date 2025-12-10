@@ -41,6 +41,15 @@ impl From<InternalTransactionManifest> for TransactionManifest {
 decl_conversion_tests_for!(TransactionManifest);
 
 #[uniffi::export]
+pub fn is_access_controller_timed_recovery_manifest(
+    manifest: &TransactionManifest,
+) -> bool {
+    manifest
+        .into_internal()
+        .is_access_controller_timed_recovery_manifest()
+}
+
+#[uniffi::export]
 pub fn new_transaction_manifest_from_instructions_string_and_blobs(
     instructions_string: String,
     network_id: NetworkID,

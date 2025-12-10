@@ -1,7 +1,10 @@
 [package]
 name = "signing-traits"
-version = "1.2.41"
+version = "1.2.42"
 edition = "2021"
+
+[features]
+mock = ["mockall"]
 
 [dependencies]
 # === SARGON CRATES ===
@@ -31,3 +34,8 @@ derive_more = { workspace = true }
 indexmap = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
+mockall = { workspace = true, optional = true }
+
+[dev-dependencies]
+actix-rt = { workspace = true }
+mockall = { workspace = true }

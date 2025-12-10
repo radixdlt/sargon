@@ -1,7 +1,10 @@
 [package]
 name = "sargon-os-signing"
-version = "1.2.41"
+version = "1.2.42"
 edition = "2021"
+
+[features]
+mock = ["mockall"]
 
 [dependencies]
 # === SARGON CRATES ===
@@ -15,6 +18,9 @@ profile-security-structures = { workspace = true }
 radix-connect-models = { workspace = true }
 profile = { workspace = true }
 profile-logic = { workspace = true }
+manifests = { workspace = true }
+profile-supporting-types = { workspace = true }
+radix-engine-interface = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 # None
@@ -25,6 +31,8 @@ async-trait = { workspace = true }
 derive_more = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true }
+extend = { workspace = true }
+mockall = { workspace = true, optional = true }
 
 [dev-dependencies]
 # === SARGON CRATES ===
@@ -34,3 +42,4 @@ interactors = { workspace = true }
 clients = { workspace = true }
 factor-instances-provider = { workspace = true }
 key-derivation-traits = { workspace = true }
+mockall = { workspace = true }

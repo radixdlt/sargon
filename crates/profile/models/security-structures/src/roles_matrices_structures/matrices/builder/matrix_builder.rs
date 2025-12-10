@@ -381,10 +381,9 @@ impl MatrixBuilder {
 
     pub fn set_time_until_delayed_confirmation_is_callable(
         &mut self,
-        number_of_days: u16,
+        time_period: TimePeriod,
     ) -> MatrixBuilderMutateResult {
-        self.time_until_delayed_confirmation_is_callable =
-            TimePeriod::with_days(number_of_days);
+        self.time_until_delayed_confirmation_is_callable = time_period;
 
         self.validate_time_until_delayed_confirmation_is_callable()
     }

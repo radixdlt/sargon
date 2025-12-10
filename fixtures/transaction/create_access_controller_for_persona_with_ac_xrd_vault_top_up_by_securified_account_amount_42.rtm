@@ -1,4 +1,14 @@
 CALL_METHOD
+    Address("accesscontroller_rdx1cdgmx69r8532n7e0w6sgs8lrctmdzsmylak75a0khwmp55pau5p8pr")
+    "create_proof"
+;
+CALL_METHOD
+    Address("account_rdx12xek3geay25lktmk5zyplc7z7mg5xe8ldh48ta4mkcd9q0v0q6l8y6")
+    "withdraw"
+    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
+    Decimal("42")
+;
+CALL_METHOD
     Address("identity_rdx12tw6rt9c4l56rz6p866e35tmzp556nymxmpj8hagfewq82kspctdyw")
     "securify"
 ;
@@ -105,16 +115,6 @@ CREATE_ACCESS_CONTROLLER
     Enum<1u8>(
         AddressReservation("reservation1")
     )
-;
-CALL_METHOD
-    Address("accesscontroller_rdx1cdgmx69r8532n7e0w6sgs8lrctmdzsmylak75a0khwmp55pau5p8pr")
-    "create_proof"
-;
-CALL_METHOD
-    Address("account_rdx12xek3geay25lktmk5zyplc7z7mg5xe8ldh48ta4mkcd9q0v0q6l8y6")
-    "withdraw"
-    Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")
-    Decimal("42")
 ;
 TAKE_FROM_WORKTOP
     Address("resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd")

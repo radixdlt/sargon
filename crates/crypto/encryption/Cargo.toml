@@ -1,6 +1,6 @@
 [package]
 name = "encryption"
-version = "1.2.41"
+version = "1.2.42"
 edition = "2021"
 
 [dependencies]

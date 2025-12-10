@@ -12,7 +12,6 @@ mod summary;
 mod third_party_deposit_update;
 
 pub mod prelude {
-
     pub(crate) use crate::bucket_factory;
 
     pub use crate::delete_account::*;
@@ -48,9 +47,17 @@ pub mod prelude {
     pub(crate) use radix_engine_toolkit::functions::transaction_v1::manifest::dynamically_analyze as RET_dynamically_analyze;
     pub(crate) use radix_engine_toolkit_common::receipt::RuntimeToolkitTransactionReceipt as ScryptoRuntimeToolkitTransactionReceipt;
 
+    #[cfg(test)]
+    pub(crate) use radix_engine::blueprints::access_controller::v2::*;
+    #[cfg(test)]
+    pub(crate) use sbor::versioned::*;
+
     pub(crate) use radix_engine_interface::{
         blueprints::{
-            access_controller::RuleSet as ScryptoRuleSet,
+            access_controller::{
+                RuleSet as ScryptoRuleSet,
+                ACCESS_CONTROLLER_CREATE_PROOF_IDENT as SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
+            },
             account::{
                 DefaultDepositRule as ScryptoDefaultDepositRule,
                 ACCOUNT_SECURIFY_IDENT as SCRYPTO_ACCOUNT_SECURIFY_IDENT,
@@ -70,6 +77,8 @@ pub mod prelude {
             UncheckedUrl as ScryptoUncheckedUrl,
         },
     };
+    #[cfg(test)]
+    pub(crate) use scrypto_test::ledger_simulator::*;
 
     pub(crate) use serde::{Deserialize, Serialize};
 

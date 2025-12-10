@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os"
-version = "1.2.41"
+version = "1.2.42"
 edition = "2021"
 
 [dependencies]
@@ -16,11 +16,13 @@ interactors = { workspace = true }
 sub-systems = { workspace = true }
 host-info = { workspace = true }
 key-derivation-traits = { workspace = true }
-signing-traits = { workspace = true }
+signing-traits = { workspace = true, features = ["mock"] }
 factor-instances-provider = { workspace = true }
+manifests = { workspace = true }
+keys-collector = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
-# None
+radix-engine-interface = { workspace = true }
 
 # ==== EXTERNAL DEPENDENCIES ====
 async-trait = { workspace = true }

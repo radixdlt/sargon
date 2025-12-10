@@ -1,6 +1,6 @@
 [package]
 name = "gateway-models"
-version = "1.2.41"
+version = "1.2.42"
 edition = "2021"
 
 
@@ -22,3 +22,4 @@ radix-engine-interface = { workspace = true }
 enum-as-inner = { workspace = true }
 derive_more = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
