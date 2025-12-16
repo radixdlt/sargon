@@ -134,6 +134,18 @@ impl MnemonicBuilder {
         Ok(self)
     }
 
+    /// Updates the passphrase associated with the generated mnemonic.
+    pub fn set_passphrase(&self, passphrase: BIP39Passphrase) -> &Self {
+        let mut mnemonic_with_passphrase =
+            self.mnemonic_with_passphrase.write().unwrap();
+        let Some(mnemonic_with_passphrase) = mnemonic_with_passphrase.as_mut()
+        else {
+            panic!("Mnemonic with passphrase should be created first");
+        };
+        mnemonic_with_passphrase.passphrase = passphrase;
+        self
+    }
+
     fn set_mnemonic_with_passphrase(&self, mnemonic: Mnemonic) {
         *self.mnemonic_with_passphrase.write().unwrap() =
             Some(MnemonicWithPassphrase::new(mnemonic));
@@ -315,6 +327,18 @@ mod tests {
         )
         .unwrap();
         assert!(sut.mnemonic_with_passphrase.read().unwrap().is_some());
+    }
+
+    #[test]
+    fn set_passphrase_updates_existing_mnemonic() {
+        let sut = SUT::sample();
+        let passphrase = BIP39Passphrase::new("custom passphrase");
+        sut.set_passphrase(passphrase.clone());
+
+        pretty_assertions::assert_eq!(
+            sut.get_mnemonic_with_passphrase().passphrase,
+            passphrase
+        );
     }
 
     #[test]
