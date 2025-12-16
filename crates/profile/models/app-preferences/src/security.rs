@@ -222,15 +222,8 @@ mod tests {
                                     {
                                         "discriminator": "fromHash",
                                         "fromHash": {
-                                            "kind": "device",
-                                            "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
-                                        }
-                                    },
-                                    {
-                                        "discriminator": "fromHash",
-                                        "fromHash": {
-                                            "kind": "ledgerHQHardwareWallet",
-                                            "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
+                                            "kind": "arculusCard",
+                                            "body": "12f36554769cd96614776e6dbd5629825b8e87366eec5e515de32bb1ea153820"
                                         }
                                     }
                                 ]

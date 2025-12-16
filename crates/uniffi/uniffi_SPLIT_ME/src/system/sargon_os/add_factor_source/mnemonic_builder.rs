@@ -140,6 +140,14 @@ impl MnemonicBuilder {
                 .into_result()
         })
     }
+
+    /// Updates the passphrase associated with the managed mnemonic.
+    pub fn set_passphrase(
+        self: Arc<Self>,
+        passphrase: BIP39Passphrase,
+    ) -> Arc<Self> {
+        self.set(|builder| builder.set_passphrase(passphrase.into_internal()))
+    }
 }
 
 #[uniffi::export]
