@@ -310,21 +310,21 @@ sargon-uniffi-conversion-macros = { path = "crates/uniffi/conversion-macros" }
 
 
 # ==== RADIX DEPENDENCIES ====
-radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
+radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f", features = [
     "serde",
     "secp256k1_sign_and_validate",
 ] }
-radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "89ebf30287ddc425ab232dbc3f651b1a8ecef2e2" }
-radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e", features = [
+radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
+radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
+radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "655fca8e6b5d4438836de7e8d7a554575efb4964" }
+radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
+radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f", features = [
     "serde",
 ] }
-radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-scrypto-test = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
-sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e" }
+radix-transactions = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
+scrypto-test = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
+sbor = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
 
 
 # ==== EXTERNAL DEPENDENCIES ====
@@ -351,7 +351,7 @@ bip39 = { version = "=2.0.0", default-features = true, features = [
 ] }
 
 camino = { version = "1.0.8", default-features = false }
-cargo_toml = { version = "0.15.3", default-features = false }
+cargo_toml = { version = "0.22.3", default-features = false }
 clap = { version = "4.5.1", default-features = false, features = [
     "std",
     "derive",
