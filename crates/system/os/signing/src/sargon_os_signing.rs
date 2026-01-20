@@ -118,7 +118,7 @@ impl OsSigning for SargonOS {
             outcome.signatures_of_successful_transactions();
 
         let external_accounts =
-            self.resolve_external_accounts_for_subintent(&subintent).await?;
+            resolve_external_accounts_for_subintent(self, &subintent).await?;
         let external_signatures = collect_external_signatures(
             subintent.clone(),
             external_accounts,
@@ -162,21 +162,97 @@ impl OsSigning for SargonOS {
 impl FactorInstanceLookupByNftIds for SargonOS {
     async fn factor_instances_for_nfts(
         &self,
-        _nft_ids: Vec<NonFungibleGlobalId>,
+        nft_ids: Vec<NonFungibleGlobalId>,
     ) -> Result<Vec<HierarchicalDeterministicFactorInstance>> {
-        // TODO: wire the real lookup for NFT -> factor instance mapping.
-        Ok(Vec::new())
+        if nft_ids.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let instances = mock_factor_instances_json()
+            .into_iter()
+            .map(|raw| {
+                serde_json::from_str::<HierarchicalDeterministicFactorInstance>(
+                    raw,
+                )
+                .map_err(|e| CommonError::Unknown {
+                    error_message: format!(
+                        "Failed to parse mock factor instance: {:?}",
+                        e
+                    ),
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(instances)
     }
 }
 
-impl SargonOS {
-    async fn resolve_external_accounts_for_subintent(
-        &self,
-        subintent: &Subintent,
-    ) -> Result<Vec<ExternalAccountAccessRule>> {
-        let summary = subintent.manifest.summary()?;
-        let profile = self.profile()?;
+fn mock_factor_instances_json() -> [&'static str; 2] {
+    [
+        r#"{
+                "factorSourceID": {
+                  "discriminator": "fromHash",
+                  "fromHash": {
+                    "kind": "device",
+                    "body": "882f0061b30bf8c8b6886ea3f96ec7ae13b59bad55155a54b57739c6be004fcd"
+                  }
+                },
+                "badge": {
+                  "discriminator": "virtualSource",
+                  "virtualSource": {
+                    "discriminator": "hierarchicalDeterministicPublicKey",
+                    "hierarchicalDeterministicPublicKey": {
+                      "publicKey": {
+                        "curve": "curve25519",
+                        "compressedData": "e904d627969460fb049ad1d5e5b53f8dfae22b97b908ce7e4d0e793ffff9eaae"
+                      },
+                      "derivationPath": {
+                        "scheme": "cap26",
+                        "path": "m/44H/1022H/2H/525H/1460H/1S"
+                      }
+                    }
+                  }
+                }
+              }"#,
+            r#"{
+                "factorSourceID": {
+                  "discriminator": "fromHash",
+                  "fromHash": {
+                    "kind": "device",
+                    "body": "f1c0109e39908610c2146cda7d7676a1993ad270cd4756cb472219950ecef2fb"
+                  }
+                },
+                "badge": {
+                  "discriminator": "virtualSource",
+                  "virtualSource": {
+                    "discriminator": "hierarchicalDeterministicPublicKey",
+                    "hierarchicalDeterministicPublicKey": {
+                      "publicKey": {
+                        "curve": "curve25519",
+                        "compressedData": "44ebecae39e5ca8ae58e1fe4963b6412e5791a3bc2cc160e2e7c8261a72ccaf5"
+                      },
+                      "derivationPath": {
+                        "scheme": "cap26",
+                        "path": "m/44H/1022H/2H/525H/1460H/0S"
+                      }
+                    }
+                  }
+                }
+              }"#,
+    ]
+}
 
+async fn resolve_external_accounts_for_subintent(
+    os: &SargonOS,
+    subintent: &Subintent,
+) -> Result<Vec<ExternalAccountNftRequirements>> {
+        let summary = subintent.manifest.summary()?;
+        let profile = os.profile()?;
+
+        debug!(
+            "Resolving external accounts for subintent: {:?}",
+            subintent.get_id()
+        );
         let external_account_addresses = summary
             .addresses_of_accounts_requiring_auth
             .into_iter()
@@ -184,10 +260,15 @@ impl SargonOS {
             .collect_vec();
 
         if external_account_addresses.is_empty() {
+            debug!("No external accounts detected for subintent");
             return Ok(Vec::new());
         }
 
-        let (gateway_client, network_id) = self.gateway_client_on()?;
+        debug!(
+            "External accounts detected for subintent: {:?}",
+            external_account_addresses
+        );
+        let (gateway_client, network_id) = os.gateway_client_on()?;
         let badge_owners = gateway_client
             .fetch_entities_badge_owners(
                 network_id,
@@ -196,6 +277,42 @@ impl SargonOS {
                     .map(|address| {
                         AddressOfAccountOrPersona::Account(*address)
                     })
+                    .collect_vec(),
+            )
+            .await?;
+
+        debug!(
+            "Resolved badge owners for external accounts: {:?}",
+            badge_owners
+        );
+        let account_role_assignments =
+            fetch_role_assignments_for_addresses(
+                os,
+                external_account_addresses
+                    .iter()
+                    .map(|address| Address::from(*address))
+                    .collect_vec(),
+            )
+            .await?;
+        let access_controller_addresses = badge_owners
+            .values()
+            .filter_map(|owner| {
+                owner
+                    .as_ref()
+                    .and_then(|address| address.as_access_controller())
+                    .cloned()
+            })
+            .collect::<IndexSet<_>>();
+        debug!(
+            "Access controller addresses for external accounts: {:?}",
+            access_controller_addresses
+        );
+        let access_controller_role_assignments =
+            fetch_role_assignments_for_addresses(
+                os,
+                access_controller_addresses
+                    .iter()
+                    .map(|address| Address::from(*address))
                     .collect_vec(),
             )
             .await?;
@@ -209,43 +326,189 @@ impl SargonOS {
             let Some(access_controller_address) =
                 maybe_badge_owner.and_then(|a| a.as_access_controller().cloned())
             else {
+                debug!(
+                    "Skipping external account without access controller owner: {}",
+                    address
+                );
                 continue;
             };
 
-            let access_rule = self
-                .access_rule_for_access_controller(access_controller_address)
-                .await?;
-            external_accounts.push(ExternalAccountAccessRule {
+            let account_assignments = account_role_assignments
+                .get(&Address::from(address))
+                .ok_or(CommonError::Unknown {
+                    error_message: format!(
+                        "Missing role assignments for account {}",
+                        address
+                    ),
+                })?;
+            let account_rule =
+                access_rule_from_explicit_rule(&account_assignments.owner.rule)
+                    .ok_or(CommonError::Unknown {
+                        error_message: format!(
+                            "Missing access rule for account {}",
+                            address
+                        ),
+                    })?;
+
+            debug!(
+                "Account access rule for external account {}: {:?}",
+                address, account_rule
+            );
+            let mut required_nft_ids =
+                extract_nft_ids_from_access_rule(&account_rule)?;
+
+            if let Some(assignments) =
+                access_controller_role_assignments.get(&Address::from(
+                    access_controller_address,
+                ))
+            {
+                debug!(
+                    "Access controller role assignments for {}: {:?}",
+                    access_controller_address, assignments
+                );
+                for rule in access_rules_from_access_controller(assignments) {
+                    debug!(
+                        "Access controller rule for {}: {:?}",
+                        access_controller_address, rule
+                    );
+                    required_nft_ids
+                        .extend(extract_nft_ids_from_access_rule(&rule)?);
+                }
+            } else {
+                debug!(
+                    "No access controller role assignments found for {}",
+                    access_controller_address
+                );
+            }
+
+            debug!(
+                "Required NFT ids for external account {}: {:?}",
+                address, required_nft_ids
+            );
+            external_accounts.push(ExternalAccountNftRequirements {
                 owner: owner_address,
-                access_rule,
+                required_nft_ids,
             });
         }
 
+        debug!(
+            "Resolved external account NFT requirements: {:?}",
+            external_accounts
+        );
         Ok(external_accounts)
+}
+
+async fn fetch_role_assignments_for_addresses(
+    os: &SargonOS,
+    addresses: Vec<Address>,
+) -> Result<IndexMap<Address, ComponentEntityRoleAssignments>> {
+        if addresses.is_empty() {
+            return Ok(IndexMap::new());
+        }
+
+        let gateway_client = os.gateway_client()?;
+        let ledger_state = gateway_client.gateway_status().await?.ledger_state;
+        let request = StateEntityDetailsRequest::new(
+            addresses.clone(),
+            Some(ledger_state.into()),
+            None,
+        );
+        let response = gateway_client.state_entity_details(request).await?;
+
+        let mut assignments =
+            IndexMap::<Address, ComponentEntityRoleAssignments>::new();
+        for address in addresses {
+            let item = response.items.iter().find(|item| {
+                item.address == address
+            }).ok_or(CommonError::GWMissingResponseItem {
+                item: "StateEntityDetailsResponseItem".to_owned(),
+            })?;
+
+            let details = item.details.as_ref().ok_or(CommonError::Unknown {
+                error_message: format!(
+                    "Missing entity details for address {}",
+                    address
+                ),
+            })?;
+            let role_assignments =
+                role_assignments_from_details(details).ok_or(
+                    CommonError::Unknown {
+                        error_message: format!(
+                            "Missing role assignments for address {}",
+                            address
+                        ),
+                    },
+                )?;
+            assignments.insert(address, role_assignments);
+        }
+
+        Ok(assignments)
+}
+
+fn role_assignments_from_details(
+    details: &StateEntityDetailsResponseItemDetails,
+) -> Option<ComponentEntityRoleAssignments> {
+    match details {
+        StateEntityDetailsResponseItemDetails::FungibleResource(details) => {
+            Some(details.role_assignments.clone())
+        }
+        StateEntityDetailsResponseItemDetails::NonFungibleResource(
+            details,
+        ) => Some(details.role_assignments.clone()),
+        StateEntityDetailsResponseItemDetails::Package(details) => {
+            details.role_assignments.clone()
+        }
+        StateEntityDetailsResponseItemDetails::Component(details) => {
+            details.role_assignments.clone()
+        }
+        StateEntityDetailsResponseItemDetails::FungibleVault
+        | StateEntityDetailsResponseItemDetails::NonFungibleVault => None,
     }
 }
 
-impl SargonOS {
-    async fn access_rule_for_access_controller(
-        &self,
-        access_controller_address: AccessControllerAddress,
-    ) -> Result<gateway_models::prelude::AccessRule> {
-        let gateway_client = self.gateway_client()?;
-        let details = gateway_client
-            .fetch_access_controller_details(access_controller_address)
-            .await?;
+fn access_rule_from_explicit_rule(rule: &ExplicitRule) -> Option<AccessRule> {
+    Some(rule.clone())
+}
 
-        if let Some(attempt) = details.state.primary_role_recovery_attempt {
-            return Ok(attempt.recovery_proposal.primary_role);
-        }
-        if let Some(attempt) = details.state.recovery_role_recovery_attempt {
-            return Ok(attempt.recovery_proposal.primary_role);
-        }
-
-        Err(CommonError::Unknown {
-            error_message: "Access controller access rule unavailable; TODO: fetch configured rule set from access controller or account entity.".to_string(),
+fn access_rules_from_access_controller(
+    assignments: &ComponentEntityRoleAssignments,
+) -> Vec<AccessRule> {
+    let rules: Vec<AccessRule> = assignments
+        .entries
+        .iter()
+        .filter(|entry| is_access_controller_role_key(&entry.role_key))
+        .filter_map(|entry| {
+            access_rule_from_role_assignment(entry, &assignments.owner.rule)
         })
+        .collect();
+    if rules.is_empty() {
+        debug!("No access controller role assignments matched primary/recovery/confirmation keys");
     }
+    rules
+}
+
+fn access_rule_from_role_assignment(
+    entry: &ComponentEntityRoleAssignmentEntry,
+    owner_rule: &ExplicitRule,
+) -> Option<AccessRule> {
+    match entry.assignment.resolution {
+        RoleAssignmentResolution::Owner => {
+            access_rule_from_explicit_rule(owner_rule)
+        }
+        RoleAssignmentResolution::Explicit => entry
+            .assignment
+            .explicit_rule
+            .as_ref()
+            .and_then(access_rule_from_explicit_rule),
+    }
+}
+
+fn is_access_controller_role_key(role_key: &RoleKey) -> bool {
+    role_key.module == ObjectModuleId::Main
+        && matches!(
+            role_key.name.as_str(),
+            "primary" | "recovery" | "confirmation"
+        )
 }
 
 #[cfg(test)]
@@ -263,6 +526,117 @@ mod test {
                 Decimal192::one(),
             ),
         )
+    }
+
+    #[test]
+    fn access_controller_role_key_filtering() {
+        let primary = RoleKey::new("primary".to_string(), ObjectModuleId::Main);
+        let recovery =
+            RoleKey::new("recovery".to_string(), ObjectModuleId::Main);
+        let confirmation = RoleKey::new(
+            "confirmation".to_string(),
+            ObjectModuleId::Main,
+        );
+        let depositor =
+            RoleKey::new("depositor".to_string(), ObjectModuleId::Main);
+        let metadata_primary =
+            RoleKey::new("primary".to_string(), ObjectModuleId::Metadata);
+
+        assert!(is_access_controller_role_key(&primary));
+        assert!(is_access_controller_role_key(&recovery));
+        assert!(is_access_controller_role_key(&confirmation));
+        assert!(!is_access_controller_role_key(&depositor));
+        assert!(!is_access_controller_role_key(&metadata_primary));
+    }
+
+    #[test]
+    fn access_rules_from_access_controller_collects_primary_roles() {
+        let owner_rule = AccessRule::Protected {
+            access_rule: CompositeRequirement::AnyOf { access_rules: vec![] },
+        };
+        let explicit_primary = AccessRule::AllowAll;
+        let explicit_recovery = AccessRule::DenyAll;
+
+        let entries = vec![
+            ComponentEntityRoleAssignmentEntry::new(
+                RoleKey::new("primary".to_string(), ObjectModuleId::Main),
+                ComponentEntityRoleAssignmentEntryAssignment::new(
+                    RoleAssignmentResolution::Explicit,
+                    explicit_primary.clone(),
+                ),
+            ),
+            ComponentEntityRoleAssignmentEntry::new(
+                RoleKey::new("recovery".to_string(), ObjectModuleId::Main),
+                ComponentEntityRoleAssignmentEntryAssignment::new(
+                    RoleAssignmentResolution::Explicit,
+                    explicit_recovery.clone(),
+                ),
+            ),
+            ComponentEntityRoleAssignmentEntry::new(
+                RoleKey::new("confirmation".to_string(), ObjectModuleId::Main),
+                ComponentEntityRoleAssignmentEntryAssignment::new(
+                    RoleAssignmentResolution::Owner,
+                    None,
+                ),
+            ),
+            ComponentEntityRoleAssignmentEntry::new(
+                RoleKey::main_depositor(),
+                ComponentEntityRoleAssignmentEntryAssignment::new(
+                    RoleAssignmentResolution::Explicit,
+                    AccessRule::AllowAll,
+                ),
+            ),
+        ];
+
+        let assignments = ComponentEntityRoleAssignments::new(
+            ComponentEntityRoleAssignmentOwner::new(owner_rule.clone()),
+            entries,
+        );
+
+        let rules = access_rules_from_access_controller(&assignments);
+        assert_eq!(rules.len(), 3);
+        assert!(rules.contains(&explicit_primary));
+        assert!(rules.contains(&explicit_recovery));
+        assert!(rules.contains(&owner_rule));
+    }
+
+    #[test]
+    fn role_assignments_from_details_component() {
+        let assignments = ComponentEntityRoleAssignments::sample();
+        let details = StateEntityDetailsResponseItemDetails::Component(
+            StateEntityDetailsResponseComponentDetails::new(assignments.clone()),
+        );
+
+        assert_eq!(
+            role_assignments_from_details(&details),
+            Some(assignments)
+        );
+
+        let vault_details = StateEntityDetailsResponseItemDetails::FungibleVault;
+        assert!(role_assignments_from_details(&vault_details).is_none());
+    }
+
+    #[test]
+    fn mock_factor_instance_json_parses() {
+        let instances = mock_factor_instances_json()
+            .into_iter()
+            .map(|raw| {
+                serde_json::from_str::<HierarchicalDeterministicFactorInstance>(
+                    raw,
+                )
+                .unwrap()
+            })
+            .collect_vec();
+
+        assert_eq!(instances.len(), 2);
+        assert_eq!(
+            instances[0].factor_source_id.body.to_string(),
+            "882f0061b30bf8c8b6886ea3f96ec7ae13b59bad55155a54b57739c6be004fcd"
+        );
+        assert_eq!(
+            instances[1].factor_source_id.body.to_string(),
+            "f1c0109e39908610c2146cda7d7676a1993ad270cd4756cb472219950ecef2fb"
+        );
     }
 
     #[actix_rt::test]

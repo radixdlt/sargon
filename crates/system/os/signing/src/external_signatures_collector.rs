@@ -1,14 +1,9 @@
 use crate::prelude::*;
-use addresses::prelude::NonFungibleLocalId;
-use gateway_models::prelude::{
-    AccessRule, BasicRequirement, CompositeRequirement, NonFungible,
-    Requirement,
-};
 
 #[derive(Clone, Debug)]
-pub struct ExternalAccountAccessRule {
+pub struct ExternalAccountNftRequirements {
     pub owner: AddressOfAccountOrPersona,
-    pub access_rule: AccessRule,
+    pub required_nft_ids: IndexSet<NonFungibleGlobalId>,
 }
 
 #[async_trait::async_trait]
@@ -21,13 +16,15 @@ pub trait FactorInstanceLookupByNftIds: Send + Sync {
 
 pub async fn collect_external_signatures<S: Signable>(
     signable: S,
-    external_accounts: Vec<ExternalAccountAccessRule>,
+    external_accounts: Vec<ExternalAccountNftRequirements>,
     lookup: &impl FactorInstanceLookupByNftIds,
     interactor: Arc<dyn SignInteractor<S>>,
 ) -> Result<IndexSet<HDSignature<S::ID>>> {
-    let owned_instances =
-        owned_factor_instances_from_access_rules(external_accounts, lookup)
-            .await?;
+    let owned_instances = owned_factor_instances_from_nft_requirements(
+        external_accounts,
+        lookup,
+    )
+    .await?;
 
     if owned_instances.is_empty() {
         return Ok(IndexSet::new());
@@ -77,14 +74,16 @@ pub async fn collect_external_signatures<S: Signable>(
     Ok(signatures)
 }
 
-async fn owned_factor_instances_from_access_rules(
-    external_accounts: Vec<ExternalAccountAccessRule>,
+async fn owned_factor_instances_from_nft_requirements(
+    external_accounts: Vec<ExternalAccountNftRequirements>,
     lookup: &impl FactorInstanceLookupByNftIds,
 ) -> Result<IndexSet<OwnedFactorInstance>> {
     let mut owned_instances = IndexSet::new();
     for external in external_accounts {
-        let nft_ids =
-            extract_nft_ids_from_access_rule(&external.access_rule)?;
+        let nft_ids = external.required_nft_ids;
+        if nft_ids.is_empty() {
+            continue;
+        }
         let factor_instances = lookup
             .factor_instances_for_nfts(nft_ids.into_iter().collect())
             .await?;
@@ -179,4 +178,74 @@ fn non_fungible_global_id(
         non_fungible.resource_address,
         local_id,
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn nft(resource: ResourceAddress, simple_rep: &str) -> NonFungible {
+        NonFungible {
+            resource_address: resource,
+            local_id: NonFungibleLocalIdId {
+                id_type: "Integer".to_string(),
+                sbor_hex: "".to_string(),
+                simple_rep: simple_rep.to_string(),
+            },
+        }
+    }
+
+    #[test]
+    fn extracts_nft_ids_from_access_rule() {
+        let resource = ResourceAddress::sample();
+        let rule = AccessRule::Protected {
+            access_rule: CompositeRequirement::AnyOf {
+                access_rules: vec![
+                    CompositeRequirement::ProofRule {
+                        proof_rule: BasicRequirement::Require {
+                            requirement: Requirement::NonFungible {
+                                non_fungible: nft(resource, "#1#"),
+                            },
+                        },
+                    },
+                    CompositeRequirement::ProofRule {
+                        proof_rule: BasicRequirement::Require {
+                            requirement: Requirement::NonFungible {
+                                non_fungible: nft(resource, "#2#"),
+                            },
+                        },
+                    },
+                ],
+            },
+        };
+
+        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
+        let expected: IndexSet<NonFungibleGlobalId> = IndexSet::from_iter([
+            NonFungibleGlobalId::new_unchecked(
+                resource,
+                NonFungibleLocalId::integer(1),
+            ),
+            NonFungibleGlobalId::new_unchecked(
+                resource,
+                NonFungibleLocalId::integer(2),
+            ),
+        ]);
+
+        assert_eq!(ids, expected);
+    }
+
+    #[test]
+    fn ignores_non_nft_requirements() {
+        let rule = AccessRule::Protected {
+            access_rule: CompositeRequirement::ProofRule {
+                proof_rule: BasicRequirement::AmountOf {
+                    amount: Decimal192::one(),
+                    resource: ResourceAddress::sample_other(),
+                },
+            },
+        };
+
+        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
+        assert!(ids.is_empty());
+    }
 }
