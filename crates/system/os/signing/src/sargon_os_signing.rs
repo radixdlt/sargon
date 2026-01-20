@@ -97,12 +97,38 @@ impl OsSigning for SargonOS {
         subintent: Subintent,
         role_kind: RoleKind,
     ) -> Result<SignedSubintent> {
-        self.sign(
-            subintent.clone(),
+        let profile = &self.profile()?;
+
+        let collector = SignaturesCollector::new(
+            SigningFinishEarlyStrategy::default(),
+            vec![subintent.clone()],
             self.sign_subintents_interactor(),
+            profile,
             SigningPurpose::sign_transaction(role_kind),
+        )?;
+
+        let outcome = collector.collect_signatures().await?;
+        if !outcome.successful() {
+            return Err(
+                CommonError::SigningFailedTooManyFactorSourcesNeglected,
+            );
+        }
+
+        let mut signatures =
+            outcome.signatures_of_successful_transactions();
+
+        let external_accounts =
+            self.resolve_external_accounts_for_subintent(&subintent).await?;
+        let external_signatures = collect_external_signatures(
+            subintent.clone(),
+            external_accounts,
+            self,
+            self.sign_subintents_interactor(),
         )
-        .await
+        .await?;
+        signatures.extend(external_signatures);
+
+        subintent.signed(signatures)
     }
 
     async fn sign<S: Signable>(
@@ -129,6 +155,96 @@ impl OsSigning for SargonOS {
         } else {
             Err(CommonError::SigningFailedTooManyFactorSourcesNeglected)
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl FactorInstanceLookupByNftIds for SargonOS {
+    async fn factor_instances_for_nfts(
+        &self,
+        _nft_ids: Vec<NonFungibleGlobalId>,
+    ) -> Result<Vec<HierarchicalDeterministicFactorInstance>> {
+        // TODO: wire the real lookup for NFT -> factor instance mapping.
+        Ok(Vec::new())
+    }
+}
+
+impl SargonOS {
+    async fn resolve_external_accounts_for_subintent(
+        &self,
+        subintent: &Subintent,
+    ) -> Result<Vec<ExternalAccountAccessRule>> {
+        let summary = subintent.manifest.summary()?;
+        let profile = self.profile()?;
+
+        let external_account_addresses = summary
+            .addresses_of_accounts_requiring_auth
+            .into_iter()
+            .filter(|address| profile.account_by_address(*address).is_err())
+            .collect_vec();
+
+        if external_account_addresses.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let (gateway_client, network_id) = self.gateway_client_on()?;
+        let badge_owners = gateway_client
+            .fetch_entities_badge_owners(
+                network_id,
+                external_account_addresses
+                    .iter()
+                    .map(|address| {
+                        AddressOfAccountOrPersona::Account(*address)
+                    })
+                    .collect_vec(),
+            )
+            .await?;
+
+        let mut external_accounts = Vec::new();
+        for address in external_account_addresses {
+            let owner_address =
+                AddressOfAccountOrPersona::Account(address);
+            let maybe_badge_owner =
+                badge_owners.get(&owner_address).unwrap_or(&None);
+            let Some(access_controller_address) =
+                maybe_badge_owner.and_then(|a| a.as_access_controller().cloned())
+            else {
+                continue;
+            };
+
+            let access_rule = self
+                .access_rule_for_access_controller(access_controller_address)
+                .await?;
+            external_accounts.push(ExternalAccountAccessRule {
+                owner: owner_address,
+                access_rule,
+            });
+        }
+
+        Ok(external_accounts)
+    }
+}
+
+impl SargonOS {
+    async fn access_rule_for_access_controller(
+        &self,
+        access_controller_address: AccessControllerAddress,
+    ) -> Result<gateway_models::prelude::AccessRule> {
+        let gateway_client = self.gateway_client()?;
+        let details = gateway_client
+            .fetch_access_controller_details(access_controller_address)
+            .await?;
+
+        if let Some(attempt) = details.state.primary_role_recovery_attempt {
+            return Ok(attempt.recovery_proposal.primary_role);
+        }
+        if let Some(attempt) = details.state.recovery_role_recovery_attempt {
+            return Ok(attempt.recovery_proposal.primary_role);
+        }
+
+        Err(CommonError::Unknown {
+            error_message: "Access controller access rule unavailable; TODO: fetch configured rule set from access controller or account entity.".to_string(),
+        })
     }
 }
 
