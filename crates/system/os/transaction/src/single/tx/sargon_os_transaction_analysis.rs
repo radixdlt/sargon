@@ -159,14 +159,18 @@ impl OsExecutionSummary for SargonOS {
         let entities = manifest_summary
             .addresses_of_accounts_requiring_auth
             .iter()
-            .map(|a| self.entity_by_address((*a).into()))
+            .filter_map(|a| self.account_by_address(*a).ok())
+            .map(AccountOrPersona::from)
             .chain(
                 manifest_summary
                     .addresses_of_personas_requiring_auth
                     .iter()
-                    .map(|i| self.entity_by_address((*i).into())),
+                    .map(|i| self.persona_by_address(*i))
+                    .collect::<Result<Vec<_>>>()?
+                    .into_iter()
+                    .map(AccountOrPersona::from),
             )
-            .collect::<Result<Vec<_>>>()?;
+            .collect::<Vec<_>>();
 
         let mut proofs = IndexMap::<
             AddressOfAccountOrPersona,
@@ -364,6 +368,46 @@ mod tests {
             result,
             Err(CommonError::InvalidInstructionsString { .. })
         ));
+    }
+
+    #[actix_rt::test]
+    async fn unknown_account_requiring_auth_reaches_preview() {
+        let req = SargonOS::boot_test_with_networking_driver(Arc::new(
+            MockNetworkingDriver::new_always_failing(),
+        ));
+        let os = actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+            .await
+            .unwrap()
+            .unwrap();
+
+        os.update_profile_with(|profile| {
+            profile.networks.insert(ProfileNetwork::new(
+                NetworkID::Mainnet,
+                Vec::new(),
+                Vec::new(),
+                AuthorizedDapps::default(),
+                ResourcePreferences::default(),
+            ));
+            profile.factor_sources.extend(FactorSource::sample_all());
+            Ok(())
+        })
+        .await
+        .unwrap();
+
+        let result = os
+            .analyse_transaction_preview(
+                prepare_manifest_with_account_entity().instructions_string(),
+                Blobs::default(),
+                true,
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await;
+
+        assert_eq!(
+            result,
+            Err(CommonError::NetworkResponseBadCode { code: 500 })
+        );
     }
 
     #[actix_rt::test]
