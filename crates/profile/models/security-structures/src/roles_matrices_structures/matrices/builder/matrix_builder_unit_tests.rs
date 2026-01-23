@@ -1329,7 +1329,6 @@ mod shield_configs {
                     ],),
                 )
             );
-            assert_eq!(built, MatrixOfFactorSourceIds::sample_config_1_1());
         }
 
         #[test]

@@ -1,6 +1,21 @@
 #![allow(non_snake_case)]
 use crate::prelude::*;
 
+async fn pre_derive_instances_for_factor_source(
+    os: &SargonOS,
+    factor_source: &FactorSource,
+    network_id: NetworkID,
+) {
+    if factor_source.factor_source_id().is_hash() {
+        os.pre_derive_and_fill_cache_with_instances_for_factor_source(
+            factor_source.clone(),
+            network_id,
+        )
+        .await
+        .unwrap();
+    }
+}
+
 #[async_trait::async_trait]
 pub trait OsTestDummySecurifyEntities {
     async fn __OFFLINE_ONLY_securify_accounts(
@@ -241,8 +256,19 @@ async fn add_factor_source() {
     assert_eq!(os.profile().unwrap().factor_sources.len(), 2);
     let cache = os.cache_snapshot().await;
     assert!(
+        !cache.is_full(NetworkID::Mainnet, factor_source.id_from_hash()),
+        "Cache should not be prefilled for new factor sources."
+    );
+    pre_derive_instances_for_factor_source(
+        &os,
+        &factor_source,
+        NetworkID::Mainnet,
+    )
+    .await;
+    let cache = os.cache_snapshot().await;
+    assert!(
         cache.is_full(NetworkID::Mainnet, factor_source.id_from_hash()),
-        "Should have put factors into the cache."
+        "Should have put factors into the cache after pre-derivation."
     );
 }
 
@@ -697,6 +723,14 @@ async fn adding_accounts_different_networks_different_factor_sources() {
     os.add_factor_source(fs_device.clone()).await.unwrap();
     os.add_factor_source(fs_arculus.clone()).await.unwrap();
     os.add_factor_source(fs_ledger.clone()).await.unwrap();
+    pre_derive_instances_for_factor_source(
+        &os,
+        &fs_arculus,
+        NetworkID::Mainnet,
+    )
+    .await;
+    pre_derive_instances_for_factor_source(&os, &fs_ledger, NetworkID::Mainnet)
+        .await;
 
     let profile = os.profile().unwrap();
     let cache = os.cache_snapshot().await;
@@ -896,6 +930,24 @@ async fn test_securified_accounts() {
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(password.clone()).await.unwrap();
+    pre_derive_instances_for_factor_source(&os, &bdfs, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
 
     let matrix_0 = unsafe {
         MatrixOfFactorSources::unbuilt_with_roles_and_days(
@@ -1357,6 +1409,11 @@ async fn securify_accounts_when_cache_is_half_full_multiple_factor_sources() {
     let (_, derivation_outcome) = os.batch_create_many_accounts_with_bdfs_with_derivation_outcome_then_save_once(3 * n as u16, NetworkID::Mainnet, "Acco".to_owned()).await.unwrap();
 
     assert_eq!(derivation_outcome.debug_was_derived.len(), 3 * n); // `n` missing + CACHE filling 2*n more.
+
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
 
     // This is NOT a valid Matrix! But for the purpose of this test, it's fine.
     // We are not testing valid matrices here... we are testing the factor
@@ -1859,6 +1916,12 @@ async fn securified_personas() {
     os.add_factor_source(ledger.clone()).await.unwrap();
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(password.clone()).await.unwrap();
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &password, NetworkID::Mainnet)
+        .await;
 
     let matrix_0 = unsafe {
         MatrixOfFactorSources::unbuilt_with_roles_and_days(
@@ -2164,6 +2227,11 @@ async fn securified_all_accounts_next_veci_does_not_start_at_zero() {
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(ledger.clone()).await.unwrap();
 
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
+
     let factor_source_count = os.profile().unwrap().factor_sources.len();
 
     let cache = os.cache_snapshot().await;
@@ -2367,6 +2435,11 @@ async fn securified_accounts_and_personas_mixed_asymmetric_indices() {
 
     os.add_factor_source(arculus.clone()).await.unwrap();
     os.add_factor_source(ledger.clone()).await.unwrap();
+
+    pre_derive_instances_for_factor_source(&os, &arculus, NetworkID::Mainnet)
+        .await;
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
 
     let number_of_factor_sources = os.profile().unwrap().factor_sources.len();
     assert_eq!(number_of_factor_sources, 3);
@@ -2940,12 +3013,12 @@ async fn securify_accounts_and_personas_with_override_factor() {
         .unwrap();
     assert!(derivation_outcome.debug_was_derived.is_empty());
 
-    os.add_factor_source(FactorSource::sample_ledger())
-        .await
-        .unwrap();
-    os.add_factor_source(FactorSource::sample_password())
-        .await
-        .unwrap();
+    let ledger = FactorSource::sample_ledger();
+    let password = FactorSource::sample_password();
+    os.add_factor_source(ledger.clone()).await.unwrap();
+    os.add_factor_source(password).await.unwrap();
+    pre_derive_instances_for_factor_source(&os, &ledger, NetworkID::Mainnet)
+        .await;
     let factor_sources = &os.profile().unwrap().factor_sources;
     let matrix_ids = MatrixTemplate::config_1_4()
         .materialize(factor_sources.items())
@@ -2978,7 +3051,10 @@ async fn securify_accounts_and_personas_with_override_factor() {
         .await
         .unwrap();
 
-    assert_eq!(outcome.per_derivation_preset.len(), 4);
+    assert_eq!(
+        outcome.per_derivation_preset.len(),
+        DerivationPreset::all().len()
+    );
 
     // don't forget to consume
     instances_in_cache_consumer.consume().await.unwrap();

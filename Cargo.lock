@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "account-for-display"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "derive_more",
@@ -49,10 +49,10 @@ dependencies = [
 
 [[package]]
 name = "addresses"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "cap26-models",
  "core-utils",
  "derive_more",
@@ -252,7 +252,7 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "assert-json"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json-diff",
  "error",
@@ -552,10 +552,10 @@ dependencies = [
 
 [[package]]
 name = "build-info"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
- "cargo_toml",
+ "cargo_toml 0.22.3",
  "derive_more",
  "enum-as-inner",
  "error",
@@ -579,7 +579,7 @@ checksum = "5ce89b21cab1437276d2650d57e971f9d548a2d9037cc231abdc0562b97498ce"
 
 [[package]]
 name = "bytes"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "delegate",
@@ -613,7 +613,7 @@ dependencies = [
 
 [[package]]
 name = "cap26-models"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -672,6 +672,16 @@ checksum = "599aa35200ffff8f04c1925aa1acc92fa2e08874379ef42e210a80e527e60838"
 dependencies = [
  "serde",
  "toml 0.7.8",
+]
+
+[[package]]
+name = "cargo_toml"
+version = "0.22.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "374b7c592d9c00c1f4972ea58390ac6b18cbb6ab79011f3bdc90a0b82ca06b77"
+dependencies = [
+ "serde",
+ "toml 0.9.11+spec-1.1.0",
 ]
 
 [[package]]
@@ -756,7 +766,7 @@ checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
 name = "clients"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -813,7 +823,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "117725a109d387c937a1533ce01b450cbde6b88abceea8473c4d7a85853cda3c"
 dependencies = [
  "lazy_static",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -839,10 +849,10 @@ checksum = "0d8a42181e0652c2997ae4d217f25b63c5337a52fd2279736e97b832fa0a3cff"
 
 [[package]]
 name = "core-collections"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "has-sample-values",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "prelude",
  "serde",
  "serde_json",
@@ -866,7 +876,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "core-misc"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "core-utils",
@@ -886,7 +896,7 @@ dependencies = [
 
 [[package]]
 name = "core-utils"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "error",
  "iso8601-timestamp",
@@ -1157,7 +1167,7 @@ dependencies = [
 
 [[package]]
 name = "discover"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "clients",
@@ -1195,7 +1205,7 @@ checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
 name = "drivers"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1203,7 +1213,7 @@ dependencies = [
  "derive_more",
  "enum-iterator",
  "hierarchical-deterministic",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "itertools 0.12.1",
  "log",
  "mockall",
@@ -1220,10 +1230,10 @@ dependencies = [
 
 [[package]]
 name = "ecc"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "derive_more",
  "enum-as-inner",
  "error",
@@ -1322,11 +1332,11 @@ dependencies = [
 
 [[package]]
 name = "encryption"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "aes-gcm",
  "assert-json",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "derive_more",
  "error",
  "has-sample-values",
@@ -1343,7 +1353,7 @@ dependencies = [
 
 [[package]]
 name = "entity-by-address"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "error",
@@ -1355,7 +1365,7 @@ dependencies = [
 
 [[package]]
 name = "entity-foundation"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -1425,12 +1435,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33d852cb9b869c2a9b3df2f71a3074817f01e1844f839a144f5fcef059a4eb5d"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
 name = "error"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "derive_more",
  "log",
@@ -1489,7 +1499,7 @@ dependencies = [
 
 [[package]]
 name = "factor-instances-provider"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1502,7 +1512,7 @@ dependencies = [
  "futures",
  "hierarchical-deterministic",
  "identified-vec-of",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "key-derivation-traits",
  "keys-collector",
  "next-derivation-index-ephemeral",
@@ -1515,9 +1525,9 @@ dependencies = [
 
 [[package]]
 name = "factors"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -1532,7 +1542,7 @@ dependencies = [
  "hkdf",
  "host-info",
  "identified-vec-of",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "iota-crypto",
  "k256",
  "network",
@@ -1552,7 +1562,7 @@ dependencies = [
 
 [[package]]
 name = "factors-supporting-types"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "async-trait",
  "error",
@@ -1727,7 +1737,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-client-and-api"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -1749,7 +1759,7 @@ dependencies = [
 
 [[package]]
 name = "gateway-models"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "assert-json",
@@ -1861,10 +1871,10 @@ dependencies = [
 
 [[package]]
 name = "has-sample-values"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "error",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "iso8601-timestamp",
  "url",
  "uuid",
@@ -1872,9 +1882,9 @@ dependencies = [
 
 [[package]]
 name = "hash"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "derive_more",
  "prelude",
  "radix-common",
@@ -1899,9 +1909,9 @@ dependencies = [
 
 [[package]]
 name = "hashbrown"
-version = "0.15.2"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
+checksum = "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
 
 [[package]]
 name = "heck"
@@ -1938,11 +1948,11 @@ dependencies = [
 
 [[package]]
 name = "hierarchical-deterministic"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "bip39",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "cap26-models",
  "derive_more",
  "ecc",
@@ -1985,13 +1995,13 @@ dependencies = [
 
 [[package]]
 name = "home-cards"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
  "async-trait",
  "base64",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "core-utils",
  "derive_more",
  "drivers",
@@ -2011,7 +2021,7 @@ dependencies = [
 
 [[package]]
 name = "host-info"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "derive_more",
@@ -2058,10 +2068,10 @@ dependencies = [
 
 [[package]]
 name = "http-client"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "core-utils",
  "drivers",
  "error",
@@ -2286,12 +2296,12 @@ checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "identified-vec-of"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "derive_more",
  "error",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "itertools 0.12.1",
  "paste",
  "prelude",
@@ -2333,13 +2343,14 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.7.0"
+version = "2.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62f822373a4fe84d4bb149bf54e584a7f4abec90e072ed49cda0edea5b95471f"
+checksum = "7714e70437a7dc3ac8eb7e6f8df75fd8eb422675fc7678aff7364301092b1017"
 dependencies = [
  "equivalent",
- "hashbrown 0.15.2",
+ "hashbrown 0.16.1",
  "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -2359,7 +2370,7 @@ dependencies = [
 
 [[package]]
 name = "interactors"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "async-trait",
  "derive_more",
@@ -2497,7 +2508,7 @@ dependencies = [
 
 [[package]]
 name = "key-derivation-traits"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "async-trait",
@@ -2508,14 +2519,14 @@ dependencies = [
  "factors-supporting-types",
  "has-sample-values",
  "hierarchical-deterministic",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "itertools 0.12.1",
  "prelude",
 ]
 
 [[package]]
 name = "keys-collector"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -2529,7 +2540,7 @@ dependencies = [
  "factors-supporting-types",
  "has-sample-values",
  "hierarchical-deterministic",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "itertools 0.12.1",
  "key-derivation-traits",
  "log",
@@ -2613,11 +2624,11 @@ dependencies = [
 
 [[package]]
 name = "manifests"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "account-for-display",
  "addresses",
- "cargo_toml",
+ "cargo_toml 0.22.3",
  "core-utils",
  "derive_more",
  "enum-as-inner",
@@ -2659,7 +2670,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
 name = "metadata"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "derive_more",
  "has-sample-values",
@@ -2783,7 +2794,7 @@ dependencies = [
 
 [[package]]
 name = "network"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
  "enum-iterator",
@@ -2799,7 +2810,7 @@ dependencies = [
 
 [[package]]
 name = "next-derivation-index-ephemeral"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "assert-json",
@@ -2811,7 +2822,7 @@ dependencies = [
  "has-sample-values",
  "hierarchical-deterministic",
  "identified-vec-of",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "network",
  "prelude",
  "serde",
@@ -2875,9 +2886,9 @@ dependencies = [
 
 [[package]]
 name = "numeric"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "delegate",
  "derive_more",
  "enum-iterator",
@@ -3147,7 +3158,7 @@ dependencies = [
 
 [[package]]
 name = "prelude"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "radix-engine",
  "radix-engine-toolkit",
@@ -3208,11 +3219,11 @@ dependencies = [
 
 [[package]]
 name = "profile"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "account-for-display",
  "addresses",
- "cargo_toml",
+ "cargo_toml 0.22.3",
  "core-misc",
  "derive_more",
  "encryption",
@@ -3252,7 +3263,7 @@ dependencies = [
 
 [[package]]
 name = "profile-account"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "account-for-display",
  "addresses",
@@ -3272,7 +3283,7 @@ dependencies = [
 
 [[package]]
 name = "profile-account-or-persona"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "cap26-models",
  "derive_more",
@@ -3289,7 +3300,7 @@ dependencies = [
 
 [[package]]
 name = "profile-app-preferences"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "core-misc",
@@ -3297,7 +3308,7 @@ dependencies = [
  "factors",
  "hierarchical-deterministic",
  "identified-vec-of",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "keys-collector",
  "log",
  "numeric",
@@ -3312,7 +3323,7 @@ dependencies = [
 
 [[package]]
 name = "profile-base-entity"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3337,7 +3348,7 @@ dependencies = [
 
 [[package]]
 name = "profile-gateway"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "assert-json",
@@ -3361,7 +3372,7 @@ dependencies = [
 
 [[package]]
 name = "profile-logic"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3383,7 +3394,7 @@ dependencies = [
 
 [[package]]
 name = "profile-persona"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "cap26-models",
@@ -3404,7 +3415,7 @@ dependencies = [
 
 [[package]]
 name = "profile-persona-data"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "assert-json",
@@ -3423,7 +3434,7 @@ dependencies = [
 
 [[package]]
 name = "profile-security-structures"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "cap26-models",
@@ -3451,7 +3462,7 @@ dependencies = [
 
 [[package]]
 name = "profile-state-holder"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "derive_more",
  "error",
@@ -3466,7 +3477,7 @@ dependencies = [
 
 [[package]]
 name = "profile-supporting-types"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "derive_more",
@@ -3506,8 +3517,8 @@ dependencies = [
 
 [[package]]
 name = "radix-blueprint-schema-init"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "bitflags 1.3.2",
  "radix-common",
@@ -3517,8 +3528,8 @@ dependencies = [
 
 [[package]]
 name = "radix-common"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "bech32",
  "blake2",
@@ -3543,8 +3554,8 @@ dependencies = [
 
 [[package]]
 name = "radix-common-derive"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "paste",
  "proc-macro2",
@@ -3555,14 +3566,14 @@ dependencies = [
 
 [[package]]
 name = "radix-connect"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
  "assert-json",
  "async-trait",
  "base64",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "core-misc",
  "core-utils",
  "derive_more",
@@ -3591,10 +3602,10 @@ dependencies = [
 
 [[package]]
 name = "radix-connect-models"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "core-misc",
  "derive_more",
  "error",
@@ -3606,8 +3617,8 @@ dependencies = [
 
 [[package]]
 name = "radix-engine"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "bitflags 1.3.2",
  "colored",
@@ -3638,8 +3649,8 @@ dependencies = [
 
 [[package]]
 name = "radix-engine-interface"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "bitflags 1.3.2",
  "const-sha1",
@@ -3659,16 +3670,16 @@ dependencies = [
 
 [[package]]
 name = "radix-engine-profiling"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "fixedstr",
 ]
 
 [[package]]
 name = "radix-engine-profiling-derive"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3679,10 +3690,10 @@ dependencies = [
 [[package]]
 name = "radix-engine-toolkit"
 version = "2.2.3"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=89ebf30287ddc425ab232dbc3f651b1a8ecef2e2#89ebf30287ddc425ab232dbc3f651b1a8ecef2e2"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=655fca8e6b5d4438836de7e8d7a554575efb4964#655fca8e6b5d4438836de7e8d7a554575efb4964"
 dependencies = [
  "bech32",
- "cargo_toml",
+ "cargo_toml 0.15.3",
  "extend",
  "itertools 0.14.0",
  "paste",
@@ -3704,8 +3715,8 @@ dependencies = [
 
 [[package]]
 name = "radix-engine-toolkit-common"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "radix-common",
  "radix-engine",
@@ -3718,11 +3729,11 @@ dependencies = [
 
 [[package]]
 name = "radix-name-service"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "core-utils",
  "drivers",
  "gateway-client-and-api",
@@ -3738,8 +3749,8 @@ dependencies = [
 
 [[package]]
 name = "radix-native-sdk"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "radix-common",
  "radix-engine-interface",
@@ -3749,17 +3760,18 @@ dependencies = [
 
 [[package]]
 name = "radix-rust"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
+ "preinterpret",
  "serde",
 ]
 
 [[package]]
 name = "radix-sbor-derive"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3769,8 +3781,8 @@ dependencies = [
 
 [[package]]
 name = "radix-substate-store-impls"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "hex",
  "itertools 0.10.5",
@@ -3782,8 +3794,8 @@ dependencies = [
 
 [[package]]
 name = "radix-substate-store-interface"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "hex",
  "itertools 0.10.5",
@@ -3794,8 +3806,8 @@ dependencies = [
 
 [[package]]
 name = "radix-substate-store-queries"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "hex",
  "itertools 0.10.5",
@@ -3811,8 +3823,8 @@ dependencies = [
 
 [[package]]
 name = "radix-transactions"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "annotate-snippets",
  "bech32",
@@ -3986,6 +3998,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustc-build-sysroot"
+version = "0.5.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b881c015c729b43105bbd3702a9bdecee28fafaa21126d1d62e454ec011a4b7"
+dependencies = [
+ "anyhow",
+ "rustc_version",
+ "tempfile",
+ "toml 0.8.23",
+ "walkdir",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4016,7 +4041,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -4057,7 +4082,7 @@ dependencies = [
 
 [[package]]
 name = "sargon"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4125,7 +4150,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -4155,7 +4180,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-accounts"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4164,7 +4189,7 @@ dependencies = [
  "derive_more",
  "error",
  "gateway-client-and-api",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "itertools 0.12.1",
  "log",
  "manifests",
@@ -4181,7 +4206,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-arculus-card"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "async-trait",
  "ecc",
@@ -4189,14 +4214,14 @@ dependencies = [
  "factors",
  "hash",
  "hierarchical-deterministic",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "sargon-os",
  "signing-traits",
 ]
 
 [[package]]
 name = "sargon-os-derive-public-keys"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -4215,7 +4240,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-factors"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4250,7 +4275,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-security-center"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "derive_more",
@@ -4266,7 +4291,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-signing"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "async-trait",
@@ -4297,7 +4322,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-os-transaction"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "async-std",
@@ -4332,7 +4357,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
@@ -4356,7 +4381,7 @@ dependencies = [
  "hex",
  "hierarchical-deterministic",
  "identified-vec-of",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "iso8601-timestamp",
  "itertools 0.12.1",
  "keys-collector",
@@ -4389,7 +4414,7 @@ dependencies = [
 
 [[package]]
 name = "sargon-uniffi-conversion-macros"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4398,8 +4423,8 @@ dependencies = [
 
 [[package]]
 name = "sbor"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "const-sha1",
  "hex",
@@ -4412,8 +4437,8 @@ dependencies = [
 
 [[package]]
 name = "sbor-derive"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "proc-macro2",
  "sbor-derive-common",
@@ -4422,11 +4447,11 @@ dependencies = [
 
 [[package]]
 name = "sbor-derive-common"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "const-sha1",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "itertools 0.10.5",
  "proc-macro2",
  "quote",
@@ -4436,7 +4461,7 @@ dependencies = [
 [[package]]
 name = "sbor-json"
 version = "2.2.3"
-source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=89ebf30287ddc425ab232dbc3f651b1a8ecef2e2#89ebf30287ddc425ab232dbc3f651b1a8ecef2e2"
+source = "git+https://github.com/radixdlt/radix-engine-toolkit?rev=655fca8e6b5d4438836de7e8d7a554575efb4964#655fca8e6b5d4438836de7e8d7a554575efb4964"
 dependencies = [
  "bech32",
  "radix-common",
@@ -4500,8 +4525,8 @@ dependencies = [
 
 [[package]]
 name = "scrypto"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "bech32",
  "const-sha1",
@@ -4521,23 +4546,25 @@ dependencies = [
 
 [[package]]
 name = "scrypto-compiler"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
- "cargo_toml",
+ "cargo_toml 0.15.3",
  "fslock",
+ "lazy_static",
  "radix-common",
  "radix-engine",
  "radix-engine-interface",
  "radix-rust",
+ "rustc-build-sysroot",
  "serde_json",
  "wasm-opt",
 ]
 
 [[package]]
 name = "scrypto-derive"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4552,8 +4579,8 @@ dependencies = [
 
 [[package]]
 name = "scrypto-test"
-version = "1.3.0"
-source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e#53d068fa1b471a63d7b5fd25c91dfa6e4940ee9e"
+version = "1.4.0-dev"
+source = "git+https://github.com/radixdlt/radixdlt-scrypto?rev=9c9c51021b7f04073e5d5685e1aa4113c425209f#9c9c51021b7f04073e5d5685e1aa4113c425209f"
 dependencies = [
  "ouroboros",
  "paste",
@@ -4605,7 +4632,7 @@ dependencies = [
 
 [[package]]
 name = "security-center"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
  "assert-json",
@@ -4651,18 +4678,28 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.217"
+version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02fc4265df13d6fa1d00ecff087228cc0a2b5f3c0e87e258d8b94a156e984c70"
+checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
+dependencies = [
+ "serde_core",
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_core"
+version = "1.0.228"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.217"
+version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a9bf7cf98d04a2b28aead066b7496853d4779c9cc183c440dbac457641e19a0"
+checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4675,7 +4712,7 @@ version = "1.0.134"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d00f4175c42ee48b15416f6193a959ba3a0d67fc699a0db9ad12df9f83991c7d"
 dependencies = [
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "itoa",
  "memchr",
  "ryu",
@@ -4695,11 +4732,20 @@ dependencies = [
 
 [[package]]
 name = "serde_spanned"
-version = "0.6.8"
+version = "0.6.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87607cb1398ed59d48732e575a4c28a7a8ebf2454b964fe3f224f2afc07909e1"
+checksum = "bf41e0cfaf7226dca15e8197172c295a782857fcb97fad1808a166870dee75a3"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "serde_spanned"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8bbf91e5a4d6315eee45e704372590b30e260ee83af6639d64557f51b067776"
+dependencies = [
+ "serde_core",
 ]
 
 [[package]]
@@ -4724,7 +4770,7 @@ dependencies = [
  "chrono",
  "hex",
  "indexmap 1.9.3",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "serde",
  "serde_derive",
  "serde_json",
@@ -4773,7 +4819,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "short-string"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "arraystring",
  "assert-json",
@@ -4808,13 +4854,13 @@ dependencies = [
 
 [[package]]
 name = "signatures-collector"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "addresses",
  "assert-json",
  "async-trait",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "cap26-models",
  "core-collections",
  "core-misc",
@@ -4846,11 +4892,11 @@ dependencies = [
 
 [[package]]
 name = "signing-traits"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "actix-rt",
  "async-trait",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "core-collections",
  "derive_more",
  "ecc",
@@ -4858,7 +4904,7 @@ dependencies = [
  "enum-as-inner",
  "error",
  "hash",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "manifests",
  "metadata",
  "mockall",
@@ -5017,7 +5063,7 @@ dependencies = [
 
 [[package]]
 name = "sub-systems"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "derive_more",
  "drivers",
@@ -5093,7 +5139,7 @@ dependencies = [
  "getrandom",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5182,7 +5228,7 @@ dependencies = [
 
 [[package]]
 name = "time-utils"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "iso8601-timestamp",
  "prelude",
@@ -5257,18 +5303,55 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd79e69d3b627db300ff956027cc6c3798cef26d22526befdfcd12feeb6d2257"
 dependencies = [
  "serde",
- "serde_spanned",
- "toml_datetime",
- "toml_edit",
+ "serde_spanned 0.6.9",
+ "toml_datetime 0.6.11",
+ "toml_edit 0.19.15",
+]
+
+[[package]]
+name = "toml"
+version = "0.8.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc1beb996b9d83529a9e75c17a1686767d148d70663143c7854d8b4a09ced362"
+dependencies = [
+ "indexmap 2.13.0",
+ "serde",
+ "serde_spanned 0.6.9",
+ "toml_datetime 0.6.11",
+ "toml_edit 0.22.27",
+]
+
+[[package]]
+name = "toml"
+version = "0.9.11+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f3afc9a848309fe1aaffaed6e1546a7a14de1f935dc9d89d32afd9a44bab7c46"
+dependencies = [
+ "indexmap 2.13.0",
+ "serde_core",
+ "serde_spanned 1.0.4",
+ "toml_datetime 0.7.5+spec-1.1.0",
+ "toml_parser",
+ "toml_writer",
+ "winnow 0.7.14",
 ]
 
 [[package]]
 name = "toml_datetime"
-version = "0.6.8"
+version = "0.6.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0dd7358ecb8fc2f8d014bf86f6f638ce72ba252a2c3a2572f2a795f1d23efb41"
+checksum = "22cddaf88f4fbc13c51aebbf5f8eceb5c7c5a9da2ac40a13519eb5b0a0e8f11c"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "toml_datetime"
+version = "0.7.5+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92e1cfed4a3038bc5a127e35a2d360f145e1f4b971b551a2ba5fd7aedf7e1347"
+dependencies = [
+ "serde_core",
 ]
 
 [[package]]
@@ -5277,12 +5360,47 @@ version = "0.19.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b5bb770da30e5cbfde35a2d7b9b8a2c4b8ef89548a7a6aeab5c9a576e3e7421"
 dependencies = [
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "serde",
- "serde_spanned",
- "toml_datetime",
- "winnow",
+ "serde_spanned 0.6.9",
+ "toml_datetime 0.6.11",
+ "winnow 0.5.40",
 ]
+
+[[package]]
+name = "toml_edit"
+version = "0.22.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41fe8c660ae4257887cf66394862d21dbca4a6ddd26f04a3560410406a2f819a"
+dependencies = [
+ "indexmap 2.13.0",
+ "serde",
+ "serde_spanned 0.6.9",
+ "toml_datetime 0.6.11",
+ "toml_write",
+ "winnow 0.7.14",
+]
+
+[[package]]
+name = "toml_parser"
+version = "1.0.6+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a3198b4b0a8e11f09dd03e133c0280504d0801269e9afa46362ffde1cbeebf44"
+dependencies = [
+ "winnow 0.7.14",
+]
+
+[[package]]
+name = "toml_write"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
+
+[[package]]
+name = "toml_writer"
+version = "1.0.6+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab16f14aed21ee8bfd8ec22513f7287cd4a91aa92e44edfe2c17ddd004e92607"
 
 [[package]]
 name = "tower"
@@ -5332,10 +5450,10 @@ dependencies = [
 
 [[package]]
 name = "transaction-foundation"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "assert-json",
- "bytes 1.2.43",
+ "bytes 1.2.44",
  "derive_more",
  "has-sample-values",
  "paste",
@@ -5347,11 +5465,11 @@ dependencies = [
 
 [[package]]
 name = "transaction-models"
-version = "1.2.43"
+version = "1.2.44"
 dependencies = [
  "addresses",
- "bytes 1.2.43",
- "cargo_toml",
+ "bytes 1.2.44",
+ "cargo_toml 0.22.3",
  "core-collections",
  "core-misc",
  "core-utils",
@@ -5853,7 +5971,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9dbe55c8f9d0dbd25d9447a5a889ff90c0cc3feaa7395310d3d826b2c703eaab"
 dependencies = [
  "bitflags 2.6.0",
- "indexmap 2.7.0",
+ "indexmap 2.13.0",
  "semver",
 ]
 
@@ -5916,7 +6034,7 @@ version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -6051,6 +6169,15 @@ name = "winnow"
 version = "0.5.40"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f593a95398737aeed53e489c785df13f3618e41dbcd6718c6addbf1395aa6876"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
+name = "winnow"
+version = "0.7.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a5364e9d77fcdeeaa6062ced926ee3381faa2ee02d3eb83a5c27a8825540829"
 dependencies = [
  "memchr",
 ]
