@@ -465,6 +465,7 @@ mod tests {
             Personas::new(),
             AuthorizedDapps::new(),
             ResourcePreferences::new(),
+            MFAFactorInstances::new(),
         );
 
         profile.networks.append(new_network.clone());

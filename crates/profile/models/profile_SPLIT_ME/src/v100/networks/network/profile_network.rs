@@ -36,6 +36,10 @@ pub struct ProfileNetwork {
     /// Configuration related to resources
     #[serde(default)]
     pub resource_preferences: ResourcePreferences,
+
+    /// Pre-derived MFA factor instances
+    #[serde(default)]
+    pub mfa_factor_instances: MFAFactorInstances,
 }
 
 impl IsNetworkAware for ProfileNetwork {
@@ -53,12 +57,14 @@ impl ProfileNetwork {
 			personas: {}
 			authorized_dapps: {}
 			resource_preferences: {:?}
+			mfa_factor_instances: {:?}
 			"#,
             self.id,
             self.accounts,
             self.personas,
             self.authorized_dapps,
-            self.resource_preferences
+            self.resource_preferences,
+            self.mfa_factor_instances,
         )
     }
 }
@@ -85,12 +91,14 @@ impl ProfileNetwork {
         personas: impl IntoIterator<Item = Persona>,
         authorized_dapps: impl Into<AuthorizedDapps>,
         resource_preferences: impl Into<ResourcePreferences>,
+        mfa_factor_instances: impl Into<MFAFactorInstances>,
     ) -> Self {
         let network_id = network_id.into();
         let accounts = accounts.into_iter().collect::<Accounts>();
         let personas = personas.into_iter().collect::<Personas>();
         let authorized_dapps = authorized_dapps.into();
         let resource_preferences = resource_preferences.into();
+        let mfa_factor_instances = mfa_factor_instances.into();
         assert!(
             accounts
                 .get_all()
@@ -121,12 +129,21 @@ impl ProfileNetwork {
             "Discrepancy, found a ResourceAppPreference on other network than {network_id}"
         );
 
+        assert!(
+            mfa_factor_instances
+                .get_all()
+                .into_iter()
+                .all(|d| d.factor_instance.badge.network_id() == network_id),
+            "Discrepancy, found a MFAFactorInstance on other network than {network_id}"
+        );
+
         Self {
             id: network_id,
             accounts,
             personas,
             authorized_dapps,
             resource_preferences,
+            mfa_factor_instances,
         }
     }
 
@@ -139,6 +156,7 @@ impl ProfileNetwork {
             Personas::new(),
             AuthorizedDapps::new(),
             ResourcePreferences::new(),
+            MFAFactorInstances::new(),
         )
     }
 
@@ -154,6 +172,7 @@ impl ProfileNetwork {
             Personas::new(),
             AuthorizedDapps::new(),
             ResourcePreferences::new(),
+            MFAFactorInstances::new(),
         )
     }
 }
@@ -179,6 +198,7 @@ impl ProfileNetwork {
             Personas::sample_mainnet(),
             AuthorizedDapps::sample_mainnet(),
             ResourcePreferences::sample_mainnet(),
+            MFAFactorInstances::sample_mainnet(),
         )
     }
 
@@ -190,6 +210,7 @@ impl ProfileNetwork {
             Personas::sample_stokenet(),
             AuthorizedDapps::sample_stokenet(),
             ResourcePreferences::sample_stokenet(),
+            MFAFactorInstances::sample_stokenet(),
         )
     }
 }
@@ -241,6 +262,7 @@ mod tests {
                 Personas::default(),
                 AuthorizedDapps::default(),
                 ResourcePreferences::default(),
+                MFAFactorInstances::default(),
             )
             .accounts
             .len(),
@@ -259,6 +281,7 @@ mod tests {
             Personas::default(),
             AuthorizedDapps::default(),
             ResourcePreferences::default(),
+            MFAFactorInstances::default(),
         );
     }
 
@@ -273,6 +296,7 @@ mod tests {
             Personas::just(Persona::sample_stokenet()),
             AuthorizedDapps::default(),
             ResourcePreferences::default(),
+            MFAFactorInstances::default(),
         );
     }
 
@@ -287,6 +311,7 @@ mod tests {
             Personas::sample_mainnet(),
             AuthorizedDapps::just(AuthorizedDapp::sample_stokenet()),
             ResourcePreferences::default(),
+            MFAFactorInstances::default(),
         );
     }
 
@@ -303,6 +328,7 @@ mod tests {
             ResourcePreferences::from_iter([
                 ResourceAppPreference::sample_non_fungible_stokenet(),
             ]),
+            MFAFactorInstances::default(),
         );
     }
 
@@ -310,13 +336,31 @@ mod tests {
     #[should_panic(
         expected = "Discrepancy, found an AuthorizedDapp on other network than mainnet"
     )]
-    fn panic_when_network_id_mismatch_between_accounts_when_new_() {
+    fn panic_when_network_id_mismatch_between_authorized_dapps_and_value() {
         SUT::new(
             NetworkID::Mainnet,
             Accounts::sample_mainnet(),
             Personas::sample_mainnet(),
             AuthorizedDapps::just(AuthorizedDapp::sample_stokenet()),
             ResourcePreferences::default(),
+            MFAFactorInstances::default(),
+        );
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "Discrepancy, found an MFAFactorInstance on other network than mainnet"
+    )]
+    fn panic_when_network_id_mismatch_between_mfa_factor_instances_and_value() {
+        SUT::new(
+            NetworkID::Mainnet,
+            Accounts::sample_mainnet(),
+            Personas::sample_mainnet(),
+            AuthorizedDapps::default(),
+            ResourcePreferences::default(),
+            MFAFactorInstances::just(
+                MFAFactorInstance::sample_stokenet_account_securified_idx_0(),
+            ),
         );
     }
 

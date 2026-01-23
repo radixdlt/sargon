@@ -96,6 +96,7 @@ mod tests {
             all_personas,
             AuthorizedDapps::sample_stokenet(),
             ResourcePreferences::sample_stokenet(),
+            MFAFactorInstances::sample_stokenet(),
         );
 
         let result = sut

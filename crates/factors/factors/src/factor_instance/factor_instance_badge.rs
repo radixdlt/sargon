@@ -19,6 +19,23 @@ pub enum FactorInstanceBadge {
     // },
 }
 
+impl IsNetworkAware for FactorInstanceBadge {
+    fn network_id(&self) -> NetworkID {
+        match self {
+            FactorInstanceBadge::Virtual { value } => value.network_id(),
+        }
+    }
+}
+
+impl Identifiable for FactorInstanceBadge {
+    type ID = PublicKey;
+    fn id(&self) -> Self::ID {
+        match self {
+            FactorInstanceBadge::Virtual { value } => value.id(),
+        }
+    }
+}
+
 impl HasSampleValues for FactorInstanceBadge {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

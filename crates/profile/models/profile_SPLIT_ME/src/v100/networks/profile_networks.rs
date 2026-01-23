@@ -92,6 +92,7 @@ mod tests {
             Personas::default(),
             AuthorizedDapps::default(),
             ResourcePreferences::default(),
+            MFAFactorInstances::default(),
         )]);
         assert!(
             !sut.append(ProfileNetwork::new(
@@ -100,6 +101,7 @@ mod tests {
                 Personas::default(),
                 AuthorizedDapps::default(),
                 ResourcePreferences::default(),
+                MFAFactorInstances::default(),
             ))
             .0
         );
@@ -121,6 +123,7 @@ mod tests {
             Personas::default(),
             AuthorizedDapps::default(),
             ResourcePreferences::default(),
+            MFAFactorInstances::default(),
         );
         assert_eq!(SUT::just(network).len(), 1);
     }

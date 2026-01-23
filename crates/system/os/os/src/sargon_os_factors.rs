@@ -513,6 +513,88 @@ impl SargonOS {
         }
         Ok(())
     }
+
+    pub async fn get_new_mfa_factor_instance(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<MFAFactorInstance> {
+        let factor_source_id = factor_source.id();
+        let stored_mfa_factor_instances = self
+            .profile_state_holder
+            .access_profile_with(|p| {
+                p.current_network().map(|n| n.mfa_factor_instances.clone())
+            })?
+            .map(|instances| {
+                instances
+                    .into_iter()
+                    .filter(|mfafi| {
+                        mfafi.factor_instance.factor_source_id
+                            == factor_source_id
+                    })
+                    .collect::<Vec<MFAFactorInstance>>()
+            })?;
+
+        let maybe_unused_stored_mfa_factor_instance = self
+            .get_unused_mfa_factor_instance(stored_mfa_factor_instances)
+            .await?;
+        if let Some(maybe_unused_stored_mfa_factor_instance) =
+            maybe_unused_stored_mfa_factor_instance
+        {
+            return Ok(maybe_unused_stored_mfa_factor_instance);
+        }
+
+        // todo derive and store new instances
+
+        Err(CommonError::Unknown {
+            error_message: "test".to_string(),
+        })
+    }
+
+    async fn get_unused_mfa_factor_instance(
+        &self,
+        mfa_factor_instances: Vec<MFAFactorInstance>,
+    ) -> Result<Option<MFAFactorInstance>> {
+        let mfafi_with_requirements = mfa_factor_instances
+            .clone()
+            .into_iter()
+            .map(|mfafi| {
+                let requirement =
+                    RoleRequirement::from(mfafi.clone().factor_instance.badge);
+                (mfafi, requirement)
+            })
+            .collect::<Vec<(MFAFactorInstance, RoleRequirement)>>();
+        let role_requirements = mfafi_with_requirements
+            .clone()
+            .into_iter()
+            .map(|mfafi_and_requirement| mfafi_and_requirement.1)
+            .collect::<Vec<RoleRequirement>>();
+
+        let response = self
+            .gateway_client()?
+            .fetch_entities_by_role_requirement_lookup(role_requirements)
+            .await?;
+
+        let unused_role_requirement_lookup_item = response
+            .items
+            .into_iter()
+            .find(|item| item.entities.is_empty());
+
+        if let Some(unused) = unused_role_requirement_lookup_item {
+            let unused_mfafi_with_requirement = mfafi_with_requirements
+                .into_iter()
+                .find(|mfafi_with_requirement| {
+                    mfafi_with_requirement.clone().1 == unused.requirement
+                });
+
+            if let Some(unused_mfafi_with_requirement) =
+                unused_mfafi_with_requirement
+            {
+                return Ok(Some(unused_mfafi_with_requirement.0));
+            }
+        }
+
+        Ok(None)
+    }
 }
 
 #[cfg(debug_assertions)]
@@ -538,7 +620,6 @@ impl SargonOS {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use actix_rt::time::timeout;
 
@@ -613,11 +694,11 @@ mod tests {
 
         // ACT
         let loaded = os
-      .with_timeout(|x| {
-          x.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&id)
-      })
-      .await
-      .unwrap();
+            .with_timeout(|x| {
+                x.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&id)
+            })
+            .await
+            .unwrap();
 
         // ASSERT
         assert_eq!(loaded, mwp);

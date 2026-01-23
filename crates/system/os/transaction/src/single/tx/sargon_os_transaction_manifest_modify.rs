@@ -593,6 +593,7 @@ mod tests {
                 personas.clone(),
                 AuthorizedDapps::default(),
                 ResourcePreferences::default(),
+                MFAFactorInstances::default(),
             ));
             profile.factor_sources.extend(FactorSource::sample_all());
             Ok(())
