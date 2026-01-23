@@ -723,8 +723,12 @@ async fn adding_accounts_different_networks_different_factor_sources() {
     os.add_factor_source(fs_device.clone()).await.unwrap();
     os.add_factor_source(fs_arculus.clone()).await.unwrap();
     os.add_factor_source(fs_ledger.clone()).await.unwrap();
-    pre_derive_instances_for_factor_source(&os, &fs_arculus, NetworkID::Mainnet)
-        .await;
+    pre_derive_instances_for_factor_source(
+        &os,
+        &fs_arculus,
+        NetworkID::Mainnet,
+    )
+    .await;
     pre_derive_instances_for_factor_source(&os, &fs_ledger, NetworkID::Mainnet)
         .await;
 
