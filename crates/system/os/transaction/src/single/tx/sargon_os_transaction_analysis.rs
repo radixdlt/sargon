@@ -375,10 +375,11 @@ mod tests {
         let req = SargonOS::boot_test_with_networking_driver(Arc::new(
             MockNetworkingDriver::new_always_failing(),
         ));
-        let os = actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
-            .await
-            .unwrap()
-            .unwrap();
+        let os =
+            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+                .await
+                .unwrap()
+                .unwrap();
 
         os.update_profile_with(|profile| {
             profile.networks.insert(ProfileNetwork::new(
