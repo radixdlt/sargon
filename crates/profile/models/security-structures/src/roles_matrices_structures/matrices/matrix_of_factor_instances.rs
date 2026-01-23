@@ -496,8 +496,8 @@ mod tests {
                     "factorSourceID": {
                       "discriminator": "fromHash",
                       "fromHash": {
-                        "kind": "device",
-                        "body": "f1a93d324dd0f2bff89963ab81ed6e0c2ee7e18c0827dc1d3576b2d9f26bbd0a"
+                        "kind": "arculusCard",
+                        "body": "12f36554769cd96614776e6dbd5629825b8e87366eec5e515de32bb1ea153820"
                       }
                     },
                     "badge": {
@@ -507,32 +507,7 @@ mod tests {
                         "hierarchicalDeterministicPublicKey": {
                           "publicKey": {
                             "curve": "curve25519",
-                            "compressedData": "427969814e15d74c3ff4d9971465cb709d210c8a7627af9466bdaa67bd0929b7"
-                          },
-                          "derivationPath": {
-                            "scheme": "cap26",
-                            "path": "m/44H/1022H/1H/525H/1460H/0S"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  {
-                    "factorSourceID": {
-                      "discriminator": "fromHash",
-                      "fromHash": {
-                        "kind": "ledgerHQHardwareWallet",
-                        "body": "ab59987eedd181fe98e512c1ba0f5ff059f11b5c7c56f15614dcc9fe03fec58b"
-                      }
-                    },
-                    "badge": {
-                      "discriminator": "virtualSource",
-                      "virtualSource": {
-                        "discriminator": "hierarchicalDeterministicPublicKey",
-                        "hierarchicalDeterministicPublicKey": {
-                          "publicKey": {
-                            "curve": "curve25519",
-                            "compressedData": "92cd6838cd4e7b0523ed93d498e093f71139ffd5d632578189b39a26005be56b"
+                            "compressedData": "999bc2b17d012c3ce49da85b880029be5f9a9093247821f746ba73b6fc20e406"
                           },
                           "derivationPath": {
                             "scheme": "cap26",

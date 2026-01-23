@@ -78,7 +78,7 @@ impl From<FactorInstanceBadge> for ScryptoResourceOrNonFungible {
                     },
             } => ScryptoResourceOrNonFungible::NonFungible(
                 ScryptoNonFungibleGlobalId::from_public_key(
-                    &ScryptoPublicKey::from(value.public_key),
+                    ScryptoPublicKey::from(value.public_key),
                 ),
             ),
             // FactorInstanceBadge::Physical { value } => {
