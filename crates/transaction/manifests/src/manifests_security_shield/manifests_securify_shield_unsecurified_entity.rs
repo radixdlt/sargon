@@ -89,7 +89,7 @@ impl TransactionManifestSecurifyUnsecurifiedEntity for TransactionManifest {
                 SCRYPTO_ACCESS_CONTROLLER_CREATE_IDENT,
                 ScryptoAccessControllerCreateManifestInput {
                     controlled_asset: owner_badge_bucket,
-                    rule_set,
+                    rule_set: rule_set.into(),
                     timed_recovery_delay_in_minutes: Some(
                         *timed_recovery_delay_in_minutes,
                     ),

@@ -1,6 +1,6 @@
 [package]
 name = "bytes"
-version = "1.2.43"
+version = "1.2.45"
 edition = "2021"
 
 [dependencies]

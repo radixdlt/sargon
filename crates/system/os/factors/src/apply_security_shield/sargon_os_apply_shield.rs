@@ -1260,8 +1260,20 @@ mod tests {
         let ledger = FactorSource::sample_ledger();
         let arculus = FactorSource::sample_arculus();
 
-        os.add_factor_source(ledger.clone()).await.unwrap(); // This pre-derives keys for Ledger as well
-        os.add_factor_source(arculus.clone()).await.unwrap(); // This pre-derives keys for Arculus as well
+        os.add_factor_source(ledger.clone()).await.unwrap();
+        os.add_factor_source(arculus.clone()).await.unwrap();
+        os.pre_derive_and_fill_cache_with_instances_for_factor_source(
+            ledger.clone(),
+            NetworkID::Mainnet,
+        )
+        .await
+        .unwrap();
+        os.pre_derive_and_fill_cache_with_instances_for_factor_source(
+            arculus.clone(),
+            NetworkID::Mainnet,
+        )
+        .await
+        .unwrap();
 
         // Set up a shield that requires all factor sources:
         // `device` & `ledger` are used on P, R and C roles
