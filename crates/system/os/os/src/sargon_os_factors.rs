@@ -1,6 +1,6 @@
-use std::borrow::Borrow;
-
 use crate::prelude::*;
+use futures::FutureExt;
+use std::borrow::Borrow;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
@@ -514,6 +514,18 @@ impl SargonOS {
         Ok(())
     }
 
+    /// Returns a usable MFA factor instance for the given `factor_source`.
+    ///
+    /// Behavior:
+    /// - Fast path: read stored `MFAFactorInstances` for the current network and check
+    ///   if any stored instance is currently unused. If a stored unused instance exists,
+    ///   return it immediately.
+    /// - Otherwise: determine the highest derived index present in storage, then derive the next
+    ///   batch of factor instances starting after the current maximum derivation index, store the
+    ///   newly derived instances into the profile, and return the first unused instance.
+    ///
+    /// - Propagates errors from profile access, gateway queries, derivation logic,
+    ///   and profile update operations.
     pub async fn get_new_mfa_factor_instance(
         &self,
         factor_source: FactorSource,
@@ -531,31 +543,74 @@ impl SargonOS {
                         mfafi.factor_instance.factor_source_id
                             == factor_source_id
                     })
-                    .collect::<Vec<MFAFactorInstance>>()
+                    .collect::<MFAFactorInstances>()
             })?;
 
-        let maybe_unused_stored_mfa_factor_instance = self
-            .get_unused_mfa_factor_instance(stored_mfa_factor_instances)
-            .await?;
-        if let Some(maybe_unused_stored_mfa_factor_instance) =
-            maybe_unused_stored_mfa_factor_instance
+        // Fast path: is any stored instance unused?
+        if let Some(unused) = self
+            .get_unused_mfa_factor_instance(stored_mfa_factor_instances.clone())
+            .await?
         {
-            return Ok(maybe_unused_stored_mfa_factor_instance);
+            return Ok(unused);
         }
 
-        // todo derive and store new instances
+        // Start from the highest existing derived index (if any).
+        let mut current_max_index =
+            stored_mfa_factor_instances.max_index_component();
 
-        Err(CommonError::Unknown {
-            error_message: "test".to_string(),
-        })
+        loop {
+            // Derive the next batch starting from `current_max_index`.
+            let new_instances = self
+                .derive_factor_instances_for_factor_source(
+                    factor_source.clone(),
+                    DerivationPurpose::PreDerivingKeys,
+                    CAP26EntityKind::Account,
+                    current_max_index,
+                    10,
+                )
+                .await
+                .map(|instances| {
+                    instances
+                        .into_iter()
+                        .map(|fi| MFAFactorInstance::new(fi.factor_instance()))
+                        .collect::<MFAFactorInstances>()
+                })?;
+
+            // Persist the newly derived instances
+            self.update_profile_with(|profile| {
+                profile.networks.insert_mfa_factor_instances(
+                    profile.current_network_id(),
+                    new_instances.clone(),
+                );
+                Ok(())
+            })
+            .await?;
+
+            // Is any derived instance unused?
+            let maybe_unused_mfa_factor_instance = self
+                .get_unused_mfa_factor_instance(new_instances.clone())
+                .await?;
+            if let Some(maybe_unused_mfa_factor_instance) =
+                maybe_unused_mfa_factor_instance
+            {
+                return Ok(maybe_unused_mfa_factor_instance);
+            }
+
+            // Next time start after the last derived index
+            current_max_index = new_instances.max_index_component();
+        }
     }
 
+    /// Check a collection of `MFAFactorInstance`s for an unused instance.
+    /// - For every `MFAFactorInstance` builds the corresponding `RoleRequirement`
+    ///   and calls the gateway `EntitiesByRoleRequirementLookup` API
+    /// - If the gateway returns an item whose `entities` array is empty, the
+    ///   corresponding `MFAFactorInstance` is considered unused
     async fn get_unused_mfa_factor_instance(
         &self,
-        mfa_factor_instances: Vec<MFAFactorInstance>,
+        mfa_factor_instances: MFAFactorInstances,
     ) -> Result<Option<MFAFactorInstance>> {
         let mfafi_with_requirements = mfa_factor_instances
-            .clone()
             .into_iter()
             .map(|mfafi| {
                 let requirement =
@@ -563,10 +618,10 @@ impl SargonOS {
                 (mfafi, requirement)
             })
             .collect::<Vec<(MFAFactorInstance, RoleRequirement)>>();
+
         let role_requirements = mfafi_with_requirements
-            .clone()
-            .into_iter()
-            .map(|mfafi_and_requirement| mfafi_and_requirement.1)
+            .iter()
+            .map(|(_, req)| req.clone())
             .collect::<Vec<RoleRequirement>>();
 
         let response = self
@@ -574,22 +629,16 @@ impl SargonOS {
             .fetch_entities_by_role_requirement_lookup(role_requirements)
             .await?;
 
-        let unused_role_requirement_lookup_item = response
+        if let Some(unused_item) = response
             .items
             .into_iter()
-            .find(|item| item.entities.is_empty());
-
-        if let Some(unused) = unused_role_requirement_lookup_item {
-            let unused_mfafi_with_requirement = mfafi_with_requirements
+            .find(|item| item.entities.is_empty())
+        {
+            if let Some((mfafi, _)) = mfafi_with_requirements
                 .into_iter()
-                .find(|mfafi_with_requirement| {
-                    mfafi_with_requirement.clone().1 == unused.requirement
-                });
-
-            if let Some(unused_mfafi_with_requirement) =
-                unused_mfafi_with_requirement
+                .find(|(_, req)| *req == unused_item.requirement)
             {
-                return Ok(Some(unused_mfafi_with_requirement.0));
+                return Ok(Some(mfafi));
             }
         }
 

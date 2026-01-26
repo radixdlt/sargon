@@ -5,6 +5,25 @@ decl_identified_vec_of!(
     MFAFactorInstance
 );
 
+impl MFAFactorInstances {
+    pub fn max_index_component(&self) -> Option<HDPathComponent> {
+        self.iter()
+            .filter_map(|mfafi| {
+                mfafi
+                    .factor_instance
+                    .badge
+                    .as_virtual()
+                    .map(|badge_source| {
+                        badge_source
+                            .as_hierarchical_deterministic()
+                            .derivation_path
+                            .index()
+                    })
+            })
+            .max()
+    }
+}
+
 impl HasSampleValues for MFAFactorInstances {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {

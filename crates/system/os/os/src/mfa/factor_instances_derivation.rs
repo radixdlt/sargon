@@ -120,6 +120,68 @@ impl SargonOS {
             })
             .collect::<IndexMap<FactorSourceIDFromHash, FactorInstances>>())
     }
+
+    pub async fn derive_factor_instances_for_factor_source(
+        &self,
+        factor_source: FactorSource,
+        derivation_purpose: DerivationPurpose,
+        entity_kind: CAP26EntityKind,
+        start_index: Option<HDPathComponent>,
+        instance_count: u64,
+    ) -> Result<FactorInstances> {
+        let profile_snapshot = self.profile()?;
+        let network_id = profile_snapshot.current_network_id();
+        let key_derivation_interactors = self.keys_derivation_interactor();
+        let factor_source_id = factor_source.id_from_hash();
+
+        let mut per_factor_paths =
+            IndexMap::<FactorSourceIDFromHash, IndexSet<DerivationPath>>::new();
+        let mfa_preset = DerivationPreset::mfa_entity_kind(entity_kind);
+        let index_agnostic_path =
+            mfa_preset.index_agnostic_path_on_network(network_id);
+        let default_index = HDPathComponent::from_local_key_space(
+            0u32,
+            index_agnostic_path.key_space,
+        )?;
+
+        // Start from the provided start_index (inclusive)
+        let mut current_index = start_index.unwrap_or(default_index);
+
+        for _ in 0..instance_count {
+            let derivation_path =
+                DerivationPath::from_index_agnostic_path_and_component(
+                    index_agnostic_path,
+                    current_index,
+                );
+
+            per_factor_paths
+                .append_or_insert_element_to(factor_source_id, derivation_path);
+
+            current_index = current_index
+                .checked_add_one_to_global()
+                .map(Some)
+                .map(|index| index.unwrap_or(default_index))?;
+        }
+
+        // Derive all requested keys and translate them into FactorInstances.
+        let collector = KeysCollector::new(
+            IndexSet::just(factor_source),
+            per_factor_paths.clone(),
+            key_derivation_interactors,
+            derivation_purpose,
+        )?;
+
+        let keys_output = collector.collect_keys().await?;
+
+        let instances = keys_output
+            .factors_by_source
+            .into_iter()
+            .find(|(id, _)| *id == factor_source_id)
+            .map(|(_, factors)| FactorInstances::from(factors))
+            .ok_or(CommonError::NoDerivedMFAFactorInstances)?;
+
+        Ok(instances)
+    }
 }
 
 #[cfg(test)]
