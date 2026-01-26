@@ -13,24 +13,19 @@ impl EntitiesByRoleRequirementLookupRequest {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RoleRequirement {
+    pub resource_address: ResourceAddress,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub resource_address: Option<ResourceAddress>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub non_fungible_id: Option<NonFungibleGlobalId>,
+    pub non_fungible_id: Option<NonFungibleLocalId>,
 }
 
 impl RoleRequirement {
-    pub fn with_resource_address(resource_address: ResourceAddress) -> Self {
+    pub fn new(
+        resource_address: ResourceAddress,
+        non_fungible_id: Option<NonFungibleLocalId>,
+    ) -> Self {
         Self {
-            resource_address: Some(resource_address),
-            non_fungible_id: None,
-        }
-    }
-
-    pub fn with_non_fungible_id(non_fungible_id: NonFungibleGlobalId) -> Self {
-        Self {
-            resource_address: None,
-            non_fungible_id: Some(non_fungible_id),
+            resource_address,
+            non_fungible_id,
         }
     }
 }
@@ -50,14 +45,18 @@ impl From<(ScryptoResourceOrNonFungible, NetworkID)> for RoleRequirement {
     fn from(value: (ScryptoResourceOrNonFungible, NetworkID)) -> Self {
         match value.0 {
             ScryptoResourceOrNonFungible::NonFungible(id) => {
-                RoleRequirement::with_non_fungible_id(
-                    NonFungibleGlobalId::from((id, value.1)),
+                let global_id = NonFungibleGlobalId::from((id, value.1));
+
+                RoleRequirement::new(
+                    global_id.resource_address,
+                    Some(global_id.non_fungible_local_id),
                 )
             }
             ScryptoResourceOrNonFungible::Resource(address) => {
-                RoleRequirement::with_resource_address(ResourceAddress::from((
-                    address, value.1,
-                )))
+                RoleRequirement::new(
+                    ResourceAddress::from((address, value.1)),
+                    None,
+                )
             }
         }
     }

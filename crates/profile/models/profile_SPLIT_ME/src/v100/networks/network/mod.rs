@@ -1,7 +1,7 @@
 mod accounts;
 mod authorized_dapp;
 mod authorized_dapps;
-pub mod mfa_factor_instance;
+mod mfa_factor_instance;
 mod mfa_factor_instances;
 mod personas;
 mod profile_network;

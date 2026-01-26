@@ -37,6 +37,9 @@ pub const DAYS_PER_WEEK: u16 = 7;
 /// Max amount of role requirements (resource addresses or non-fungible ids) to be queried in one request.
 pub const GATEWAY_CHUNK_ENTITIES_BY_ROLE_REQUIREMENT_LOOKUP: u64 = 50;
 
+/// Number of new MFA factor instances to derive and store when requested.
+pub const NUMBER_OF_NEW_MFA_FACTOR_INSTANCES_TO_DERIVE_AND_STORE: u64 = 3;
+
 #[cfg(test)]
 mod tests {
     use super::*;

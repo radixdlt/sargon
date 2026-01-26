@@ -566,7 +566,7 @@ impl SargonOS {
                     DerivationPurpose::PreDerivingKeys,
                     CAP26EntityKind::Account,
                     current_max_index,
-                    10,
+                    NUMBER_OF_NEW_MFA_FACTOR_INSTANCES_TO_DERIVE_AND_STORE,
                 )
                 .await
                 .map(|instances| {

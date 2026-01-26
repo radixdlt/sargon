@@ -29,5 +29,5 @@ impl GatewayClient {
         "/state/non-fungible/location";
     pub const PATH_STATE_NON_FUNGIBLE_DATA: &str = "/state/non-fungible/data";
     pub const PATH_ENTITIES_BY_ROLE_REQUIREMENT_LOOKUP: &str =
-        "/extensions/entities-by-role-requirement/page";
+        "/extensions/entities-by-role-requirement/lookup";
 }
