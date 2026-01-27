@@ -383,6 +383,7 @@ mod tests {
                     vec![persona_securified_on_ledger.clone()],
                     AuthorizedDapps::new(),
                     ResourcePreferences::new(),
+                    MFAFactorInstances::new(),
                 )),
             ),
             true,
