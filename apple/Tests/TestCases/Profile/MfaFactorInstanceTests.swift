@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class P2PLinkTests: Test<MfaFactorInstance> {
+final class MfaFactorInstanceTests: Test<MfaFactorInstance> {
 	func test_codable() throws {
 		let raw = """
 		{

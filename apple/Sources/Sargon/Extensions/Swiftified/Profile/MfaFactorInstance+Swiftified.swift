@@ -10,4 +10,7 @@ extension MfaFactorInstance: SargonObjectCodable {}
 // MARK: - MfaFactorInstance + Identifiable
 extension MfaFactorInstance: Identifiable {
 	public typealias ID = FactorInstance
+	public var id: ID {
+		factorInstance
+	}
 }
