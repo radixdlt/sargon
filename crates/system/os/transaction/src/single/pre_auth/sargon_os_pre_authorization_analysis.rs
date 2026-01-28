@@ -48,6 +48,7 @@ impl OsAnalysePreAuthPreview for SargonOS {
                         nonce,
                         notary_public_key,
                         false,
+                        true,
                     )
                     .await?;
 
