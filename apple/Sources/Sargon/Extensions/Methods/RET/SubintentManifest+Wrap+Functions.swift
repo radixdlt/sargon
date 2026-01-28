@@ -3,7 +3,9 @@ import SargonUniFFI
 
 // MARK: - SubintentManifest + CustomStringConvertible
 extension SubintentManifest: CustomStringConvertible {
-	public var description: String { manifestString }
+	public var description: String {
+		manifestString
+	}
 }
 
 extension SubintentManifest {

@@ -3,7 +3,9 @@ import SargonUniFFI
 
 // MARK: - TransactionManifestV2 + CustomStringConvertible
 extension TransactionManifestV2: CustomStringConvertible {
-	public var description: String { manifestString }
+	public var description: String {
+		manifestString
+	}
 }
 
 extension TransactionManifestV2 {

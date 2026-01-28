@@ -20,7 +20,9 @@ extension AccountOrPersona: EntityBaseProtocol {
 		id
 	}
 
-	public var asGeneral: AccountOrPersona { self }
+	public var asGeneral: AccountOrPersona {
+		self
+	}
 
 	public typealias ID = AddressOfAccountOrPersona
 	public typealias EntityAddress = AddressOfAccountOrPersona
@@ -59,11 +61,11 @@ extension AccountOrPersona: EntityBaseProtocol {
 		try extract()
 	}
 
-	public func extract<F>(_ type: F.Type = F.self) -> F? where F: EntityProtocol {
+	public func extract<F: EntityProtocol>(_ type: F.Type = F.self) -> F? {
 		F.extract(from: self)
 	}
 
-	public func extract<F>(as _: F.Type = F.self) throws -> F where F: EntityProtocol {
+	public func extract<F: EntityProtocol>(as _: F.Type = F.self) throws -> F {
 		guard let extracted = extract(F.self) else {
 			throw IncorrectEntityType(
 				expectedKind: F.kind,

@@ -2,7 +2,9 @@ import Foundation
 
 // MARK: - SargonOS + SargonOSProtocol
 extension SargonOS: SargonOSProtocol {
-	public var os: SargonOS { self }
+	public var os: SargonOS {
+		self
+	}
 }
 
 // MARK: SargonOSProtocol Conformance

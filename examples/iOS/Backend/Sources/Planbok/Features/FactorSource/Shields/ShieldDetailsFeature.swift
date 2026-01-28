@@ -126,7 +126,6 @@ extension ShieldDetailsFeature {
 			}
 		}
 
-		@ViewBuilder
 		func sectionFactors(
 			factors: [FactorSource],
 			factorAmount: LocalizedStringKey,

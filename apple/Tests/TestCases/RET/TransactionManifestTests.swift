@@ -1,8 +1,6 @@
-@testable import Sargon
-
 import CustomDump
 import Foundation
-import Sargon
+@testable import Sargon
 import SargonUniFFI
 import XCTest
 
@@ -35,7 +33,7 @@ final class TransactionManifestTests: Test<TransactionManifest> {
 		XCTAssertNoDifference(SUT.sample.involvedPoolAddresses, [])
 	}
 
-	func test_manifest_summary() throws {
+	func test_manifest_summary() {
 		XCTAssertNoDifference(SUT.sample.summary.addressesOfAccountsWithdrawnFrom, [AccountAddress.sampleMainnet])
 	}
 

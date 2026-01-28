@@ -5,7 +5,7 @@ import SargonUniFFI
 import XCTest
 
 class UnsafeStorageDriverTests: DriverTest<UnsafeStorage> {
-	func test_crud() async throws {
+	func test_crud() {
 		let sut = SUT()
 		let key = UnsafeStorage.Key.factorSourceUserHasWrittenDown
 		let data = Data([0x01])
@@ -15,7 +15,7 @@ class UnsafeStorageDriverTests: DriverTest<UnsafeStorage> {
 		XCTAssertNil(sut.loadData(key: key))
 	}
 
-	func test_keyMapping() async throws {
+	func test_keyMapping() {
 		// Set up SUT with keyMapping that uses custom key
 		let key = "custom_key"
 		let keyMapping: UnsafeStorageKeyMapping = [.factorSourceUserHasWrittenDown: key]

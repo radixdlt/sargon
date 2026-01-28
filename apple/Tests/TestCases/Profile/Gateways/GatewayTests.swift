@@ -21,11 +21,11 @@ final class GatewayTests: Test<Gateway> {
 		)
 	}
 
-	func test_id() throws {
+	func test_id() {
 		XCTAssertEqual(SUT.sample.id, SUT.sample.getID())
 	}
 
-	func test_description() throws {
+	func test_description() {
 		XCTAssertEqual(SUT.sample.description, SUT.sample.toString())
 	}
 

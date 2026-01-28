@@ -40,7 +40,7 @@ extension Decimal192 {
 		return values
 	}()
 
-	// Sorted in increasing order: [-10, -9, .. -2, -1]
+	/// Sorted in increasing order: [-10, -9, .. -2, -1]
 	public static let negative: [Self] = positive.map { $0.negate() }.sorted()
 
 	public static let nonZero: [Self] = {

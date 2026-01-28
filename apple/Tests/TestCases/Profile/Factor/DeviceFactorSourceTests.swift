@@ -58,7 +58,7 @@ final class DeviceFactorSourceTests: SpecificFactorSourceTest<DeviceFactorSource
 		}
 	}
 
-	func test_known_factor_source_id() async throws {
+	func test_known_factor_source_id() throws {
 		let mnemonic = try Mnemonic(
 			phrase: "equip will roof matter pink blind book anxiety banner elbow sun young"
 		)

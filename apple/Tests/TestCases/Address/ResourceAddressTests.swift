@@ -19,12 +19,12 @@ final class ResourceAddressTests: AddressTest<ResourceAddress> {
 		XCTAssertNotNil(SUT.sampleMainnetNonFungibleGCMembership.asNonFungibleResourceAddress)
 	}
 
-	func test_xrd_on_network() {
+	func test_xrd_on_network() throws {
 		XCTAssertEqual(SUT.xrd(on: .mainnet), SUT.sampleMainnet)
 		XCTAssertEqual(SUT.xrd(on: .stokenet), SUT.sampleStokenet)
 		XCTAssertEqual(
 			SUT.xrd(on: .simulator),
-			try! SUT(
+			try SUT(
 				validatingAddress: "resource_sim1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxakj8n3"
 			)
 		)

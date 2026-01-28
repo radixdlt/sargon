@@ -5,7 +5,7 @@ import XCTest
 final class DappToWalletInteractionSubintentExpirationTests: TestCase {
 	typealias SUT = DappToWalletInteractionSubintentExpiration
 
-	func testGetStatus() throws {
+	func testGetStatus() {
 		let afterDelay = SUT.afterDelay(.init(expireAfterSeconds: 100))
 		XCTAssertEqual(afterDelay.getStatus(), .valid)
 

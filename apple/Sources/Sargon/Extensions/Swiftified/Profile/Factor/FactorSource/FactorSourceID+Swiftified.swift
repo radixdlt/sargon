@@ -21,11 +21,11 @@ extension FactorSourceID: FactorSourceIDProtocol {
 }
 
 extension FactorSourceID {
-	public func extract<F>(_ type: F.Type = F.self) -> F? where F: FactorSourceIDSpecificProtocol {
+	public func extract<F: FactorSourceIDSpecificProtocol>(_ type: F.Type = F.self) -> F? {
 		F.extract(from: self)
 	}
 
-	public func extract<F>(as _: F.Type = F.self) throws -> F where F: FactorSourceIDSpecificProtocol {
+	public func extract<F: FactorSourceIDSpecificProtocol>(as _: F.Type = F.self) throws -> F {
 		guard let extracted = extract(F.self) else {
 			throw IncorrectFactorSourceIDType()
 		}

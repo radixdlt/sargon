@@ -21,7 +21,7 @@ final class HDPathComponentTests: BaseHDPathComponentProtocolTest<HdPathComponen
 		}
 	}
 
-	func test_global_roundtrip() throws {
+	func test_global_roundtrip() {
 		struct Param {
 			let keySpace: KeySpace
 			let global: UInt32

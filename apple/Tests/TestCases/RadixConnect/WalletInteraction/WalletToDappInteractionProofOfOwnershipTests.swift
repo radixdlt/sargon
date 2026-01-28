@@ -7,7 +7,7 @@ import XCTest
 final class WalletToDappInteractionProofOfOwnershipTests: TestCase {
 	typealias SUT = WalletToDappInteractionProofOfOwnership
 
-	func testNewFromIntentSignatures_Ed25519_Account() throws {
+	func testNewFromIntentSignatures_Ed25519_Account() {
 		let owner = AddressOfAccountOrPersona.account(.sample)
 		let intentSignature = IntentSignature.sample // Ed25519
 		let sut = SUT(intentSignatureOfOwner: .init(owner: owner, intentSignature: intentSignature))
@@ -21,7 +21,7 @@ final class WalletToDappInteractionProofOfOwnershipTests: TestCase {
 		}
 	}
 
-	func testNewFromIntentSignatures_Ed25519_Persona() throws {
+	func testNewFromIntentSignatures_Ed25519_Persona() {
 		let owner = AddressOfAccountOrPersona.identity(.sample)
 		let intentSignature = IntentSignature.sample // Ed25519
 		let sut = SUT(intentSignatureOfOwner: .init(owner: owner, intentSignature: intentSignature))
@@ -35,7 +35,7 @@ final class WalletToDappInteractionProofOfOwnershipTests: TestCase {
 		}
 	}
 
-	func testNewFromIntentSignatures_Secp256k1_Account() throws {
+	func testNewFromIntentSignatures_Secp256k1_Account() {
 		let owner = AddressOfAccountOrPersona.account(.sample)
 		let intentSignature = IntentSignature.sampleOther // Secp256k1
 		let sut = SUT(intentSignatureOfOwner: .init(owner: owner, intentSignature: intentSignature))
@@ -49,7 +49,7 @@ final class WalletToDappInteractionProofOfOwnershipTests: TestCase {
 		}
 	}
 
-	func testNewFromIntentSignatures_Secp256k1_Persona() throws {
+	func testNewFromIntentSignatures_Secp256k1_Persona() {
 		let owner = AddressOfAccountOrPersona.identity(.sample)
 		let intentSignature = IntentSignature.sampleOther // Secp256k1
 		let sut = SUT(intentSignatureOfOwner: .init(owner: owner, intentSignature: intentSignature))

@@ -1,7 +1,7 @@
 import Foundation
 import SargonUniFFI
 
-// FiatCurrency -> SargonStringCodable
+/// FiatCurrency -> SargonStringCodable
 extension FiatCurrency {
 	public init(jsonStringLiteral: String) throws {
 		self = try newFiatCurrencyFromJsonString(jsonString: jsonStringLiteral)

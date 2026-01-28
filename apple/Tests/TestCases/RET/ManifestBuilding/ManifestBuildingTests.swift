@@ -1,9 +1,7 @@
-import RegexBuilder
-@testable import Sargon
-
 import CustomDump
 import Foundation
-import Sargon
+import RegexBuilder
+@testable import Sargon
 import SargonUniFFI
 import XCTest
 
@@ -163,7 +161,7 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		AccountAddress.sampleValues.forEach(doTest)
 	}
 
-	func test_assets_transfers() throws {
+	func test_assets_transfers() {
 		let transfers = PerAssetTransfers.sample
 		let manifest = TransactionManifest.assetsTransfers(transfers: transfers)
 		XCTAssert(manifest.description.contains(transfers.fromAccount.address))

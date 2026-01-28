@@ -44,5 +44,7 @@ public protocol FactorSourceProtocol: BaseFactorSourceProtocol {
 }
 
 extension FactorSourceProtocol {
-	public var factorSourceKind: FactorSourceKind { Self.kind }
+	public var factorSourceKind: FactorSourceKind {
+		Self.kind
+	}
 }

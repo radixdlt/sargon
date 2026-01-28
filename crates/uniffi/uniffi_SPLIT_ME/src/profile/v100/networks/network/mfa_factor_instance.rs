@@ -9,6 +9,8 @@ pub struct MFAFactorInstance {
     pub factor_instance: FactorInstance,
 }
 
+json_data_convertible!(MFAFactorInstance);
+
 #[uniffi::export]
 pub fn new_mfa_factor_instance_sample() -> MFAFactorInstance {
     InternalMFAFactorInstance::sample().into()

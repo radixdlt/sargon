@@ -10,7 +10,6 @@ public struct AddressView<Address: AddressProtocol>: SwiftUI.View {
 		self.format = format
 	}
 
-	@ViewBuilder
 	public var body: some View {
 		Text("\(address.formatted(format))")
 			.lineLimit(nil)

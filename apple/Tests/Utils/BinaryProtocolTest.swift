@@ -29,7 +29,7 @@ class SignatureTest<SUT_: SignatureProtocol>: BinaryProtocolTest<SUT_> {}
 
 // MARK: - ExactlyNBytesTest
 class ExactlyNBytesTest<SUT_: ExactlyNBytesProtocol>: BinaryProtocolTest<SUT_> {
-	func test_length() throws {
+	func test_length() {
 		for sampleValue in SUT.sampleValues {
 			XCTAssertEqual(sampleValue.data.count, SUT.length)
 		}

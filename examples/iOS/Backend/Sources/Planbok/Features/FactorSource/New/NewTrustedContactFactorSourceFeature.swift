@@ -132,7 +132,6 @@ extension NewTrustedContactFactorSourceFeature {
 			}
 		}
 
-		@ViewBuilder
 		private func buttonRandomize(
 			with action: HostingFeature.Action.ViewAction
 		) -> some SwiftUI.View {

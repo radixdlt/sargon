@@ -5,7 +5,7 @@ import XCTest
 final class InstantTests: TestCase {
 	typealias SUT = Instant
 
-	func testDate() throws {
+	func testDate() {
 		var sut = SUT(secondsSinceUnixEpoch: 0)
 		XCTAssertEqual(sut.date, Date(timeIntervalSince1970: 0))
 

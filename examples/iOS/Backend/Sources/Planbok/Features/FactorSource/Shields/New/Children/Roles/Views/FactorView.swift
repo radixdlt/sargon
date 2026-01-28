@@ -44,7 +44,6 @@ public struct FactorView: SwiftUI.View {
 		}
 	}
 
-	@ViewBuilder
 	private var label: some View {
 		HStack(alignment: .top) {
 			if let factorSource = factor.factorSource {

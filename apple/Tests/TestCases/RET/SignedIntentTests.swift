@@ -1,8 +1,6 @@
-@testable import Sargon
-
 import CustomDump
 import Foundation
-import Sargon
+@testable import Sargon
 import SargonUniFFI
 import XCTest
 

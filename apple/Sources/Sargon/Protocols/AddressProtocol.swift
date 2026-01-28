@@ -55,17 +55,30 @@ public protocol AddressProtocol: BaseAddressProtocol & Identifiable where Self.I
 	#if DEBUG
 	static func random(networkID: NetworkID) -> Self
 	func mapTo(networkID: NetworkID) -> Self
-	static var sampleMainnet: Self { get }
-	static var sampleMainnetOther: Self { get }
-	static var sampleStokenet: Self { get }
-	static var sampleStokenetOther: Self { get }
+	static var sampleMainnet: Self {
+		get
+	}
+	static var sampleMainnetOther: Self {
+		get
+	}
+	static var sampleStokenet: Self {
+		get
+	}
+	static var sampleStokenetOther: Self {
+		get
+	}
 	#endif // DEBUG
 }
 
 #if DEBUG
 extension AddressProtocol {
-	public static var sample: Self { sampleMainnet }
-	public static var sampleOther: Self { sampleMainnetOther }
+	public static var sample: Self {
+		sampleMainnet
+	}
+
+	public static var sampleOther: Self {
+		sampleMainnetOther
+	}
 }
 #endif // DEBUG
 

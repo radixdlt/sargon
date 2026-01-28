@@ -5,7 +5,7 @@ import XCTest
 final class DappToWalletInteractionSubintentExpireAtTimeTests: TestCase {
 	typealias SUT = DappToWalletInteractionSubintentExpireAtTime
 
-	func testDate() throws {
+	func testDate() {
 		var sut = SUT(unixTimestampSeconds: 0)
 		XCTAssertEqual(sut.date, Date(timeIntervalSince1970: 0))
 
