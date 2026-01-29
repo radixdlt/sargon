@@ -2,14 +2,9 @@ package com.radixdlt.sargon.extensions
 
 import com.radixdlt.sargon.FactorInstance
 import com.radixdlt.sargon.MfaFactorInstance
-import com.radixdlt.sargon.P2pLink
 import com.radixdlt.sargon.annotation.KoverIgnore
-import com.radixdlt.sargon.mFAFactorInstanceToJsonBytes
 import com.radixdlt.sargon.mfaFactorInstancesToJsonBytes
-import com.radixdlt.sargon.newMFAFactorInstanceFromJsonBytes
 import com.radixdlt.sargon.newMfaFactorInstancesFromJsonBytes
-import com.radixdlt.sargon.newP2pLinksFromJsonBytes
-import com.radixdlt.sargon.p2pLinksToJsonBytes
 
 class MfaFactorInstances private constructor(
     private val array: IdentifiedArray<FactorInstance, MfaFactorInstance>

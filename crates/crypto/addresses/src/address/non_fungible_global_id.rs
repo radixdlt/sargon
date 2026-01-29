@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use core_utils::prelude::format_string;
+use hierarchical_deterministic::HierarchicalDeterministicPublicKey;
 use radix_common::{
     address::{AddressBech32Decoder, AddressBech32Encoder},
     prelude::NetworkDefinition,
@@ -122,6 +123,17 @@ impl FromStr for NonFungibleGlobalId {
                 NonFungibleGlobalId::from((non_fungible_global_id, network_id))
             },
         )
+    }
+}
+
+impl From<HierarchicalDeterministicPublicKey> for NonFungibleGlobalId {
+    fn from(value: HierarchicalDeterministicPublicKey) -> Self {
+        NonFungibleGlobalId::from((
+            ScryptoNonFungibleGlobalId::from_public_key(
+                ScryptoPublicKey::from(value.public_key),
+            ),
+            value.derivation_path.network_id(),
+        ))
     }
 }
 
@@ -457,5 +469,13 @@ mod tests {
                 bad_value: invalid.to_owned()
             })
         );
+    }
+
+    #[test]
+    fn from_hierarchical_deterministic_public_key() {
+        let public_key = HierarchicalDeterministicPublicKey::sample();
+        let result = SUT::from(public_key.clone());
+        let expected: SUT = "resource_rdx1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxxed25sg:[dabcaee921f921c12d12f3b24acfb32f3edf4dea474f24623d1b872b07]".parse().unwrap();
+        assert_eq!(result, expected);
     }
 }
