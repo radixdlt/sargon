@@ -49,7 +49,7 @@ pub fn non_fungible_global_id_formatted(
 }
 
 #[uniffi::export]
-pub fn non_fungible_global_from_hierarchical_deterministic_public_key(
+pub fn non_fungible_global_id_from_hierarchical_deterministic_public_key(
     public_key: &HierarchicalDeterministicPublicKey,
 ) -> NonFungibleGlobalId {
     InternalNonFungibleGlobalId::from(public_key.into_internal()).into()

@@ -11,7 +11,7 @@ fun MfaFactorInstance.nonFungibleGlobalId(): NonFungibleGlobalId {
     return when (val badge = factorInstance.badge) {
         is FactorInstanceBadge.Virtual -> when (val key = badge.value) {
             is FactorInstanceBadgeVirtualSource.HierarchicalDeterministic -> {
-                nonFungibleGlobalFromHierarchicalDeterministicPublicKey(key.value)
+                nonFungibleGlobalIdFromHierarchicalDeterministicPublicKey(key.value)
             }
         }
     }
