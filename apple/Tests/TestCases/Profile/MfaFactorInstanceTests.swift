@@ -4,7 +4,7 @@ import Sargon
 import SargonUniFFI
 import XCTest
 
-final class P2PLinkTests: Test<MfaFactorInstance> {
+final class MfaFactorInstanceTests: Test<MfaFactorInstance> {
 	func test_codable() throws {
 		let raw = """
 		{
@@ -14,11 +14,11 @@ final class P2PLinkTests: Test<MfaFactorInstance> {
 		                "hierarchicalDeterministicPublicKey": {
 		                    "publicKey": {
 		                        "curve": "curve25519",
-		                        "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+		                        "compressedData": "427969814e15d74c3ff4d9971465cb709d210c8a7627af9466bdaa67bd0929b7"
 		                    },
 		                    "derivationPath": {
 		                        "scheme": "cap26",
-		                        "path": "m/44H/1022H/1H/525H/1460H/0H"
+		                        "path": "m/44H/1022H/1H/525H/1460H/0S"
 		                    }
 		                },
 		                "discriminator": "hierarchicalDeterministicPublicKey"

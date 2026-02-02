@@ -4,7 +4,6 @@ use crate::prelude::*;
 #[serde(rename_all = "camelCase")]
 pub struct MFAFactorInstance {
     /// The `FactorInstance` used for MFA
-    #[serde(rename = "factorInstance")]
     pub factor_instance: FactorInstance,
 }
 
@@ -72,12 +71,12 @@ impl MFAFactorInstance {
 impl HasSampleValues for MFAFactorInstance {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(FactorInstance::sample())
+        Self::sample_mainnet_account_securified_idx_0()
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::new(FactorInstance::sample_other())
+        Self::sample_mainnet_account_securified_idx_1()
     }
 }
 
@@ -112,11 +111,11 @@ mod tests {
                             "hierarchicalDeterministicPublicKey": {
                                 "publicKey": {
                                     "curve": "curve25519",
-                                    "compressedData": "c05f9fa53f203a01cbe43e89086cae29f6c7cdd5a435daa9e52b69e656739b36"
+                                    "compressedData": "427969814e15d74c3ff4d9971465cb709d210c8a7627af9466bdaa67bd0929b7"
                                 },
                                 "derivationPath": {
                                     "scheme": "cap26",
-                                    "path": "m/44H/1022H/1H/525H/1460H/0H"
+                                    "path": "m/44H/1022H/1H/525H/1460H/0S"
                                 }
                             },
                             "discriminator": "hierarchicalDeterministicPublicKey"
@@ -131,7 +130,7 @@ mod tests {
                         "discriminator": "fromHash"
                     }
                 }
-			}
+            }
             "#,
         );
     }
