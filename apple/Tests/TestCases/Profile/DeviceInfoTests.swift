@@ -16,9 +16,9 @@ final class DeviceInfoTests: Test<DeviceInfo> {
 
 	func test_codable_lowercase_rust_styled_uuid() throws {
 		func doTest(_ jsonString: String, expected: SUT? = .sample) throws {
-			// No matter which encoding strategy is set on encoder/decoder
-			// the Date coding should work since it should happen inside of
-			// sargon
+			/// No matter which encoding strategy is set on encoder/decoder
+			/// the Date coding should work since it should happen inside of
+			/// sargon
 			func doDoTest(encoder: JSONEncoder, decoder: JSONDecoder) throws {
 				let raw = Data(jsonString.utf8)
 				// test decoding
