@@ -23,18 +23,35 @@ public protocol EntityBaseProtocol: BaseBaseEntityProtocol, CustomStringConverti
 	var unsecuredControllingFactorInstance: HierarchicalDeterministicFactorInstance? { get }
 
 	#if DEBUG
-	static var sampleMainnet: Self { get }
-	static var sampleMainnetOther: Self { get }
-	static var sampleMainnetThird: Self { get }
-	static var sampleStokenet: Self { get }
-	static var sampleStokenetOther: Self { get }
-	static var sampleStokenetThird: Self { get }
+	static var sampleMainnet: Self {
+		get
+	}
+	static var sampleMainnetOther: Self {
+		get
+	}
+	static var sampleMainnetThird: Self {
+		get
+	}
+	static var sampleStokenet: Self {
+		get
+	}
+	static var sampleStokenetOther: Self {
+		get
+	}
+	static var sampleStokenetThird: Self {
+		get
+	}
 	#endif // DEBUG
 }
 
 extension EntityBaseProtocol {
-	public var id: ID { address }
-	public var networkID: NetworkID { networkId }
+	public var id: ID {
+		address
+	}
+
+	public var networkID: NetworkID {
+		networkId
+	}
 
 	public var isDeleted: Bool {
 		flags.contains(.tombstonedByUser)
@@ -83,8 +100,13 @@ extension EntityBaseProtocol {
 
 #if DEBUG
 extension EntityBaseProtocol {
-	public static var sample: Self { sampleMainnet }
-	public static var sampleOther: Self { sampleMainnetOther }
+	public static var sample: Self {
+		sampleMainnet
+	}
+
+	public static var sampleOther: Self {
+		sampleMainnetOther
+	}
 }
 #endif // DEBUG
 
@@ -149,7 +171,8 @@ extension EntityProtocol {
 			networkID: networkID,
 			address: address,
 			securityState: .unsecured(
-				value: .init(transactionSigning: factorInstance, provisionalSecurifiedConfig: nil)),
+				value: .init(transactionSigning: factorInstance, provisionalSecurifiedConfig: nil)
+			),
 			displayName: displayName,
 			extraProperties: extraProperties
 		)

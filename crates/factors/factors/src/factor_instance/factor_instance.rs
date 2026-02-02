@@ -28,6 +28,13 @@ impl IsMaybeKeySpaceAware for FactorInstance {
     }
 }
 
+impl Identifiable for FactorInstance {
+    type ID = PublicKey;
+    fn id(&self) -> Self::ID {
+        self.badge.id()
+    }
+}
+
 impl FactorInstance {
     pub fn new(
         factor_source_id: FactorSourceID,

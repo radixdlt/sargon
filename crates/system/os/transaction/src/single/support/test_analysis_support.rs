@@ -41,6 +41,7 @@ pub(crate) async fn prepare_os_with_entities(
             personas.clone(),
             AuthorizedDapps::default(),
             ResourcePreferences::default(),
+            MFAFactorInstances::default(),
         ));
         profile.factor_sources.extend(FactorSource::sample_all());
         Ok(())

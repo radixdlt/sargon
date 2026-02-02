@@ -20,6 +20,7 @@ impl Profile {
                     Personas::new(),
                     AuthorizedDapps::default(),
                     ResourcePreferences::default(),
+                    MFAFactorInstances::default(),
                 );
                 networks.append(network);
             }
@@ -37,6 +38,7 @@ impl Profile {
                     Personas::just(p.clone()),
                     AuthorizedDapps::default(),
                     ResourcePreferences::default(),
+                    MFAFactorInstances::default(),
                 );
                 networks.append(network);
             }

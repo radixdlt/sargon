@@ -343,6 +343,7 @@ mod tests {
             Personas::just(Persona::sample_stokenet_leia_skywalker()),
             AuthorizedDapps::new(),
             ResourcePreferences::new(),
+            MFAFactorInstances::new(),
         );
 
         profile.networks.append(new_network);

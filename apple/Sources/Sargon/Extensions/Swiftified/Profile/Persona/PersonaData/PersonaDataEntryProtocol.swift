@@ -14,5 +14,7 @@ public protocol PersonaDataEntryProtocol:
 }
 
 extension PersonaDataEntryProtocol {
-	public var kind: PersonaData.Entry.Kind { Self.kind }
+	public var kind: PersonaData.Entry.Kind {
+		Self.kind
+	}
 }

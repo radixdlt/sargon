@@ -7,14 +7,18 @@ extension Profile: SargonModel {}
 @available(*, unavailable, message: "Profile should not use Swift `Encodable` (Codable), since it is too slow.")
 extension Profile: Encodable {
 	@available(*, unavailable, message: "Profile should not use Swift `Encodable` (Codable), since it is too slow.")
-	public func encode(to encoder: any Encoder) throws { fatalError("Unreachable") }
+	public func encode(to encoder: any Encoder) throws {
+		fatalError("Unreachable")
+	}
 }
 
 // MARK: - Profile + Decodable
 @available(*, unavailable, message: "Profile should not use Swift `Encodable` (Codable), since it is too slow.")
 extension Profile: Decodable {
 	@available(*, unavailable, message: "Profile should not use Swift `Encodable` (Codable), since it is too slow.")
-	public init(from decoder: any Decoder) throws { fatalError("Unreachable") }
+	public init(from decoder: any Decoder) throws {
+		fatalError("Unreachable")
+	}
 }
 
 extension Profile {

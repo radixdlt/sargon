@@ -27,12 +27,15 @@ class TestCase: XCTestCase {
 		extension fileExtension: String
 	) throws -> Data {
 		let testsDirectory: String = URL(fileURLWithPath: "\(#file)").pathComponents.dropLast(4).joined(
-			separator: "/")
+			separator: "/"
+		)
 
 		let fileURL = try XCTUnwrap(
 			URL(
 				fileURLWithPath:
-				"\(testsDirectory)/fixtures/\(subPath)/\(fileName).\(fileExtension)"))
+				"\(testsDirectory)/fixtures/\(subPath)/\(fileName).\(fileExtension)"
+			)
+		)
 
 		return try Data(contentsOf: fileURL)
 	}
@@ -93,11 +96,11 @@ class Test<SUT_: SargonModel>: TestCase {
 		try SUT.sampleValues.forEach(test)
 	}
 
-	func test_equality() throws {
+	func test_equality() {
 		XCTAssertNoDifference(SUT.sample, SUT.sample)
 	}
 
-	func test_inequality() throws {
+	func test_inequality() {
 		XCTAssertNotEqual(SUT.sample, SUT.sampleOther)
 	}
 
@@ -111,7 +114,7 @@ class Test<SUT_: SargonModel>: TestCase {
 		XCTAssertGreaterThanOrEqual(set.count, 2)
 	}
 
-	func test_custom_string_convertible() throws {
+	func test_custom_string_convertible() {
 		guard
 			let sample = SUT.sample as? CustomStringConvertible,
 			let sampleOther = SUT.sample as? CustomStringConvertible

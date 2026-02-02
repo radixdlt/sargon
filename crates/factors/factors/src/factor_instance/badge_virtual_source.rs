@@ -11,6 +11,27 @@ pub enum FactorInstanceBadgeVirtualSource {
     },
 }
 
+impl IsNetworkAware for FactorInstanceBadgeVirtualSource {
+    fn network_id(&self) -> NetworkID {
+        match self {
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                value,
+            } => value.derivation_path.network_id(),
+        }
+    }
+}
+
+impl Identifiable for FactorInstanceBadgeVirtualSource {
+    type ID = PublicKey;
+    fn id(&self) -> Self::ID {
+        match self {
+            FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                value,
+            } => value.public_key,
+        }
+    }
+}
+
 impl IsKeySpaceAware for FactorInstanceBadgeVirtualSource {
     fn key_space(&self) -> KeySpace {
         match self {

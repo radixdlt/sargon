@@ -4,12 +4,14 @@ import SargonUniFFI
 // MARK: - FileManager + @unchecked @retroactive Sendable
 extension FileManager: @unchecked @retroactive Sendable {}
 
-// Makes it possible to type `.shared` on an initalizer/func taking
-// `some FileSystemDriver` as parameter.
+/// Makes it possible to type `.shared` on an initalizer/func taking
+/// `some FileSystemDriver` as parameter.
 extension FileSystemDriver where Self == FileSystem {
 	/// Singleton `FileSystemDriver` of type `FileSystem`being an `actor`  which
 	/// uses a `FileManager` for File I/O CRUD operations.
-	public static var shared: Self { Self.shared }
+	public static var shared: Self {
+		Self.shared
+	}
 }
 
 // MARK: - FileSystem

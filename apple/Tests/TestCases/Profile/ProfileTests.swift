@@ -9,11 +9,11 @@ final class ProfileTests: Test<Profile> {
 		XCTAssertGreaterThan(SUT.sample.debugDescription, SUT.sample.description)
 	}
 
-	func test_profile_description_equals() throws {
+	func test_profile_description_equals() {
 		XCTAssertNoDifference(SUT.sample.description, SUT.sample.description)
 	}
 
-	func test_debug_description_equals() throws {
+	func test_debug_description_equals() {
 		XCTAssertNoDifference(SUT.sample.debugDescription, SUT.sample.debugDescription)
 		XCTAssertNoDifference(
 			SUT.sampleOther.debugDescription, SUT.sampleOther.debugDescription
@@ -95,7 +95,7 @@ final class ProfileTests: Test<Profile> {
 		vectors.enumerated().forEach(doTest)
 	}
 
-	func test_encrypted_profile_contents() throws {
+	func test_encrypted_profile_contents() {
 		let jsonString = SUT.sample.encryptedJsonString(password: "open sesame")
 		XCTAssertTrue(jsonString.contains("encryptionScheme"))
 		XCTAssertTrue(jsonString.contains("keyDerivationScheme"))
@@ -118,16 +118,16 @@ final class ProfileTests: Test<Profile> {
 		try vectors.forEach(doTest)
 	}
 
-	// Macbook Pro M2: 0.06 (10x speedup vs BagOfBytes)
-	func test_performance_json_encoding_string() throws {
+	/// Macbook Pro M2: 0.06 (10x speedup vs BagOfBytes)
+	func test_performance_json_encoding_string() {
 		let (sut, _) = vector
 		measure {
 			_ = sut.toJSONString()
 		}
 	}
 
-	// Macbook Pro M2: 0.1 (2.5x speedup vs BagOfBytes)
-	func test_performance_json_decoding_string() throws {
+	/// Macbook Pro M2: 0.1 (2.5x speedup vs BagOfBytes)
+	func test_performance_json_decoding_string() {
 		let (_, jsonString) = vector
 		measure {
 			_ = try! SUT(jsonString: jsonString)

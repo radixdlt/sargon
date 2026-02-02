@@ -4,12 +4,14 @@ import SargonUniFFI
 // MARK: - UserDefaults + @unchecked @retroactive Sendable
 extension UserDefaults: @unchecked @retroactive Sendable {}
 
-// Makes it possible to type `.shared` on an initalizer/func taking
-// `some UnsafeStorageDriver` as parameter.
+/// Makes it possible to type `.shared` on an initalizer/func taking
+/// `some UnsafeStorageDriver` as parameter.
 extension UnsafeStorageDriver where Self == UnsafeStorage {
 	/// Singleton `UnsafeStorageDriver` of type `UnsafeStorage,
 	/// which uses `UserDefaults.standard` as storage
-	public static var shared: Self { Self.shared }
+	public static var shared: Self {
+		Self.shared
+	}
 }
 
 public typealias UnsafeStorageKeyMapping = [UnsafeStorageKey: String]

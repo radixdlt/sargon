@@ -8,6 +8,7 @@ import com.radixdlt.sargon.ProfileNetwork
 import com.radixdlt.sargon.annotation.UsesSampleValues
 import com.radixdlt.sargon.extensions.Accounts
 import com.radixdlt.sargon.extensions.AuthorizedDapps
+import com.radixdlt.sargon.extensions.MfaFactorInstances
 import com.radixdlt.sargon.extensions.Personas
 import com.radixdlt.sargon.extensions.ResourceAppPreferences
 
@@ -25,7 +26,8 @@ val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleMainnet()
             ).asList(),
-            resourcePreferences = ResourceAppPreferences.sample().asList()
+            resourcePreferences = ResourceAppPreferences.sample().asList(),
+            mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
 
         override fun other(): ProfileNetwork = ProfileNetwork(
@@ -39,7 +41,8 @@ val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleMainnet.other()
             ).asList(),
-            resourcePreferences = ResourceAppPreferences.sample.other().asList()
+            resourcePreferences = ResourceAppPreferences.sample.other().asList(),
+            mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
     }
 
@@ -57,7 +60,8 @@ val ProfileNetwork.Companion.sampleStokenet: Sample<ProfileNetwork>
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleStokenet()
             ).asList(),
-            resourcePreferences = ResourceAppPreferences.sample().asList()
+            resourcePreferences = ResourceAppPreferences.sample().asList(),
+            mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
 
         override fun other(): ProfileNetwork = ProfileNetwork(
@@ -71,6 +75,7 @@ val ProfileNetwork.Companion.sampleStokenet: Sample<ProfileNetwork>
             authorizedDapps = AuthorizedDapps(
                 AuthorizedDapp.sampleStokenet.other()
             ).asList(),
-            resourcePreferences = ResourceAppPreferences.sample.other().asList()
+            resourcePreferences = ResourceAppPreferences.sample.other().asList(),
+            mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
     }

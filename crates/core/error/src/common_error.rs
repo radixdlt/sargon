@@ -1099,6 +1099,9 @@ pub enum CommonError {
 
     #[error("Access controller must be in timed recovery state")]
     AccessControllerNotInRecoveryState = 10321,
+
+    #[error("No derived factor instances for factor source")]
+    NoDerivedMFAFactorInstances = 10322,
 }
 
 impl CommonError {

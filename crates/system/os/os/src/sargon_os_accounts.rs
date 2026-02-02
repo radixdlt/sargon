@@ -480,6 +480,7 @@ impl SargonOS {
                             Personas::default(),
                             AuthorizedDapps::default(),
                             ResourcePreferences::default(),
+                            MFAFactorInstances::default(),
                         )
                     }
                     CAP26EntityKind::Identity => {
@@ -489,6 +490,7 @@ impl SargonOS {
                             to_personas(),
                             AuthorizedDapps::default(),
                             ResourcePreferences::default(),
+                            MFAFactorInstances::default(),
                         )
                     }
                 };

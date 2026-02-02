@@ -1,12 +1,14 @@
 import Foundation
 import SargonUniFFI
 
-// Makes it possible to type `.shared` on an initalizer/func taking
-// `some EntropyProviderDriver` as parameter.
+/// Makes it possible to type `.shared` on an initalizer/func taking
+/// `some EntropyProviderDriver` as parameter.
 extension EntropyProviderDriver where Self == EntropyProvider {
 	/// Singleton `EntropyProviderDriver` of type `EntropyProvider`,
 	/// being an `actor` that uses CSRNG `SystemRandomNumberGenerator`
-	public static var shared: Self { Self.shared }
+	public static var shared: Self {
+		Self.shared
+	}
 }
 
 // MARK: - EntropyProvider

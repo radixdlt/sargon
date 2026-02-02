@@ -12,6 +12,8 @@ public protocol SargonModel: BaseSargonModel {}
 
 #if DEBUG
 extension SargonModel {
-	public static var sampleValues: [Self] { [sample, sampleOther] }
+	public static var sampleValues: [Self] {
+		[sample, sampleOther]
+	}
 }
 #endif // DEBUG

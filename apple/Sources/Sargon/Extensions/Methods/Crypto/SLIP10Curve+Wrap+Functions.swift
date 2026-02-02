@@ -9,7 +9,7 @@ extension SLIP10Curve {
 		slip10CurveToString(curve: self)
 	}
 
-	// SLIP10Curve -> SargonStringCodable
+	/// SLIP10Curve -> SargonStringCodable
 	public init(jsonStringLiteral: String) throws {
 		self = try newSLIP10CurveFromJsonString(jsonString: jsonStringLiteral)
 	}

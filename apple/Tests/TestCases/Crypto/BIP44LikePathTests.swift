@@ -31,9 +31,9 @@ final class BIP44LikePathTests: HDPathProtocolTest<BIP44LikePath> {
 		let sut = try SUT(string: "m/44H/1022H/0H/0/42H")
 		XCTAssertEqual(
 			sut.addressIndex,
-			.unsecurifiedComponent(
+			try .unsecurifiedComponent(
 				.hardenedComponent(
-					try! UnsecurifiedHardened(localKeySpace: 42)
+					UnsecurifiedHardened(localKeySpace: 42)
 				)
 			)
 		)

@@ -25,7 +25,8 @@ public final class SceneDelegate: NSObject, UIWindowSceneDelegate, ObservableObj
 			store: .init(
 				initialState: .init(),
 				reducer: OverlayFeature.init
-			))
+			)
+		)
 
 		let overlayWindow = UIWindow(windowScene: scene)
 		overlayWindow.rootViewController = UIHostingController(rootView: overlayView)

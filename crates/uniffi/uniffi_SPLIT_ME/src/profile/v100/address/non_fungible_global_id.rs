@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use sargon::HierarchicalDeterministicPublicKey as InternalHierarchicalDeterministicPublicKey;
 use sargon::NonFungibleGlobalId as InternalNonFungibleGlobalId;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
@@ -45,4 +46,11 @@ pub fn non_fungible_global_id_formatted(
     format: AddressFormat,
 ) -> String {
     global_id.into_internal().formatted(format.into_internal())
+}
+
+#[uniffi::export]
+pub fn non_fungible_global_from_hierarchical_deterministic_public_key(
+    public_key: &HierarchicalDeterministicPublicKey,
+) -> NonFungibleGlobalId {
+    InternalNonFungibleGlobalId::from(public_key.into_internal()).into()
 }

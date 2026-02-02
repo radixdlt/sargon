@@ -9,10 +9,12 @@ public var log: Logger {
 	Log.shared.swiftLogger
 }
 
-// Makes it possible to type `.shared` on an initalizer/func taking
-// `some LoggingDriver` as parameter.
+/// Makes it possible to type `.shared` on an initalizer/func taking
+/// `some LoggingDriver` as parameter.
 extension LoggingDriver where Self == Log {
-	public static var shared: Self { Self.shared }
+	public static var shared: Self {
+		Self.shared
+	}
 }
 
 // MARK: - Log

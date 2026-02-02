@@ -50,85 +50,189 @@ extension Color {
 
 extension ShapeStyle where Self == Color {
 	/// Namespace only
-	public static var app: Color.App { Color.app }
+	public static var app: Color.App {
+		Color.app
+	}
 }
 
 extension Color.App {
-	// blue
-	public var blue1: Color { .init(hex: .blue1) }
-	public var blue2: Color { .init(hex: .blue2) }
-	public var blue3: Color { .init(hex: .blue3) }
+	/// blue
+	public var blue1: Color {
+		.init(hex: .blue1)
+	}
 
-	// green
-	public var green1: Color { .init(hex: .green1) }
-	public var green2: Color { .init(hex: .green2) }
-	public var green3: Color { .init(hex: .green3) }
+	public var blue2: Color {
+		.init(hex: .blue2)
+	}
 
-	// gray
-	public var gray1: Color { .init(hex: .gray1) }
-	public var gray2: Color { .init(hex: .gray2) }
-	public var gray3: Color { .init(hex: .gray3) }
-	public var gray4: Color { .init(hex: .gray4) }
-	public var gray5: Color { .init(hex: .gray5) }
+	public var blue3: Color {
+		.init(hex: .blue3)
+	}
 
-	// white
-	public var white: Color { .init(hex: .white) }
+	/// green
+	public var green1: Color {
+		.init(hex: .green1)
+	}
+
+	public var green2: Color {
+		.init(hex: .green2)
+	}
+
+	public var green3: Color {
+		.init(hex: .green3)
+	}
+
+	/// gray
+	public var gray1: Color {
+		.init(hex: .gray1)
+	}
+
+	public var gray2: Color {
+		.init(hex: .gray2)
+	}
+
+	public var gray3: Color {
+		.init(hex: .gray3)
+	}
+
+	public var gray4: Color {
+		.init(hex: .gray4)
+	}
+
+	public var gray5: Color {
+		.init(hex: .gray5)
+	}
+
+	/// white
+	public var white: Color {
+		.init(hex: .white)
+	}
+
 	/// white with 0.8 opacity
-	public var whiteTransparent: Color { .white.opacity(0.8) }
+	public var whiteTransparent: Color {
+		.white.opacity(0.8)
+	}
+
 	/// white with 0.3 opacity
-	public var whiteTransparent2: Color { .white.opacity(0.3) }
+	public var whiteTransparent2: Color {
+		.white.opacity(0.3)
+	}
+
 	/// white with 0.2 opacity
-	public var whiteTransparent3: Color { .white.opacity(0.2) }
+	public var whiteTransparent3: Color {
+		.white.opacity(0.2)
+	}
 
-	// orange
-	public var orange1: Color { .init(hex: .orange1) }
-	public var orange2: Color { .init(hex: .orange2) }
+	/// orange
+	public var orange1: Color {
+		.init(hex: .orange1)
+	}
 
-	// alert
-	public var alert: Color { .init(hex: .alert) }
-	public var red1: Color { .init(hex: .red1) }
+	public var orange2: Color {
+		.init(hex: .orange2)
+	}
 
-	public var background: Color { .dynamic(light: .white, dark: .black) }
+	/// alert
+	public var alert: Color {
+		.init(hex: .alert)
+	}
+
+	public var red1: Color {
+		.init(hex: .red1)
+	}
+
+	public var background: Color {
+		.dynamic(light: .white, dark: .black)
+	}
+
 	@available(*, deprecated, message: "Use dynamic 'background' color instead")
-	public var backgroundDark: Color { .black }
+	public var backgroundDark: Color {
+		.black
+	}
+
 	@available(*, deprecated, message: "Use dynamic 'background' color instead")
-	public var backgroundLight: Color { .white }
+	public var backgroundLight: Color {
+		.white
+	}
 
-	public var notification: Color { .init(hex: .red1) }
+	public var notification: Color {
+		.init(hex: .red1)
+	}
 
-	public var buttonTextBlack: Color { .black }
-	public var buttonTextBlackTransparent: Color { .black.opacity(0.6) }
+	public var buttonTextBlack: Color {
+		.black
+	}
 
-	public var shadowBlack: Color { .black.opacity(0.08) }
+	public var buttonTextBlackTransparent: Color {
+		.black.opacity(0.6)
+	}
 
-	public var cardShadowBlack: Color { .black.opacity(0.15) }
+	public var shadowBlack: Color {
+		.black.opacity(0.08)
+	}
 
-	// Account gradient
-	public var account0green: Color { .init(hex: .account0green) }
+	public var cardShadowBlack: Color {
+		.black.opacity(0.15)
+	}
 
-	public var account1pink: Color { .init(hex: .account1pink) }
+	/// Account gradient
+	public var account0green: Color {
+		.init(hex: .account0green)
+	}
 
-	public var account4pink: Color { .init(hex: .account4pink) }
+	public var account1pink: Color {
+		.init(hex: .account1pink)
+	}
 
-	public var account5blue: Color { .init(hex: .account5blue) }
+	public var account4pink: Color {
+		.init(hex: .account4pink)
+	}
 
-	public var account6green: Color { .init(hex: .account6green) }
+	public var account5blue: Color {
+		.init(hex: .account5blue)
+	}
 
-	public var account7pink: Color { .init(hex: .account7pink) }
+	public var account6green: Color {
+		.init(hex: .account6green)
+	}
 
-	public var account9green1: Color { .init(hex: .account9green1) }
-	public var account9green2: Color { .init(hex: .account9green2) }
+	public var account7pink: Color {
+		.init(hex: .account7pink)
+	}
 
-	public var account10pink1: Color { .init(hex: .account10pink1) }
-	public var account10pink2: Color { .init(hex: .account10pink2) }
+	public var account9green1: Color {
+		.init(hex: .account9green1)
+	}
 
-	public var account11green: Color { .init(hex: .account11green) }
-	public var account11blue1: Color { .init(hex: .account11blue1) }
-	public var account11pink: Color { .init(hex: .account11pink) }
+	public var account9green2: Color {
+		.init(hex: .account9green2)
+	}
+
+	public var account10pink1: Color {
+		.init(hex: .account10pink1)
+	}
+
+	public var account10pink2: Color {
+		.init(hex: .account10pink2)
+	}
+
+	public var account11green: Color {
+		.init(hex: .account11green)
+	}
+
+	public var account11blue1: Color {
+		.init(hex: .account11blue1)
+	}
+
+	public var account11pink: Color {
+		.init(hex: .account11pink)
+	}
 
 	// Approval gradient
 
-	public var gradientPurple: Color { .init(hex: 0xFF07E6) }
+	public var gradientPurple: Color {
+		.init(hex: 0xFF07E6)
+	}
 }
 
 // MARK: - Color.Hex
@@ -151,7 +255,7 @@ extension Color {
 		case gray4 = 0xE2E5ED
 		case gray5 = 0xF4F5F9
 
-		// white
+		/// white
 		case white = 0xFFFFFF
 
 		// orange
@@ -160,10 +264,10 @@ extension Color {
 
 		case alert = 0xE59700
 
-		// alert
+		/// alert
 		case red1 = 0xC82020
 
-		// gradient
+		/// gradient
 		case account0green = 0x01E2A0
 
 		case account1pink = 0xFF43CA

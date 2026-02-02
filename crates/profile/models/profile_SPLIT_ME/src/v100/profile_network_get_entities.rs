@@ -145,6 +145,7 @@ mod tests {
             Personas::new(),
             AuthorizedDapps::new(),
             ResourcePreferences::new(),
+            MFAFactorInstances::new(),
         );
         assert_eq!(
             &profile_network.accounts_non_hidden().items(),
@@ -171,6 +172,7 @@ mod tests {
             personas,
             AuthorizedDapps::new(),
             ResourcePreferences::new(),
+            MFAFactorInstances::new(),
         );
         assert_eq!(
             &sut.personas_non_hidden().items(),

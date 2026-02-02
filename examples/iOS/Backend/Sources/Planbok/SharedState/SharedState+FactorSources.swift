@@ -13,7 +13,7 @@ public typealias ShieldReference = SecurityStructureOfFactorSourceIDs
 public typealias ShieldReferences = IdentifiedArrayOf<ShieldReference>
 
 extension FactorSources {
-	public func compactMap<F>(as kind: F.Type = F.self) -> IdentifiedArrayOf<F> where F: FactorSourceProtocol {
+	public func compactMap<F: FactorSourceProtocol>(as kind: F.Type = F.self) -> IdentifiedArrayOf<F> {
 		self.elements.compactMap { $0.extract(F.self) }.asIdentified()
 	}
 

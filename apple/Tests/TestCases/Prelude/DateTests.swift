@@ -6,9 +6,9 @@ import XCTest
 
 final class DateTests: TestCase {
 	func test_date() {
-		/// This matches `[bindings.swift.custom_types.Timestamp]`
-		/// inside `uniffi.toml` with the only difference that we use `$0` here but
-		/// the toml uses `{}`;
+		// This matches `[bindings.swift.custom_types.Timestamp]`
+		// inside `uniffi.toml` with the only difference that we use `$0` here but
+		// the toml uses `{}`;
 		let into_custom: (String) -> Date = {
 			let stringToDeserialize = $0
 			let formatter = ISO8601DateFormatter()
@@ -28,8 +28,8 @@ final class DateTests: TestCase {
 			return format()!
 		}
 
-		/// This matches `[bindings.swift.custom_types.Timestamp]`
-		/// inside `uniffi.toml`
+		// This matches `[bindings.swift.custom_types.Timestamp]`
+		// inside `uniffi.toml`
 		let from_custom: (Date) -> String = {
 			let dateToSerialize = $0
 			let formatter = ISO8601DateFormatter()

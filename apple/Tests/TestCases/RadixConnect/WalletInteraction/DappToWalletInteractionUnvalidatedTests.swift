@@ -5,7 +5,7 @@ import SargonUniFFI
 import XCTest
 
 final class DappToWalletInteractionUnvalidatedTests: Test<DappToWalletInteractionUnvalidated> {
-	func test_json_roundtrip() throws {
+	func test_json_roundtrip() {
 //		func doTest(sut: SUT, json: String) throws {
 //			let encoded = sut.toJSONString()
 //			XCTAssertEqual(encoded, json)

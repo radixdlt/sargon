@@ -27,6 +27,9 @@ pub struct ProfileNetwork {
 
     /// Configuration related to resources
     pub resource_preferences: Vec<ResourceAppPreference>,
+
+    /// Pre-derived MFA factor instances
+    pub mfa_factor_instances: Vec<MFAFactorInstance>,
 }
 
 #[uniffi::export]

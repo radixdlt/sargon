@@ -364,6 +364,7 @@ mod test {
                 [],
                 AuthorizedDapps::new(),
                 ResourcePreferences::new(),
+                MFAFactorInstances::new(),
             )),
         );
 

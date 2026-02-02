@@ -43,7 +43,7 @@ public struct HUDFeature {
 
 			case .view(.animationCompletion):
 				if state.offset == State.hiddenOffset {
-					/// Notify the delegate only after the animation did complete.
+					// Notify the delegate only after the animation did complete.
 					return .send(.delegate(.dismiss))
 				} else {
 					return .run { send in

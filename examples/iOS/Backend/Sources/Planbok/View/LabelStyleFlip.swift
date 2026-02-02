@@ -12,5 +12,7 @@ public struct LabelStyleFlip: LabelStyle {
 }
 
 extension LabelStyle where Self == LabelStyleFlip {
-	public static func flipped(imageColor: Color = .gray) -> Self { LabelStyleFlip(imageColor: imageColor) }
+	public static func flipped(imageColor: Color = .gray) -> Self {
+		LabelStyleFlip(imageColor: imageColor)
+	}
 }

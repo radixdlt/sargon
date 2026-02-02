@@ -1,4 +1,4 @@
-// A default stub implementation of the HostInteractor, that always rejects any operation
+/// A default stub implementation of the HostInteractor, that always rejects any operation
 public class ThrowingHostInteractor: HostInteractor {
 	public nonisolated(unsafe) static var shared: HostInteractor = ThrowingHostInteractor()
 

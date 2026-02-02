@@ -52,7 +52,8 @@ extension Data {
 		}
 
 		let stringBytes: [UInt8] = Array(
-			hexString.lowercased().data(using: String.Encoding.utf8)!)
+			hexString.lowercased().data(using: String.Encoding.utf8)!
+		)
 
 		for i in stride(from: stringBytes.startIndex, to: stringBytes.endIndex - 1, by: 2) {
 			let char1 = stringBytes[i]

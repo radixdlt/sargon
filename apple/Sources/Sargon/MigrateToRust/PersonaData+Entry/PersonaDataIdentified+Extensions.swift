@@ -43,15 +43,15 @@ struct PersonaFieldCollectionValueWithIDNotFound: Swift.Error {
 public typealias PersonaDataEntryID = UUID
 
 extension PersonaData.Entry {
-	public func extract<F>(
+	public func extract<F: PersonaDataEntryProtocol>(
 		_ type: F.Type = F.self
-	) -> F? where F: PersonaDataEntryProtocol {
+	) -> F? {
 		F.extract(from: self)
 	}
 
-	public func extract<F>(
+	public func extract<F: PersonaDataEntryProtocol>(
 		as _: F.Type = F.self
-	) throws -> F where F: PersonaDataEntryProtocol {
+	) throws -> F {
 		guard let extracted = extract(F.self) else {
 			throw IncorrectPersonaFieldType(expectedKind: F.kind, actualKind: discriminator)
 		}

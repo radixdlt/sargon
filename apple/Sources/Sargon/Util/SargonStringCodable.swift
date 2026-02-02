@@ -8,8 +8,8 @@ public protocol SargonStringCodable: SargonLiteralCodable where Literal == Strin
 	func jsonStringLiteral() -> String
 }
 
-/// We piggyback on `SargonLiteralCodable` and always use that,
-/// making it fast for us to add support for e.g. Int literals.
+// We piggyback on `SargonLiteralCodable` and always use that,
+// making it fast for us to add support for e.g. Int literals.
 
 // MARK: SargonLiteralCodable
 extension SargonStringCodable {

@@ -214,4 +214,26 @@ impl SargonOS {
             .await
             .into_result()
     }
+
+    /// Returns a usable MFA factor instance for the given `factor_source`.
+    ///
+    /// Behavior:
+    /// - Fast path: read stored `MFAFactorInstances` for the current network and check
+    ///   if any stored instance is currently unused. If a stored unused instance exists,
+    ///   return it immediately.
+    /// - Otherwise: determine the highest derived index present in storage, then derive the next
+    ///   batch of factor instances starting after the current maximum derivation index, store the
+    ///   newly derived instances into the profile, and return the first unused instance.
+    ///
+    /// - Propagates errors from profile access, gateway queries, derivation logic,
+    ///   and profile update operations.
+    pub async fn get_new_mfa_factor_instance(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<MFAFactorInstance> {
+        self.wrapped
+            .get_new_mfa_factor_instance(factor_source.into_internal())
+            .await
+            .into_result()
+    }
 }

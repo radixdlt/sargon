@@ -5,7 +5,7 @@ extension TransactionManifest: SargonModel {}
 
 // MARK: Build Manifest
 extension TransactionManifest {
-	// Not DEBUG only, since used in PROD for Stokenet.
+	/// Not DEBUG only, since used in PROD for Stokenet.
 	public static func faucet(
 		includeLockFeeInstruction: Bool,
 		addressOfReceivingAccount: AccountAddress

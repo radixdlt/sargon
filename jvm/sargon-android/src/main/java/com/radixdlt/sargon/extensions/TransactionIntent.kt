@@ -1,6 +1,5 @@
 package com.radixdlt.sargon.extensions
 
-import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.TransactionIntentHash
 import com.radixdlt.sargon.CompiledTransactionIntent
 import com.radixdlt.sargon.TransactionIntent

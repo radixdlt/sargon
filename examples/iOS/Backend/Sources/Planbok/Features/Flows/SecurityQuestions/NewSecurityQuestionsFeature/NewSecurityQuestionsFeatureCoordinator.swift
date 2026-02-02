@@ -100,7 +100,8 @@ public struct NewSecurityQuestionsFeatureCoordinator {
 
 					state.path.append(.reviewAnswers(
 						SecurityQuestionsReviewAnswersFeature.State(
-							answersToQuestions: qas.asIdentified())
+							answersToQuestions: qas.asIdentified()
+						)
 					))
 
 					return .none

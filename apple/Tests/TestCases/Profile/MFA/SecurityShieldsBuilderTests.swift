@@ -99,7 +99,7 @@ struct ShieldTests {
 	}
 
 	@Test("cannot add forbidden FactorSourceKinds")
-	func preventAddOfForbiddenFactorSourceKinds() throws {
+	func preventAddOfForbiddenFactorSourceKinds() {
 		let builder = SecurityShieldBuilder()
 			// Primary
 //			.addFactorSourceToPrimaryThreshold(factorSourceId: .sampleTrustedContact) // Verboten
@@ -116,7 +116,7 @@ struct ShieldTests {
 	}
 
 	@Test("Primary can contain two DeviceFactorSource while building - but is never valid")
-	func primaryCanOnlyContainOneDeviceFactorSourceThreshold() throws {
+	func primaryCanOnlyContainOneDeviceFactorSourceThreshold() {
 		let factor = FactorSourceId.sampleDevice
 		let other = FactorSourceId.sampleDeviceOther
 		var builder = SecurityShieldBuilder()
@@ -193,7 +193,10 @@ struct ShieldTests {
 			builder.selectedPrimaryThresholdFactorsStatus()
 				== .invalid(
 					reason: SelectedPrimaryThresholdFactorsStatusInvalidReason.cannotBeUsedAlone(
-						factorSourceKind: FactorSourceKind.password)))
+						factorSourceKind: FactorSourceKind.password
+					)
+				)
+		)
 	}
 
 	@Test("selected primary threshold factors status")

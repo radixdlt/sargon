@@ -5,7 +5,7 @@ import XCTest
 final class SecurityProblemTests: TestCase {
 	typealias SUT = SecurityProblem
 
-	func testKind() throws {
+	func testKind() {
 		var sut = SUT.problem3(addresses: .init(accounts: [], hiddenAccounts: [], personas: [], hiddenPersonas: []))
 		XCTAssertEqual(sut.kind, .securityFactors)
 
@@ -22,7 +22,7 @@ final class SecurityProblemTests: TestCase {
 		XCTAssertEqual(sut.kind, .securityFactors)
 	}
 
-	func testId() throws {
+	func testId() {
 		var sut = SUT.problem3(addresses: .init(accounts: [], hiddenAccounts: [], personas: [], hiddenPersonas: []))
 		XCTAssertEqual(sut.id, 3)
 

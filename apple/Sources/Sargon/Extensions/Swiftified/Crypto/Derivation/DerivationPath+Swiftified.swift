@@ -17,7 +17,9 @@ extension DerivationPath: DerivationPathProtocol {
 		self
 	}
 
-	public var asDerivationPath: DerivationPath { self }
+	public var asDerivationPath: DerivationPath {
+		self
+	}
 }
 
 public typealias HDPath = HdPath

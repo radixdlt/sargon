@@ -41,6 +41,7 @@ fn with_android_bug_with_shared_pubkey_between_account_and_persona() -> Profile
         Personas::just(persona),
         AuthorizedDapps::default(),
         ResourcePreferences::default(),
+        MFAFactorInstances::default(),
     ));
     sut
 }
@@ -82,6 +83,7 @@ fn with_instance_collision_both_accounts() -> Profile {
         Personas::default(),
         AuthorizedDapps::default(),
         ResourcePreferences::default(),
+        MFAFactorInstances::default(),
     ));
     sut
 }
@@ -109,6 +111,7 @@ fn with_instance_collision_securified() -> Profile {
         Personas::default(),
         AuthorizedDapps::default(),
         ResourcePreferences::default(),
+        MFAFactorInstances::default(),
     ));
     sut
 }
@@ -155,6 +158,7 @@ fn with_instance_collision_both_personas() -> Profile {
         Personas::from_iter([persona1, persona2]),
         AuthorizedDapps::default(),
         ResourcePreferences::default(),
+        MFAFactorInstances::default(),
     ));
     sut
 }

@@ -5,7 +5,7 @@ import SargonUniFFI
 import XCTest
 
 final class AddressOfAccountOrPersonaTests: AddressTest<AddressOfAccountOrPersona> {
-	func testAccountAddress() throws {
+	func testAccountAddress() {
 		let accountAddress = AccountAddress.sample
 
 		var sut = SUT.account(accountAddress)

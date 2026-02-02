@@ -1,6 +1,6 @@
-use std::borrow::Borrow;
-
 use crate::prelude::*;
+use futures::FutureExt;
+use std::borrow::Borrow;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
@@ -513,6 +513,137 @@ impl SargonOS {
         }
         Ok(())
     }
+
+    /// Returns a usable MFA factor instance for the given `factor_source`.
+    ///
+    /// Behavior:
+    /// - Fast path: read stored `MFAFactorInstances` for the current network and check
+    ///   if any stored instance is currently unused. If a stored unused instance exists,
+    ///   return it immediately.
+    /// - Otherwise: determine the highest derived index present in storage, then derive the next
+    ///   batch of factor instances starting after the current maximum derivation index, store the
+    ///   newly derived instances into the profile, and return the first unused instance.
+    ///
+    /// - Propagates errors from profile access, gateway queries, derivation logic,
+    ///   and profile update operations.
+    pub async fn get_new_mfa_factor_instance(
+        &self,
+        factor_source: FactorSource,
+    ) -> Result<MFAFactorInstance> {
+        let factor_source_id = factor_source.id();
+        let stored_mfa_factor_instances = self
+            .profile_state_holder
+            .access_profile_with(|p| {
+                p.current_network().map(|n| n.mfa_factor_instances.clone())
+            })?
+            .map(|instances| {
+                instances
+                    .into_iter()
+                    .filter(|mfafi| {
+                        mfafi.factor_instance.factor_source_id
+                            == factor_source_id
+                    })
+                    .collect::<MFAFactorInstances>()
+            })?;
+
+        // Fast path: is any stored instance unused?
+        if let Some(unused) = self
+            .get_unused_mfa_factor_instance(stored_mfa_factor_instances.clone())
+            .await?
+        {
+            return Ok(unused);
+        }
+
+        // Start from the highest existing derived index (if any).
+        let mut current_max_index =
+            stored_mfa_factor_instances.max_index_component();
+
+        loop {
+            // Derive the next batch starting from `current_max_index`.
+            let new_instances = self
+                .derive_factor_instances_for_factor_source(
+                    factor_source.clone(),
+                    DerivationPurpose::PreDerivingKeys,
+                    CAP26EntityKind::Account,
+                    current_max_index,
+                    NUMBER_OF_NEW_MFA_FACTOR_INSTANCES_TO_DERIVE_AND_STORE,
+                )
+                .await
+                .map(|instances| {
+                    instances
+                        .into_iter()
+                        .map(|fi| MFAFactorInstance::new(fi.factor_instance()))
+                        .collect::<MFAFactorInstances>()
+                })?;
+
+            // Persist the newly derived instances
+            self.update_profile_with(|profile| {
+                profile.networks.insert_mfa_factor_instances(
+                    profile.current_network_id(),
+                    new_instances.clone(),
+                );
+                Ok(())
+            })
+            .await?;
+
+            // Is any derived instance unused?
+            let maybe_unused_mfa_factor_instance = self
+                .get_unused_mfa_factor_instance(new_instances.clone())
+                .await?;
+            if let Some(maybe_unused_mfa_factor_instance) =
+                maybe_unused_mfa_factor_instance
+            {
+                return Ok(maybe_unused_mfa_factor_instance);
+            }
+
+            // Next time start after the last derived index
+            current_max_index = new_instances.max_index_component();
+        }
+    }
+
+    /// Check a collection of `MFAFactorInstance`s for an unused instance.
+    /// - For every `MFAFactorInstance` builds the corresponding `RoleRequirement`
+    ///   and calls the gateway `EntitiesByRoleRequirementLookup` API
+    /// - If the gateway returns an item whose `entities` array is empty, the
+    ///   corresponding `MFAFactorInstance` is considered unused
+    async fn get_unused_mfa_factor_instance(
+        &self,
+        mfa_factor_instances: MFAFactorInstances,
+    ) -> Result<Option<MFAFactorInstance>> {
+        let mfafi_with_requirements = mfa_factor_instances
+            .into_iter()
+            .map(|mfafi| {
+                let requirement =
+                    RoleRequirement::from(mfafi.clone().factor_instance.badge);
+                (mfafi, requirement)
+            })
+            .collect::<Vec<(MFAFactorInstance, RoleRequirement)>>();
+
+        let role_requirements = mfafi_with_requirements
+            .iter()
+            .map(|(_, req)| req.clone())
+            .collect::<Vec<RoleRequirement>>();
+
+        let response = self
+            .gateway_client()?
+            .fetch_entities_by_role_requirement_lookup(role_requirements)
+            .await?;
+
+        if let Some(unused_item) = response
+            .items
+            .into_iter()
+            .find(|item| item.entities.is_empty())
+        {
+            if let Some((mfafi, _)) = mfafi_with_requirements
+                .into_iter()
+                .find(|(_, req)| *req == unused_item.requirement)
+            {
+                return Ok(Some(mfafi));
+            }
+        }
+
+        Ok(None)
+    }
 }
 
 #[cfg(debug_assertions)]
@@ -538,7 +669,6 @@ impl SargonOS {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use actix_rt::time::timeout;
 
@@ -613,11 +743,11 @@ mod tests {
 
         // ACT
         let loaded = os
-      .with_timeout(|x| {
-          x.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&id)
-      })
-      .await
-      .unwrap();
+            .with_timeout(|x| {
+                x.mnemonic_with_passphrase_of_device_factor_source_by_factor_source_id(&id)
+            })
+            .await
+            .unwrap();
 
         // ASSERT
         assert_eq!(loaded, mwp);
@@ -991,6 +1121,444 @@ mod tests {
             .expect_err("Expected an error");
 
         assert_eq!(result, error);
+    }
+
+    #[actix_rt::test]
+    async fn get_new_mfa_factor_instance_returns_unused_stored_instance() {
+        // ARRANGE
+        // Create mock that echoes back the first requirement with empty entities (unused)
+        let mock_driver = MockNetworkingDriver::with_lazy_response(
+            |req: EntitiesByRoleRequirementLookupRequest, _count: u64| {
+                // Echo back the first requirement with empty entities (unused)
+                let items = req
+                    .requirements
+                    .into_iter()
+                    .map(|requirement| EntitiesByRoleRequirementLookupItem {
+                        total_count: 0,
+                        requirement,
+                        entities: vec![], // Empty means unused
+                    })
+                    .collect();
+                EntitiesByRoleRequirementLookupResponse::new(items)
+            },
+        );
+
+        let os = SUT::boot_test_with_networking_driver(Arc::new(mock_driver))
+            .await
+            .unwrap();
+
+        // Change to Stokenet since boot_test_with_networking_driver only creates Stokenet network
+        os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
+            .await
+            .unwrap();
+
+        // Store some MFA factor instances in the profile
+        let stored_instance =
+            MFAFactorInstance::sample_stokenet_account_securified_idx_0();
+        let factor_source_id = stored_instance.factor_instance.factor_source_id;
+
+        os.update_profile_with(|profile| {
+            profile.networks.insert_mfa_factor_instances(
+                profile.current_network_id(),
+                MFAFactorInstances::just(stored_instance.clone()),
+            );
+            Ok(())
+        })
+        .await
+        .unwrap();
+
+        // ACT
+        let factor_source = os
+            .factor_sources()
+            .unwrap()
+            .into_iter()
+            .find(|fs| fs.id() == factor_source_id)
+            .unwrap_or_else(|| FactorSource::sample_device());
+
+        let result = os
+            .with_timeout(|x| {
+                x.get_new_mfa_factor_instance(factor_source.clone())
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        assert_eq!(result.factor_instance, stored_instance.factor_instance);
+    }
+
+    #[actix_rt::test]
+    async fn get_new_mfa_factor_instance_derives_new_when_all_stored_are_used()
+    {
+        // ARRANGE
+        // Create mock that returns all instances as used on first call,
+        // then returns the first instance as unused on subsequent calls
+        let mock_driver = MockNetworkingDriver::with_lazy_response(
+            |req: EntitiesByRoleRequirementLookupRequest, count: u64| {
+                // First call (count=0): return all instances as used
+                // Subsequent calls: return first instance as unused
+                let items = req
+                    .requirements
+                    .into_iter()
+                    .enumerate()
+                    .map(|(idx, requirement)| {
+                        if count == 0 {
+                            // All used on first call
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 1,
+                                requirement,
+                                entities: vec![EntityByRoleRequirement {
+                                    entity_address: Some(Address::sample()),
+                                    first_seen_state_version: 1,
+                                }],
+                            }
+                        } else if idx == 0 {
+                            // First one unused on subsequent calls
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 0,
+                                requirement,
+                                entities: vec![],
+                            }
+                        } else {
+                            // Rest used
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 1,
+                                requirement,
+                                entities: vec![EntityByRoleRequirement {
+                                    entity_address: Some(Address::sample()),
+                                    first_seen_state_version: 1,
+                                }],
+                            }
+                        }
+                    })
+                    .collect();
+                EntitiesByRoleRequirementLookupResponse::new(items)
+            },
+        );
+
+        let os = SUT::boot_test_with_networking_driver(Arc::new(mock_driver))
+            .await
+            .unwrap();
+
+        // Change to Stokenet since boot_test_with_networking_driver only creates Stokenet network
+        os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
+            .await
+            .unwrap();
+
+        // Get the BDFS factor source
+        let factor_source: FactorSource = os.bdfs().into();
+
+        // ACT
+        let result = os
+            .with_timeout(|x| {
+                x.get_new_mfa_factor_instance(factor_source.clone())
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        // The result should be a valid MFAFactorInstance
+        assert!(result.factor_instance.factor_source_id.is_hash());
+    }
+
+    #[actix_rt::test]
+    async fn get_new_mfa_factor_instance_gateway_error_propagates() {
+        // ARRANGE
+        let mock_driver = MockNetworkingDriver::new_always_failing();
+
+        let os = SUT::boot_test_with_networking_driver(Arc::new(mock_driver))
+            .await
+            .unwrap();
+
+        // Change to Stokenet since boot_test_with_networking_driver only creates Stokenet network
+        // This will fail because the mock driver always fails
+        let _ = os
+            .with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
+            .await;
+
+        let factor_source: FactorSource = os.bdfs().into();
+
+        // ACT
+        let result = os
+            .with_timeout(|x| {
+                x.get_new_mfa_factor_instance(factor_source.clone())
+            })
+            .await;
+
+        // ASSERT
+        assert!(result.is_err());
+    }
+
+    #[actix_rt::test]
+    async fn get_new_mfa_factor_instance_no_stored_instances_derives_new() {
+        // ARRANGE
+        // Mock that echoes back all requirements with first one as unused
+        let mock_driver = MockNetworkingDriver::with_lazy_response(
+            |req: EntitiesByRoleRequirementLookupRequest, _count: u64| {
+                let items = req
+                    .requirements
+                    .into_iter()
+                    .enumerate()
+                    .map(|(idx, requirement)| {
+                        if idx == 0 {
+                            // First one unused
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 0,
+                                requirement,
+                                entities: vec![],
+                            }
+                        } else {
+                            // Rest used
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 1,
+                                requirement,
+                                entities: vec![EntityByRoleRequirement {
+                                    entity_address: Some(Address::sample()),
+                                    first_seen_state_version: 1,
+                                }],
+                            }
+                        }
+                    })
+                    .collect();
+                EntitiesByRoleRequirementLookupResponse::new(items)
+            },
+        );
+
+        let os = SUT::boot_test_with_networking_driver(Arc::new(mock_driver))
+            .await
+            .unwrap();
+
+        // Change to Stokenet since boot_test_with_networking_driver only creates Stokenet network
+        os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
+            .await
+            .unwrap();
+
+        let factor_source: FactorSource = os.bdfs().into();
+        let factor_source_id = factor_source.id();
+
+        // ACT
+        let result = os
+            .with_timeout(|x| {
+                x.get_new_mfa_factor_instance(factor_source.clone())
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        // A new instance should be derived and returned
+        assert_eq!(result.factor_instance.factor_source_id, factor_source_id);
+
+        // Verify the derived instances were stored in the profile
+        let stored_instances = os
+            .profile_state_holder
+            .access_profile_with(|p| {
+                p.current_network().map(|n| n.mfa_factor_instances.clone())
+            })
+            .unwrap()
+            .unwrap();
+        assert!(!stored_instances.is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn get_new_mfa_factor_instance_stores_derived_instances_in_profile() {
+        // ARRANGE
+        // Mock that echoes back all requirements with first one as unused
+        let mock_driver = MockNetworkingDriver::with_lazy_response(
+            |req: EntitiesByRoleRequirementLookupRequest, _count: u64| {
+                let items = req
+                    .requirements
+                    .into_iter()
+                    .enumerate()
+                    .map(|(idx, requirement)| {
+                        if idx == 0 {
+                            // First one unused
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 0,
+                                requirement,
+                                entities: vec![],
+                            }
+                        } else {
+                            // Rest used
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 1,
+                                requirement,
+                                entities: vec![EntityByRoleRequirement {
+                                    entity_address: Some(Address::sample()),
+                                    first_seen_state_version: 1,
+                                }],
+                            }
+                        }
+                    })
+                    .collect();
+                EntitiesByRoleRequirementLookupResponse::new(items)
+            },
+        );
+
+        let os = SUT::boot_test_with_networking_driver(Arc::new(mock_driver))
+            .await
+            .unwrap();
+
+        // Change to Stokenet since boot_test_with_networking_driver only creates Stokenet network
+        os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
+            .await
+            .unwrap();
+
+        let factor_source: FactorSource = os.bdfs().into();
+
+        // Verify no MFA factor instances initially
+        let initial_instances = os
+            .profile_state_holder
+            .access_profile_with(|p| {
+                p.current_network().map(|n| n.mfa_factor_instances.clone())
+            })
+            .unwrap()
+            .unwrap();
+        assert!(initial_instances.is_empty());
+
+        // ACT
+        let _result = os
+            .with_timeout(|x| {
+                x.get_new_mfa_factor_instance(factor_source.clone())
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        let final_instances = os
+            .profile_state_holder
+            .access_profile_with(|p| {
+                p.current_network().map(|n| n.mfa_factor_instances.clone())
+            })
+            .unwrap()
+            .unwrap();
+
+        // Should have stored NUMBER_OF_NEW_MFA_FACTOR_INSTANCES_TO_DERIVE_AND_STORE instances
+        assert_eq!(
+            final_instances.len(),
+            NUMBER_OF_NEW_MFA_FACTOR_INSTANCES_TO_DERIVE_AND_STORE as usize
+        );
+    }
+
+    #[actix_rt::test]
+    async fn get_new_mfa_factor_instance_returns_instance_with_index_after_stored_max(
+    ) {
+        // ARRANGE
+        // Mock that returns first stored instance as used, then first derived as unused
+        let mock_driver = MockNetworkingDriver::with_lazy_response(
+            |req: EntitiesByRoleRequirementLookupRequest, count: u64| {
+                let items = req
+                    .requirements
+                    .into_iter()
+                    .enumerate()
+                    .map(|(idx, requirement)| {
+                        // First call (count=0): All stored instances are used
+                        // Second call (count=1): First derived instance is unused
+                        if count == 0 {
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 1,
+                                requirement,
+                                entities: vec![EntityByRoleRequirement {
+                                    entity_address: Some(Address::sample()),
+                                    first_seen_state_version: 1,
+                                }],
+                            }
+                        } else if idx == 0 {
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 0,
+                                requirement,
+                                entities: vec![],
+                            }
+                        } else {
+                            EntitiesByRoleRequirementLookupItem {
+                                total_count: 1,
+                                requirement,
+                                entities: vec![EntityByRoleRequirement {
+                                    entity_address: Some(Address::sample()),
+                                    first_seen_state_version: 1,
+                                }],
+                            }
+                        }
+                    })
+                    .collect();
+                EntitiesByRoleRequirementLookupResponse::new(items)
+            },
+        );
+
+        let os = SUT::boot_test_with_networking_driver(Arc::new(mock_driver))
+            .await
+            .unwrap();
+
+        // Change to Stokenet
+        os.with_timeout(|x| x.change_current_gateway(Gateway::stokenet()))
+            .await
+            .unwrap();
+
+        // Store MFA factor instances with indices 0 and 1 (max index = 1)
+        // These use FactorSource::sample_device() which has a specific factor source ID
+        let stored_instance_0 =
+            MFAFactorInstance::sample_stokenet_account_securified_idx_0();
+        let stored_instance_1 =
+            MFAFactorInstance::sample_stokenet_account_securified_idx_1();
+
+        os.update_profile_with(|profile| {
+            profile.networks.insert_mfa_factor_instances(
+                profile.current_network_id(),
+                MFAFactorInstances::from_iter([
+                    stored_instance_0.clone(),
+                    stored_instance_1.clone(),
+                ]),
+            );
+            Ok(())
+        })
+        .await
+        .unwrap();
+
+        // Verify the max index of stored instances is 1
+        let stored_instances = os
+            .profile_state_holder
+            .access_profile_with(|p| {
+                p.current_network().map(|n| n.mfa_factor_instances.clone())
+            })
+            .unwrap()
+            .unwrap();
+
+        let stored_max_index = stored_instances.max_index_component().unwrap();
+        // SecurifiedU30::ONE corresponds to index 1 in securified space
+        assert_eq!(
+            stored_max_index,
+            HDPathComponent::Securified(SecurifiedU30::ONE)
+        );
+
+        // Get the BDFS factor source
+        let factor_source: FactorSource = os.bdfs().into();
+
+        // ACT
+        let result = os
+            .with_timeout(|x| {
+                x.get_new_mfa_factor_instance(factor_source.clone())
+            })
+            .await
+            .unwrap();
+
+        // ASSERT
+        // The returned instance should have an index > stored max index (1)
+        // Since derivation starts after the max index, the first derived should be at index 2
+        let result_index = result
+            .factor_instance
+            .badge
+            .as_virtual()
+            .unwrap()
+            .as_hierarchical_deterministic()
+            .derivation_path
+            .index();
+
+        // The result index should be greater than the stored max index (1)
+        // The derivation should start from index 2 (after max index 1)
+        assert!(
+            result_index > stored_max_index,
+            "Expected result index {:?} to be greater than stored max index {:?}",
+            result_index,
+            stored_max_index
+        );
     }
 
     #[allow(dead_code)]

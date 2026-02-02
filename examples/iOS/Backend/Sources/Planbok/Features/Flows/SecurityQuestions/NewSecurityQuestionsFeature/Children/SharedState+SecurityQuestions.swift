@@ -28,7 +28,9 @@ public struct PendingAnswerToQuestion: Hashable, Sendable, Identifiable {
 	public let questionID: ID
 	public let answer: String
 
-	public var id: ID { questionID }
+	public var id: ID {
+		questionID
+	}
 }
 
 public typealias PendingAnswersToQuestions = IdentifiedArrayOf<PendingAnswerToQuestion>

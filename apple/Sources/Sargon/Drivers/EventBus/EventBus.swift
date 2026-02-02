@@ -2,12 +2,14 @@ import AsyncExtensions
 import Foundation
 import SargonUniFFI
 
-// Makes it possible to type `.shared` on an initalizer/func taking
-// `some EventBusDriver` as parameter.
+/// Makes it possible to type `.shared` on an initalizer/func taking
+/// `some EventBusDriver` as parameter.
 extension EventBusDriver where Self == EventBus {
 	/// Singleton `EventBusDriver` of type `EventBus` being an `actor`  which forwards `EventNotification`s
 	/// originally emitted by `SargonOS` (Rust side).
-	public static var shared: Self { Self.shared }
+	public static var shared: Self {
+		Self.shared
+	}
 }
 
 // MARK: - EventBus

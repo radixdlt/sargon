@@ -30,6 +30,11 @@ extension DeviceFactorSource: FactorSourceProtocol {
 		.device
 	}
 
-	public var supportsOlympia: Bool { asGeneral.supportsOlympia }
-	public var supportsBabylon: Bool { asGeneral.supportsBabylon }
+	public var supportsOlympia: Bool {
+		asGeneral.supportsOlympia
+	}
+
+	public var supportsBabylon: Bool {
+		asGeneral.supportsBabylon
+	}
 }
