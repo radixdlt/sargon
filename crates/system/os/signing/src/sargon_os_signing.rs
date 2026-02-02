@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use profile_logic::prelude::ProfileCurrentNetwork;
 
 #[async_trait::async_trait]
 pub trait OsSigning {
@@ -97,6 +98,11 @@ impl OsSigning for SargonOS {
         subintent: Subintent,
         role_kind: RoleKind,
     ) -> Result<SignedSubintent> {
+        info!(
+            "External signing: begin for subintent {:?} (role: {:?})",
+            subintent.get_id(),
+            role_kind
+        );
         let profile = &self.profile()?;
 
         let collector = SignaturesCollector::new(
@@ -119,6 +125,10 @@ impl OsSigning for SargonOS {
 
         let external_accounts =
             resolve_external_accounts_for_subintent(self, &subintent).await?;
+        info!(
+            "External signing: external accounts resolved: {}",
+            external_accounts.len()
+        );
         let external_signatures = collect_external_signatures(
             subintent.clone(),
             external_accounts,
@@ -126,6 +136,10 @@ impl OsSigning for SargonOS {
             self.sign_subintents_interactor(),
         )
         .await?;
+        info!(
+            "External signing: collected {} external signatures",
+            external_signatures.len()
+        );
         signatures.extend(external_signatures);
 
         subintent.signed(signatures)
@@ -165,81 +179,55 @@ impl FactorInstanceLookupByNftIds for SargonOS {
         nft_ids: Vec<NonFungibleGlobalId>,
     ) -> Result<Vec<HierarchicalDeterministicFactorInstance>> {
         if nft_ids.is_empty() {
+            debug!(
+                "External signing: no NFT ids provided for factor instance lookup"
+            );
             return Ok(Vec::new());
         }
 
-        let instances = mock_factor_instances_json()
-            .into_iter()
-            .map(|raw| {
-                serde_json::from_str::<HierarchicalDeterministicFactorInstance>(
-                    raw,
-                )
-                .map_err(|e| CommonError::Unknown {
-                    error_message: format!(
-                        "Failed to parse mock factor instance: {:?}",
-                        e
-                    ),
-                })
-            })
-            .collect::<Result<Vec<_>>>()?;
+        let profile = self.profile()?;
+        let mfa_instances = match profile.current_network() {
+            Ok(network) => network.mfa_factor_instances.clone(),
+            Err(CommonError::NoNetworkInProfile { .. }) => {
+                return Ok(Vec::new())
+            }
+            Err(err) => return Err(err),
+        };
 
+        if mfa_instances.is_empty() {
+            debug!(
+                "External signing: no MFA factor instances in current network"
+            );
+            return Ok(Vec::new());
+        }
+
+        let required_ids: IndexSet<NonFungibleGlobalId> =
+            nft_ids.into_iter().collect();
+        debug!(
+            "External signing: looking up factor instances for {} NFT ids",
+            required_ids.len()
+        );
+        let mut instances = Vec::new();
+
+        for mfafi in mfa_instances {
+            let badge_id =
+                mfafi.factor_instance.badge.try_non_fungible_global_id()?;
+            if required_ids.contains(&badge_id) {
+                instances.push(
+                    mfafi
+                        .factor_instance
+                        .try_as_hd_factor_instances()?,
+                );
+            }
+        }
+
+        debug!(
+            "External signing: resolved {} factor instances from {} NFT ids",
+            instances.len(),
+            required_ids.len()
+        );
         Ok(instances)
     }
-}
-
-fn mock_factor_instances_json() -> [&'static str; 2] {
-    [
-        r#"{
-                "factorSourceID": {
-                  "discriminator": "fromHash",
-                  "fromHash": {
-                    "kind": "device",
-                    "body": "882f0061b30bf8c8b6886ea3f96ec7ae13b59bad55155a54b57739c6be004fcd"
-                  }
-                },
-                "badge": {
-                  "discriminator": "virtualSource",
-                  "virtualSource": {
-                    "discriminator": "hierarchicalDeterministicPublicKey",
-                    "hierarchicalDeterministicPublicKey": {
-                      "publicKey": {
-                        "curve": "curve25519",
-                        "compressedData": "e904d627969460fb049ad1d5e5b53f8dfae22b97b908ce7e4d0e793ffff9eaae"
-                      },
-                      "derivationPath": {
-                        "scheme": "cap26",
-                        "path": "m/44H/1022H/2H/525H/1460H/1S"
-                      }
-                    }
-                  }
-                }
-              }"#,
-            r#"{
-                "factorSourceID": {
-                  "discriminator": "fromHash",
-                  "fromHash": {
-                    "kind": "device",
-                    "body": "f1c0109e39908610c2146cda7d7676a1993ad270cd4756cb472219950ecef2fb"
-                  }
-                },
-                "badge": {
-                  "discriminator": "virtualSource",
-                  "virtualSource": {
-                    "discriminator": "hierarchicalDeterministicPublicKey",
-                    "hierarchicalDeterministicPublicKey": {
-                      "publicKey": {
-                        "curve": "curve25519",
-                        "compressedData": "44ebecae39e5ca8ae58e1fe4963b6412e5791a3bc2cc160e2e7c8261a72ccaf5"
-                      },
-                      "derivationPath": {
-                        "scheme": "cap26",
-                        "path": "m/44H/1022H/2H/525H/1460H/0S"
-                      }
-                    }
-                  }
-                }
-              }"#,
-    ]
 }
 
 async fn resolve_external_accounts_for_subintent(
@@ -323,15 +311,6 @@ async fn resolve_external_accounts_for_subintent(
                 AddressOfAccountOrPersona::Account(address);
             let maybe_badge_owner =
                 badge_owners.get(&owner_address).unwrap_or(&None);
-            let Some(access_controller_address) =
-                maybe_badge_owner.and_then(|a| a.as_access_controller().cloned())
-            else {
-                debug!(
-                    "Skipping external account without access controller owner: {}",
-                    address
-                );
-                continue;
-            };
 
             let account_assignments = account_role_assignments
                 .get(&Address::from(address))
@@ -357,27 +336,38 @@ async fn resolve_external_accounts_for_subintent(
             let mut required_nft_ids =
                 extract_nft_ids_from_access_rule(&account_rule)?;
 
-            if let Some(assignments) =
-                access_controller_role_assignments.get(&Address::from(
-                    access_controller_address,
-                ))
+            if let Some(access_controller_address) =
+                maybe_badge_owner.and_then(|a| a.as_access_controller().cloned())
             {
-                debug!(
-                    "Access controller role assignments for {}: {:?}",
-                    access_controller_address, assignments
-                );
-                for rule in access_rules_from_access_controller(assignments) {
+                if let Some(assignments) =
+                    access_controller_role_assignments.get(&Address::from(
+                        access_controller_address,
+                    ))
+                {
                     debug!(
-                        "Access controller rule for {}: {:?}",
-                        access_controller_address, rule
+                        "Access controller role assignments for {}: {:?}",
+                        access_controller_address, assignments
                     );
-                    required_nft_ids
-                        .extend(extract_nft_ids_from_access_rule(&rule)?);
+                    for rule in
+                        access_rules_from_access_controller(assignments)
+                    {
+                        debug!(
+                            "Access controller rule for {}: {:?}",
+                            access_controller_address, rule
+                        );
+                        required_nft_ids
+                            .extend(extract_nft_ids_from_access_rule(&rule)?);
+                    }
+                } else {
+                    debug!(
+                        "No access controller role assignments found for {}",
+                        access_controller_address
+                    );
                 }
             } else {
                 debug!(
-                    "No access controller role assignments found for {}",
-                    access_controller_address
+                    "External account {} has no access controller owner; using account access rule only",
+                    address
                 );
             }
 
@@ -616,26 +606,31 @@ mod test {
         assert!(role_assignments_from_details(&vault_details).is_none());
     }
 
-    #[test]
-    fn mock_factor_instance_json_parses() {
-        let instances = mock_factor_instances_json()
-            .into_iter()
-            .map(|raw| {
-                serde_json::from_str::<HierarchicalDeterministicFactorInstance>(
-                    raw,
-                )
-                .unwrap()
-            })
-            .collect_vec();
+    #[actix_rt::test]
+    async fn factor_instances_for_nfts_uses_profile_mfa_instances() {
+        let profile = Profile::sample();
+        let sut = boot(Some(profile.clone()), None).await;
 
-        assert_eq!(instances.len(), 2);
+        let network = profile.current_network().unwrap();
+        let first_mfa = network.mfa_factor_instances.iter().next().unwrap();
+        let required_id = first_mfa
+            .factor_instance
+            .badge
+            .try_non_fungible_global_id()
+            .unwrap();
+
+        let instances = sut
+            .factor_instances_for_nfts(vec![required_id])
+            .await
+            .unwrap();
+
+        assert_eq!(instances.len(), 1);
         assert_eq!(
-            instances[0].factor_source_id.body.to_string(),
-            "882f0061b30bf8c8b6886ea3f96ec7ae13b59bad55155a54b57739c6be004fcd"
-        );
-        assert_eq!(
-            instances[1].factor_source_id.body.to_string(),
-            "f1c0109e39908610c2146cda7d7676a1993ad270cd4756cb472219950ecef2fb"
+            instances[0],
+            first_mfa
+                .factor_instance
+                .try_as_hd_factor_instances()
+                .unwrap()
         );
     }
 

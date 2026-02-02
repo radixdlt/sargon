@@ -20,6 +20,11 @@ pub async fn collect_external_signatures<S: Signable>(
     lookup: &impl FactorInstanceLookupByNftIds,
     interactor: Arc<dyn SignInteractor<S>>,
 ) -> Result<IndexSet<HDSignature<S::ID>>> {
+    info!(
+        "External signing: start for signable {:?} (accounts: {})",
+        signable.get_id(),
+        external_accounts.len()
+    );
     let owned_instances = owned_factor_instances_from_nft_requirements(
         external_accounts,
         lookup,
@@ -27,6 +32,7 @@ pub async fn collect_external_signatures<S: Signable>(
     .await?;
 
     if owned_instances.is_empty() {
+        debug!("External signing: no owned factor instances resolved");
         return Ok(IndexSet::new());
     }
 
@@ -45,9 +51,19 @@ pub async fn collect_external_signatures<S: Signable>(
     }
 
     for (kind, per_factor_source) in per_kind {
+        debug!(
+            "External signing: signing with kind {:?} (factor sources: {})",
+            kind,
+            per_factor_source.len()
+        );
         let per_factor_source_input = per_factor_source
             .into_iter()
             .map(|(factor_source_id, owned)| {
+                debug!(
+                    "External signing: building request for factor source {} (instances: {})",
+                    factor_source_id,
+                    owned.len()
+                );
                 let per_transaction = IndexSet::just(
                     TransactionSignRequestInput::new(
                         signable.get_payload(),
@@ -68,9 +84,19 @@ pub async fn collect_external_signatures<S: Signable>(
 
         let request = SignRequest::new(kind, per_factor_source_input);
         let response = interactor.sign(request).await?;
-        signatures.extend(signatures_from_response(response));
+        let response_signatures = signatures_from_response(response);
+        debug!(
+            "External signing: received {} signatures for kind {:?}",
+            response_signatures.len(),
+            kind
+        );
+        signatures.extend(response_signatures);
     }
 
+    info!(
+        "External signing: collected {} signatures total",
+        signatures.len()
+    );
     Ok(signatures)
 }
 
@@ -78,15 +104,33 @@ async fn owned_factor_instances_from_nft_requirements(
     external_accounts: Vec<ExternalAccountNftRequirements>,
     lookup: &impl FactorInstanceLookupByNftIds,
 ) -> Result<IndexSet<OwnedFactorInstance>> {
+    debug!(
+        "External signing: resolving owned factor instances for {} external accounts",
+        external_accounts.len()
+    );
     let mut owned_instances = IndexSet::new();
     for external in external_accounts {
         let nft_ids = external.required_nft_ids;
         if nft_ids.is_empty() {
+            debug!(
+                "External signing: account {} has no required NFT ids",
+                external.owner
+            );
             continue;
         }
+        debug!(
+            "External signing: account {} requires {} NFT ids",
+            external.owner,
+            nft_ids.len()
+        );
         let factor_instances = lookup
             .factor_instances_for_nfts(nft_ids.into_iter().collect())
             .await?;
+        debug!(
+            "External signing: resolved {} factor instances for account {}",
+            factor_instances.len(),
+            external.owner
+        );
         for instance in factor_instances {
             owned_instances.insert(OwnedFactorInstance::owned_factor_instance(
                 external.owner,
@@ -95,6 +139,10 @@ async fn owned_factor_instances_from_nft_requirements(
         }
     }
 
+    debug!(
+        "External signing: total owned factor instances resolved: {}",
+        owned_instances.len()
+    );
     Ok(owned_instances)
 }
 

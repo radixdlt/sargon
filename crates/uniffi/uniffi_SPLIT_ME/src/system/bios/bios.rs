@@ -16,17 +16,9 @@ impl Bios {
 }
 
 impl Bios {
-    pub fn into_internal(&self) -> InternalBios {
-        self.clone().into()
-    }
-}
-
-impl From<Bios> for InternalBios {
-    fn from(val: Bios) -> Self {
+    pub fn into_internal(&self) -> Arc<InternalBios> {
         let internal_drivers: InternalDrivers =
-            val.drivers.as_ref().clone().into();
-        InternalBios {
-            drivers: Arc::new(internal_drivers),
-        }
+            self.drivers.as_ref().clone().into();
+        InternalBios::new(Arc::new(internal_drivers))
     }
 }
