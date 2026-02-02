@@ -13,4 +13,14 @@ extension MfaFactorInstance: Identifiable {
 	public var id: ID {
 		factorInstance
 	}
+
+	public func nonFungibleGlobalId() throws -> NonFungibleGlobalID {
+		switch factorInstance.badge {
+		case let .virtual(value):
+			switch value {
+			case let .hierarchicalDeterministic(value):
+				try value.nonFungibleGlobalId()
+			}
+		}
+	}
 }
