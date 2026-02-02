@@ -186,8 +186,8 @@ impl FactorInstanceLookupByNftIds for SargonOS {
         }
 
         let profile = self.profile()?;
-        let mfa_instances = match profile.current_network() {
-            Ok(network) => network.mfa_factor_instances.clone(),
+        let (network_id, mfa_instances) = match profile.current_network() {
+            Ok(network) => (network.id, network.mfa_factor_instances.clone()),
             Err(CommonError::NoNetworkInProfile { .. }) => {
                 return Ok(Vec::new())
             }
@@ -212,6 +212,7 @@ impl FactorInstanceLookupByNftIds for SargonOS {
         for mfafi in mfa_instances {
             let badge_id =
                 mfafi.factor_instance.badge.try_non_fungible_global_id()?;
+            let badge_id = NonFungibleGlobalId::from((badge_id, network_id));
             if required_ids.contains(&badge_id) {
                 instances.push(
                     mfafi
