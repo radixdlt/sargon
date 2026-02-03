@@ -69,3 +69,4 @@ jobs:
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/29.0.13113456
