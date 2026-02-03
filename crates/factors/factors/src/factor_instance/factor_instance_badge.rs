@@ -65,9 +65,7 @@ impl FactorInstanceBadge {
         }
     }
 
-    pub fn try_non_fungible_global_id(
-        &self,
-    ) -> Result<NonFungibleGlobalId> {
+    pub fn try_non_fungible_global_id(&self) -> Result<NonFungibleGlobalId> {
         match self {
             FactorInstanceBadge::Virtual { value } => match value {
                 FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {

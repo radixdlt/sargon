@@ -294,13 +294,14 @@ impl PreviewableManifest for TransactionManifestV2 {
         let modified_with_proofs =
             self.modify_add_proofs(entities_with_access_controllers)?;
 
-        let mut request = TransactionPreviewRequestV2::new_transaction_analysis(
-            modified_with_proofs,
-            start_epoch_inclusive,
-            signer_public_keys,
-            notary_public_key,
-            nonce,
-        )?;
+        let mut request =
+            TransactionPreviewRequestV2::new_transaction_analysis(
+                modified_with_proofs,
+                start_epoch_inclusive,
+                signer_public_keys,
+                notary_public_key,
+                nonce,
+            )?;
         request.flags.disable_auth_checks = disable_auth_checks;
 
         let response = gateway_client.transaction_preview_v2(request).await?;
