@@ -51,7 +51,7 @@ jobs:
           java-version: "17"
 
       - name: Setup Android SDK
-        uses: RDXWorks-actions/setup-android@v2
+        uses: RDXWorks-actions/setup-android@v3
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --version 3.5.4
