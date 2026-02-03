@@ -71,3 +71,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/${{ env.NDK_VERSION }}
+          ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/${{ env.NDK_VERSION }}
+
