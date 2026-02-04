@@ -16,6 +16,8 @@ pub struct DappToWalletInteractionSubintentRequestItem {
     pub message: Option<String>,
 
     pub expiration: DappToWalletInteractionSubintentExpiration,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub header: Option<DappToWalletInteractionSubintentHeader>,
 }
 
 impl DappToWalletInteractionSubintentRequestItem {
@@ -24,12 +26,14 @@ impl DappToWalletInteractionSubintentRequestItem {
         unvalidated_manifest: impl Into<UnvalidatedSubintentManifest>,
         message: impl Into<Option<String>>,
         expiration: impl Into<DappToWalletInteractionSubintentExpiration>,
+        header: impl Into<Option<DappToWalletInteractionSubintentHeader>>,
     ) -> Self {
         Self {
             version: version.into(),
             unvalidated_manifest: unvalidated_manifest.into(),
             message: message.into(),
             expiration: expiration.into(),
+            header: header.into(),
         }
     }
 }
@@ -41,6 +45,7 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
             UnvalidatedSubintentManifest::sample(),
             "message".to_owned(),
             DappToWalletInteractionSubintentExpiration::sample(),
+            None,
         )
     }
 
@@ -50,6 +55,7 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
             UnvalidatedSubintentManifest::sample_other(),
             "message_other".to_owned(),
             DappToWalletInteractionSubintentExpiration::sample_other(),
+            Some(DappToWalletInteractionSubintentHeader::sample()),
         )
     }
 }

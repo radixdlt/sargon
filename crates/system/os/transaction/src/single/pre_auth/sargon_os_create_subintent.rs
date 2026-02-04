@@ -9,6 +9,7 @@ pub trait OSCreateSubintent {
         subintent_manifest: SubintentManifest,
         expiration: DappToWalletInteractionSubintentExpiration,
         message: Option<String>,
+        header: Option<DappToWalletInteractionSubintentHeader>,
     ) -> Result<Subintent>;
 
     fn expiry_time_from_now_in_seconds(
@@ -28,39 +29,63 @@ pub trait OSCreateSubintent {
 // ==================
 #[async_trait::async_trait]
 impl OSCreateSubintent for SargonOS {
-    /// Creates a Subintent given its discriminator, manifest and expiration.
+    /// Creates a Subintent either from the provided header directly or
+    /// given its discriminator, manifest and expiration if the header is absent.
     async fn create_subintent(
         &self,
         intent_discriminator: IntentDiscriminator,
         subintent_manifest: SubintentManifest,
         expiration: DappToWalletInteractionSubintentExpiration,
         message: Option<String>,
+        header: Option<DappToWalletInteractionSubintentHeader>,
     ) -> Result<Subintent> {
-        // Calculate the seconds until the expiration of the subintent.
-        let expiry_time_from_now_in_seconds =
-            self.expiry_time_from_now_in_seconds(expiration);
-        if expiry_time_from_now_in_seconds == 0 {
-            return Err(CommonError::SubintentExpired);
-        }
+        let header = if let Some(provided_header) = header {
+            // If a header is provided, use it.
+            IntentHeaderV2 {
+                network_id: NetworkID::try_from(provided_header.network_id)?,
+                start_epoch_inclusive: Epoch::from(
+                    provided_header.start_epoch_inclusive,
+                ),
+                end_epoch_exclusive: Epoch::from(
+                    provided_header.end_epoch_exclusive,
+                ),
+                min_proposer_timestamp_inclusive: provided_header
+                    .min_proposer_timestamp_inclusive
+                    .map(Instant::from),
+                max_proposer_timestamp_exclusive: provided_header
+                    .max_proposer_timestamp_exclusive
+                    .map(Instant::from),
+                intent_discriminator: IntentDiscriminator::from(
+                    provided_header.intent_discriminator,
+                ),
+            }
+        } else {
+            // Calculate the seconds until the expiration of the subintent.
+            let expiry_time_from_now_in_seconds =
+                self.expiry_time_from_now_in_seconds(expiration);
+            if expiry_time_from_now_in_seconds == 0 {
+                return Err(CommonError::SubintentExpired);
+            }
 
-        // Get current epoch
-        let (gateway_client, network_id) = self.gateway_client_on()?;
-        let current_epoch = gateway_client.current_epoch().await?;
+            // Get current epoch
+            let (gateway_client, network_id) = self.gateway_client_on()?;
+            let current_epoch = gateway_client.current_epoch().await?;
 
-        // Calculate header ranges
-        let end_ranges = self.calculate_end_ranges(
-            current_epoch,
-            expiry_time_from_now_in_seconds,
-        );
+            // Calculate header ranges
+            let end_ranges = self.calculate_end_ranges(
+                current_epoch,
+                expiry_time_from_now_in_seconds,
+            );
 
-        // Build header
-        let header = IntentHeaderV2 {
-            network_id,
-            start_epoch_inclusive: current_epoch,
-            end_epoch_exclusive: end_ranges.0,
-            min_proposer_timestamp_inclusive: None,
-            max_proposer_timestamp_exclusive: Some(end_ranges.1),
-            intent_discriminator,
+            // Build header
+            IntentHeaderV2 {
+                network_id,
+                start_epoch_inclusive: current_epoch,
+                end_epoch_exclusive: end_ranges.0,
+                min_proposer_timestamp_inclusive: None,
+                max_proposer_timestamp_exclusive: Some(end_ranges.1),
+                intent_discriminator,
+            }
         };
 
         // Build subintent
@@ -124,6 +149,7 @@ mod tests {
                 SubintentManifest::sample(),
                 expiration,
                 None,
+                None,
             )
             .await
             .expect_err("Expected an error");
@@ -150,6 +176,7 @@ mod tests {
                 manifest.clone(),
                 expiration,
                 Some(message.clone()),
+                None,
             )
             .await
             .expect("Expected a valid subintent");

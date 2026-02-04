@@ -14,6 +14,7 @@ impl SargonOS {
         subintent_manifest: SubintentManifest,
         expiration: DappToWalletInteractionSubintentExpiration,
         message: Option<String>,
+        header: Option<DappToWalletInteractionSubintentHeader>,
     ) -> Result<Subintent> {
         self.wrapped
             .create_subintent(
@@ -21,6 +22,7 @@ impl SargonOS {
                 subintent_manifest.into_internal(),
                 expiration.into_internal(),
                 message,
+                header.into_internal(),
             )
             .await
             .into_result()
