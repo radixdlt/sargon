@@ -12,4 +12,5 @@ pub struct DappToWalletInteractionSubintentRequestItem {
     pub message: Option<String>,
 
     pub expiration: DappToWalletInteractionSubintentExpiration,
+    pub header: Option<DappToWalletInteractionSubintentHeader>,
 }

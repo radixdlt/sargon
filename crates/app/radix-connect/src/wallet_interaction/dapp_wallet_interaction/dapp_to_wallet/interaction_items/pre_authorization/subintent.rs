@@ -16,6 +16,8 @@ pub struct DappToWalletInteractionSubintentRequestItem {
     pub message: Option<String>,
 
     pub expiration: DappToWalletInteractionSubintentExpiration,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub header: Option<DappToWalletInteractionSubintentHeader>,
 }
 
 impl DappToWalletInteractionSubintentRequestItem {
@@ -24,12 +26,14 @@ impl DappToWalletInteractionSubintentRequestItem {
         unvalidated_manifest: impl Into<UnvalidatedSubintentManifest>,
         message: impl Into<Option<String>>,
         expiration: impl Into<DappToWalletInteractionSubintentExpiration>,
+        header: impl Into<Option<DappToWalletInteractionSubintentHeader>>,
     ) -> Self {
         Self {
             version: version.into(),
             unvalidated_manifest: unvalidated_manifest.into(),
             message: message.into(),
             expiration: expiration.into(),
+            header: header.into(),
         }
     }
 }
@@ -41,6 +45,7 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
             UnvalidatedSubintentManifest::sample(),
             "message".to_owned(),
             DappToWalletInteractionSubintentExpiration::sample(),
+            None,
         )
     }
 
@@ -50,6 +55,7 @@ impl HasSampleValues for DappToWalletInteractionSubintentRequestItem {
             UnvalidatedSubintentManifest::sample_other(),
             "message_other".to_owned(),
             DappToWalletInteractionSubintentExpiration::sample_other(),
+            Some(DappToWalletInteractionSubintentHeader::sample()),
         )
     }
 }
@@ -89,5 +95,31 @@ mod tests {
             }
             "#,
         );
+    }
+
+    #[test]
+    fn json_roundtrip_with_header() {
+        // Test that sample_other (which includes a header) can be serialized and deserialized
+        assert_json_roundtrip(&SUT::sample_other());
+
+        // Verify the header is present in sample_other
+        let sut = SUT::sample_other();
+        assert!(sut.header.is_some());
+        let header = sut.header.unwrap();
+        assert_eq!(header.network_id, NetworkID::Mainnet.discriminant());
+        assert_eq!(header.start_epoch_inclusive, 0);
+        assert_eq!(header.end_epoch_exclusive, 1);
+        assert_eq!(header.min_proposer_timestamp_inclusive, Some(1694448356));
+        assert_eq!(header.max_proposer_timestamp_exclusive, Some(1703438036));
+        assert_eq!(header.intent_discriminator, 123456789);
+    }
+
+    #[test]
+    fn json_roundtrip_without_header() {
+        // Test that sample (which has no header) serializes without the header field
+        assert_json_roundtrip(&SUT::sample());
+
+        // Verify the header is absent in sample
+        assert!(SUT::sample().header.is_none());
     }
 }

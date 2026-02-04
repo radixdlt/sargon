@@ -9,6 +9,7 @@ pub trait OSCreateSubintent {
         subintent_manifest: SubintentManifest,
         expiration: DappToWalletInteractionSubintentExpiration,
         message: Option<String>,
+        header: Option<DappToWalletInteractionSubintentHeader>,
     ) -> Result<Subintent>;
 
     fn expiry_time_from_now_in_seconds(
@@ -28,39 +29,63 @@ pub trait OSCreateSubintent {
 // ==================
 #[async_trait::async_trait]
 impl OSCreateSubintent for SargonOS {
-    /// Creates a Subintent given its discriminator, manifest and expiration.
+    /// Creates a Subintent either from the provided header directly or
+    /// given its discriminator, manifest and expiration if the header is absent.
     async fn create_subintent(
         &self,
         intent_discriminator: IntentDiscriminator,
         subintent_manifest: SubintentManifest,
         expiration: DappToWalletInteractionSubintentExpiration,
         message: Option<String>,
+        header: Option<DappToWalletInteractionSubintentHeader>,
     ) -> Result<Subintent> {
-        // Calculate the seconds until the expiration of the subintent.
-        let expiry_time_from_now_in_seconds =
-            self.expiry_time_from_now_in_seconds(expiration);
-        if expiry_time_from_now_in_seconds == 0 {
-            return Err(CommonError::SubintentExpired);
-        }
+        let header = if let Some(provided_header) = header {
+            // If a header is provided, use it.
+            IntentHeaderV2 {
+                network_id: NetworkID::try_from(provided_header.network_id)?,
+                start_epoch_inclusive: Epoch::from(
+                    provided_header.start_epoch_inclusive,
+                ),
+                end_epoch_exclusive: Epoch::from(
+                    provided_header.end_epoch_exclusive,
+                ),
+                min_proposer_timestamp_inclusive: provided_header
+                    .min_proposer_timestamp_inclusive
+                    .map(Instant::from),
+                max_proposer_timestamp_exclusive: provided_header
+                    .max_proposer_timestamp_exclusive
+                    .map(Instant::from),
+                intent_discriminator: IntentDiscriminator::from(
+                    provided_header.intent_discriminator,
+                ),
+            }
+        } else {
+            // Calculate the seconds until the expiration of the subintent.
+            let expiry_time_from_now_in_seconds =
+                self.expiry_time_from_now_in_seconds(expiration);
+            if expiry_time_from_now_in_seconds == 0 {
+                return Err(CommonError::SubintentExpired);
+            }
 
-        // Get current epoch
-        let (gateway_client, network_id) = self.gateway_client_on()?;
-        let current_epoch = gateway_client.current_epoch().await?;
+            // Get current epoch
+            let (gateway_client, network_id) = self.gateway_client_on()?;
+            let current_epoch = gateway_client.current_epoch().await?;
 
-        // Calculate header ranges
-        let end_ranges = self.calculate_end_ranges(
-            current_epoch,
-            expiry_time_from_now_in_seconds,
-        );
+            // Calculate header ranges
+            let end_ranges = self.calculate_end_ranges(
+                current_epoch,
+                expiry_time_from_now_in_seconds,
+            );
 
-        // Build header
-        let header = IntentHeaderV2 {
-            network_id,
-            start_epoch_inclusive: current_epoch,
-            end_epoch_exclusive: end_ranges.0,
-            min_proposer_timestamp_inclusive: None,
-            max_proposer_timestamp_exclusive: Some(end_ranges.1),
-            intent_discriminator,
+            // Build header
+            IntentHeaderV2 {
+                network_id,
+                start_epoch_inclusive: current_epoch,
+                end_epoch_exclusive: end_ranges.0,
+                min_proposer_timestamp_inclusive: None,
+                max_proposer_timestamp_exclusive: Some(end_ranges.1),
+                intent_discriminator,
+            }
         };
 
         // Build subintent
@@ -124,6 +149,7 @@ mod tests {
                 SubintentManifest::sample(),
                 expiration,
                 None,
+                None,
             )
             .await
             .expect_err("Expected an error");
@@ -150,6 +176,7 @@ mod tests {
                 manifest.clone(),
                 expiration,
                 Some(message.clone()),
+                None,
             )
             .await
             .expect("Expected a valid subintent");
@@ -167,6 +194,132 @@ mod tests {
         assert_eq!(result.header.intent_discriminator, intent_discriminator);
         assert_eq!(result.manifest, manifest);
         assert_eq!(result.message, MessageV2::plain_text(message));
+    }
+
+    #[actix_rt::test]
+    async fn create_subintent_with_provided_header() {
+        // Test the case where a header is provided by the dApp
+        let os = boot_always_failing().await;
+
+        let expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
+            DappToWalletInteractionSubintentExpireAfterDelay::from(600),
+        );
+
+        let manifest = SubintentManifest::sample();
+        let message = "Hello from dApp!".to_string();
+
+        let provided_header = DappToWalletInteractionSubintentHeader::new(
+            NetworkID::Mainnet.discriminant(),
+            100,
+            200,
+            Some(1694448356),
+            Some(1703438036),
+            987654321,
+        );
+
+        let result = os
+            .create_subintent(
+                IntentDiscriminator::sample(), // This should be ignored when header is provided
+                manifest.clone(),
+                expiration,
+                Some(message.clone()),
+                Some(provided_header.clone()),
+            )
+            .await
+            .expect("Expected a valid subintent");
+
+        // Verify the header values come from the provided header, not calculated
+        assert_eq!(result.header.network_id, NetworkID::Mainnet);
+        assert_eq!(result.header.start_epoch_inclusive, Epoch(100));
+        assert_eq!(result.header.end_epoch_exclusive, Epoch(200));
+        assert_eq!(
+            result.header.min_proposer_timestamp_inclusive,
+            Some(Instant::from(1694448356i64))
+        );
+        assert_eq!(
+            result.header.max_proposer_timestamp_exclusive,
+            Some(Instant::from(1703438036i64))
+        );
+        assert_eq!(
+            result.header.intent_discriminator,
+            IntentDiscriminator::from(987654321u64)
+        );
+        assert_eq!(result.manifest, manifest);
+        assert_eq!(result.message, MessageV2::plain_text(message));
+    }
+
+    #[actix_rt::test]
+    async fn create_subintent_with_provided_header_no_timestamps() {
+        // Test the case where a header is provided without optional timestamp fields
+        let os = boot_always_failing().await;
+
+        let expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
+            DappToWalletInteractionSubintentExpireAfterDelay::from(600),
+        );
+
+        let manifest = SubintentManifest::sample();
+
+        let provided_header = DappToWalletInteractionSubintentHeader::new(
+            NetworkID::Stokenet.discriminant(),
+            50,
+            150,
+            None, // No min timestamp
+            None, // No max timestamp
+            111222333,
+        );
+
+        let result = os
+            .create_subintent(
+                IntentDiscriminator::sample(),
+                manifest.clone(),
+                expiration,
+                None, // No message
+                Some(provided_header),
+            )
+            .await
+            .expect("Expected a valid subintent");
+
+        assert_eq!(result.header.network_id, NetworkID::Stokenet);
+        assert_eq!(result.header.start_epoch_inclusive, Epoch(50));
+        assert_eq!(result.header.end_epoch_exclusive, Epoch(150));
+        assert_eq!(result.header.min_proposer_timestamp_inclusive, None);
+        assert_eq!(result.header.max_proposer_timestamp_exclusive, None);
+        assert_eq!(
+            result.header.intent_discriminator,
+            IntentDiscriminator::from(111222333u64)
+        );
+        assert_eq!(result.manifest, manifest);
+        assert_eq!(result.message, MessageV2::None);
+    }
+
+    #[actix_rt::test]
+    async fn create_subintent_with_provided_header_invalid_network_id() {
+        // Test the case where a header has an invalid network ID
+        let os = boot_always_failing().await;
+
+        let expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
+            DappToWalletInteractionSubintentExpireAfterDelay::from(600),
+        );
+
+        let manifest = SubintentManifest::sample();
+
+        let provided_header = DappToWalletInteractionSubintentHeader::new(
+            255, // Invalid network ID
+            100, 200, None, None, 123456789,
+        );
+
+        let result = os
+            .create_subintent(
+                IntentDiscriminator::sample(),
+                manifest,
+                expiration,
+                None,
+                Some(provided_header),
+            )
+            .await
+            .expect_err("Expected an error for invalid network ID");
+
+        assert_eq!(result, CommonError::UnknownNetworkID { bad_value: 255 });
     }
 
     #[actix_rt::test]
