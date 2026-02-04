@@ -197,6 +197,132 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn create_subintent_with_provided_header() {
+        // Test the case where a header is provided by the dApp
+        let os = boot_always_failing().await;
+
+        let expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
+            DappToWalletInteractionSubintentExpireAfterDelay::from(600),
+        );
+
+        let manifest = SubintentManifest::sample();
+        let message = "Hello from dApp!".to_string();
+
+        let provided_header = DappToWalletInteractionSubintentHeader::new(
+            NetworkID::Mainnet.discriminant(),
+            100,
+            200,
+            Some(1694448356),
+            Some(1703438036),
+            987654321,
+        );
+
+        let result = os
+            .create_subintent(
+                IntentDiscriminator::sample(), // This should be ignored when header is provided
+                manifest.clone(),
+                expiration,
+                Some(message.clone()),
+                Some(provided_header.clone()),
+            )
+            .await
+            .expect("Expected a valid subintent");
+
+        // Verify the header values come from the provided header, not calculated
+        assert_eq!(result.header.network_id, NetworkID::Mainnet);
+        assert_eq!(result.header.start_epoch_inclusive, Epoch(100));
+        assert_eq!(result.header.end_epoch_exclusive, Epoch(200));
+        assert_eq!(
+            result.header.min_proposer_timestamp_inclusive,
+            Some(Instant::from(1694448356i64))
+        );
+        assert_eq!(
+            result.header.max_proposer_timestamp_exclusive,
+            Some(Instant::from(1703438036i64))
+        );
+        assert_eq!(
+            result.header.intent_discriminator,
+            IntentDiscriminator::from(987654321u64)
+        );
+        assert_eq!(result.manifest, manifest);
+        assert_eq!(result.message, MessageV2::plain_text(message));
+    }
+
+    #[actix_rt::test]
+    async fn create_subintent_with_provided_header_no_timestamps() {
+        // Test the case where a header is provided without optional timestamp fields
+        let os = boot_always_failing().await;
+
+        let expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
+            DappToWalletInteractionSubintentExpireAfterDelay::from(600),
+        );
+
+        let manifest = SubintentManifest::sample();
+
+        let provided_header = DappToWalletInteractionSubintentHeader::new(
+            NetworkID::Stokenet.discriminant(),
+            50,
+            150,
+            None, // No min timestamp
+            None, // No max timestamp
+            111222333,
+        );
+
+        let result = os
+            .create_subintent(
+                IntentDiscriminator::sample(),
+                manifest.clone(),
+                expiration,
+                None, // No message
+                Some(provided_header),
+            )
+            .await
+            .expect("Expected a valid subintent");
+
+        assert_eq!(result.header.network_id, NetworkID::Stokenet);
+        assert_eq!(result.header.start_epoch_inclusive, Epoch(50));
+        assert_eq!(result.header.end_epoch_exclusive, Epoch(150));
+        assert_eq!(result.header.min_proposer_timestamp_inclusive, None);
+        assert_eq!(result.header.max_proposer_timestamp_exclusive, None);
+        assert_eq!(
+            result.header.intent_discriminator,
+            IntentDiscriminator::from(111222333u64)
+        );
+        assert_eq!(result.manifest, manifest);
+        assert_eq!(result.message, MessageV2::None);
+    }
+
+    #[actix_rt::test]
+    async fn create_subintent_with_provided_header_invalid_network_id() {
+        // Test the case where a header has an invalid network ID
+        let os = boot_always_failing().await;
+
+        let expiration = DappToWalletInteractionSubintentExpiration::AfterDelay(
+            DappToWalletInteractionSubintentExpireAfterDelay::from(600),
+        );
+
+        let manifest = SubintentManifest::sample();
+
+        let provided_header = DappToWalletInteractionSubintentHeader::new(
+            255, // Invalid network ID
+            100, 200, None, None, 123456789,
+        );
+
+        let result = os
+            .create_subintent(
+                IntentDiscriminator::sample(),
+                manifest,
+                expiration,
+                None,
+                Some(provided_header),
+            )
+            .await
+            .expect_err("Expected an error for invalid network ID");
+
+        assert_eq!(result, CommonError::UnknownNetworkID { bad_value: 255 });
+    }
+
+    #[actix_rt::test]
     async fn expiry_time() {
         let os = boot_always_failing().await;
 
