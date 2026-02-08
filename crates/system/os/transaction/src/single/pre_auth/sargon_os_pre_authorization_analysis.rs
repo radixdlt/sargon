@@ -28,40 +28,55 @@ impl OsAnalysePreAuthPreview for SargonOS {
         nonce: Nonce,
         notary_public_key: PublicKey,
     ) -> Result<PreAuthToReview> {
+        debug!(
+            "Pre-auth review: received subintent manifest (instructions_len={}, blobs={})",
+            instructions.len(),
+            blobs.0.len()
+        );
         let network_id = self.current_network_id()?;
+        debug!("Pre-auth review: using network_id={:?}", network_id);
         let subintent_manifest = SubintentManifest::new(
             instructions,
             network_id,
             blobs.clone(),
             ChildSubintentSpecifiers::default(),
         )?;
+        debug!("Pre-auth review: subintent manifest constructed");
 
         let summary = subintent_manifest.validated_summary(
             false, // PreAuth transaction cannot be sent by the Host itself
         )?;
+        debug!("Pre-auth review: subintent manifest summary validated");
 
         let pre_auth_to_review = match subintent_manifest.as_enclosed() {
             Some(manifest) => {
+                debug!("Pre-auth review: enclosed subintent manifest detected");
                 let execution_summary = self
                     .get_execution_summary(
                         manifest,
                         nonce,
                         notary_public_key,
                         false,
+                        true,
                     )
                     .await?;
+                debug!("Pre-auth review: enclosed preview execution summary computed");
 
                 PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
                     manifest: subintent_manifest,
                     summary: execution_summary,
                 })
             }
-            None => PreAuthToReview::Open(PreAuthOpenManifest {
-                manifest: subintent_manifest,
-                summary,
-            }),
+            None => {
+                debug!("Pre-auth review: open subintent manifest detected");
+                PreAuthToReview::Open(PreAuthOpenManifest {
+                    manifest: subintent_manifest,
+                    summary,
+                })
+            }
         };
 
+        debug!("Pre-auth review: completed");
         Ok(pre_auth_to_review)
     }
 }

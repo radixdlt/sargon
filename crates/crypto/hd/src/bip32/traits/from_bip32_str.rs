@@ -50,8 +50,7 @@ impl<T: ValueInLocalKeyspaceFromBIP32Str + FromLocalKeySpace> FromCAP43String
     ///
     /// e.g:
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use hierarchical_deterministic::prelude::*;
     ///
     /// assert!(AccountPath::from_cap43_string("m/44'/1022'/1'/525'/1460'/1'").is_ok());
     /// ```
@@ -68,8 +67,7 @@ impl<T: IsPathComponentStringConvertible> ValueInLocalKeyspaceFromBIP32Str
     ///
     /// e.g:
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use hierarchical_deterministic::prelude::*;
     ///
     /// assert!(AccountPath::from_cap43_string("m/44'/1022'/1'/525'/1460'/1'").is_ok());
     /// ```

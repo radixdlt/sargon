@@ -14,22 +14,26 @@ pub struct TransactionPreviewRequestFlags {
     pub use_free_credit: UseFreeCredit,
     pub assume_all_signature_proofs: AssumeAllSignatureProofs,
     pub skip_epoch_check: SkipEpochCheck,
+    pub disable_auth_checks: DisableAuthChecks,
 }
 
 decl_bool_type!(UseFreeCredit, true);
 decl_bool_type!(AssumeAllSignatureProofs, false);
 decl_bool_type!(SkipEpochCheck, false);
+decl_bool_type!(DisableAuthChecks, false);
 
 impl TransactionPreviewRequestFlags {
     pub fn new(
         use_free_credit: UseFreeCredit,
         assume_all_signature_proofs: AssumeAllSignatureProofs,
         skip_epoch_check: SkipEpochCheck,
+        disable_auth_checks: DisableAuthChecks,
     ) -> Self {
         Self {
             use_free_credit,
             assume_all_signature_proofs,
             skip_epoch_check,
+            disable_auth_checks,
         }
     }
 }
@@ -40,6 +44,7 @@ impl Default for TransactionPreviewRequestFlags {
             UseFreeCredit::default(),
             AssumeAllSignatureProofs::default(),
             SkipEpochCheck::default(),
+            DisableAuthChecks::default(),
         )
     }
 }
@@ -75,7 +80,8 @@ mod tests {
             {
                 "use_free_credit": true,
                 "assume_all_signature_proofs": false,
-                "skip_epoch_check": false
+                "skip_epoch_check": false,
+                "disable_auth_checks": false
             }
             "#,
         )

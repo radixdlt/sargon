@@ -15,8 +15,8 @@ decl_address!(
     /// * GlobalVirtualEd25519Identity
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use addresses::IdentityAddress;
+    /// use network::prelude::{IsNetworkAware, NetworkID};
     ///
     /// assert_eq!(
     ///     "identity_rdx12tgzjrz9u0xz4l28vf04hz87eguclmfaq4d2p8f8lv7zg9ssnzku8j".parse::<IdentityAddress>().unwrap().network_id(),

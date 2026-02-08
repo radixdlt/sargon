@@ -87,8 +87,7 @@ impl From<Ed25519PublicKey> for PublicKey {
     /// Enables:
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use ecc::prelude::*;
     ///
     /// let key: PublicKey = Ed25519PrivateKey::generate().public_key().into();
     /// ```
@@ -101,8 +100,7 @@ impl From<Secp256k1PublicKey> for PublicKey {
     /// Enables:
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use ecc::prelude::*;
     ///
     /// let key: PublicKey = Secp256k1PrivateKey::generate().public_key().into();
     /// ```

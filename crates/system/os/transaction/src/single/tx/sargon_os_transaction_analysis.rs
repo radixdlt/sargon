@@ -53,6 +53,7 @@ impl OsAnalyseTxPreview for SargonOS {
                 nonce,
                 notary_public_key,
                 are_instructions_originating_from_host,
+                false,
             )
             .await?;
 
@@ -71,6 +72,7 @@ pub trait OsExecutionSummary {
         nonce: Nonce,
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
+        allow_disable_auth_checks: bool,
     ) -> Result<ExecutionSummary>;
 
     fn extract_signer_public_keys(
@@ -103,10 +105,18 @@ impl OsExecutionSummary for SargonOS {
         nonce: Nonce,
         notary_public_key: PublicKey,
         are_instructions_originating_from_host: bool,
+        allow_disable_auth_checks: bool,
     ) -> Result<ExecutionSummary> {
         let summary = manifest.summary()?;
 
-        let signer_public_keys = self.extract_signer_public_keys(&summary)?;
+        let (signer_public_keys, disable_auth_checks) =
+            match self.extract_signer_public_keys(&summary) {
+                Ok(keys) => (keys, DisableAuthChecks::default()),
+                Err(_) if allow_disable_auth_checks => {
+                    (IndexSet::new(), DisableAuthChecks(true))
+                }
+                Err(err) => return Err(err),
+            };
         let proofs = self.extract_proofs(&summary)?;
 
         let gateway_client = self.gateway_client_with(manifest.network_id());
@@ -121,6 +131,7 @@ impl OsExecutionSummary for SargonOS {
                 signer_public_keys,
                 notary_public_key,
                 nonce,
+                disable_auth_checks,
             )
             .await?;
 
@@ -250,6 +261,7 @@ impl OsExecutionSummary for SargonOS {
 pub trait PreviewableManifest:
     DynamicallyAnalyzableManifest + Send + Sync
 {
+    #[allow(clippy::too_many_arguments)]
     async fn fetch_preview(
         &self,
         entities_with_access_controllers: IndexMap<
@@ -261,6 +273,7 @@ pub trait PreviewableManifest:
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
+        disable_auth_checks: DisableAuthChecks,
     ) -> Result<PreviewResponseReceipts>;
 }
 
@@ -277,17 +290,20 @@ impl PreviewableManifest for TransactionManifestV2 {
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
+        disable_auth_checks: DisableAuthChecks,
     ) -> Result<PreviewResponseReceipts> {
         let modified_with_proofs =
             self.modify_add_proofs(entities_with_access_controllers)?;
 
-        let request = TransactionPreviewRequestV2::new_transaction_analysis(
-            modified_with_proofs,
-            start_epoch_inclusive,
-            signer_public_keys,
-            notary_public_key,
-            nonce,
-        )?;
+        let mut request =
+            TransactionPreviewRequestV2::new_transaction_analysis(
+                modified_with_proofs,
+                start_epoch_inclusive,
+                signer_public_keys,
+                notary_public_key,
+                nonce,
+            )?;
+        request.flags.disable_auth_checks = disable_auth_checks;
 
         let response = gateway_client.transaction_preview_v2(request).await?;
 
@@ -311,17 +327,19 @@ impl PreviewableManifest for TransactionManifest {
         signer_public_keys: IndexSet<PublicKey>,
         notary_public_key: PublicKey,
         nonce: Nonce,
+        disable_auth_checks: DisableAuthChecks,
     ) -> Result<PreviewResponseReceipts> {
         let modified_with_proofs =
             self.modify_add_proofs(entities_with_access_controllers)?;
 
-        let request = TransactionPreviewRequest::new_transaction_analysis(
+        let mut request = TransactionPreviewRequest::new_transaction_analysis(
             modified_with_proofs,
             start_epoch_inclusive,
             signer_public_keys,
             Some(notary_public_key),
             nonce,
         );
+        request.flags.disable_auth_checks = disable_auth_checks;
         let response = gateway_client.transaction_preview(request).await?;
 
         Ok(PreviewResponseReceipts {

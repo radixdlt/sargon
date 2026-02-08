@@ -15,8 +15,10 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use hierarchical_deterministic::prelude::*;
+///
+/// let hardened_offset = 1u32 << 31;
+/// let securified_offset = hardened_offset + (1u32 << 30);
 ///
 /// assert_eq!(
 ///     HDPathComponent::from_global_key_space(0).unwrap(),
@@ -24,12 +26,12 @@ use crate::prelude::*;
 /// );
 ///
 /// assert_eq!(
-///     HDPathComponent::from_global_key_space(1 + GLOBAL_OFFSET_HARDENED).unwrap(),
+///     HDPathComponent::from_global_key_space(1 + hardened_offset).unwrap(),
 ///     HDPathComponent::Unsecurified(Unsecurified::Hardened(UnsecurifiedHardened::ONE))
 /// );
 ///
 /// assert_eq!(
-///     HDPathComponent::from_global_key_space(2 + GLOBAL_OFFSET_HARDENED_SECURIFIED).unwrap(),
+///     HDPathComponent::from_global_key_space(2 + securified_offset).unwrap(),
 ///     HDPathComponent::Securified(SecurifiedU30::TWO)
 /// );
 /// ```

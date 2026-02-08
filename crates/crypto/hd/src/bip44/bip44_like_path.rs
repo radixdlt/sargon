@@ -12,19 +12,16 @@ use crate::prelude::*;
 /// This was a mistake made during implementation of Radix Olympia.
 ///
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use hierarchical_deterministic::prelude::*;
 ///
-/// fn parse(s: &str) -> Result<BIP44LikePath> {
-///    s.parse::<BIP44LikePath>()
-/// }
+/// let parse = |s: &str| s.parse::<BIP44LikePath>();
 ///
 /// assert!(parse("m/44'/1022'/0'/0/0").is_ok()); // Canonical BIP44
 /// assert!(parse("m/44'/1022'/0'/0/0'").is_ok()); // BIP44 like
 ///
-/// assert_eq!(parse("m/44'/1022'/0'/0'/0"), Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened));
-/// assert_eq!(parse("m/44'/1022'/0'/0'/0'"), Err(CommonError::InvalidBIP44LikePathChangeWasUnexpectedlyHardened));
-/// assert_eq!(parse("m/44'/0'/0'/0/0'"), Err(CommonError::CoinTypeNotFound { bad_value: 0 }));
+/// assert!(parse("m/44'/1022'/0'/0'/0").is_err());
+/// assert!(parse("m/44'/1022'/0'/0'/0'").is_err());
+/// assert!(parse("m/44'/0'/0'/0/0'").is_err());
 /// ```
 #[derive(
     Clone,

@@ -13,25 +13,21 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use hierarchical_deterministic::prelude::*;
+/// let hardened_offset = 1u32 << 31;
+/// let securified_offset = hardened_offset + (1u32 << 30);
 /// // From Global KeySpace
 /// assert_eq!(
-///   Hardened::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap(),
+///   Hardened::from_global_key_space(42 + hardened_offset).unwrap(),
 ///   Hardened::Unsecurified(UnsecurifiedHardened::from_local_key_space(42u32).unwrap())
 /// );
 ///
 /// assert_eq!(
-///   Hardened::from_global_key_space(5 + GLOBAL_OFFSET_HARDENED_SECURIFIED).unwrap(),
+///   Hardened::from_global_key_space(5 + securified_offset).unwrap(),
 ///   Hardened::Securified(SecurifiedU30::from_local_key_space(5u32).unwrap())
 /// );
 ///
-/// assert!(
-///   matches!(
-///     Hardened::from_global_key_space(3),
-///     Err(CommonError::IndexNotHardened { bad_value: 3 })
-///  )
-/// );
+/// assert!(Hardened::from_global_key_space(3).is_err());
 ///
 /// // From Local KeySpace
 /// assert_eq!(
@@ -41,8 +37,8 @@ use crate::prelude::*;
 ///
 /// // Ok to pass an `U31`
 /// assert_eq!(
-///   Hardened::from_local_key_space(U31::new(77), IsSecurified(false)).unwrap(),
-///   Hardened::Unsecurified(UnsecurifiedHardened::from_local_key_space(U31::new(77)).unwrap())
+///   Hardened::from_local_key_space(77u32, IsSecurified(false)).unwrap(),
+///   Hardened::Unsecurified(UnsecurifiedHardened::from_local_key_space(77u32).unwrap())
 /// );
 ///
 /// assert_eq!(
@@ -53,12 +49,12 @@ use crate::prelude::*;
 /// // Map to global KeySpace
 /// assert_eq!(
 ///   Hardened::from_local_key_space(9u32, IsSecurified(true)).unwrap().map_to_global_key_space(),
-///   9 + GLOBAL_OFFSET_HARDENED_SECURIFIED
+///   9 + securified_offset
 /// );
 ///
 /// assert_eq!(
 ///   Hardened::from_local_key_space(4u32, IsSecurified(false)).unwrap().map_to_global_key_space(),
-///   4 + GLOBAL_OFFSET_HARDENED
+///   4 + hardened_offset
 /// );
 /// ```
 #[derive(

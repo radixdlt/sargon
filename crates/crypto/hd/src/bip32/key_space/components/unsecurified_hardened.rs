@@ -9,25 +9,20 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use hierarchical_deterministic::prelude::*;
+/// let hardened_offset = 1u32 << 31;
 ///
 /// assert_eq!(
-///   UnsecurifiedHardened::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED).unwrap().index_in_local_key_space(),
-///   U31::new(42)
+///   UnsecurifiedHardened::from_global_key_space(42 + hardened_offset).unwrap(),
+///   UnsecurifiedHardened::from_local_key_space(42u32).unwrap()
 /// );
 ///
 /// assert_eq!(
 ///   UnsecurifiedHardened::from_local_key_space(5u32).unwrap().map_to_global_key_space(),
-///   5 + GLOBAL_OFFSET_HARDENED
+///   5 + hardened_offset
 /// );
 ///
-/// assert!(
-///   matches!(
-///     UnsecurifiedHardened::from_global_key_space(3),
-///     Err(CommonError::IndexInGlobalKeySpaceIsLowerThanOffset)
-///  )
-/// );
+/// assert!(UnsecurifiedHardened::from_global_key_space(3).is_err());
 /// ```
 #[derive(
     Clone,

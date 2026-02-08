@@ -1,6 +1,7 @@
 use serde::ser::SerializeStruct;
 
 use crate::prelude::*;
+use radix_common::prelude::NonFungibleGlobalId;
 
 /// Either a "physical" badge (resource) or some source for recreation of a producer
 /// of a virtual badge (signature), e.g. a HD derivation path, from which a private key
@@ -61,6 +62,21 @@ impl FactorInstanceBadge {
     fn sample_virtual_other() -> Self {
         Self::Virtual {
             value: FactorInstanceBadgeVirtualSource::sample_other(),
+        }
+    }
+
+    pub fn try_non_fungible_global_id(&self) -> Result<NonFungibleGlobalId> {
+        match self {
+            FactorInstanceBadge::Virtual { value } => match value {
+                FactorInstanceBadgeVirtualSource::HierarchicalDeterministic {
+                    value,
+                } => Ok(NonFungibleGlobalId::from_public_key(
+                    ScryptoPublicKey::from(value.public_key),
+                )),
+            },
+            // FactorInstanceBadge::Physical { .. } => {
+            //     Err(CommonError::BadgeIsNotVirtualHierarchicalDeterministic)
+            // }
         }
     }
 }

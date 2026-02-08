@@ -35,8 +35,7 @@ use crate::prelude::*;
 /// See `test_asciisum` for the source of the `entity_kind` and `key_kind` numbers.
 ///
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use hierarchical_deterministic::prelude::*;
 ///
 /// assert!("m/44'/1022'/1'/618'/1460'/1'".parse::<IdentityPath>().is_ok());
 /// assert!("m/44H/1022H/1H/618H/1460H/1H".parse::<IdentityPath>().is_ok());

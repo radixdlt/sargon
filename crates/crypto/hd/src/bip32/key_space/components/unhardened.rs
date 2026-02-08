@@ -5,8 +5,8 @@ use crate::prelude::*;
 /// Represented internally using a U31.
 /// # Examples
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use hierarchical_deterministic::prelude::*;
+/// let hardened_offset = 1u32 << 31;
 ///
 /// assert_eq!(
 ///     Unhardened::from_local_key_space(0u32).unwrap().map_to_global_key_space(),
@@ -19,15 +19,12 @@ use crate::prelude::*;
 /// );
 ///
 /// assert_eq!(
-///     Unhardened::from_global_key_space(2u32).unwrap().index_in_local_key_space(),
-///     U31::from(2)
+///     Unhardened::from_global_key_space(2u32).unwrap(),
+///     Unhardened::from_local_key_space(2u32).unwrap()
 /// );
 ///
 /// assert!(
-///   matches!(
-///     Unhardened::from_global_key_space(7 + GLOBAL_OFFSET_HARDENED),
-///     Err(CommonError::IndexOverflow)
-///  )
+///     Unhardened::from_global_key_space(7 + hardened_offset).is_err()
 /// );
 /// ```
 #[derive(

@@ -21,7 +21,7 @@ impl SargonOS {
         interactor: Arc<dyn HostInteractor>,
     ) -> Result<Arc<Self>> {
         let internal_sargon_os = InternalSargonOS::boot(
-            Arc::new(bios.as_ref().clone().into()),
+            bios.as_ref().into_internal(),
             Interactors::new(
                 Arc::new(UseFactorSourcesInteractorAdapter::new(
                     interactor.clone(),
