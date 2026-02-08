@@ -27,6 +27,7 @@ jobs:
       RUST_TOOLCHAIN: nightly-2024-12-14
       RUST_COMPONENTS: "rust-std"
       CUSTOM_BUILD_NAME: ${{ inputs.build_name }}
+      NDK_VERSION: 29.0.13113456
     steps:
       - uses: RDXWorks-actions/checkout@main
 
@@ -51,7 +52,10 @@ jobs:
           java-version: "17"
 
       - name: Setup Android SDK
-        uses: RDXWorks-actions/setup-android@v2
+        uses: RDXWorks-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 14742923
+          packages: ndk;${{ env.NDK_VERSION }}
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --version 3.5.4
@@ -66,3 +70,6 @@ jobs:
           build-root-directory: jvm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANDROID_NDK_HOME: /usr/local/lib/android/sdk/ndk/${{ env.NDK_VERSION }}
+          ANDROID_NDK_ROOT: /usr/local/lib/android/sdk/ndk/${{ env.NDK_VERSION }}
+
