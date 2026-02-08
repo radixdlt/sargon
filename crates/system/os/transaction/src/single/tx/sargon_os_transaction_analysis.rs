@@ -261,6 +261,7 @@ impl OsExecutionSummary for SargonOS {
 pub trait PreviewableManifest:
     DynamicallyAnalyzableManifest + Send + Sync
 {
+    #[allow(clippy::too_many_arguments)]
     async fn fetch_preview(
         &self,
         entities_with_access_controllers: IndexMap<
