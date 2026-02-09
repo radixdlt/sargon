@@ -6,8 +6,7 @@ use crate::prelude::*;
 /// the name of an Account or Persona.
 ///
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use short_string::prelude::*;
 /// #[allow(clippy::upper_case_acronyms)]
 /// type SUT = DisplayName;
 ///
@@ -17,8 +16,7 @@ use crate::prelude::*;
 ///
 /// Names with longer than 30 chars are trimmed.
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use short_string::prelude::*;
 /// #[allow(clippy::upper_case_acronyms)]
 /// type SUT = DisplayName;
 /// assert_eq!("A very big name that is over than 30 characters long".parse::<SUT>().unwrap().to_string(), "A very big name that is over t");

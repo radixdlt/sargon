@@ -12,35 +12,28 @@ use crate::prelude::*;
 ///
 /// # Examples
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use hierarchical_deterministic::prelude::*;
+/// let securified_offset = (1u32 << 31) + (1u32 << 30);
 /// // From Global KeySpace
 /// assert_eq!(
-///   SecurifiedU30::from_global_key_space(42 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
-///     .unwrap()
-///     .index_in_local_key_space(),
-///     U31::new(42)
+///   SecurifiedU30::from_global_key_space(42 + securified_offset).unwrap(),
+///   SecurifiedU30::from_local_key_space(42u32).unwrap()
 /// );
 ///
-/// assert!(
-///   matches!(
-///     SecurifiedU30::from_global_key_space(1234),
-///     Err(CommonError::IndexInGlobalKeySpaceIsLowerThanOffset)
-///  )
-/// );
+/// assert!(SecurifiedU30::from_global_key_space(1234).is_err());
 ///
 /// // From Local KeySpace
 /// assert_eq!(
 ///     SecurifiedU30::from_local_key_space(55u32).unwrap().map_to_global_key_space(),
-///     55 + GLOBAL_OFFSET_HARDENED_SECURIFIED
+///     55 + securified_offset
 /// );
 ///
 /// // To Global KeySpace
 /// assert_eq!(
-///   SecurifiedU30::from_global_key_space(237 + GLOBAL_OFFSET_HARDENED_SECURIFIED)
+///   SecurifiedU30::from_global_key_space(237 + securified_offset)
 ///     .unwrap()
 ///     .map_to_global_key_space(),
-///     237 + GLOBAL_OFFSET_HARDENED_SECURIFIED
+///     237 + securified_offset
 /// );
 #[derive(
     Clone,

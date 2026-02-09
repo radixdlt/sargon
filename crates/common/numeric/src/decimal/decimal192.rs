@@ -122,8 +122,7 @@ impl From<f32> for Decimal {
     /// represented by the underlying Decimal from Scrypto
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert!(Decimal::from(208050.17).to_string() == "208050.17");
     ///
@@ -144,8 +143,7 @@ impl TryFrom<f64> for Decimal {
     /// by the underlying Decimal from Scrypto.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert!(Decimal::try_from(208050.17).is_ok());
     ///
@@ -168,8 +166,7 @@ impl Decimal {
     /// The number `0` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::zero().to_string(), "0");
     /// ```
@@ -181,8 +178,7 @@ impl Decimal {
     /// The minimum possible value of `Decimal192`:
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::min().to_string(), "-3138550867693340381917894711603833208051.177722232017256448");
     /// ```
@@ -194,8 +190,7 @@ impl Decimal {
     /// The maximum possible value of `Decimal192`
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::max().to_string(), "3138550867693340381917894711603833208051.177722232017256447");
     /// ```
@@ -207,8 +202,7 @@ impl Decimal {
     /// The number `1` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::one().to_string(), "1");
     /// ```
@@ -220,8 +214,7 @@ impl Decimal {
     /// The number `2` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::two().to_string(), "2");
     /// ```
@@ -233,8 +226,7 @@ impl Decimal {
     /// The number `3` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::three().to_string(), "3");
     /// ```
@@ -246,8 +238,7 @@ impl Decimal {
     /// The number `4` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::four().to_string(), "4");
     /// ```
@@ -259,8 +250,7 @@ impl Decimal {
     /// The number `5` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::five().to_string(), "5");
     /// ```
@@ -272,8 +262,7 @@ impl Decimal {
     /// The number `6` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::six().to_string(), "6");
     /// ```
@@ -285,8 +274,7 @@ impl Decimal {
     /// The number `7` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::seven().to_string(), "7");
     /// ```
@@ -298,8 +286,7 @@ impl Decimal {
     /// The number `8` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::eight().to_string(), "8");
     /// ```
@@ -311,8 +298,7 @@ impl Decimal {
     /// The number `9` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::nine().to_string(), "9");
     /// ```
@@ -324,8 +310,7 @@ impl Decimal {
     /// The number `10` as a `Decimal192`.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal192::ten().to_string(), "10");
     /// ```
@@ -340,8 +325,7 @@ impl Add for Decimal {
     /// Addition: `self + rhs`
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(Decimal::one().add(Decimal::two()), Decimal::three());
     /// ```
@@ -356,8 +340,7 @@ impl Sub for Decimal {
     /// Subtraction: `self - rhs`
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// type SUT = Decimal;
     ///
     /// assert_eq!(SUT::three().sub(SUT::two()), SUT::one());
@@ -373,8 +356,7 @@ impl Mul for Decimal {
     /// Multiplication: `self * rhs`
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// type SUT = Decimal;
     ///
     /// assert_eq!(SUT::two().mul(SUT::three()), SUT::six());
@@ -398,8 +380,7 @@ impl Div for Decimal {
     /// Division: `self / rhs`
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal;
     ///
@@ -418,8 +399,7 @@ impl Neg for Decimal {
     /// Negates `self`
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal;
     ///
@@ -434,54 +414,51 @@ impl Neg for Decimal {
 
 impl Decimal {
     delegate! {
-        to self.native() {
+            to self.native() {
 
-            /// Whether this decimal is zero
-            ///
-            /// ```
-            /// extern crate sargon;
-            /// use sargon::prelude::*;
-            /// #[allow(clippy::upper_case_acronyms)]
-            /// type SUT = Decimal;
-            ///
-            /// assert!(SUT::zero().is_zero());
-            /// assert!(!SUT::one().is_zero());
-            /// assert!(!SUT::one().neg().is_zero());
-            /// ```
-            ///
-            pub fn is_zero(&self) -> bool;
+                /// Whether this decimal is zero
+                ///
+                /// ```
+    /// use numeric::prelude::*;
+                /// #[allow(clippy::upper_case_acronyms)]
+                /// type SUT = Decimal;
+                ///
+                /// assert!(SUT::zero().is_zero());
+                /// assert!(!SUT::one().is_zero());
+                /// assert!(!SUT::one().neg().is_zero());
+                /// ```
+                ///
+                pub fn is_zero(&self) -> bool;
 
-            /// Whether this decimal is positive.
-            ///
-            /// ```
-            /// extern crate sargon;
-            /// use sargon::prelude::*;
-            /// #[allow(clippy::upper_case_acronyms)]
-            /// type SUT = Decimal;
-            ///
-            /// assert!(SUT::one().is_positive());
-            /// assert!(!SUT::zero().is_positive());
-            /// assert!(!SUT::one().neg().is_positive());
-            /// ```
-            ///
-            pub fn is_positive(&self) -> bool;
+                /// Whether this decimal is positive.
+                ///
+                /// ```
+    /// use numeric::prelude::*;
+                /// #[allow(clippy::upper_case_acronyms)]
+                /// type SUT = Decimal;
+                ///
+                /// assert!(SUT::one().is_positive());
+                /// assert!(!SUT::zero().is_positive());
+                /// assert!(!SUT::one().neg().is_positive());
+                /// ```
+                ///
+                pub fn is_positive(&self) -> bool;
 
-            /// Whether this decimal is negative.
-            ///
-            /// ```
-            /// extern crate sargon;
-            /// use sargon::prelude::*;
-            /// #[allow(clippy::upper_case_acronyms)]
-            /// type SUT = Decimal;
-            ///
-            /// assert!(SUT::one().neg().is_negative());
-            /// assert!(!SUT::one().is_negative());
-            /// assert!(!SUT::zero().is_negative());
-            /// ```
-            ///
-            pub fn is_negative(&self) -> bool;
+                /// Whether this decimal is negative.
+                ///
+                /// ```
+    /// use numeric::prelude::*;
+                /// #[allow(clippy::upper_case_acronyms)]
+                /// type SUT = Decimal;
+                ///
+                /// assert!(SUT::one().neg().is_negative());
+                /// assert!(!SUT::one().is_negative());
+                /// assert!(!SUT::zero().is_negative());
+                /// ```
+                ///
+                pub fn is_negative(&self) -> bool;
+            }
         }
-    }
 }
 
 impl Decimal {
@@ -494,8 +471,7 @@ impl Decimal {
     /// Creates the Decimal `10^exponent`
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal192;
     ///
@@ -514,8 +490,7 @@ impl Decimal {
     /// is returned, since `Decimal::min().abs()` would overflow.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal192;
     ///
@@ -539,8 +514,7 @@ impl Decimal {
     /// `max(self, 0)`, which is often called "clamping to zero"
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal192;
     ///
@@ -569,8 +543,7 @@ impl Decimal {
     /// to rounding using `ToZero` which never fails.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     ///
     /// assert_eq!(
     ///     "3138550867693340381917894711603833208051.149".parse::<Decimal192>().unwrap().round(2),
@@ -882,8 +855,7 @@ impl Decimal192 {
     /// be used.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal192;
     ///
@@ -896,8 +868,7 @@ impl Decimal192 {
     /// Panics if `self.abs()` is smaller than 1
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal192;
     ///
@@ -935,8 +906,7 @@ impl Decimal192 {
     /// places, counting all digits.
     ///
     /// ```
-    /// extern crate sargon;
-    /// use sargon::prelude::*;
+    /// use numeric::prelude::*;
     /// #[allow(clippy::upper_case_acronyms)]
     /// type SUT = Decimal192;
     ///
