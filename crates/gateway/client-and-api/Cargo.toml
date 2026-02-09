@@ -1,6 +1,6 @@
 [package]
 name = "gateway-client-and-api"
-version = "1.2.47"
+version = "1.2.48"
 edition = "2021"
 
 [dependencies]

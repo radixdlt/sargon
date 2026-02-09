@@ -1,10 +1,12 @@
 mod access_controller_recovery;
 mod entity_securify;
+mod external_signatures_collector;
 mod sargon_os_signing;
 
 pub mod prelude {
     pub(crate) use crate::access_controller_recovery::*;
     pub(crate) use crate::entity_securify::*;
+    pub(crate) use crate::external_signatures_collector::*;
     pub use crate::sargon_os_signing::*;
 
     pub(crate) use error::prelude::*;

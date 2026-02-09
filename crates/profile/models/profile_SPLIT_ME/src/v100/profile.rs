@@ -8,8 +8,7 @@ use crate::prelude::*;
 /// RDX Works known as "the Profile".
 ///
 /// ```
-/// extern crate sargon;
-/// use sargon::prelude::*;
+/// use profile::prelude::*;
 ///
 /// assert_eq!(Profile::sample(), Profile::sample())
 /// ```
