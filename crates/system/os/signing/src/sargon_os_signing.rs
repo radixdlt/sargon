@@ -97,12 +97,50 @@ impl OsSigning for SargonOS {
         subintent: Subintent,
         role_kind: RoleKind,
     ) -> Result<SignedSubintent> {
-        self.sign(
-            subintent.clone(),
+        info!(
+            "External signing: begin for subintent {:?} (role: {:?})",
+            subintent.get_id(),
+            role_kind
+        );
+        let profile = &self.profile()?;
+
+        let collector = SignaturesCollector::new(
+            SigningFinishEarlyStrategy::default(),
+            vec![subintent.clone()],
             self.sign_subintents_interactor(),
+            profile,
             SigningPurpose::sign_transaction(role_kind),
+        )?;
+
+        let outcome = collector.collect_signatures().await?;
+        if !outcome.successful() {
+            return Err(
+                CommonError::SigningFailedTooManyFactorSourcesNeglected,
+            );
+        }
+
+        let mut signatures = outcome.signatures_of_successful_transactions();
+
+        let external_accounts =
+            resolve_external_accounts_for_subintent(self, &subintent).await?;
+        info!(
+            "External signing: external accounts resolved: {}",
+            external_accounts.len()
+        );
+        let external_signatures = collect_external_signatures(
+            subintent.clone(),
+            external_accounts,
+            self,
+            self.sign_subintents_interactor(),
         )
-        .await
+        .await?;
+        info!(
+            "External signing: collected {} external signatures",
+            external_signatures.len()
+        );
+        signatures.extend(external_signatures);
+
+        subintent.signed(signatures)
     }
 
     async fn sign<S: Signable>(
@@ -138,16 +176,6 @@ mod test {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
-
-    fn default_sign_transaction_args() -> (ExecutionSummary, LockFeeData) {
-        (
-            ExecutionSummary::sample(),
-            LockFeeData::new_with_unsecurified_fee_payer(
-                AccountAddress::sample(),
-                Decimal192::one(),
-            ),
-        )
-    }
 
     #[actix_rt::test]
     async fn test_sign_auth_success() {
@@ -436,9 +464,6 @@ mod test {
                 vec![AccountAddress::sample_mainnet()],
                 vec![],
             );
-
-        let (execution_summary, lock_fee_data) =
-            default_sign_transaction_args();
 
         let outcome = sut
             .sign_transaction(transaction, ExecutionSummary::sample())

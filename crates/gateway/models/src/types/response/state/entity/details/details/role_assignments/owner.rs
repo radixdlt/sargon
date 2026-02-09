@@ -31,7 +31,11 @@ impl ComponentEntityRoleAssignmentOwner {
     }
 
     pub fn sample_protected() -> Self {
-        Self::new(ExplicitRule::Protected)
+        Self::new(ExplicitRule::Protected {
+            access_rule: CompositeRequirement::AnyOf {
+                access_rules: vec![],
+            },
+        })
     }
 }
 
