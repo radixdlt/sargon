@@ -38,15 +38,29 @@ impl RadixConnectMobile {
 }
 
 impl RadixConnectMobile {
-    pub fn new(
+    pub fn new_with_relay_service_url_resolver(
         networking_driver: Arc<dyn NetworkingDriver>,
         session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
+        relay_service_url_resolver: Arc<dyn Fn() -> Result<Url> + Send + Sync>,
     ) -> Self {
         Self::init(
             Arc::new(RelayService::new_with_networking_driver(
                 networking_driver.clone(),
+                relay_service_url_resolver,
             )),
             session_storage,
+        )
+    }
+
+    pub fn new(
+        networking_driver: Arc<dyn NetworkingDriver>,
+        session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
+        relay_service_url: Url,
+    ) -> Self {
+        Self::new_with_relay_service_url_resolver(
+            networking_driver,
+            session_storage,
+            Arc::new(move || Ok(relay_service_url.clone())),
         )
     }
 }

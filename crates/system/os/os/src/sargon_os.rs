@@ -9,6 +9,8 @@ use crate::prelude::*;
 pub struct SargonOS {
     pub(crate) profile_state_holder: ProfileStateHolder,
     pub(crate) clients: Clients,
+    pub(crate) radix_connect_mobile:
+        std::sync::RwLock<Option<Arc<RadixConnectMobile>>>,
     pub(crate) interactors: Interactors,
     pub(crate) host_id: HostId,
     pub(crate) host_info: HostInfo,
@@ -82,6 +84,7 @@ impl SargonOS {
             profile_state_holder: ProfileStateHolder::new(
                 profile_state.clone(),
             ),
+            radix_connect_mobile: std::sync::RwLock::new(None),
             interactors,
             host_id,
             host_info,

@@ -9,6 +9,8 @@ import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.UnsafeStorageDriver
 import com.radixdlt.sargon.UnsafeStorageKey
 import com.radixdlt.sargon.extensions.then
+import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
+import com.radixdlt.sargon.os.storage.key.ByteArrayKeyMapping
 import com.radixdlt.sargon.os.storage.key.DeviceFactorSourceMnemonicKeyMapping
 import com.radixdlt.sargon.os.storage.key.FactorSourceUserHasWrittenDownKeyMapping
 import com.radixdlt.sargon.os.storage.key.HostIdKeyMapping
@@ -77,6 +79,12 @@ internal class AndroidStorageDriver(
             key = this,
             encryptedStorage = encryptedPreferencesDatastore,
             biometricAuthorizationDriver = biometricAuthorizationDriver
+        )
+
+        is SecureStorageKey.RadixConnectMobileSession -> ByteArrayKeyMapping(
+            key = this,
+            keystoreAccessRequest = KeystoreAccessRequest.ForRadixConnect,
+            storage = encryptedPreferencesDatastore
         )
     }.let { mapping ->
         Result.success(mapping)

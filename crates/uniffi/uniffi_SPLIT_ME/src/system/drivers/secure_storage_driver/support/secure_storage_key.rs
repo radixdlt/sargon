@@ -7,6 +7,9 @@ pub enum SecureStorageKey {
     DeviceFactorSourceMnemonic {
         factor_source_id: FactorSourceIDFromHash,
     },
+    RadixConnectMobileSession {
+        session_id: String,
+    },
     ProfileSnapshot {
         // Note:
         // `profile_id` is only meant to be used by the iOS Host for backward compatibility.

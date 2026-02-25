@@ -25,6 +25,32 @@ impl MnemonicLoading for SecureStorageClient {
 }
 
 impl SecureStorageClient {
+    pub async fn save_radix_connect_mobile_session(
+        &self,
+        session_id: String,
+        encoded_session: BagOfBytes,
+    ) -> Result<()> {
+        self.driver
+            .save_data(
+                SecureStorageKey::RadixConnectMobileSession { session_id },
+                encoded_session,
+            )
+            .await
+    }
+
+    pub async fn load_radix_connect_mobile_session(
+        &self,
+        session_id: String,
+    ) -> Result<Option<BagOfBytes>> {
+        self.driver
+            .load_data(SecureStorageKey::RadixConnectMobileSession {
+                session_id,
+            })
+            .await
+    }
+}
+
+impl SecureStorageClient {
     /// Creates a new SecureStorageClient using an implementation of
     /// `SecureStorageDriver`.
     pub fn new(driver: Arc<dyn SecureStorageDriver>) -> Self {

@@ -20,6 +20,7 @@ signing-traits = { workspace = true, features = ["mock"] }
 factor-instances-provider = { workspace = true }
 manifests = { workspace = true }
 keys-collector = { workspace = true }
+radix-connect = { workspace = true }
 
 # ==== RADIX DEPENDENCIES ====
 radix-engine-interface = { workspace = true }
