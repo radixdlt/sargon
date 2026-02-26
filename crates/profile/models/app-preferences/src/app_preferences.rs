@@ -257,13 +257,27 @@ mod tests {
                     "current": {
                         "name": "Sample Production",
                         "signalingServer": "wss://signaling-server.radixdlt.com/",
-                        "iceServers": []
+                        "stun": {
+                            "urls": []
+                        },
+                        "turn": {
+                            "urls": [],
+                            "username": null,
+                            "credential": null
+                        }
                     },
                     "other": [
                         {
                             "name": "Sample Development",
                             "signalingServer": "wss://signaling-server-dev.rdx-works-main.extratools.works/",
-                            "iceServers": []
+                            "stun": {
+                                "urls": []
+                            },
+                            "turn": {
+                                "urls": [],
+                                "username": null,
+                                "credential": null
+                            }
                         }
                     ]
                 },

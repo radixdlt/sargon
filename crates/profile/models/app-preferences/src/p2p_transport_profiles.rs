@@ -11,14 +11,27 @@ decl_identified_vec_of!(
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct P2PIceServer {
-    /// ICE URL list. Supported URL schemes are `stun:` and `turn:`.
+pub struct P2PStunServer {
+    /// STUN URL list. Supported URL scheme is `stun:`.
+    pub urls: Vec<String>,
+}
+
+impl P2PStunServer {
+    pub fn new(urls: Vec<String>) -> Self {
+        Self { urls }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct P2PTurnServer {
+    /// TURN URL list. Supported URL scheme is `turn:`.
     pub urls: Vec<String>,
     pub username: Option<String>,
     pub credential: Option<String>,
 }
 
-impl P2PIceServer {
+impl P2PTurnServer {
     pub fn new(
         urls: Vec<String>,
         username: Option<String>,
@@ -39,8 +52,10 @@ pub struct P2PTransportProfile {
     pub name: String,
     /// Base URL of signaling server, e.g. wss://signaling-server.radixdlt.com/
     pub signaling_server: String,
-    /// Full ICE server configuration used by WebRTC peer connections.
-    pub ice_servers: Vec<P2PIceServer>,
+    /// STUN server configuration used by WebRTC peer connections.
+    pub stun: P2PStunServer,
+    /// TURN server configuration used by WebRTC peer connections.
+    pub turn: P2PTurnServer,
 }
 
 impl fmt::Display for P2PTransportProfile {
@@ -53,12 +68,14 @@ impl P2PTransportProfile {
     pub fn new(
         name: impl Into<String>,
         signaling_server: impl Into<String>,
-        ice_servers: Vec<P2PIceServer>,
+        stun: P2PStunServer,
+        turn: P2PTurnServer,
     ) -> Self {
         Self {
             name: name.into(),
             signaling_server: signaling_server.into(),
-            ice_servers,
+            stun,
+            turn,
         }
     }
 }
@@ -142,85 +159,77 @@ impl Default for SavedP2PTransportProfiles {
 }
 
 impl P2PTransportProfile {
-    fn google_stun_servers() -> Vec<P2PIceServer> {
-        vec![
-            P2PIceServer::new(
-                vec!["stun:stun.l.google.com:19302".to_string()],
-                None,
-                None,
-            ),
-            P2PIceServer::new(
-                vec!["stun:stun1.l.google.com:19302".to_string()],
-                None,
-                None,
-            ),
-            P2PIceServer::new(
-                vec!["stun:stun2.l.google.com:19302".to_string()],
-                None,
-                None,
-            ),
-            P2PIceServer::new(
-                vec!["stun:stun3.l.google.com:19302".to_string()],
-                None,
-                None,
-            ),
-            P2PIceServer::new(
-                vec!["stun:stun4.l.google.com:19302".to_string()],
-                None,
-                None,
-            ),
-        ]
+    fn google_stun_servers() -> P2PStunServer {
+        P2PStunServer::new(vec![
+            "stun:stun.l.google.com:19302".to_string(),
+            "stun:stun1.l.google.com:19302".to_string(),
+            "stun:stun2.l.google.com:19302".to_string(),
+            "stun:stun3.l.google.com:19302".to_string(),
+            "stun:stun4.l.google.com:19302".to_string(),
+        ])
     }
 
     fn default_production_profile() -> Self {
-        let mut ice_servers = Self::google_stun_servers();
-        ice_servers.push(P2PIceServer::new(
-            vec!["turn:turn-udp.radixdlt.com:80?transport=udp".to_string()],
+        let stun = Self::google_stun_servers();
+        let turn = P2PTurnServer::new(
+            vec![
+                "turn:turn-udp.radixdlt.com:80?transport=udp".to_string(),
+                "turn:turn-tcp.radixdlt.com:80?transport=tcp".to_string(),
+            ],
             Some("username".to_string()),
             Some("password".to_string()),
-        ));
-        ice_servers.push(P2PIceServer::new(
-            vec!["turn:turn-tcp.radixdlt.com:80?transport=tcp".to_string()],
-            Some("username".to_string()),
-            Some("password".to_string()),
-        ));
+        );
 
         Self::new(
             "Radix Production",
             "wss://signaling-server.radixdlt.com/",
-            ice_servers,
+            stun,
+            turn,
         )
     }
 
     fn default_development_profile() -> Self {
-        let mut ice_servers = Self::google_stun_servers();
-        ice_servers.push(P2PIceServer::new(
-            vec!["turn:turn-dev-udp.rdx-works-main.extratools.works:80?transport=udp".to_string()],
+        let stun = Self::google_stun_servers();
+        let turn = P2PTurnServer::new(
+            vec![
+                "turn:turn-dev-udp.rdx-works-main.extratools.works:80?transport=udp".to_string(),
+                "turn:turn-dev-tcp.rdx-works-main.extratools.works:80?transport=tcp".to_string(),
+            ],
             Some("username".to_string()),
             Some("password".to_string()),
-        ));
-        ice_servers.push(P2PIceServer::new(
-            vec!["turn:turn-dev-tcp.rdx-works-main.extratools.works:80?transport=tcp".to_string()],
-            Some("username".to_string()),
-            Some("password".to_string()),
-        ));
+        );
 
         Self::new(
             "Radix Development",
             "wss://signaling-server-dev.rdx-works-main.extratools.works/",
-            ice_servers,
+            stun,
+            turn,
         )
     }
 }
 
-impl HasSampleValues for P2PIceServer {
+impl HasSampleValues for P2PStunServer {
     fn sample() -> Self {
-        Self::new(vec!["stun:stun.l.google.com:19302".to_string()], None, None)
+        Self::new(vec!["stun:stun.l.google.com:19302".to_string()])
+    }
+
+    fn sample_other() -> Self {
+        Self::new(vec!["stun:stun1.l.google.com:19302".to_string()])
+    }
+}
+
+impl HasSampleValues for P2PTurnServer {
+    fn sample() -> Self {
+        Self::new(
+            vec!["turn:turn-udp.radixdlt.com:80?transport=udp".to_string()],
+            Some("username".to_string()),
+            Some("password".to_string()),
+        )
     }
 
     fn sample_other() -> Self {
         Self::new(
-            vec!["turn:turn-udp.radixdlt.com:80?transport=udp".to_string()],
+            vec!["turn:turn-tcp.radixdlt.com:80?transport=tcp".to_string()],
             Some("username".to_string()),
             Some("password".to_string()),
         )
@@ -232,7 +241,8 @@ impl HasSampleValues for P2PTransportProfile {
         Self::new(
             "Sample Production",
             "wss://signaling-server.radixdlt.com/",
-            vec![],
+            P2PStunServer::new(vec![]),
+            P2PTurnServer::new(vec![], None, None),
         )
     }
 
@@ -240,7 +250,8 @@ impl HasSampleValues for P2PTransportProfile {
         Self::new(
             "Sample Development",
             "wss://signaling-server-dev.rdx-works-main.extratools.works/",
-            vec![],
+            P2PStunServer::new(vec![]),
+            P2PTurnServer::new(vec![], None, None),
         )
     }
 }

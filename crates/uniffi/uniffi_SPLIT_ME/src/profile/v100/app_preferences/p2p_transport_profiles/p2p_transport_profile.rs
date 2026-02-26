@@ -6,7 +6,8 @@ use sargon::P2PTransportProfile as InternalP2PTransportProfile;
 pub struct P2PTransportProfile {
     pub name: String,
     pub signaling_server: String,
-    pub ice_servers: Vec<P2PIceServer>,
+    pub stun: P2PStunServer,
+    pub turn: P2PTurnServer,
 }
 
 #[uniffi::export]
