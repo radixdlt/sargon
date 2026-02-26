@@ -46,10 +46,10 @@ extension SavedP2PTransportProfiles {
 }
 
 extension AppPreferences {
-	public func hasP2PTransportProfile(withSignalingServerURL url: FfiUrl) -> Bool {
-		appPreferencesHasP2pTransportProfileWithSignalingServerUrl(
+	public func hasP2PTransportProfile(withSignalingServer signalingServer: String) -> Bool {
+		appPreferencesHasP2pTransportProfileWithSignalingServer(
 			appPreferences: self,
-			url: url
+			signalingServer: signalingServer
 		)
 	}
 }

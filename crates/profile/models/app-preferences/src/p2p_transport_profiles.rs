@@ -38,7 +38,7 @@ pub struct P2PTransportProfile {
     /// User-facing label of the profile.
     pub name: String,
     /// Base URL of signaling server, e.g. wss://signaling-server.radixdlt.com/
-    pub signaling_server: Url,
+    pub signaling_server: String,
     /// Full ICE server configuration used by WebRTC peer connections.
     pub ice_servers: Vec<P2PIceServer>,
 }
@@ -52,21 +52,21 @@ impl fmt::Display for P2PTransportProfile {
 impl P2PTransportProfile {
     pub fn new(
         name: impl Into<String>,
-        signaling_server: Url,
+        signaling_server: impl Into<String>,
         ice_servers: Vec<P2PIceServer>,
     ) -> Self {
         Self {
             name: name.into(),
-            signaling_server,
+            signaling_server: signaling_server.into(),
             ice_servers,
         }
     }
 }
 
 impl Identifiable for P2PTransportProfile {
-    type ID = Url;
+    type ID = String;
 
-    fn id(&self) -> Url {
+    fn id(&self) -> String {
         self.signaling_server.clone()
     }
 }
@@ -94,8 +94,11 @@ impl SavedP2PTransportProfiles {
         all
     }
 
-    pub fn has_signaling_server(&self, url: Url) -> bool {
-        self.all().into_iter().any(|p| p.id() == url)
+    pub fn has_signaling_server(&self, url: impl AsRef<str>) -> bool {
+        let signaling_server = url.as_ref();
+        self.all()
+            .into_iter()
+            .any(|p| p.id().as_str() == signaling_server)
     }
 
     pub fn append(&mut self, profile: P2PTransportProfile) -> bool {
@@ -184,8 +187,7 @@ impl P2PTransportProfile {
 
         Self::new(
             "Radix Production",
-            Url::parse("wss://signaling-server.radixdlt.com/")
-                .expect("valid URL"),
+            "wss://signaling-server.radixdlt.com/",
             ice_servers,
         )
     }
@@ -205,10 +207,7 @@ impl P2PTransportProfile {
 
         Self::new(
             "Radix Development",
-            Url::parse(
-                "wss://signaling-server-dev.rdx-works-main.extratools.works/",
-            )
-            .expect("valid URL"),
+            "wss://signaling-server-dev.rdx-works-main.extratools.works/",
             ice_servers,
         )
     }
@@ -232,8 +231,7 @@ impl HasSampleValues for P2PTransportProfile {
     fn sample() -> Self {
         Self::new(
             "Sample Production",
-            Url::parse("wss://signaling-server.radixdlt.com/")
-                .expect("valid URL"),
+            "wss://signaling-server.radixdlt.com/",
             vec![],
         )
     }
@@ -241,10 +239,7 @@ impl HasSampleValues for P2PTransportProfile {
     fn sample_other() -> Self {
         Self::new(
             "Sample Development",
-            Url::parse(
-                "wss://signaling-server-dev.rdx-works-main.extratools.works/",
-            )
-            .expect("valid URL"),
+            "wss://signaling-server-dev.rdx-works-main.extratools.works/",
             vec![],
         )
     }

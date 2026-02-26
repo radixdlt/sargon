@@ -113,9 +113,10 @@ impl AppPreferences {
 
     pub fn has_p2p_transport_profile_with_signaling_server(
         &self,
-        url: Url,
+        signaling_server: impl AsRef<str>,
     ) -> bool {
-        self.p2p_transport_profiles.has_signaling_server(url)
+        self.p2p_transport_profiles
+            .has_signaling_server(signaling_server)
     }
 
     pub fn has_relay_service_with_url(&self, url: Url) -> bool {
@@ -194,11 +195,10 @@ mod tests {
     fn test_has_p2p_transport_profile_with_signaling_server() {
         let sut = SUT::sample();
 
-        let existing =
-            Url::parse("wss://signaling-server.radixdlt.com/").unwrap();
+        let existing = "wss://signaling-server.radixdlt.com/";
         assert!(sut.has_p2p_transport_profile_with_signaling_server(existing));
 
-        let missing = Url::parse("wss://example.com/").unwrap();
+        let missing = "wss://example.com/";
         assert!(!sut.has_p2p_transport_profile_with_signaling_server(missing));
     }
 

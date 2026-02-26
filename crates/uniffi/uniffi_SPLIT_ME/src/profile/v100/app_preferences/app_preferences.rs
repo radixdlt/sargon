@@ -53,13 +53,13 @@ pub fn app_preferences_has_gateway_with_url(
 }
 
 #[uniffi::export]
-pub fn app_preferences_has_p2p_transport_profile_with_signaling_server_url(
+pub fn app_preferences_has_p2p_transport_profile_with_signaling_server(
     app_preferences: AppPreferences,
-    url: &FfiUrl,
+    signaling_server: String,
 ) -> bool {
     app_preferences
         .into_internal()
-        .has_p2p_transport_profile_with_signaling_server(url.url.clone())
+        .has_p2p_transport_profile_with_signaling_server(signaling_server)
 }
 
 #[uniffi::export]
