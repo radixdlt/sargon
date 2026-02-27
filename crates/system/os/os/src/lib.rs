@@ -13,6 +13,7 @@ mod sargon_os_factors;
 mod sargon_os_gateway;
 mod sargon_os_gateway_client;
 mod sargon_os_nft_pricing;
+mod sargon_os_p2p_transport_profiles;
 mod sargon_os_personas;
 mod sargon_os_profile;
 mod sargon_os_radix_connect_mobile;
@@ -31,6 +32,7 @@ pub mod prelude {
     pub use crate::sargon_os_gateway::*;
     pub use crate::sargon_os_gateway_client::*;
     pub use crate::sargon_os_nft_pricing::*;
+    pub use crate::sargon_os_p2p_transport_profiles::*;
     pub use crate::sargon_os_personas::*;
     pub use crate::sargon_os_profile::*;
     pub use crate::sargon_os_radix_connect_mobile::*;
