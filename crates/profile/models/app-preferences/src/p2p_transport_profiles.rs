@@ -238,21 +238,11 @@ impl HasSampleValues for P2PTurnServer {
 
 impl HasSampleValues for P2PTransportProfile {
     fn sample() -> Self {
-        Self::new(
-            "Sample Production",
-            "wss://signaling-server.radixdlt.com/",
-            P2PStunServer::new(vec![]),
-            P2PTurnServer::new(vec![], None, None),
-        )
+        Self::default_production_profile()
     }
 
     fn sample_other() -> Self {
-        Self::new(
-            "Sample Development",
-            "wss://signaling-server-dev.rdx-works-main.extratools.works/",
-            P2PStunServer::new(vec![]),
-            P2PTurnServer::new(vec![], None, None),
-        )
+        Self::default_development_profile()
     }
 }
 

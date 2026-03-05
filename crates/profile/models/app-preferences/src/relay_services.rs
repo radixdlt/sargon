@@ -118,11 +118,7 @@ impl RelayService {
 
 impl HasSampleValues for RelayService {
     fn sample() -> Self {
-        Self::new(
-            "Sample Relay Production",
-            Url::parse("https://radix-connect-relay.radixdlt.com/api/v1")
-                .expect("valid URL"),
-        )
+        Self::default_production_service()
     }
 
     fn sample_other() -> Self {
@@ -135,10 +131,7 @@ impl HasSampleValues for RelayService {
 
 impl HasSampleValues for SavedRelayServices {
     fn sample() -> Self {
-        Self {
-            current: RelayService::sample(),
-            other: RelayServices::from_iter([RelayService::sample_other()]),
-        }
+        Self::default()
     }
 
     fn sample_other() -> Self {
