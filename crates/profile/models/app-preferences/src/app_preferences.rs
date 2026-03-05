@@ -3,7 +3,7 @@ use crate::prelude::*;
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
 ///
-/// Current and other saved Gateways, security settings,
+/// Current and other saved Gateways, P2P transport profiles, security settings,
 /// App Display settings and preferences for transaction.
 #[derive(
     Debug,
@@ -25,6 +25,15 @@ pub struct AppPreferences {
     /// The gateway of the active network and collection of other saved gateways.
     pub gateways: SavedGateways,
 
+    /// Current and other saved P2P transport profiles containing signaling server
+    /// and full TURN/STUN ICE server configuration.
+    #[serde(default)]
+    pub p2p_transport_profiles: SavedP2PTransportProfiles,
+
+    /// Current and other saved Radix Connect relay services.
+    #[serde(default)]
+    pub relay_services: SavedRelayServices,
+
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
     pub security: Security,
 
@@ -38,10 +47,17 @@ impl AppPreferences {
             r#"
         display: {}
         gateways: {}
+        p2p_transport_profiles: {}
+        relay_services: {}
         security: {}
         transaction: {}
         "#,
-            self.display, self.gateways, self.security, self.transaction
+            self.display,
+            self.gateways,
+            self.p2p_transport_profiles.current.name,
+            self.relay_services.current.name,
+            self.security,
+            self.transaction
         )
     }
 }
@@ -56,6 +72,8 @@ impl AppPreferences {
         Self {
             display,
             gateways,
+            p2p_transport_profiles: SavedP2PTransportProfiles::default(),
+            relay_services: SavedRelayServices::default(),
             security,
             transaction,
         }
@@ -65,28 +83,44 @@ impl AppPreferences {
 impl HasSampleValues for AppPreferences {
     /// A sample used to facilitate unit tests.
     fn sample() -> Self {
-        Self::new(
-            AppDisplay::sample(),
-            SavedGateways::sample(),
-            Security::sample(),
-            TransactionPreferences::sample(),
-        )
+        Self {
+            display: AppDisplay::sample(),
+            gateways: SavedGateways::sample(),
+            p2p_transport_profiles: SavedP2PTransportProfiles::sample(),
+            relay_services: SavedRelayServices::sample(),
+            security: Security::sample(),
+            transaction: TransactionPreferences::sample(),
+        }
     }
 
     /// A sample used to facilitate unit tests.
     fn sample_other() -> Self {
-        Self::new(
-            AppDisplay::sample_other(),
-            SavedGateways::sample_other(),
-            Security::sample_other(),
-            TransactionPreferences::sample_other(),
-        )
+        Self {
+            display: AppDisplay::sample_other(),
+            gateways: SavedGateways::sample_other(),
+            p2p_transport_profiles: SavedP2PTransportProfiles::sample_other(),
+            relay_services: SavedRelayServices::sample_other(),
+            security: Security::sample_other(),
+            transaction: TransactionPreferences::sample_other(),
+        }
     }
 }
 
 impl AppPreferences {
     pub fn has_gateway_with_url(&self, url: Url) -> bool {
         self.gateways.all().into_iter().any(|g| g.id() == url)
+    }
+
+    pub fn has_p2p_transport_profile_with_signaling_server(
+        &self,
+        signaling_server: impl AsRef<str>,
+    ) -> bool {
+        self.p2p_transport_profiles
+            .has_signaling_server(signaling_server)
+    }
+
+    pub fn has_relay_service_with_url(&self, url: Url) -> bool {
+        self.relay_services.has_url(url)
     }
 }
 
@@ -124,6 +158,19 @@ mod tests {
     }
 
     #[test]
+    fn get_p2p_transport_profiles() {
+        assert_eq!(
+            SUT::sample().p2p_transport_profiles,
+            SavedP2PTransportProfiles::sample()
+        )
+    }
+
+    #[test]
+    fn get_relay_services() {
+        assert_eq!(SUT::sample().relay_services, SavedRelayServices::sample())
+    }
+
+    #[test]
     fn get_transaction() {
         assert_eq!(SUT::sample().transaction, TransactionPreferences::sample())
     }
@@ -142,6 +189,30 @@ mod tests {
         // Test with a Url that isn't present
         url = Url::parse("https://radixdlt.com/").unwrap();
         assert!(!sut.has_gateway_with_url(url));
+    }
+
+    #[test]
+    fn test_has_p2p_transport_profile_with_signaling_server() {
+        let sut = SUT::sample();
+
+        let existing = "wss://signaling-server.radixdlt.com/";
+        assert!(sut.has_p2p_transport_profile_with_signaling_server(existing));
+
+        let missing = "wss://example.com/";
+        assert!(!sut.has_p2p_transport_profile_with_signaling_server(missing));
+    }
+
+    #[test]
+    fn test_has_relay_service_with_url() {
+        let sut = SUT::sample();
+
+        let existing =
+            Url::parse("https://radix-connect-relay.radixdlt.com/api/v1")
+                .unwrap();
+        assert!(sut.has_relay_service_with_url(existing));
+
+        let missing = Url::parse("https://example.com/api/v1").unwrap();
+        assert!(!sut.has_relay_service_with_url(missing));
     }
 
     #[test]
@@ -182,11 +253,105 @@ mod tests {
                     "isAdvancedLockEnabled": false,
                     "securityStructuresOfFactorSourceIDs": []
                 },
+                "p2pTransportProfiles": {
+                    "current": {
+                        "name": "Radix Production",
+                        "signalingServer": "wss://signaling-server.radixdlt.com/",
+                        "stun": {
+                            "urls": [
+                                "stun:stun.l.google.com:19302",
+                                "stun:stun1.l.google.com:19302",
+                                "stun:stun2.l.google.com:19302",
+                                "stun:stun3.l.google.com:19302",
+                                "stun:stun4.l.google.com:19302"
+                            ]
+                        },
+                        "turn": {
+                            "urls": [
+                                "turn:turn-udp.radixdlt.com:80?transport=udp",
+                                "turn:turn-tcp.radixdlt.com:80?transport=tcp"
+                            ],
+                            "username": "username",
+                            "credential": "password"
+                        }
+                    },
+                    "other": [
+                        {
+                            "name": "Radix Development",
+                            "signalingServer": "wss://signaling-server-dev.rdx-works-main.extratools.works/",
+                            "stun": {
+                                "urls": [
+                                    "stun:stun.l.google.com:19302",
+                                    "stun:stun1.l.google.com:19302",
+                                    "stun:stun2.l.google.com:19302",
+                                    "stun:stun3.l.google.com:19302",
+                                    "stun:stun4.l.google.com:19302"
+                                ]
+                            },
+                            "turn": {
+                                "urls": [
+                                    "turn:turn-dev-udp.rdx-works-main.extratools.works:80?transport=udp",
+                                    "turn:turn-dev-tcp.rdx-works-main.extratools.works:80?transport=tcp"
+                                ],
+                                "username": "username",
+                                "credential": "password"
+                            }
+                        }
+                    ]
+                },
+                "relayServices": {
+                    "current": {
+                        "name": "Radix Relay Production",
+                        "url": "https://radix-connect-relay.radixdlt.com/api/v1"
+                    },
+                    "other": []
+                },
                 "transaction": {
                     "defaultDepositGuarantee": "0.975"
                 }
             }               
             "#,
         )
+    }
+
+    #[test]
+    fn json_deserialize_without_p2p_transport_profiles_uses_default() {
+        let json = r#"
+        {
+            "display": {
+                "isCurrencyAmountVisible": true,
+                "fiatCurrencyPriceTarget": "usd"
+            },
+            "gateways": {
+                "current": "https://mainnet.radixdlt.com/",
+                "saved": [
+                    {
+                        "network": {
+                        "name": "mainnet",
+                        "id": 1,
+                        "displayDescription": "Mainnet"
+                        },
+                        "url": "https://mainnet.radixdlt.com/"
+                    }
+                ]
+            },
+            "security": {
+                "isCloudProfileSyncEnabled": true,
+                "isDeveloperModeEnabled": false,
+                "isAdvancedLockEnabled": false,
+                "securityStructuresOfFactorSourceIDs": []
+            },
+            "transaction": {
+                "defaultDepositGuarantee": "0.975"
+            }
+        }
+        "#;
+
+        let decoded: SUT = serde_json::from_str(json).unwrap();
+        assert_eq!(
+            decoded.p2p_transport_profiles,
+            SavedP2PTransportProfiles::default()
+        );
+        assert_eq!(decoded.relay_services, SavedRelayServices::default());
     }
 }

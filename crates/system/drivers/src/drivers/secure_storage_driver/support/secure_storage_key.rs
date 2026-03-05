@@ -7,6 +7,9 @@ pub enum SecureStorageKey {
     DeviceFactorSourceMnemonic {
         factor_source_id: FactorSourceIDFromHash,
     },
+    RadixConnectMobileSession {
+        session_id: String,
+    },
     ProfileSnapshot {
         // Note:
         // `profile_id` is only meant to be used by the iOS Host for backward compatibility.
@@ -32,6 +35,10 @@ impl PartialEq<SecureStorageKey> for SecureStorageKey {
                 SecureStorageKey::ProfileSnapshot { .. },
                 SecureStorageKey::ProfileSnapshot { .. },
             ) => true, // Note: `profile_id` is not used for comparison, as it is only forwarded as additional payload to the iOS Host.
+            (
+                SecureStorageKey::RadixConnectMobileSession { session_id: a },
+                SecureStorageKey::RadixConnectMobileSession { session_id: b },
+            ) => a == b,
             _ => false,
         }
     }
@@ -48,6 +55,10 @@ impl Hash for SecureStorageKey {
             } => {
                 "device_factor_source".hash(state);
                 factor_source_id.hash(state);
+            }
+            SecureStorageKey::RadixConnectMobileSession { session_id } => {
+                "radix_connect_mobile_session".hash(state);
+                session_id.hash(state);
             }
             // Note: `profile_id` is not used for computing the hash, as it is only forwarded as additional payload to the iOS Host.
             SecureStorageKey::ProfileSnapshot { .. } => {
@@ -66,6 +77,8 @@ impl SecureStorageKey {
                 SecureStorageKey::DeviceFactorSourceMnemonic {
                     factor_source_id,
                 } => format!("device_factor_source_{}", factor_source_id),
+                SecureStorageKey::RadixConnectMobileSession { session_id } =>
+                    format!("radix_connect_mobile_session_{}", session_id),
                 SecureStorageKey::ProfileSnapshot { .. } =>
                     "profile_snapshot".to_owned(),
             }

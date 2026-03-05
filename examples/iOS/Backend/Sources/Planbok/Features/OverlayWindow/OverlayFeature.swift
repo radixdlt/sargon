@@ -8,7 +8,7 @@ struct OverlayFeature {
 	@Dependency(\.continuousClock) var clock
 
 	@Reducer(state: .equatable)
-	enum Destination: Sendable {
+	enum Destination {
 		case hud(HUDFeature)
 	}
 
@@ -25,7 +25,7 @@ struct OverlayFeature {
 	}
 
 	@CasePathable
-	enum Action: ViewAction, Sendable {
+	enum Action: ViewAction {
 		@CasePathable
 		enum ViewAction {
 			case task

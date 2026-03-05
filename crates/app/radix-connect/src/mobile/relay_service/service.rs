@@ -21,37 +21,63 @@ pub trait WalletInteractionTransport: Send + Sync {
 pub struct Service {
     pub http_client: HttpClient,
     pub encryption_scheme: EncryptionScheme,
+    pub relay_service_url_resolver: Arc<dyn Fn() -> Result<Url> + Send + Sync>,
 }
 
 impl Service {
-    pub fn new(http_client: HttpClient) -> Self {
+    pub fn new(
+        http_client: HttpClient,
+        relay_service_url_resolver: Arc<dyn Fn() -> Result<Url> + Send + Sync>,
+    ) -> Self {
         Self {
             http_client,
             encryption_scheme: EncryptionScheme::default(),
+            relay_service_url_resolver,
         }
     }
 
     pub fn new_with_networking_driver(
         networking_driver: Arc<dyn NetworkingDriver>,
+        relay_service_url_resolver: Arc<dyn Fn() -> Result<Url> + Send + Sync>,
     ) -> Self {
-        Self::new(HttpClient::new(networking_driver))
+        Self::new(
+            HttpClient::new(networking_driver),
+            relay_service_url_resolver,
+        )
+    }
+
+    pub fn new_with_relay_service_url(
+        http_client: HttpClient,
+        relay_service_url: Url,
+    ) -> Self {
+        Self::new(http_client, Arc::new(move || Ok(relay_service_url.clone())))
+    }
+
+    pub fn new_with_networking_driver_and_relay_service_url(
+        networking_driver: Arc<dyn NetworkingDriver>,
+        relay_service_url: Url,
+    ) -> Self {
+        Self::new_with_relay_service_url(
+            HttpClient::new(networking_driver),
+            relay_service_url,
+        )
     }
 }
 
-const SERVICE_PATH: &str = "https://radix-connect-relay.radixdlt.com/api/v1";
-
 pub trait NetworkRequestsForRadixConnect {
-    fn radix_connect_relay_request() -> NetworkRequest;
+    fn radix_connect_relay_request(relay_service_url: Url) -> NetworkRequest;
     fn radix_connect_success_response(
+        relay_service_url: Url,
         response: SuccessResponse,
     ) -> Result<NetworkRequest> {
-        Self::radix_connect_relay_request().with_serializing_body(response)
+        Self::radix_connect_relay_request(relay_service_url)
+            .with_serializing_body(response)
     }
 }
 
 impl NetworkRequestsForRadixConnect for NetworkRequest {
-    fn radix_connect_relay_request() -> Self {
-        NetworkRequest::new_post(Url::from_str(SERVICE_PATH).unwrap())
+    fn radix_connect_relay_request(relay_service_url: Url) -> Self {
+        NetworkRequest::new_post(relay_service_url)
     }
 }
 
@@ -76,8 +102,11 @@ impl WalletInteractionTransport for Service {
             session.wallet_public_key,
             hex.parse()?,
         );
-        let request =
-            NetworkRequest::radix_connect_success_response(success_response)?;
+        let relay_service_url = (self.relay_service_url_resolver)()?;
+        let request = NetworkRequest::radix_connect_success_response(
+            relay_service_url,
+            success_response,
+        )?;
         self.http_client.execute_network_request(request).await?;
         Ok(())
     }
@@ -86,15 +115,19 @@ impl WalletInteractionTransport for Service {
 #[cfg(test)]
 impl Service {
     fn new_always_failing() -> Self {
-        Self::new_with_networking_driver(Arc::new(
-            MockNetworkingDriver::new_always_failing(),
-        ))
+        Self::new_with_networking_driver_and_relay_service_url(
+            Arc::new(MockNetworkingDriver::new_always_failing()),
+            Url::parse("https://radix-connect-relay.radixdlt.com/api/v1")
+                .unwrap(),
+        )
     }
 
     fn new_succeeding_http_client(request: Vec<u8>) -> Self {
-        Self::new_with_networking_driver(Arc::new(MockNetworkingDriver::new(
-            200, request,
-        )))
+        Self::new_with_networking_driver_and_relay_service_url(
+            Arc::new(MockNetworkingDriver::new(200, request)),
+            Url::parse("https://radix-connect-relay.radixdlt.com/api/v1")
+                .unwrap(),
+        )
     }
 }
 
@@ -106,14 +139,6 @@ mod tests {
     use encryption::{EncryptionScheme, VersionedEncryption};
     use std::time::Duration;
     const MAX: Duration = Duration::from_millis(10);
-
-    #[test]
-    fn test_service_path() {
-        assert_eq!(
-            SERVICE_PATH,
-            "https://radix-connect-relay.radixdlt.com/api/v1"
-        );
-    }
 
     #[actix_rt::test]
     async fn test_send_wallet_interaction_response_failure() {
@@ -160,7 +185,10 @@ mod tests {
 
                 // Request that is expected to be sent
                 let expected_request = NetworkRequest {
-                    url: Url::from_str(SERVICE_PATH).unwrap(),
+                    url: Url::from_str(
+                        "https://radix-connect-relay.radixdlt.com/api/v1",
+                    )
+                    .unwrap(),
                     method: NetworkMethod::Post,
                     body: encoded.into(),
                     headers: HashMap::new(),
@@ -199,8 +227,11 @@ mod tests {
             },
         );
 
-        let service =
-            Service::new_with_networking_driver(Arc::new(mock_antenna));
+        let service = Service::new_with_networking_driver_and_relay_service_url(
+            Arc::new(mock_antenna),
+            Url::parse("https://radix-connect-relay.radixdlt.com/api/v1")
+                .unwrap(),
+        );
         let session = Session::sample();
 
         let req = service.send_wallet_interaction_response(

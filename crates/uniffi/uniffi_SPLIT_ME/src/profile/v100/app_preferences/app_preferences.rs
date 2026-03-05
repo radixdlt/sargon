@@ -4,7 +4,7 @@ use sargon::AppPreferences as InternalAppPreferences;
 /// Collection of all settings, preferences and configuration related to how the wallet
 /// behaves and looks.
 ///
-/// Current and other saved Gateways, security settings,
+/// Current and other saved Gateways, P2P transport profiles, security settings,
 /// App Display settings and preferences for transaction.
 #[derive(PartialEq, Eq, Clone, Hash, InternalConversion, uniffi::Record)]
 pub struct AppPreferences {
@@ -13,6 +13,12 @@ pub struct AppPreferences {
 
     /// The gateway of the active network and collection of other saved gateways.
     pub gateways: SavedGateways,
+
+    /// Current and other saved P2P transport profiles.
+    pub p2p_transport_profiles: SavedP2PTransportProfiles,
+
+    /// Current and other saved Radix Connect relay services.
+    pub relay_services: SavedRelayServices,
 
     /// Controls e.g. if Profile Snapshot gets synced to iCloud/Google backup or not.
     pub security: Security,
@@ -44,4 +50,24 @@ pub fn app_preferences_has_gateway_with_url(
     app_preferences
         .into_internal()
         .has_gateway_with_url(url.url.clone())
+}
+
+#[uniffi::export]
+pub fn app_preferences_has_p2p_transport_profile_with_signaling_server(
+    app_preferences: AppPreferences,
+    signaling_server: String,
+) -> bool {
+    app_preferences
+        .into_internal()
+        .has_p2p_transport_profile_with_signaling_server(signaling_server)
+}
+
+#[uniffi::export]
+pub fn app_preferences_has_relay_service_with_url(
+    app_preferences: AppPreferences,
+    url: &FfiUrl,
+) -> bool {
+    app_preferences
+        .into_internal()
+        .has_relay_service_with_url(url.url.clone())
 }

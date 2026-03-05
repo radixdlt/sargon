@@ -4,7 +4,39 @@ use sargon::RadixConnectMobile as InternalRadixConnectMobile;
 /// The Radix Connect Mobile client that handles the interaction with dApps on mobile through deepLinks.
 #[derive(uniffi::Object)]
 pub struct RadixConnectMobile {
-    wrapped: Arc<InternalRadixConnectMobile>,
+    pub(crate) wrapped: Arc<InternalRadixConnectMobile>,
+}
+
+impl RadixConnectMobile {
+    pub(crate) fn from_internal(
+        wrapped: Arc<InternalRadixConnectMobile>,
+    ) -> Self {
+        Self { wrapped }
+    }
+
+    pub(crate) fn new_with_relay_service_url_resolver(
+        networking_driver: Arc<dyn NetworkingDriver>,
+        session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
+        relay_service_url_resolver: Arc<dyn Fn() -> Result<Url> + Send + Sync>,
+    ) -> Self {
+        let internal_relay_service_url_resolver = Arc::new(move || {
+            relay_service_url_resolver().into_internal_result()
+        });
+
+        Self {
+            wrapped: Arc::new(
+                InternalRadixConnectMobile::new_with_relay_service_url_resolver(
+                    Arc::new(NetworkingDriverAdapter {
+                        wrapped: networking_driver,
+                    }),
+                    Arc::new(RadixConnectMobileSessionStorageAdapter {
+                        wrapped: session_storage,
+                    }),
+                    internal_relay_service_url_resolver,
+                ),
+            ),
+        }
+    }
 }
 
 #[uniffi::export]
@@ -13,17 +45,13 @@ impl RadixConnectMobile {
     pub fn new(
         networking_driver: Arc<dyn NetworkingDriver>,
         session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
+        relay_service_url: Url,
     ) -> Self {
-        Self {
-            wrapped: Arc::new(InternalRadixConnectMobile::new(
-                Arc::new(NetworkingDriverAdapter {
-                    wrapped: networking_driver,
-                }),
-                Arc::new(RadixConnectMobileSessionStorageAdapter {
-                    wrapped: session_storage,
-                }),
-            )),
-        }
+        Self::new_with_relay_service_url_resolver(
+            networking_driver,
+            session_storage,
+            Arc::new(move || Ok(relay_service_url.clone())),
+        )
     }
 }
 

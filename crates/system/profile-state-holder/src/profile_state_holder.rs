@@ -32,6 +32,16 @@ impl ProfileStateHolder {
         self.access_profile_with(|p| p.app_preferences.gateways.clone())
     }
 
+    pub fn current_relay_service(&self) -> Result<RelayService> {
+        self.access_profile_with(|p| {
+            p.app_preferences.relay_services.current.clone()
+        })
+    }
+
+    pub fn relay_services(&self) -> Result<SavedRelayServices> {
+        self.access_profile_with(|p| p.app_preferences.relay_services.clone())
+    }
+
     pub fn current_network(&self) -> Result<ProfileNetwork> {
         self.try_access_profile_with(|p| p.current_network().cloned())
     }

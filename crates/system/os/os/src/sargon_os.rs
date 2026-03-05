@@ -7,8 +7,9 @@ use crate::prelude::*;
 /// to secure storage and make use of the network connection of the iPhone/Android
 /// phone.
 pub struct SargonOS {
-    pub(crate) profile_state_holder: ProfileStateHolder,
+    pub(crate) profile_state_holder: Arc<ProfileStateHolder>,
     pub(crate) clients: Clients,
+    pub(crate) radix_connect_mobile: Arc<RadixConnectMobile>,
     pub(crate) interactors: Interactors,
     pub(crate) host_id: HostId,
     pub(crate) host_info: HostInfo,
@@ -77,10 +78,17 @@ impl SargonOS {
         }
 
         let host_id = Self::get_host_id(&clients).await;
+        let networking_driver = clients.http_client.driver.clone();
+        let secure_storage = clients.secure_storage.clone();
+        let profile_state_holder =
+            Arc::new(ProfileStateHolder::new(profile_state.clone()));
         let os = Arc::new(Self {
             clients,
-            profile_state_holder: ProfileStateHolder::new(
-                profile_state.clone(),
+            profile_state_holder: profile_state_holder.clone(),
+            radix_connect_mobile: Self::new_radix_connect_mobile(
+                profile_state_holder,
+                networking_driver.clone(),
+                secure_storage.clone(),
             ),
             interactors,
             host_id,

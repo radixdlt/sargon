@@ -817,6 +817,59 @@ mod tests {
                     }
                   ]
                 },
+                "p2pTransportProfiles": {
+                  "current": {
+                    "name": "Radix Production",
+                    "signalingServer": "wss://signaling-server.radixdlt.com/",
+                    "stun": {
+                      "urls": [
+                        "stun:stun.l.google.com:19302",
+                        "stun:stun1.l.google.com:19302",
+                        "stun:stun2.l.google.com:19302",
+                        "stun:stun3.l.google.com:19302",
+                        "stun:stun4.l.google.com:19302"
+                      ]
+                    },
+                    "turn": {
+                      "urls": [
+                        "turn:turn-udp.radixdlt.com:80?transport=udp",
+                        "turn:turn-tcp.radixdlt.com:80?transport=tcp"
+                      ],
+                      "username": "username",
+                      "credential": "password"
+                    }
+                  },
+                  "other": [
+                    {
+                      "name": "Radix Development",
+                      "signalingServer": "wss://signaling-server-dev.rdx-works-main.extratools.works/",
+                      "stun": {
+                        "urls": [
+                          "stun:stun.l.google.com:19302",
+                          "stun:stun1.l.google.com:19302",
+                          "stun:stun2.l.google.com:19302",
+                          "stun:stun3.l.google.com:19302",
+                          "stun:stun4.l.google.com:19302"
+                        ]
+                      },
+                      "turn": {
+                        "urls": [
+                          "turn:turn-dev-udp.rdx-works-main.extratools.works:80?transport=udp",
+                          "turn:turn-dev-tcp.rdx-works-main.extratools.works:80?transport=tcp"
+                        ],
+                        "username": "username",
+                        "credential": "password"
+                      }
+                    }
+                  ]
+                },
+                "relayServices": {
+                  "current": {
+                    "name": "Radix Relay Production",
+                    "url": "https://radix-connect-relay.radixdlt.com/api/v1"
+                  },
+                  "other": []
+                },
                 "security": {
                   "isCloudProfileSyncEnabled": true,
                   "isDeveloperModeEnabled": false,
