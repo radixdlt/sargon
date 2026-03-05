@@ -5,7 +5,6 @@ import SargonUniFFI
 import Testing
 
 // MARK: - ShieldTests
-@Suite("ShieldBuilder")
 struct ShieldTests {
 	@Test("name")
 	func name() {

@@ -48,7 +48,7 @@ public struct SplashFeature {
 	public var body: some ReducerOf<Self> {
 		Reduce {
 			state,
-				action in
+			action in
 			switch action {
 			case .view(.appear):
 				struct SplashID: Hashable {}
