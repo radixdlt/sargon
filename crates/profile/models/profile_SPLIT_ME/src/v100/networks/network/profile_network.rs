@@ -37,6 +37,10 @@ pub struct ProfileNetwork {
     #[serde(default)]
     pub resource_preferences: ResourcePreferences,
 
+    /// User-managed external addresses and names.
+    #[serde(default, skip_serializing_if = "AddressBook::is_empty")]
+    pub address_book: AddressBook,
+
     /// Pre-derived MFA factor instances
     #[serde(default)]
     pub mfa_factor_instances: MFAFactorInstances,
@@ -57,6 +61,7 @@ impl ProfileNetwork {
 			personas: {}
 			authorized_dapps: {}
 			resource_preferences: {:?}
+			address_book: {:?}
 			mfa_factor_instances: {:?}
 			"#,
             self.id,
@@ -64,6 +69,7 @@ impl ProfileNetwork {
             self.personas,
             self.authorized_dapps,
             self.resource_preferences,
+            self.address_book,
             self.mfa_factor_instances,
         )
     }
@@ -143,6 +149,7 @@ impl ProfileNetwork {
             personas,
             authorized_dapps,
             resource_preferences,
+            address_book: AddressBook::new(),
             mfa_factor_instances,
         }
     }
@@ -249,6 +256,42 @@ mod tests {
             SUT::sample().resource_preferences,
             ResourcePreferences::sample()
         )
+    }
+
+    #[test]
+    fn get_address_book() {
+        assert_eq!(SUT::sample().address_book, AddressBook::new())
+    }
+
+    #[test]
+    fn deserialize_legacy_json_without_address_book_defaults_to_empty() {
+        let sut: SUT = serde_json::from_str(
+            r#"
+            {
+              "networkID": 1,
+              "accounts": [],
+              "personas": [],
+              "authorizedDapps": [],
+              "resource_preferences": [],
+              "mfa_factor_instances": []
+            }
+            "#,
+        )
+        .unwrap();
+
+        assert!(sut.address_book.is_empty());
+    }
+
+    #[test]
+    fn json_roundtrip_with_populated_address_book() {
+        let mut sut = SUT::new_empty_on(NetworkID::Mainnet);
+        sut.address_book
+            .add_entry(AddressBookEntry::new(
+                AccountAddress::sample_mainnet(),
+                DisplayName::sample(),
+                Some("Exchange".to_owned()),
+            ));
+        assert_json_roundtrip(&sut);
     }
 
     #[test]

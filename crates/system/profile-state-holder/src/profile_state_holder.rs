@@ -46,6 +46,26 @@ impl ProfileStateHolder {
         self.try_access_profile_with(|p| p.current_network().cloned())
     }
 
+    pub fn address_book_on_current_network(&self) -> Result<AddressBook> {
+        self.try_access_profile_with(|p| {
+            p.current_network().map(|n| n.address_book.clone())
+        })
+    }
+
+    pub fn address_book_entry_by_address(
+        &self,
+        address: AccountAddress,
+    ) -> Result<AddressBookEntry> {
+        self.try_access_profile_with(|p| {
+            let network = p.current_network()?;
+            network
+                .address_book
+                .get_id(address)
+                .cloned()
+                .ok_or(CommonError::EntityNotFound)
+        })
+    }
+
     /// Returns the non-hidden accounts on the current network, empty if no accounts
     /// on the network
     pub fn accounts_on_current_network(&self) -> Result<Accounts> {
