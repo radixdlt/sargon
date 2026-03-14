@@ -4,6 +4,7 @@ mod sargon_os_commit_provisional_security_structure;
 mod sargon_os_entities_linked_to_factor_source;
 mod sargon_os_mark_as_securified;
 mod sargon_os_security_structures;
+mod sargon_os_used_mfa_signature_resources_with_accounts;
 #[cfg(test)]
 mod test_instances_provider;
 
@@ -15,6 +16,7 @@ pub mod prelude {
     pub use crate::sargon_os_entities_linked_to_factor_source::*;
     pub use crate::sargon_os_mark_as_securified::*;
     pub use crate::sargon_os_security_structures::*;
+    pub use crate::sargon_os_used_mfa_signature_resources_with_accounts::*;
 
     pub use addresses::prelude::*;
     pub use clients::prelude::*;

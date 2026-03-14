@@ -2,7 +2,9 @@ use crate::prelude::*;
 use sargon::DeviceFactorSourceType as InternalDeviceFactorSourceType;
 use sargon::HasIndexInLocalKeySpace;
 use sargon::HierarchicalDeterministicFactorInstance as InternalHierarchicalDeterministicFactorInstance;
+use sargon::OsUsedMfaSignatureResourcesWithAccounts;
 use sargon::ToAgnosticPath;
+use sargon::UsedMfaSignatureResourceWithAccounts as InternalUsedMfaSignatureResourceWithAccounts;
 
 /// If we wanna create an Olympia DeviceFactorSource or
 /// a Babylon one, either main or not.
@@ -20,6 +22,13 @@ pub struct FactorInstanceForDebugPurposes {
     pub factor_source_id: String,
     pub derivation_entity_index: u32,
     pub factor_source_kind: FactorSourceKind,
+}
+
+#[derive(Clone, PartialEq, Eq, InternalConversion, uniffi::Record)]
+pub struct UsedMfaSignatureResourceWithAccounts {
+    pub mfa_factor_instance: MFAFactorInstance,
+    pub non_fungible_global_id: NonFungibleGlobalId,
+    pub account_addresses: Vec<AccountAddress>,
 }
 impl From<InternalHierarchicalDeterministicFactorInstance>
     for FactorInstanceForDebugPurposes
@@ -235,5 +244,33 @@ impl SargonOS {
             .get_new_mfa_factor_instance(factor_source.into_internal())
             .await
             .into_result()
+    }
+
+    pub async fn used_mfa_signature_resources_with_accounts_current_network(
+        &self,
+    ) -> Result<Vec<UsedMfaSignatureResourceWithAccounts>> {
+        self.wrapped
+            .used_mfa_signature_resources_with_accounts_current_network()
+            .await
+            .into_iter_result()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn used_mfa_signature_resource_with_accounts_internal_conversion_roundtrip()
+    {
+        let internal = InternalUsedMfaSignatureResourceWithAccounts {
+            mfa_factor_instance: sargon::MFAFactorInstance::sample(),
+            non_fungible_global_id: sargon::NonFungibleGlobalId::sample(),
+            account_addresses: vec![sargon::AccountAddress::sample()],
+        };
+
+        let uniffi_model: UsedMfaSignatureResourceWithAccounts =
+            internal.clone().into();
+        assert_eq!(uniffi_model.into_internal(), internal);
     }
 }
