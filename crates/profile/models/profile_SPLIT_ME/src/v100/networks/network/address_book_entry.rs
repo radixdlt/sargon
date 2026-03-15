@@ -21,13 +21,7 @@ impl AddressBookEntry {
         note: Option<String>,
     ) -> Self {
         let timestamp = now();
-        Self::with_timestamps(
-            address,
-            name,
-            note,
-            timestamp,
-            timestamp,
-        )
+        Self::with_timestamps(address, name, note, timestamp, timestamp)
     }
 
     pub fn with_timestamps(

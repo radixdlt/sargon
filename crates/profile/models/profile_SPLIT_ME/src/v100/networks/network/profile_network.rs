@@ -285,12 +285,11 @@ mod tests {
     #[test]
     fn json_roundtrip_with_populated_address_book() {
         let mut sut = SUT::new_empty_on(NetworkID::Mainnet);
-        sut.address_book
-            .add_entry(AddressBookEntry::new(
-                AccountAddress::sample_mainnet(),
-                DisplayName::sample(),
-                Some("Exchange".to_owned()),
-            ));
+        sut.address_book.add_entry(AddressBookEntry::new(
+            AccountAddress::sample_mainnet(),
+            DisplayName::sample(),
+            Some("Exchange".to_owned()),
+        ));
         assert_json_roundtrip(&sut);
     }
 

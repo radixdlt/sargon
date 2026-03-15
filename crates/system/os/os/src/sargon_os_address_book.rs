@@ -11,7 +11,8 @@ impl SargonOS {
         &self,
         address: AccountAddress,
     ) -> Result<AddressBookEntry> {
-        self.profile_state_holder.address_book_entry_by_address(address)
+        self.profile_state_holder
+            .address_book_entry_by_address(address)
     }
 }
 
@@ -34,8 +35,7 @@ impl SargonOS {
                 });
             }
 
-            let entry =
-                AddressBookEntry::new(address, name, note.clone());
+            let entry = AddressBookEntry::new(address, name, note.clone());
             let mut did_add = false;
             profile.networks.update_with(current_network, |network| {
                 did_add = network.address_book.add_entry(entry.clone());
@@ -65,9 +65,11 @@ impl SargonOS {
 
             let mut did_update = false;
             profile.networks.update_with(current_network, |network| {
-                did_update = network
-                    .address_book
-                    .update_entry(address, name, note.clone());
+                did_update = network.address_book.update_entry(
+                    address,
+                    name,
+                    note.clone(),
+                );
             });
             Ok(did_update)
         })
@@ -92,8 +94,7 @@ impl SargonOS {
 
             let mut did_delete = false;
             profile.networks.update_with(current_network, |network| {
-                did_delete =
-                    network.address_book.remove_by_address(&address);
+                did_delete = network.address_book.remove_by_address(&address);
             });
             Ok(did_delete)
         })
