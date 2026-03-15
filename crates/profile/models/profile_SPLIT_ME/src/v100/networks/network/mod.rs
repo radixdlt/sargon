@@ -1,4 +1,6 @@
 mod accounts;
+mod address_book;
+mod address_book_entry;
 mod authorized_dapp;
 mod authorized_dapps;
 mod mfa_factor_instance;
@@ -8,6 +10,8 @@ mod profile_network;
 mod resource_preferences;
 
 pub use accounts::*;
+pub use address_book::*;
+pub use address_book_entry::*;
 pub use authorized_dapp::*;
 pub use authorized_dapps::*;
 pub use mfa_factor_instance::*;

@@ -1,8 +1,17 @@
 use crate::prelude::*;
 use profile_logic::prelude::ProfileNetworkDetailsForAuthorizedDapp as _;
+use sargon::AddressBook as InternalAddressBook;
 use sargon::ProfileNetwork as InternalProfileNetwork;
 
 decl_vec_samples_for!(ProfileNetworks, ProfileNetwork);
+
+impl IntoInternal<Vec<AddressBookEntry>, InternalAddressBook>
+    for Vec<AddressBookEntry>
+{
+    fn into_internal(self) -> InternalAddressBook {
+        self.into_iter().map(Into::into).collect()
+    }
+}
 
 /// [`Accounts`], [`Personas`] and [`AuthorizedDapps`] for some [`ProfileNetwork`]
 /// which user has created/interacted with, all on the same [Radix Network][`NetworkDefinition`],
@@ -27,6 +36,9 @@ pub struct ProfileNetwork {
 
     /// Configuration related to resources
     pub resource_preferences: Vec<ResourceAppPreference>,
+
+    /// User-managed external addresses and names.
+    pub address_book: Vec<AddressBookEntry>,
 
     /// Pre-derived MFA factor instances
     pub mfa_factor_instances: Vec<MFAFactorInstance>,
