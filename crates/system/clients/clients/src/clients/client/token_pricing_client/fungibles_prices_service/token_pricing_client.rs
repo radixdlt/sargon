@@ -3,44 +3,87 @@ use crate::prelude::*;
 /// A mapping from resource addresses to their prices in a specific fiat currency.
 pub type PerTokenPrices = HashMap<ResourceAddress, Decimal192>;
 
-/// Represents a token's price in a specific fiat currency.
-///
-/// This structure is returned by the remote token pricing API and used internally
-/// for price calculations. The price is stored as f32 from the API but converted
-/// to Decimal192 for precise calculations.
-#[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
-pub struct TokenPrice {
-    /// The on-ledger address of the token resource
-    pub resource_address: ResourceAddress,
-    /// The price per unit of the token in the specified currency
-    pub price: f32,
-    /// The fiat currency this price is denominated in
+/// Request payload for scoped fungible and LSU price lookup.
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct FungiblePricesRequest {
     pub currency: FiatCurrency,
+    pub tokens: Vec<ResourceAddress>,
+    pub lsus: Vec<ResourceAddress>,
 }
 
-/// Client for fetching and caching fungible token prices.
-///
-/// This client provides access to real-time token pricing data from the Radix token price service.
-/// It implements a cache-first strategy with a 5-minute TTL to minimize network requests and
-/// improve performance.
-///
-/// # Caching Strategy
-///
-/// 1. When prices are requested, the client first checks the local file system cache
-/// 2. If valid cached prices exist (less than 5 minutes old), they are returned immediately
-/// 3. If cache is expired or missing, prices are fetched from the remote API
-/// 4. Successful remote fetches are automatically cached for future requests
-///
-/// # Example
-///
-/// ```ignore
-/// let http_client = Arc::new(HttpClient::new(driver));
-/// let file_system = Arc::new(FileSystemClient::new(fs_driver));
-/// let client = FungiblesPricesClient::new(http_client, file_system);
-///
-/// // Fetch USD prices for all tokens
-/// let prices = client.get_prices_for_currency(FiatCurrency::USD).await?;
-/// ```
+impl FungiblePricesRequest {
+    pub fn new(
+        currency: FiatCurrency,
+        tokens: impl IntoIterator<Item = ResourceAddress>,
+        lsus: impl IntoIterator<Item = ResourceAddress>,
+    ) -> Self {
+        Self {
+            currency,
+            tokens: Self::normalize_addresses(tokens),
+            lsus: Self::normalize_addresses(lsus),
+        }
+    }
+
+    fn normalize_addresses(
+        addresses: impl IntoIterator<Item = ResourceAddress>,
+    ) -> Vec<ResourceAddress> {
+        let mut unique: Vec<_> =
+            HashSet::<ResourceAddress>::from_iter(addresses)
+                .into_iter()
+                .collect();
+        unique.sort_by_key(|address| address.to_string());
+        unique
+    }
+}
+
+#[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ScopedTokenPricesResponse {
+    pub tokens: Vec<ScopedTokenPrice>,
+    pub lsus: Vec<ScopedLsuPrice>,
+}
+
+#[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
+pub struct ScopedTokenPrice {
+    pub resource_address: ResourceAddress,
+    pub usd_price: f64,
+}
+
+#[derive(Deserialize, Serialize, Clone, PartialEq, Debug)]
+pub struct ScopedLsuPrice {
+    pub resource_address: ResourceAddress,
+    pub usd_price: f64,
+}
+
+impl ScopedTokenPricesResponse {
+    pub fn into_prices_map(self) -> PerTokenPrices {
+        let mut prices: PerTokenPrices = HashMap::new();
+
+        for token in self.tokens {
+            insert_price(&mut prices, token.resource_address, token.usd_price);
+        }
+
+        // In case a resource appears in both arrays, LSU value wins.
+        for lsu in self.lsus {
+            insert_price(&mut prices, lsu.resource_address, lsu.usd_price);
+        }
+
+        prices
+    }
+}
+
+fn insert_price(
+    prices: &mut PerTokenPrices,
+    resource_address: ResourceAddress,
+    value: f64,
+) {
+    if let Ok(decimal) = Decimal192::try_from(value) {
+        prices.insert(resource_address, decimal);
+    }
+}
+
+/// Client for fetching and caching scoped fungible token prices.
 pub struct FungiblesPricesClient {
     pub(crate) http_client: Arc<HttpClient>,
     pub(crate) file_system_client: Arc<FileSystemClient>,
@@ -59,68 +102,24 @@ impl FungiblesPricesClient {
 }
 
 impl FungiblesPricesClient {
-    /// Fetches token prices for a specific fiat currency.
+    /// Fetches token prices for a scoped request.
     ///
-    /// This method returns a mapping of resource addresses to their prices in the requested
-    /// fiat currency. It uses a cache-first strategy with automatic fallback to remote fetching.
-    ///
-    /// # Arguments
-    ///
-    /// * `currency` - The fiat currency to get prices in (e.g., USD, SEK)
-    ///
-    /// # Returns
-    ///
-    /// A `HashMap` mapping `ResourceAddress` to `Decimal192` price values in the requested currency.
-    /// Only tokens with prices in the requested currency are included in the result.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if:
-    /// * The cache is invalid and remote fetch fails
-    /// * Network request fails
-    /// * Response cannot be deserialized
-    ///
-    /// # Example
-    ///
-    /// ```ignore
-    /// let prices = client.get_prices_for_currency(FiatCurrency::USD).await?;
-    /// for (resource_addr, price) in prices {
-    ///     println!("{}: ${}", resource_addr, price);
-    /// }
-    /// ```
-    pub async fn get_prices_for_currency(
+    /// Uses a 5-minute cache keyed by (currency, tokens, lsus).
+    pub async fn get_prices_for_request(
         &self,
-        currency: FiatCurrency,
+        request: FungiblePricesRequest,
+        force_fetch: bool,
     ) -> Result<PerTokenPrices> {
-        let prices = self.get_token_prices().await?;
-        let mut per_token_prices: HashMap<ResourceAddress, Decimal192> =
-            HashMap::new();
-
-        for token_price in prices {
-            if token_price.currency == currency {
-                per_token_prices.insert(
-                    token_price.resource_address,
-                    token_price.price.into(),
-                );
+        if !force_fetch {
+            let cached_prices =
+                self.load_cached_prices(&request).await.ok().flatten();
+            if let Some(cached_prices) = cached_prices {
+                return Ok(cached_prices);
             }
         }
 
-        Ok(per_token_prices)
-    }
-
-    async fn get_token_prices(&self) -> Result<Vec<TokenPrice>> {
-        let cached_prices = self.load_cached_prices().await.ok().flatten();
-
-        if let Some(cached_prices) = cached_prices {
-            return Ok(cached_prices);
-        }
-
-        let remote_prices = self.fetch_remote_token_prices().await;
-
-        if let Ok(remote_prices) = remote_prices.clone() {
-            _ = self.store_prices(remote_prices).await;
-        }
-
-        remote_prices
+        let remote_prices = self.fetch_remote_token_prices(&request).await?;
+        _ = self.store_prices(&request, &remote_prices).await;
+        Ok(remote_prices)
     }
 }

@@ -11,6 +11,7 @@ mod sargon_os_accounts;
 mod sargon_os_address_book;
 mod sargon_os_arculus_card;
 mod sargon_os_factors;
+mod sargon_os_fungible_pricing;
 mod sargon_os_gateway;
 mod sargon_os_gateway_client;
 mod sargon_os_nft_pricing;
@@ -31,6 +32,7 @@ pub mod prelude {
     pub use crate::sargon_os_address_book::*;
     pub use crate::sargon_os_arculus_card::*;
     pub use crate::sargon_os_factors::*;
+    pub use crate::sargon_os_fungible_pricing::*;
     pub use crate::sargon_os_gateway::*;
     pub use crate::sargon_os_gateway_client::*;
     pub use crate::sargon_os_nft_pricing::*;

@@ -1,26 +1,29 @@
 use crate::prelude::*;
-use std::path::Path;
+use std::{
+    collections::hash_map::DefaultHasher,
+    hash::{Hash, Hasher},
+    path::Path,
+};
 
-/// File name for the cached token prices snapshot
-const ALL_TOKEN_PRICES_PATH: &str = "all_token_prices.json";
+/// Prefix for request-scoped token price cache files.
+const SCOPED_TOKEN_PRICES_PATH_PREFIX: &str = "scoped_token_prices";
 
-/// Cache time-to-live in seconds (5 minutes)
-///
-/// Token prices are considered fresh for 5 minutes before requiring a refresh
-/// from the remote API. This balances data freshness with API rate limiting.
+/// Cache time-to-live in seconds (5 minutes).
 pub const CACHE_TTL_SECONDS: i64 = 5 * 60;
 
 impl FungiblesPricesClient {
-    pub async fn load_cached_prices(&self) -> Result<Option<Vec<TokenPrice>>> {
-        let path = self
+    pub async fn load_cached_prices(
+        &self,
+        request: &FungiblePricesRequest,
+    ) -> Result<Option<PerTokenPrices>> {
+        let path = Self::cache_file_path(request);
+        let bytes = self
             .file_system_client
-            .create_if_needed(ALL_TOKEN_PRICES_PATH)
+            .load_from_file(Path::new(&path))
             .await?;
 
-        let bytes = self.file_system_client.load_from_file(path).await?;
-
         if let Some(bytes) = bytes {
-            let snapshot: AllTokenPricesSnapshot = bytes.deserialize()?;
+            let snapshot: ScopedTokenPricesSnapshot = bytes.deserialize()?;
             let now = Timestamp::now_utc();
 
             let age = now.duration_since(snapshot.fetched_at);
@@ -32,32 +35,42 @@ impl FungiblesPricesClient {
         Ok(None)
     }
 
-    pub async fn store_prices(&self, prices: Vec<TokenPrice>) -> Result<()> {
-        let snapshot =
-            AllTokenPricesSnapshot::new(Timestamp::now_utc(), prices);
+    pub async fn store_prices(
+        &self,
+        request: &FungiblePricesRequest,
+        prices: &PerTokenPrices,
+    ) -> Result<()> {
+        let snapshot = ScopedTokenPricesSnapshot::new(
+            Timestamp::now_utc(),
+            prices.clone(),
+        );
 
         let serialized = snapshot.serialize_to_bytes()?;
+        let path = Self::cache_file_path(request);
 
         self.file_system_client
-            .save_to_file(Path::new(ALL_TOKEN_PRICES_PATH), serialized, true)
+            .save_to_file(Path::new(&path), serialized, true)
             .await
+    }
+
+    fn cache_file_path(request: &FungiblePricesRequest) -> String {
+        let mut hasher = DefaultHasher::new();
+        request.hash(&mut hasher);
+        let hash = hasher.finish();
+
+        format!("{}_{}.json", SCOPED_TOKEN_PRICES_PATH_PREFIX, hash)
     }
 }
 
-/// A cached snapshot of all token prices with timestamp for TTL validation.
-///
-/// This structure is serialized and stored in the file system to provide caching
-/// for token price data. The cache is considered valid for 5 minutes.
+/// A cached snapshot of scoped prices with timestamp for TTL validation.
 #[derive(Deserialize, Serialize)]
-pub struct AllTokenPricesSnapshot {
-    /// When this snapshot was created (UTC timestamp)
+pub struct ScopedTokenPricesSnapshot {
     pub fetched_at: Timestamp,
-    /// The cached token prices across all currencies
-    pub prices: Vec<TokenPrice>,
+    pub prices: PerTokenPrices,
 }
 
-impl AllTokenPricesSnapshot {
-    fn new(fetched_at: Timestamp, prices: Vec<TokenPrice>) -> Self {
+impl ScopedTokenPricesSnapshot {
+    fn new(fetched_at: Timestamp, prices: PerTokenPrices) -> Self {
         Self { fetched_at, prices }
     }
 }
