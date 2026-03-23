@@ -41,6 +41,13 @@ pub struct ProfileNetwork {
     #[serde(default, skip_serializing_if = "AddressBook::is_empty")]
     pub address_book: AddressBook,
 
+    /// Ordered token price service endpoints used for failover.
+    #[serde(
+        default = "TokenPriceServices::default",
+        skip_serializing_if = "TokenPriceServices::is_default"
+    )]
+    pub token_price_services: TokenPriceServices,
+
     /// Pre-derived MFA factor instances
     #[serde(default)]
     pub mfa_factor_instances: MFAFactorInstances,
@@ -62,6 +69,7 @@ impl ProfileNetwork {
 			authorized_dapps: {}
 			resource_preferences: {:?}
 			address_book: {:?}
+			token_price_services: {:?}
 			mfa_factor_instances: {:?}
 			"#,
             self.id,
@@ -70,6 +78,7 @@ impl ProfileNetwork {
             self.authorized_dapps,
             self.resource_preferences,
             self.address_book,
+            self.token_price_services,
             self.mfa_factor_instances,
         )
     }
@@ -150,6 +159,7 @@ impl ProfileNetwork {
             authorized_dapps,
             resource_preferences,
             address_book: AddressBook::new(),
+            token_price_services: TokenPriceServices::default(),
             mfa_factor_instances,
         }
     }
@@ -264,6 +274,14 @@ mod tests {
     }
 
     #[test]
+    fn get_token_price_services() {
+        assert_eq!(
+            SUT::sample().token_price_services,
+            TokenPriceServices::default()
+        )
+    }
+
+    #[test]
     fn deserialize_legacy_json_without_address_book_defaults_to_empty() {
         let sut: SUT = serde_json::from_str(
             r#"
@@ -280,6 +298,7 @@ mod tests {
         .unwrap();
 
         assert!(sut.address_book.is_empty());
+        assert_eq!(sut.token_price_services, TokenPriceServices::default());
     }
 
     #[test]
@@ -290,6 +309,15 @@ mod tests {
             DisplayName::sample(),
             Some("Exchange".to_owned()),
         ));
+        assert_json_roundtrip(&sut);
+    }
+
+    #[test]
+    fn json_roundtrip_with_populated_token_price_services() {
+        let mut sut = SUT::new_empty_on(NetworkID::Mainnet);
+        assert!(sut
+            .token_price_services
+            .add(TokenPriceService::sample_other()));
         assert_json_roundtrip(&sut);
     }
 

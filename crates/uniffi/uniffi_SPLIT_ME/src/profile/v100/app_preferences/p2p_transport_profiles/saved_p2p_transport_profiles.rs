@@ -36,5 +36,8 @@ pub fn new_saved_p2p_transport_profiles_sample_other(
 pub fn saved_p2p_transport_profiles_get_all_elements(
     profiles: &SavedP2PTransportProfiles,
 ) -> Vec<P2PTransportProfile> {
-    profiles.into_internal().all().into_type()
+    profiles
+        .into_internal()
+        .all_available_for_selection()
+        .into_type()
 }

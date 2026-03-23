@@ -111,6 +111,17 @@ impl SavedP2PTransportProfiles {
         all
     }
 
+    pub fn all_available_for_selection(&self) -> Vec<P2PTransportProfile> {
+        self.all()
+            .into_iter()
+            .filter(|profile| {
+                !P2PTransportProfile::is_radix_development_signaling_server(
+                    &profile.signaling_server,
+                )
+            })
+            .collect()
+    }
+
     pub fn has_signaling_server(&self, url: impl AsRef<str>) -> bool {
         let signaling_server = url.as_ref();
         self.all()
@@ -159,6 +170,14 @@ impl Default for SavedP2PTransportProfiles {
 }
 
 impl P2PTransportProfile {
+    const RADIX_DEVELOPMENT_SIGNALING_SERVER: &'static str =
+        "wss://signaling-server-dev.rdx-works-main.extratools.works/";
+
+    pub fn is_radix_development_signaling_server(url: impl AsRef<str>) -> bool {
+        url.as_ref().trim_end_matches('/')
+            == Self::RADIX_DEVELOPMENT_SIGNALING_SERVER.trim_end_matches('/')
+    }
+
     fn google_stun_servers() -> P2PStunServer {
         P2PStunServer::new(vec![
             "stun:stun.l.google.com:19302".to_string(),
@@ -201,7 +220,7 @@ impl P2PTransportProfile {
 
         Self::new(
             "Radix Development",
-            "wss://signaling-server-dev.rdx-works-main.extratools.works/",
+            Self::RADIX_DEVELOPMENT_SIGNALING_SERVER,
             stun,
             turn,
         )
@@ -303,5 +322,32 @@ mod tests {
         assert!(sut.change_current(development.clone()));
         assert_eq!(sut.current, development);
         assert!(sut.other.contains_by_id(&production));
+    }
+
+    #[test]
+    fn all_available_for_selection_filters_out_radix_development_profile() {
+        let sut = SUT::default();
+        let all = sut.all_available_for_selection();
+
+        assert_eq!(all.len(), 1);
+        assert_eq!(all[0].name, "Radix Production");
+        assert_eq!(
+            all[0].signaling_server,
+            "wss://signaling-server.radixdlt.com/"
+        );
+    }
+
+    #[test]
+    fn all_available_for_selection_filters_out_current_radix_development_profile(
+    ) {
+        let sut = SUT::sample_other();
+        let all = sut.all_available_for_selection();
+
+        assert_eq!(all.len(), 1);
+        assert_eq!(all[0].name, "Radix Production");
+        assert_eq!(
+            all[0].signaling_server,
+            "wss://signaling-server.radixdlt.com/"
+        );
     }
 }

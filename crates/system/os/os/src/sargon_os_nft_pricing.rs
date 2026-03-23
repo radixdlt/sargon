@@ -49,12 +49,16 @@ impl SargonOS {
             .await?
             .ledger_state
             .state_version;
+        let token_price_services = self
+            .profile_state_holder
+            .token_price_services_on_current_network()?;
 
         self.nft_prices_client
-            .fetch_nft_fiat_values(
+            .fetch_nft_fiat_values_using_token_price_services(
                 state_version,
                 nft_ids,
                 currency,
+                token_price_services,
                 force_fetch,
             )
             .await

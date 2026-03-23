@@ -52,6 +52,14 @@ impl ProfileStateHolder {
         })
     }
 
+    pub fn token_price_services_on_current_network(
+        &self,
+    ) -> Result<TokenPriceServices> {
+        self.try_access_profile_with(|p| {
+            p.current_network().map(|n| n.token_price_services.clone())
+        })
+    }
+
     pub fn address_book_entry_by_address(
         &self,
         address: AccountAddress,
