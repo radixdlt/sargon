@@ -158,9 +158,7 @@ impl NonFungiblePricesClient {
             .iter()
             .flat_map(|receipt| receipt.items.iter())
             .flat_map(|item| {
-                item.resources
-                    .iter()
-                    .map(|resource| resource.address)
+                item.resources.iter().map(|resource| resource.address)
             })
             .collect();
 
