@@ -9,6 +9,7 @@ decl_identified_vec_of!(
 impl TokenPriceServices {
     /// "Default" for this collection in profile/network context:
     /// one production endpoint.
+    #[allow(clippy::should_implement_trait)]
     pub fn default() -> Self {
         Self::just(TokenPriceService::production())
     }
