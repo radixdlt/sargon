@@ -173,9 +173,7 @@ impl P2PTransportProfile {
     const RADIX_DEVELOPMENT_SIGNALING_SERVER: &'static str =
         "wss://signaling-server-dev.rdx-works-main.extratools.works/";
 
-    pub fn is_radix_development_signaling_server(
-        url: impl AsRef<str>,
-    ) -> bool {
+    pub fn is_radix_development_signaling_server(url: impl AsRef<str>) -> bool {
         url.as_ref().trim_end_matches('/')
             == Self::RADIX_DEVELOPMENT_SIGNALING_SERVER.trim_end_matches('/')
     }
@@ -333,7 +331,10 @@ mod tests {
 
         assert_eq!(all.len(), 1);
         assert_eq!(all[0].name, "Radix Production");
-        assert_eq!(all[0].signaling_server, "wss://signaling-server.radixdlt.com/");
+        assert_eq!(
+            all[0].signaling_server,
+            "wss://signaling-server.radixdlt.com/"
+        );
     }
 
     #[test]
@@ -344,6 +345,9 @@ mod tests {
 
         assert_eq!(all.len(), 1);
         assert_eq!(all[0].name, "Radix Production");
-        assert_eq!(all[0].signaling_server, "wss://signaling-server.radixdlt.com/");
+        assert_eq!(
+            all[0].signaling_server,
+            "wss://signaling-server.radixdlt.com/"
+        );
     }
 }
