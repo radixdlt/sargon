@@ -20,6 +20,7 @@ mod sargon_os_personas;
 mod sargon_os_profile;
 mod sargon_os_radix_connect_mobile;
 mod sargon_os_relay_service;
+mod sargon_os_token_price_services;
 mod testing_interactors;
 
 pub mod prelude {
@@ -41,6 +42,7 @@ pub mod prelude {
     pub use crate::sargon_os_profile::*;
     pub use crate::sargon_os_radix_connect_mobile::*;
     pub use crate::sargon_os_relay_service::*;
+    pub use crate::sargon_os_token_price_services::*;
     pub use crate::testing_interactors::*;
     pub use clients::prelude::ArculusMinFirmwareVersionRequirement;
     pub use clients::prelude::NFCTagArculusInteractonPurpose;

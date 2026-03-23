@@ -97,7 +97,6 @@ mod tests {
     use drivers::{
         MockNetworkingDriver, NetworkMethod, NetworkResponse, NetworkingDriver,
     };
-    use serde_json::Value;
     use std::collections::{HashMap, HashSet};
     use std::sync::{Arc, Mutex};
 

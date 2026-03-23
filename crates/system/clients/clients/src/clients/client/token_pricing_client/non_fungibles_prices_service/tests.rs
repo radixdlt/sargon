@@ -133,6 +133,56 @@ struct LsuPriceResponseItem {
     usd_price: f64,
 }
 
+#[actix_rt::test]
+async fn test_fetch_fungible_fiat_values_uses_provided_token_price_service() {
+    let captured_requests =
+        Arc::new(std::sync::Mutex::new(Vec::<NetworkRequest>::new()));
+    let captured_requests_clone = captured_requests.clone();
+
+    let xrd = ResourceAddress::sample_mainnet_xrd();
+    let response = TokenPricesResponse {
+        tokens: vec![sample_token_price(xrd.clone(), 1.0, FiatCurrency::USD)],
+        lsus: vec![],
+    };
+    let response_bytes = serde_json::to_vec(&response).unwrap();
+
+    let driver = Arc::new(MockNetworkingDriver::with_lazy_responses(
+        move |request, _| {
+            captured_requests_clone
+                .lock()
+                .unwrap()
+                .push(request.clone());
+            NetworkResponse::new(200, response_bytes.clone())
+        },
+    ));
+    let http_client = Arc::new(HttpClient::new(driver));
+    let file_system = Arc::new(FileSystemClient::in_memory());
+    let sut = SUT::new(http_client, file_system);
+
+    let token_price_services =
+        TokenPriceServices::just(TokenPriceService::new(
+            Url::parse("https://token-prices-custom.example").unwrap(),
+        ));
+
+    let result = sut
+        .fetch_fungible_fiat_values_using_token_price_services(
+            HashSet::from([xrd]),
+            HashSet::new(),
+            FiatCurrency::USD,
+            token_price_services,
+            false,
+        )
+        .await;
+
+    assert!(result.is_ok());
+    let captured = captured_requests.lock().unwrap();
+    assert_eq!(captured.len(), 1);
+    assert_eq!(
+        captured[0].url.as_str(),
+        "https://token-prices-custom.example/price/tokens"
+    );
+}
+
 // Tests for fetch_non_fungibles_prices
 
 #[actix_rt::test]

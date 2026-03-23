@@ -28,6 +28,7 @@ val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
             ).asList(),
             resourcePreferences = ResourceAppPreferences.sample().asList(),
             addressBook = emptyList(),
+            tokenPriceServices = emptyList(),
             mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
 
@@ -44,6 +45,7 @@ val ProfileNetwork.Companion.sampleMainnet: Sample<ProfileNetwork>
             ).asList(),
             resourcePreferences = ResourceAppPreferences.sample.other().asList(),
             addressBook = emptyList(),
+            tokenPriceServices = emptyList(),
             mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
     }
@@ -64,6 +66,7 @@ val ProfileNetwork.Companion.sampleStokenet: Sample<ProfileNetwork>
             ).asList(),
             resourcePreferences = ResourceAppPreferences.sample().asList(),
             addressBook = emptyList(),
+            tokenPriceServices = emptyList(),
             mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
 
@@ -80,6 +83,7 @@ val ProfileNetwork.Companion.sampleStokenet: Sample<ProfileNetwork>
             ).asList(),
             resourcePreferences = ResourceAppPreferences.sample.other().asList(),
             addressBook = emptyList(),
+            tokenPriceServices = emptyList(),
             mfaFactorInstances = MfaFactorInstances.sample().asList()
         )
     }

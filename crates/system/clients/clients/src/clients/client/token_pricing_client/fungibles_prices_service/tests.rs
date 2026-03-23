@@ -87,6 +87,17 @@ fn request_usd_with_unsorted_duplicates() -> FungiblePricesRequest {
     )
 }
 
+fn token_price_services_two_endpoints() -> TokenPriceServices {
+    TokenPriceServices::from_iter([
+        TokenPriceService::new(
+            Url::parse("https://token-prices-primary.example").unwrap(),
+        ),
+        TokenPriceService::new(
+            Url::parse("https://token-prices-secondary.example").unwrap(),
+        ),
+    ])
+}
+
 fn cache_file_path_for(request: &FungiblePricesRequest) -> String {
     use std::{
         collections::hash_map::DefaultHasher,
@@ -169,6 +180,92 @@ async fn test_fetch_remote_token_prices_uses_requested_currency() {
     let body: Vec<u8> = captured[0].body.to_vec();
     let decoded: FungiblePricesRequest = serde_json::from_slice(&body).unwrap();
     assert_eq!(decoded.currency, FiatCurrency::SEK);
+}
+
+#[actix_rt::test]
+async fn test_fetch_remote_token_prices_fails_over_to_next_service() {
+    let captured_requests =
+        Arc::new(std::sync::Mutex::new(Vec::<NetworkRequest>::new()));
+    let captured_requests_clone = captured_requests.clone();
+    let response = sample_scoped_response();
+
+    let driver = Arc::new(MockNetworkingDriver::with_lazy_responses(
+        move |request, _| {
+            captured_requests_clone
+                .lock()
+                .unwrap()
+                .push(request.clone());
+
+            if request.url.host_str() == Some("token-prices-primary.example") {
+                NetworkResponse::new(500, vec![])
+            } else {
+                let body = serde_json::to_vec(&response).unwrap();
+                NetworkResponse::new(200, body)
+            }
+        },
+    ));
+
+    let http_client = Arc::new(HttpClient::new(driver));
+    let file_system = Arc::new(FileSystemClient::in_memory());
+    let sut = SUT::new(http_client, file_system);
+
+    let request = request_usd_with_unsorted_duplicates();
+    let result = sut
+        .fetch_remote_token_prices_using_token_price_services(
+            &request,
+            token_price_services_two_endpoints(),
+        )
+        .await;
+
+    assert!(result.is_ok());
+    assert_eq!(result.unwrap().len(), 3);
+
+    let captured = captured_requests.lock().unwrap();
+    assert_eq!(captured.len(), 2);
+    assert_eq!(
+        captured[0].url.as_str(),
+        "https://token-prices-primary.example/price/tokens"
+    );
+    assert_eq!(
+        captured[1].url.as_str(),
+        "https://token-prices-secondary.example/price/tokens"
+    );
+}
+
+#[actix_rt::test]
+async fn test_fetch_remote_token_prices_all_services_fail() {
+    let driver = Arc::new(MockNetworkingDriver::new_always_failing());
+    let http_client = Arc::new(HttpClient::new(driver));
+    let file_system = Arc::new(FileSystemClient::in_memory());
+    let sut = SUT::new(http_client, file_system);
+
+    let request = request_usd_with_unsorted_duplicates();
+    let result = sut
+        .fetch_remote_token_prices_using_token_price_services(
+            &request,
+            token_price_services_two_endpoints(),
+        )
+        .await;
+
+    assert!(result.is_err());
+}
+
+#[actix_rt::test]
+async fn test_fetch_remote_token_prices_empty_services_returns_error() {
+    let response = sample_scoped_response();
+    let http_client = make_http_client_with_single_response(response);
+    let file_system = Arc::new(FileSystemClient::in_memory());
+    let sut = SUT::new(http_client, file_system);
+
+    let request = request_usd_with_unsorted_duplicates();
+    let result = sut
+        .fetch_remote_token_prices_using_token_price_services(
+            &request,
+            TokenPriceServices::new(),
+        )
+        .await;
+
+    assert_eq!(result, Err(CommonError::ExpectedNonEmptyCollection));
 }
 
 #[actix_rt::test]

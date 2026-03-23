@@ -2,6 +2,7 @@ use crate::prelude::*;
 use profile_logic::prelude::ProfileNetworkDetailsForAuthorizedDapp as _;
 use sargon::AddressBook as InternalAddressBook;
 use sargon::ProfileNetwork as InternalProfileNetwork;
+use sargon::TokenPriceServices as InternalTokenPriceServices;
 
 decl_vec_samples_for!(ProfileNetworks, ProfileNetwork);
 
@@ -9,6 +10,14 @@ impl IntoInternal<Vec<AddressBookEntry>, InternalAddressBook>
     for Vec<AddressBookEntry>
 {
     fn into_internal(self) -> InternalAddressBook {
+        self.into_iter().map(Into::into).collect()
+    }
+}
+
+impl IntoInternal<Vec<TokenPriceService>, InternalTokenPriceServices>
+    for Vec<TokenPriceService>
+{
+    fn into_internal(self) -> InternalTokenPriceServices {
         self.into_iter().map(Into::into).collect()
     }
 }
@@ -39,6 +48,9 @@ pub struct ProfileNetwork {
 
     /// User-managed external addresses and names.
     pub address_book: Vec<AddressBookEntry>,
+
+    /// Ordered token price service endpoints used for failover.
+    pub token_price_services: Vec<TokenPriceService>,
 
     /// Pre-derived MFA factor instances
     pub mfa_factor_instances: Vec<MFAFactorInstance>,

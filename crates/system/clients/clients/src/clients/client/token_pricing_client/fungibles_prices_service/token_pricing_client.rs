@@ -110,6 +110,22 @@ impl FungiblesPricesClient {
         request: FungiblePricesRequest,
         force_fetch: bool,
     ) -> Result<PerTokenPrices> {
+        self.get_prices_for_request_using_token_price_services(
+            request,
+            TokenPriceServices::default(),
+            force_fetch,
+        )
+        .await
+    }
+
+    /// Fetches token prices for a scoped request using an ordered list of
+    /// token price services for automatic failover.
+    pub async fn get_prices_for_request_using_token_price_services(
+        &self,
+        request: FungiblePricesRequest,
+        token_price_services: TokenPriceServices,
+        force_fetch: bool,
+    ) -> Result<PerTokenPrices> {
         if !force_fetch {
             let cached_prices =
                 self.load_cached_prices(&request).await.ok().flatten();
@@ -118,7 +134,15 @@ impl FungiblesPricesClient {
             }
         }
 
-        let remote_prices = self.fetch_remote_token_prices(&request).await?;
+        let remote_prices = if token_price_services.is_default() {
+            self.fetch_remote_token_prices(&request).await?
+        } else {
+            self.fetch_remote_token_prices_using_token_price_services(
+                &request,
+                token_price_services,
+            )
+            .await?
+        };
         _ = self.store_prices(&request, &remote_prices).await;
         Ok(remote_prices)
     }

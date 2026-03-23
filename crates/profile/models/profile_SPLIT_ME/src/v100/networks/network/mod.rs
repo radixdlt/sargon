@@ -8,6 +8,8 @@ mod mfa_factor_instances;
 mod personas;
 mod profile_network;
 mod resource_preferences;
+mod token_price_service;
+mod token_price_services;
 
 pub use accounts::*;
 pub use address_book::*;
@@ -19,3 +21,5 @@ pub use mfa_factor_instances::*;
 pub use personas::*;
 pub use profile_network::*;
 pub use resource_preferences::*;
+pub use token_price_service::*;
+pub use token_price_services::*;

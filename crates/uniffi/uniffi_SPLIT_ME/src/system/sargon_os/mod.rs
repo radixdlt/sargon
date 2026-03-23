@@ -24,6 +24,7 @@ mod sargon_os_security_center;
 mod sargon_os_security_structures;
 mod sargon_os_signing;
 mod sargon_os_stop_timed_recovery_interaction;
+mod sargon_os_token_price_services;
 mod transactions;
 
 pub use add_factor_source::*;
@@ -52,4 +53,5 @@ pub use sargon_os_security_center::*;
 pub use sargon_os_security_structures::*;
 pub use sargon_os_signing::*;
 pub use sargon_os_stop_timed_recovery_interaction::*;
+pub use sargon_os_token_price_services::*;
 pub use transactions::*;

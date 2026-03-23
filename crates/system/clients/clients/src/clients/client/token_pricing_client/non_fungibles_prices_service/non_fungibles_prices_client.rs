@@ -67,6 +67,23 @@ impl NonFungiblePricesClient {
             .await
     }
 
+    pub async fn fetch_fungible_fiat_values_using_token_price_services(
+        &self,
+        tokens: HashSet<ResourceAddress>,
+        lsus: HashSet<ResourceAddress>,
+        currency: FiatCurrency,
+        token_price_services: TokenPriceServices,
+        force_fetch: bool,
+    ) -> Result<PerTokenPrices> {
+        self.fungibles_prices_client
+            .get_prices_for_request_using_token_price_services(
+                FungiblePricesRequest::new(currency, tokens, lsus),
+                token_price_services,
+                force_fetch,
+            )
+            .await
+    }
+
     /// Fetches and calculates the fiat value of NFTs based on their liquidity receipts.
     ///
     /// This method:
@@ -115,6 +132,24 @@ impl NonFungiblePricesClient {
         currency: FiatCurrency,
         force_fetch: bool,
     ) -> Result<NonFungibleTokenPricesTable> {
+        self.fetch_nft_fiat_values_using_token_price_services(
+            state_version,
+            addresses,
+            currency,
+            TokenPriceServices::default(),
+            force_fetch,
+        )
+        .await
+    }
+
+    pub async fn fetch_nft_fiat_values_using_token_price_services(
+        &self,
+        state_version: u64,
+        addresses: HashSet<NonFungibleGlobalId>,
+        currency: FiatCurrency,
+        token_price_services: TokenPriceServices,
+        force_fetch: bool,
+    ) -> Result<NonFungibleTokenPricesTable> {
         let liquidity_receipts = self
             .fetch_liquidity_receipts(state_version, addresses, force_fetch)
             .await?;
@@ -130,10 +165,11 @@ impl NonFungiblePricesClient {
             .collect();
 
         let fungible_prices = self
-            .fetch_fungible_fiat_values(
+            .fetch_fungible_fiat_values_using_token_price_services(
                 backing_tokens,
                 HashSet::new(),
                 currency,
+                token_price_services,
                 force_fetch,
             )
             .await?;
