@@ -160,7 +160,7 @@ impl NonFungiblePricesClient {
             .flat_map(|item| {
                 item.resources
                     .iter()
-                    .map(|resource| resource.address.clone())
+                    .map(|resource| resource.address)
             })
             .collect();
 
