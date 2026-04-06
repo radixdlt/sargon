@@ -1,13 +1,13 @@
 use crate::prelude::*;
 
 decl_identified_vec_of!(
-    /// A collection of user-managed external account addresses with custom names.
+    /// A collection of user-managed addresses with custom names.
     AddressBook,
     AddressBookEntry
 );
 
 impl AddressBook {
-    pub fn contains_address(&self, address: &AccountAddress) -> bool {
+    pub fn contains_address(&self, address: &Address) -> bool {
         self.contains_id(*address)
     }
 
@@ -17,7 +17,7 @@ impl AddressBook {
 
     pub fn update_entry(
         &mut self,
-        address: AccountAddress,
+        address: Address,
         name: DisplayName,
         note: Option<String>,
     ) -> bool {
@@ -26,7 +26,7 @@ impl AddressBook {
         })
     }
 
-    pub fn remove_by_address(&mut self, address: &AccountAddress) -> bool {
+    pub fn remove_by_address(&mut self, address: &Address) -> bool {
         self.remove_id(address).is_some()
     }
 }
@@ -88,7 +88,7 @@ mod tests {
     fn update_missing_entry_returns_false() {
         let mut sut = SUT::new();
         assert!(!sut.update_entry(
-            AccountAddress::sample(),
+            Address::sample(),
             DisplayName::sample(),
             None
         ));

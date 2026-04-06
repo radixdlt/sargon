@@ -52,6 +52,17 @@ impl ProfileStateHolder {
         })
     }
 
+    pub fn account_address_book_on_current_network(
+        &self,
+    ) -> Result<Vec<AddressBookEntry>> {
+        self.address_book_on_current_network().map(|entries| {
+            entries
+                .into_iter()
+                .filter(|entry| entry.address.is_account())
+                .collect()
+        })
+    }
+
     pub fn token_price_services_on_current_network(
         &self,
     ) -> Result<TokenPriceServices> {
@@ -62,7 +73,7 @@ impl ProfileStateHolder {
 
     pub fn address_book_entry_by_address(
         &self,
-        address: AccountAddress,
+        address: Address,
     ) -> Result<AddressBookEntry> {
         self.try_access_profile_with(|p| {
             let network = p.current_network()?;

@@ -6,10 +6,18 @@ impl SargonOS {
         self.profile_state_holder.address_book_on_current_network()
     }
 
+    /// Returns only account address book entries on the current network.
+    pub fn account_address_book_on_current_network(
+        &self,
+    ) -> Result<Vec<AddressBookEntry>> {
+        self.profile_state_holder
+            .account_address_book_on_current_network()
+    }
+
     /// Looks up an address book entry by address on the current network.
     pub fn address_book_entry_by_address(
         &self,
-        address: AccountAddress,
+        address: Address,
     ) -> Result<AddressBookEntry> {
         self.profile_state_holder
             .address_book_entry_by_address(address)
@@ -21,7 +29,7 @@ impl SargonOS {
     /// Returns false if an entry with this address already exists.
     pub async fn add_address_book_entry(
         &self,
-        address: AccountAddress,
+        address: Address,
         name: DisplayName,
         note: Option<String>,
     ) -> Result<bool> {
@@ -49,7 +57,7 @@ impl SargonOS {
     /// Returns false if no entry exists for the address.
     pub async fn update_address_book_entry(
         &self,
-        address: AccountAddress,
+        address: Address,
         name: DisplayName,
         note: Option<String>,
     ) -> Result<bool> {
@@ -80,7 +88,7 @@ impl SargonOS {
     /// Returns false if no entry exists for the address.
     pub async fn delete_address_book_entry(
         &self,
-        address: AccountAddress,
+        address: Address,
     ) -> Result<bool> {
         self.update_profile_with(|profile| {
             let current_network = profile.current_network_id();
@@ -112,7 +120,7 @@ mod tests {
     #[actix_rt::test]
     async fn add_address_book_entry_adds_new_entry() {
         let os = SUT::fast_boot().await;
-        let address = AccountAddress::sample_mainnet_other();
+        let address = Address::Resource(ResourceAddress::sample_mainnet_xrd());
         let did_add = os
             .with_timeout(|x| {
                 x.add_address_book_entry(
@@ -131,9 +139,42 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn account_address_book_on_current_network_filters_non_accounts() {
+        let os = SUT::fast_boot().await;
+        let account_address =
+            Address::Account(AccountAddress::sample_mainnet_other());
+        let resource_address =
+            Address::Resource(ResourceAddress::sample_mainnet_xrd());
+
+        os.with_timeout(|x| {
+            x.add_address_book_entry(
+                account_address,
+                DisplayName::sample(),
+                Some("Account".to_owned()),
+            )
+        })
+        .await
+        .unwrap();
+        os.with_timeout(|x| {
+            x.add_address_book_entry(
+                resource_address,
+                DisplayName::sample_other(),
+                Some("Resource".to_owned()),
+            )
+        })
+        .await
+        .unwrap();
+
+        let entries = os.account_address_book_on_current_network().unwrap();
+
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].address, account_address);
+    }
+
+    #[actix_rt::test]
     async fn add_address_book_entry_duplicate_returns_false() {
         let os = SUT::fast_boot().await;
-        let address = AccountAddress::sample_mainnet_other();
+        let address = Address::Resource(ResourceAddress::sample_mainnet_xrd());
 
         let _ = os
             .with_timeout(|x| {
@@ -163,7 +204,8 @@ mod tests {
     #[actix_rt::test]
     async fn update_address_book_entry_updates_and_bumps_updated_at() {
         let os = SUT::fast_boot().await;
-        let address = AccountAddress::sample_mainnet_other();
+        let address =
+            Address::Identity(IdentityAddress::sample_mainnet_other());
         os.with_timeout(|x| {
             x.add_address_book_entry(
                 address,
@@ -198,7 +240,7 @@ mod tests {
     #[actix_rt::test]
     async fn update_or_delete_missing_address_book_entry_returns_false() {
         let os = SUT::fast_boot().await;
-        let address = AccountAddress::sample_mainnet_other();
+        let address = Address::Locker(LockerAddress::sample_mainnet_other());
 
         let did_update = os
             .with_timeout(|x| {
@@ -222,7 +264,8 @@ mod tests {
     #[actix_rt::test]
     async fn address_book_cross_network_is_rejected() {
         let os = SUT::fast_boot().await;
-        let wrong_network_address = AccountAddress::sample_stokenet();
+        let wrong_network_address =
+            Address::Validator(ValidatorAddress::sample_stokenet());
 
         let err = os
             .with_timeout(|x| {
