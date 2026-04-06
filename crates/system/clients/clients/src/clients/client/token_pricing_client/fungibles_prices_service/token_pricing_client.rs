@@ -84,6 +84,7 @@ fn insert_price(
 }
 
 /// Client for fetching and caching scoped fungible token prices.
+#[derive(Clone)]
 pub struct FungiblesPricesClient {
     pub(crate) http_client: Arc<HttpClient>,
     pub(crate) file_system_client: Arc<FileSystemClient>,
@@ -102,6 +103,36 @@ impl FungiblesPricesClient {
 }
 
 impl FungiblesPricesClient {
+    pub async fn fetch_fungible_fiat_values(
+        &self,
+        tokens: HashSet<ResourceAddress>,
+        lsus: HashSet<ResourceAddress>,
+        currency: FiatCurrency,
+        force_fetch: bool,
+    ) -> Result<PerTokenPrices> {
+        self.get_prices_for_request(
+            FungiblePricesRequest::new(currency, tokens, lsus),
+            force_fetch,
+        )
+        .await
+    }
+
+    pub async fn fetch_fungible_fiat_values_using_token_price_services(
+        &self,
+        tokens: HashSet<ResourceAddress>,
+        lsus: HashSet<ResourceAddress>,
+        currency: FiatCurrency,
+        token_price_services: TokenPriceServices,
+        force_fetch: bool,
+    ) -> Result<PerTokenPrices> {
+        self.get_prices_for_request_using_token_price_services(
+            FungiblePricesRequest::new(currency, tokens, lsus),
+            token_price_services,
+            force_fetch,
+        )
+        .await
+    }
+
     /// Fetches token prices for a scoped request.
     ///
     /// Uses a 5-minute cache keyed by (currency, tokens, lsus).
@@ -134,15 +165,12 @@ impl FungiblesPricesClient {
             }
         }
 
-        let remote_prices = if token_price_services.is_default() {
-            self.fetch_remote_token_prices(&request).await?
-        } else {
-            self.fetch_remote_token_prices_using_token_price_services(
+        let remote_prices = self
+            .fetch_remote_token_prices_using_token_price_services(
                 &request,
                 token_price_services,
             )
-            .await?
-        };
+            .await?;
         _ = self.store_prices(&request, &remote_prices).await;
         Ok(remote_prices)
     }

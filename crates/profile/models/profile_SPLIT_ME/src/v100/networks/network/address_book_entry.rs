@@ -4,7 +4,7 @@ use time_utils::now;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct AddressBookEntry {
-    pub address: AccountAddress,
+    pub address: Address,
     pub name: DisplayName,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
@@ -16,7 +16,7 @@ impl AddressBookEntry {
     pub const NOTE_MAX_LEN: usize = 140;
 
     pub fn new(
-        address: AccountAddress,
+        address: impl Into<Address>,
         name: DisplayName,
         note: Option<String>,
     ) -> Self {
@@ -25,14 +25,14 @@ impl AddressBookEntry {
     }
 
     pub fn with_timestamps(
-        address: AccountAddress,
+        address: impl Into<Address>,
         name: DisplayName,
         note: Option<String>,
         created_at: Timestamp,
         updated_at: Timestamp,
     ) -> Self {
         Self {
-            address,
+            address: address.into(),
             name,
             note: Self::normalize_note(note),
             created_at,
@@ -58,7 +58,7 @@ impl AddressBookEntry {
 }
 
 impl Identifiable for AddressBookEntry {
-    type ID = AccountAddress;
+    type ID = Address;
 
     fn id(&self) -> Self::ID {
         self.address
@@ -76,7 +76,7 @@ impl HasSampleValues for AddressBookEntry {
         Self::with_timestamps(
             AccountAddress::sample_mainnet(),
             DisplayName::sample(),
-            Some("Main account at exchange".to_owned()),
+            Some("Exchange address".to_owned()),
             Timestamp::sample(),
             Timestamp::sample(),
         )
@@ -84,9 +84,9 @@ impl HasSampleValues for AddressBookEntry {
 
     fn sample_other() -> Self {
         Self::with_timestamps(
-            AccountAddress::sample_stokenet(),
+            ResourceAddress::sample_stokenet_gum(),
             DisplayName::sample_other(),
-            Some("Friend wallet".to_owned()),
+            Some("Shared address".to_owned()),
             Timestamp::sample_other(),
             Timestamp::sample_other(),
         )

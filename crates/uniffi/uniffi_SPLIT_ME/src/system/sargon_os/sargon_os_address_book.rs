@@ -12,9 +12,19 @@ impl SargonOS {
         Ok(entries.into_iter().map(Into::into).collect())
     }
 
+    pub fn account_address_book_on_current_network(
+        &self,
+    ) -> Result<Vec<AddressBookEntry>> {
+        let entries: Vec<sargon::AddressBookEntry> = self
+            .wrapped
+            .account_address_book_on_current_network()
+            .into_result()?;
+        Ok(entries.into_iter().map(Into::into).collect())
+    }
+
     pub fn address_book_entry_by_address(
         &self,
-        address: AccountAddress,
+        address: Address,
     ) -> Result<AddressBookEntry> {
         let entry: sargon::AddressBookEntry = self
             .wrapped
@@ -28,10 +38,10 @@ impl SargonOS {
 impl SargonOS {
     pub async fn add_address_book_entry(
         &self,
-        address: AccountAddress,
+        address: Address,
         name: DisplayName,
         note: Option<String>,
-    ) -> Result<bool> {
+    ) -> Result<()> {
         self.wrapped
             .add_address_book_entry(
                 address.into_internal(),
@@ -44,7 +54,7 @@ impl SargonOS {
 
     pub async fn update_address_book_entry(
         &self,
-        address: AccountAddress,
+        address: Address,
         name: DisplayName,
         note: Option<String>,
     ) -> Result<bool> {
@@ -60,7 +70,7 @@ impl SargonOS {
 
     pub async fn delete_address_book_entry(
         &self,
-        address: AccountAddress,
+        address: Address,
     ) -> Result<bool> {
         self.wrapped
             .delete_address_book_entry(address.into_internal())

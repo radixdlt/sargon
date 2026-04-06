@@ -1102,6 +1102,9 @@ pub enum CommonError {
 
     #[error("No derived factor instances for factor source")]
     NoDerivedMFAFactorInstances = 10322,
+
+    #[error("Address book entry already exists with alias: {alias}")]
+    AddressBookEntryAlreadyExists { alias: String } = 10323,
 }
 
 impl CommonError {
