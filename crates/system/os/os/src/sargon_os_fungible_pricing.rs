@@ -15,7 +15,7 @@ impl SargonOS {
         let token_price_services = self
             .profile_state_holder
             .token_price_services_on_current_network()?;
-        self.nft_prices_client
+        self.fungible_prices_client
             .fetch_fungible_fiat_values_using_token_price_services(
                 tokens,
                 lsus,

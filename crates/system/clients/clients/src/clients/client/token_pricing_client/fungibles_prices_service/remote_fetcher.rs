@@ -5,10 +5,11 @@ impl FungiblesPricesClient {
         &self,
         request_body: &FungiblePricesRequest,
     ) -> Result<PerTokenPrices> {
-        let production_url =
-            TokenPriceService::production().scoped_tokens_url()?;
-        self.fetch_remote_token_prices_from_url(request_body, production_url)
-            .await
+        self.fetch_remote_token_prices_using_token_price_services(
+            request_body,
+            TokenPriceServices::default(),
+        )
+        .await
     }
 
     pub async fn fetch_remote_token_prices_using_token_price_services(

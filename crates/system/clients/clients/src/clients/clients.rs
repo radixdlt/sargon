@@ -13,6 +13,7 @@ pub struct Clients {
     pub profile_state_change: ProfileStateChangeClient,
     pub factor_instances_cache: FactorInstancesCacheClient,
     pub arculus_wallet_client: ArculusWalletClient,
+    pub fungible_prices_client: FungiblesPricesClient,
     pub nft_prices_client: NonFungiblePricesClient,
     pub access_controller_state_repository_client:
         AccessControllerStateRepositoryClient,
@@ -39,9 +40,14 @@ impl Clients {
             drivers.arculus_csdk_driver.clone(),
             drivers.nfc_tag_driver.clone(),
         );
+        let fungible_prices_client = FungiblesPricesClient::new(
+            Arc::new(http_client.clone()),
+            file_system.clone(),
+        );
         let nft_prices_client = NonFungiblePricesClient::new(
             Arc::new(http_client.clone()),
             file_system.clone(),
+            fungible_prices_client.clone(),
         );
         let access_controller_cache_client =
             AccessControllerDetailsCacheClient::new(file_system.clone());
@@ -61,6 +67,7 @@ impl Clients {
             profile_state_change: profile_change,
             factor_instances_cache,
             arculus_wallet_client,
+            fungible_prices_client,
             nft_prices_client,
             access_controller_state_repository_client,
         }

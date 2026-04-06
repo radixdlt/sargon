@@ -26,13 +26,12 @@ impl SargonOS {
 
 impl SargonOS {
     /// Adds a new address book entry on the current network.
-    /// Returns false if an entry with this address already exists.
     pub async fn add_address_book_entry(
         &self,
         address: Address,
         name: DisplayName,
         note: Option<String>,
-    ) -> Result<bool> {
+    ) -> Result<()> {
         self.update_profile_with(|profile| {
             let current_network = profile.current_network_id();
             if address.network_id() != current_network {
@@ -43,12 +42,22 @@ impl SargonOS {
                 });
             }
 
+            if let Some(alias) = profile
+                .current_network()?
+                .address_book
+                .get_id(address)
+                .map(|entry| entry.name.to_string())
+            {
+                return Err(CommonError::AddressBookEntryAlreadyExists {
+                    alias,
+                });
+            }
+
             let entry = AddressBookEntry::new(address, name, note.clone());
-            let mut did_add = false;
             profile.networks.update_with(current_network, |network| {
-                did_add = network.address_book.add_entry(entry.clone());
+                network.address_book.add_entry(entry.clone());
             });
-            Ok(did_add)
+            Ok(())
         })
         .await
     }
@@ -121,18 +130,15 @@ mod tests {
     async fn add_address_book_entry_adds_new_entry() {
         let os = SUT::fast_boot().await;
         let address = Address::Resource(ResourceAddress::sample_mainnet_xrd());
-        let did_add = os
-            .with_timeout(|x| {
-                x.add_address_book_entry(
-                    address,
-                    DisplayName::sample(),
-                    Some("Exchange".to_owned()),
-                )
-            })
-            .await
-            .unwrap();
-
-        assert!(did_add);
+        os.with_timeout(|x| {
+            x.add_address_book_entry(
+                address,
+                DisplayName::sample(),
+                Some("Exchange".to_owned()),
+            )
+        })
+        .await
+        .unwrap();
         let stored = os.address_book_entry_by_address(address).unwrap();
         assert_eq!(stored.name, DisplayName::sample());
         assert_eq!(stored.note, Some("Exchange".to_owned()));
@@ -172,22 +178,21 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn add_address_book_entry_duplicate_returns_false() {
+    async fn add_address_book_entry_duplicate_returns_alias_error() {
         let os = SUT::fast_boot().await;
         let address = Address::Resource(ResourceAddress::sample_mainnet_xrd());
 
-        let _ = os
-            .with_timeout(|x| {
-                x.add_address_book_entry(
-                    address,
-                    DisplayName::sample(),
-                    Some("Exchange".to_owned()),
-                )
-            })
-            .await
-            .unwrap();
+        os.with_timeout(|x| {
+            x.add_address_book_entry(
+                address,
+                DisplayName::sample(),
+                Some("Exchange".to_owned()),
+            )
+        })
+        .await
+        .unwrap();
 
-        let did_add = os
+        let err = os
             .with_timeout(|x| {
                 x.add_address_book_entry(
                     address,
@@ -196,9 +201,14 @@ mod tests {
                 )
             })
             .await
-            .unwrap();
+            .unwrap_err();
 
-        assert!(!did_add);
+        assert_eq!(
+            err,
+            CommonError::AddressBookEntryAlreadyExists {
+                alias: DisplayName::sample().to_string(),
+            }
+        );
     }
 
     #[actix_rt::test]

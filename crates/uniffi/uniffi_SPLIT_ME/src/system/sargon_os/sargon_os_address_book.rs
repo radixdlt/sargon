@@ -41,7 +41,7 @@ impl SargonOS {
         address: Address,
         name: DisplayName,
         note: Option<String>,
-    ) -> Result<bool> {
+    ) -> Result<()> {
         self.wrapped
             .add_address_book_entry(
                 address.into_internal(),

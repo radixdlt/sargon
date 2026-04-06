@@ -18,7 +18,13 @@ pub type NonFungibleTokenPricesTable = HashMap<NonFungibleGlobalId, Decimal192>;
 /// # Example
 ///
 /// ```ignore
-/// let client = NonFungiblePricesClient::new(http_client, file_system);
+/// let fungibles_prices_client =
+///     FungiblesPricesClient::new(http_client.clone(), file_system.clone());
+/// let client = NonFungiblePricesClient::new(
+///     http_client,
+///     file_system,
+///     fungibles_prices_client,
+/// );
 ///
 /// let nft_ids = HashSet::from([nft_global_id1, nft_global_id2]);
 /// let prices = client
@@ -39,51 +45,17 @@ impl NonFungiblePricesClient {
     pub fn new(
         http_client: Arc<HttpClient>,
         file_system_client: Arc<FileSystemClient>,
+        fungibles_prices_client: FungiblesPricesClient,
     ) -> Self {
         Self {
             http_client: http_client.clone(),
             file_system_client: file_system_client.clone(),
-            fungibles_prices_client: FungiblesPricesClient::new(
-                http_client,
-                file_system_client,
-            ),
+            fungibles_prices_client,
         }
     }
 }
 
 impl NonFungiblePricesClient {
-    pub async fn fetch_fungible_fiat_values(
-        &self,
-        tokens: HashSet<ResourceAddress>,
-        lsus: HashSet<ResourceAddress>,
-        currency: FiatCurrency,
-        force_fetch: bool,
-    ) -> Result<PerTokenPrices> {
-        self.fungibles_prices_client
-            .get_prices_for_request(
-                FungiblePricesRequest::new(currency, tokens, lsus),
-                force_fetch,
-            )
-            .await
-    }
-
-    pub async fn fetch_fungible_fiat_values_using_token_price_services(
-        &self,
-        tokens: HashSet<ResourceAddress>,
-        lsus: HashSet<ResourceAddress>,
-        currency: FiatCurrency,
-        token_price_services: TokenPriceServices,
-        force_fetch: bool,
-    ) -> Result<PerTokenPrices> {
-        self.fungibles_prices_client
-            .get_prices_for_request_using_token_price_services(
-                FungiblePricesRequest::new(currency, tokens, lsus),
-                token_price_services,
-                force_fetch,
-            )
-            .await
-    }
-
     /// Fetches and calculates the fiat value of NFTs based on their liquidity receipts.
     ///
     /// This method:
@@ -163,10 +135,13 @@ impl NonFungiblePricesClient {
             .collect();
 
         let fungible_prices = self
-            .fetch_fungible_fiat_values_using_token_price_services(
-                backing_tokens,
-                HashSet::new(),
-                currency,
+            .fungibles_prices_client
+            .get_prices_for_request_using_token_price_services(
+                FungiblePricesRequest::new(
+                    currency,
+                    backing_tokens,
+                    HashSet::new(),
+                ),
                 token_price_services,
                 force_fetch,
             )

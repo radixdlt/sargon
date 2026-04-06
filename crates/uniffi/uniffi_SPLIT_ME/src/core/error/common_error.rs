@@ -114,6 +114,9 @@ pub enum CommonError {
     GatewaySubmitDuplicateTX {
         intent_hash: String,
     },
+    AddressBookEntryAlreadyExists {
+        alias: String,
+    },
     UnableToLoadMnemonicFromSecureStorage {
         bad_value: String,
     },
@@ -380,6 +383,11 @@ impl CommonError {
                     intent_hash: intent_hash.clone(),
                 }
             }
+            AddressBookEntryAlreadyExists { alias } => {
+                InternalCommonError::AddressBookEntryAlreadyExists {
+                    alias: alias.clone(),
+                }
+            }
             UnableToLoadMnemonicFromSecureStorage { bad_value } => {
                 InternalCommonError::UnableToLoadMnemonicFromSecureStorage {
                     bad_value: bad_value.clone(),
@@ -601,6 +609,11 @@ impl From<InternalCommonError> for CommonError {
             InternalCommonError::GatewaySubmitDuplicateTX { intent_hash } => {
                 GatewaySubmitDuplicateTX {
                     intent_hash: intent_hash.clone(),
+                }
+            }
+            InternalCommonError::AddressBookEntryAlreadyExists { alias } => {
+                AddressBookEntryAlreadyExists {
+                    alias: alias.clone(),
                 }
             }
             InternalCommonError::UnableToLoadMnemonicFromSecureStorage {
