@@ -32,6 +32,7 @@ pub mod prelude {
     pub use crate::system::*;
     pub use crate::types::*;
     pub use crate::wrapped_radix_engine_toolkit::*;
+    pub use ::profile::prelude::RelayServiceUrl;
 
     pub use radix_engine_toolkit::functions::{
         transaction_v1::manifest::{
@@ -82,6 +83,14 @@ uniffi::custom_type!(Url, String, {
     remote,
     try_lift: |val| Ok(Url::parse(&val)?),
     lower: |obj| obj.into(),
+});
+
+// Relay service URLs are kept as validated strings to preserve the exact text
+// hosts provided while still validating at the Rust boundary.
+uniffi::custom_type!(RelayServiceUrl, String, {
+    remote,
+    try_lift: |val| Ok(RelayServiceUrl::try_from(val)?),
+    lower: |obj| obj.to_string(),
 });
 
 // `Timestamp` gets converted to a `String` to pass across the FFI.
