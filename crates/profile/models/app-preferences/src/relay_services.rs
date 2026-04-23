@@ -10,14 +10,7 @@ decl_identified_vec_of!(
     RelayService
 );
 
-#[derive(
-    Debug,
-    Clone,
-    PartialEq,
-    Eq,
-    Hash,
-    derive_more::Display,
-)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, derive_more::Display)]
 #[display("{}", self.0)]
 pub struct RelayServiceUrl(String);
 
@@ -60,7 +53,10 @@ impl From<RelayServiceUrl> for String {
 }
 
 impl Serialize for RelayServiceUrl {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    fn serialize<S>(
+        &self,
+        serializer: S,
+    ) -> std::result::Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
@@ -261,11 +257,8 @@ mod tests {
 
     #[test]
     fn relay_service_preserves_exact_url_string() {
-        let sut = RelayService::parse(
-            "Custom Relay",
-            "https://relay.example",
-        )
-        .unwrap();
+        let sut = RelayService::parse("Custom Relay", "https://relay.example")
+            .unwrap();
 
         assert_eq!(sut.url.as_str(), "https://relay.example");
         assert_eq!(
@@ -279,26 +272,21 @@ mod tests {
 
     #[test]
     fn relay_service_identity_still_treats_root_urls_as_equal() {
-        let without_trailing_slash = RelayService::parse(
-            "Custom Relay",
-            "https://relay.example",
-        )
-        .unwrap();
-        let with_trailing_slash = RelayService::parse(
-            "Custom Relay",
-            "https://relay.example/",
-        )
-        .unwrap();
+        let without_trailing_slash =
+            RelayService::parse("Custom Relay", "https://relay.example")
+                .unwrap();
+        let with_trailing_slash =
+            RelayService::parse("Custom Relay", "https://relay.example/")
+                .unwrap();
 
-        assert_eq!(
-            without_trailing_slash.id(),
-            with_trailing_slash.id()
-        );
+        assert_eq!(without_trailing_slash.id(), with_trailing_slash.id());
     }
 
     #[test]
     fn relay_service_url_deserialization_still_validates() {
-        assert!(serde_json::from_value::<RelayServiceUrl>(json!("not a url"))
-            .is_err());
+        assert!(
+            serde_json::from_value::<RelayServiceUrl>(json!("not a url"))
+                .is_err()
+        );
     }
 }
