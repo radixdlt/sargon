@@ -109,10 +109,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_add_relay_service_adds_service() {
         let os = SUT::fast_boot().await;
-        let custom = RelayService::new(
+        let custom = RelayService::parse(
             "Custom Relay",
-            Url::parse("https://relay.custom.example/api/v1").unwrap(),
-        );
+            "https://relay.custom.example/api/v1",
+        )
+        .unwrap();
 
         let did_add = os
             .with_timeout(|x| x.add_relay_service(custom.clone()))
@@ -120,7 +121,7 @@ mod tests {
             .unwrap();
 
         assert!(did_add);
-        assert!(os.relay_services().unwrap().has_url(custom.url));
+        assert!(os.relay_services().unwrap().has_url(custom.id()));
     }
 
     #[actix_rt::test]
@@ -141,10 +142,11 @@ mod tests {
     #[actix_rt::test]
     async fn test_delete_relay_service_deletes_other_service() {
         let os = SUT::fast_boot().await;
-        let custom = RelayService::new(
+        let custom = RelayService::parse(
             "Custom Relay",
-            Url::parse("https://relay.delete.example/api/v1").unwrap(),
-        );
+            "https://relay.delete.example/api/v1",
+        )
+        .unwrap();
 
         os.with_timeout(|x| x.add_relay_service(custom.clone()))
             .await
@@ -156,6 +158,6 @@ mod tests {
             .unwrap();
 
         assert!(did_delete);
-        assert!(!os.relay_services().unwrap().has_url(custom.url));
+        assert!(!os.relay_services().unwrap().has_url(custom.id()));
     }
 }

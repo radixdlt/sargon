@@ -41,6 +41,18 @@ imports = ["okhttp3.HttpUrl", "okhttp3.HttpUrl.Companion.toHttpUrl"]
 into_custom = "{}.toHttpUrl()"
 from_custom = "{}.toString()"
 
+[bindings.swift.custom_types.RelayServiceUrl]
+type_name = "String"
+imports = []
+into_custom = "{}"
+from_custom = "{}"
+
+[bindings.kotlin.custom_types.RelayServiceUrl]
+type_name = "String"
+imports = []
+into_custom = "{}"
+from_custom = "{}"
+
 [bindings.swift.custom_types.Timestamp]
 type_name = "Date"
 imports = ["Foundation"]

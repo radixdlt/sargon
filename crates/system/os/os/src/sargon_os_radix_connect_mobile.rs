@@ -38,7 +38,7 @@ impl SargonOS {
         let relay_service_url_resolver = Arc::new(move || {
             profile_state_holder
                 .current_relay_service()
-                .map(|service| service.url)
+                .map(|service| service.url.parsed())
         });
 
         Arc::new(RadixConnectMobile::new_with_relay_service_url_resolver(
@@ -92,7 +92,7 @@ mod tests {
             .await
             .unwrap();
 
-        let first_relay_url = os.current_relay_service().unwrap().url;
+        let first_relay_url = os.current_relay_service().unwrap().id();
         mobile
             .send_dapp_interaction_response(
                 RadixConnectMobileWalletResponse::sample(),
@@ -103,7 +103,7 @@ mod tests {
         os.change_current_relay_service(RelayService::sample_other())
             .await
             .unwrap();
-        let second_relay_url = os.current_relay_service().unwrap().url;
+        let second_relay_url = os.current_relay_service().unwrap().id();
         assert_ne!(first_relay_url, second_relay_url);
 
         mobile

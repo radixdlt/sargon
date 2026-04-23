@@ -45,12 +45,12 @@ impl RadixConnectMobile {
     pub fn new(
         networking_driver: Arc<dyn NetworkingDriver>,
         session_storage: Arc<dyn RadixConnectMobileSessionStorage>,
-        relay_service_url: Url,
+        relay_service_url: RelayServiceUrl,
     ) -> Self {
         Self::new_with_relay_service_url_resolver(
             networking_driver,
             session_storage,
-            Arc::new(move || Ok(relay_service_url.clone())),
+            Arc::new(move || Ok(relay_service_url.parsed())),
         )
     }
 }
