@@ -11,13 +11,13 @@ impl RadixNameService {
     #[uniffi::constructor]
     pub fn new(
         networking_driver: Arc<dyn NetworkingDriver>,
-        network_id: NetworkID,
+        gateway: Gateway,
     ) -> Result<Self> {
         let wrapped = InternalRadixNameService::new_xrd_domains(
             Arc::new(NetworkingDriverAdapter {
                 wrapped: networking_driver,
             }),
-            network_id.into(),
+            gateway.into_internal(),
         )
         .into_result()?;
 

@@ -80,9 +80,11 @@ mod fetch_tests {
                 );
             });
 
-        let sut =
-            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
-                .unwrap();
+        let sut = SUT::new_xrd_domains(
+            Arc::new(mock_antenna),
+            Gateway::from(NetworkID::Mainnet),
+        )
+        .unwrap();
 
         let domain = RnsDomain::new("bakirci.xrd".to_owned());
         let docket = Docket::wildcard_receiver();

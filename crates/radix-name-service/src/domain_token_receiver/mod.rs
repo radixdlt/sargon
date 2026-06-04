@@ -115,9 +115,11 @@ mod pub_api_tests {
             vec![domain_body.into(), location_body.into(), record_body.into()],
         );
 
-        let sut =
-            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
-                .unwrap();
+        let sut = SUT::new_xrd_domains(
+            Arc::new(mock_antenna),
+            Gateway::from(NetworkID::Mainnet),
+        )
+        .unwrap();
 
         let domain = RnsDomain::new("bakirci.xrd".to_owned());
         let result = sut

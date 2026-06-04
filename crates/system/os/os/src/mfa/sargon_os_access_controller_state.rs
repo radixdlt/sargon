@@ -4,7 +4,7 @@ impl SargonOS {
     pub async fn fetch_all_access_controllers_details(
         &self,
     ) -> Result<Vec<AccessControllerStateDetails>> {
-        let network_id = self.profile_state_holder.current_network_id()?;
+        let gateway = self.current_gateway()?;
         let accounts =
             self.profile_state_holder.accounts_on_current_network()?;
         let personas =
@@ -17,7 +17,7 @@ impl SargonOS {
 
         self.clients
             .access_controller_state_repository_client
-            .fetch_access_controllers_details(ac_addresses, network_id)
+            .fetch_access_controllers_details(ac_addresses, gateway)
             .await
     }
 

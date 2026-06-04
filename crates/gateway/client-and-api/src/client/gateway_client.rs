@@ -1,4 +1,4 @@
-use profile_gateway::prelude::Gateway;
+pub use profile_gateway::prelude::Gateway;
 
 use crate::prelude::*;
 

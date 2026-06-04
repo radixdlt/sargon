@@ -21,11 +21,11 @@ impl AccessControllerStateRepositoryClient {
     pub async fn fetch_access_controllers_details(
         &self,
         addresses: Vec<AccessControllerAddress>,
-        network_id: NetworkID,
+        gateway: Gateway,
     ) -> Result<Vec<AccessControllerStateDetails>> {
-        let gateway_client = GatewayClient::with_http_client(
-            self.http_client.clone(),
-            network_id,
+        let gateway_client = GatewayClient::with_gateway(
+            self.http_client.driver.clone(),
+            gateway,
         );
         let details = gateway_client
             .fetch_access_controllers_details(addresses.clone())
@@ -67,17 +67,52 @@ mod tests {
             AccessControllerAddress::sample(),
             AccessControllerAddress::sample_other(),
         ];
-        let network_id = NetworkID::Mainnet;
         let expected_details = vec![
             AccessControllerStateDetails::sample(),
             AccessControllerStateDetails::sample_other(),
         ];
 
         let result = sut
-            .fetch_access_controllers_details(addresses, network_id)
+            .fetch_access_controllers_details(
+                addresses,
+                Gateway::from(NetworkID::Mainnet),
+            )
             .await;
 
         pretty_assertions::assert_eq!(result.unwrap(), expected_details);
+    }
+
+    #[actix_rt::test]
+    async fn fetch_access_controllers_details_uses_custom_gateway_url() {
+        let mock_networking_driver =
+            MockNetworkingDriver::new_with_responses_and_spy(
+                vec![
+                    gateway_status_response(),
+                    state_entity_details_response(),
+                ],
+                |request, _| {
+                    assert_eq!(
+                        request.url.host_str(),
+                        Some("custom-mainnet.example")
+                    );
+                },
+            );
+        let http_client = HttpClient::new(Arc::new(mock_networking_driver));
+        let file_system = Arc::new(FileSystemClient::in_memory());
+        let cache_client = AccessControllerDetailsCacheClient::new(file_system);
+        let sut = SUT::new(http_client, cache_client);
+        let custom_gateway = Gateway::new(
+            "https://custom-mainnet.example/".to_string(),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+
+        let _ = sut
+            .fetch_access_controllers_details(
+                vec![AccessControllerAddress::sample()],
+                custom_gateway,
+            )
+            .await;
     }
 
     /// Creates a mock response for `GatewayStatusResponse`.

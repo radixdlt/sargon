@@ -94,9 +94,11 @@ mod fetch_tests {
                 );
             });
 
-        let sut =
-            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
-                .unwrap();
+        let sut = SUT::new_xrd_domains(
+            Arc::new(mock_antenna),
+            Gateway::from(NetworkID::Mainnet),
+        )
+        .unwrap();
 
         let domain = RnsDomain::new("bakirci.xrd".to_owned());
         let result = sut.fetch_domain_details(domain.clone()).await.unwrap();
@@ -108,6 +110,42 @@ mod fetch_tests {
             "#D32F2F".to_owned(),
         );
         assert_eq!(result, expected_domain_details);
+    }
+
+    #[actix_rt::test]
+    async fn check_domain_authenticity_uses_custom_gateway_url() {
+        let body = StateNonFungibleLocationResponse {
+            ledger_state: LedgerState::sample(),
+            resource_address: ResourceAddress::sample_mainnet(),
+            non_fungible_ids: vec![],
+        }
+        .serialize_to_bytes()
+        .unwrap();
+
+        let mock_antenna =
+            MockNetworkingDriver::with_spy(200, body, |request, _| {
+                assert_eq!(
+                    request.url.host_str(),
+                    Some("custom-mainnet.example")
+                );
+            });
+
+        let custom_gateway = Gateway::new(
+            "https://custom-mainnet.example/".to_string(),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+        let sut = SUT::new_xrd_domains(Arc::new(mock_antenna), custom_gateway)
+            .unwrap();
+
+        let _ = sut
+            .check_domain_authenticity(RnsDomainDetails::new(
+                RnsDomain::new("bakirci.xrd".to_owned()),
+                AccountAddress::sample_mainnet(),
+                "#FF5722".to_owned(),
+                "#D32F2F".to_owned(),
+            ))
+            .await;
     }
 
     #[actix_rt::test]
@@ -158,9 +196,11 @@ mod fetch_tests {
                 )
             });
 
-        let sut =
-            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
-                .unwrap();
+        let sut = SUT::new_xrd_domains(
+            Arc::new(mock_antenna),
+            Gateway::from(NetworkID::Mainnet),
+        )
+        .unwrap();
 
         let result =
             sut.check_domain_authenticity(domain_details.clone()).await;
@@ -202,9 +242,11 @@ mod fetch_tests {
 
         let mock_antenna = MockNetworkingDriver::new(200, body);
 
-        let sut =
-            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
-                .unwrap();
+        let sut = SUT::new_xrd_domains(
+            Arc::new(mock_antenna),
+            Gateway::from(NetworkID::Mainnet),
+        )
+        .unwrap();
 
         let result =
             sut.check_domain_authenticity(domain_details.clone()).await;
@@ -246,9 +288,11 @@ mod fetch_tests {
 
         let mock_antenna = MockNetworkingDriver::new(200, body);
 
-        let sut =
-            SUT::new_xrd_domains(Arc::new(mock_antenna), NetworkID::Mainnet)
-                .unwrap();
+        let sut = SUT::new_xrd_domains(
+            Arc::new(mock_antenna),
+            Gateway::from(NetworkID::Mainnet),
+        )
+        .unwrap();
 
         let result =
             sut.check_domain_authenticity(domain_details.clone()).await;
