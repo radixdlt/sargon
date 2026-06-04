@@ -493,6 +493,94 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn transaction_preview_uses_current_custom_gateway_url() {
+        let responses = prepare_preview_response(
+            LedgerState {
+                network: "".to_string(),
+                state_version: 0,
+                proposer_round_timestamp: "".to_string(),
+                epoch: 0,
+                round: 0,
+            },
+            TransactionPreviewResponse {
+                encoded_receipt: "".to_string(),
+                radix_engine_toolkit_receipt: Some(
+                    ScryptoSerializableToolkitTransactionReceipt::CommitSuccess {
+                        state_updates_summary: RETStateUpdatesSummary {
+                            new_entities: IndexSet::new(),
+                            metadata_updates: IndexMap::new(),
+                            non_fungible_data_updates: IndexMap::new(),
+                            newly_minted_non_fungibles: IndexSet::new(),
+                        },
+                        worktop_changes: IndexMap::new(),
+                        fee_summary: RETFeeSummary {
+                            execution_fees_in_xrd:
+                                radix_common::math::Decimal::zero().into(),
+                            finalization_fees_in_xrd:
+                                radix_common::math::Decimal::zero().into(),
+                            storage_fees_in_xrd:
+                                radix_common::math::Decimal::zero().into(),
+                            royalty_fees_in_xrd:
+                                radix_common::math::Decimal::zero().into(),
+                        },
+                        locked_fees: RETLockedFees {
+                            contingent:
+                                radix_common::math::Decimal::zero().into(),
+                            non_contingent:
+                                radix_common::math::Decimal::zero().into(),
+                        },
+                    },
+                ),
+                logs: vec![],
+                receipt: TransactionReceipt {
+                    status: TransactionReceiptStatus::Succeeded,
+                    error_message: None,
+                },
+            },
+        );
+        let mock_driver = MockNetworkingDriver::with_spy_multiple_bodies(
+            200,
+            responses,
+            |request, count| {
+                assert_eq!(
+                    request.url.host_str(),
+                    Some("custom-mainnet.example")
+                );
+                match count {
+                    0 => assert_eq!(
+                        request.url.path(),
+                        "/transaction/construction"
+                    ),
+                    1 => {
+                        assert_eq!(request.url.path(), "/transaction/preview")
+                    }
+                    _ => panic!("Unexpected request count: {}", count),
+                }
+            },
+        );
+        let os = prepare_os(mock_driver).await;
+        os.change_current_gateway(
+            Gateway::new(
+                "https://custom-mainnet.example/".to_string(),
+                NetworkID::Mainnet,
+            )
+            .unwrap(),
+        )
+        .await
+        .unwrap();
+
+        os.analyse_transaction_preview(
+            prepare_manifest_with_account_entity().instructions_string(),
+            Blobs::sample(),
+            true,
+            Nonce::sample(),
+            PublicKey::sample(),
+        )
+        .await
+        .unwrap();
+    }
+
+    #[actix_rt::test]
     async fn failed_preview_response_deposit_rules_error() {
         let mut responses: Vec<BagOfBytes> = vec![];
         let mut first_call_responses = prepare_preview_response(

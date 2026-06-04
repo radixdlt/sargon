@@ -222,6 +222,48 @@ mod tests {
         assert_eq!(result.1, vec![2]);
     }
 
+    #[actix_rt::test]
+    async fn poll_status_uses_current_custom_gateway_url() {
+        let mock_driver = MockNetworkingDriver::new_with_responses_and_spy(
+            vec![MockNetworkingDriverResponse::new_success(
+                TSR::sample_committed_success(),
+            )],
+            |request, _| {
+                assert_eq!(
+                    request.url.host_str(),
+                    Some("custom-mainnet.example")
+                );
+                assert_eq!(request.url.path(), "/transaction/status");
+            },
+        );
+
+        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
+
+        let os =
+            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+                .await
+                .unwrap()
+                .unwrap();
+        os.change_current_gateway(
+            Gateway::new(
+                "https://custom-mainnet.example/".to_string(),
+                NetworkID::Mainnet,
+            )
+            .unwrap(),
+        )
+        .await
+        .unwrap();
+
+        let result =
+            os.poll_transaction_status_with_delays(
+                TransactionIntentHash::sample(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(result.0, TransactionStatus::Success);
+    }
+
     // Creates a `MockNetworkingDriver` that returns the given list of responses sequentially,
     // and then call `poll_transaction_status` to get the result.
     async fn simulate_poll_status(

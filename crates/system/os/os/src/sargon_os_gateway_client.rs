@@ -6,14 +6,29 @@ use crate::prelude::*;
 impl SargonOS {
     /// Returns a new instance if the `GatewayClient` on the provided `network_id`.
     pub fn gateway_client_with(&self, network_id: NetworkID) -> GatewayClient {
-        GatewayClient::new(self.http_client.driver.clone(), network_id)
+        let gateway = self
+            .gateways()
+            .ok()
+            .and_then(|gateways| {
+                gateways
+                    .all()
+                    .into_iter()
+                    .find(|gateway| gateway.network.id == network_id)
+            })
+            .unwrap_or_else(|| Gateway::from(network_id));
+
+        GatewayClient::with_gateway(self.http_client.driver.clone(), gateway)
     }
 
     /// Returns a new instance if the `GatewayClient` on the current network's
     /// gateway alongside the network id as a tuple.
     pub fn gateway_client_on(&self) -> Result<(GatewayClient, NetworkID)> {
-        let network_id = self.current_network_id()?;
-        let client = self.gateway_client_with(network_id);
+        let gateway = self.current_gateway()?;
+        let network_id = gateway.network.id;
+        let client = GatewayClient::with_gateway(
+            self.http_client.driver.clone(),
+            gateway,
+        );
 
         Ok((client, network_id))
     }
@@ -71,6 +86,46 @@ mod tests {
 
         // ASSERT
         assert_eq!(client.gateway.network.id, NetworkID::Stokenet)
+    }
+
+    #[actix_rt::test]
+    pub async fn gateway_client_uses_current_custom_gateway_url() {
+        // ARRANGE
+        let sut = SUT::fast_boot().await;
+        let custom_gateway = Gateway::new(
+            "https://custom-mainnet.example/".to_string(),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+        sut.change_current_gateway(custom_gateway.clone())
+            .await
+            .unwrap();
+
+        // ACT
+        let client = sut.gateway_client().unwrap();
+
+        // ASSERT
+        assert_eq!(client.gateway, custom_gateway)
+    }
+
+    #[actix_rt::test]
+    pub async fn gateway_client_with_uses_current_custom_gateway_for_network() {
+        // ARRANGE
+        let sut = SUT::fast_boot().await;
+        let custom_gateway = Gateway::new(
+            "https://custom-stokenet.example/".to_string(),
+            NetworkID::Stokenet,
+        )
+        .unwrap();
+        sut.change_current_gateway(custom_gateway.clone())
+            .await
+            .unwrap();
+
+        // ACT
+        let client = sut.gateway_client_with(NetworkID::Stokenet);
+
+        // ASSERT
+        assert_eq!(client.gateway, custom_gateway)
     }
 
     #[actix_rt::test]

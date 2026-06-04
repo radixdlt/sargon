@@ -41,26 +41,29 @@ impl ApplyShieldTransactionsBuilderImpl {
     /// Creates a new instance of `ApplyShieldTransactionsBuilderImpl`, using
     /// SargonOS and its clients to init helpers.
     pub fn new(os: &SargonOS) -> Result<Self> {
-        os.profile().map(|profile| {
-            let networking_driver = os.http_client.driver.clone();
-            Self {
-                profile_view: Arc::new(
-                    ApplyShieldTransactionsProfileViewImpl::new(profile),
+        let profile = os.profile()?;
+        let gateways = os.gateways()?;
+        let networking_driver = os.http_client.driver.clone();
+
+        Ok(Self {
+            profile_view: Arc::new(
+                ApplyShieldTransactionsProfileViewImpl::new(profile),
+            ),
+            xrd_balances_fetcher: Arc::new(
+                ApplyShieldTransactionsXrdBalancesFetcherImpl::new(
+                    networking_driver.clone(),
+                    gateways.clone(),
                 ),
-                xrd_balances_fetcher: Arc::new(
-                    ApplyShieldTransactionsXrdBalancesFetcherImpl::new(
-                        networking_driver.clone(),
-                    ),
+            ),
+            poly_manifest_builder: Arc::new(
+                ApplyShieldTransactionsPolyManifestBuilderImpl::new(),
+            ),
+            transaction_intent_builder: Arc::new(
+                ApplyShieldTransactionsTransactionIntentBuilderImpl::new(
+                    networking_driver,
+                    gateways,
                 ),
-                poly_manifest_builder: Arc::new(
-                    ApplyShieldTransactionsPolyManifestBuilderImpl::new(),
-                ),
-                transaction_intent_builder: Arc::new(
-                    ApplyShieldTransactionsTransactionIntentBuilderImpl::new(
-                        networking_driver,
-                    ),
-                ),
-            }
+            ),
         })
     }
 

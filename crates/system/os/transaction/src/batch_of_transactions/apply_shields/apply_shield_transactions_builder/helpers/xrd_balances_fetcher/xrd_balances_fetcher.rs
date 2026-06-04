@@ -28,11 +28,18 @@ pub trait ApplyShieldTransactionsXrdBalancesFetcher: Send + Sync {
 
 pub struct ApplyShieldTransactionsXrdBalancesFetcherImpl {
     networking_driver: Arc<dyn NetworkingDriver>,
+    gateways: SavedGateways,
 }
 
 impl ApplyShieldTransactionsXrdBalancesFetcherImpl {
-    pub fn new(networking_driver: Arc<dyn NetworkingDriver>) -> Self {
-        Self { networking_driver }
+    pub fn new(
+        networking_driver: Arc<dyn NetworkingDriver>,
+        gateways: SavedGateways,
+    ) -> Self {
+        Self {
+            networking_driver,
+            gateways,
+        }
     }
 
     /// Fetches XRD balances of AccessControllers of securified **Personas**
@@ -44,8 +51,11 @@ impl ApplyShieldTransactionsXrdBalancesFetcherImpl {
         addresses: IndexSet<AddressOfPayerOfShieldApplication>,
     ) -> Result<XrdBalances> {
         assert!(addresses.iter().all(|a| a.network_id() == network_id));
-        let gateway_client =
-            GatewayClient::new(self.networking_driver.clone(), network_id);
+        let gateway_client = super::super::gateway_client_for_network(
+            self.networking_driver.clone(),
+            &self.gateways,
+            network_id,
+        );
 
         let balances = gateway_client
             .xrd_balances_of_access_controller_or_account(network_id, addresses)
@@ -283,5 +293,69 @@ impl ApplicationInputForSecurifiedPersonaWithoutXrdBalance {
             fee_tip_percentage,
         )
         .into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ApplyShieldTransactionsXrdBalancesFetcherImpl;
+
+    #[actix_rt::test]
+    async fn batch_fetch_xrd_balances_uses_custom_gateway_url() {
+        let account = AccountAddress::sample_mainnet();
+        let networking_driver = Arc::new(
+            MockNetworkingDriver::with_lazy_responses(move |request, _| {
+                assert_eq!(
+                    request.url.host_str(),
+                    Some("custom-mainnet.example")
+                );
+                assert_eq!(request.url.path(), "/state/entity/details");
+
+                let response_item = StateEntityDetailsResponseItem::new(
+                    account.into(),
+                    FungibleResourcesCollection::new(
+                        None,
+                        None,
+                        [FungibleResourcesCollectionItem::global(
+                            ResourceAddress::xrd_on_network(NetworkID::Mainnet),
+                            Decimal::from(10),
+                        )],
+                    ),
+                    None,
+                    EntityMetadataCollection::empty(),
+                    None,
+                );
+                let response =
+                    StateEntityDetailsResponse::new(None, [response_item]);
+
+                NetworkResponse::new(
+                    200,
+                    serde_json::to_vec(&response).unwrap(),
+                )
+            }),
+        );
+        let custom_gateway = Gateway::new(
+            "https://custom-mainnet.example/".to_string(),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+        let sut =
+            SUT::new(networking_driver, SavedGateways::new(custom_gateway));
+
+        let mut result = sut
+            .batch_fetch_xrd_balances_of_accounts_or_access_controllers(
+                NetworkID::Mainnet,
+                IndexSet::from_iter([account.into()]),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(
+            result.get_xrd_balance_of_paying_component(account).unwrap(),
+            Decimal192::from(10)
+        );
     }
 }

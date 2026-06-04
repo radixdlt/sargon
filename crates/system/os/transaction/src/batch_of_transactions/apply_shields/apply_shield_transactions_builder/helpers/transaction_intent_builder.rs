@@ -30,10 +30,17 @@ pub trait ApplyShieldTransactionsTransactionIntentBuilder: Send + Sync {
 /// securified entities).
 pub struct ApplyShieldTransactionsTransactionIntentBuilderImpl {
     networking_driver: Arc<dyn NetworkingDriver>,
+    gateways: SavedGateways,
 }
 impl ApplyShieldTransactionsTransactionIntentBuilderImpl {
-    pub fn new(networking_driver: Arc<dyn NetworkingDriver>) -> Self {
-        Self { networking_driver }
+    pub fn new(
+        networking_driver: Arc<dyn NetworkingDriver>,
+        gateways: SavedGateways,
+    ) -> Self {
+        Self {
+            networking_driver,
+            gateways,
+        }
     }
 }
 
@@ -55,8 +62,11 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
             SecurityShieldApplication,
         >,
     ) -> Result<ApplySecurityShieldPayloadToSign> {
-        let gateway_client =
-            GatewayClient::new(self.networking_driver.clone(), network_id);
+        let gateway_client = super::gateway_client_for_network(
+            self.networking_driver.clone(),
+            &self.gateways,
+            network_id,
+        );
 
         let start_epoch_inclusive = gateway_client.current_epoch().await?;
 
@@ -189,5 +199,51 @@ impl ApplyShieldTransactionsTransactionIntentBuilder
         };
 
         Ok(payload_to_sign)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = ApplyShieldTransactionsTransactionIntentBuilderImpl;
+
+    #[actix_rt::test]
+    async fn build_transaction_intents_uses_custom_gateway_url_for_epoch() {
+        let response = TransactionConstructionResponse::new(LedgerState::new(
+            NetworkID::Mainnet.logical_name(),
+            1,
+            "2021-01-01T00:00:00Z",
+            1,
+            1,
+        ));
+        let body = serde_json::to_vec(&response).unwrap();
+        let networking_driver = Arc::new(MockNetworkingDriver::with_spy(
+            200,
+            body,
+            |request, _| {
+                assert_eq!(
+                    request.url.host_str(),
+                    Some("custom-mainnet.example")
+                );
+                assert_eq!(request.url.path(), "/transaction/construction");
+            },
+        ));
+        let custom_gateway = Gateway::new(
+            "https://custom-mainnet.example/".to_string(),
+            NetworkID::Mainnet,
+        )
+        .unwrap();
+        let sut =
+            SUT::new(networking_driver, SavedGateways::new(custom_gateway));
+
+        let result = sut
+            .build_transaction_intents(NetworkID::Mainnet, vec![])
+            .await
+            .unwrap();
+
+        assert!(result.applications_with_intents.is_empty());
+        assert!(result.notary_keys.is_empty());
     }
 }

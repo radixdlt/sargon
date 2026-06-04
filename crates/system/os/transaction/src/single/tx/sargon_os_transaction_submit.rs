@@ -72,6 +72,41 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn submit_transaction_uses_current_custom_gateway_url() {
+        let notarized_transaction = NotarizedTransaction::sample();
+        let response = TransactionSubmitResponse { duplicate: false };
+        let body = serde_json::to_vec(&response).unwrap();
+
+        let mock_driver =
+            MockNetworkingDriver::with_spy(200, body, |request, _| {
+                assert_eq!(
+                    request.url.host_str(),
+                    Some("custom-mainnet.example")
+                );
+                assert_eq!(request.url.path(), "/transaction/submit");
+            });
+
+        let req = SUT::boot_test_with_networking_driver(Arc::new(mock_driver));
+
+        let os =
+            actix_rt::time::timeout(SARGON_OS_TEST_MAX_ASYNC_DURATION, req)
+                .await
+                .unwrap()
+                .unwrap();
+        os.change_current_gateway(
+            Gateway::new(
+                "https://custom-mainnet.example/".to_string(),
+                NetworkID::Mainnet,
+            )
+            .unwrap(),
+        )
+        .await
+        .unwrap();
+
+        os.submit_transaction(notarized_transaction).await.unwrap();
+    }
+
+    #[actix_rt::test]
     async fn submit_transaction_failure() {
         let notarized_transaction = NotarizedTransaction::sample();
         let mock_driver = MockNetworkingDriver::new_always_failing();
