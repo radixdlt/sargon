@@ -109,29 +109,46 @@ impl SargonOS {
     }
 
     pub async fn new_wallet(&self) -> Result<()> {
-        self.new_wallet_with_mnemonic(None).await
-    }
+        let (profile, bdfs) = self.create_new_profile_with_bdfs()?;
 
-    pub async fn new_wallet_with_mnemonic(
-        &self,
-        mnemonic: Option<MnemonicWithPassphrase>,
-    ) -> Result<()> {
-        let (profile, bdfs) = self.create_new_profile_with_bdfs(mnemonic)?;
-
-        self.secure_storage
+        let mnemonic_was_saved = match self
+            .secure_storage
             .save_private_hd_factor_source(&bdfs)
-            .await?;
+            .await
+        {
+            Ok(()) => {
+                info!("Saved default BDFS mnemonic");
+                true
+            }
+            Err(error) => {
+                if matches!(
+                    &error,
+                    CommonError::SecureStorageAccessError {
+                        error_kind,
+                        ..
+                    } if error_kind.is_manual_cancellation()
+                ) {
+                    return Err(error);
+                }
 
-        let set_profile_result = self.set_profile(profile).await;
-        if let Some(error) = set_profile_result.err() {
-            self.secure_storage
-                .delete_mnemonic(&bdfs.factor_source.id)
-                .await?;
+                warn!(
+                    "Created new Profile, but failed to save default BDFS mnemonic: {}",
+                    error
+                );
+                false
+            }
+        };
+
+        if let Err(error) = self.set_profile(profile).await {
+            if mnemonic_was_saved {
+                self.secure_storage
+                    .delete_mnemonic(&bdfs.factor_source.id)
+                    .await?;
+            }
             return Err(error);
         }
 
-        info!("Saved new Profile and BDFS, finish creating wallet");
-
+        info!("Finished creating new wallet");
         Ok(())
     }
 
@@ -327,34 +344,31 @@ impl SargonOS {
 impl SargonOS {
     pub fn create_new_profile_with_bdfs(
         &self,
-        mnemonic_with_passphrase: Option<MnemonicWithPassphrase>,
     ) -> Result<(Profile, PrivateHierarchicalDeterministicFactorSource)> {
         debug!("Creating new Profile and BDFS");
 
         let host_info = self.host_info();
+        debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
 
-        let private_bdfs = match mnemonic_with_passphrase {
-            Some(mwp) => {
-                debug!("Using specified MnemonicWithPassphrase, perhaps we are running in at test...");
+        let entropy: BIP39Entropy = self.clients.entropy.bip39_entropy();
+        let private_bdfs =
+            PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
+                entropy,
+                BIP39Passphrase::default(),
+                &host_info,
+            );
 
-                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(mwp, &host_info)
-            }
-            None => {
-                debug!("Generating mnemonic (using Host provided entropy) for a new 'Babylon' `DeviceFactorSource` ('BDFS')");
+        Ok(self.create_profile_with_bdfs(private_bdfs))
+    }
 
-                let entropy: BIP39Entropy =
-                    self.clients.entropy.bip39_entropy();
-
-                PrivateHierarchicalDeterministicFactorSource::new_babylon_with_entropy(
-                    entropy,
-                    BIP39Passphrase::default(),
-                    &host_info,
-                )
-            }
-        };
+    fn create_profile_with_bdfs(
+        &self,
+        private_bdfs: PrivateHierarchicalDeterministicFactorSource,
+    ) -> (Profile, PrivateHierarchicalDeterministicFactorSource) {
         debug!("Created BDFS (unsaved)");
 
         debug!("Creating new Profile...");
+        let host_info = self.host_info();
         let profile = Profile::with(
             Header::new(DeviceInfo::new_from_info(&self.host_id, &host_info)),
             FactorSources::with_bdfs(private_bdfs.factor_source.clone()),
@@ -362,7 +376,7 @@ impl SargonOS {
             ProfileNetworks::default(),
         );
         info!("Created new (unsaved) Profile with ID {}", profile.id());
-        Ok((profile, private_bdfs))
+        (profile, private_bdfs)
     }
 
     pub(crate) async fn get_host_id(clients: &Clients) -> HostId {
@@ -412,6 +426,30 @@ pub const SARGON_OS_TEST_MAX_ASYNC_DURATION: std::time::Duration =
 
 #[cfg(debug_assertions)]
 impl SargonOS {
+    pub async fn new_wallet_with_bdfs_mnemonic_for_testing(
+        &self,
+        mnemonic: MnemonicWithPassphrase,
+    ) -> Result<()> {
+        let private_bdfs = PrivateHierarchicalDeterministicFactorSource::new_babylon_with_mnemonic_with_passphrase(
+            mnemonic,
+            &self.host_info(),
+        );
+        let (profile, bdfs) = self.create_profile_with_bdfs(private_bdfs);
+
+        self.secure_storage
+            .save_private_hd_factor_source(&bdfs)
+            .await?;
+
+        if let Err(error) = self.set_profile(profile).await {
+            self.secure_storage
+                .delete_mnemonic(&bdfs.factor_source.id)
+                .await?;
+            return Err(error);
+        }
+
+        Ok(())
+    }
+
     pub async fn with_timeout<'a, F, Fut, T>(&'a self, func: F) -> T
     where
         F: Fn(&'a SargonOS) -> Fut,
@@ -465,7 +503,12 @@ impl SargonOS {
             ),
         )
         .await;
-        os.new_wallet_with_mnemonic(bdfs_mnemonic.into()).await?;
+        if let Some(mnemonic) = bdfs_mnemonic.into() {
+            os.new_wallet_with_bdfs_mnemonic_for_testing(mnemonic)
+                .await?;
+        } else {
+            os.new_wallet().await?;
+        }
 
         os.update_profile_with(|p| {
             // Append Mainnet network since initial profile has no network
@@ -538,7 +581,7 @@ impl SargonOS {
         let os =
             Self::boot_with_clients_and_interactor(clients, interactors).await;
 
-        let (mut profile, bdfs) = os.create_new_profile_with_bdfs(None)?;
+        let (mut profile, bdfs) = os.create_new_profile_with_bdfs()?;
 
         // Append Stokenet network since initial profile has no network
         profile
@@ -589,6 +632,88 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    #[derive(Debug)]
+    struct MnemonicSaveFailingSecureStorage {
+        inner: Arc<EphemeralSecureStorage>,
+        failure: MnemonicSaveFailure,
+    }
+
+    #[derive(Debug)]
+    enum MnemonicSaveFailure {
+        Write,
+        Access(SecureStorageAccessErrorKind),
+    }
+
+    impl MnemonicSaveFailingSecureStorage {
+        fn new() -> Arc<Self> {
+            Arc::new(Self {
+                inner: EphemeralSecureStorage::new(),
+                failure: MnemonicSaveFailure::Write,
+            })
+        }
+
+        fn with_access_error(
+            error_kind: SecureStorageAccessErrorKind,
+        ) -> Arc<Self> {
+            Arc::new(Self {
+                inner: EphemeralSecureStorage::new(),
+                failure: MnemonicSaveFailure::Access(error_kind),
+            })
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl SecureStorageDriver for MnemonicSaveFailingSecureStorage {
+        async fn load_data(
+            &self,
+            key: SecureStorageKey,
+        ) -> Result<Option<BagOfBytes>> {
+            self.inner.load_data(key).await
+        }
+
+        async fn save_data(
+            &self,
+            key: SecureStorageKey,
+            data: BagOfBytes,
+        ) -> Result<()> {
+            if matches!(
+                key,
+                SecureStorageKey::DeviceFactorSourceMnemonic { .. }
+            ) {
+                return Err(match &self.failure {
+                    MnemonicSaveFailure::Write => {
+                        CommonError::SecureStorageWriteError {
+                            underlying: "Failed to write mnemonic".to_owned(),
+                        }
+                    }
+                    MnemonicSaveFailure::Access(error_kind) => {
+                        CommonError::SecureStorageAccessError {
+                            key: key.identifier(),
+                            error_kind: error_kind.clone(),
+                            error_message: "Mnemonic access failed".to_owned(),
+                        }
+                    }
+                });
+            }
+
+            self.inner.save_data(key, data).await
+        }
+
+        async fn delete_data_for_key(
+            &self,
+            key: SecureStorageKey,
+        ) -> Result<()> {
+            self.inner.delete_data_for_key(key).await
+        }
+
+        async fn contains_data_for_key(
+            &self,
+            key: SecureStorageKey,
+        ) -> Result<bool> {
+            self.inner.contains_data_for_key(key).await
+        }
+    }
 
     #[actix_rt::test]
     async fn test_new_profile_is_active_profile() {
@@ -657,7 +782,7 @@ mod tests {
         let os =
             SUT::boot_with_clients_and_interactor(clients, interactors).await;
         let (first_profile, first_bdfs) =
-            os.create_new_profile_with_bdfs(None).unwrap();
+            os.create_new_profile_with_bdfs().unwrap();
 
         os.secure_storage
             .save_private_hd_factor_source(&first_bdfs)
@@ -736,6 +861,74 @@ mod tests {
             .is_ok());
 
         assert!(profile.networks.is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn test_new_wallet_succeeds_when_generated_bdfs_mnemonic_save_fails()
+    {
+        for secure_storage in [
+            MnemonicSaveFailingSecureStorage::new(),
+            MnemonicSaveFailingSecureStorage::with_access_error(
+                SecureStorageAccessErrorKind::HardwareUnavailable,
+            ),
+        ] {
+            let drivers = Drivers::with_secure_storage(secure_storage);
+            let mut clients = Clients::new(Bios::new(drivers));
+            clients.factor_instances_cache =
+                FactorInstancesCacheClient::in_memory();
+            let interactors = Interactors::new_from_clients(&clients);
+            let os =
+                SUT::boot_with_clients_and_interactor(clients, interactors)
+                    .await;
+
+            os.new_wallet().await.unwrap();
+
+            let profile = os.profile().unwrap();
+            let bdfs = os.bdfs();
+            assert_eq!(
+                os.secure_storage.load_profile().await.unwrap(),
+                Some(profile)
+            );
+            assert!(os
+                .secure_storage
+                .load_mnemonic_with_passphrase(bdfs.id)
+                .await
+                .is_err());
+            assert!(!os
+                .secure_storage
+                .contains_device_mnemonic(bdfs)
+                .await
+                .unwrap());
+        }
+    }
+
+    #[actix_rt::test]
+    async fn test_new_wallet_propagates_manual_mnemonic_save_cancellation() {
+        for error_kind in [
+            SecureStorageAccessErrorKind::UserCancelled,
+            SecureStorageAccessErrorKind::NegativeButton,
+        ] {
+            let secure_storage =
+                MnemonicSaveFailingSecureStorage::with_access_error(
+                    error_kind.clone(),
+                );
+            let drivers = Drivers::with_secure_storage(secure_storage);
+            let clients = Clients::new(Bios::new(drivers));
+            let interactors = Interactors::new_from_clients(&clients);
+            let os =
+                SUT::boot_with_clients_and_interactor(clients, interactors)
+                    .await;
+
+            assert!(matches!(
+                os.new_wallet().await,
+                Err(CommonError::SecureStorageAccessError {
+                    error_kind: actual,
+                    ..
+                }) if actual == error_kind
+            ));
+            assert!(os.profile().is_err());
+            assert_eq!(os.secure_storage.load_profile().await.unwrap(), None);
+        }
     }
 
     #[actix_rt::test]
