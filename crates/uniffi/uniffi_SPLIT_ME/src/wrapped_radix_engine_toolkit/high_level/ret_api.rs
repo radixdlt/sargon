@@ -179,8 +179,13 @@ pub fn manifest_per_recipient_transfers(
 #[uniffi::export]
 pub fn manifest_per_asset_transfers(
     transfers: PerAssetTransfers,
+    required_badges: Vec<RequiredBadge>,
 ) -> TransactionManifest {
-    InternalTransactionManifest::per_asset_transfers(transfers.into()).into()
+    InternalTransactionManifest::per_asset_transfers(
+        transfers.into(),
+        required_badges.into_internal(),
+    )
+    .into()
 }
 
 #[uniffi::export]

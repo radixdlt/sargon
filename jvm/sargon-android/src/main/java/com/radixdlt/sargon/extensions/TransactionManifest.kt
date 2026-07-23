@@ -12,6 +12,7 @@ import com.radixdlt.sargon.PerAssetTransfers
 import com.radixdlt.sargon.PerRecipientAssetTransfers
 import com.radixdlt.sargon.PoolAddress
 import com.radixdlt.sargon.PublicKeyHash
+import com.radixdlt.sargon.RequiredBadge
 import com.radixdlt.sargon.ResourceAddress
 import com.radixdlt.sargon.StakeClaim
 import com.radixdlt.sargon.ThirdPartyDeposits
@@ -106,9 +107,11 @@ fun TransactionManifest.Companion.markingAccountAsDAppDefinitionType(
 )
 
 fun TransactionManifest.Companion.perAssetTransfers(
-    transfers: PerAssetTransfers
+    transfers: PerAssetTransfers,
+    requiredBadges: List<RequiredBadge> = emptyList()
 ) = manifestPerAssetTransfers(
-    transfers = transfers
+    transfers = transfers,
+    requiredBadges = requiredBadges
 )
 
 /**
