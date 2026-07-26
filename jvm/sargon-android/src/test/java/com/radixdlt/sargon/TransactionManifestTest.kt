@@ -375,7 +375,7 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
 
         with(manifest.instructionsString) {
             assertTrue(contains(transfers.fromAccount.string))
-            assertTrue(contains("create_proof_from_account_of_amount"))
+            assertTrue(contains("create_proof_of_amount"))
             assertTrue(contains(dummyBadgeAddress.string))
         }
     }
