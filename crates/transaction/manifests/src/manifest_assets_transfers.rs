@@ -5,7 +5,7 @@ use crate::prelude::*;
 pub trait TransactionManifestAssetTransfers: Sized {
     fn per_asset_transfers(
         transfers: PerAssetTransfers,
-        required_badges: Vec<RequiredBadge>,
+        required_badges: Vec<ResourceSpecifier>,
     ) -> TransactionManifest;
 
     /// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`
@@ -22,7 +22,7 @@ pub trait TransactionManifestAssetTransfers: Sized {
 impl TransactionManifestAssetTransfers for TransactionManifest {
     fn per_asset_transfers(
         transfers: PerAssetTransfers,
-        required_badges: Vec<RequiredBadge>,
+        required_badges: Vec<ResourceSpecifier>,
     ) -> Self {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
@@ -30,7 +30,7 @@ impl TransactionManifestAssetTransfers for TransactionManifest {
 
         for badge in required_badges {
             match badge {
-                RequiredBadge::Fungible {
+                ResourceSpecifier::Fungible {
                     resource_address,
                     amount,
                 } => {
@@ -39,11 +39,11 @@ impl TransactionManifestAssetTransfers for TransactionManifest {
                     let amount_arg: ScryptoDecimal192 = amount.into();
                     builder = builder.call_method(
                         from_account,
-                        "create_proof_of_amount",
+                        "create_proof_from_account_of_amount",
                         (resource_arg, amount_arg),
                     );
                 }
-                RequiredBadge::NonFungible {
+                ResourceSpecifier::NonFungible {
                     resource_address,
                     ids,
                 } => {
@@ -55,7 +55,7 @@ impl TransactionManifestAssetTransfers for TransactionManifest {
                         .collect();
                     builder = builder.call_method(
                         from_account,
-                        "create_proof_of_non_fungibles",
+                        "create_proof_from_account_of_non_fungibles",
                         (resource_arg, scrypto_ids),
                     );
                 }
@@ -456,11 +456,11 @@ mod tests {
 
     #[test]
     fn with_required_badges() {
-        let badge_fungible = RequiredBadge::Fungible {
+        let badge_fungible = ResourceSpecifier::Fungible {
             resource_address: ResourceAddress::sample_mainnet_candy(),
-            amount: Decimal192::one(),
+            amount: Decimal::one(),
         };
-        let badge_non_fungible = RequiredBadge::NonFungible {
+        let badge_non_fungible = ResourceSpecifier::NonFungible {
             resource_address: ResourceAddress::sample_mainnet_other(),
             ids: vec![NonFungibleLocalId::integer(1)],
         };
@@ -475,13 +475,13 @@ mod tests {
             r##"
         CALL_METHOD
             Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
-            "create_proof_of_amount"
+            "create_proof_from_account_of_amount"
             Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
             Decimal("1")
         ;
         CALL_METHOD
             Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
-            "create_proof_of_non_fungibles"
+            "create_proof_from_account_of_non_fungibles"
             Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
             Array<NonFungibleLocalId>(
                 NonFungibleLocalId("#1#")

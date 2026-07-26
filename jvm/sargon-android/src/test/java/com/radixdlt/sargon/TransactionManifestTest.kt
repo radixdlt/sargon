@@ -370,12 +370,12 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     fun testPerAssetTransfersWithBadges() {
         val transfers = PerAssetTransfers.sample()
         val dummyBadgeAddress = ResourceAddress.sampleMainnet.xrd
-        val requiredBadges = listOf(RequiredBadge.Fungible(dummyBadgeAddress, 10.toDecimal192()))
+        val requiredBadges = listOf(ResourceSpecifier.Fungible(dummyBadgeAddress, 10.toDecimal192()))
         val manifest = TransactionManifest.perAssetTransfers(transfers = transfers, requiredBadges = requiredBadges)
 
         with(manifest.instructionsString) {
             assertTrue(contains(transfers.fromAccount.string))
-            assertTrue(contains("create_proof_of_amount"))
+            assertTrue(contains("create_proof_from_account_of_amount"))
             assertTrue(contains(dummyBadgeAddress.string))
         }
     }
