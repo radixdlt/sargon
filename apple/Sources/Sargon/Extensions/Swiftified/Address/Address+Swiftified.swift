@@ -17,10 +17,9 @@ extension Address: AddressProtocol {
 	#endif // DEBUG
 }
 
-public func == (lhs: Address, rhs: some AddressProtocol) -> Bool {
-	lhs == rhs.asGeneral
-}
-
-public func == (lhs: some AddressProtocol, rhs: Address) -> Bool {
-	rhs == lhs
+public func == (
+	lhs: some AddressProtocol,
+	rhs: some AddressProtocol
+) -> Bool {
+	lhs.address == rhs.address
 }
