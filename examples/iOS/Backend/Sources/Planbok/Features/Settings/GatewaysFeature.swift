@@ -67,8 +67,12 @@ extension GatewaysFeature {
 // MARK: - Gateway + Comparable
 extension Gateway: Comparable {
 	public static func < (lhs: Self, rhs: Self) -> Bool {
-		if lhs.networkID == .mainnet { return true }
-		if rhs.networkID == .mainnet { return false }
+		if lhs.networkID == .mainnet {
+			return true
+		}
+		if rhs.networkID == .mainnet {
+			return false
+		}
 		return lhs.networkID.rawValue < rhs.networkID.rawValue && lhs.url.absoluteString < rhs.url.absoluteString
 	}
 }
