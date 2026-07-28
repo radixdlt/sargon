@@ -3,8 +3,10 @@ use bucket_factory::BucketFactory;
 use crate::prelude::*;
 
 pub trait TransactionManifestAssetTransfers: Sized {
-    fn per_asset_transfers(transfers: PerAssetTransfers)
-        -> TransactionManifest;
+    fn per_asset_transfers(
+        transfers: PerAssetTransfers,
+        required_badges: Vec<ResourceSpecifier>,
+    ) -> TransactionManifest;
 
     /// Uses `per_asset_transfers` after having transposed the `PerRecipientAssetTransfers`
     /// into `PerAssetTransfers`. We always use `PerAssetTransfers` when building the manifest
@@ -13,16 +15,52 @@ pub trait TransactionManifestAssetTransfers: Sized {
     fn per_recipient_transfers(
         transfers: PerRecipientAssetTransfers,
     ) -> TransactionManifest {
-        Self::per_asset_transfers(transfers.transpose())
+        Self::per_asset_transfers(transfers.transpose(), Vec::new())
     }
 }
 
 impl TransactionManifestAssetTransfers for TransactionManifest {
-    fn per_asset_transfers(transfers: PerAssetTransfers) -> Self {
+    fn per_asset_transfers(
+        transfers: PerAssetTransfers,
+        required_badges: Vec<ResourceSpecifier>,
+    ) -> Self {
         let mut builder = ScryptoTransactionManifestBuilder::new();
         let bucket_factory = BucketFactory::default();
         let from_account = &transfers.from_account;
 
+        for badge in required_badges {
+            match badge {
+                ResourceSpecifier::Fungible {
+                    resource_address,
+                    amount,
+                } => {
+                    let resource_arg: ScryptoResourceAddress =
+                        resource_address.into();
+                    let amount_arg: ScryptoDecimal192 = amount.into();
+                    builder = builder.call_method(
+                        from_account,
+                        "create_proof_of_amount",
+                        (resource_arg, amount_arg),
+                    );
+                }
+                ResourceSpecifier::NonFungible {
+                    resource_address,
+                    ids,
+                } => {
+                    let resource_arg: ScryptoResourceAddress =
+                        resource_address.into();
+                    let scrypto_ids: IndexSet<ScryptoNonFungibleLocalId> = ids
+                        .into_iter()
+                        .map(ScryptoNonFungibleLocalId::from)
+                        .collect();
+                    builder = builder.call_method(
+                        from_account,
+                        "create_proof_of_non_fungibles",
+                        (resource_arg, scrypto_ids),
+                    );
+                }
+            }
+        }
         for fungible in transfers.fungible_resources {
             let divisibility = fungible.resource.divisibility;
 
@@ -83,11 +121,10 @@ mod tests {
 
     #[test]
     fn trivial() {
-        let sut = SUT::per_asset_transfers(PerAssetTransfers::new(
-            AccountAddress::sample(),
-            [],
-            [],
-        ));
+        let sut = SUT::per_asset_transfers(
+            PerAssetTransfers::new(AccountAddress::sample(), [], []),
+            Vec::new(),
+        );
         manifest_eq(sut, ""); // empty!
     }
 
@@ -307,7 +344,7 @@ mod tests {
 
     #[test]
     fn simple() {
-        let sut = SUT::per_asset_transfers(PerAssetTransfers::sample());
+        let sut = SUT::per_asset_transfers(PerAssetTransfers::sample(), Vec::new());
         manifest_eq(
             sut,
             r##"
@@ -414,6 +451,43 @@ mod tests {
             Enum<0u8>()
         ;
         "##,
+        );
+    }
+
+    #[test]
+    fn with_required_badges() {
+        let badge_fungible = ResourceSpecifier::Fungible {
+            resource_address: ResourceAddress::sample_mainnet_candy(),
+            amount: Decimal::one(),
+        };
+        let badge_non_fungible = ResourceSpecifier::NonFungible {
+            resource_address: ResourceAddress::sample_mainnet_other(),
+            ids: vec![NonFungibleLocalId::integer(1)],
+        };
+        let transfers = PerAssetTransfers::new(
+            AccountAddress::sample_mainnet(),
+            [],
+            [],
+        );
+        let sut = SUT::per_asset_transfers(transfers, vec![badge_fungible, badge_non_fungible]);
+        manifest_eq(
+            sut,
+            r##"
+        CALL_METHOD
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+            "create_proof_of_amount"
+            Address("resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j")
+            Decimal("1")
+        ;
+        CALL_METHOD
+            Address("account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr")
+            "create_proof_of_non_fungibles"
+            Address("resource_rdx1n2ekdd2m0jsxjt9wasmu3p49twy2yfalpaa6wf08md46sk8dfmldnd")
+            Array<NonFungibleLocalId>(
+                NonFungibleLocalId("#1#")
+            )
+        ;
+            "##,
         );
     }
 }
