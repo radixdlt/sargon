@@ -157,8 +157,8 @@ class BiometricsHandler(
                 authCallback
             )
 
-            if (cipher != null && hasStrongAuthenticator) {
-                // Invokes crypto based authentication
+            if (cipher != null && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || hasStrongAuthenticator)) {
+                // Android 11+ device credentials can authorize a CryptoObject without enrolled biometrics.
                 biometricPrompt.authenticate(
                     promptInfo,
                     BiometricPrompt.CryptoObject(cipher)

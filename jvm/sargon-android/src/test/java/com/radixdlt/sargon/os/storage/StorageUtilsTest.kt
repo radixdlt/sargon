@@ -180,6 +180,25 @@ class StorageUtilsTest {
         )
     }
 
+    @Test
+    fun testReadUsesAuthorizedCipherWithoutLookingUpTheKeyAgain() = runTest(context = testDispatcher) {
+        val key = stringPreferencesKey("a_key")
+        val secretKey = SecretKeySpec(ByteArray(32) { 7 }, EncryptionHelper.AES_ALGORITHM)
+        val ciphertext = "a value".encrypt(secretKey).getOrThrow()
+        sut.write(key, ciphertext).getOrThrow()
+        val cipher = EncryptionHelper.initDecryptCipher(
+            AndroidBase64.decode(ciphertext, AndroidBase64.DEFAULT), secretKey
+        ).getOrThrow()
+        // No keySpec mock: looking up the key instead of using this cipher must fail.
+        val request = mockk<KeystoreAccessRequest.ForMnemonic>()
+        coEvery { request.requestAuthorization(any()) } returns Result.success(
+            KeystoreAccessRequest.AuthorizationArgs.Decrypt(cipher)
+        )
+
+        assertEquals("a value", sut.read(key, request).getOrThrow())
+        assertEquals(ciphertext, sut.read(key).getOrThrow())
+    }
+
     private fun mockProfileAccessRequest() {
         val mockKeySpec = mockk<KeySpec.Profile>()
         every { mockKeySpec.getOrGenerateSecretKey() } returns Result.success(

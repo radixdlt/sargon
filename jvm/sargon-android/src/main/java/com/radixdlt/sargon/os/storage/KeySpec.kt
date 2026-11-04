@@ -68,12 +68,11 @@ sealed interface KeystoreAccessRequest {
          * Request authorization for the provided [purpose] and return the resolved authorization arguments.
          *
          * Behavior:
-         * - Time-window flow: If the existing key is a legacy time-window key (see [KeySpec.Mnemonic.isLegacyTimedWindowKey])
-         *   or a strong authenticator is not available, this method enables the time-window flow by setting an authentication
-         *   timeout on the mnemonic key and invoking the `authorize` callback with [AuthorizationArgs.TimeWindowAuth].
-         * - Per-operation flow: If the key is not legacy and a strong authenticator is available, the method obtains (or
-         *   generates) the secret key, initializes a cipher for the requested purpose (encrypt/decrypt) and invokes the
-         *   `authorize` callback with either [AuthorizationArgs.Encrypt] or [AuthorizationArgs.Decrypt].
+         * - Existing authentication-bound keys retain their stored policy: timed keys use [AuthorizationArgs.TimeWindowAuth],
+         *   while per-operation keys use a cipher even if strong biometrics are no longer available.
+         * - When no authentication-bound key exists, devices without a strong authenticator use the time-window flow.
+         * - Per-operation flow: The method obtains (or generates) the secret key, initializes a cipher for the requested
+         *   purpose and invokes `authorize` with either [AuthorizationArgs.Encrypt] or [AuthorizationArgs.Decrypt].
          *
          * Notes:
          * - Cipher initialization failures or key access errors are propagated as failures in the returned [Result].
@@ -83,7 +82,14 @@ sealed interface KeystoreAccessRequest {
          * @return a [Result] containing the resolved [AuthorizationArgs] on success, or an exception describing the failure.
          */
         suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> {
-            return if (mnemonicKeySpec.isLegacyTimedWindowKey() || !hasStrongAuthenticator) {
+            val existingKeyInfo = mnemonicKeySpec.getKeyInfo()
+            val useTimeWindowAuth = if (existingKeyInfo?.isUserAuthenticationRequired == true) {
+                existingKeyInfo.userAuthenticationValidityDurationSeconds > 0
+            } else {
+                !hasStrongAuthenticator
+            }
+
+            return if (useTimeWindowAuth) {
                 mnemonicKeySpec.setAuthenticationTimeout()
                 authorize(AuthorizationArgs.TimeWindowAuth)
             } else {
@@ -182,7 +188,7 @@ sealed class KeySpec(val alias: String) {
         alias: String = KEY_ALIAS_MNEMONIC
     ) : KeySpec(alias) {
 
-        private var authenticationTimeoutSeconds: Int? = null
+        private var authenticationTimeoutSeconds: Int? = 0
 
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
             .apply {
@@ -214,16 +220,18 @@ sealed class KeySpec(val alias: String) {
         }
 
         fun isLegacyTimedWindowKey(): Boolean {
+            val info = getKeyInfo() ?: return false
+            return info.isUserAuthenticationRequired && info.userAuthenticationValidityDurationSeconds > 0
+        }
+
+        internal fun getKeyInfo(): KeyInfo? {
             val secretKey = getSecretKey().getOrNull()
 
-            if (secretKey == null) return false
+            if (secretKey == null) return null
 
             val factory = SecretKeyFactory.getInstance(secretKey.algorithm, PROVIDER)
 
-            val spec = factory.getKeySpec(secretKey, KeyInfo::class.java)
-            val info = spec as? KeyInfo ?: return false
-
-            return info.isUserAuthenticationRequired && info.userAuthenticationValidityDurationSeconds > 0
+            return factory.getKeySpec(secretKey, KeyInfo::class.java) as? KeyInfo
         }
 
     }
@@ -247,13 +255,13 @@ sealed class KeySpec(val alias: String) {
         fun setAuthenticationTimeoutSeconds(
             authenticationTimeout: Int
         ) = apply {
-            require(authenticationTimeout > 0) { "Authentication timeout seconds must be > 0" }
+            require(authenticationTimeout >= 0) { "Authentication timeout seconds must be >= 0" }
             authenticationTimeoutSeconds = authenticationTimeout
         }
 
         /**
-         * If authenticationTimeoutSeconds is not set, the key will require user authentication for every use.
-         * This is recommended for highly sensitive data such as mnemonic storage.
+         * A null timeout leaves user authentication disabled. On Android 11+, zero requires
+         * authentication for each operation; a positive timeout permits use within that window.
          */
         fun build(): Result<SecretKey> = runCatching {
             val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER)
