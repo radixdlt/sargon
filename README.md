@@ -335,6 +335,18 @@ cd jvm
 ./gradlew sargon-android:connectedDebugAndroidTest
 ```
 
+The mnemonic Keystore regression tests require Android 11+ with a configured PIN,
+pattern, or password. Tests that display authentication prompts are skipped by default.
+To run them, approve each prompt manually on a disposable test device:
+
+```sh
+./gradlew sargon-android:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.radixdlt.sargon.os.storage.ZeroTimeoutExperimentTest \
+  -Pandroid.testInstrumentationRunnerArguments.runManualKeystoreAuthTests=true
+```
+
+The credential-only regression test also requires no enrolled strong biometrics.
+
 # Release
 
 ## Bumping Version

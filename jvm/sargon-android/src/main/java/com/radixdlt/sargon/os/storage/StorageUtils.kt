@@ -94,7 +94,7 @@ suspend fun <T> DataStore<Preferences>.read(
         ).then { args ->
             when (args) {
                 is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> encryptedValue.decrypt(
-                    keySpec = keystoreAccessRequest.keySpec
+                    cipher = args.cipher
                 )
 
                 is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> error("Unexpected encrypt args for decryption")
