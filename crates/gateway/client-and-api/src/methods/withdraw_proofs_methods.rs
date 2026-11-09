@@ -280,4 +280,114 @@ mod tests {
 
         assert_eq!(result, TransferWithdrawProofs::default());
     }
+
+    fn nft_badge() -> ResourceAddress {
+        ResourceAddress::sample_stokenet_nft_gc_membership()
+    }
+
+    fn spy_nft_badge_requests(request: NetworkRequest, count: u64) {
+        let expected_path = match count {
+            0 => "state/entity/details",
+            1 => "status/gateway-status",
+            2 => "state/entity/details",
+            3 => "state/entity/page/non-fungible-vaults/",
+            _ => panic!("unexpected request #{count}: {}", request.url),
+        };
+        assert!(
+            request.url.as_str().ends_with(expected_path),
+            "request #{count} went to {}",
+            request.url
+        );
+    }
+
+    #[actix_rt::test]
+    async fn a_token_restricted_by_a_specific_nft_gets_a_proof_of_that_nft() {
+        let account = AccountAddress::sample_stokenet();
+        let nft_rule = AccessRule::Protected {
+            access_rule: CompositeRequirement::ProofRule {
+                proof_rule: BasicRequirement::Require {
+                    requirement: Requirement::NonFungible {
+                        non_fungible: NonFungible {
+                            resource_address: nft_badge(),
+                            local_id: NonFungibleLocalIdId {
+                                id_type: "Integer".to_owned(),
+                                sbor_hex: String::new(),
+                                simple_rep: "#2#".to_owned(),
+                            },
+                        },
+                    },
+                },
+            },
+        };
+        let account_details = StateEntityDetailsResponse::new(
+            LedgerState::sample(),
+            [StateEntityDetailsResponseItem::new(
+                account.into(),
+                None,
+                NonFungibleResourcesCollection::new(
+                    1,
+                    None,
+                    vec![NonFungibleResourcesCollectionItem::Global(
+                        NonFungibleResourcesCollectionItemGloballyAggregated::new(
+                            nft_badge(),
+                            2,
+                        ),
+                    )],
+                ),
+                EntityMetadataCollection::empty(),
+                None,
+            )],
+        );
+        let vaults = PageResponse::new(
+            LedgerState::sample(),
+            1,
+            None,
+            vec![NonFungibleResourcesCollectionItemVaultAggregatedVaultItem {
+                total_count: Some(2),
+                vault_address: VaultAddress::sample(),
+                last_updated_at_state_version: 1,
+                next_cursor: None,
+                items: Some(vec![
+                    NonFungibleLocalId::integer(1),
+                    NonFungibleLocalId::integer(2),
+                ]),
+            }],
+        );
+        let mock_driver = MockNetworkingDriver::new_with_responses_and_spy(
+            vec![
+                MockNetworkingDriverResponse::new_success(
+                    StateEntityDetailsResponse::new(
+                        LedgerState::sample(),
+                        [resource_details(restricted_token(), nft_rule)],
+                    ),
+                ),
+                MockNetworkingDriverResponse::new_success(
+                    GatewayStatusResponse {
+                        ledger_state: LedgerState::sample(),
+                    },
+                ),
+                MockNetworkingDriverResponse::new_success(account_details),
+                MockNetworkingDriverResponse::new_success(vaults),
+            ],
+            spy_nft_badge_requests,
+        );
+        let sut = SUT::with_networking_driver(
+            Arc::new(mock_driver),
+            Gateway::stokenet(),
+        );
+
+        let result = sut
+            .fetch_transfer_withdraw_proofs(account, vec![restricted_token()])
+            .await
+            .unwrap();
+
+        assert!(result.is_satisfied());
+        assert_eq!(
+            result.proofs,
+            vec![ResourceSpecifier::non_fungible(
+                nft_badge(),
+                vec![NonFungibleLocalId::integer(2)]
+            )]
+        );
+    }
 }
