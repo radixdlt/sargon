@@ -98,5 +98,5 @@ pub(crate) fn prepare_xrd_transfer_transaction(
         [],
     );
 
-    TransactionManifest::per_asset_transfers(transfers)
+    TransactionManifest::per_asset_transfers(transfers, Vec::new())
 }
