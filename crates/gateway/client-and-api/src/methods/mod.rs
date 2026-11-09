@@ -7,3 +7,4 @@ mod chunk;
 mod page_methods;
 mod state_methods;
 mod transaction_methods;
+mod withdraw_proofs_methods;
