@@ -28,38 +28,26 @@ impl TransactionManifestAssetTransfers for TransactionManifest {
         let bucket_factory = BucketFactory::default();
         let from_account = &transfers.from_account;
 
+        // The proofs the withdrawals need (e.g. a badge for a restricted token): before them.
         for badge in required_badges {
-            match badge {
+            builder = match badge {
                 ResourceSpecifier::Fungible {
                     resource_address,
                     amount,
-                } => {
-                    let resource_arg: ScryptoResourceAddress =
-                        resource_address.into();
-                    let amount_arg: ScryptoDecimal192 = amount.into();
-                    builder = builder.call_method(
-                        from_account,
-                        "create_proof_of_amount",
-                        (resource_arg, amount_arg),
-                    );
-                }
+                } => builder.create_proof_from_account_of_amount(
+                    from_account,
+                    ScryptoResourceAddress::from(resource_address),
+                    ScryptoDecimal192::from(amount),
+                ),
                 ResourceSpecifier::NonFungible {
                     resource_address,
                     ids,
-                } => {
-                    let resource_arg: ScryptoResourceAddress =
-                        resource_address.into();
-                    let scrypto_ids: IndexSet<ScryptoNonFungibleLocalId> = ids
-                        .into_iter()
-                        .map(ScryptoNonFungibleLocalId::from)
-                        .collect();
-                    builder = builder.call_method(
-                        from_account,
-                        "create_proof_of_non_fungibles",
-                        (resource_arg, scrypto_ids),
-                    );
-                }
-            }
+                } => builder.create_proof_from_account_of_non_fungibles(
+                    from_account,
+                    ScryptoResourceAddress::from(resource_address),
+                    ids.into_iter().map(ScryptoNonFungibleLocalId::from),
+                ),
+            };
         }
         for fungible in transfers.fungible_resources {
             let divisibility = fungible.resource.divisibility;
@@ -344,7 +332,8 @@ mod tests {
 
     #[test]
     fn simple() {
-        let sut = SUT::per_asset_transfers(PerAssetTransfers::sample(), Vec::new());
+        let sut =
+            SUT::per_asset_transfers(PerAssetTransfers::sample(), Vec::new());
         manifest_eq(
             sut,
             r##"
@@ -461,15 +450,15 @@ mod tests {
             amount: Decimal::one(),
         };
         let badge_non_fungible = ResourceSpecifier::NonFungible {
-            resource_address: ResourceAddress::sample_mainnet_other(),
+            resource_address: ResourceAddress::sample_mainnet_nft_other(),
             ids: vec![NonFungibleLocalId::integer(1)],
         };
-        let transfers = PerAssetTransfers::new(
-            AccountAddress::sample_mainnet(),
-            [],
-            [],
+        let transfers =
+            PerAssetTransfers::new(AccountAddress::sample_mainnet(), [], []);
+        let sut = SUT::per_asset_transfers(
+            transfers,
+            vec![badge_fungible, badge_non_fungible],
         );
-        let sut = SUT::per_asset_transfers(transfers, vec![badge_fungible, badge_non_fungible]);
         manifest_eq(
             sut,
             r##"
