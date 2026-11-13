@@ -1,6 +1,29 @@
 use sargon::OsAnalysePreAuthPreview;
+use sargon::PreAuthPreviewOptions as InternalPreAuthPreviewOptions;
 
 use crate::prelude::*;
+
+/// Host-controlled options for `analyse_pre_auth_preview_with_options`.
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    PartialEq,
+    Eq,
+    Hash,
+    InternalConversion,
+    uniffi::Record,
+)]
+pub struct PreAuthPreviewOptions {
+    /// Allow calls on AccessControllers that do not secure any entity in this
+    /// wallet's Profile, i.e. multisig accounts controlled by an external
+    /// AccessController: `create_proof`, the recovery family, and primary-role
+    /// lock/unlock. Badge withdrawal, recovery-badge minting, the recovery-fee
+    /// methods, every other reserved instruction and any role-assignment
+    /// change stay forbidden. Off by default.
+    pub allow_external_access_controller_operations: bool,
+}
 
 #[uniffi::export]
 impl SargonOS {
@@ -25,6 +48,30 @@ impl SargonOS {
                 blobs.into_internal(),
                 nonce.into_internal(),
                 notary_public_key.into_internal(),
+            )
+            .await
+            .into_result()
+    }
+
+    /// Same as `analyse_pre_auth_preview`, with host-controlled options.
+    ///
+    /// With `PreAuthPreviewOptions::default()` the behaviour is identical to
+    /// `analyse_pre_auth_preview`.
+    pub async fn analyse_pre_auth_preview_with_options(
+        &self,
+        instructions: String,
+        blobs: Blobs,
+        nonce: Nonce,
+        notary_public_key: PublicKey,
+        options: PreAuthPreviewOptions,
+    ) -> Result<PreAuthToReview> {
+        self.wrapped
+            .analyse_pre_auth_preview_with_options(
+                instructions,
+                blobs.into_internal(),
+                nonce.into_internal(),
+                notary_public_key.into_internal(),
+                options.into_internal(),
             )
             .await
             .into_result()
