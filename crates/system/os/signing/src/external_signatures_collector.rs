@@ -552,6 +552,123 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
     Ok(external_accounts)
 }
 
+// ==================
+// External AccessController Resolution
+// ==================
+
+/// External AccessControllers that `manifest` calls directly, in manifest
+/// order and without duplicates. Unsupported calls and controllers securing a
+/// Profile entity are left out: the former are refused during analysis, and
+/// the latter are signed through the wallet's own Security Shield flows.
+fn external_access_controllers_in(
+    manifest: &SubintentManifest,
+    secures_profile_entity: impl Fn(AccessControllerAddress) -> bool,
+) -> Vec<AccessControllerAddress> {
+    manifest
+        .access_controller_operations()
+        .into_iter()
+        .filter(|op| op.kind.is_supported())
+        .map(|op| op.access_controller)
+        .filter(|ac| !secures_profile_entity(*ac))
+        .collect::<IndexSet<_>>()
+        .into_iter()
+        .collect()
+}
+
+/// Signature requirements for external AccessControllers called directly by
+/// a subintent, attributed to the account or persona each one secures.
+///
+/// A controller whose secured entity is unknown is skipped, as is one whose
+/// entity `already_resolved` covers: resolving that entity as an external
+/// account has already collected the same controller's role badges.
+fn requirements_for_external_access_controllers(
+    access_controllers: Vec<AccessControllerAddress>,
+    secured_entities: &IndexMap<
+        AccessControllerAddress,
+        AddressOfAccountOrPersona,
+    >,
+    role_assignments: &IndexMap<Address, ComponentEntityRoleAssignments>,
+    already_resolved: &[ExternalAccountNftRequirements],
+) -> Result<Vec<ExternalAccountNftRequirements>> {
+    let mut requirements = Vec::new();
+    for access_controller in access_controllers {
+        let Some(owner) = secured_entities.get(&access_controller).cloned()
+        else {
+            debug!(
+                "External signing: no secured entity found for access controller {}",
+                access_controller
+            );
+            continue;
+        };
+        if already_resolved.iter().any(|r| r.owner == owner) {
+            continue;
+        }
+        let Some(assignments) =
+            role_assignments.get(&Address::from(access_controller))
+        else {
+            debug!(
+                "External signing: no role assignments found for access controller {}",
+                access_controller
+            );
+            continue;
+        };
+        let mut required_nft_ids = IndexSet::new();
+        for rule in access_rules_from_access_controller(assignments) {
+            required_nft_ids.extend(extract_nft_ids_from_access_rule(&rule)?);
+        }
+        requirements.push(ExternalAccountNftRequirements {
+            owner,
+            required_nft_ids,
+        });
+    }
+    Ok(requirements)
+}
+
+/// Signature requirements for external AccessControllers that a subintent
+/// calls without touching the entity they secure, such as a recovery
+/// proposal or `lock_primary_role` on a multisig account. Resolution from the
+/// accounts requiring auth cannot find these: there are none.
+pub(crate) async fn resolve_external_access_controllers_for_subintent(
+    os: &SargonOS,
+    subintent: &Subintent,
+    already_resolved: &[ExternalAccountNftRequirements],
+) -> Result<Vec<ExternalAccountNftRequirements>> {
+    let profile = os.profile()?;
+    let access_controllers =
+        external_access_controllers_in(&subintent.manifest, |ac| {
+            profile.entity_by_access_controller_address(ac).is_ok()
+        });
+    if access_controllers.is_empty() {
+        return Ok(Vec::new());
+    }
+    debug!(
+        "External signing: external access controllers called by subintent: {:?}",
+        access_controllers
+    );
+
+    let secured_entities = os
+        .gateway_client()
+        .fetch_access_controllers_controlled_entities(
+            access_controllers.clone(),
+        )
+        .await?;
+    let role_assignments = fetch_role_assignments_for_addresses(
+        os,
+        access_controllers
+            .iter()
+            .map(|ac| Address::from(*ac))
+            .collect_vec(),
+    )
+    .await?;
+
+    requirements_for_external_access_controllers(
+        access_controllers,
+        &secured_entities,
+        &role_assignments,
+        already_resolved,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1624,5 +1741,201 @@ mod tests {
             sut.factor_instances_for_nfts(vec![nft_id]).await.unwrap();
 
         assert!(instances.is_empty());
+    }
+
+    // ==================
+    // External AccessController Resolution
+    // ==================
+
+    fn controller_call_manifest(calls: &[String]) -> SubintentManifest {
+        SubintentManifest::new(
+            format!("{}\nYIELD_TO_PARENT;\n", calls.join("\n")),
+            NetworkID::Mainnet,
+            Blobs::default(),
+            ChildSubintentSpecifiers::default(),
+        )
+        .unwrap()
+    }
+
+    fn call(ac: AccessControllerAddress, method: &str) -> String {
+        format!(r#"CALL_METHOD Address("{ac}") "{method}";"#)
+    }
+
+    fn badge_rule(ids: &[u64]) -> AccessRule {
+        let resource = ResourceAddress::sample();
+        AccessRule::Protected {
+            access_rule: CompositeRequirement::ProofRule {
+                proof_rule: BasicRequirement::CountOf {
+                    count: 1,
+                    list: ids
+                        .iter()
+                        .map(|id| Requirement::NonFungible {
+                            non_fungible: nft(resource, &format!("#{id}#")),
+                        })
+                        .collect(),
+                },
+            },
+        }
+    }
+
+    fn controller_assignments(
+        primary: AccessRule,
+        recovery: AccessRule,
+        confirmation: AccessRule,
+    ) -> ComponentEntityRoleAssignments {
+        let entry = |name: &str, rule: AccessRule| {
+            ComponentEntityRoleAssignmentEntry::new(
+                RoleKey::new(name.to_string(), ObjectModuleId::Main),
+                ComponentEntityRoleAssignmentEntryAssignment::new(
+                    RoleAssignmentResolution::Explicit,
+                    rule,
+                ),
+            )
+        };
+        ComponentEntityRoleAssignments::new(
+            ComponentEntityRoleAssignmentOwner::new(AccessRule::DenyAll),
+            vec![
+                entry("primary", primary),
+                entry("recovery", recovery),
+                entry("confirmation", confirmation),
+            ],
+        )
+    }
+
+    fn badge(id: u64) -> NonFungibleGlobalId {
+        NonFungibleGlobalId::new_unchecked(
+            ResourceAddress::sample(),
+            NonFungibleLocalId::integer(id),
+        )
+    }
+
+    #[test]
+    fn external_access_controllers_in_lists_each_controller_once_in_order() {
+        let (a, b) = (
+            AccessControllerAddress::sample_mainnet(),
+            AccessControllerAddress::sample_mainnet_other(),
+        );
+        let manifest = controller_call_manifest(&[
+            call(b, "lock_primary_role"),
+            call(a, "cancel_primary_role_recovery_proposal"),
+            call(b, "unlock_primary_role"),
+        ]);
+        assert_eq!(
+            external_access_controllers_in(&manifest, |_| false),
+            vec![b, a]
+        );
+    }
+
+    #[test]
+    fn external_access_controllers_in_skips_profile_controllers() {
+        let (a, b) = (
+            AccessControllerAddress::sample_mainnet(),
+            AccessControllerAddress::sample_mainnet_other(),
+        );
+        let manifest = controller_call_manifest(&[
+            call(a, "lock_primary_role"),
+            call(b, "lock_primary_role"),
+        ]);
+        assert_eq!(
+            external_access_controllers_in(&manifest, |ac| ac == a),
+            vec![b]
+        );
+    }
+
+    #[test]
+    fn external_access_controllers_in_skips_unsupported_calls() {
+        let a = AccessControllerAddress::sample_mainnet();
+        let manifest = controller_call_manifest(&[call(
+            a,
+            "initiate_badge_withdraw_attempt_as_primary",
+        )]);
+        assert!(external_access_controllers_in(&manifest, |_| false).is_empty());
+    }
+
+    #[test]
+    fn requirements_collect_badges_of_all_three_roles_for_the_secured_entity() {
+        let ac = AccessControllerAddress::sample_mainnet();
+        let account = AddressOfAccountOrPersona::Account(
+            AccountAddress::sample_mainnet(),
+        );
+        let secured = IndexMap::from([(ac, account)]);
+        let assignments = IndexMap::from([(
+            Address::from(ac),
+            controller_assignments(
+                badge_rule(&[1, 2]),
+                badge_rule(&[3]),
+                badge_rule(&[4]),
+            ),
+        )]);
+
+        let result = requirements_for_external_access_controllers(
+            vec![ac],
+            &secured,
+            &assignments,
+            &[],
+        )
+        .unwrap();
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].owner, account);
+        assert_eq!(
+            result[0].required_nft_ids,
+            [badge(1), badge(2), badge(3), badge(4)]
+                .into_iter()
+                .collect::<IndexSet<_>>()
+        );
+    }
+
+    #[test]
+    fn requirements_skip_controller_whose_secured_entity_is_unknown() {
+        let ac = AccessControllerAddress::sample_mainnet();
+        let assignments = IndexMap::from([(
+            Address::from(ac),
+            controller_assignments(
+                badge_rule(&[1]),
+                badge_rule(&[2]),
+                badge_rule(&[3]),
+            ),
+        )]);
+
+        let result = requirements_for_external_access_controllers(
+            vec![ac],
+            &IndexMap::new(),
+            &assignments,
+            &[],
+        )
+        .unwrap();
+
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn requirements_skip_entity_already_resolved_as_external_account() {
+        let ac = AccessControllerAddress::sample_mainnet();
+        let account = AddressOfAccountOrPersona::Account(
+            AccountAddress::sample_mainnet(),
+        );
+        let assignments = IndexMap::from([(
+            Address::from(ac),
+            controller_assignments(
+                badge_rule(&[1]),
+                badge_rule(&[2]),
+                badge_rule(&[3]),
+            ),
+        )]);
+        let already_resolved = [ExternalAccountNftRequirements {
+            owner: account,
+            required_nft_ids: [badge(1)].into_iter().collect(),
+        }];
+
+        let result = requirements_for_external_access_controllers(
+            vec![ac],
+            &IndexMap::from([(ac, account)]),
+            &assignments,
+            &already_resolved,
+        )
+        .unwrap();
+
+        assert!(result.is_empty());
     }
 }

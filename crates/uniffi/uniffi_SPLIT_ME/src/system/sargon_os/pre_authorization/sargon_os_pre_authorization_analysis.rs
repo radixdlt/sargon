@@ -16,12 +16,13 @@ use crate::prelude::*;
     uniffi::Record,
 )]
 pub struct PreAuthPreviewOptions {
-    /// Allow `create_proof` on AccessControllers that do not secure any entity
-    /// in this wallet's Profile, i.e. multisig accounts controlled by an
-    /// external AccessController. Every other AccessController method, every
-    /// other reserved instruction, and any role-assignment change stays
-    /// forbidden. Off by default.
-    pub allow_external_access_controller_proofs: bool,
+    /// Allow calls on AccessControllers that do not secure any entity in this
+    /// wallet's Profile, i.e. multisig accounts controlled by an external
+    /// AccessController: `create_proof`, the recovery family, and primary-role
+    /// lock/unlock. Badge withdrawal, recovery-badge minting, the recovery-fee
+    /// methods, every other reserved instruction and any role-assignment
+    /// change stay forbidden. Off by default.
+    pub allow_external_access_controller_operations: bool,
 }
 
 #[uniffi::export]

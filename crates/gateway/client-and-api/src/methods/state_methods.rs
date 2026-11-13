@@ -629,6 +629,96 @@ impl GatewayClient {
         Self::parse_access_controller_item(item, ac_address)
     }
 
+    /// The account or persona whose owner badge each AccessController holds,
+    /// i.e. the entity it secures.
+    ///
+    /// Used to attribute signatures for manifests that call an external
+    /// AccessController without touching the entity it secures, such as a
+    /// recovery proposal or `lock_primary_role` on a multisig account.
+    ///
+    /// A controller whose controlled vault holds no account or identity owner
+    /// badge is left out of the result.
+    pub async fn fetch_access_controllers_controlled_entities(
+        &self,
+        ac_addresses: Vec<AccessControllerAddress>,
+    ) -> Result<IndexMap<AccessControllerAddress, AddressOfAccountOrPersona>>
+    {
+        let mut result = IndexMap::new();
+        if ac_addresses.is_empty() {
+            return Ok(result);
+        }
+
+        let network_id = self.gateway.network.id;
+        let account_owner_badge = ResourceAddress::new_from_node_id(
+            SCRYPTO_ACCOUNT_OWNER_BADGE,
+            network_id,
+        )?;
+        let identity_owner_badge = ResourceAddress::new_from_node_id(
+            SCRYPTO_IDENTITY_OWNER_BADGE,
+            network_id,
+        )?;
+
+        let ledger_state = self.gateway_status().await?.ledger_state;
+        let request = StateEntityDetailsRequest::new(
+            ac_addresses.iter().map(|ac| (*ac).into()).collect(),
+            Some(ledger_state.clone().into()),
+            None,
+        );
+        let response = self.state_entity_details(request).await?;
+
+        for ac_address in ac_addresses {
+            let Some(item) = response
+                .items
+                .iter()
+                .find(|item| item.address == ac_address.into())
+            else {
+                continue;
+            };
+            let details = Self::parse_access_controller_item(item, ac_address)?;
+            let vault_address = VaultAddress::from_str(
+                &details.state.controlled_vault.entity_address,
+            )?;
+
+            let held = |badge: ResourceAddress| {
+                item.non_fungible_resources.as_ref().is_some_and(|nfts| {
+                    nfts.items.iter().any(|nft| match nft {
+                        NonFungibleResourcesCollectionItem::Global(global) => {
+                            global.resource_address == badge
+                        }
+                    })
+                })
+            };
+            let (badge, is_account) = if held(account_owner_badge) {
+                (account_owner_badge, true)
+            } else if held(identity_owner_badge) {
+                (identity_owner_badge, false)
+            } else {
+                continue;
+            };
+
+            let page = self
+                .state_entity_page_non_fungible_vault_ids(
+                    StateEntityPageNonFungibleVaultIdsRequest::new(
+                        ac_address.into(),
+                        vault_address,
+                        badge,
+                        Some(ledger_state.clone().into()),
+                        None,
+                        None,
+                    ),
+                )
+                .await?;
+
+            if let Some(entity) = page.items.first().and_then(|local_id| {
+                entity_secured_by_owner_badge(local_id, is_account, network_id)
+            }) {
+                result.insert(ac_address, entity);
+            }
+        }
+
+        Ok(result)
+    }
+
     fn parse_access_controller_item(
         item: &StateEntityDetailsResponseItem,
         ac_address: AccessControllerAddress,
@@ -1110,5 +1200,218 @@ mod filter_transferable_tests {
                 ),
             )
         }
+    }
+}
+
+/// The account or identity an owner badge belongs to. Owner badges are
+/// `Bytes` local ids holding the node id of the entity.
+fn entity_secured_by_owner_badge(
+    local_id: &NonFungibleLocalId,
+    is_account: bool,
+    network_id: NetworkID,
+) -> Option<AddressOfAccountOrPersona> {
+    let NonFungibleLocalId::Bytes { value } = local_id else {
+        return None;
+    };
+    let node_id: [u8; 30] = value.to_vec().try_into().ok()?;
+    if is_account {
+        AccountAddress::new_from_node_id(node_id, network_id)
+            .ok()
+            .map(AddressOfAccountOrPersona::Account)
+    } else {
+        IdentityAddress::new_from_node_id(node_id, network_id)
+            .ok()
+            .map(AddressOfAccountOrPersona::Identity)
+    }
+}
+
+#[cfg(test)]
+mod access_controllers_controlled_entities_tests {
+    use super::*;
+    use profile_gateway::prelude::Gateway;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = GatewayClient;
+
+    fn owner_badge(account: bool) -> ResourceAddress {
+        ResourceAddress::new_from_node_id(
+            if account {
+                SCRYPTO_ACCOUNT_OWNER_BADGE
+            } else {
+                SCRYPTO_IDENTITY_OWNER_BADGE
+            },
+            NetworkID::Mainnet,
+        )
+        .unwrap()
+    }
+
+    fn access_controller_item(
+        ac: AccessControllerAddress,
+        held_badges: Vec<ResourceAddress>,
+    ) -> StateEntityDetailsResponseItem {
+        StateEntityDetailsResponseItem::new(
+            ac.into(),
+            None,
+            NonFungibleResourcesCollection::new(
+                None,
+                None,
+                held_badges
+                    .into_iter()
+                    .map(|badge| {
+                        NonFungibleResourcesCollectionItem::Global(
+                            NonFungibleResourcesCollectionItemGloballyAggregated::new(
+                                badge, 1,
+                            ),
+                        )
+                    })
+                    .collect(),
+            ),
+            EntityMetadataCollection::empty(),
+            Some(StateEntityDetailsResponseItemDetails::Component(
+                StateEntityDetailsResponseComponentDetails {
+                    role_assignments: None,
+                    state: Some(
+                        serde_json::to_string(
+                            &AccessControllerFieldStateValue::sample(),
+                        )
+                        .unwrap(),
+                    ),
+                },
+            )),
+        )
+    }
+
+    fn status() -> MockNetworkingDriverResponse {
+        MockNetworkingDriverResponse::new_success(GatewayStatusResponse {
+            ledger_state: LedgerState::sample(),
+        })
+    }
+
+    fn details(
+        items: Vec<StateEntityDetailsResponseItem>,
+    ) -> MockNetworkingDriverResponse {
+        MockNetworkingDriverResponse::new_success(
+            StateEntityDetailsResponse::new(LedgerState::sample(), items),
+        )
+    }
+
+    fn vault_ids(ids: Vec<NonFungibleLocalId>) -> MockNetworkingDriverResponse {
+        MockNetworkingDriverResponse::new_success(PageResponse::new(
+            LedgerState::sample(),
+            None,
+            None,
+            ids,
+        ))
+    }
+
+    fn sut(responses: Vec<MockNetworkingDriverResponse>) -> SUT {
+        SUT::with_networking_driver(
+            Arc::new(MockNetworkingDriver::new_with_responses(responses)),
+            Gateway::mainnet(),
+        )
+    }
+
+    #[actix_rt::test]
+    async fn resolves_account_secured_by_access_controller() {
+        let ac = AccessControllerAddress::sample_mainnet();
+        let account = AccountAddress::sample_mainnet();
+        let sut = sut(vec![
+            status(),
+            details(vec![access_controller_item(ac, vec![owner_badge(true)])]),
+            vault_ids(vec![NonFungibleLocalId::from(account)]),
+        ]);
+
+        let result = sut
+            .fetch_access_controllers_controlled_entities(vec![ac])
+            .await
+            .unwrap();
+
+        assert_eq!(
+            result,
+            IndexMap::from([(ac, AddressOfAccountOrPersona::Account(account))])
+        );
+    }
+
+    #[actix_rt::test]
+    async fn resolves_persona_secured_by_access_controller() {
+        let ac = AccessControllerAddress::sample_mainnet();
+        let identity = IdentityAddress::sample_mainnet();
+        let sut = sut(vec![
+            status(),
+            details(vec![access_controller_item(ac, vec![owner_badge(false)])]),
+            vault_ids(vec![NonFungibleLocalId::from(identity)]),
+        ]);
+
+        let result = sut
+            .fetch_access_controllers_controlled_entities(vec![ac])
+            .await
+            .unwrap();
+
+        assert_eq!(
+            result,
+            IndexMap::from([(
+                ac,
+                AddressOfAccountOrPersona::Identity(identity)
+            )])
+        );
+    }
+
+    #[actix_rt::test]
+    async fn skips_access_controller_holding_no_owner_badge() {
+        let ac = AccessControllerAddress::sample_mainnet();
+        let sut = sut(vec![
+            status(),
+            details(vec![access_controller_item(
+                ac,
+                vec![ResourceAddress::sample_mainnet()],
+            )]),
+        ]);
+
+        let result = sut
+            .fetch_access_controllers_controlled_entities(vec![ac])
+            .await
+            .unwrap();
+
+        assert!(result.is_empty());
+    }
+
+    #[actix_rt::test]
+    async fn no_access_controllers_makes_no_requests() {
+        let sut = sut(vec![]);
+        let result = sut
+            .fetch_access_controllers_controlled_entities(vec![])
+            .await
+            .unwrap();
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn owner_badge_local_id_round_trips() {
+        let account = AccountAddress::sample_mainnet();
+        let identity = IdentityAddress::sample_mainnet();
+        assert_eq!(
+            entity_secured_by_owner_badge(
+                &NonFungibleLocalId::from(account),
+                true,
+                NetworkID::Mainnet
+            ),
+            Some(AddressOfAccountOrPersona::Account(account))
+        );
+        assert_eq!(
+            entity_secured_by_owner_badge(
+                &NonFungibleLocalId::from(identity),
+                false,
+                NetworkID::Mainnet
+            ),
+            Some(AddressOfAccountOrPersona::Identity(identity))
+        );
+        assert_eq!(
+            entity_secured_by_owner_badge(
+                &NonFungibleLocalId::integer(1),
+                true,
+                NetworkID::Mainnet
+            ),
+            None
+        );
     }
 }

@@ -3,11 +3,24 @@ use crate::prelude::*;
 /// Host-controlled options for [`OsAnalysePreAuthPreview::analyse_pre_auth_preview_with_options`].
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub struct PreAuthPreviewOptions {
-    /// Allow `create_proof` on AccessControllers that do not secure any entity
-    /// in this wallet's Profile, i.e. multisig accounts controlled by an
-    /// external AccessController. Off by default. See
-    /// [`ExternalAccessControllerProofsPolicy`] for the exact conditions.
-    pub allow_external_access_controller_proofs: bool,
+    /// Allow calls on AccessControllers that do not secure any entity in this
+    /// wallet's Profile, i.e. multisig accounts controlled by an external
+    /// AccessController: `create_proof` to spend, the recovery family to
+    /// rotate signers, and primary-role lock/unlock. Off by default. See
+    /// [`ExternalAccessControllerPolicy`] for the exact conditions.
+    pub allow_external_access_controller_operations: bool,
+}
+
+impl HasSampleValues for PreAuthPreviewOptions {
+    fn sample() -> Self {
+        Self::default()
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            allow_external_access_controller_operations: true,
+        }
+    }
 }
 
 #[async_trait::async_trait]
@@ -83,17 +96,17 @@ impl OsAnalysePreAuthPreview for SargonOS {
         debug!("Pre-auth review: subintent manifest constructed");
 
         // PreAuth transaction cannot be sent by the Host itself, so reserved
-        // instructions are always checked. The host may opt in to the narrow
+        // instructions are always checked. The host may opt in to the
         // external-AccessController exemption.
-        let external_access_controller_proofs =
-            if options.allow_external_access_controller_proofs {
-                Some(self.external_access_controller_proofs_policy()?)
+        let external_access_controllers =
+            if options.allow_external_access_controller_operations {
+                Some(self.external_access_controller_policy()?)
             } else {
                 None
             };
         let summary = subintent_manifest
             .validated_summary_for_pre_authorization(
-                external_access_controller_proofs.as_ref(),
+                external_access_controllers.as_ref(),
             )?;
         debug!("Pre-auth review: subintent manifest summary validated");
 
@@ -130,19 +143,19 @@ impl OsAnalysePreAuthPreview for SargonOS {
     }
 }
 
-trait ExternalAccessControllerProofsPolicyBuilding {
-    fn external_access_controller_proofs_policy(
+trait ExternalAccessControllerPolicyBuilding {
+    fn external_access_controller_policy(
         &self,
-    ) -> Result<ExternalAccessControllerProofsPolicy>;
+    ) -> Result<ExternalAccessControllerPolicy>;
 }
 
-impl ExternalAccessControllerProofsPolicyBuilding for SargonOS {
+impl ExternalAccessControllerPolicyBuilding for SargonOS {
     /// AccessControllers that secure any account or persona in the Profile, on
     /// any network, including hidden and tombstoned entities. These are never
     /// exempt.
-    fn external_access_controller_proofs_policy(
+    fn external_access_controller_policy(
         &self,
-    ) -> Result<ExternalAccessControllerProofsPolicy> {
+    ) -> Result<ExternalAccessControllerPolicy> {
         let profile = self.profile()?;
         let access_controllers = profile
             .networks
@@ -162,9 +175,7 @@ impl ExternalAccessControllerProofsPolicyBuilding for SargonOS {
                     .map(|control| control.access_controller_address)
             })
             .collect_vec();
-        Ok(ExternalAccessControllerProofsPolicy::new(
-            access_controllers,
-        ))
+        Ok(ExternalAccessControllerPolicy::new(access_controllers))
     }
 }
 
@@ -319,17 +330,18 @@ YIELD_TO_PARENT;
         )
     }
 
-    fn allowing_external_access_controller_proofs() -> PreAuthPreviewOptions {
+    fn allowing_external_access_controller_operations() -> PreAuthPreviewOptions
+    {
         PreAuthPreviewOptions {
-            allow_external_access_controller_proofs: true,
+            allow_external_access_controller_operations: true,
         }
     }
 
     #[test]
-    fn external_access_controller_proofs_are_off_by_default() {
+    fn external_access_controller_operations_are_off_by_default() {
         assert!(
             !PreAuthPreviewOptions::default()
-                .allow_external_access_controller_proofs
+                .allow_external_access_controller_operations
         );
     }
 
@@ -382,7 +394,7 @@ YIELD_TO_PARENT;
                 Blobs::default(),
                 Nonce::sample(),
                 PublicKey::sample(),
-                allowing_external_access_controller_proofs(),
+                allowing_external_access_controller_operations(),
             )
             .await
             .unwrap();
@@ -429,7 +441,7 @@ YIELD_TO_PARENT;
                 Blobs::default(),
                 Nonce::sample(),
                 PublicKey::sample(),
-                allowing_external_access_controller_proofs(),
+                allowing_external_access_controller_operations(),
             )
             .await;
 
@@ -461,7 +473,108 @@ YIELD_TO_PARENT;
                 Blobs::default(),
                 Nonce::sample(),
                 PublicKey::sample(),
-                allowing_external_access_controller_proofs(),
+                allowing_external_access_controller_operations(),
+            )
+            .await;
+
+        assert_eq!(
+            result,
+            Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions: "AccessControllerMethod".to_owned()
+            })
+        );
+    }
+
+    fn lock_primary_role_instructions(ac: AccessControllerAddress) -> String {
+        format!(
+            "CALL_METHOD Address(\"{ac}\") \"lock_primary_role\";\nYIELD_TO_PARENT;\n"
+        )
+    }
+
+    #[actix_rt::test]
+    async fn controller_only_call_on_external_access_controller_is_rejected_by_default(
+    ) {
+        let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
+        let result = os
+            .analyse_pre_auth_preview(
+                lock_primary_role_instructions(
+                    AccessControllerAddress::sample_mainnet(),
+                ),
+                Blobs::default(),
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await;
+        assert_eq!(
+            result,
+            Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions: "AccessControllerMethod".to_owned()
+            })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn controller_only_call_on_external_access_controller_is_permitted_when_enabled(
+    ) {
+        let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
+        let ac = AccessControllerAddress::sample_mainnet();
+        let instructions = lock_primary_role_instructions(ac);
+
+        let result = os
+            .analyse_pre_auth_preview_with_options(
+                instructions.clone(),
+                Blobs::default(),
+                Nonce::sample(),
+                PublicKey::sample(),
+                allowing_external_access_controller_operations(),
+            )
+            .await
+            .unwrap();
+
+        let subintent_manifest = SubintentManifest::new(
+            instructions,
+            NetworkID::Mainnet,
+            Blobs::default(),
+            ChildSubintentSpecifiers::default(),
+        )
+        .unwrap();
+        assert_eq!(
+            subintent_manifest.access_controller_operations(),
+            vec![AccessControllerOperation {
+                access_controller: ac,
+                kind: AccessControllerOperationKind::LockPrimaryRole,
+            }]
+        );
+        assert_eq!(
+            result,
+            PreAuthToReview::Open(PreAuthOpenManifest {
+                summary: subintent_manifest.summary().unwrap(),
+                manifest: subintent_manifest,
+            })
+        );
+    }
+
+    #[actix_rt::test]
+    async fn controller_only_call_on_profile_access_controller_is_rejected_when_enabled(
+    ) {
+        let securified = Account::sample_all()
+            .into_iter()
+            .find(|a| a.security_state().as_securified().is_some())
+            .expect("a securified account sample");
+        let own_access_controller = securified
+            .security_state()
+            .as_securified()
+            .unwrap()
+            .access_controller_address;
+        let os = prepare_os_with_entities([securified], []).await;
+
+        let result = os
+            .analyse_pre_auth_preview_with_options(
+                lock_primary_role_instructions(own_access_controller),
+                Blobs::default(),
+                Nonce::sample(),
+                PublicKey::sample(),
+                allowing_external_access_controller_operations(),
             )
             .await;
 
