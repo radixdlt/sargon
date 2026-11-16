@@ -368,9 +368,12 @@ migrating existing records.
 
 Unfinished records retain their original ciphertext and key. The old key is deleted only
 after all pending legacy records have been committed as v2.
-Cleanup failure is reported separately and may be retried. A key referenced by retained
-ciphertext is never regenerated. Key lookup, authorization, encryption, and commit errors
+Cleanup failure is reported separately and may be retried. Migration never regenerates a key
+referenced by retained ciphertext. Migration key lookup, authorization, encryption, and commit errors
 preserve the affected record; cancellation also preserves earlier migration commits.
+`clearInvalidatedMnemonics()` restores the original invalidation/reset policy before the wallet
+checks integrity: missing keys and key lookup failures trigger reset and removal of the affected
+mnemonic records. This applies on all supported Android versions and allows seed re-import.
 `containsDataForKey()` checks only whether the stored record exists. Key inspection reads
 presence and authentication-policy metadata without prompting. Blocking key operations run
 on IO, including calls from Main.

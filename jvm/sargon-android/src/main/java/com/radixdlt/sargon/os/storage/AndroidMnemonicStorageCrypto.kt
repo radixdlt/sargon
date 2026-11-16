@@ -9,10 +9,11 @@ import com.radixdlt.sargon.os.driver.BiometricAuthorizationDriver
  * Inspects key presence and authentication policy and requests authorization for every read/write,
  * including reads of legacy records whose keys do not require authentication. Protected keys use
  * their existing per-operation or timed authorization policy.
- * Key lookup errors propagate without replacing keys or changing stored records.
+ * Read/write key lookup errors propagate without replacing keys or changing stored records.
  *
- * Only [ensureKeyExists] may create a key, when explicitly allowed by the caller. Encryption and
+ * Normal writes create keys through [ensureKeyExists], when explicitly allowed by the caller. Encryption and
  * decryption require an existing key so retained ciphertext never causes silent key replacement.
+ * Explicit recovery uses the original [KeySpec.reset] policy, including its replacement fallback.
  * [MnemonicStorage] runs these operations off Main and coordinates key deletion with migration.
  */
 internal class AndroidMnemonicStorageCrypto(private val authorization: BiometricAuthorizationDriver) : MnemonicStorageCrypto {
@@ -23,6 +24,13 @@ internal class AndroidMnemonicStorageCrypto(private val authorization: Biometric
             info.isUserAuthenticationRequired -> MnemonicKeyState.Protected
             else -> MnemonicKeyState.Unprotected
         }
+    }
+
+    override fun isInvalidated(alias: String): Boolean = KeySpec.Mnemonic(alias).checkIfPermanentlyInvalidated()
+
+    override fun reset(alias: String) {
+        KeySpec.reset(listOf(KeySpec.Mnemonic(alias).withAuthenticationPolicy(authorization.hasStrongAuthenticator)))
+            .getOrThrow()
     }
 
     override fun ensureKeyExists(alias: String, mayCreate: Boolean) {

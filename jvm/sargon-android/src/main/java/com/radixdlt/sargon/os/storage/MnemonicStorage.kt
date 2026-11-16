@@ -55,6 +55,24 @@ class MnemonicStorage internal constructor(
 
     suspend fun contains(name: String): Boolean = storedValue(name) != null
 
+    /** Restores the original invalidation/reset policy, removing records for each reset alias. */
+    suspend fun clearInvalidatedMnemonics(): Result<Unit> = operation {
+        val byAlias = records().entries.groupBy { (_, value) ->
+            (value as? String)?.let { runCatching { alias(it) }.getOrNull() }
+        }
+        for ((alias, records) in byAlias) {
+            if (alias == null || !crypto.isInvalidated(alias)) continue
+            // Reset the key before clearing the records that depended on it.
+            crypto.reset(alias)
+            preferences.edit { prefs ->
+                for ((name, stored) in records) {
+                    val key = stringPreferencesKey(name)
+                    if (prefs[key] == stored) prefs.remove(key)
+                }
+            }
+        }
+    }
+
     suspend fun pendingMigrationCount(): Result<Int> = operation {
         if (crypto.keyState(LEGACY_ALIAS) == MnemonicKeyState.Unprotected) records().values.count { !isV2(it) }
         else 0
@@ -145,6 +163,8 @@ internal enum class MnemonicKeyState { Missing, Unprotected, Protected }
 
 internal interface MnemonicStorageCrypto {
     fun keyState(alias: String): MnemonicKeyState
+    fun isInvalidated(alias: String): Boolean = keyState(alias) == MnemonicKeyState.Missing
+    fun reset(alias: String) = delete(alias)
     /** Reuses an existing key, or creates an authentication-required key when [mayCreate] is true. */
     fun ensureKeyExists(alias: String, mayCreate: Boolean)
     fun delete(alias: String)

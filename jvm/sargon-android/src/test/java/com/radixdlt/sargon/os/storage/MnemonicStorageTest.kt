@@ -1,6 +1,8 @@
 package com.radixdlt.sargon.os.storage
 
 import android.security.keystore.KeyInfo
+import android.security.keystore.KeyPermanentlyInvalidatedException
+import android.security.keystore.UserNotAuthenticatedException
 import android.util.Base64 as AndroidBase64
 import androidx.biometric.BiometricPrompt
 import androidx.datastore.core.DataStore
@@ -13,8 +15,10 @@ import com.radixdlt.sargon.os.driver.BiometricsFailure
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.unmockkConstructor
+import io.mockk.unmockkObject
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.TestScope
@@ -31,6 +35,7 @@ import java.io.File
 import java.io.IOException
 import java.util.Base64
 import javax.crypto.Cipher
+import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 internal class MnemonicStorageTest {
@@ -79,6 +84,98 @@ internal class MnemonicStorageTest {
                     ciphertext.removePrefix("new:")
                 }
             }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun invalidationClearsOnlyRecordsUsingThatKeyAndAllowsReimport(lostLegacy: Boolean) = runTest {
+        val data = store()
+        data.put("mnemonicLegacy", "old:legacy seed")
+        data.put("mnemonicProtected", secured("protected seed"))
+        data.put("mnemonicShared", if (lostLegacy) "old:shared seed" else secured("shared seed"))
+        data.put("mnemonicUnknown", "sargon:mnemonic:v99:untouched")
+        data.put("profile", "unrelated ciphertext")
+        val lost = if (lostLegacy) legacy else protected
+        val affected = if (lostLegacy) "mnemonicLegacy" else "mnemonicProtected"
+        val healthy = if (lostLegacy) "mnemonicProtected" else "mnemonicLegacy"
+        val crypto = FakeCrypto().apply { states[protected] = MnemonicKeyState.Protected; states.remove(lost) }
+        val storage = MnemonicStorage(data, crypto)
+        val retained = data.raw(healthy)
+
+        storage.clearInvalidatedMnemonics().getOrThrow()
+
+        assertFalse(storage.contains(affected))
+        assertFalse(storage.contains("mnemonicShared"))
+        assertEquals(retained, data.raw(healthy))
+        assertEquals("sargon:mnemonic:v99:untouched", data.raw("mnemonicUnknown"))
+        assertEquals("unrelated ciphertext", data.raw("profile"))
+        storage.write(affected, "reimported seed").getOrThrow()
+        assertEquals("reimported seed", storage.read(affected).getOrThrow())
+        assertEquals(retained, data.raw(healthy))
+    }
+
+    @Test fun failedKeyResetPreservesAffectedRecords() = runTest {
+        val data = store()
+        data.put("mnemonicA", secured("seed A"))
+        val crypto = FakeCrypto().apply { deleteFailure = true }
+        val storage = MnemonicStorage(data, crypto)
+        val retained = data.data.first()
+        assertTrue(storage.clearInvalidatedMnemonics().isFailure)
+        assertEquals(retained, data.data.first())
+        crypto.deleteFailure = false
+        storage.clearInvalidatedMnemonics().getOrThrow()
+        assertFalse(storage.contains("mnemonicA"))
+    }
+
+    @Test fun failedCleanupCommitPreservesCiphertextAndCanBeRetried() = runTest {
+        val data = store()
+        data.put("mnemonicA", secured("seed A"))
+        val failing = object : DataStore<Preferences> by data {
+            override suspend fun updateData(transform: suspend (Preferences) -> Preferences): Preferences =
+                throw IOException("Disk unavailable")
+        }
+        val crypto = FakeCrypto()
+        assertTrue(MnemonicStorage(failing, crypto).clearInvalidatedMnemonics().isFailure)
+        assertEquals(secured("seed A"), data.raw("mnemonicA"))
+        MnemonicStorage(data, crypto).clearInvalidatedMnemonics().getOrThrow()
+        assertNull(data.raw("mnemonicA"))
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [0, 1, 2, 3, 4, 5])
+    fun androidCleanupUsesOriginalInvalidationPolicy(scenario: Int) = runTest {
+        val data = store()
+        data.put("mnemonicA", secured("seed A"))
+        val invalidated = mockk<KeyPermanentlyInvalidatedException>()
+        every { invalidated.cause } returns null
+        val authExpired = mockk<UserNotAuthenticatedException>()
+        every { authExpired.cause } returns null
+        val key = mockk<SecretKey>()
+        mockkConstructor(KeySpec.Mnemonic::class)
+        mockkObject(EncryptionHelper, KeySpec.Companion)
+        try {
+            every { anyConstructed<KeySpec.Mnemonic>().getSecretKey() } returns when (scenario) {
+                0 -> Result.failure(IOException("Keystore temporarily unavailable"))
+                1 -> Result.failure(java.security.UnrecoverableKeyException().apply { initCause(invalidated) })
+                5 -> Result.success(null) // Missing keys trigger recovery on every supported Android version.
+                else -> Result.success(key)
+            }
+            every { KeySpec.reset(any()) } returns Result.success(Unit)
+            every { EncryptionHelper.encrypt(any<ByteArray>(), key) } returns Result.failure(when (scenario) {
+                2 -> authExpired
+                4 -> invalidated
+                else -> IOException("Cipher service temporarily unavailable")
+            })
+            val authorization = mockk<BiometricAuthorizationDriver>()
+            every { authorization.hasStrongAuthenticator } returns false
+            val storage = MnemonicStorage(data, AndroidMnemonicStorageCrypto(authorization))
+            storage.clearInvalidatedMnemonics()
+            assertEquals(scenario in listOf(2, 3), storage.contains("mnemonicA"))
+            if (scenario in listOf(2, 3)) assertEquals(secured("seed A"), data.raw("mnemonicA"))
+        } finally {
+            unmockkObject(EncryptionHelper, KeySpec.Companion)
+            unmockkConstructor(KeySpec.Mnemonic::class)
         }
     }
 
