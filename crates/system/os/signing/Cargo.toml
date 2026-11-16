@@ -1,6 +1,6 @@
 [package]
 name = "sargon-os-signing"
-version = "1.2.60"
+version = "1.2.61"
 edition = "2021"
 
 [features]
