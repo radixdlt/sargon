@@ -335,6 +335,76 @@ cd jvm
 ./gradlew sargon-android:connectedDebugAndroidTest
 ```
 
+The mnemonic Keystore regression tests require Android 11+ with a configured PIN,
+pattern, or password. Tests that display authentication prompts are skipped by default.
+To run them, approve each prompt manually on a disposable test device:
+
+```sh
+./gradlew sargon-android:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.radixdlt.sargon.os.storage.ZeroTimeoutExperimentTest \
+  -Pandroid.testInstrumentationRunnerArguments.runManualKeystoreAuthTests=true
+```
+
+The credential-only regression test also requires no enrolled strong biometrics.
+
+### Android mnemonic migration
+
+Create one `MnemonicStorage(encryptedPreferences, biometricsHandler)` instance and share it
+with `Bios.from(mnemonicStorage = ...)` and the wallet's mnemonic repository. All mnemonic
+reads, writes, removal, and migration must use that instance to coordinate access.
+
+On an unlocked foreground screen, inspect `pendingMigrationCount()` without authentication,
+then offer `migrate()`. Migration only upgrades legacy keys without authentication protection.
+Each mnemonic is decrypted with the legacy key and encrypted through the normal encryption
+flow before its versioned ciphertext is committed atomically. Migrated records use
+`sargon:mnemonic:v2:<ciphertext>`; v2 selects the protected
+key, while unprefixed records use the legacy key. Cancellation preserves earlier commits; retry
+skips completed records. Other record failures do not stop the remaining records. With the
+current authorization flow, expect two prompts per migrated mnemonic: read the legacy record
+and encrypt with the protected key.
+
+All writes use the protected key and v2 format. The legacy key is used only for reading and
+migrating existing records.
+
+Unfinished records retain their original ciphertext and key. The old key is deleted only
+after all pending legacy records have been committed as v2.
+Cleanup failure is reported separately and may be retried. Migration never regenerates a key
+referenced by retained ciphertext. Migration key lookup, authorization, encryption, and commit errors
+preserve the affected record; cancellation also preserves earlier migration commits.
+`clearInvalidatedMnemonics()` restores the original invalidation/reset policy before the wallet
+checks integrity: missing keys and key lookup failures trigger reset and removal of the affected
+mnemonic records. This applies on all supported Android versions and allows seed re-import.
+`containsDataForKey()` checks only whether the stored record exists. Key inspection reads
+presence and authentication-policy metadata without prompting. Blocking key operations run
+on IO, including calls from Main.
+
+**Rollback builds must understand the versioned mnemonic format. Do not roll back to the
+old storage implementation after migration.** Preserve ciphertext on lookup or read errors;
+never interpret a failed Keystore query as permission to reset keys or delete seed records.
+The wallet rollback must retain the updated mnemonic repository adapter, shared
+`MnemonicStorage` injection, and non-destructive storage error handling as well as the
+compatible SDK. An SDK dependency change alone does not update wallet code that reads the
+old format directly or deletes records when the retired legacy key is absent. Validate
+both fully migrated and mixed legacy/versioned storage, then roll forward and resume any
+unfinished migration before releasing a rollback build.
+
+The opt-in `MnemonicMigrationTest` uses disposable seeds in the library test APK. Approve
+the first mnemonic's two prompts, cancel the next prompt, then approve six prompts to check
+mixed storage, retry, key retirement, and authenticated reads. It then deletes the replacement
+key and verifies that failed reads/writes preserve ciphertext without regenerating that key:
+
+```sh
+./gradlew sargon-android:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.radixdlt.sargon.os.storage.MnemonicMigrationTest \
+  -Pandroid.testInstrumentationRunnerArguments.runManualKeystoreAuthTests=true
+```
+
+`MnemonicStorageDispatchTest` checks that Main-thread callers execute key operations off Main.
+`ZeroTimeoutExperimentTest` checks key presence and authentication policy without prompting or
+regenerating keys. Its credential-only case verifies that policy inspection preserves the original
+ciphertext, grants no decryption permission, and permits subsequent PIN-authorized reads and writes
+through `MnemonicStorage`.
+
 # Release
 
 ## Bumping Version

@@ -31,6 +31,7 @@ import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
 import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import com.radixdlt.sargon.os.driver.BiometricsHandler
 import com.radixdlt.sargon.os.from
+import com.radixdlt.sargon.os.storage.MnemonicStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -152,6 +153,13 @@ object ApplicationModule {
 
     @Provides
     @Singleton
+    fun provideMnemonicStorage(
+        @EncryptedPreferences preferences: DataStore<Preferences>,
+        biometricsHandler: BiometricsHandler
+    ): MnemonicStorage = MnemonicStorage(preferences, biometricsHandler)
+
+    @Provides
+    @Singleton
     fun provideEventBusDriver(): AndroidEventBusDriver = AndroidEventBusDriver
 
     @Provides
@@ -194,21 +202,21 @@ object ApplicationModule {
         httpClient: OkHttpClient,
         eventBusDriver: AndroidEventBusDriver,
         profileStateChangeDriver: AndroidProfileStateChangeDriver,
-        biometricsHandler: BiometricsHandler,
+        mnemonicStorage: MnemonicStorage,
         @EncryptedPreferences encryptedPreferences: DataStore<Preferences>,
         @NonEncryptedPreferences preferences: DataStore<Preferences>,
         @DeviceInfoPreferences deviceInfoPreferences: DataStore<Preferences>,
     ): Bios = Bios.from(
         context = context,
         httpClient = httpClient,
-        biometricsHandler = biometricsHandler,
         encryptedPreferencesDataStore = encryptedPreferences,
         preferencesDatastore = preferences,
         deviceInfoDatastore = deviceInfoPreferences,
         eventBusDriver = eventBusDriver,
         profileStateChangeDriver = profileStateChangeDriver,
         arculusCsdkDriver = FakeArculusCsdkDriver(),
-        nfcTagDriver = FakeNfcTagDriver()
+        nfcTagDriver = FakeNfcTagDriver(),
+        mnemonicStorage = mnemonicStorage
     )
 
     @Provides

@@ -8,15 +8,19 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.radixdlt.sargon.Profile
+import com.radixdlt.sargon.Exactly32Bytes
+import com.radixdlt.sargon.FactorSourceIdFromHash
+import com.radixdlt.sargon.FactorSourceKind
+import com.radixdlt.sargon.vecOfFactorSourceIdFromHashToJson
 import com.radixdlt.sargon.ProfileId
 import com.radixdlt.sargon.SecureStorageKey
 import com.radixdlt.sargon.UnsafeStorageKey
 import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.extensions.bagOfBytes
 import com.radixdlt.sargon.extensions.fromJson
-import com.radixdlt.sargon.extensions.randomBagOfBytes
 import com.radixdlt.sargon.extensions.string
 import com.radixdlt.sargon.extensions.toJson
+import com.radixdlt.sargon.os.storage.MnemonicStorage
 import com.radixdlt.sargon.samples.sample
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
@@ -86,7 +90,9 @@ class AndroidStorageDriverTest {
     fun testCrudForByteArrayUnsafeKey() = runTest {
         val sut = sut(testContext, backgroundScope)
 
-        val bytes = randomBagOfBytes(2)
+        val bytes = vecOfFactorSourceIdFromHashToJson(listOf(
+            FactorSourceIdFromHash(FactorSourceKind.DEVICE, Exactly32Bytes.sample())
+        ))
         sut.saveData(UnsafeStorageKey.FACTOR_SOURCE_USER_HAS_WRITTEN_DOWN, bytes)
         assertEquals(
             bytes,
@@ -101,19 +107,15 @@ class AndroidStorageDriverTest {
     companion object {
         internal fun sut(
             context: Context,
-            scope: CoroutineScope,
-            onAuthorize: () -> Result<Unit> = { Result.success(Unit) }
-        ) = AndroidStorageDriver(
-            encryptedPreferencesDatastore = encryptedDataStore(context, scope),
-            preferencesDatastore = unEncryptedDataStore(context, scope),
-            deviceInfoDatastore = deviceInfoDataStore(context, scope),
-            biometricAuthorizationDriver = TestBiometricAuthorizationDriver(onAuthorize)
-        )
-
-        private class TestBiometricAuthorizationDriver(
-            private val onAuthorize: () -> Result<Unit>
-        ): BiometricAuthorizationDriver {
-            override suspend fun authorize(): Result<Unit> = onAuthorize()
+            scope: CoroutineScope
+        ): AndroidStorageDriver {
+            val encryptedPreferences = encryptedDataStore(context, scope)
+            return AndroidStorageDriver(
+                encryptedPreferencesDatastore = encryptedPreferences,
+                preferencesDatastore = unEncryptedDataStore(context, scope),
+                deviceInfoDatastore = deviceInfoDataStore(context, scope),
+                mnemonicStorage = MnemonicStorage(encryptedPreferences, BiometricsHandler("Storage driver test"))
+            )
         }
 
         private fun encryptedDataStore(

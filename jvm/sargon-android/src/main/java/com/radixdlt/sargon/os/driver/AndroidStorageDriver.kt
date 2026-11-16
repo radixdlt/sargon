@@ -10,6 +10,7 @@ import com.radixdlt.sargon.UnsafeStorageDriver
 import com.radixdlt.sargon.UnsafeStorageKey
 import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
+import com.radixdlt.sargon.os.storage.MnemonicStorage
 import com.radixdlt.sargon.os.storage.key.ByteArrayKeyMapping
 import com.radixdlt.sargon.os.storage.key.DeviceFactorSourceMnemonicKeyMapping
 import com.radixdlt.sargon.os.storage.key.FactorSourceUserHasWrittenDownKeyMapping
@@ -17,10 +18,10 @@ import com.radixdlt.sargon.os.storage.key.HostIdKeyMapping
 import com.radixdlt.sargon.os.storage.key.ProfileSnapshotKeyMapping
 
 internal class AndroidStorageDriver(
-    private val biometricAuthorizationDriver: BiometricAuthorizationDriver,
     private val encryptedPreferencesDatastore: DataStore<Preferences>,
     private val preferencesDatastore: DataStore<Preferences>,
-    private val deviceInfoDatastore: DataStore<Preferences>
+    private val deviceInfoDatastore: DataStore<Preferences>,
+    private val mnemonicStorage: MnemonicStorage
 ) : SecureStorageDriver, UnsafeStorageDriver {
 
     override suspend fun loadData(key: SecureStorageKey): BagOfBytes? = key
@@ -77,8 +78,7 @@ internal class AndroidStorageDriver(
 
         is SecureStorageKey.DeviceFactorSourceMnemonic -> DeviceFactorSourceMnemonicKeyMapping(
             key = this,
-            encryptedStorage = encryptedPreferencesDatastore,
-            biometricAuthorizationDriver = biometricAuthorizationDriver
+            mnemonicStorage = mnemonicStorage
         )
 
         is SecureStorageKey.RadixConnectMobileSession -> ByteArrayKeyMapping(

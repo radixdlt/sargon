@@ -5,6 +5,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyInfo
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
+import android.util.Base64
 import com.radixdlt.sargon.Uuid
 import com.radixdlt.sargon.annotation.KoverIgnore
 import com.radixdlt.sargon.extensions.then
@@ -20,9 +21,8 @@ import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 
 /**
- * A request to the keystore that describes which [KeySpec] should be used for cryptographic
- * operations. [requestAuthorization] is only invoked for [KeySpec]s that are defined with
- * [KeyGenParameterSpec#Builder#setUserAuthenticationRequired] to true
+ * Selects the key and authorization flow for encrypted storage. Mnemonic access requests user
+ * authorization even for legacy keys that do not require it cryptographically.
  */
 sealed interface KeystoreAccessRequest {
 
@@ -53,66 +53,102 @@ sealed interface KeystoreAccessRequest {
 
     data class ForMnemonic(
         private val hasStrongAuthenticator: Boolean,
-        private val authorize: suspend (AuthorizationArgs) -> Result<AuthorizationArgs>
+        private val authorize: suspend (AuthorizationArgs) -> Result<AuthorizationArgs>,
+        private val mnemonicKeySpec: KeySpec.Mnemonic = KeySpec.Mnemonic()
     ) : KeystoreAccessRequest {
-
-        private val mnemonicKeySpec = KeySpec.Mnemonic()
 
         override val keySpec: KeySpec = mnemonicKeySpec
 
-        override suspend fun requestAuthorization(): Result<Unit> {
-            return authorize(AuthorizationArgs.TimeWindowAuth).toUnit()
+        override suspend fun requestAuthorization(): Result<Unit> = existingKey().then {
+            authorize(AuthorizationArgs.TimeWindowAuth).toUnit()
         }
 
         /**
          * Request authorization for the provided [purpose] and return the resolved authorization arguments.
          *
          * Behavior:
-         * - Time-window flow: If the existing key is a legacy time-window key (see [KeySpec.Mnemonic.isLegacyTimedWindowKey])
-         *   or a strong authenticator is not available, this method enables the time-window flow by setting an authentication
-         *   timeout on the mnemonic key and invoking the `authorize` callback with [AuthorizationArgs.TimeWindowAuth].
-         * - Per-operation flow: If the key is not legacy and a strong authenticator is available, the method obtains (or
-         *   generates) the secret key, initializes a cipher for the requested purpose (encrypt/decrypt) and invokes the
-         *   `authorize` callback with either [AuthorizationArgs.Encrypt] or [AuthorizationArgs.Decrypt].
+         * - Existing authentication-bound keys retain their stored policy: timed keys use [AuthorizationArgs.TimeWindowAuth],
+         *   while per-operation keys use a cipher even if strong biometrics are no longer available.
+         * - Legacy unprotected keys still request authorization, using the device's available authenticator.
+         * - Per-operation flow: The method obtains the existing secret key, initializes a cipher for the requested
+         *   purpose and invokes `authorize` with either [AuthorizationArgs.Encrypt] or [AuthorizationArgs.Decrypt].
          *
          * Notes:
+         * - A missing key fails before requesting authentication. Authorization never creates keys.
          * - Cipher initialization failures or key access errors are propagated as failures in the returned [Result].
          * - The [AuthorizationArgs] containing [Cipher] is to be used for the specific encrypt/decrypt operation.
          *
          * @param purpose the operation requiring authorization: [Purpose.Encrypt] or [Purpose.Decrypt] (contains the encrypted bytes).
          * @return a [Result] containing the resolved [AuthorizationArgs] on success, or an exception describing the failure.
          */
-        suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> {
-            return if (mnemonicKeySpec.isLegacyTimedWindowKey() || !hasStrongAuthenticator) {
-                mnemonicKeySpec.setAuthenticationTimeout()
+        suspend fun requestAuthorization(purpose: Purpose): Result<AuthorizationArgs> = existingKey().then { secretKey ->
+            requestAuthorization(purpose, secretKey)
+        }
+
+        private suspend fun requestAuthorization(purpose: Purpose, secretKey: SecretKey): Result<AuthorizationArgs> {
+            val existingKeyInfo = mnemonicKeySpec.getKeyInfo(secretKey)
+            val useTimeWindowAuth = if (existingKeyInfo.isUserAuthenticationRequired) {
+                existingKeyInfo.userAuthenticationValidityDurationSeconds > 0
+            } else {
+                !hasStrongAuthenticator
+            }
+
+            return if (useTimeWindowAuth) {
                 authorize(AuthorizationArgs.TimeWindowAuth)
             } else {
-                keySpec.getOrGenerateSecretKey()
-                    .then { secretKey ->
-                        when (purpose) {
-                            is Purpose.Decrypt -> EncryptionHelper.initDecryptCipher(
-                                encryptedValue = purpose.encryptedValue,
-                                secretKey = secretKey
-                            ).map { cipher ->
-                                AuthorizationArgs.Decrypt(
-                                    cipher = cipher
-                                )
-                            }
-
-                            Purpose.Encrypt -> EncryptionHelper.initEncryptCipher(
-                                secretKey = secretKey
-                            ).map { cipherAndIvBytes ->
-                                AuthorizationArgs.Encrypt(
-                                    cipher = cipherAndIvBytes.first,
-                                    ivBytes = cipherAndIvBytes.second
-                                )
-                            }
-                        }
-                    }.then { args ->
-                        authorize(args)
+                when (purpose) {
+                    is Purpose.Decrypt -> EncryptionHelper.initDecryptCipher(
+                        encryptedValue = purpose.encryptedValue,
+                        secretKey = secretKey
+                    ).map { cipher ->
+                        AuthorizationArgs.Decrypt(
+                            cipher = cipher
+                        )
                     }
+
+                    Purpose.Encrypt -> EncryptionHelper.initEncryptCipher(
+                        secretKey = secretKey
+                    ).map { cipherAndIvBytes ->
+                        AuthorizationArgs.Encrypt(
+                            cipher = cipherAndIvBytes.first,
+                            ivBytes = cipherAndIvBytes.second
+                        )
+                    }
+                }.then { args -> authorize(args) }
             }
         }
+
+        // Load once per operation: timed access reuses the key, per-operation access uses the authorized cipher.
+        internal suspend fun <T : Any> encryptWithAuthorization(value: T): Result<T> = existingKey().then { secretKey ->
+            requestAuthorization(Purpose.Encrypt, secretKey).then { args ->
+                when (args) {
+                    is AuthorizationArgs.Encrypt -> value.encrypt(args.cipher, args.ivBytes)
+                    AuthorizationArgs.TimeWindowAuth -> value.encrypt(secretKey)
+                    else -> error("Unexpected decrypt args for encryption")
+                }
+            }
+        }
+
+        internal suspend fun <T : Any> decryptWithAuthorization(value: T): Result<T> = runCatching {
+            when (value) {
+                is String -> Base64.decode(value, Base64.DEFAULT)
+                is ByteArray -> value
+                else -> throw IllegalArgumentException("Attempted to decrypt unsupported type ${value::class.java}")
+            }
+        }.then { encryptedValue ->
+            existingKey().then { secretKey ->
+                requestAuthorization(Purpose.Decrypt(encryptedValue), secretKey).then { args ->
+                    when (args) {
+                        is AuthorizationArgs.Decrypt -> value.decrypt(args.cipher)
+                        AuthorizationArgs.TimeWindowAuth -> value.decrypt(secretKey)
+                        else -> error("Unexpected encrypt args for decryption")
+                    }
+                }
+            }
+        }
+
+        private fun existingKey(): Result<SecretKey> = keySpec.getSecretKey()
+            .mapCatching { checkNotNull(it) { "Mnemonic encryption key is missing" } }
     }
 
     sealed interface Purpose {
@@ -161,8 +197,12 @@ sealed class KeySpec(val alias: String) {
     internal abstract fun generateSecretKey(): Result<SecretKey>
 
     internal fun getSecretKey(): Result<SecretKey?> = runCatching {
-        val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
-        keyStore.getKey(alias, null) as? SecretKey
+        loadKeyStore().getKey(alias, null) as? SecretKey
+    }
+
+    /** Deletes this alias without generating a replacement if deletion fails. */
+    internal fun deleteSecretKey(): Result<Unit> = runCatching {
+        loadKeyStore().deleteEntry(alias)
     }
 
     @KoverIgnore
@@ -182,14 +222,15 @@ sealed class KeySpec(val alias: String) {
         alias: String = KEY_ALIAS_MNEMONIC
     ) : KeySpec(alias) {
 
-        private var authenticationTimeoutSeconds: Int? = null
+        private var authenticationTimeoutSeconds: Int = 0
+
+        /** Selects the policy for newly generated keys; existing Keystore keys retain their policy. */
+        internal fun withAuthenticationPolicy(hasStrongAuthenticator: Boolean) = apply {
+            authenticationTimeoutSeconds = if (hasStrongAuthenticator) 0 else KEY_AUTHORIZATION_TIMEOUT_SECONDS
+        }
 
         override fun generateSecretKey(): Result<SecretKey> = AesKeyGeneratorBuilder(alias = alias)
-            .apply {
-                authenticationTimeoutSeconds?.let {
-                    setAuthenticationTimeoutSeconds(authenticationTimeout = it)
-                }
-            }
+            .setAuthenticationTimeoutSeconds(authenticationTimeoutSeconds)
             .build()
 
         /**
@@ -214,17 +255,15 @@ sealed class KeySpec(val alias: String) {
         }
 
         fun isLegacyTimedWindowKey(): Boolean {
-            val secretKey = getSecretKey().getOrNull()
-
-            if (secretKey == null) return false
-
-            val factory = SecretKeyFactory.getInstance(secretKey.algorithm, PROVIDER)
-
-            val spec = factory.getKeySpec(secretKey, KeyInfo::class.java)
-            val info = spec as? KeyInfo ?: return false
-
+            val info = getKeyInfo() ?: return false
             return info.isUserAuthenticationRequired && info.userAuthenticationValidityDurationSeconds > 0
         }
+
+        internal fun getKeyInfo(): KeyInfo? = getSecretKey().getOrThrow()?.let { getKeyInfo(it) }
+
+        /** Reads metadata from a loaded key without looking up the alias again. */
+        internal fun getKeyInfo(key: SecretKey): KeyInfo = SecretKeyFactory.getInstance(key.algorithm, PROVIDER)
+            .getKeySpec(key, KeyInfo::class.java) as KeyInfo
 
     }
 
@@ -247,13 +286,13 @@ sealed class KeySpec(val alias: String) {
         fun setAuthenticationTimeoutSeconds(
             authenticationTimeout: Int
         ) = apply {
-            require(authenticationTimeout > 0) { "Authentication timeout seconds must be > 0" }
+            require(authenticationTimeout >= 0) { "Authentication timeout seconds must be >= 0" }
             authenticationTimeoutSeconds = authenticationTimeout
         }
 
         /**
-         * If authenticationTimeoutSeconds is not set, the key will require user authentication for every use.
-         * This is recommended for highly sensitive data such as mnemonic storage.
+         * A null timeout leaves user authentication disabled. On Android 11+, zero requires
+         * authentication for each operation; a positive timeout permits use within that window.
          */
         fun build(): Result<SecretKey> = runCatching {
             val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER)
@@ -313,6 +352,8 @@ sealed class KeySpec(val alias: String) {
         private const val KEY_ALIAS_MNEMONIC = "EncryptedMnemonicAlias"
         private const val KEY_ALIAS_RADIX_CONNECT = "EncryptedRadixConnectSessionAlias"
 
+        private fun loadKeyStore(): KeyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
+
         /**
          * Resets the given [keySpecs] from [KeyStore]
          *
@@ -328,7 +369,7 @@ sealed class KeySpec(val alias: String) {
          * device credentials
          */
         fun reset(keySpecs: List<KeySpec>): Result<Unit> = runCatching {
-            val keyStore = KeyStore.getInstance(PROVIDER).apply { load(null) }
+            val keyStore = loadKeyStore()
             keySpecs.forEach {
                 try {
                     if (keyStore.containsAlias(it.alias)) {

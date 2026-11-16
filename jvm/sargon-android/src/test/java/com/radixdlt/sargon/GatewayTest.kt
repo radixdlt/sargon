@@ -1,6 +1,5 @@
 package com.radixdlt.sargon
 
-import com.radixdlt.sargon.extensions.forNetwork
 import com.radixdlt.sargon.extensions.init
 import com.radixdlt.sargon.extensions.isWellKnown
 import com.radixdlt.sargon.extensions.mainnet
@@ -18,7 +17,7 @@ class GatewayTest {
     fun testIsWellKnown() {
         assertTrue(Gateway.mainnet.isWellKnown)
         assertTrue(Gateway.stokenet.isWellKnown)
-        assertFalse(Gateway.forNetwork(networkId = NetworkId.HAMMUNET).isWellKnown)
+        assertFalse(Gateway.init(url = "https://hammunet-gateway.radixdlt.com", networkId = NetworkId.HAMMUNET).isWellKnown)
 
         assertEquals(
             listOf(Gateway.mainnet, Gateway.stokenet),
