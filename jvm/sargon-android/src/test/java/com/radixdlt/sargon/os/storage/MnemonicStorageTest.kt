@@ -54,6 +54,7 @@ internal class MnemonicStorageTest {
 
     private class FakeCrypto : MnemonicStorageCrypto {
         val states = mutableMapOf(MnemonicStorage.LEGACY_ALIAS to MnemonicKeyState.Unprotected)
+        val invalidatedAliases = mutableSetOf<String>()
         var encryptFailure: ((String) -> Unit)? = null
         var deleteFailure = false
         var lookupFailureAlias: String? = null
@@ -66,9 +67,18 @@ internal class MnemonicStorageTest {
             check(mayCreate)
             states[alias] = MnemonicKeyState.Protected
         }
-        override fun delete(alias: String) { check(!deleteFailure); states.remove(alias) }
+        override fun isInvalidated(alias: String): Boolean =
+            alias in invalidatedAliases || keyState(alias) == MnemonicKeyState.Missing
+        override fun delete(alias: String) {
+            check(!deleteFailure)
+            states.remove(alias)
+            invalidatedAliases.remove(alias)
+        }
         override suspend fun encrypt(plaintext: String, alias: String): String {
             encryptFailure?.invoke(plaintext)
+            if (alias in invalidatedAliases) {
+                throw java.security.InvalidKeyException("Key permanently invalidated")
+            }
             check(keyState(alias) == MnemonicKeyState.Protected)
             return "new:$plaintext"
         }
@@ -85,6 +95,58 @@ internal class MnemonicStorageTest {
                 }
             }
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun recoveryAfterRemovingLastMnemonicHandlesBothFormsOfKeyInvalidation(keyDisappears: Boolean) = runTest {
+        val data = store()
+        data.put("profile", "unrelated ciphertext")
+        val crypto = FakeCrypto().apply { states.clear() }
+        val storage = MnemonicStorage(data, crypto)
+        storage.write("mnemonicOld", "old seed").getOrThrow()
+
+        // Wallet deletion removes the record but does not remove its Keystore alias.
+        storage.remove("mnemonicOld").getOrThrow()
+        assertEquals(MnemonicKeyState.Protected, crypto.keyState(protected))
+        if (keyDisappears) {
+            crypto.states.remove(protected)
+        } else {
+            // Some devices retain the invalidated key and its authentication metadata.
+            crypto.invalidatedAliases.add(protected)
+        }
+        assertTrue(crypto.isInvalidated(protected))
+
+        // Even explicitly requesting recovery must permit saving the next wallet's seed.
+        storage.clearInvalidatedMnemonics().getOrThrow()
+        val result = storage.write("mnemonicNew", "new seed")
+
+        assertTrue(result.isSuccess, "First write after recovery failed: ${result.exceptionOrNull()}")
+        assertTrue(storage.contains("mnemonicNew"))
+        assertFalse(storage.contains("mnemonicOld"))
+        assertEquals("unrelated ciphertext", data.raw("profile"))
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = [false, true])
+    fun recoverySkipsUnusedLegacyKeyWhoseResetWouldFail(hasProtectedRecord: Boolean) = runTest {
+        val data = store()
+        data.put("profile", "unrelated ciphertext")
+        if (hasProtectedRecord) data.put("mnemonicExisting", secured("existing seed"))
+        val crypto = FakeCrypto().apply {
+            states[legacy] = MnemonicKeyState.Protected
+            states[protected] = MnemonicKeyState.Protected
+            invalidatedAliases.add(legacy)
+            deleteFailure = true
+        }
+        val storage = MnemonicStorage(data, crypto)
+        storage.clearInvalidatedMnemonics().getOrThrow()
+        assertTrue(legacy in crypto.invalidatedAliases)
+        assertEquals(MnemonicKeyState.Protected, crypto.states[protected])
+        assertEquals(if (hasProtectedRecord) secured("existing seed") else null, data.raw("mnemonicExisting"))
+        assertEquals("unrelated ciphertext", data.raw("profile"))
+        storage.write("mnemonicNew", "seed").getOrThrow()
+        assertEquals("seed", storage.read("mnemonicNew").getOrThrow())
     }
 
     @ParameterizedTest

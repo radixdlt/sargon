@@ -60,12 +60,14 @@ class MnemonicStorage internal constructor(
         val byAlias = records().entries.groupBy { (_, value) ->
             (value as? String)?.let { runCatching { alias(it) }.getOrNull() }
         }
-        for ((alias, records) in byAlias) {
-            if (alias == null || !crypto.isInvalidated(alias)) continue
+        // V2 can outlive its last record; legacy recovery is only needed for existing records.
+        for (alias in listOf(LEGACY_ALIAS, PROTECTED_ALIAS)) {
+            if (alias == LEGACY_ALIAS && alias !in byAlias) continue
+            if (!crypto.isInvalidated(alias)) continue
             // Reset the key before clearing the records that depended on it.
             crypto.reset(alias)
             preferences.edit { prefs ->
-                for ((name, stored) in records) {
+                for ((name, stored) in byAlias[alias].orEmpty()) {
                     val key = stringPreferencesKey(name)
                     if (prefs[key] == stored) prefs.remove(key)
                 }
