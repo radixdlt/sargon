@@ -9,7 +9,6 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyInfo
 import android.security.keystore.KeyProperties
 import android.security.keystore.UserNotAuthenticatedException
-import android.util.Log
 import android.widget.TextView
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -24,6 +23,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import com.radixdlt.sargon.os.driver.BiometricsHandler
+import com.radixdlt.sargon.os.driver.AndroidBiometricAuthorizationDriver
+import com.radixdlt.sargon.os.driver.BiometricAuthorizationDriver
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,36 +77,28 @@ class ZeroTimeoutExperimentTest {
     }
 
     @Test
-    fun newKeyRequiresPerOperationAuthenticationAndRejectsUnauthenticatedUse() {
+    fun newKeyRequiresPerOperationAuthenticationAndRejectsUnauthenticatedUse() = runBlocking<Unit> {
         val spec = newSpec()
-        val key = spec.getOrGenerateSecretKey().getOrThrow()
+        val crypto = AndroidMnemonicStorageCrypto(AndroidBiometricAuthorizationDriver(BiometricsHandler("Key inspection")))
+        assertEquals(MnemonicKeyState.Missing, crypto.keyState(spec.alias))
+        var authorizationRequested = false
+        val request = KeystoreAccessRequest.ForMnemonic(
+            hasStrongAuthenticator = false,
+            authorize = { authorizationRequested = true; Result.success(it) },
+            mnemonicKeySpec = spec
+        )
+        assertTrue(request.requestAuthorization(KeystoreAccessRequest.Purpose.Encrypt).isFailure)
+        assertTrue(request.requestAuthorization().isFailure)
+        assertFalse("A missing key must fail before asking for authorization", authorizationRequested)
+        assertFalse(keyStore.containsAlias(spec.alias))
+        val key = spec.generateSecretKey().getOrThrow()
         key.info().assertPerOperationAuthentication()
-        val failure = "dummy seed".encrypt(spec).exceptionOrNull()
-        assertTrue("Expected authentication failure, got $failure", failure.isAuthenticationFailure())
-    }
-
-    @Test
-    fun existingUnrestrictedKeyAndCiphertextAreNotChangedByTheNewDefault() {
-        val spec = newSpec()
-        val generator = KeyGenerator.getInstance("AES", "AndroidKeyStore")
-        generator.init(KeyGenParameterSpec.Builder(spec.alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-            .setRandomizedEncryptionRequired(false)
-            .build())
-        generator.generateKey()
-        val ciphertext = "old dummy seed".encrypt(spec).getOrThrow()
-
-        assertFalse(spec.getOrGenerateSecretKey().getOrThrow().info().isUserAuthenticationRequired)
-        assertEquals("old dummy seed", ciphertext.decrypt(spec).getOrThrow())
-    }
-
-    @Test
-    fun explicitTimedFallbackStillUsesThirtySeconds() {
-        val spec = newSpec().apply { setAuthenticationTimeout() }
-        val info = spec.getOrGenerateSecretKey().getOrThrow().info()
-        assertTrue(info.isUserAuthenticationRequired)
-        assertEquals(30, info.userAuthenticationValidityDurationSeconds)
+        assertTrue("A fresh operation must require authentication", "dummy seed".encrypt(spec).exceptionOrNull().isAuthenticationFailure())
+        assertEquals(MnemonicKeyState.Protected, crypto.keyState(spec.alias))
+        assertTrue("Inspection must not authorize another operation", "dummy seed".encrypt(spec).exceptionOrNull().isAuthenticationFailure())
+        keyStore.deleteEntry(spec.alias)
+        assertEquals(MnemonicKeyState.Missing, crypto.keyState(spec.alias))
+        assertFalse("Inspection must not regenerate a deleted key", keyStore.containsAlias(spec.alias))
     }
 
     @Test
@@ -125,19 +118,23 @@ class ZeroTimeoutExperimentTest {
         try {
             ActivityScenario.launch<ZeroTimeoutTestActivity>(intent).use { scenario ->
                 scenario.onActivity { activity.complete(it) }
-                val request = KeystoreAccessRequest.ForMnemonic(hasStrongAuthenticator = true, authorize = { args ->
-                    assertEquals(timeoutSeconds != null, args is KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth)
-                    val cipher = authenticate(activity.await(), args.cipher)
-                    Result.success(when (args) {
-                        is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> args.copy(cipher = requireNotNull(cipher))
-                        is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> args.copy(cipher = requireNotNull(cipher))
-                        KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth -> args
-                    })
-                })
-                aliases.add(request.keySpec.alias)
-                assertFalse(keyStore.containsAlias(request.keySpec.alias))
+                var authorizationCount = 0
+                val authorization = object : BiometricAuthorizationDriver {
+                    override val hasStrongAuthenticator = true
+                    override suspend fun authorize(cipher: Cipher?): Result<Cipher?> {
+                        assertEquals(timeoutSeconds != null && authorizationCount == 0, cipher == null)
+                        authorizationCount++
+                        return Result.success(authenticate(activity.await(), cipher))
+                    }
+                }
+                val mnemonics = MnemonicStorage(storage, AndroidMnemonicStorageCrypto(authorization))
+                val legacySpec = KeySpec.Mnemonic()
+                aliases.add(legacySpec.alias)
+                aliases.add(MnemonicStorage.PROTECTED_ALIAS)
+                assertFalse(keyStore.containsAlias(legacySpec.alias))
+                assertFalse(keyStore.containsAlias(MnemonicStorage.PROTECTED_ALIAS))
                 // Reproduce the historical key configuration independently of the fixed key generator.
-                val builder = KeyGenParameterSpec.Builder(request.keySpec.alias,
+                val builder = KeyGenParameterSpec.Builder(legacySpec.alias,
                     KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
@@ -158,53 +155,17 @@ class ZeroTimeoutExperimentTest {
                 storage.write(entry, oldCiphertext).getOrThrow()
 
                 // The fixed SDK must read the original bytes, not replace the key or rewrite the record.
-                assertEquals("old disposable seed", storage.read(entry, request).getOrThrow())
+                assertEquals("old disposable seed", mnemonics.read(entry.name).getOrThrow())
                 assertEquals(oldCiphertext, storage.data.first()[entry])
-                storage.write(entry, "another disposable seed", request).getOrThrow()
-                assertEquals("another disposable seed", storage.read(entry, request).getOrThrow())
-                assertEquals("old disposable seed", oldCiphertext.decrypt(request.keySpec).getOrThrow())
-                val retainedInfo = request.keySpec.getOrGenerateSecretKey().getOrThrow().info()
+                mnemonics.write(entry.name, "another disposable seed").getOrThrow()
+                assertEquals("another disposable seed", mnemonics.read(entry.name).getOrThrow())
+                assertTrue(storage.data.first()[entry]!!.startsWith(MnemonicStorage.PREFIX))
+                assertEquals(3, authorizationCount)
+                assertEquals("old disposable seed", oldCiphertext.decrypt(legacySpec).getOrThrow())
+                val retainedInfo = requireNotNull(legacySpec.getSecretKey().getOrThrow()).info()
                 assertEquals(oldInfo.isUserAuthenticationRequired, retainedInfo.isUserAuthenticationRequired)
                 assertEquals(oldInfo.userAuthenticationValidityDurationSeconds,
                     retainedInfo.userAuthenticationValidityDurationSeconds)
-            }
-        } finally {
-            job.cancelAndJoin()
-            file.delete()
-        }
-    }
-
-    @Test
-    fun authenticatedWriteAndReadUsePromptAuthorizedCipher() = runBlocking {
-        requireManualAuthentication()
-        val job = SupervisorJob()
-        val file = File(context.cacheDir, "zero-timeout-${UUID.randomUUID()}.preferences_pb")
-        val storage = PreferenceDataStoreFactory.create(scope = CoroutineScope(job + Dispatchers.IO)) { file }
-        val entry = stringPreferencesKey("mnemonic-dummy")
-        val plaintext = "disposable dummy seed"
-        val activity = CompletableDeferred<ZeroTimeoutTestActivity>()
-        val intent = Intent(context, ZeroTimeoutTestActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        try {
-            ActivityScenario.launch<ZeroTimeoutTestActivity>(intent).use { scenario ->
-                scenario.onActivity { activity.complete(it) }
-                val request = KeystoreAccessRequest.ForMnemonic(hasStrongAuthenticator = true, authorize = { args ->
-                    val cipher = requireNotNull(authenticate(activity.await(), requireNotNull(args.cipher)))
-                    when (args) {
-                        is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> args.copy(cipher = cipher)
-                        is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> args.copy(cipher = cipher)
-                        else -> error("Expected a per-operation CryptoObject")
-                    }.let { Result.success(it) }
-                })
-                // The library test APK owns a separate UID/Keystore, never the wallet's alias.
-                aliases.add(request.keySpec.alias)
-                assertFalse(keyStore.containsAlias(request.keySpec.alias))
-                storage.write(entry, plaintext, request).getOrThrow()
-                val stored = storage.data.first()[entry]!!
-
-                assertEquals(plaintext, storage.read(entry, request).getOrThrow())
-                assertEquals(stored, storage.data.first()[entry])
-                // A fresh cipher is not authorized by a previous prompt.
-                assertTrue(stored.decrypt(request.keySpec).exceptionOrNull().isAuthenticationFailure())
             }
         } finally {
             job.cancelAndJoin()
@@ -244,59 +205,44 @@ class ZeroTimeoutExperimentTest {
 
                 // Seed the same key/data state that a former strong-biometric session creates.
                 // Android 11+ also permits the current device credential to authorize this cipher.
-                val originalRequest = KeystoreAccessRequest.ForMnemonic(hasStrongAuthenticator = true, authorize = { args ->
-                    val cipher = requireNotNull(authenticate(activity.await(), requireNotNull(args.cipher)))
-                    Result.success(when (args) {
-                        is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> args.copy(cipher = cipher)
-                        is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> args.copy(cipher = cipher)
-                        else -> error("Expected a per-operation cipher while seeding the key")
-                    })
-                })
-                aliases.add(originalRequest.keySpec.alias)
-                assertFalse(keyStore.containsAlias(originalRequest.keySpec.alias))
-                storage.write(entry, plaintext, originalRequest).getOrThrow()
+                val originalSpec = KeySpec.Mnemonic()
+                aliases.add(originalSpec.alias)
+                aliases.add(MnemonicStorage.PROTECTED_ALIAS)
+                assertFalse(keyStore.containsAlias(originalSpec.alias))
+                assertFalse(keyStore.containsAlias(MnemonicStorage.PROTECTED_ALIAS))
+                val originalKey = originalSpec
+                    .withAuthenticationPolicy(hasStrongAuthenticator = true)
+                    .generateSecretKey().getOrThrow()
+                // Seed an unprefixed legacy record independently of the current v2-only writer.
+                val (cipher, ivBytes) = EncryptionHelper.initEncryptCipher(originalKey).getOrThrow()
+                val authorizedCipher = requireNotNull(authenticate(activity.await(), cipher))
+                storage.write(entry, plaintext.encrypt(authorizedCipher, ivBytes).getOrThrow()).getOrThrow()
                 val ciphertext = requireNotNull(storage.data.first()[entry])
-                val originalKey = originalRequest.keySpec.getOrGenerateSecretKey().getOrThrow()
                 originalKey.info().assertPerOperationAuthentication()
 
                 var credentialAuthenticationCount = 0
-                val currentRequest = KeystoreAccessRequest.ForMnemonic(
-                    hasStrongAuthenticator = handler.hasStrongAuthenticator,
-                    authorize = { args ->
-                        withTimeout(90_000) { handler.askForBiometrics(args.cipher) }.mapCatching { cipher ->
-                            credentialAuthenticationCount++
-                            Log.i("SargonAuthRegression", "Production PIN authentication succeeded: ${args.javaClass.simpleName}")
-                            when (args) {
-                                is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> args.copy(cipher = requireNotNull(cipher))
-                                is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> args.copy(cipher = requireNotNull(cipher))
-                                KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth -> args
-                            }
-                        }
+                val authorization = object : BiometricAuthorizationDriver {
+                    override val hasStrongAuthenticator get() = handler.hasStrongAuthenticator
+                    override suspend fun authorize(cipher: Cipher?) = withTimeout(90_000) {
+                        handler.askForBiometrics(cipher).onSuccess { credentialAuthenticationCount++ }
                     }
-                )
-                val result = storage.read(entry, currentRequest)
-                assertEquals("The current PIN/password must have been accepted", 1, credentialAuthenticationCount)
-                assertEquals(ciphertext, storage.data.first()[entry])
-                currentRequest.keySpec.getOrGenerateSecretKey().getOrThrow()
-                    .info().assertPerOperationAuthentication()
-
-                if (result.isFailure) {
-                    Log.i("SargonAuthRegression", "Production read failed after successful PIN authentication", result.exceptionOrNull())
-                    // Rule out lost/corrupt data or an invalidated key: the same PIN and key must
-                    // still decrypt this record when authentication includes the cipher.
-                    val cipher = EncryptionHelper.initDecryptCipher(
-                        android.util.Base64.decode(ciphertext, android.util.Base64.DEFAULT), originalKey
-                    ).getOrThrow()
-                    val authorizedCipher = requireNotNull(authenticate(activity.await(), cipher))
-                    assertEquals(plaintext, ciphertext.decrypt(authorizedCipher).getOrThrow())
-                    Log.i("SargonAuthRegression", "Control read with PIN-authorized cipher succeeded")
                 }
+                val current = MnemonicStorage(storage, AndroidMnemonicStorageCrypto(authorization))
+                assertEquals("Existing protected keys must not be migrated", 0, current.migrate().getOrThrow().migrated)
+                assertEquals("Inspection must not request authentication", 0, credentialAuthenticationCount)
+                assertTrue("Inspection must not grant decryption permission", ciphertext.decrypt(originalKey).exceptionOrNull().isAuthenticationFailure())
+                assertEquals(ciphertext, storage.data.first()[entry])
 
-                assertEquals("A valid device credential must preserve access to the existing mnemonic",
-                    plaintext, result.getOrThrow())
-                storage.write(entry, "updated disposable seed", currentRequest).getOrThrow()
-                assertEquals("updated disposable seed", storage.read(entry, currentRequest).getOrThrow())
-                assertEquals("Each read/write must authenticate its own cipher", 3, credentialAuthenticationCount)
+                assertEquals(plaintext, current.read(entry.name).getOrThrow())
+                assertEquals("The read must authenticate the original cipher", 1, credentialAuthenticationCount)
+                assertEquals("Reading must not rewrite ciphertext", ciphertext, storage.data.first()[entry])
+                requireNotNull(originalSpec.getSecretKey().getOrThrow()).info().assertPerOperationAuthentication()
+                current.write(entry.name, "updated disposable seed").getOrThrow()
+                assertEquals("updated disposable seed", current.read(entry.name).getOrThrow())
+                assertTrue(storage.data.first()[entry]!!.startsWith(MnemonicStorage.PREFIX))
+                assertEquals("Each read/write must request authorization", 3, credentialAuthenticationCount)
+                assertTrue("Previous prompts must not authorize a fresh cipher",
+                    ciphertext.decrypt(originalKey).exceptionOrNull().isAuthenticationFailure())
             }
         } finally {
             job.cancelAndJoin()
@@ -341,16 +287,16 @@ class ZeroTimeoutExperimentTest {
             userAuthenticationValidityDurationSeconds <= 0)
     }
 
-    private fun Throwable?.isAuthenticationFailure() = generateSequence(this) { it.cause }
-        .any { failure ->
-            when {
-                failure is UserNotAuthenticatedException -> true
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ->
-                    failure is android.security.KeyStoreException && failure.requiresUserAuthentication()
-                // Before API 33, KeyStoreException has no public error-inspection API. The framework
-                // maps Keymaster's authentication error to this message, including at Cipher.doFinal.
-                else -> failure.javaClass.name == "android.security.KeyStoreException" &&
-                    failure.message?.contains("Key user not authenticated", ignoreCase = true) == true
-            }
-        }
 }
+
+internal fun Throwable?.isAuthenticationFailure() = generateSequence(this) { it.cause }
+    .any { failure ->
+        when {
+            failure is UserNotAuthenticatedException -> true
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ->
+                failure is android.security.KeyStoreException && failure.requiresUserAuthentication()
+            // Before API 33, the framework maps Keymaster's auth error to this message.
+            else -> failure.javaClass.name == "android.security.KeyStoreException" &&
+                failure.message?.contains("Key user not authenticated", ignoreCase = true) == true
+        }
+    }

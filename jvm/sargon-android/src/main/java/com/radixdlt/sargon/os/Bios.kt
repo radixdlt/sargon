@@ -8,7 +8,6 @@ import com.radixdlt.sargon.Bios
 import com.radixdlt.sargon.Drivers
 import com.radixdlt.sargon.NfcTagDriver
 import com.radixdlt.sargon.annotation.KoverIgnore
-import com.radixdlt.sargon.os.driver.AndroidBiometricAuthorizationDriver
 import com.radixdlt.sargon.os.driver.AndroidEntropyProviderDriver
 import com.radixdlt.sargon.os.driver.AndroidEventBusDriver
 import com.radixdlt.sargon.os.driver.AndroidFileSystemDriver
@@ -17,29 +16,27 @@ import com.radixdlt.sargon.os.driver.AndroidLoggingDriver
 import com.radixdlt.sargon.os.driver.AndroidNetworkingDriver
 import com.radixdlt.sargon.os.driver.AndroidProfileStateChangeDriver
 import com.radixdlt.sargon.os.driver.AndroidStorageDriver
-import com.radixdlt.sargon.os.driver.BiometricsHandler
+import com.radixdlt.sargon.os.storage.MnemonicStorage
 import okhttp3.OkHttpClient
 
 @KoverIgnore
 fun Bios.Companion.from(
     context: Context,
     httpClient: OkHttpClient,
-    biometricsHandler: BiometricsHandler,
     encryptedPreferencesDataStore: DataStore<Preferences>,
     preferencesDatastore: DataStore<Preferences>,
     deviceInfoDatastore: DataStore<Preferences>,
     eventBusDriver: AndroidEventBusDriver,
     profileStateChangeDriver: AndroidProfileStateChangeDriver,
     arculusCsdkDriver: ArculusCsdkDriver,
-    nfcTagDriver: NfcTagDriver
+    nfcTagDriver: NfcTagDriver,
+    mnemonicStorage: MnemonicStorage
 ): Bios {
     val storageDriver = AndroidStorageDriver(
-        biometricAuthorizationDriver = AndroidBiometricAuthorizationDriver(
-            biometricsHandler = biometricsHandler
-        ),
         encryptedPreferencesDatastore = encryptedPreferencesDataStore,
         preferencesDatastore = preferencesDatastore,
         deviceInfoDatastore = deviceInfoDatastore,
+        mnemonicStorage = mnemonicStorage,
     )
     return Bios(
         drivers = Drivers(

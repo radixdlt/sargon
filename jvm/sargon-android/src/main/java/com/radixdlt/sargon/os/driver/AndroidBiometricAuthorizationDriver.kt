@@ -158,7 +158,9 @@ class BiometricsHandler(
             )
 
             if (cipher != null && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || hasStrongAuthenticator)) {
-                // Android 11+ device credentials can authorize a CryptoObject without enrolled biometrics.
+                // Per-operation keys need authentication bound to this cipher; a plain PIN prompt
+                // does not authorize the operation. Android 11+ supports this binding with device
+                // credentials even when strong biometrics are unavailable.
                 biometricPrompt.authenticate(
                     promptInfo,
                     BiometricPrompt.CryptoObject(cipher)

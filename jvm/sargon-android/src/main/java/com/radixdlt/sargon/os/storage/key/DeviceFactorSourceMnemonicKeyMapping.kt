@@ -1,8 +1,5 @@
 package com.radixdlt.sargon.os.storage.key
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.radixdlt.sargon.BagOfBytes
 import com.radixdlt.sargon.MnemonicWithPassphrase
 import com.radixdlt.sargon.SecureStorageKey
@@ -12,42 +9,22 @@ import com.radixdlt.sargon.extensions.then
 import com.radixdlt.sargon.extensions.toJson
 import com.radixdlt.sargon.mnemonicWithPassphraseToJsonBytes
 import com.radixdlt.sargon.newMnemonicWithPassphraseFromJsonBytes
-import com.radixdlt.sargon.os.driver.BiometricAuthorizationDriver
-import com.radixdlt.sargon.os.storage.KeystoreAccessRequest
-import com.radixdlt.sargon.os.storage.read
-import com.radixdlt.sargon.os.storage.remove
-import com.radixdlt.sargon.os.storage.write
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import com.radixdlt.sargon.os.storage.MnemonicStorage
 
 internal class DeviceFactorSourceMnemonicKeyMapping(
     key: SecureStorageKey.DeviceFactorSourceMnemonic,
-    private val encryptedStorage: DataStore<Preferences>,
-    private val biometricAuthorizationDriver: BiometricAuthorizationDriver
+    private val mnemonicStorage: MnemonicStorage
 ) : DatastoreKeyMapping {
 
-    private val preferencesKey = stringPreferencesKey("mnemonic${key.factorSourceId.body.hex}")
+    private val preferencesKey = "mnemonic${key.factorSourceId.body.hex}"
 
     override suspend fun write(bagOfBytes: BagOfBytes): Result<Unit> = runCatching {
         newMnemonicWithPassphraseFromJsonBytes(bagOfBytes).toJson()
     }.then { json ->
-        encryptedStorage.write(
-            key = preferencesKey,
-            value = json,
-            keystoreAccessRequest = KeystoreAccessRequest.ForMnemonic(
-                hasStrongAuthenticator = biometricAuthorizationDriver.hasStrongAuthenticator,
-                authorize = ::authorize
-            )
-        )
+        mnemonicStorage.write(preferencesKey, json)
     }
 
-    override suspend fun read(): Result<BagOfBytes?> = encryptedStorage.read(
-        key = preferencesKey,
-        keystoreAccessRequest = KeystoreAccessRequest.ForMnemonic(
-            hasStrongAuthenticator = biometricAuthorizationDriver.hasStrongAuthenticator,
-            authorize = ::authorize
-        )
-    ).mapCatching { androidCompatibleJson ->
+    override suspend fun read(): Result<BagOfBytes?> = mnemonicStorage.read(preferencesKey).mapCatching { androidCompatibleJson ->
         if (androidCompatibleJson != null) {
             val mnemonicWithPassphrase = MnemonicWithPassphrase.fromJson(androidCompatibleJson)
             mnemonicWithPassphraseToJsonBytes(mnemonicWithPassphrase)
@@ -56,28 +33,7 @@ internal class DeviceFactorSourceMnemonicKeyMapping(
         }
     }
 
-    override suspend fun remove(): Result<Unit> = encryptedStorage.remove(key = preferencesKey)
+    override suspend fun remove(): Result<Unit> = mnemonicStorage.remove(preferencesKey)
 
-    override suspend fun keyExist(): Boolean {
-        return encryptedStorage.data.map { preference ->
-            preference.contains(preferencesKey)
-        }.first()
-    }
-
-    private suspend fun authorize(args: KeystoreAccessRequest.AuthorizationArgs): Result<KeystoreAccessRequest.AuthorizationArgs> {
-        return biometricAuthorizationDriver.authorize(args.cipher)
-            .mapCatching { cipher ->
-                when (args) {
-                    is KeystoreAccessRequest.AuthorizationArgs.Decrypt -> args.copy(
-                        cipher = requireNotNull(cipher)
-                    )
-
-                    is KeystoreAccessRequest.AuthorizationArgs.Encrypt -> args.copy(
-                        cipher = requireNotNull(cipher)
-                    )
-
-                    KeystoreAccessRequest.AuthorizationArgs.TimeWindowAuth -> args
-                }
-            }
-    }
+    override suspend fun keyExist(): Boolean = mnemonicStorage.contains(preferencesKey)
 }
