@@ -121,8 +121,16 @@ impl OsSigning for SargonOS {
 
         let mut signatures = outcome.signatures_of_successful_transactions();
 
-        let external_accounts =
+        let mut external_accounts =
             resolve_external_accounts_for_subintent(self, &subintent).await?;
+        let external_access_controllers =
+            resolve_external_access_controllers_for_subintent(
+                self,
+                &subintent,
+                &external_accounts,
+            )
+            .await?;
+        external_accounts.extend(external_access_controllers);
         info!(
             "External signing: external accounts resolved: {}",
             external_accounts.len()
