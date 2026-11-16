@@ -1,6 +1,6 @@
 [package]
 name = "build-info"
-version = "1.2.60"
+version = "1.2.61"
 edition = "2021"
 build = "build.rs"
 
