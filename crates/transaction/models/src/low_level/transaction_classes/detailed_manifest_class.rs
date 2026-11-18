@@ -400,24 +400,26 @@ impl From<(RetAccountSettingsUpdateOutput, NetworkID)>
 
 impl From<(RetEntitySecurifyOutput, NetworkID)> for DetailedManifestClass {
     fn from((output, n): (RetEntitySecurifyOutput, NetworkID)) -> Self {
-        let accounts = filter_try_to_vec_network_aware::<_, AccountAddress>(
-            output.securified_accounts,
-            n,
-        )
-        .into_iter()
-        .map(AddressOfAccountOrPersona::from)
-        .collect::<Vec<_>>();
+        let (accounts, identities): (Vec<_>, Vec<_>) = output
+            .securify_operations
+            .into_iter()
+            .filter_map(|operation| {
+                let node_id = *operation.entity_address.as_node_id();
+                AccountAddress::new_from_node_id(node_id, n)
+                    .map(AddressOfAccountOrPersona::from)
+                    .map(Either::Left)
+                    .or_else(|_| {
+                        IdentityAddress::new_from_node_id(node_id, n)
+                            .map(AddressOfAccountOrPersona::from)
+                            .map(Either::Right)
+                    })
+                    .ok()
+            })
+            .partition_map(|entity| entity);
 
-        let mut identities = filter_try_to_vec_network_aware::<
-            _,
-            IdentityAddress,
-        >(output.securified_identities, n)
-        .into_iter()
-        .map(AddressOfAccountOrPersona::from)
-        .collect::<Vec<_>>();
-
-        let mut entities = accounts;
-        entities.append(&mut identities);
+        // Accounts first, then identities, as before the toolkit merged them
+        // into a single list of securify operations.
+        let entities = accounts.into_iter().chain(identities).collect();
 
         Self::SecurifyEntity { entities }
     }
@@ -429,8 +431,16 @@ impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
     fn from(
         (output, n): (RetAccessControllerRecoveryOutput, NetworkID),
     ) -> Self {
+        // An access controller can have both a primary and a recovery role
+        // proposal in the same manifest, so deduplicate.
+        let access_controllers = output
+            .recovery_proposals
+            .into_iter()
+            .map(|proposal| proposal.access_controller)
+            .unique();
+
         Self::AccessControllerRecovery {
-            ac_addresses: to_vec_network_aware(output.access_controllers, n),
+            ac_addresses: to_vec_network_aware(access_controllers, n),
         }
     }
 }
