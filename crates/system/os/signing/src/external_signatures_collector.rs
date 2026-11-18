@@ -289,13 +289,19 @@ fn non_fungible_global_id(
 // External Account Resolution
 // ==================
 
-fn is_access_controller_role_key(role_key: &RoleKey) -> bool {
+/// Only the access controller's primary role is used for external signing.
+///
+/// The only access controller method exercised in a pre-authorization today is
+/// the `create_proof` the wallet injects, which requires the primary role.
+/// Signing with recovery/confirmation factors would only cause needless
+/// prompts. Access controller operations (e.g. recovery) in subintents will
+/// require picking the roles based on the manifest classification.
+fn is_access_controller_primary_role_key(role_key: &RoleKey) -> bool {
     role_key.module == ObjectModuleId::Main
-        && matches!(
-            role_key.name.as_str(),
-            "primary" | "recovery" | "confirmation"
-        )
+        && role_key.name == ACCESS_CONTROLLER_PRIMARY_ROLE_NAME
 }
+
+const ACCESS_CONTROLLER_PRIMARY_ROLE_NAME: &str = "primary";
 
 fn access_rule_from_explicit_rule(rule: &ExplicitRule) -> Option<AccessRule> {
     Some(rule.clone())
@@ -392,13 +398,13 @@ fn access_rules_from_access_controller(
     let rules: Vec<AccessRule> = assignments
         .entries
         .iter()
-        .filter(|entry| is_access_controller_role_key(&entry.role_key))
+        .filter(|entry| is_access_controller_primary_role_key(&entry.role_key))
         .filter_map(|entry| {
             access_rule_from_role_assignment(entry, &assignments.owner.rule)
         })
         .collect();
     if rules.is_empty() {
-        debug!("No access controller role assignments matched primary/recovery/confirmation keys");
+        debug!("No access controller role assignments matched the primary role key");
     }
     rules
 }
@@ -430,8 +436,8 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
         external_account_addresses
     );
     let gateway_client = os.gateway_client();
-    let badge_owners = gateway_client
-        .fetch_entities_badge_owners(
+    let access_controllers_of_accounts = gateway_client
+        .fetch_access_controllers_of_entities(
             external_account_addresses
                 .iter()
                 .map(|address| AddressOfAccountOrPersona::Account(*address))
@@ -440,8 +446,8 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
         .await?;
 
     debug!(
-        "Resolved badge owners for external accounts: {:?}",
-        badge_owners
+        "Resolved access controllers of external accounts: {:?}",
+        access_controllers_of_accounts
     );
     let account_role_assignments = fetch_role_assignments_for_addresses(
         os,
@@ -451,14 +457,9 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .collect_vec(),
     )
     .await?;
-    let access_controller_addresses = badge_owners
+    let access_controller_addresses = access_controllers_of_accounts
         .values()
-        .filter_map(|owner| {
-            owner
-                .as_ref()
-                .and_then(|address| address.as_access_controller())
-                .cloned()
-        })
+        .cloned()
         .collect::<IndexSet<_>>();
     debug!(
         "Access controller addresses for external accounts: {:?}",
@@ -477,8 +478,6 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
     let mut external_accounts = Vec::new();
     for address in external_account_addresses {
         let owner_address = AddressOfAccountOrPersona::Account(address);
-        let maybe_badge_owner =
-            badge_owners.get(&owner_address).unwrap_or(&None);
 
         let account_assignments = account_role_assignments
             .get(&Address::from(address))
@@ -505,7 +504,7 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             extract_nft_ids_from_access_rule(&account_rule)?;
 
         if let Some(access_controller_address) =
-            maybe_badge_owner.and_then(|a| a.as_access_controller().cloned())
+            access_controllers_of_accounts.get(&owner_address).cloned()
         {
             if let Some(assignments) = access_controller_role_assignments
                 .get(&Address::from(access_controller_address))
@@ -633,11 +632,11 @@ mod tests {
         let metadata_primary =
             RoleKey::new("primary".to_string(), ObjectModuleId::Metadata);
 
-        assert!(is_access_controller_role_key(&primary));
-        assert!(is_access_controller_role_key(&recovery));
-        assert!(is_access_controller_role_key(&confirmation));
-        assert!(!is_access_controller_role_key(&depositor));
-        assert!(!is_access_controller_role_key(&metadata_primary));
+        assert!(is_access_controller_primary_role_key(&primary));
+        assert!(!is_access_controller_primary_role_key(&recovery));
+        assert!(!is_access_controller_primary_role_key(&confirmation));
+        assert!(!is_access_controller_primary_role_key(&depositor));
+        assert!(!is_access_controller_primary_role_key(&metadata_primary));
     }
 
     #[test]
@@ -703,10 +702,7 @@ mod tests {
         );
 
         let rules = access_rules_from_access_controller(&assignments);
-        assert_eq!(rules.len(), 3);
-        assert!(rules.contains(&explicit_primary));
-        assert!(rules.contains(&explicit_recovery));
-        assert!(rules.contains(&owner_rule));
+        assert_eq!(rules, vec![explicit_primary]);
     }
 
     #[actix_rt::test]
@@ -1117,11 +1113,11 @@ mod tests {
     }
 
     #[test]
-    fn is_access_controller_role_key_accepts_all_variants() {
+    fn is_access_controller_primary_role_key_accepts_only_primary() {
         let test_cases = vec![
             ("primary", ObjectModuleId::Main, true),
-            ("recovery", ObjectModuleId::Main, true),
-            ("confirmation", ObjectModuleId::Main, true),
+            ("recovery", ObjectModuleId::Main, false),
+            ("confirmation", ObjectModuleId::Main, false),
             ("depositor", ObjectModuleId::Main, false),
             ("withdrawer", ObjectModuleId::Main, false),
             ("primary", ObjectModuleId::Metadata, false),
@@ -1131,7 +1127,7 @@ mod tests {
         for (name, module, expected) in test_cases {
             let role_key = RoleKey::new(name.to_string(), module.clone());
             assert_eq!(
-                is_access_controller_role_key(&role_key),
+                is_access_controller_primary_role_key(&role_key),
                 expected,
                 "Failed for role: {}, module: {:?}",
                 name,
@@ -1410,7 +1406,7 @@ mod tests {
     // ==================
 
     #[test]
-    fn access_rules_from_access_controller_handles_multiple_ac_roles() {
+    fn access_rules_from_access_controller_ignores_non_primary_ac_roles() {
         let owner_rule = AccessRule::Protected {
             access_rule: CompositeRequirement::AnyOf {
                 access_rules: vec![],
@@ -1454,10 +1450,7 @@ mod tests {
         );
 
         let rules = access_rules_from_access_controller(&assignments);
-        assert_eq!(rules.len(), 3);
-        assert!(rules.contains(&primary_rule));
-        assert!(rules.contains(&recovery_rule));
-        assert!(rules.contains(&confirmation_rule));
+        assert_eq!(rules, vec![primary_rule]);
     }
 
     #[test]
@@ -1495,11 +1488,9 @@ mod tests {
         );
 
         let rules = access_rules_from_access_controller(&assignments);
-        // Should get owner_rule (from primary) and explicit_rule (from recovery)
-        // confirmation returns None so it's filtered out
-        assert_eq!(rules.len(), 2);
-        assert!(rules.contains(&owner_rule));
-        assert!(rules.contains(&explicit_rule));
+        // Primary resolves to the owner rule; recovery and confirmation are
+        // not used for external signing.
+        assert_eq!(rules, vec![owner_rule]);
     }
 
     #[test]
