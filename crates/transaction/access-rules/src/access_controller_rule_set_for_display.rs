@@ -10,16 +10,32 @@ pub struct AccessControllerRuleSetForDisplay {
 
 impl AccessControllerRuleSet {
     /// Each role for display, see [`AccessRequirement::for_display`].
-    pub fn for_display(
+    pub fn for_display(self) -> AccessControllerRuleSetForDisplay {
+        AccessControllerRuleSetForDisplay {
+            primary_role: self.primary_role.for_display(),
+            recovery_role: self.recovery_role.for_display(),
+            confirmation_role: self.confirmation_role.for_display(),
+        }
+    }
+}
+
+impl AccessControllerRuleSetForDisplay {
+    /// Each role with the user's keys marked, see
+    /// [`AccessRequirementForDisplay::with_own_factor_sources`].
+    pub fn with_own_factor_sources(
         self,
         own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
-    ) -> AccessControllerRuleSetForDisplay {
-        AccessControllerRuleSetForDisplay {
-            primary_role: self.primary_role.for_display(own_factor_source),
-            recovery_role: self.recovery_role.for_display(own_factor_source),
+    ) -> Self {
+        Self {
+            primary_role: self
+                .primary_role
+                .with_own_factor_sources(own_factor_source),
+            recovery_role: self
+                .recovery_role
+                .with_own_factor_sources(own_factor_source),
             confirmation_role: self
                 .confirmation_role
-                .for_display(own_factor_source),
+                .with_own_factor_sources(own_factor_source),
         }
     }
 }
@@ -70,7 +86,9 @@ mod tests {
         };
 
         assert_eq!(
-            rule_set.for_display(&own_factor_source),
+            rule_set
+                .for_display()
+                .with_own_factor_sources(&own_factor_source),
             AccessControllerRuleSetForDisplay {
                 primary_role: AccessRequirementForDisplay::Anyone,
                 recovery_role: AccessRequirementForDisplay::NoOne,

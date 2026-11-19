@@ -64,32 +64,24 @@ pub enum BadgeForDisplay {
 
 impl AccessRequirement {
     /// The requirement to show to the user: simplified, see
-    /// [`AccessRequirement::simplified`], with each badge resolved.
-    /// `own_factor_source` returns the user's factor source whose key a
-    /// signature badge is, if any.
-    pub fn for_display(
-        self,
-        own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
-    ) -> AccessRequirementForDisplay {
-        self.simplified().into_display(own_factor_source)
+    /// [`AccessRequirement::simplified`], with each badge shown as what it
+    /// is. Every signature badge is an unknown key until
+    /// [`AccessRequirementForDisplay::with_own_factor_sources`] marks the
+    /// user's keys.
+    pub fn for_display(self) -> AccessRequirementForDisplay {
+        self.simplified().into_display()
     }
 
     /// `self` must be simplified.
-    fn into_display(
-        self,
-        own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
-    ) -> AccessRequirementForDisplay {
+    fn into_display(self) -> AccessRequirementForDisplay {
         let display_all = |requirements: Vec<Self>| {
-            requirements
-                .into_iter()
-                .map(|requirement| requirement.into_display(own_factor_source))
-                .collect()
+            requirements.into_iter().map(Self::into_display).collect()
         };
         match self {
             Self::Anyone => AccessRequirementForDisplay::Anyone,
             Self::NoOne => AccessRequirementForDisplay::NoOne,
             Self::Badge { badge } => AccessRequirementForDisplay::Badge {
-                badge: BadgeForDisplay::resolve(badge, own_factor_source),
+                badge: badge.into(),
             },
             Self::AmountOf { amount, resource } => {
                 AccessRequirementForDisplay::AmountOf { amount, resource }
@@ -114,15 +106,11 @@ impl AccessRequirement {
             } => match Self::only_badges(&requirements) {
                 Some(badges) => AccessRequirementForDisplay::CountOf {
                     count,
-                    badges: badges
-                        .into_iter()
-                        .map(|badge| {
-                            BadgeForDisplay::resolve(badge, own_factor_source)
-                        })
-                        .collect(),
+                    badges: badges.into_iter().map(Into::into).collect(),
                 },
-                None => Self::any_of_subsets(count, requirements)
-                    .into_display(own_factor_source),
+                None => {
+                    Self::any_of_subsets(count, requirements).into_display()
+                }
             },
         }
     }
@@ -161,26 +149,75 @@ impl AccessRequirement {
     }
 }
 
-impl BadgeForDisplay {
-    fn resolve(
-        badge: ResourceOrNonFungible,
+impl AccessRequirementForDisplay {
+    /// Shows the user's keys among the unknown keys as their factor sources.
+    /// `own_factor_source` returns the user's factor source whose key a
+    /// signature badge is, if any.
+    pub fn with_own_factor_sources(
+        self,
         own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
     ) -> Self {
+        let mark_all = |requirements: Vec<Self>| {
+            requirements
+                .into_iter()
+                .map(|requirement| {
+                    requirement.with_own_factor_sources(own_factor_source)
+                })
+                .collect()
+        };
+        match self {
+            Self::Badge { badge } => Self::Badge {
+                badge: badge.with_own_factor_source(own_factor_source),
+            },
+            Self::AnyOf { requirements } => Self::AnyOf {
+                requirements: mark_all(requirements),
+            },
+            Self::AllOf { requirements } => Self::AllOf {
+                requirements: mark_all(requirements),
+            },
+            Self::CountOf { count, badges } => Self::CountOf {
+                count,
+                badges: badges
+                    .into_iter()
+                    .map(|badge| {
+                        badge.with_own_factor_source(own_factor_source)
+                    })
+                    .collect(),
+            },
+            Self::Anyone | Self::NoOne | Self::AmountOf { .. } => self,
+        }
+    }
+}
+
+impl From<ResourceOrNonFungible> for BadgeForDisplay {
+    fn from(badge: ResourceOrNonFungible) -> Self {
         match badge {
             ResourceOrNonFungible::Resource { value } => {
                 Self::Resource { resource: value }
             }
             ResourceOrNonFungible::NonFungible { value }
-                if !is_signature_badge(&value) =>
+                if is_signature_badge(&value) =>
             {
-                Self::NonFungible { badge: value }
+                Self::UnknownKey { badge: value }
             }
             ResourceOrNonFungible::NonFungible { value } => {
-                match own_factor_source(&value) {
-                    Some(factor_source) => Self::OwnFactor { factor_source },
-                    None => Self::UnknownKey { badge: value },
-                }
+                Self::NonFungible { badge: value }
             }
+        }
+    }
+}
+
+impl BadgeForDisplay {
+    fn with_own_factor_source(
+        self,
+        own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
+    ) -> Self {
+        match self {
+            Self::UnknownKey { badge } => match own_factor_source(&badge) {
+                Some(factor_source) => Self::OwnFactor { factor_source },
+                None => Self::UnknownKey { badge },
+            },
+            badge => badge,
         }
     }
 }
@@ -270,10 +307,6 @@ mod tests {
         BadgeForDisplay::NonFungible { badge: id.clone() }
     }
 
-    fn no_own_factors(_: &NonFungibleGlobalId) -> Option<FactorSource> {
-        None
-    }
-
     #[test]
     fn badges_are_shown_by_what_they_are() {
         let own_key = NonFungibleGlobalId::from(
@@ -309,7 +342,9 @@ mod tests {
 
         let as_badge = |badge| SUT::Badge { badge };
         assert_eq!(
-            requirement.for_display(&own_factor_source),
+            requirement
+                .for_display()
+                .with_own_factor_sources(&own_factor_source),
             SUT::AnyOf {
                 requirements: vec![
                     as_badge(BadgeForDisplay::OwnFactor {
@@ -335,7 +370,7 @@ mod tests {
         let badges = [badge(&a), badge(&b), badge(&c)];
 
         assert_eq!(
-            at_least(2, badges.clone()).for_display(&no_own_factors),
+            at_least(2, badges.clone()).for_display(),
             SUT::CountOf {
                 count: 2,
                 badges: vec![shown(&a), shown(&b), shown(&c)],
@@ -343,8 +378,7 @@ mod tests {
         );
         // The Sargon shield shape: "2 of 3", or an override.
         assert_eq!(
-            at_least(1, [at_least(2, badges.clone()), badge(&a)])
-                .for_display(&no_own_factors),
+            at_least(1, [at_least(2, badges.clone()), badge(&a)]).for_display(),
             SUT::AnyOf {
                 requirements: vec![
                     SUT::CountOf {
@@ -356,7 +390,7 @@ mod tests {
             }
         );
         assert_eq!(
-            at_least(3, badges).for_display(&no_own_factors),
+            at_least(3, badges).for_display(),
             SUT::AllOf {
                 requirements: vec![
                     SUT::Badge { badge: shown(&a) },
@@ -399,7 +433,7 @@ mod tests {
         let all_of = |requirements| SUT::AllOf { requirements };
         let one = |id| SUT::Badge { badge: shown(id) };
         assert_eq!(
-            requirement.for_display(&no_own_factors),
+            requirement.for_display(),
             any_of(vec![
                 all_of(vec![any_of(vec![one(&a), one(&b)]), one(&b), one(&c)]),
                 all_of(vec![any_of(vec![one(&a), one(&b)]), one(&c)]),

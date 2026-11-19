@@ -10,7 +10,6 @@
 
 use access_rules::prelude::*;
 use addresses::prelude::{NonFungibleGlobalId, ResourceAddress};
-use factors::prelude::FactorSource;
 use network::prelude::NetworkID;
 use numeric::prelude::Decimal192;
 use scrypto_test::prelude as st;
@@ -444,13 +443,7 @@ fn random_rules_have_the_display_shapes() {
             AccessRequirement::from((rule.clone(), NETWORK)).simplified();
         assert_counts_only_list_badges(&simplified, &rule);
 
-        let no_own_factors =
-            |_: &NonFungibleGlobalId| -> Option<FactorSource> { None };
-        assert_display_shapes(
-            &simplified.for_display(&no_own_factors),
-            None,
-            &rule,
-        );
+        assert_display_shapes(&simplified.for_display(), None, &rule);
     }
 }
 
