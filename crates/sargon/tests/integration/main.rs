@@ -95,7 +95,8 @@ mod integration_tests {
             )],
         );
 
-        let manifest = TransactionManifest::per_recipient_transfers(transfers);
+        let manifest =
+            TransactionManifest::per_recipient_transfers(transfers, Vec::new());
 
         let end_epoch_exclusive = Epoch::from(start_epoch_inclusive.0 + 10u64);
         let notary_public_key = Ed25519PublicKey::sample();
