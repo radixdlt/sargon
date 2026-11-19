@@ -7,14 +7,18 @@
 
 mod access_requirement;
 mod access_requirement_from_scrypto;
+mod auth_zone;
 
 pub mod prelude {
     pub use crate::access_requirement::*;
+    pub use crate::auth_zone::*;
 
     pub(crate) use addresses::prelude::*;
     pub(crate) use has_sample_values::prelude::*;
     pub(crate) use network::prelude::*;
     pub(crate) use numeric::prelude::*;
+
+    pub(crate) use std::collections::HashSet;
 
     pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
     pub(crate) use radix_engine_interface::prelude::{
