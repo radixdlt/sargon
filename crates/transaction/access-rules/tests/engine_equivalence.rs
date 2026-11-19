@@ -28,9 +28,33 @@ struct Engine {
 }
 
 /// A proof the transaction creates from the account's vaults.
+#[derive(Clone, Debug)]
 enum VaultProof {
     Amount(st::ResourceAddress, u64),
-    NonFungibles(st::ResourceAddress, Vec<st::NonFungibleLocalId>),
+    /// Of the non-fungibles with these integer local IDs.
+    NonFungibles(st::ResourceAddress, Vec<u64>),
+}
+
+impl VaultProof {
+    fn auth_zone_proof(&self) -> AuthZoneProof {
+        match self {
+            Self::Amount(resource, amount) => AuthZoneProof {
+                resource: sargon_resource(*resource),
+                amount: (*amount).into(),
+                non_fungible_local_ids: HashSet::new(),
+            },
+            Self::NonFungibles(resource, ids) => AuthZoneProof {
+                resource: sargon_resource(*resource),
+                amount: (ids.len() as u64).into(),
+                non_fungible_local_ids: ids
+                    .iter()
+                    .map(|id| {
+                        addresses::prelude::NonFungibleLocalId::integer(*id)
+                    })
+                    .collect(),
+            },
+        }
+    }
 }
 
 impl Engine {
@@ -131,7 +155,8 @@ impl Engine {
                     .create_proof_from_account_of_non_fungibles(
                         self.account,
                         *resource,
-                        ids.clone(),
+                        ids.iter()
+                            .map(|id| st::NonFungibleLocalId::integer(*id)),
                     ),
             };
         }
@@ -153,6 +178,27 @@ impl Engine {
             )
         });
         false
+    }
+
+    /// The auth zone of a transaction with these signatures and vault proofs,
+    /// as `authorizes` sends it: the account owner signs when it has proofs.
+    fn auth_zone(
+        &self,
+        signers: &[st::NonFungibleGlobalId],
+        vault_proofs: &[VaultProof],
+    ) -> AuthZone {
+        let mut implicit_non_fungibles =
+            signers.iter().map(sargon_id).collect::<HashSet<_>>();
+        if !vault_proofs.is_empty() {
+            implicit_non_fungibles.insert(sargon_id(&self.account_owner));
+        }
+        AuthZone {
+            implicit_non_fungibles,
+            proofs: vault_proofs
+                .iter()
+                .map(VaultProof::auth_zone_proof)
+                .collect(),
+        }
     }
 }
 
@@ -201,24 +247,35 @@ fn check_with_every_set_of_signers(
     rules: &[st::AccessRule],
     badges: &[st::NonFungibleGlobalId],
 ) -> [usize; 2] {
-    let mut engine = Engine::new();
+    check_with_every_auth_zone(&mut Engine::new(), rules, badges, &[vec![]])
+}
+
+/// Checks each rule with every subset of `signers` combined with each set of
+/// vault proofs, and returns how many checks the engine denied and
+/// authorized.
+fn check_with_every_auth_zone(
+    engine: &mut Engine,
+    rules: &[st::AccessRule],
+    signers: &[st::NonFungibleGlobalId],
+    vault_proof_sets: &[Vec<VaultProof>],
+) -> [usize; 2] {
     let resources = engine.resources_protected_by(rules);
     let mut outcomes = [0; 2];
     for (rule, resource) in rules.iter().zip(resources) {
-        for subset in 0..1usize << badges.len() {
-            let signers = badges
+        for subset in 0..1usize << signers.len() {
+            let subset_signers = signers
                 .iter()
                 .enumerate()
                 .filter(|(index, _)| subset & (1 << index) != 0)
                 .map(|(_, badge)| badge.clone())
                 .collect::<Vec<_>>();
-            let auth_zone = AuthZone {
-                implicit_non_fungibles: signers.iter().map(sargon_id).collect(),
-                proofs: vec![],
-            };
-            let authorizes = engine.authorizes(resource, &signers, &[]);
-            assert_evaluated_like_engine(rule, &auth_zone, authorizes);
-            outcomes[authorizes as usize] += 1;
+            for vault_proofs in vault_proof_sets {
+                let auth_zone = engine.auth_zone(&subset_signers, vault_proofs);
+                let authorizes =
+                    engine.authorizes(resource, &subset_signers, vault_proofs);
+                assert_evaluated_like_engine(rule, &auth_zone, authorizes);
+                outcomes[authorizes as usize] += 1;
+            }
         }
     }
     outcomes
@@ -274,12 +331,60 @@ fn random_nested_rules() {
     let badges = signature_badges(3);
     // Deterministic, so the same rules are checked on ledger every run.
     let mut runner = TestRunner::deterministic();
-    let strategy = rules(&badges, 2);
+    let strategy = rules(&resource_or_non_fungibles(&badges), &[], 2);
     let rules = (0..32)
         .map(|_| strategy.new_tree(&mut runner).unwrap().current())
         .collect::<Vec<_>>();
 
     let outcomes = check_with_every_set_of_signers(&rules, &badges);
+    // Guards against random rules that are all trivially allowed or denied.
+    assert!(outcomes.iter().all(|count| *count >= 60), "{outcomes:?}");
+}
+
+/// Random nested rules of signatures, non-fungibles and resources in the
+/// account's vaults, and amounts of a token, each checked with every subset
+/// of two signers combined with no vault proof, a proof of a non-fungible, a
+/// proof of 3 tokens, or two proofs of 3 tokens.
+#[test]
+fn random_rules_with_vault_proofs() {
+    let mut engine = Engine::new();
+    let non_fungibles = engine.non_fungible_in_account();
+    let token = engine.fungible_in_account(10);
+    let signers = signature_badges(2);
+    let mut badges = resource_or_non_fungibles(&signers);
+    badges.extend([
+        st::NonFungibleGlobalId::new(
+            non_fungibles,
+            st::NonFungibleLocalId::integer(1),
+        )
+        .into(),
+        st::NonFungibleGlobalId::new(
+            non_fungibles,
+            st::NonFungibleLocalId::integer(2),
+        )
+        .into(),
+        non_fungibles.into(),
+        token.into(),
+    ]);
+
+    let mut runner = TestRunner::deterministic();
+    let strategy = rules(&badges, &[token], 2);
+    let rules = (0..24)
+        .map(|_| strategy.new_tree(&mut runner).unwrap().current())
+        .collect::<Vec<_>>();
+    let vault_proof_sets = [
+        vec![],
+        vec![VaultProof::NonFungibles(non_fungibles, vec![1])],
+        vec![VaultProof::Amount(token, 3)],
+        vec![VaultProof::Amount(token, 3), VaultProof::Amount(token, 3)],
+    ];
+
+    let outcomes = check_with_every_auth_zone(
+        &mut engine,
+        &rules,
+        &signers,
+        &vault_proof_sets,
+    );
     // Guards against random rules that are all trivially allowed or denied.
     assert!(outcomes.iter().all(|count| *count >= 60), "{outcomes:?}");
 }
@@ -364,10 +469,7 @@ fn proof_from_a_vault_proves_its_non_fungibles_and_resource() {
         require(not_proven.into()),
     ];
     let resources = engine.resources_protected_by(&rules);
-    let vault_proofs = [VaultProof::NonFungibles(
-        badge_resource,
-        vec![st::NonFungibleLocalId::integer(1)],
-    )];
+    let vault_proofs = [VaultProof::NonFungibles(badge_resource, vec![1])];
     let auth_zone = AuthZone {
         implicit_non_fungibles: HashSet::from([sargon_id(
             &engine.account_owner,
@@ -447,7 +549,7 @@ fn random_rules_have_the_display_shapes() {
         failure_persistence: None,
         ..ProptestConfig::default()
     })
-    .run(&rules(&badges, 4), |rule| {
+    .run(&rules(&grammar_badges(&badges), &[st::XRD], 4), |rule| {
         let simplified =
             AccessRequirement::from((rule.clone(), NETWORK)).simplified();
         assert_counts_only_list_badges(&simplified, &rule);
@@ -506,27 +608,39 @@ fn assert_display_shapes(
     }
 }
 
-/// Engine rules over `badges`, nested up to `depth` levels: `AllowAll`,
-/// `DenyAll`, and composite `AnyOf`/`AllOf` of basic `Require`, `CountOf`
-/// (counts from 0 to 4), `AnyOf` and `AllOf` with repeated badges.
+/// Engine rules over `badges` and amounts of `amount_resources`, nested up to
+/// `depth` levels: `AllowAll`, `DenyAll`, and composite `AnyOf`/`AllOf` of
+/// basic `Require`, `CountOf` (counts from 0 to 4), `AnyOf` and `AllOf` with
+/// repeated badges, and `AmountOf` (amounts from 0 to 6).
 fn rules(
-    badges: &[st::NonFungibleGlobalId],
+    badges: &[st::ResourceOrNonFungible],
+    amount_resources: &[st::ResourceAddress],
     depth: u32,
 ) -> impl Strategy<Value = st::AccessRule> {
     let badges = badges.to_vec();
-    let badge =
-        (0..badges.len()).prop_map(move |index| -> st::ResourceOrNonFungible {
-            badges[index].clone().into()
-        });
+    let badge = (0..badges.len()).prop_map(move |index| badges[index].clone());
     let list = prop::collection::vec(badge.clone(), 0..4);
-    let basic = prop_oneof![
+    let mut basic = prop_oneof![
         badge.prop_map(st::BasicRequirement::Require),
         (0u8..5, list.clone()).prop_map(|(count, list)| {
             st::BasicRequirement::CountOf(count, list)
         }),
         list.clone().prop_map(st::BasicRequirement::AnyOf),
         list.prop_map(st::BasicRequirement::AllOf),
-    ];
+    ]
+    .boxed();
+    if !amount_resources.is_empty() {
+        let amount_resources = amount_resources.to_vec();
+        let amount_of = (0u64..7, 0..amount_resources.len()).prop_map(
+            move |(amount, index)| {
+                st::BasicRequirement::AmountOf(
+                    amount.into(),
+                    amount_resources[index],
+                )
+            },
+        );
+        basic = basic.prop_union(amount_of.boxed()).boxed();
+    }
     let composite = basic
         .prop_map(st::CompositeRequirement::BasicRequirement)
         .prop_recursive(depth, 32, 3, |nested| {
@@ -542,4 +656,27 @@ fn rules(
         1 => Just(st::AccessRule::DenyAll),
         8 => composite.prop_map(st::AccessRule::Protected),
     ]
+}
+
+fn resource_or_non_fungibles(
+    badges: &[st::NonFungibleGlobalId],
+) -> Vec<st::ResourceOrNonFungible> {
+    badges.iter().cloned().map(Into::into).collect()
+}
+
+/// `badges`, plus a resource and a non-signature non-fungible, so that
+/// rules also have badges that aren't signatures.
+fn grammar_badges(
+    badges: &[st::NonFungibleGlobalId],
+) -> Vec<st::ResourceOrNonFungible> {
+    let mut all = resource_or_non_fungibles(badges);
+    all.push(st::XRD.into());
+    all.push(
+        st::NonFungibleGlobalId::new(
+            st::ACCOUNT_OWNER_BADGE,
+            st::NonFungibleLocalId::integer(1),
+        )
+        .into(),
+    );
+    all
 }
