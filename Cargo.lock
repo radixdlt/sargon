@@ -4334,6 +4334,7 @@ dependencies = [
  "derive_more",
  "entity-by-address",
  "enum-as-inner",
+ "futures",
  "gateway-client-and-api",
  "itertools 0.12.1",
  "log",
