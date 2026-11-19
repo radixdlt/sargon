@@ -4263,6 +4263,7 @@ dependencies = [
 name = "sargon-os-factors"
 version = "1.2.61"
 dependencies = [
+ "access-rules",
  "actix-rt",
  "addresses",
  "async-trait",
