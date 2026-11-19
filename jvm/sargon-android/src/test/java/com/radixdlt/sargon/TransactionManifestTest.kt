@@ -367,6 +367,65 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     }
 
     @Test
+    fun testPerAssetTransfersWithRequiredBadges() {
+        val transfers = PerAssetTransfers.sample()
+        val badgeAddress = ResourceAddress.sampleMainnet.xrd
+        val requiredBadges = listOf(ResourceSpecifier.Fungible(badgeAddress, 10.toDecimal192()))
+        val manifest = TransactionManifest.perAssetTransfers(
+            transfers = transfers,
+            requiredBadges = requiredBadges
+        )
+
+        with(manifest.instructionsString) {
+            assertTrue(contains(transfers.fromAccount.string))
+            assertTrue(contains(badgeAddress.string))
+            // The proofs come first, and are dropped before the badge itself is withdrawn.
+            assertTrue(indexOf("create_proof_of_amount") < indexOf("POP_FROM_AUTH_ZONE"))
+            assertTrue(contains("DROP_PROOF"))
+        }
+    }
+
+    @Test
+    fun testPerRecipientTransfersWithRequiredBadges() {
+        val badgeAddress = ResourceAddress.sampleMainnet.xrd
+        val manifest = TransactionManifest.perRecipientTransfers(
+            transfers = PerRecipientAssetTransfers(
+                addressOfSender = AccountAddress.init(
+                    "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
+                ),
+                transfers = listOf(
+                    PerRecipientAssetTransfer(
+                        recipient = TransferRecipient.AddressOfExternalAccount(
+                            value = AccountAddress.init(
+                                "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+                            )
+                        ),
+                        fungibles = listOf(
+                            PerRecipientFungibleTransfer(
+                                useTryDepositOrAbort = false,
+                                amount = 100.toDecimal192(),
+                                divisibility = 18.toUByte(),
+                                resourceAddress = ResourceAddress.init(
+                                    validatingAddress = "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
+                                )
+                            )
+                        ),
+                        nonFungibles = emptyList()
+                    )
+                )
+            ),
+            requiredBadges = listOf(ResourceSpecifier.Fungible(badgeAddress, 1.toDecimal192()))
+        )
+
+        with(manifest.instructionsString) {
+            assertTrue(contains(badgeAddress.string))
+            assertTrue(indexOf("create_proof_of_amount") < indexOf("\"withdraw\""))
+            // The badge is not transferred: its proof needs not be dropped.
+            assertFalse(contains("POP_FROM_AUTH_ZONE"))
+        }
+    }
+
+    @Test
     fun testPerRecipientTransfers() {
         val manifest =
             TransactionManifest.perRecipientTransfers(

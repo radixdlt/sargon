@@ -13,6 +13,7 @@ import com.radixdlt.sargon.PerRecipientAssetTransfers
 import com.radixdlt.sargon.PoolAddress
 import com.radixdlt.sargon.PublicKeyHash
 import com.radixdlt.sargon.ResourceAddress
+import com.radixdlt.sargon.ResourceSpecifier
 import com.radixdlt.sargon.StakeClaim
 import com.radixdlt.sargon.ThirdPartyDeposits
 import com.radixdlt.sargon.TokenDefinitionMetadata
@@ -105,10 +106,18 @@ fun TransactionManifest.Companion.markingAccountAsDAppDefinitionType(
     accountAddress = accountAddress
 )
 
+/**
+ * The manifest of [transfers], proving [requiredBadges] (see `SargonOS.transferRequiredBadges`)
+ * for the restricted resources: the proofs are created first, then the resources that are not
+ * badges are transferred, then (if badges are transferred too) the badge proofs are dropped, so
+ * that the badges can be withdrawn.
+ */
 fun TransactionManifest.Companion.perAssetTransfers(
-    transfers: PerAssetTransfers
+    transfers: PerAssetTransfers,
+    requiredBadges: List<ResourceSpecifier> = emptyList()
 ) = manifestPerAssetTransfers(
-    transfers = transfers
+    transfers = transfers,
+    requiredBadges = requiredBadges
 )
 
 /**
@@ -118,9 +127,11 @@ fun TransactionManifest.Companion.perAssetTransfers(
  * cheaper TX fee for user.
  */
 fun TransactionManifest.Companion.perRecipientTransfers(
-    transfers: PerRecipientAssetTransfers
+    transfers: PerRecipientAssetTransfers,
+    requiredBadges: List<ResourceSpecifier> = emptyList()
 ) = manifestPerRecipientTransfers(
-    transfers = transfers
+    transfers = transfers,
+    requiredBadges = requiredBadges
 )
 
 fun TransactionManifest.Companion.setOwnerKeysHashes(
