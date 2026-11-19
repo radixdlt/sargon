@@ -12,6 +12,7 @@ dependencies = [
  "numeric",
  "prelude",
  "radix-engine-interface",
+ "scrypto-test",
 ]
 
 [[package]]

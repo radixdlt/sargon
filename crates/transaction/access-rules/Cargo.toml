@@ -13,3 +13,6 @@ numeric = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
 radix-engine-interface = { workspace = true }
+
+[dev-dependencies]
+scrypto-test = { workspace = true }
