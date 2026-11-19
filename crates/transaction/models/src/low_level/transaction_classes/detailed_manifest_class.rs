@@ -428,6 +428,35 @@ impl From<(RetEntitySecurifyOutput, NetworkID)> for DetailedManifestClass {
     }
 }
 
+impl DetailedManifestClass {
+    /// Marks the user's keys in the proposed rules of recovery proposals,
+    /// which the classification shows as unknown, see
+    /// [`AccessControllerRuleSetForDisplay::with_own_factor_sources`].
+    pub fn with_own_factor_sources(
+        self,
+        own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
+    ) -> Self {
+        match self {
+            Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals,
+            } => Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals: recovery_proposals
+                    .into_iter()
+                    .map(|proposal| AccessControllerRecoveryProposal {
+                        proposed_rules: proposal
+                            .proposed_rules
+                            .with_own_factor_sources(own_factor_source),
+                        ..proposal
+                    })
+                    .collect(),
+            },
+            class => class,
+        }
+    }
+}
+
 impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
     for DetailedManifestClass
 {

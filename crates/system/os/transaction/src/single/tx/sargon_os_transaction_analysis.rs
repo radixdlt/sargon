@@ -231,7 +231,7 @@ impl OsExecutionSummary for SargonOS {
             });
         }
 
-        Ok(execution_summary)
+        with_own_factor_sources(self, execution_summary)
     }
 
     fn map_failed_transaction_preview(
@@ -255,6 +255,22 @@ impl OsExecutionSummary for SargonOS {
             }
         }
     }
+}
+
+/// Marks the user's keys in the rules of recovery proposals, which the
+/// classification shows as unknown keys.
+fn with_own_factor_sources(
+    os: &SargonOS,
+    mut execution_summary: ExecutionSummary,
+) -> Result<ExecutionSummary> {
+    let own_factor_sources = os.own_factor_sources()?;
+    execution_summary.detailed_classification =
+        execution_summary.detailed_classification.map(|class| {
+            class.with_own_factor_sources(&|badge| {
+                own_factor_sources.factor_source_of(badge)
+            })
+        });
+    Ok(execution_summary)
 }
 
 #[async_trait::async_trait]
@@ -944,5 +960,62 @@ mod tests {
             Decimal192::zero(),
         ))
         .unwrap()
+    }
+
+    #[actix_rt::test]
+    async fn recovery_proposals_show_own_keys_as_factor_sources() {
+        let os = SUT::fast_boot().await;
+        let mfa = MFAFactorInstance::sample_stokenet_account_securified_idx_0()
+            .factor_instance;
+        let factor_source = FactorSources::sample_values_all()
+            .into_iter()
+            .find(|factor_source| factor_source.id() == mfa.factor_source_id)
+            .unwrap();
+        os.update_profile_with(|profile| {
+            if profile.factor_sources.get_id(factor_source.id()).is_none() {
+                profile.factor_sources.append(factor_source.clone());
+            }
+            profile.networks.insert_mfa_factor_instances(
+                profile.current_network_id(),
+                MFAFactorInstances::just(MFAFactorInstance::new(mfa.clone())),
+            );
+            Ok(())
+        })
+        .await
+        .unwrap();
+
+        let own_key = NonFungibleGlobalId::from((
+            mfa.badge.try_non_fungible_global_id().unwrap(),
+            NetworkID::Mainnet,
+        ));
+        let other_key = NonFungibleGlobalId::from(
+            HierarchicalDeterministicPublicKey::sample_other(),
+        );
+        let key = |badge| AccessRequirementForDisplay::Badge {
+            badge: BadgeForDisplay::UnknownKey { badge },
+        };
+        let recovery =
+            |primary_role| DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: vec![AccessControllerAddress::sample()],
+                recovery_proposals: vec![AccessControllerRecoveryProposal {
+                    proposed_rules: AccessControllerRuleSetForDisplay {
+                        primary_role,
+                        recovery_role: key(other_key.clone()),
+                        confirmation_role: AccessRequirementForDisplay::NoOne,
+                    },
+                    ..AccessControllerRecoveryProposal::sample()
+                }],
+            };
+        let mut summary = ExecutionSummary::sample();
+        summary.detailed_classification = Some(recovery(key(own_key)));
+
+        let summary = with_own_factor_sources(&os, summary).unwrap();
+
+        assert_eq!(
+            summary.detailed_classification,
+            Some(recovery(AccessRequirementForDisplay::Badge {
+                badge: BadgeForDisplay::OwnFactor { factor_source }
+            }))
+        );
     }
 }
