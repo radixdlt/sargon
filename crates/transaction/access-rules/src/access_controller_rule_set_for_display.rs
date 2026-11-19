@@ -24,6 +24,24 @@ impl AccessControllerRuleSet {
     }
 }
 
+impl HasSampleValues for AccessControllerRuleSetForDisplay {
+    fn sample() -> Self {
+        Self {
+            primary_role: AccessRequirementForDisplay::sample(),
+            recovery_role: AccessRequirementForDisplay::sample_other(),
+            confirmation_role: AccessRequirementForDisplay::sample_other(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            primary_role: AccessRequirementForDisplay::sample_other(),
+            recovery_role: AccessRequirementForDisplay::sample(),
+            confirmation_role: AccessRequirementForDisplay::NoOne,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -2,6 +2,7 @@ mod test_diagnose_instance_duplicates;
 
 pub mod prelude {
 
+    pub use access_rules::prelude::*;
     pub use build_info::prelude::*;
     pub use clients::prelude::*;
     pub use discover::prelude::*;

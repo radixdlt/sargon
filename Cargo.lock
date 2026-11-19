@@ -4102,6 +4102,7 @@ dependencies = [
 name = "sargon"
 version = "1.2.61"
 dependencies = [
+ "access-rules",
  "actix-rt",
  "addresses",
  "async-std",

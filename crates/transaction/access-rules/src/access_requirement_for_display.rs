@@ -110,6 +110,42 @@ impl BadgeForDisplay {
     }
 }
 
+impl HasSampleValues for AccessRequirementForDisplay {
+    /// One of the user's factors.
+    fn sample() -> Self {
+        Self::Badge {
+            badge: BadgeForDisplay::sample(),
+        }
+    }
+
+    /// One of the user's factors or an unknown key.
+    fn sample_other() -> Self {
+        Self::AtLeast {
+            count: 1,
+            requirements: vec![
+                Self::sample(),
+                Self::Badge {
+                    badge: BadgeForDisplay::sample_other(),
+                },
+            ],
+        }
+    }
+}
+
+impl HasSampleValues for BadgeForDisplay {
+    fn sample() -> Self {
+        Self::OwnFactor {
+            factor_source: FactorSource::sample(),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self::UnknownKey {
+            badge: NonFungibleGlobalId::sample_other(),
+        }
+    }
+}
+
 /// Whether the badge is the implicit badge of a key's signature.
 fn is_signature_badge(badge: &NonFungibleGlobalId) -> bool {
     let network_id = badge.resource_address.network_id();
