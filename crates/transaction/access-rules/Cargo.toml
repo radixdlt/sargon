@@ -7,12 +7,15 @@ edition = "2021"
 # === SARGON CRATES ===
 prelude = { workspace = true }
 addresses = { workspace = true }
+factors = { workspace = true }
 has-sample-values = { workspace = true }
 network = { workspace = true }
 numeric = { workspace = true }
 
 # === RADIX DEPENDENCIES ===
+radix-common = { workspace = true }
 radix-engine-interface = { workspace = true }
 
 [dev-dependencies]
+hierarchical-deterministic = { workspace = true }
 scrypto-test = { workspace = true }

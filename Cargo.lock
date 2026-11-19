@@ -7,10 +7,13 @@ name = "access-rules"
 version = "1.2.61"
 dependencies = [
  "addresses",
+ "factors",
  "has-sample-values",
+ "hierarchical-deterministic",
  "network",
  "numeric",
  "prelude",
+ "radix-common",
  "radix-engine-interface",
  "scrypto-test",
 ]
