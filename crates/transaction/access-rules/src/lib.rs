@@ -7,6 +7,7 @@
 
 mod access_requirement;
 mod access_requirement_from_scrypto;
+mod access_requirement_simplification;
 mod auth_zone;
 
 pub mod prelude {
