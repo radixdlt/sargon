@@ -86,6 +86,7 @@ members = [
     "crates/system/os/transaction",
 
     # === TRANSACTION ===
+    "crates/transaction/access-rules",
     "crates/transaction/foundation",
     "crates/transaction/manifests",
     "crates/transaction/models",
@@ -183,6 +184,7 @@ default-members = [
     "crates/system/os/transaction",
 
     # === TRANSACTION ===
+    "crates/transaction/access-rules",
     "crates/transaction/foundation",
     "crates/transaction/manifests",
     "crates/transaction/models",
@@ -297,6 +299,7 @@ sargon-os-signing = { path = "crates/system/os/signing" }
 sargon-os-transaction = { path = "crates/system/os/transaction" }
 
 # === TRANSACTION ===
+access-rules = { path = "crates/transaction/access-rules" }
 transaction-foundation = { path = "crates/transaction/foundation" }
 manifests = { path = "crates/transaction/manifests" }
 transaction-models = { path = "crates/transaction/models" }

@@ -1,0 +1,11 @@
+[package]
+name = "access-rules"
+version = "1.2.61"
+edition = "2021"
+
+[dependencies]
+# === SARGON CRATES ===
+prelude = { workspace = true }
+addresses = { workspace = true }
+has-sample-values = { workspace = true }
+numeric = { workspace = true }

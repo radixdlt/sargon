@@ -3,6 +3,16 @@
 version = 4
 
 [[package]]
+name = "access-rules"
+version = "1.2.61"
+dependencies = [
+ "addresses",
+ "has-sample-values",
+ "numeric",
+ "prelude",
+]
+
+[[package]]
 name = "account-for-display"
 version = "1.2.61"
 dependencies = [
