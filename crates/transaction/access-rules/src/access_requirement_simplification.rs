@@ -80,6 +80,8 @@ impl AccessRequirement {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proptest::prelude::*;
+    use proptest::test_runner::TestRunner;
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = AccessRequirement;
@@ -282,45 +284,34 @@ mod tests {
         }
     }
 
-    /// Random larger requirements, from a fixed seed so failures reproduce.
+    /// Requirements up to four levels deep over the three badges.
+    fn requirements() -> impl Strategy<Value = SUT> {
+        let leaves = leaves();
+        let leaf = prop_oneof![
+            Just(SUT::Anyone),
+            Just(SUT::NoOne),
+            (0usize..3).prop_map(move |index| leaves[index].clone()),
+        ];
+        leaf.prop_recursive(4, 64, 4, |nested| {
+            (0u32..6, prop::collection::vec(nested, 0..5))
+                .prop_map(|(count, requirements)| at_least(count, requirements))
+        })
+    }
+
+    /// Random larger requirements. A failure is shrunk to a smallest
+    /// requirement that still fails.
     #[test]
     fn keeps_meaning_of_random_requirements() {
         let auth_zones = auth_zones();
-        let leaves = leaves();
-        let mut random = Xorshift(0x5eed_acce_5500_0001);
-        for _ in 0..20_000 {
-            let requirement = random_requirement(&mut random, &leaves, 4);
+        TestRunner::new(ProptestConfig {
+            cases: 20_000,
+            failure_persistence: None,
+            ..ProptestConfig::default()
+        })
+        .run(&requirements(), |requirement| {
             assert_simplifies_correctly(&requirement, &auth_zones);
-        }
-    }
-
-    fn random_requirement(
-        random: &mut Xorshift,
-        leaves: &[SUT; 3],
-        depth: u32,
-    ) -> SUT {
-        if depth == 0 || random.below(3) == 0 {
-            return match random.below(5) {
-                0 => SUT::Anyone,
-                1 => SUT::NoOne,
-                index => leaves[index as usize - 2].clone(),
-            };
-        }
-        let len = random.below(5);
-        let requirements = (0..len)
-            .map(|_| random_requirement(random, leaves, depth - 1))
-            .collect::<Vec<_>>();
-        at_least(random.below(len + 2) as u32, requirements)
-    }
-
-    struct Xorshift(u64);
-
-    impl Xorshift {
-        fn below(&mut self, bound: u64) -> u64 {
-            self.0 ^= self.0 << 13;
-            self.0 ^= self.0 >> 7;
-            self.0 ^= self.0 << 17;
-            self.0 % bound
-        }
+            Ok(())
+        })
+        .unwrap();
     }
 }

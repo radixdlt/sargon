@@ -6,12 +6,15 @@
 //! proofs of the transaction.
 //!
 //! Also checks, without the engine, that random engine rules have the shapes
-//! `AccessRequirementForDisplay` documents.
+//! `AccessRequirementForDisplay` documents. Random rules come from proptest.
 
 use access_rules::prelude::*;
 use addresses::prelude::{NonFungibleGlobalId, ResourceAddress};
 use network::prelude::NetworkID;
 use numeric::prelude::Decimal192;
+use proptest::prelude::*;
+use proptest::strategy::ValueTree;
+use proptest::test_runner::TestRunner;
 use scrypto_test::prelude as st;
 use scrypto_test::prelude::FromPublicKey;
 use std::collections::HashSet;
@@ -269,9 +272,11 @@ fn every_rule_without_nesting() {
 #[test]
 fn random_nested_rules() {
     let badges = signature_badges(3);
-    let mut random = Xorshift(0x5eed_e4f1_0000_0001);
+    // Deterministic, so the same rules are checked on ledger every run.
+    let mut runner = TestRunner::deterministic();
+    let strategy = rules(&badges, 2);
     let rules = (0..32)
-        .map(|_| random_rule(&mut random, &badges, 2))
+        .map(|_| strategy.new_tree(&mut runner).unwrap().current())
         .collect::<Vec<_>>();
 
     let outcomes = check_with_every_set_of_signers(&rules, &badges);
@@ -433,18 +438,23 @@ fn amount_needs_a_single_proof_of_at_least_the_amount() {
 
 /// A count above one and below all only ever lists badges, so no engine rule
 /// needs rewriting to be shown, and the display has its documented shapes.
+/// A failure is shrunk to a smallest rule that still fails.
 #[test]
 fn random_rules_have_the_display_shapes() {
     let badges = signature_badges(3);
-    let mut random = Xorshift(0x5eed_9a11_0000_0001);
-    for _ in 0..5_000 {
-        let rule = random_rule(&mut random, &badges, 4);
+    TestRunner::new(ProptestConfig {
+        cases: 5_000,
+        failure_persistence: None,
+        ..ProptestConfig::default()
+    })
+    .run(&rules(&badges, 4), |rule| {
         let simplified =
             AccessRequirement::from((rule.clone(), NETWORK)).simplified();
         assert_counts_only_list_badges(&simplified, &rule);
-
         assert_display_shapes(&simplified.for_display(), None, &rule);
-    }
+        Ok(())
+    })
+    .unwrap();
 }
 
 fn assert_counts_only_list_badges(
@@ -496,64 +506,40 @@ fn assert_display_shapes(
     }
 }
 
-fn random_rule(
-    random: &mut Xorshift,
+/// Engine rules over `badges`, nested up to `depth` levels: `AllowAll`,
+/// `DenyAll`, and composite `AnyOf`/`AllOf` of basic `Require`, `CountOf`
+/// (counts from 0 to 4), `AnyOf` and `AllOf` with repeated badges.
+fn rules(
     badges: &[st::NonFungibleGlobalId],
     depth: u32,
-) -> st::AccessRule {
-    match random.below(10) {
-        0 => st::AccessRule::AllowAll,
-        1 => st::AccessRule::DenyAll,
-        _ => st::AccessRule::Protected(random_composite(random, badges, depth)),
-    }
-}
-
-fn random_composite(
-    random: &mut Xorshift,
-    badges: &[st::NonFungibleGlobalId],
-    depth: u32,
-) -> st::CompositeRequirement {
-    if depth == 0 || random.below(2) == 0 {
-        return st::CompositeRequirement::BasicRequirement(random_basic(
-            random, badges,
-        ));
-    }
-    let nested = (0..random.below(4))
-        .map(|_| random_composite(random, badges, depth - 1))
-        .collect();
-    if random.below(2) == 0 {
-        st::CompositeRequirement::AnyOf(nested)
-    } else {
-        st::CompositeRequirement::AllOf(nested)
-    }
-}
-
-fn random_basic(
-    random: &mut Xorshift,
-    badges: &[st::NonFungibleGlobalId],
-) -> st::BasicRequirement {
-    let badge = |random: &mut Xorshift| -> st::ResourceOrNonFungible {
-        badges[random.below(badges.len() as u64) as usize]
-            .clone()
-            .into()
-    };
-    let len = random.below(4);
-    let list = (0..len).map(|_| badge(random)).collect::<Vec<_>>();
-    match random.below(4) {
-        0 => st::BasicRequirement::Require(badge(random)),
-        1 => st::BasicRequirement::CountOf(random.below(len + 2) as u8, list),
-        2 => st::BasicRequirement::AnyOf(list),
-        _ => st::BasicRequirement::AllOf(list),
-    }
-}
-
-struct Xorshift(u64);
-
-impl Xorshift {
-    fn below(&mut self, bound: u64) -> u64 {
-        self.0 ^= self.0 << 13;
-        self.0 ^= self.0 >> 7;
-        self.0 ^= self.0 << 17;
-        self.0 % bound
-    }
+) -> impl Strategy<Value = st::AccessRule> {
+    let badges = badges.to_vec();
+    let badge =
+        (0..badges.len()).prop_map(move |index| -> st::ResourceOrNonFungible {
+            badges[index].clone().into()
+        });
+    let list = prop::collection::vec(badge.clone(), 0..4);
+    let basic = prop_oneof![
+        badge.prop_map(st::BasicRequirement::Require),
+        (0u8..5, list.clone()).prop_map(|(count, list)| {
+            st::BasicRequirement::CountOf(count, list)
+        }),
+        list.clone().prop_map(st::BasicRequirement::AnyOf),
+        list.prop_map(st::BasicRequirement::AllOf),
+    ];
+    let composite = basic
+        .prop_map(st::CompositeRequirement::BasicRequirement)
+        .prop_recursive(depth, 32, 3, |nested| {
+            prop_oneof![
+                prop::collection::vec(nested.clone(), 0..4)
+                    .prop_map(st::CompositeRequirement::AnyOf),
+                prop::collection::vec(nested, 0..4)
+                    .prop_map(st::CompositeRequirement::AllOf),
+            ]
+        });
+    prop_oneof![
+        1 => Just(st::AccessRule::AllowAll),
+        1 => Just(st::AccessRule::DenyAll),
+        8 => composite.prop_map(st::AccessRule::Protected),
+    ]
 }

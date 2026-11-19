@@ -20,5 +20,6 @@ radix-common = { workspace = true }
 radix-engine-interface = { workspace = true }
 
 [dev-dependencies]
+proptest = { workspace = true }
 hierarchical-deterministic = { workspace = true }
 scrypto-test = { workspace = true }
