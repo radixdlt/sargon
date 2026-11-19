@@ -105,6 +105,9 @@ pub enum DetailedManifestClass {
     /// the difference is not important.
     AccessControllerRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        /// The recoveries proposed in the manifest, with the rules they
+        /// propose.
+        recovery_proposals: Vec<AccessControllerRecoveryProposal>,
     },
     /// A manifest that stops the timed recovery.
     /// It can as well contain instructions to cancel the given recovery proposal.
@@ -431,16 +434,24 @@ impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
     fn from(
         (output, n): (RetAccessControllerRecoveryOutput, NetworkID),
     ) -> Self {
-        // An access controller can have both a primary and a recovery role
-        // proposal in the same manifest, so deduplicate.
-        let access_controllers = output
+        let recovery_proposals = output
             .recovery_proposals
             .into_iter()
+            .map(|proposal| {
+                AccessControllerRecoveryProposal::from((proposal, n))
+            })
+            .collect_vec();
+        // An access controller can have both a primary and a recovery role
+        // proposal in the same manifest, so deduplicate.
+        let ac_addresses = recovery_proposals
+            .iter()
             .map(|proposal| proposal.access_controller)
-            .unique();
+            .unique()
+            .collect();
 
         Self::AccessControllerRecovery {
-            ac_addresses: to_vec_network_aware(access_controllers, n),
+            ac_addresses,
+            recovery_proposals,
         }
     }
 }
@@ -571,6 +582,9 @@ mod tests {
         test(
             SUT::AccessControllerRecovery {
                 ac_addresses: Vec::<_>::sample(),
+                recovery_proposals: vec![
+                    AccessControllerRecoveryProposal::sample(),
+                ],
             },
             DetailedManifestClassKind::AccessControllerRecovery,
         );
@@ -585,6 +599,65 @@ mod tests {
                 ac_addresses: Vec::<_>::sample(),
             },
             DetailedManifestClassKind::AccessControllerStopTimedRecovery,
+        );
+    }
+
+    #[test]
+    fn recovery_carries_each_proposal_and_deduplicates_access_controllers() {
+        use radix_engine_interface::blueprints::access_controller::{
+            Proposer as ScryptoProposer, RuleSet as ScryptoRuleSet,
+        };
+        use radix_engine_interface::prelude::{
+            AccessRule as ScryptoAccessRule,
+            ComponentAddress as ScryptoComponentAddress,
+        };
+
+        let access_controller = AccessControllerAddress::sample();
+        let scrypto_access_controller = ScryptoComponentAddress::new_or_panic(
+            access_controller.scrypto().as_node_id().0,
+        );
+        let rule_set = ScryptoRuleSet {
+            primary_role: ScryptoAccessRule::AllowAll,
+            recovery_role: ScryptoAccessRule::DenyAll,
+            confirmation_role: ScryptoAccessRule::AllowAll,
+        };
+        let proposal = |proposer, delay| RetAccessControllerRecoveryProposal {
+            access_controller: scrypto_access_controller,
+            proposer,
+            rule_set: rule_set.clone(),
+            timed_recovery_delay_in_minutes: delay,
+        };
+        let output = RetAccessControllerRecoveryOutput {
+            recovery_proposals: vec![
+                proposal(ScryptoProposer::Primary, None),
+                proposal(ScryptoProposer::Recovery, Some(10)),
+            ],
+        };
+
+        let proposed_rules = AccessControllerRuleSetForDisplay {
+            primary_role: AccessRequirementForDisplay::Anyone,
+            recovery_role: AccessRequirementForDisplay::NoOne,
+            confirmation_role: AccessRequirementForDisplay::Anyone,
+        };
+        assert_eq!(
+            SUT::from((output, NetworkID::Mainnet)),
+            SUT::AccessControllerRecovery {
+                ac_addresses: vec![access_controller],
+                recovery_proposals: vec![
+                    AccessControllerRecoveryProposal {
+                        access_controller,
+                        proposer: RecoveryProposer::Primary,
+                        proposed_rules: proposed_rules.clone(),
+                        timed_recovery_delay_in_minutes: None,
+                    },
+                    AccessControllerRecoveryProposal {
+                        access_controller,
+                        proposer: RecoveryProposer::Recovery,
+                        proposed_rules,
+                        timed_recovery_delay_in_minutes: Some(10),
+                    },
+                ],
+            }
         );
     }
 }

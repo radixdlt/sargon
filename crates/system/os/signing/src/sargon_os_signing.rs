@@ -52,6 +52,7 @@ impl OsSigning for SargonOS {
         match execution_summary.detailed_classification {
             Some(DetailedManifestClass::AccessControllerRecovery {
                 ac_addresses,
+                ..
             }) => {
                 return sign_access_controller_recovery_transaction(
                     self,

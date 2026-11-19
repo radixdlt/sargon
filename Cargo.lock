@@ -5490,6 +5490,7 @@ dependencies = [
 name = "transaction-models"
 version = "1.2.61"
 dependencies = [
+ "access-rules",
  "addresses",
  "bytes 1.2.61",
  "cargo_toml 0.22.3",
