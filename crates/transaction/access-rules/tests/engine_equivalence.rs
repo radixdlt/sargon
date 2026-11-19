@@ -180,6 +180,34 @@ impl Engine {
         false
     }
 
+    /// The engine's error when creating a resource whose minting `rule`
+    /// protects.
+    fn rejection_of(&mut self, rule: st::AccessRule) -> String {
+        // The role and metadata macros need the Scrypto prelude in scope.
+        use scrypto_test::prelude::*;
+
+        let manifest = ManifestBuilder::new()
+            .lock_fee_from_faucet()
+            .create_fungible_resource(
+                OwnerRole::None,
+                false,
+                0,
+                FungibleResourceRoles {
+                    mint_roles: mint_roles! {
+                        minter => rule;
+                        minter_updater => rule!(deny_all);
+                    },
+                    ..Default::default()
+                },
+                metadata!(),
+                None,
+            )
+            .build();
+        let receipt = self.ledger.execute_manifest(manifest, []);
+        assert!(!receipt.is_commit_success(), "the engine accepted it");
+        format!("{:?}", receipt.expect_commit_failure().outcome)
+    }
+
     /// The auth zone of a transaction with these signatures and vault proofs,
     /// as `authorizes` sends it: the account owner signs when it has proofs.
     fn auth_zone(
@@ -387,6 +415,114 @@ fn random_rules_with_vault_proofs() {
     );
     // Guards against random rules that are all trivially allowed or denied.
     assert!(outcomes.iter().all(|count| *count >= 60), "{outcomes:?}");
+}
+
+/// A chain of "any of" and "all of", alternating, nested `levels` deep below
+/// the top-level requirement, each level with a basic requirement beside it.
+fn deep_rule(
+    badges: &[st::NonFungibleGlobalId],
+    levels: usize,
+) -> st::AccessRule {
+    fn level(
+        badges: &[st::NonFungibleGlobalId],
+        depth: usize,
+        levels: usize,
+    ) -> st::CompositeRequirement {
+        let badge = |index: usize| -> st::ResourceOrNonFungible {
+            badges[index % badges.len()].clone().into()
+        };
+        if depth == levels {
+            return st::CompositeRequirement::BasicRequirement(
+                st::BasicRequirement::Require(badge(depth)),
+            );
+        }
+        let beside = st::CompositeRequirement::BasicRequirement(
+            st::BasicRequirement::CountOf(
+                2,
+                vec![badge(depth), badge(depth + 1)],
+            ),
+        );
+        let nested = vec![level(badges, depth + 1, levels), beside];
+        if depth % 2 == 0 {
+            st::CompositeRequirement::AnyOf(nested)
+        } else {
+            st::CompositeRequirement::AllOf(nested)
+        }
+    }
+    st::AccessRule::Protected(level(badges, 0, levels))
+}
+
+/// An "all of" with `count` basic requirements, so `count + 1` composite
+/// requirements.
+fn wide_rule(
+    badges: &[st::NonFungibleGlobalId],
+    count: usize,
+) -> st::AccessRule {
+    let badge = |index: usize| -> st::ResourceOrNonFungible {
+        badges[index % badges.len()].clone().into()
+    };
+    st::AccessRule::Protected(st::CompositeRequirement::AllOf(
+        (0..count)
+            .map(|index| {
+                st::CompositeRequirement::BasicRequirement(
+                    st::BasicRequirement::AnyOf(vec![
+                        badge(index),
+                        badge(index + 1),
+                    ]),
+                )
+            })
+            .collect(),
+    ))
+}
+
+/// The largest rules, each evaluated like the engine does with every set of
+/// signers, and with the display shapes:
+///
+/// * 5 levels below the top-level requirement. The engine allows 8, but a
+///   transaction can carry at most 5 for a resource role, and 6 for an access
+///   controller's rules, before reaching the depth limit of its encoding. The
+///   engine's deepest is checked without the engine below.
+/// * 64 composite requirements, the engine's limit.
+/// * A count over a list of 300 badges, which the engine doesn't limit.
+#[test]
+fn rules_at_the_engines_size_limits() {
+    let badges = signature_badges(3);
+    let long_list =
+        st::AccessRule::Protected(st::CompositeRequirement::BasicRequirement(
+            st::BasicRequirement::CountOf(
+                150,
+                (0..300)
+                    .map(|index| badges[index % 3].clone().into())
+                    .collect(),
+            ),
+        ));
+    let rules = [deep_rule(&badges, 5), wide_rule(&badges, 63), long_list];
+    for rule in &rules {
+        let shown =
+            AccessRequirement::from((rule.clone(), NETWORK)).for_display();
+        assert_display_shapes(&shown, None, rule);
+    }
+
+    let outcomes = check_with_every_set_of_signers(&rules, &badges);
+    assert!(outcomes.iter().all(|count| *count > 0), "{outcomes:?}");
+}
+
+/// The engine's deepest rule, 8 levels below the top-level requirement, which
+/// a blueprint can set although no transaction can carry it.
+#[test]
+fn deepest_rule_the_engine_allows_has_the_display_shapes() {
+    let rule = deep_rule(&signature_badges(3), 8);
+    let shown = AccessRequirement::from((rule.clone(), NETWORK)).for_display();
+    assert_display_shapes(&shown, None, &rule);
+}
+
+/// One composite requirement more than the widest rule above is rejected.
+#[test]
+fn rule_over_the_composite_requirement_limit_is_rejected() {
+    let mut engine = Engine::new();
+    assert!(engine
+        .rejection_of(wide_rule(&signature_badges(3), 64))
+        .contains("ExceededMaxAccessRuleNodes"));
 }
 
 /// The shape of a shield role without threshold factors.
