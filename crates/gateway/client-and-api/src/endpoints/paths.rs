@@ -18,9 +18,9 @@ impl GatewayClient {
     pub const PATH_STATE_ENTITY_PAGE_NON_FUNGIBLES: &str =
         "state/entity/page/non-fungibles/";
     pub const PATH_STATE_ENTITY_PAGE_NON_FUNGIBLE_VAULTS: &str =
-        "state/entity/page/non_fungible-vaults/";
+        "state/entity/page/non-fungible-vaults/";
     pub const PATH_STATE_ENTITY_PAGE_NON_FUNGIBLE_VAULT_IDS: &str =
-        "state/entity/page/non_fungible-vault/ids";
+        "state/entity/page/non-fungible-vault/ids";
     pub const PATH_ACCOUNT_PAGE_RESOURCE_PREFERENCES: &str =
         "state/account/page/resource-preferences";
     pub const PATH_ACCOUNT_PAGE_AUTHORIZED_DEPOSITORS: &str =
