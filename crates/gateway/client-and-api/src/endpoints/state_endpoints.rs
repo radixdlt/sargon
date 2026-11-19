@@ -50,6 +50,29 @@ impl GatewayClient {
             .await
     }
 
+    /// Get page of Global Entity Fungible Resource Vaults
+    ///
+    /// Returns vaults for fungible resource owned by a given global entity.
+    /// The returned response is in a paginated format, ordered by the resource's first
+    /// appearance on the ledger.
+    ///
+    /// See [the Gateway API docs for details][doc].
+    ///
+    /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityFungibleResourceVaultPage
+    pub async fn state_entity_page_fungible_vaults(
+        &self,
+        request: StateEntityPageFungibleVaultsRequest,
+    ) -> Result<
+        PageResponse<FungibleResourcesCollectionItemVaultAggregatedVaultItem>,
+    > {
+        self.post(
+            Self::PATH_STATE_ENTITY_PAGE_FUNGIBLE_VAULTS,
+            request,
+            res_id,
+        )
+        .await
+    }
+
     /// Get page of Global Entity Non-Fungible Resource Vaults
     /// Returns vaults for non fungible resource owned by a given global entity.
     /// The returned response is in a paginated format, ordered by the resource's first
@@ -58,7 +81,6 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleResourceVaultPage
-    #[allow(dead_code)]
     pub async fn state_entity_page_non_fungible_vaults(
         &self,
         request: StateEntityPageNonFungibleVaultsRequest,
@@ -84,7 +106,6 @@ impl GatewayClient {
     /// See [the Gateway API docs for details][doc].
     ///
     /// [doc]: https://radix-babylon-gateway-api.redoc.ly/#operation/EntityNonFungibleIdsPage
-    #[allow(dead_code)]
     pub async fn state_entity_page_non_fungible_vault_ids(
         &self,
         request: StateEntityPageNonFungibleVaultIdsRequest,

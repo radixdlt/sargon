@@ -17,6 +17,8 @@ impl GatewayClient {
         "state/entity/page/fungibles/";
     pub const PATH_STATE_ENTITY_PAGE_NON_FUNGIBLES: &str =
         "state/entity/page/non-fungibles/";
+    pub const PATH_STATE_ENTITY_PAGE_FUNGIBLE_VAULTS: &str =
+        "state/entity/page/fungible-vaults/";
     pub const PATH_STATE_ENTITY_PAGE_NON_FUNGIBLE_VAULTS: &str =
         "state/entity/page/non-fungible-vaults/";
     pub const PATH_STATE_ENTITY_PAGE_NON_FUNGIBLE_VAULT_IDS: &str =
