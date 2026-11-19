@@ -8,8 +8,10 @@ version = "1.2.61"
 dependencies = [
  "addresses",
  "has-sample-values",
+ "network",
  "numeric",
  "prelude",
+ "radix-engine-interface",
 ]
 
 [[package]]

@@ -8,4 +8,8 @@ edition = "2021"
 prelude = { workspace = true }
 addresses = { workspace = true }
 has-sample-values = { workspace = true }
+network = { workspace = true }
 numeric = { workspace = true }
+
+# === RADIX DEPENDENCIES ===
+radix-engine-interface = { workspace = true }
