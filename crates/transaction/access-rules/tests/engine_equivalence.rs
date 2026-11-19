@@ -4,9 +4,13 @@
 //!
 //! The engine checks a rule protecting the minting of a resource, with the
 //! proofs of the transaction.
+//!
+//! Also checks, without the engine, that random engine rules have the shapes
+//! `AccessRequirementForDisplay` documents.
 
 use access_rules::prelude::*;
 use addresses::prelude::{NonFungibleGlobalId, ResourceAddress};
+use factors::prelude::FactorSource;
 use network::prelude::NetworkID;
 use numeric::prelude::Decimal192;
 use scrypto_test::prelude as st;
@@ -425,6 +429,77 @@ fn amount_needs_a_single_proof_of_at_least_the_amount() {
         let rule = &rules[rule_index];
         assert_eq!(authorizes, expected, "{rule:?} with {amounts:?}");
         assert_evaluated_like_engine(rule, &auth_zone(&amounts), authorizes);
+    }
+}
+
+/// A count above one and below all only ever lists badges, so no engine rule
+/// needs rewriting to be shown, and the display has its documented shapes.
+#[test]
+fn random_rules_have_the_display_shapes() {
+    let badges = signature_badges(3);
+    let mut random = Xorshift(0x5eed_9a11_0000_0001);
+    for _ in 0..5_000 {
+        let rule = random_rule(&mut random, &badges, 4);
+        let simplified =
+            AccessRequirement::from((rule.clone(), NETWORK)).simplified();
+        assert_counts_only_list_badges(&simplified, &rule);
+
+        let no_own_factors =
+            |_: &NonFungibleGlobalId| -> Option<FactorSource> { None };
+        assert_display_shapes(
+            &simplified.for_display(&no_own_factors),
+            None,
+            &rule,
+        );
+    }
+}
+
+fn assert_counts_only_list_badges(
+    requirement: &AccessRequirement,
+    rule: &st::AccessRule,
+) {
+    let AccessRequirement::AtLeast {
+        count,
+        requirements,
+    } = requirement
+    else {
+        return;
+    };
+    let is_count_of = *count > 1 && (*count as usize) < requirements.len();
+    for nested in requirements {
+        assert!(
+            !is_count_of || matches!(nested, AccessRequirement::Badge { .. }),
+            "{rule:?} simplified to a count over {nested:?}"
+        );
+        assert_counts_only_list_badges(nested, rule);
+    }
+}
+
+/// `parent` is `None` for a whole role.
+fn assert_display_shapes(
+    shown: &AccessRequirementForDisplay,
+    parent: Option<&AccessRequirementForDisplay>,
+    rule: &st::AccessRule,
+) {
+    use AccessRequirementForDisplay::*;
+    match shown {
+        Anyone | NoOne => assert!(parent.is_none(), "{rule:?} nests {shown:?}"),
+        Badge { .. } | AmountOf { .. } => {}
+        CountOf { count, badges } => assert!(
+            *count > 1 && (*count as usize) < badges.len(),
+            "{rule:?} shows {shown:?}"
+        ),
+        AnyOf { requirements } | AllOf { requirements } => {
+            assert!(requirements.len() >= 2, "{rule:?} shows {shown:?}");
+            assert!(
+                parent.map(std::mem::discriminant)
+                    != Some(std::mem::discriminant(shown)),
+                "{rule:?} nests {shown:?} in the same kind"
+            );
+            for nested in requirements {
+                assert_display_shapes(nested, Some(shown), rule);
+            }
+        }
     }
 }
 

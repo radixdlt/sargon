@@ -26,6 +26,7 @@ pub mod prelude {
     pub(crate) use network::prelude::*;
     pub(crate) use numeric::prelude::*;
 
+    pub(crate) use itertools::Itertools;
     pub(crate) use std::collections::HashSet;
 
     pub(crate) use radix_common::constants::{

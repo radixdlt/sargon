@@ -12,6 +12,9 @@ has-sample-values = { workspace = true }
 network = { workspace = true }
 numeric = { workspace = true }
 
+# === EXTERNAL DEPENDENCIES ===
+itertools = { workspace = true }
+
 # === RADIX DEPENDENCIES ===
 radix-common = { workspace = true }
 radix-engine-interface = { workspace = true }

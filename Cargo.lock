@@ -10,6 +10,7 @@ dependencies = [
  "factors",
  "has-sample-values",
  "hierarchical-deterministic",
+ "itertools 0.12.1",
  "network",
  "numeric",
  "prelude",

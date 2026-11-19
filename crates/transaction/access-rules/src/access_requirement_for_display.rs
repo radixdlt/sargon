@@ -2,6 +2,13 @@ use crate::prelude::*;
 
 /// A requirement as shown to the user: simplified, with each badge resolved
 /// to what it is, e.g. one of the user's factors.
+///
+/// Its shape follows from the engine's rules, so hosts only draw:
+/// * `Anyone` and `NoOne` for a whole role, never nested;
+/// * `AnyOf` and `AllOf` with at least two requirements, alternating: an
+///   `AnyOf` never directly holds an `AnyOf`, nor an `AllOf` an `AllOf`;
+/// * `CountOf` with only badges, and a count above one and below their
+///   number.
 #[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum AccessRequirementForDisplay {
@@ -20,10 +27,20 @@ pub enum AccessRequirementForDisplay {
         resource: ResourceAddress,
     },
 
-    /// At least `count` of `requirements` must pass.
-    AtLeast {
-        count: u32,
+    /// At least one of `requirements` must pass.
+    AnyOf {
         requirements: Vec<AccessRequirementForDisplay>,
+    },
+
+    /// All of `requirements` must pass.
+    AllOf {
+        requirements: Vec<AccessRequirementForDisplay>,
+    },
+
+    /// At least `count` of `badges` must be proven.
+    CountOf {
+        count: u32,
+        badges: Vec<BadgeForDisplay>,
     },
 }
 
@@ -57,10 +74,17 @@ impl AccessRequirement {
         self.simplified().into_display(own_factor_source)
     }
 
+    /// `self` must be simplified.
     fn into_display(
         self,
         own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
     ) -> AccessRequirementForDisplay {
+        let display_all = |requirements: Vec<Self>| {
+            requirements
+                .into_iter()
+                .map(|requirement| requirement.into_display(own_factor_source))
+                .collect()
+        };
         match self {
             Self::Anyone => AccessRequirementForDisplay::Anyone,
             Self::NoOne => AccessRequirementForDisplay::NoOne,
@@ -71,18 +95,69 @@ impl AccessRequirement {
                 AccessRequirementForDisplay::AmountOf { amount, resource }
             }
             Self::AtLeast {
+                count: 1,
+                requirements,
+            } => AccessRequirementForDisplay::AnyOf {
+                requirements: display_all(requirements),
+            },
+            Self::AtLeast {
                 count,
                 requirements,
-            } => AccessRequirementForDisplay::AtLeast {
+            } if count as usize == requirements.len() => {
+                AccessRequirementForDisplay::AllOf {
+                    requirements: display_all(requirements),
+                }
+            }
+            Self::AtLeast {
                 count,
-                requirements: requirements
-                    .into_iter()
-                    .map(|requirement| {
-                        requirement.into_display(own_factor_source)
-                    })
-                    .collect(),
+                requirements,
+            } => match Self::only_badges(&requirements) {
+                Some(badges) => AccessRequirementForDisplay::CountOf {
+                    count,
+                    badges: badges
+                        .into_iter()
+                        .map(|badge| {
+                            BadgeForDisplay::resolve(badge, own_factor_source)
+                        })
+                        .collect(),
+                },
+                None => Self::any_of_subsets(count, requirements)
+                    .into_display(own_factor_source),
             },
         }
+    }
+
+    fn only_badges(
+        requirements: &[Self],
+    ) -> Option<Vec<ResourceOrNonFungible>> {
+        requirements
+            .iter()
+            .map(|requirement| match requirement {
+                Self::Badge { badge } => Some(badge.clone()),
+                _ => None,
+            })
+            .collect()
+    }
+
+    /// "At least `count` of `requirements`" as "any of" its subsets of
+    /// `count` requirements, "all of" each: the same meaning, without a count
+    /// over anything but badges.
+    ///
+    /// The engine's `CountOf` only takes badges, so rules converted from the
+    /// engine never need this. It keeps a requirement built otherwise exact.
+    fn any_of_subsets(count: u32, requirements: Vec<Self>) -> Self {
+        Self::AtLeast {
+            count: 1,
+            requirements: requirements
+                .into_iter()
+                .combinations(count as usize)
+                .map(|subset| Self::AtLeast {
+                    count,
+                    requirements: subset,
+                })
+                .collect(),
+        }
+        .simplified()
     }
 }
 
@@ -120,8 +195,7 @@ impl HasSampleValues for AccessRequirementForDisplay {
 
     /// One of the user's factors or an unknown key.
     fn sample_other() -> Self {
-        Self::AtLeast {
-            count: 1,
+        Self::AnyOf {
             requirements: vec![
                 Self::sample(),
                 Self::Badge {
@@ -162,10 +236,42 @@ mod tests {
     use super::*;
     use hierarchical_deterministic::prelude::HierarchicalDeterministicPublicKey;
 
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AccessRequirementForDisplay;
+
     fn badge(id: &NonFungibleGlobalId) -> AccessRequirement {
         AccessRequirement::Badge {
             badge: ResourceOrNonFungible::NonFungible { value: id.clone() },
         }
+    }
+
+    fn at_least(
+        count: u32,
+        requirements: impl Into<Vec<AccessRequirement>>,
+    ) -> AccessRequirement {
+        AccessRequirement::AtLeast {
+            count,
+            requirements: requirements.into(),
+        }
+    }
+
+    /// Three different non-signature badges, shown as themselves.
+    fn nfts() -> [NonFungibleGlobalId; 3] {
+        let resource = NonFungibleGlobalId::sample().resource_address;
+        [1, 2, 3].map(|id| {
+            NonFungibleGlobalId::new_unchecked(
+                resource,
+                NonFungibleLocalId::integer(id),
+            )
+        })
+    }
+
+    fn shown(id: &NonFungibleGlobalId) -> BadgeForDisplay {
+        BadgeForDisplay::NonFungible { badge: id.clone() }
+    }
+
+    fn no_own_factors(_: &NonFungibleGlobalId) -> Option<FactorSource> {
+        None
     }
 
     #[test]
@@ -188,9 +294,9 @@ mod tests {
             (*id == own_key || *id == nft).then(FactorSource::sample)
         };
 
-        let requirement = AccessRequirement::AtLeast {
-            count: 1,
-            requirements: vec![
+        let requirement = at_least(
+            1,
+            [
                 badge(&own_key),
                 badge(&unknown_key),
                 badge(&nft),
@@ -199,26 +305,106 @@ mod tests {
                 },
                 amount,
             ],
-        };
+        );
 
-        let shown = |badge| AccessRequirementForDisplay::Badge { badge };
+        let as_badge = |badge| SUT::Badge { badge };
         assert_eq!(
             requirement.for_display(&own_factor_source),
-            AccessRequirementForDisplay::AtLeast {
-                count: 1,
+            SUT::AnyOf {
                 requirements: vec![
-                    shown(BadgeForDisplay::OwnFactor {
+                    as_badge(BadgeForDisplay::OwnFactor {
                         factor_source: FactorSource::sample()
                     }),
-                    shown(BadgeForDisplay::UnknownKey { badge: unknown_key }),
-                    shown(BadgeForDisplay::NonFungible { badge: nft }),
-                    shown(BadgeForDisplay::Resource { resource }),
-                    AccessRequirementForDisplay::AmountOf {
+                    as_badge(BadgeForDisplay::UnknownKey {
+                        badge: unknown_key
+                    }),
+                    as_badge(shown(&nft)),
+                    as_badge(BadgeForDisplay::Resource { resource }),
+                    SUT::AmountOf {
                         amount: Decimal192::one(),
                         resource
                     },
                 ],
             }
+        );
+    }
+
+    #[test]
+    fn groups_are_shown_by_their_count() {
+        let [a, b, c] = nfts();
+        let badges = [badge(&a), badge(&b), badge(&c)];
+
+        assert_eq!(
+            at_least(2, badges.clone()).for_display(&no_own_factors),
+            SUT::CountOf {
+                count: 2,
+                badges: vec![shown(&a), shown(&b), shown(&c)],
+            }
+        );
+        // The Sargon shield shape: "2 of 3", or an override.
+        assert_eq!(
+            at_least(1, [at_least(2, badges.clone()), badge(&a)])
+                .for_display(&no_own_factors),
+            SUT::AnyOf {
+                requirements: vec![
+                    SUT::CountOf {
+                        count: 2,
+                        badges: vec![shown(&a), shown(&b), shown(&c)],
+                    },
+                    SUT::Badge { badge: shown(&a) },
+                ],
+            }
+        );
+        assert_eq!(
+            at_least(3, badges).for_display(&no_own_factors),
+            SUT::AllOf {
+                requirements: vec![
+                    SUT::Badge { badge: shown(&a) },
+                    SUT::Badge { badge: shown(&b) },
+                    SUT::Badge { badge: shown(&c) },
+                ],
+            }
+        );
+    }
+
+    /// Only for requirements not converted from the engine.
+    #[test]
+    fn count_over_groups_is_shown_as_any_of_its_subsets() {
+        let [a, b, c] = nfts();
+        let groups = [
+            at_least(1, [badge(&a), badge(&b)]),
+            at_least(2, [badge(&b), badge(&c)]),
+            badge(&c),
+        ];
+        let requirement = at_least(2, groups.clone());
+
+        let rewritten = AccessRequirement::any_of_subsets(2, groups.into());
+        for subset in 0..1usize << 3 {
+            let auth_zone = AuthZone {
+                implicit_non_fungibles: nfts()
+                    .into_iter()
+                    .enumerate()
+                    .filter(|(index, _)| subset & (1 << index) != 0)
+                    .map(|(_, id)| id)
+                    .collect(),
+                proofs: vec![],
+            };
+            assert_eq!(
+                rewritten.is_satisfied_by(&auth_zone),
+                requirement.is_satisfied_by(&auth_zone)
+            );
+        }
+
+        let any_of = |requirements| SUT::AnyOf { requirements };
+        let all_of = |requirements| SUT::AllOf { requirements };
+        let one = |id| SUT::Badge { badge: shown(id) };
+        assert_eq!(
+            requirement.for_display(&no_own_factors),
+            any_of(vec![
+                all_of(vec![any_of(vec![one(&a), one(&b)]), one(&b), one(&c)]),
+                all_of(vec![any_of(vec![one(&a), one(&b)]), one(&c)]),
+                all_of(vec![one(&b), one(&c), one(&c)]),
+            ])
         );
     }
 }

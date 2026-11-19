@@ -4,6 +4,13 @@ use sargon::BadgeForDisplay as InternalBadgeForDisplay;
 
 /// A requirement of an access rule as shown to the user: simplified, with each
 /// badge resolved to what it is, e.g. one of the user's factors.
+///
+/// Its shape follows from the engine's rules, so hosts only draw:
+/// * `Anyone` and `NoOne` for a whole role, never nested;
+/// * `AnyOf` and `AllOf` with at least two requirements, alternating: an
+///   `AnyOf` never directly holds an `AnyOf`, nor an `AllOf` an `AllOf`;
+/// * `CountOf` with only badges, and a count above one and below their
+///   number.
 #[allow(clippy::large_enum_variant)]
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum AccessRequirementForDisplay {
@@ -22,10 +29,20 @@ pub enum AccessRequirementForDisplay {
         resource: ResourceAddress,
     },
 
-    /// At least `count` of `requirements` must pass.
-    AtLeast {
-        count: u32,
+    /// At least one of `requirements` must pass.
+    AnyOf {
         requirements: Vec<AccessRequirementForDisplay>,
+    },
+
+    /// All of `requirements` must pass.
+    AllOf {
+        requirements: Vec<AccessRequirementForDisplay>,
+    },
+
+    /// At least `count` of `badges` must be proven.
+    CountOf {
+        count: u32,
+        badges: Vec<BadgeForDisplay>,
     },
 }
 
