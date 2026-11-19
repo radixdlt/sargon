@@ -166,18 +166,49 @@ impl Engine {
             .build();
 
         let receipt = self.ledger.execute_manifest(manifest, initial_proofs);
-        if receipt.is_commit_success() {
-            return true;
+        authorized(receipt)
+    }
+
+    /// Whether the engine authorizes minting `resource` in a transaction
+    /// with one subintent, each intent signed by its own signers. The minting
+    /// happens in the subintent when `in_subintent`, else in the transaction
+    /// intent.
+    fn authorizes_across_intents(
+        &mut self,
+        resource: st::ResourceAddress,
+        in_subintent: bool,
+        transaction_signers: &[st::NonFungibleGlobalId],
+        subintent_signers: &[st::NonFungibleGlobalId],
+    ) -> bool {
+        let mint = |builder: st::ManifestBuilder<st::SubintentManifestV2>| {
+            builder
+                .mint_fungible(resource, 1)
+                .try_deposit_entire_worktop_or_abort(self.account, None)
+        };
+        let mut builder = st::TestTransaction::new_v2_builder(
+            self.ledger.next_transaction_nonce(),
+        );
+        let mut subintent = st::ManifestBuilder::new_subintent_v2();
+        if in_subintent {
+            subintent = mint(subintent);
         }
-        receipt.expect_specific_failure(|error| {
-            matches!(
-                error,
-                st::RuntimeError::SystemModuleError(
-                    st::SystemModuleError::AuthError(..)
-                )
-            )
-        });
-        false
+        let child = builder.add_subintent(
+            subintent.yield_to_parent(()).build(),
+            subintent_signers.to_vec(),
+        );
+        let mut transaction = st::ManifestBuilder::new_v2()
+            .lock_fee_from_faucet()
+            .use_child("child", child);
+        if !in_subintent {
+            transaction = transaction
+                .mint_fungible(resource, 1)
+                .try_deposit_entire_worktop_or_abort(self.account, None);
+        }
+        let transaction = builder.finish_with_root_intent(
+            transaction.yield_to_child("child", ()).build(),
+            transaction_signers.to_vec(),
+        );
+        authorized(self.ledger.execute_test_transaction(transaction))
     }
 
     /// The engine's error when creating a resource whose minting `rule`
@@ -228,6 +259,23 @@ impl Engine {
                 .collect(),
         }
     }
+}
+
+/// Whether the transaction committed, failing the test unless it was
+/// rejected for authorization.
+fn authorized(receipt: st::TransactionReceipt) -> bool {
+    if receipt.is_commit_success() {
+        return true;
+    }
+    receipt.expect_specific_failure(|error| {
+        matches!(
+            error,
+            st::RuntimeError::SystemModuleError(
+                st::SystemModuleError::AuthError(..)
+            )
+        )
+    });
+    false
 }
 
 fn sargon_id(id: &st::NonFungibleGlobalId) -> NonFungibleGlobalId {
@@ -523,6 +571,58 @@ fn rule_over_the_composite_requirement_limit_is_rejected() {
     assert!(engine
         .rejection_of(wide_rule(&signature_badges(3), 64))
         .contains("ExceededMaxAccessRuleNodes"));
+}
+
+/// A rule checked in an intent sees only that intent's signatures: in a
+/// subintent, not its parent's, and in the transaction intent, not its
+/// subintent's. So the auth zone to evaluate is the checking intent's own.
+/// Random rules of two keys, each key absent, signing the transaction intent,
+/// or signing the subintent, checked in either intent.
+#[test]
+fn rule_in_an_intent_sees_only_its_own_signatures() {
+    let mut engine = Engine::new();
+    let keys = signature_badges(2);
+    let mut runner = TestRunner::deterministic();
+    let strategy = rules(&resource_or_non_fungibles(&keys), &[], 2);
+    let rules = (0..12)
+        .map(|_| strategy.new_tree(&mut runner).unwrap().current())
+        .collect::<Vec<_>>();
+    let resources = engine.resources_protected_by(&rules);
+
+    // Each key: 0 absent, 1 signs the transaction intent, 2 the subintent.
+    let placements = (0..9).map(|n| [n % 3, n / 3]);
+    let mut outcomes = [0; 2];
+    for (rule, resource) in rules.iter().zip(resources) {
+        for placement in placements.clone() {
+            let signing = |intent| {
+                keys.iter()
+                    .zip(placement)
+                    .filter(|(_, place)| *place == intent)
+                    .map(|(key, _)| key.clone())
+                    .collect::<Vec<_>>()
+            };
+            let (transaction_signers, subintent_signers) =
+                (signing(1), signing(2));
+            for in_subintent in [false, true] {
+                let authorizes = engine.authorizes_across_intents(
+                    resource,
+                    in_subintent,
+                    &transaction_signers,
+                    &subintent_signers,
+                );
+                let own_signers = if in_subintent {
+                    &subintent_signers
+                } else {
+                    &transaction_signers
+                };
+                let auth_zone = engine.auth_zone(own_signers, &[]);
+                assert_evaluated_like_engine(rule, &auth_zone, authorizes);
+                outcomes[authorizes as usize] += 1;
+            }
+        }
+    }
+    // Guards against random rules that are all trivially allowed or denied.
+    assert!(outcomes.iter().all(|count| *count >= 40), "{outcomes:?}");
 }
 
 /// The shape of a shield role without threshold factors.
