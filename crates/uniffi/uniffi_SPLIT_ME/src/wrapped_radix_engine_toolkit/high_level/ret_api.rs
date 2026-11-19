@@ -172,15 +172,22 @@ pub fn debug_print_compiled_notarized_intent(
 pub fn manifest_per_recipient_transfers(
     transfers: PerRecipientAssetTransfers,
 ) -> TransactionManifest {
-    InternalTransactionManifest::per_recipient_transfers(transfers.into())
-        .into()
+    InternalTransactionManifest::per_recipient_transfers(
+        transfers.into(),
+        Vec::new(),
+    )
+    .into()
 }
 
 #[uniffi::export]
 pub fn manifest_per_asset_transfers(
     transfers: PerAssetTransfers,
 ) -> TransactionManifest {
-    InternalTransactionManifest::per_asset_transfers(transfers.into()).into()
+    InternalTransactionManifest::per_asset_transfers(
+        transfers.into(),
+        Vec::new(),
+    )
+    .into()
 }
 
 #[uniffi::export]
