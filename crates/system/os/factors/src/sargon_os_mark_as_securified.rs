@@ -18,20 +18,16 @@ impl OsMarkAsSecurified for SargonOS {
     ) -> Result<()> {
         let gateway_client = self.gateway_client();
 
-        // Fetch ancestor addresses
-        let badge_owner_per_entity = gateway_client
-            .fetch_entities_badge_owners(entity_addresses.clone())
+        let access_controller_per_entity = gateway_client
+            .fetch_access_controllers_of_entities(entity_addresses.clone())
             .await?;
 
         self.update_profile_with(|profile| {
             for entity_address in &entity_addresses {
-                let maybe_badge_owner = badge_owner_per_entity
+                let Some(access_controller_address) = access_controller_per_entity
                     .get(entity_address)
-                    .unwrap_or(&None);
-
-                let Some(access_controller_address) = maybe_badge_owner.and_then(|a| {
-                    a.as_access_controller().cloned()
-                }) else {
+                    .cloned()
+                else {
                     return Err(CommonError::EntityIsNotControlledByAnAccessControllerOnLedger {
                         entity_bech32m_encoded_address: entity_address.to_string(),
                     })
