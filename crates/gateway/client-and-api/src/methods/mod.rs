@@ -5,5 +5,6 @@
 
 mod chunk;
 mod page_methods;
+mod required_badges_methods;
 mod state_methods;
 mod transaction_methods;
