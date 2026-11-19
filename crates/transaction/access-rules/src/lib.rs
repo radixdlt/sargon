@@ -5,12 +5,14 @@
 //! dApp or another wallet. Interpretations of a rule, such as the wallet's
 //! security shields, are built on top of it.
 
+mod access_controller_rule_set;
 mod access_requirement;
 mod access_requirement_from_scrypto;
 mod access_requirement_simplification;
 mod auth_zone;
 
 pub mod prelude {
+    pub use crate::access_controller_rule_set::*;
     pub use crate::access_requirement::*;
     pub use crate::auth_zone::*;
 
@@ -21,6 +23,7 @@ pub mod prelude {
 
     pub(crate) use std::collections::HashSet;
 
+    pub(crate) use radix_engine_interface::blueprints::access_controller::RuleSet as ScryptoRuleSet;
     pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
     pub(crate) use radix_engine_interface::prelude::{
         AccessRule as ScryptoAccessRule,
