@@ -304,4 +304,32 @@ mod test {
             )
         )
     }
+
+    #[test]
+    fn manifest_summary_lists_each_access_controller_called_once() {
+        let access_controller = AccessControllerAddress::sample_stokenet();
+        let manifest: SUT = (
+            ScryptoSubintentManifestV2Builder::new_subintent_v2()
+                .call_method(
+                    access_controller.scrypto(),
+                    "lock_primary_role",
+                    (),
+                )
+                .call_method(
+                    access_controller.scrypto(),
+                    "unlock_primary_role",
+                    (),
+                )
+                .yield_to_parent(())
+                .build(),
+            NetworkID::Stokenet,
+        )
+            .try_into()
+            .unwrap();
+
+        assert_eq!(
+            manifest.summary().unwrap().access_controllers_called,
+            vec![access_controller]
+        );
+    }
 }
