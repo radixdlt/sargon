@@ -34,6 +34,27 @@ pub enum AccessRequirement {
     },
 }
 
+impl AccessRequirement {
+    /// The non-fungibles this requirement names as badges, e.g. the
+    /// signature badges of the keys that can sign for it.
+    pub fn non_fungibles(&self) -> HashSet<NonFungibleGlobalId> {
+        match self {
+            Self::Anyone | Self::NoOne | Self::AmountOf { .. } => {
+                HashSet::new()
+            }
+            Self::Badge {
+                badge: ResourceOrNonFungible::NonFungible { value },
+            } => HashSet::from([value.clone()]),
+            Self::Badge {
+                badge: ResourceOrNonFungible::Resource { .. },
+            } => HashSet::new(),
+            Self::AtLeast { requirements, .. } => {
+                requirements.iter().flat_map(Self::non_fungibles).collect()
+            }
+        }
+    }
+}
+
 impl HasSampleValues for AccessRequirement {
     /// A single badge.
     fn sample() -> Self {
@@ -53,5 +74,50 @@ impl HasSampleValues for AccessRequirement {
                 },
             ],
         }
+    }
+}
+
+#[cfg(test)]
+mod non_fungibles_tests {
+    use super::*;
+
+    #[allow(clippy::upper_case_acronyms)]
+    type SUT = AccessRequirement;
+
+    /// Badges at any depth are listed; resources and amounts aren't, as no
+    /// key signs for them.
+    #[test]
+    fn non_fungible_badges_at_any_depth_are_listed() {
+        let nft = |n: u64| {
+            NonFungibleGlobalId::new_unchecked(
+                ResourceAddress::sample_stokenet_nft_abandon(),
+                NonFungibleLocalId::integer(n),
+            )
+        };
+        let badge = |n| SUT::Badge {
+            badge: ResourceOrNonFungible::NonFungible { value: nft(n) },
+        };
+        let sut = SUT::AtLeast {
+            count: 1,
+            requirements: vec![
+                badge(1),
+                SUT::AtLeast {
+                    count: 2,
+                    requirements: vec![badge(2), badge(1)],
+                },
+                SUT::Badge {
+                    badge: ResourceOrNonFungible::Resource {
+                        value: ResourceAddress::sample(),
+                    },
+                },
+                SUT::AmountOf {
+                    amount: Decimal192::one(),
+                    resource: ResourceAddress::sample(),
+                },
+                SUT::Anyone,
+            ],
+        };
+
+        assert_eq!(sut.non_fungibles(), HashSet::from([nft(1), nft(2)]));
     }
 }

@@ -19,6 +19,20 @@ impl From<(ScryptoRuleSet, NetworkID)> for AccessControllerRuleSet {
     }
 }
 
+impl AccessControllerRuleSet {
+    /// The non-fungibles any role names as badges.
+    pub fn non_fungibles(&self) -> HashSet<NonFungibleGlobalId> {
+        [
+            &self.primary_role,
+            &self.recovery_role,
+            &self.confirmation_role,
+        ]
+        .into_iter()
+        .flat_map(AccessRequirement::non_fungibles)
+        .collect()
+    }
+}
+
 impl HasSampleValues for AccessControllerRuleSet {
     fn sample() -> Self {
         Self {
