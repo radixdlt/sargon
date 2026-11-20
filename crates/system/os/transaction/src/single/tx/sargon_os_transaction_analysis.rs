@@ -144,11 +144,12 @@ impl OsExecutionSummary for SargonOS {
             )
             .await?;
 
-        self.extract_execution_summary(
+        let execution_summary = self.extract_execution_summary(
             &manifest,
             receipts,
             are_instructions_originating_from_host,
-        )
+        )?;
+        with_controlled_entities(&gateway_client, execution_summary).await
     }
 
     fn extract_signer_public_keys(
@@ -277,6 +278,46 @@ fn with_own_factor_sources(
         execution_summary.detailed_classification.map(|class| {
             class.with_own_factor_sources(&|badge| {
                 own_factor_sources.factor_source_of(badge)
+            })
+        });
+    Ok(execution_summary)
+}
+
+/// Sets the account or persona each recovery proposal's access controller
+/// controls, read from the ledger. It is shown only, so when it can't be read
+/// the proposals are shown without it.
+async fn with_controlled_entities(
+    gateway_client: &GatewayClient,
+    mut execution_summary: ExecutionSummary,
+) -> Result<ExecutionSummary> {
+    let Some(DetailedManifestClass::AccessControllerRecovery {
+        ac_addresses,
+        ..
+    }) = &execution_summary.detailed_classification
+    else {
+        return Ok(execution_summary);
+    };
+    let controlled = gateway_client
+        .fetch_access_controllers_details(ac_addresses.clone())
+        .await
+        .map(|details| {
+            details
+                .into_iter()
+                .filter_map(|details| {
+                    Some((details.address, details.controlled_entity?))
+                })
+                .collect::<IndexMap<_, _>>()
+        })
+        .unwrap_or_else(|error| {
+            warn!(
+                "Failed to read the entities access controllers control: {error}"
+            );
+            IndexMap::new()
+        });
+    execution_summary.detailed_classification =
+        execution_summary.detailed_classification.map(|class| {
+            class.with_controlled_entities(&|access_controller| {
+                controlled.get(access_controller).cloned()
             })
         });
     Ok(execution_summary)
