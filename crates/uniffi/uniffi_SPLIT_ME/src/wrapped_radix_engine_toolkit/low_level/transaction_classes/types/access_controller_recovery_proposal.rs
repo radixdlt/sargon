@@ -27,6 +27,9 @@ pub struct AccessControllerRecoveryProposal {
     /// The proposed time after which a recovery can be confirmed without the
     /// confirmation role, if any.
     pub timed_recovery_delay_in_minutes: Option<u32>,
+
+    /// The account or persona the access controller controls, if known.
+    pub controlled_entity: Option<AddressOfAccountOrPersona>,
 }
 
 decl_conversion_tests_for!(AccessControllerRecoveryProposal);

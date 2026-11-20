@@ -457,6 +457,36 @@ impl DetailedManifestClass {
     }
 }
 
+impl DetailedManifestClass {
+    /// Sets the entity each recovery proposal's access controller controls,
+    /// which the classification doesn't know, from `controlled_entity`.
+    pub fn with_controlled_entities(
+        self,
+        controlled_entity: &impl Fn(
+            &AccessControllerAddress,
+        ) -> Option<AddressOfAccountOrPersona>,
+    ) -> Self {
+        match self {
+            Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals,
+            } => Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals: recovery_proposals
+                    .into_iter()
+                    .map(|proposal| AccessControllerRecoveryProposal {
+                        controlled_entity: controlled_entity(
+                            &proposal.access_controller,
+                        ),
+                        ..proposal
+                    })
+                    .collect(),
+            },
+            class => class,
+        }
+    }
+}
+
 impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
     for DetailedManifestClass
 {
@@ -678,12 +708,14 @@ mod tests {
                         proposer: RecoveryProposer::Primary,
                         proposed_rules: proposed_rules.clone(),
                         timed_recovery_delay_in_minutes: None,
+                        controlled_entity: None,
                     },
                     AccessControllerRecoveryProposal {
                         access_controller,
                         proposer: RecoveryProposer::Recovery,
                         proposed_rules,
                         timed_recovery_delay_in_minutes: Some(10),
+                        controlled_entity: None,
                     },
                 ],
             }

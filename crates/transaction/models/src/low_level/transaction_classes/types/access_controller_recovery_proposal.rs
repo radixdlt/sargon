@@ -33,6 +33,11 @@ pub struct AccessControllerRecoveryProposal {
     /// The proposed time after which a recovery can be confirmed without the
     /// confirmation role, if any.
     pub timed_recovery_delay_in_minutes: Option<u32>,
+
+    /// The account or persona whose owner badge the access controller holds,
+    /// if known. The classification doesn't know it; the OS reads it from the
+    /// ledger.
+    pub controlled_entity: Option<AddressOfAccountOrPersona>,
 }
 
 impl From<(RetAccessControllerRecoveryProposal, NetworkID)>
@@ -54,6 +59,7 @@ impl From<(RetAccessControllerRecoveryProposal, NetworkID)>
             .for_display(),
             timed_recovery_delay_in_minutes: proposal
                 .timed_recovery_delay_in_minutes,
+            controlled_entity: None,
         }
     }
 }
@@ -65,6 +71,7 @@ impl HasSampleValues for AccessControllerRecoveryProposal {
             proposer: RecoveryProposer::Recovery,
             proposed_rules: AccessControllerRuleSetForDisplay::sample(),
             timed_recovery_delay_in_minutes: Some(20160),
+            controlled_entity: Some(AccountAddress::sample().into()),
         }
     }
 
@@ -74,6 +81,7 @@ impl HasSampleValues for AccessControllerRecoveryProposal {
             proposer: RecoveryProposer::Primary,
             proposed_rules: AccessControllerRuleSetForDisplay::sample_other(),
             timed_recovery_delay_in_minutes: None,
+            controlled_entity: None,
         }
     }
 }
