@@ -109,14 +109,23 @@ impl OsExecutionSummary for SargonOS {
     ) -> Result<ExecutionSummary> {
         let summary = manifest.summary()?;
 
-        let (signer_public_keys, disable_auth_checks) =
-            match self.extract_signer_public_keys(&summary) {
-                Ok(keys) => (keys, DisableAuthChecks::default()),
-                Err(_) if allow_disable_auth_checks => {
-                    (IndexSet::new(), DisableAuthChecks(true))
-                }
-                Err(err) => return Err(err),
-            };
+        // A pre-authorization calling access controllers is signed by others
+        // too, so its preview can't pass their roles.
+        let signed_by_others_too = allow_disable_auth_checks
+            && summary
+                .reserved_instructions
+                .contains(&ReservedInstruction::AccessControllerMethod);
+
+        let (signer_public_keys, disable_auth_checks) = match self
+            .extract_signer_public_keys(&summary)
+        {
+            Ok(keys) if signed_by_others_too => (keys, DisableAuthChecks(true)),
+            Ok(keys) => (keys, DisableAuthChecks::default()),
+            Err(_) if allow_disable_auth_checks => {
+                (IndexSet::new(), DisableAuthChecks(true))
+            }
+            Err(err) => return Err(err),
+        };
         let proofs = self.extract_proofs(&summary)?;
 
         let gateway_client = self.gateway_client();
