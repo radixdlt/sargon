@@ -3,7 +3,8 @@ use sargon::AddressBookEntry as InternalAddressBookEntry;
 
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
 pub struct AddressBookEntry {
-    pub address: Address,
+    /// What the entry names: an address or a non-fungible.
+    pub target: AddressBookEntryTarget,
     pub name: DisplayName,
     pub note: Option<String>,
     pub created_at: Timestamp,
