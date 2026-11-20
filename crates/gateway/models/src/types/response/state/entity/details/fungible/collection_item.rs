@@ -12,6 +12,7 @@ use crate::prelude::*;
 #[serde(untagged)]
 pub enum FungibleResourcesCollectionItem {
     Global(FungibleResourcesCollectionItemGloballyAggregated),
+    Vault(FungibleResourcesCollectionItemVaultAggregated),
 }
 
 impl FungibleResourcesCollectionItem {
@@ -42,12 +43,18 @@ impl FungibleResourcesCollectionItem {
     pub fn resource_address(&self) -> ResourceAddress {
         match self {
             Self::Global(item) => item.resource_address,
+            Self::Vault(item) => item.resource_address,
         }
     }
 
     pub fn amount(&self) -> Decimal192 {
         match self {
             Self::Global(item) => item.amount,
+            Self::Vault(item) => item
+                .vaults
+                .items
+                .iter()
+                .fold(Decimal192::zero(), |sum, vault| sum + vault.amount),
         }
     }
 }
