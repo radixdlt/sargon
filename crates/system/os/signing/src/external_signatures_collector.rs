@@ -238,10 +238,18 @@ async fn fetch_owner_requirements(
         .collect()
 }
 
-/// For each account the subintent needs to authorize that isn't in the
-/// Profile, the badges that can authorize it: those its owner role names, and
-/// if an access controller holds its owner badge, those any of its roles
-/// names.
+/// The badges that can authorize what the subintent does outside the Profile,
+/// per entity:
+/// - for each account it needs to authorize that isn't in the Profile, those
+///   its owner role names, and if an access controller holds its owner badge,
+///   those any of its roles names;
+/// - for each access controller it calls, e.g. to propose a recovery of a
+///   shared account, those any of its roles names, under the entity it
+///   controls.
+///
+/// Signing with them can't hand over an entity on its own: pre-authorizations
+/// calling an access controller are rejected if the wallet's keys alone pass
+/// any of its roles.
 pub(crate) async fn resolve_external_accounts_for_subintent(
     os: &SargonOS,
     subintent: &Subintent,
@@ -255,24 +263,38 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
         .into_iter()
         .filter(|address| profile.account_by_address(*address).is_err())
         .collect_vec();
-    if external_accounts.is_empty() {
-        debug!("No external accounts detected for subintent");
+    let called_access_controllers = summary.access_controllers_called;
+    if external_accounts.is_empty() && called_access_controllers.is_empty() {
+        debug!(
+            "No external accounts or access controllers detected for subintent"
+        );
         return Ok(Vec::new());
     }
     debug!(
-        "External accounts detected for subintent: {:?}",
-        external_accounts
+        "External accounts detected for subintent: {:?}, access controllers called: {:?}",
+        external_accounts, called_access_controllers
     );
 
     let gateway_client = os.gateway_client();
-    let badge_owners = gateway_client
-        .fetch_entities_badge_owners(
-            external_accounts
-                .iter()
-                .map(|address| AddressOfAccountOrPersona::Account(*address))
-                .collect_vec(),
+    let (badge_owners, owner_requirements) = if external_accounts.is_empty() {
+        (HashMap::new(), IndexMap::new())
+    } else {
+        let badge_owners = gateway_client
+            .fetch_entities_badge_owners(
+                external_accounts
+                    .iter()
+                    .map(|address| AddressOfAccountOrPersona::Account(*address))
+                    .collect_vec(),
+            )
+            .await?;
+        let owner_requirements = fetch_owner_requirements(
+            &gateway_client,
+            &external_accounts,
+            network_id,
         )
         .await?;
+        (badge_owners, owner_requirements)
+    };
     let access_controller_of = |account: AccountAddress| {
         badge_owners
             .get(&AddressOfAccountOrPersona::Account(account))
@@ -281,18 +303,12 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .and_then(|owner| owner.as_access_controller().cloned())
     };
 
-    let owner_requirements = fetch_owner_requirements(
-        &gateway_client,
-        &external_accounts,
-        network_id,
-    )
-    .await?;
-
     let access_controllers = external_accounts
         .iter()
         .filter_map(|account| access_controller_of(*account))
+        .chain(called_access_controllers.iter().cloned())
         .collect::<IndexSet<_>>();
-    let access_controller_rules = if access_controllers.is_empty() {
+    let access_controller_details = if access_controllers.is_empty() {
         IndexMap::new()
     } else {
         gateway_client
@@ -301,41 +317,63 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             )
             .await?
             .into_iter()
-            .filter_map(|details| {
-                let rule_set = details.rule_set().ok()?;
-                Some((
-                    details.address,
-                    AccessControllerRuleSet::from((rule_set, network_id)),
-                ))
-            })
+            .map(|details| (details.address, details))
             .collect::<IndexMap<_, _>>()
     };
+    let rules_of = |access_controller: &AccessControllerAddress| {
+        let rule_set = access_controller_details
+            .get(access_controller)?
+            .rule_set()
+            .ok()?;
+        Some(AccessControllerRuleSet::from((rule_set, network_id)))
+    };
 
-    let external_accounts = external_accounts
+    let mut requirements = IndexMap::<
+        AddressOfAccountOrPersona,
+        IndexSet<NonFungibleGlobalId>,
+    >::new();
+    for account in external_accounts {
+        let mut required_nft_ids = owner_requirements
+            .get(&account)
+            .map(AccessRequirement::non_fungibles)
+            .unwrap_or_default();
+        if let Some(access_controller) = access_controller_of(account) {
+            match rules_of(&access_controller) {
+                Some(rules) => required_nft_ids.extend(rules.non_fungibles()),
+                None => debug!(
+                    "No rules read for access controller {}",
+                    access_controller
+                ),
+            }
+        }
+        requirements
+            .entry(AddressOfAccountOrPersona::Account(account))
+            .or_default()
+            .extend(required_nft_ids);
+    }
+    for access_controller in called_access_controllers {
+        let controlled = access_controller_details
+            .get(&access_controller)
+            .and_then(|details| details.controlled_entity);
+        match (controlled, rules_of(&access_controller)) {
+            (Some(entity), Some(rules)) => requirements
+                .entry(entity)
+                .or_default()
+                .extend(rules.non_fungibles()),
+            _ => debug!(
+                "No controlled entity or rules read for called access controller {}",
+                access_controller
+            ),
+        }
+    }
+
+    let external_accounts = requirements
         .into_iter()
-        .map(|account| {
-            let mut required_nft_ids = owner_requirements
-                .get(&account)
-                .map(AccessRequirement::non_fungibles)
-                .unwrap_or_default();
-            if let Some(access_controller) = access_controller_of(account) {
-                match access_controller_rules.get(&access_controller) {
-                    Some(rules) => {
-                        required_nft_ids.extend(rules.non_fungibles())
-                    }
-                    None => debug!(
-                        "No rules read for access controller {}",
-                        access_controller
-                    ),
-                }
-            }
-            ExternalAccountNftRequirements {
-                owner: AddressOfAccountOrPersona::Account(account),
-                required_nft_ids: required_nft_ids.into_iter().collect(),
-            }
+        .map(|(owner, required_nft_ids)| ExternalAccountNftRequirements {
+            owner,
+            required_nft_ids,
         })
         .collect_vec();
-
     debug!(
         "Resolved external account NFT requirements: {:?}",
         external_accounts
@@ -659,6 +697,89 @@ mod tests {
             resolved[0].required_nft_ids.iter().cloned().collect::<HashSet<_>>(),
             HashSet::from([
                 id("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk:[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"),
+                key("b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"),
+                key("fd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4"),
+                key("76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111"),
+            ])
+        );
+    }
+
+    /// A subintent calling an access controller directly, e.g. to propose a
+    /// recovery of the shared account it controls, touches no account, yet
+    /// needs the keys the access controller's roles name: those are what the
+    /// wallet signs with, under the account it controls.
+    #[actix_rt::test]
+    async fn called_access_controller_requires_the_keys_its_roles_name() {
+        use prelude::fixture_gw_model;
+
+        let os = SargonOS::boot_test_with_networking_driver(Arc::new(
+            MockNetworkingDriver::new_with_responses(vec![
+                MockNetworkingDriverResponse::new_success(
+                    GatewayStatusResponse {
+                        ledger_state: LedgerState::sample(),
+                    },
+                ),
+                MockNetworkingDriverResponse::new_success(
+                    serde_json::from_str::<serde_json::Value>(
+                        fixture_gw_model!(
+                            "state/shared_account_access_controller_details"
+                        ),
+                    )
+                    .unwrap(),
+                ),
+            ]),
+        ))
+        .await
+        .unwrap();
+
+        let manifest = SubintentManifest::new(
+            r#"
+            ASSERT_WORKTOP_IS_EMPTY;
+            CALL_METHOD
+                Address("accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz")
+                "initiate_recovery_as_recovery"
+                Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>())
+                Enum<0u8>();
+            YIELD_TO_PARENT;
+            "#,
+            NetworkID::Stokenet,
+            Blobs::default(),
+            ChildSubintentSpecifiers::default(),
+        )
+        .unwrap();
+        let subintent = Subintent::new(
+            IntentHeaderV2 {
+                network_id: NetworkID::Stokenet,
+                ..IntentHeaderV2::sample()
+            },
+            manifest,
+            MessageV2::None,
+        )
+        .unwrap();
+
+        let resolved = resolve_external_accounts_for_subintent(&os, &subintent)
+            .await
+            .unwrap();
+
+        let key = |hex: &str| {
+            NonFungibleGlobalId::from_str(&format!(
+                "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa:[{hex}]"
+            ))
+            .unwrap()
+        };
+        assert_eq!(resolved.len(), 1);
+        assert_eq!(
+            resolved[0].owner,
+            AddressOfAccountOrPersona::Account(
+                AccountAddress::from_str(
+                    "account_tdx_2_12xerddu2e5r8e3xyc06lk6rv0a98vhtvk0xjmh7j2vg0asdqqp8nq0"
+                )
+                .unwrap()
+            )
+        );
+        assert_eq!(
+            resolved[0].required_nft_ids.iter().cloned().collect::<HashSet<_>>(),
+            HashSet::from([
                 key("b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"),
                 key("fd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4"),
                 key("76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111"),
