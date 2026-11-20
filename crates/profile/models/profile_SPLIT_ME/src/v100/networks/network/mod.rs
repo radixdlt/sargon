@@ -1,6 +1,7 @@
 mod accounts;
 mod address_book;
 mod address_book_entry;
+mod address_book_entry_target;
 mod authorized_dapp;
 mod authorized_dapps;
 mod mfa_factor_instance;
@@ -14,6 +15,7 @@ mod token_price_services;
 pub use accounts::*;
 pub use address_book::*;
 pub use address_book_entry::*;
+pub use address_book_entry_target::*;
 pub use authorized_dapp::*;
 pub use authorized_dapps::*;
 pub use mfa_factor_instance::*;
