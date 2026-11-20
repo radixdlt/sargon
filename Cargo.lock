@@ -4426,6 +4426,7 @@ dependencies = [
  "radix-connect-models",
  "radix-engine-interface",
  "sargon-os",
+ "sargon-os-factors",
  "serde",
  "serde_json",
  "signatures-collector",
