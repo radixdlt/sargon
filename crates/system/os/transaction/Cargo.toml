@@ -30,6 +30,7 @@ async-std = { workspace = true }
 async-trait = { workspace = true }
 derive_more = { workspace = true }
 enum-as-inner = { workspace = true }
+futures = { workspace = true }
 itertools = { workspace = true }
 log = { workspace = true }
 paste = { workspace = true }

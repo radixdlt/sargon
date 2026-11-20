@@ -171,16 +171,27 @@ pub fn debug_print_compiled_notarized_intent(
 #[uniffi::export]
 pub fn manifest_per_recipient_transfers(
     transfers: PerRecipientAssetTransfers,
+    required_badges: Vec<ResourceSpecifier>,
 ) -> TransactionManifest {
-    InternalTransactionManifest::per_recipient_transfers(transfers.into())
-        .into()
+    InternalTransactionManifest::per_recipient_transfers(
+        transfers.into(),
+        required_badges.into_internal(),
+    )
+    .into()
 }
 
+/// The manifest of `transfers`, proving `required_badges` (see
+/// `SargonOS::transfer_required_badges`) for the withdrawals of restricted resources.
 #[uniffi::export]
 pub fn manifest_per_asset_transfers(
     transfers: PerAssetTransfers,
+    required_badges: Vec<ResourceSpecifier>,
 ) -> TransactionManifest {
-    InternalTransactionManifest::per_asset_transfers(transfers.into()).into()
+    InternalTransactionManifest::per_asset_transfers(
+        transfers.into(),
+        required_badges.into_internal(),
+    )
+    .into()
 }
 
 #[uniffi::export]

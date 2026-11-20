@@ -173,6 +173,21 @@ final class ManifestBuildingTests: Test<TransactionManifest> {
 		}
 	}
 
+	func test_assets_transfers_with_required_badges() {
+		let transfers = PerAssetTransfers.sample
+		// A badge that is transferred too: its proof is dropped before it is withdrawn.
+		let badge = transfers.fungibleResources[0].resource.resourceAddress
+		let manifest = TransactionManifest.assetsTransfers(
+			transfers: transfers,
+			requiredBadges: [.fungible(resourceAddress: badge, amount: 1)]
+		)
+		let description = manifest.description
+		XCTAssert(description.contains(transfers.fromAccount.address))
+		XCTAssert(description.contains("create_proof_of_amount"))
+		XCTAssert(description.contains("POP_FROM_AUTH_ZONE"))
+		XCTAssert(description.contains("DROP_PROOF"))
+	}
+
 	func test_account_locker_claim() {
 		func doTest(_ accountAddress: AccountAddress) {
 			let manifest = SUT.accountLockerClaim(
