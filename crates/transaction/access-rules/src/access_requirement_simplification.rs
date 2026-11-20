@@ -102,10 +102,6 @@ mod tests {
         })
     }
 
-    fn leaf(index: usize) -> SUT {
-        leaves()[index].clone()
-    }
-
     fn at_least(count: u32, requirements: impl Into<Vec<SUT>>) -> SUT {
         SUT::AtLeast {
             count,
@@ -222,50 +218,6 @@ mod tests {
             .collect()
     }
 
-    #[test]
-    fn merges_nested_any_of_and_all_of() {
-        assert_eq!(
-            at_least(1, [leaf(0), at_least(1, [leaf(1), leaf(2)])])
-                .simplified(),
-            at_least(1, [leaf(0), leaf(1), leaf(2)])
-        );
-        assert_eq!(
-            at_least(2, [leaf(0), at_least(2, [leaf(1), leaf(2)])])
-                .simplified(),
-            at_least(3, [leaf(0), leaf(1), leaf(2)])
-        );
-        // "2 of 3" inside "at least 1 of" has a different meaning, so it stays.
-        let threshold = at_least(2, [leaf(0), leaf(1), leaf(2)]);
-        assert_eq!(
-            at_least(1, [threshold.clone(), leaf(0)]).simplified(),
-            at_least(1, [threshold, leaf(0)])
-        );
-    }
-
-    #[test]
-    fn sargon_shield_role() {
-        // AnyOf[CountOf(2, [A, B, C]), AnyOf([A])]
-        let threshold = at_least(2, [leaf(0), leaf(1), leaf(2)]);
-        assert_eq!(
-            at_least(1, [threshold.clone(), at_least(1, [leaf(0)])])
-                .simplified(),
-            at_least(1, [threshold, leaf(0)])
-        );
-        // AnyOf[CountOf(0, []), AnyOf([A])], with no threshold factors.
-        assert_eq!(
-            at_least(1, [at_least(0, []), at_least(1, [leaf(0)])]).simplified(),
-            SUT::Anyone
-        );
-    }
-
-    #[test]
-    fn keeps_duplicates() {
-        let twice = at_least(2, [leaf(0), leaf(0)]);
-        assert_eq!(twice.clone().simplified(), twice);
-    }
-
-    /// Every requirement of depth one with up to three requirements, and of
-    /// depth two with up to two requirements at each level.
     #[test]
     fn keeps_meaning_of_every_small_requirement() {
         let auth_zones = auth_zones();

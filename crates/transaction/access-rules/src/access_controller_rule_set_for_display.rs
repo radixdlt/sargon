@@ -63,30 +63,37 @@ mod tests {
     use super::*;
     use hierarchical_deterministic::prelude::HierarchicalDeterministicPublicKey;
 
-    /// A different requirement per role, so that a swapped role is caught.
+    /// From engine rules to what is shown, with a different requirement per
+    /// role, so that a swapped role is caught at any step.
     #[test]
-    fn each_role_is_simplified_and_resolved() {
+    fn each_role_is_converted_simplified_and_resolved() {
         let own_key = NonFungibleGlobalId::from(
             HierarchicalDeterministicPublicKey::sample(),
         );
         let own_factor_source = |id: &NonFungibleGlobalId| {
             (*id == own_key).then(FactorSource::sample)
         };
-        let rule_set = AccessControllerRuleSet {
-            primary_role: AccessRequirement::AtLeast {
-                count: 0,
-                requirements: vec![],
-            },
-            recovery_role: AccessRequirement::NoOne,
-            confirmation_role: AccessRequirement::Badge {
-                badge: ResourceOrNonFungible::NonFungible {
+        let protected = |requirement| {
+            ScryptoAccessRule::Protected(
+                ScryptoCompositeRequirement::BasicRequirement(requirement),
+            )
+        };
+        let rule_set = ScryptoRuleSet {
+            primary_role: protected(ScryptoBasicRequirement::CountOf(
+                0,
+                vec![],
+            )),
+            recovery_role: ScryptoAccessRule::DenyAll,
+            confirmation_role: protected(ScryptoBasicRequirement::AnyOf(vec![
+                ResourceOrNonFungible::NonFungible {
                     value: own_key.clone(),
-                },
-            },
+                }
+                .into(),
+            ])),
         };
 
         assert_eq!(
-            rule_set
+            AccessControllerRuleSet::from((rule_set, NetworkID::Mainnet))
                 .for_display()
                 .with_own_factor_sources(&own_factor_source),
             AccessControllerRuleSetForDisplay {

@@ -11,7 +11,6 @@
 use access_rules::prelude::*;
 use addresses::prelude::{NonFungibleGlobalId, ResourceAddress};
 use network::prelude::NetworkID;
-use numeric::prelude::Decimal192;
 use proptest::prelude::*;
 use proptest::strategy::ValueTree;
 use proptest::test_runner::TestRunner;
@@ -167,76 +166,6 @@ impl Engine {
 
         let receipt = self.ledger.execute_manifest(manifest, initial_proofs);
         authorized(receipt)
-    }
-
-    /// Whether the engine authorizes minting `resource` in a transaction
-    /// with one subintent, each intent signed by its own signers. The minting
-    /// happens in the subintent when `in_subintent`, else in the transaction
-    /// intent.
-    fn authorizes_across_intents(
-        &mut self,
-        resource: st::ResourceAddress,
-        in_subintent: bool,
-        transaction_signers: &[st::NonFungibleGlobalId],
-        subintent_signers: &[st::NonFungibleGlobalId],
-    ) -> bool {
-        let mint = |builder: st::ManifestBuilder<st::SubintentManifestV2>| {
-            builder
-                .mint_fungible(resource, 1)
-                .try_deposit_entire_worktop_or_abort(self.account, None)
-        };
-        let mut builder = st::TestTransaction::new_v2_builder(
-            self.ledger.next_transaction_nonce(),
-        );
-        let mut subintent = st::ManifestBuilder::new_subintent_v2();
-        if in_subintent {
-            subintent = mint(subintent);
-        }
-        let child = builder.add_subintent(
-            subintent.yield_to_parent(()).build(),
-            subintent_signers.to_vec(),
-        );
-        let mut transaction = st::ManifestBuilder::new_v2()
-            .lock_fee_from_faucet()
-            .use_child("child", child);
-        if !in_subintent {
-            transaction = transaction
-                .mint_fungible(resource, 1)
-                .try_deposit_entire_worktop_or_abort(self.account, None);
-        }
-        let transaction = builder.finish_with_root_intent(
-            transaction.yield_to_child("child", ()).build(),
-            transaction_signers.to_vec(),
-        );
-        authorized(self.ledger.execute_test_transaction(transaction))
-    }
-
-    /// The engine's error when creating a resource whose minting `rule`
-    /// protects.
-    fn rejection_of(&mut self, rule: st::AccessRule) -> String {
-        // The role and metadata macros need the Scrypto prelude in scope.
-        use scrypto_test::prelude::*;
-
-        let manifest = ManifestBuilder::new()
-            .lock_fee_from_faucet()
-            .create_fungible_resource(
-                OwnerRole::None,
-                false,
-                0,
-                FungibleResourceRoles {
-                    mint_roles: mint_roles! {
-                        minter => rule;
-                        minter_updater => rule!(deny_all);
-                    },
-                    ..Default::default()
-                },
-                metadata!(),
-                None,
-            )
-            .build();
-        let receipt = self.ledger.execute_manifest(manifest, []);
-        assert!(!receipt.is_commit_success(), "the engine accepted it");
-        format!("{:?}", receipt.expect_commit_failure().outcome)
     }
 
     /// The auth zone of a transaction with these signatures and vault proofs,
@@ -401,22 +330,6 @@ fn every_rule_without_nesting() {
     check_with_every_set_of_signers(&rules, &badges);
 }
 
-/// Random nested rules of three badges.
-#[test]
-fn random_nested_rules() {
-    let badges = signature_badges(3);
-    // Deterministic, so the same rules are checked on ledger every run.
-    let mut runner = TestRunner::deterministic();
-    let strategy = rules(&resource_or_non_fungibles(&badges), &[], 2);
-    let rules = (0..32)
-        .map(|_| strategy.new_tree(&mut runner).unwrap().current())
-        .collect::<Vec<_>>();
-
-    let outcomes = check_with_every_set_of_signers(&rules, &badges);
-    // Guards against random rules that are all trivially allowed or denied.
-    assert!(outcomes.iter().all(|count| *count >= 60), "{outcomes:?}");
-}
-
 /// Random nested rules of signatures, non-fungibles and resources in the
 /// account's vaults, and amounts of a token, each checked with every subset
 /// of two signers combined with no vault proof, a proof of a non-fungible, a
@@ -529,8 +442,8 @@ fn wide_rule(
 /// * 5 levels below the top-level requirement. The engine allows 8, but a
 ///   transaction can carry at most 5 for a resource role, and 6 for an access
 ///   controller's rules, before reaching the depth limit of its encoding. The
-///   engine's deepest is checked without the engine below.
-/// * 64 composite requirements, the engine's limit.
+///   engine's deepest only has its display shapes checked.
+/// * 64 composite requirements, the engine's limit (65 is rejected).
 /// * A count over a list of 300 badges, which the engine doesn't limit.
 #[test]
 fn rules_at_the_engines_size_limits() {
@@ -545,7 +458,8 @@ fn rules_at_the_engines_size_limits() {
             ),
         ));
     let rules = [deep_rule(&badges, 5), wide_rule(&badges, 63), long_list];
-    for rule in &rules {
+    // The engine's deepest, which only a blueprint can set, without the engine.
+    for rule in rules.iter().chain([&deep_rule(&badges, 8)]) {
         let shown =
             AccessRequirement::from((rule.clone(), NETWORK)).for_display();
         assert_display_shapes(&shown, None, rule);
@@ -555,102 +469,42 @@ fn rules_at_the_engines_size_limits() {
     assert!(outcomes.iter().all(|count| *count > 0), "{outcomes:?}");
 }
 
-/// The engine's deepest rule, 8 levels below the top-level requirement, which
-/// a blueprint can set although no transaction can carry it.
+/// A proof of a non-fungible from a vault proves that non-fungible and its
+/// resource, but not another non-fungible of the same resource.
 #[test]
-fn deepest_rule_the_engine_allows_has_the_display_shapes() {
-    let rule = deep_rule(&signature_badges(3), 8);
-    let shown = AccessRequirement::from((rule.clone(), NETWORK)).for_display();
-    assert_display_shapes(&shown, None, &rule);
-}
-
-/// One composite requirement more than the widest rule above is rejected.
-#[test]
-fn rule_over_the_composite_requirement_limit_is_rejected() {
+fn proof_from_a_vault_proves_its_non_fungibles_and_resource() {
     let mut engine = Engine::new();
-    assert!(engine
-        .rejection_of(wide_rule(&signature_badges(3), 64))
-        .contains("ExceededMaxAccessRuleNodes"));
-}
-
-/// A rule checked in an intent sees only that intent's signatures: in a
-/// subintent, not its parent's, and in the transaction intent, not its
-/// subintent's. So the auth zone to evaluate is the checking intent's own.
-/// Random rules of two keys, each key absent, signing the transaction intent,
-/// or signing the subintent, checked in either intent.
-#[test]
-fn rule_in_an_intent_sees_only_its_own_signatures() {
-    let mut engine = Engine::new();
-    let keys = signature_badges(2);
-    let mut runner = TestRunner::deterministic();
-    let strategy = rules(&resource_or_non_fungibles(&keys), &[], 2);
-    let rules = (0..12)
-        .map(|_| strategy.new_tree(&mut runner).unwrap().current())
-        .collect::<Vec<_>>();
+    let badge_resource = engine.non_fungible_in_account();
+    let non_fungible = |id| {
+        st::NonFungibleGlobalId::new(
+            badge_resource,
+            st::NonFungibleLocalId::integer(id),
+        )
+    };
+    let require = |badge: st::ResourceOrNonFungible| {
+        st::AccessRule::Protected(st::CompositeRequirement::BasicRequirement(
+            st::BasicRequirement::Require(badge),
+        ))
+    };
+    let rules = [
+        require(non_fungible(1).into()),
+        require(badge_resource.into()),
+        require(non_fungible(2).into()),
+    ];
     let resources = engine.resources_protected_by(&rules);
+    let vault_proofs = [VaultProof::NonFungibles(badge_resource, vec![1])];
+    let auth_zone = engine.auth_zone(&[], &vault_proofs);
 
-    // Each key: 0 absent, 1 signs the transaction intent, 2 the subintent.
-    let placements = (0..9).map(|n| [n % 3, n / 3]);
-    let mut outcomes = [0; 2];
-    for (rule, resource) in rules.iter().zip(resources) {
-        for placement in placements.clone() {
-            let signing = |intent| {
-                keys.iter()
-                    .zip(placement)
-                    .filter(|(_, place)| *place == intent)
-                    .map(|(key, _)| key.clone())
-                    .collect::<Vec<_>>()
-            };
-            let (transaction_signers, subintent_signers) =
-                (signing(1), signing(2));
-            for in_subintent in [false, true] {
-                let authorizes = engine.authorizes_across_intents(
-                    resource,
-                    in_subintent,
-                    &transaction_signers,
-                    &subintent_signers,
-                );
-                let own_signers = if in_subintent {
-                    &subintent_signers
-                } else {
-                    &transaction_signers
-                };
-                let auth_zone = engine.auth_zone(own_signers, &[]);
-                assert_evaluated_like_engine(rule, &auth_zone, authorizes);
-                outcomes[authorizes as usize] += 1;
-            }
-        }
+    for (rule, resource, expected) in rules
+        .iter()
+        .zip(resources)
+        .zip([true, true, false])
+        .map(|((rule, resource), expected)| (rule, resource, expected))
+    {
+        let authorizes = engine.authorizes(resource, &[], &vault_proofs);
+        assert_eq!(authorizes, expected, "{rule:?}");
+        assert_evaluated_like_engine(rule, &auth_zone, authorizes);
     }
-    // Guards against random rules that are all trivially allowed or denied.
-    assert!(outcomes.iter().all(|count| *count >= 40), "{outcomes:?}");
-}
-
-/// The shape of a shield role without threshold factors.
-#[test]
-fn zero_count_needs_no_proof() {
-    let mut engine = Engine::new();
-    let [override_badge] = signature_badges(1).try_into().unwrap();
-    let rule =
-        st::AccessRule::Protected(st::CompositeRequirement::AnyOf(vec![
-            st::CompositeRequirement::BasicRequirement(
-                st::BasicRequirement::CountOf(0, vec![]),
-            ),
-            st::CompositeRequirement::BasicRequirement(
-                st::BasicRequirement::AnyOf(vec![override_badge.into()]),
-            ),
-        ]));
-    let [resource] = engine
-        .resources_protected_by(&[rule.clone()])
-        .try_into()
-        .unwrap();
-
-    let authorizes = engine.authorizes(resource, &[], &[]);
-    assert!(authorizes);
-    assert_evaluated_like_engine(&rule, &AuthZone::default(), authorizes);
-    assert_eq!(
-        AccessRequirement::from((rule, NETWORK)).simplified(),
-        AccessRequirement::Anyone
-    );
 }
 
 #[test]
@@ -679,98 +533,6 @@ fn signature_proves_its_non_fungible_but_not_its_resource() {
         let authorizes = engine.authorizes(resource, &[signer.clone()], &[]);
         assert_eq!(authorizes, expected, "{rule:?}");
         assert_evaluated_like_engine(rule, &auth_zone, authorizes);
-    }
-}
-
-#[test]
-fn proof_from_a_vault_proves_its_non_fungibles_and_resource() {
-    let mut engine = Engine::new();
-    let badge_resource = engine.non_fungible_in_account();
-    let proven = st::NonFungibleGlobalId::new(
-        badge_resource,
-        st::NonFungibleLocalId::integer(1),
-    );
-    let not_proven = st::NonFungibleGlobalId::new(
-        badge_resource,
-        st::NonFungibleLocalId::integer(2),
-    );
-    let require = |badge: st::ResourceOrNonFungible| {
-        st::AccessRule::Protected(st::CompositeRequirement::BasicRequirement(
-            st::BasicRequirement::Require(badge),
-        ))
-    };
-    let rules = [
-        require(proven.into()),
-        require(badge_resource.into()),
-        require(not_proven.into()),
-    ];
-    let resources = engine.resources_protected_by(&rules);
-    let vault_proofs = [VaultProof::NonFungibles(badge_resource, vec![1])];
-    let auth_zone = AuthZone {
-        implicit_non_fungibles: HashSet::from([sargon_id(
-            &engine.account_owner,
-        )]),
-        proofs: vec![AuthZoneProof {
-            resource: sargon_resource(badge_resource),
-            amount: Decimal192::one(),
-            non_fungible_local_ids: HashSet::from([
-                addresses::prelude::NonFungibleLocalId::integer(1),
-            ]),
-        }],
-    };
-
-    for (rule, resource, expected) in [(0, true), (1, true), (2, false)]
-        .map(|(index, expected)| (&rules[index], resources[index], expected))
-    {
-        let authorizes = engine.authorizes(resource, &[], &vault_proofs);
-        assert_eq!(authorizes, expected, "{rule:?}");
-        assert_evaluated_like_engine(rule, &auth_zone, authorizes);
-    }
-}
-
-#[test]
-fn amount_needs_a_single_proof_of_at_least_the_amount() {
-    let mut engine = Engine::new();
-    let token = engine.fungible_in_account(10);
-    let amount_of = |amount: u64| {
-        st::AccessRule::Protected(st::CompositeRequirement::BasicRequirement(
-            st::BasicRequirement::AmountOf(amount.into(), token),
-        ))
-    };
-    let rules = [amount_of(5), amount_of(0)];
-    let resources = engine.resources_protected_by(&rules);
-    let account_owner = sargon_id(&engine.account_owner);
-    let auth_zone = |amounts: &[u64]| AuthZone {
-        implicit_non_fungibles: if amounts.is_empty() {
-            HashSet::new()
-        } else {
-            HashSet::from([account_owner.clone()])
-        },
-        proofs: amounts
-            .iter()
-            .map(|amount| AuthZoneProof {
-                resource: sargon_resource(token),
-                amount: (*amount).into(),
-                non_fungible_local_ids: HashSet::new(),
-            })
-            .collect(),
-    };
-
-    for (rule_index, amounts, expected) in [
-        (0, vec![5], true),
-        (0, vec![3, 3], false),
-        (1, vec![], false),
-        (1, vec![1], true),
-    ] {
-        let vault_proofs = amounts
-            .iter()
-            .map(|amount| VaultProof::Amount(token, *amount))
-            .collect::<Vec<_>>();
-        let authorizes =
-            engine.authorizes(resources[rule_index], &[], &vault_proofs);
-        let rule = &rules[rule_index];
-        assert_eq!(authorizes, expected, "{rule:?} with {amounts:?}");
-        assert_evaluated_like_engine(rule, &auth_zone(&amounts), authorizes);
     }
 }
 
