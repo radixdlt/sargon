@@ -8,18 +8,7 @@ controller then holds the account, and its three roles say who may do what.
 When the roles name keys of several people, the account is under shared
 control: a DAO treasury, a family account, a team wallet.
 
-```mermaid
-flowchart LR
-    A["Account<br/><i>Council Treasury</i>"]
-    AC["Access controller<br/>holds the owner badge"]
-    R1["Primary role<br/><b>4 of 7</b><br/>everyday use"]
-    R2["Recovery role<br/><b>5 of 7</b><br/>propose a change"]
-    R3["Confirmation role<br/><b>5 of 7</b><br/>confirm a change"]
-    M(("7 members<br/>one key each"))
-    AC -- controls --> A
-    AC --- R1 & R2 & R3
-    R1 & R2 & R3 -. name keys of .-> M
-```
+![An account held by an access controller, whose three roles name the keys of seven members](shared-control-pre-authorization/shared-control.svg)
 
 Changing the rules (adding or removing a member, changing a threshold) is,
 on the access controller, a *recovery*: a role proposes new rules and they
@@ -31,21 +20,7 @@ No member holds enough keys to act alone. Each approves their share with a
 **pre-authorization** (a signed subintent), and the group's dApp combines them
 into one transaction.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant D as Group's dApp
-    participant O as Other members
-    participant W as Your wallet
-    participant L as Ledger
-    D->>D: Fix the subintent: manifest + header
-    O->>D: Sign the subintent hash
-    D->>W: Pre-authorization request (manifest + header)
-    W->>W: Classify, gate, review
-    W->>D: Signed subintent (your share)
-    D->>L: Transaction: all signatures
-    L-->>D: Committed: the change is made
-```
+![The group's dApp fixes the subintent, the other members sign it, your wallet reviews and signs its share, and the dApp submits](shared-control-pre-authorization/flow.svg)
 
 Because the dApp fixes the header, every member signs the **same** subintent
 hash, so approvals can be collected before or after yours. The wallet must
@@ -64,18 +39,7 @@ able to make a wallet hand over an account. The radix-engine-toolkit keeps
 them reserved; Sargon allows them **only in pre-authorizations**, and only
 when all of these hold:
 
-```mermaid
-flowchart TD
-    S([Pre-authorization request]) --> E{Enclosed<br/>manifest?}
-    E -- no --> X1[Reject]
-    E -- yes --> C{Classified by RET as<br/>access controller recovery?}
-    C -- no --> X2[Reject:<br/>reserved instructions]
-    C -- yes --> A{Any account or persona<br/>needs to authorize it?}
-    A -- yes --> X3[Reject]
-    A -- no --> K{"Do the wallet's own keys<br/>alone pass ANY role of<br/>ANY access controller called?"}
-    K -- yes --> X4[Reject]
-    K -- no --> OK([Review and sign])
-```
+![The four checks a pre-authorization with access controller calls must pass](shared-control-pre-authorization/gate.svg)
 
 | Rule | Why |
 |---|---|
@@ -96,17 +60,7 @@ judged by the rules, not by the Profile.
 
 ## What the wallet signs with
 
-```mermaid
-flowchart LR
-    S[Subintent] --> P[Profile entities<br/>it needs]
-    S --> X[Accounts it needs<br/>that aren't in the Profile]
-    S --> C[Access controllers<br/>it calls]
-    X --> O[Owner role] & AC1[Their access controller's roles]
-    C --> AC2[Its roles]
-    O & AC1 & AC2 --> N[Badges named]
-    N --> M{Wallet's MFA key<br/>for that badge?}
-    M -- yes --> SIG[Sign]
-```
+![The keys the wallet signs a subintent with](shared-control-pre-authorization/signing.svg)
 
 The rules come from one place, `fetch_access_controllers_details`, which
 reads an access controller's current rules (from its role assignments) and
@@ -130,11 +84,7 @@ joined by OR, parts by AND.
 Address book entries for non-fungibles are stored in a list of their own, so
 older wallets still load the Profile:
 
-```mermaid
-flowchart LR
-    AB["AddressBook<br/>(one list in code)"] --> J1["address_book<br/>entries for addresses<br/><i>as before</i>"]
-    AB --> J2["address_book_non_fungibles<br/>entries for keys<br/><i>skipped by older wallets</i>"]
-```
+![Address book entries stored in two lists in the Profile](shared-control-pre-authorization/address-book.svg)
 
 ## Known limits
 
@@ -149,3 +99,9 @@ flowchart LR
   error.
 - Depends on the RET classification of enclosed access controller
   subintents, not yet merged upstream.
+
+---
+
+The diagrams are Excalidraw drawings saved as SVG with the scene embedded: to
+change one, open the SVG in Excalidraw, edit it, and export it as SVG again
+with "Embed scene" on.
