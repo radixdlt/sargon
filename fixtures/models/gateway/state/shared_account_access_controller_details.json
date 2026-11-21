@@ -1,0 +1,287 @@
+{
+    "ledger_state": {
+        "network": "stokenet",
+        "state_version": 33940173,
+        "proposer_round_timestamp": "2026-11-20T11:02:44.911Z",
+        "epoch": 24182,
+        "round": 1161
+    },
+    "items": [
+        {
+            "address": "accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz",
+            "fungible_resources": {
+                "total_count": 0,
+                "items": []
+            },
+            "non_fungible_resources": {
+                "total_count": 1,
+                "items": [
+                    {
+                        "vaults": {
+                            "total_count": 1,
+                            "items": [
+                                {
+                                    "total_count": 1,
+                                    "items": [
+                                        "[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"
+                                    ],
+                                    "vault_address": "internal_vault_tdx_2_1nq3tpefhqyupldvxz8tedk0ymlu0eg5s46epes4gekt34zde570hhv",
+                                    "last_updated_at_state_version": 33912113
+                                }
+                            ]
+                        },
+                        "aggregation_level": "Vault",
+                        "resource_address": "resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk"
+                    }
+                ]
+            },
+            "metadata": {
+                "total_count": 1,
+                "items": [
+                    {
+                        "key": "recovery_badge",
+                        "value": {
+                            "raw_hex": "5c220801809a5e766ac9b999885fd3abf327f47b796d49c0a6d36507cd133b64d46f18",
+                            "programmatic_json": {
+                                "variant_id": "8",
+                                "fields": [
+                                    {
+                                        "value": "resource_tdx_2_1nf08v6kfhxvcsh7n40ej0arm09k5ns9x6djs0ngn8djdgmcc9pacw0",
+                                        "kind": "Reference"
+                                    }
+                                ],
+                                "kind": "Enum"
+                            },
+                            "typed": {
+                                "value": "resource_tdx_2_1nf08v6kfhxvcsh7n40ej0arm09k5ns9x6djs0ngn8djdgmcc9pacw0",
+                                "type": "GlobalAddress"
+                            }
+                        },
+                        "is_locked": true,
+                        "last_updated_at_state_version": 33912113
+                    }
+                ]
+            },
+            "details": {
+                "package_address": "package_tdx_2_1pkgxxxxxxxxxcntrlrxxxxxxxxx000648572295xxxxxxxxxqewm72",
+                "blueprint_name": "AccessController",
+                "blueprint_version": "1.0.0",
+                "state": {
+                    "xrd_fee_vault": null,
+                    "controlled_vault": {
+                        "is_global": false,
+                        "entity_type": "InternalNonFungibleVault",
+                        "entity_address": "internal_vault_tdx_2_1nq3tpefhqyupldvxz8tedk0ymlu0eg5s46epes4gekt34zde570hhv"
+                    },
+                    "is_primary_role_locked": false,
+                    "primary_role_recovery_attempt": null,
+                    "recovery_role_recovery_attempt": null,
+                    "recovery_badge_resource_address": "resource_tdx_2_1nf08v6kfhxvcsh7n40ej0arm09k5ns9x6djs0ngn8djdgmcc9pacw0",
+                    "has_primary_role_badge_withdraw_attempt": false,
+                    "has_recovery_role_badge_withdraw_attempt": false
+                },
+                "role_assignments": {
+                    "owner": {
+                        "rule": {
+                            "type": "DenyAll"
+                        },
+                        "updater": "None"
+                    },
+                    "entries": [
+                        {
+                            "role_key": {
+                                "module": "Main",
+                                "name": "primary"
+                            },
+                            "assignment": {
+                                "explicit_rule": {
+                                    "type": "Protected",
+                                    "access_rule": {
+                                        "type": "ProofRule",
+                                        "proof_rule": {
+                                            "type": "Require",
+                                            "requirement": {
+                                                "type": "NonFungible",
+                                                "non_fungible": {
+                                                    "local_id": {
+                                                        "id_type": "Bytes",
+                                                        "sbor_hex": "5cc0021db236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                                                        "simple_rep": "[b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"
+                                                    },
+                                                    "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "resolution": "Explicit"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Main",
+                                    "name": "_self_"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Main",
+                                "name": "recovery"
+                            },
+                            "assignment": {
+                                "explicit_rule": {
+                                    "type": "Protected",
+                                    "access_rule": {
+                                        "type": "ProofRule",
+                                        "proof_rule": {
+                                            "list": [
+                                                {
+                                                    "type": "NonFungible",
+                                                    "non_fungible": {
+                                                        "local_id": {
+                                                            "id_type": "Bytes",
+                                                            "sbor_hex": "5cc0021dfd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4",
+                                                            "simple_rep": "[fd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4]"
+                                                        },
+                                                        "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                                                    }
+                                                },
+                                                {
+                                                    "type": "NonFungible",
+                                                    "non_fungible": {
+                                                        "local_id": {
+                                                            "id_type": "Bytes",
+                                                            "sbor_hex": "5cc0021db236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                                                            "simple_rep": "[b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"
+                                                        },
+                                                        "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                                                    }
+                                                },
+                                                {
+                                                    "type": "NonFungible",
+                                                    "non_fungible": {
+                                                        "local_id": {
+                                                            "id_type": "Bytes",
+                                                            "sbor_hex": "5cc0021d76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111",
+                                                            "simple_rep": "[76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111]"
+                                                        },
+                                                        "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                                                    }
+                                                }
+                                            ],
+                                            "type": "CountOf",
+                                            "count": 2
+                                        }
+                                    }
+                                },
+                                "resolution": "Explicit"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Main",
+                                    "name": "_self_"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Main",
+                                "name": "confirmation"
+                            },
+                            "assignment": {
+                                "explicit_rule": {
+                                    "type": "Protected",
+                                    "access_rule": {
+                                        "type": "ProofRule",
+                                        "proof_rule": {
+                                            "type": "Require",
+                                            "requirement": {
+                                                "type": "NonFungible",
+                                                "non_fungible": {
+                                                    "local_id": {
+                                                        "id_type": "Bytes",
+                                                        "sbor_hex": "5cc0021db236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                                                        "simple_rep": "[b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"
+                                                    },
+                                                    "resource_address": "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa"
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "resolution": "Explicit"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Main",
+                                    "name": "_self_"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_locker"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_locker_updater"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_locker_updater"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_locker_updater"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_setter"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_setter_updater"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_setter_updater"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_setter_updater"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "type": "Component"
+            }
+        }
+    ]
+}

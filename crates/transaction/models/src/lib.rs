@@ -7,6 +7,7 @@ mod transaction_status;
 mod unvalidated_transaction_manifest;
 
 pub mod prelude {
+    pub use access_rules::prelude::*;
     pub use addresses::prelude::*;
     pub use bytes::prelude::*;
     pub use core_collections::prelude::Just;
@@ -109,6 +110,7 @@ pub mod prelude {
         manifest_analysis::{
             AccessControllerConfirmTimedRecoveryOutput as RetAccessControllerConfirmTimedRecoveryOutput,
             AccessControllerRecoveryOutput as RetAccessControllerRecoveryOutput,
+            AccessControllerRecoveryProposal as RetAccessControllerRecoveryProposal,
             AccessControllerStopTimedRecoveryAnalyzerOutput as RetAccessControllerStopTimedRecoveryOutput,
             AccountSettingsUpdateOutput as RetAccountSettingsUpdateOutput,
             AccountStaticResourceMovementsOutput as RetAccountStaticResourceMovementsOutput,

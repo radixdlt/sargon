@@ -40,6 +40,9 @@ pub struct ManifestSummary {
     /// and can only be included in the manifest by the wallet itself.
     pub reserved_instructions: Vec<ReservedInstruction>,
 
+    /// The access controllers whose methods the manifest calls.
+    pub access_controllers_called: Vec<AccessControllerAddress>,
+
     /// The various classifications that this manifest matched against. Note
     /// that an empty set means that the manifest is non-conforming.
     pub classification: Vec<ManifestClass>,

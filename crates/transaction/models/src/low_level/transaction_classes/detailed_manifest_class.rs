@@ -105,6 +105,9 @@ pub enum DetailedManifestClass {
     /// the difference is not important.
     AccessControllerRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        /// The recoveries proposed in the manifest, with the rules they
+        /// propose.
+        recovery_proposals: Vec<AccessControllerRecoveryProposal>,
     },
     /// A manifest that stops the timed recovery.
     /// It can as well contain instructions to cancel the given recovery proposal.
@@ -400,26 +403,87 @@ impl From<(RetAccountSettingsUpdateOutput, NetworkID)>
 
 impl From<(RetEntitySecurifyOutput, NetworkID)> for DetailedManifestClass {
     fn from((output, n): (RetEntitySecurifyOutput, NetworkID)) -> Self {
-        let accounts = filter_try_to_vec_network_aware::<_, AccountAddress>(
-            output.securified_accounts,
-            n,
-        )
-        .into_iter()
-        .map(AddressOfAccountOrPersona::from)
-        .collect::<Vec<_>>();
+        let (accounts, identities): (Vec<_>, Vec<_>) = output
+            .securify_operations
+            .into_iter()
+            .filter_map(|operation| {
+                let node_id = *operation.entity_address.as_node_id();
+                AccountAddress::new_from_node_id(node_id, n)
+                    .map(AddressOfAccountOrPersona::from)
+                    .map(Either::Left)
+                    .or_else(|_| {
+                        IdentityAddress::new_from_node_id(node_id, n)
+                            .map(AddressOfAccountOrPersona::from)
+                            .map(Either::Right)
+                    })
+                    .ok()
+            })
+            .partition_map(|entity| entity);
 
-        let mut identities = filter_try_to_vec_network_aware::<
-            _,
-            IdentityAddress,
-        >(output.securified_identities, n)
-        .into_iter()
-        .map(AddressOfAccountOrPersona::from)
-        .collect::<Vec<_>>();
-
-        let mut entities = accounts;
-        entities.append(&mut identities);
+        // Accounts first, then identities, as before the toolkit merged them
+        // into a single list of securify operations.
+        let entities = accounts.into_iter().chain(identities).collect();
 
         Self::SecurifyEntity { entities }
+    }
+}
+
+impl DetailedManifestClass {
+    /// Marks the user's keys in the proposed rules of recovery proposals,
+    /// which the classification shows as unknown, see
+    /// [`AccessControllerRuleSetForDisplay::with_own_factor_sources`].
+    pub fn with_own_factor_sources(
+        self,
+        own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
+    ) -> Self {
+        match self {
+            Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals,
+            } => Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals: recovery_proposals
+                    .into_iter()
+                    .map(|proposal| AccessControllerRecoveryProposal {
+                        proposed_rules: proposal
+                            .proposed_rules
+                            .with_own_factor_sources(own_factor_source),
+                        ..proposal
+                    })
+                    .collect(),
+            },
+            class => class,
+        }
+    }
+}
+
+impl DetailedManifestClass {
+    /// Sets the entity each recovery proposal's access controller controls,
+    /// which the classification doesn't know, from `controlled_entity`.
+    pub fn with_controlled_entities(
+        self,
+        controlled_entity: &impl Fn(
+            &AccessControllerAddress,
+        ) -> Option<AddressOfAccountOrPersona>,
+    ) -> Self {
+        match self {
+            Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals,
+            } => Self::AccessControllerRecovery {
+                ac_addresses,
+                recovery_proposals: recovery_proposals
+                    .into_iter()
+                    .map(|proposal| AccessControllerRecoveryProposal {
+                        controlled_entity: controlled_entity(
+                            &proposal.access_controller,
+                        ),
+                        ..proposal
+                    })
+                    .collect(),
+            },
+            class => class,
+        }
     }
 }
 
@@ -429,8 +493,24 @@ impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
     fn from(
         (output, n): (RetAccessControllerRecoveryOutput, NetworkID),
     ) -> Self {
+        let recovery_proposals = output
+            .recovery_proposals
+            .into_iter()
+            .map(|proposal| {
+                AccessControllerRecoveryProposal::from((proposal, n))
+            })
+            .collect_vec();
+        // An access controller can have both a primary and a recovery role
+        // proposal in the same manifest, so deduplicate.
+        let ac_addresses = recovery_proposals
+            .iter()
+            .map(|proposal| proposal.access_controller)
+            .unique()
+            .collect();
+
         Self::AccessControllerRecovery {
-            ac_addresses: to_vec_network_aware(output.access_controllers, n),
+            ac_addresses,
+            recovery_proposals,
         }
     }
 }
@@ -561,6 +641,9 @@ mod tests {
         test(
             SUT::AccessControllerRecovery {
                 ac_addresses: Vec::<_>::sample(),
+                recovery_proposals: vec![
+                    AccessControllerRecoveryProposal::sample(),
+                ],
             },
             DetailedManifestClassKind::AccessControllerRecovery,
         );
@@ -575,6 +658,67 @@ mod tests {
                 ac_addresses: Vec::<_>::sample(),
             },
             DetailedManifestClassKind::AccessControllerStopTimedRecovery,
+        );
+    }
+
+    #[test]
+    fn recovery_carries_each_proposal_and_deduplicates_access_controllers() {
+        use radix_engine_interface::blueprints::access_controller::{
+            Proposer as ScryptoProposer, RuleSet as ScryptoRuleSet,
+        };
+        use radix_engine_interface::prelude::{
+            AccessRule as ScryptoAccessRule,
+            ComponentAddress as ScryptoComponentAddress,
+        };
+
+        let access_controller = AccessControllerAddress::sample();
+        let scrypto_access_controller = ScryptoComponentAddress::new_or_panic(
+            access_controller.scrypto().as_node_id().0,
+        );
+        let rule_set = ScryptoRuleSet {
+            primary_role: ScryptoAccessRule::AllowAll,
+            recovery_role: ScryptoAccessRule::DenyAll,
+            confirmation_role: ScryptoAccessRule::AllowAll,
+        };
+        let proposal = |proposer, delay| RetAccessControllerRecoveryProposal {
+            access_controller: scrypto_access_controller,
+            proposer,
+            rule_set: rule_set.clone(),
+            timed_recovery_delay_in_minutes: delay,
+        };
+        let output = RetAccessControllerRecoveryOutput {
+            recovery_proposals: vec![
+                proposal(ScryptoProposer::Primary, None),
+                proposal(ScryptoProposer::Recovery, Some(10)),
+            ],
+        };
+
+        let proposed_rules = AccessControllerRuleSetForDisplay {
+            primary_role: AccessRequirementForDisplay::Anyone,
+            recovery_role: AccessRequirementForDisplay::NoOne,
+            confirmation_role: AccessRequirementForDisplay::Anyone,
+        };
+        assert_eq!(
+            SUT::from((output, NetworkID::Mainnet)),
+            SUT::AccessControllerRecovery {
+                ac_addresses: vec![access_controller],
+                recovery_proposals: vec![
+                    AccessControllerRecoveryProposal {
+                        access_controller,
+                        proposer: RecoveryProposer::Primary,
+                        proposed_rules: proposed_rules.clone(),
+                        timed_recovery_delay_in_minutes: None,
+                        controlled_entity: None,
+                    },
+                    AccessControllerRecoveryProposal {
+                        access_controller,
+                        proposer: RecoveryProposer::Recovery,
+                        proposed_rules,
+                        timed_recovery_delay_in_minutes: Some(10),
+                        controlled_entity: None,
+                    },
+                ],
+            }
         );
     }
 }

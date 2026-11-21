@@ -4,6 +4,7 @@ use crate::prelude::*;
 #[serde(untagged)]
 pub enum NonFungibleResourcesCollectionItem {
     Global(NonFungibleResourcesCollectionItemGloballyAggregated),
+    Vault(NonFungibleResourcesCollectionItemVaultAggregated),
 }
 
 impl HasSampleValues for NonFungibleResourcesCollectionItem {
@@ -25,6 +26,7 @@ impl NonFungibleResourcesCollectionItem {
     pub fn resource_address(&self) -> ResourceAddress {
         match self {
             Self::Global(item) => item.resource_address,
+            Self::Vault(item) => item.resource_address,
         }
     }
 }

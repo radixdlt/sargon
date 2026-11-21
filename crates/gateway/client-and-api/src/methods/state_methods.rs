@@ -591,7 +591,10 @@ impl GatewayClient {
                 .collect(),
             Some(ledger_state.into()),
             None,
-        );
+        )
+        // The owner badge's id says which entity the access controller
+        // controls.
+        .per_vault_with_non_fungible_ids();
 
         let response = self.state_entity_details(request).await?;
 
@@ -616,7 +619,8 @@ impl GatewayClient {
         let request = StateEntityDetailsRequest::address_ledger_state(
             ac_address.into(),
             ledger_state.into(),
-        );
+        )
+        .per_vault_with_non_fungible_ids();
 
         let response = self.state_entity_details(request).await?;
 
@@ -669,10 +673,41 @@ impl GatewayClient {
             })
             .unwrap_or(Decimal192::zero());
 
+        let role_assignments = item
+            .details
+            .clone()
+            .and_then(|detail| detail.as_component().cloned())
+            .and_then(|component| component.role_assignments);
+
+        // The access controller holds the owner badge of the entity it
+        // controls, whose id is the entity's address.
+        let network_id = ac_address.network_id();
+        let owner_badges =
+            [SCRYPTO_ACCOUNT_OWNER_BADGE, SCRYPTO_IDENTITY_OWNER_BADGE]
+                .into_iter()
+                .filter_map(|badge| {
+                    ResourceAddress::new_from_node_id(badge, network_id).ok()
+                })
+                .collect_vec();
+        let controlled_entity = item
+            .non_fungible_resources
+            .iter()
+            .flat_map(|resources| resources.items.iter())
+            .filter_map(|resource| resource.as_vault())
+            .filter(|resource| {
+                owner_badges.contains(&resource.resource_address)
+            })
+            .flat_map(|resource| resource.non_fungible_ids())
+            .find_map(|local_id| {
+                AddressOfAccountOrPersona::try_from((local_id, network_id)).ok()
+            });
+
         Ok(AccessControllerStateDetails {
             address: ac_address,
             state: ac_state,
             xrd_balance: xrd_amount,
+            role_assignments,
+            controlled_entity,
         })
     }
 }
@@ -1110,5 +1145,54 @@ mod filter_transferable_tests {
                 ),
             )
         }
+    }
+}
+
+#[cfg(test)]
+mod fetch_access_controllers_details_tests {
+    use super::*;
+    use prelude::fixture_gw_model;
+    use profile_gateway::prelude::Gateway;
+
+    /// A shared account's access controller on Stokenet, as the Gateway
+    /// returns it per vault: its vault holds the account's owner badge.
+    #[actix_rt::test]
+    async fn details_say_which_account_the_access_controller_controls() {
+        let details: serde_json::Value = serde_json::from_str(
+            fixture_gw_model!("state/shared_account_access_controller_details"),
+        )
+        .unwrap();
+        let access_controller = AccessControllerAddress::from_str(
+            "accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz",
+        )
+        .unwrap();
+        let sut = GatewayClient::with_networking_driver(
+            Arc::new(MockNetworkingDriver::new_with_responses(vec![
+                MockNetworkingDriverResponse::new_success(
+                    GatewayStatusResponse {
+                        ledger_state: LedgerState::sample(),
+                    },
+                ),
+                MockNetworkingDriverResponse::new_success(details),
+            ])),
+            Gateway::stokenet(),
+        );
+
+        let details = sut
+            .fetch_access_controllers_details(vec![access_controller])
+            .await
+            .unwrap()
+            .remove(0);
+
+        assert_eq!(
+            details.controlled_entity,
+            Some(AddressOfAccountOrPersona::from(
+                AccountAddress::from_str(
+                    "account_tdx_2_12xerddu2e5r8e3xyc06lk6rv0a98vhtvk0xjmh7j2vg0asdqqp8nq0",
+                )
+                .unwrap()
+            ))
+        );
+        assert!(details.rule_set().is_ok());
     }
 }

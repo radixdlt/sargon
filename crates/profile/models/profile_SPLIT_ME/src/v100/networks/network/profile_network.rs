@@ -37,8 +37,10 @@ pub struct ProfileNetwork {
     #[serde(default)]
     pub resource_preferences: ResourcePreferences,
 
-    /// User-managed external addresses and names.
-    #[serde(default, skip_serializing_if = "AddressBook::is_empty")]
+    /// User-managed names for external addresses and non-fungibles, written
+    /// as two lists so that wallets from before non-fungibles could be named
+    /// still load the Profile.
+    #[serde(flatten, with = "address_book_in_two_lists")]
     pub address_book: AddressBook,
 
     /// Ordered token price service endpoints used for failover.
@@ -310,6 +312,115 @@ mod tests {
             Some("Exchange".to_owned()),
         ));
         assert_json_roundtrip(&sut);
+    }
+
+    #[test]
+    fn address_book_is_written_as_two_lists() {
+        let mut sut = SUT::new_empty_on(NetworkID::Mainnet);
+        sut.address_book
+            .add_entry(AddressBookEntry::with_timestamps(
+                AccountAddress::sample_mainnet(),
+                DisplayName::sample(),
+                None,
+                Timestamp::sample(),
+                Timestamp::sample(),
+            ));
+        sut.address_book
+            .add_entry(AddressBookEntry::with_timestamps(
+                NonFungibleGlobalId::sample(),
+                DisplayName::sample_other(),
+                None,
+                Timestamp::sample(),
+                Timestamp::sample(),
+            ));
+
+        let json = serde_json::to_value(&sut).unwrap();
+        assert_eq!(
+            json["address_book"],
+            serde_json::json!([{
+                "address": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
+                "name": "Spending Account",
+                "createdAt": "2023-09-11T16:05:56.000Z",
+                "updatedAt": "2023-09-11T16:05:56.000Z"
+            }])
+        );
+        assert_eq!(
+            json["address_book_non_fungibles"],
+            serde_json::json!([{
+                "nonFungibleGlobalID": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>",
+                "name": "Savings Account",
+                "createdAt": "2023-09-11T16:05:56.000Z",
+                "updatedAt": "2023-09-11T16:05:56.000Z"
+            }])
+        );
+        assert_json_roundtrip(&sut);
+    }
+
+    #[test]
+    fn wallets_from_before_named_non_fungibles_still_read_the_network() {
+        // The address book as wallets read it before non-fungibles could be
+        // named: a list of entries for addresses, any other key skipped.
+        #[derive(Deserialize)]
+        struct EntryBefore {
+            address: Address,
+        }
+        #[derive(Deserialize)]
+        struct NetworkBefore {
+            #[serde(default)]
+            address_book: Vec<EntryBefore>,
+        }
+
+        let mut sut = SUT::new_empty_on(NetworkID::Mainnet);
+        sut.address_book.add_entry(AddressBookEntry::new(
+            AccountAddress::sample_mainnet(),
+            DisplayName::sample(),
+            None,
+        ));
+        sut.address_book.add_entry(AddressBookEntry::new(
+            NonFungibleGlobalId::sample(),
+            DisplayName::sample_other(),
+            None,
+        ));
+
+        let before: NetworkBefore =
+            serde_json::from_value(serde_json::to_value(&sut).unwrap())
+                .unwrap();
+        assert_eq!(
+            before
+                .address_book
+                .into_iter()
+                .map(|entry| entry.address)
+                .collect_vec(),
+            vec![Address::from(AccountAddress::sample_mainnet())]
+        );
+    }
+
+    #[test]
+    fn address_book_from_before_named_non_fungibles_is_read() {
+        let sut: SUT = serde_json::from_str(
+            r#"
+            {
+              "networkID": 1,
+              "accounts": [],
+              "personas": [],
+              "authorizedDapps": [],
+              "address_book": [
+                {
+                  "address": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
+                  "name": "Spending Account",
+                  "createdAt": "2023-09-11T16:05:56.000Z",
+                  "updatedAt": "2023-09-11T16:05:56.000Z"
+                }
+              ]
+            }
+            "#,
+        )
+        .unwrap();
+
+        assert!(sut
+            .address_book
+            .contains(&AccountAddress::sample_mainnet().into()));
+        assert_eq!(sut.address_book.len(), 1);
     }
 
     #[test]

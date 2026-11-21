@@ -109,14 +109,23 @@ impl OsExecutionSummary for SargonOS {
     ) -> Result<ExecutionSummary> {
         let summary = manifest.summary()?;
 
-        let (signer_public_keys, disable_auth_checks) =
-            match self.extract_signer_public_keys(&summary) {
-                Ok(keys) => (keys, DisableAuthChecks::default()),
-                Err(_) if allow_disable_auth_checks => {
-                    (IndexSet::new(), DisableAuthChecks(true))
-                }
-                Err(err) => return Err(err),
-            };
+        // A pre-authorization calling access controllers is signed by others
+        // too, so its preview can't pass their roles.
+        let signed_by_others_too = allow_disable_auth_checks
+            && summary
+                .reserved_instructions
+                .contains(&ReservedInstruction::AccessControllerMethod);
+
+        let (signer_public_keys, disable_auth_checks) = match self
+            .extract_signer_public_keys(&summary)
+        {
+            Ok(keys) if signed_by_others_too => (keys, DisableAuthChecks(true)),
+            Ok(keys) => (keys, DisableAuthChecks::default()),
+            Err(_) if allow_disable_auth_checks => {
+                (IndexSet::new(), DisableAuthChecks(true))
+            }
+            Err(err) => return Err(err),
+        };
         let proofs = self.extract_proofs(&summary)?;
 
         let gateway_client = self.gateway_client();
@@ -135,11 +144,12 @@ impl OsExecutionSummary for SargonOS {
             )
             .await?;
 
-        self.extract_execution_summary(
+        let execution_summary = self.extract_execution_summary(
             &manifest,
             receipts,
             are_instructions_originating_from_host,
-        )
+        )?;
+        with_controlled_entities(&gateway_client, execution_summary).await
     }
 
     fn extract_signer_public_keys(
@@ -231,7 +241,7 @@ impl OsExecutionSummary for SargonOS {
             });
         }
 
-        Ok(execution_summary)
+        with_own_factor_sources(self, execution_summary)
     }
 
     fn map_failed_transaction_preview(
@@ -255,6 +265,62 @@ impl OsExecutionSummary for SargonOS {
             }
         }
     }
+}
+
+/// Marks the user's keys in the rules of recovery proposals, which the
+/// classification shows as unknown keys.
+fn with_own_factor_sources(
+    os: &SargonOS,
+    mut execution_summary: ExecutionSummary,
+) -> Result<ExecutionSummary> {
+    let own_factor_sources = os.own_factor_sources()?;
+    execution_summary.detailed_classification =
+        execution_summary.detailed_classification.map(|class| {
+            class.with_own_factor_sources(&|badge| {
+                own_factor_sources.factor_source_of(badge)
+            })
+        });
+    Ok(execution_summary)
+}
+
+/// Sets the account or persona each recovery proposal's access controller
+/// controls, read from the ledger. It is shown only, so when it can't be read
+/// the proposals are shown without it.
+async fn with_controlled_entities(
+    gateway_client: &GatewayClient,
+    mut execution_summary: ExecutionSummary,
+) -> Result<ExecutionSummary> {
+    let Some(DetailedManifestClass::AccessControllerRecovery {
+        ac_addresses,
+        ..
+    }) = &execution_summary.detailed_classification
+    else {
+        return Ok(execution_summary);
+    };
+    let controlled = gateway_client
+        .fetch_access_controllers_details(ac_addresses.clone())
+        .await
+        .map(|details| {
+            details
+                .into_iter()
+                .filter_map(|details| {
+                    Some((details.address, details.controlled_entity?))
+                })
+                .collect::<IndexMap<_, _>>()
+        })
+        .unwrap_or_else(|error| {
+            warn!(
+                "Failed to read the entities access controllers control: {error}"
+            );
+            IndexMap::new()
+        });
+    execution_summary.detailed_classification =
+        execution_summary.detailed_classification.map(|class| {
+            class.with_controlled_entities(&|access_controller| {
+                controlled.get(access_controller).cloned()
+            })
+        });
+    Ok(execution_summary)
 }
 
 #[async_trait::async_trait]
@@ -944,5 +1010,62 @@ mod tests {
             Decimal192::zero(),
         ))
         .unwrap()
+    }
+
+    #[actix_rt::test]
+    async fn recovery_proposals_show_own_keys_as_factor_sources() {
+        let os = SUT::fast_boot().await;
+        let mfa = MFAFactorInstance::sample_stokenet_account_securified_idx_0()
+            .factor_instance;
+        let factor_source = FactorSources::sample_values_all()
+            .into_iter()
+            .find(|factor_source| factor_source.id() == mfa.factor_source_id)
+            .unwrap();
+        os.update_profile_with(|profile| {
+            if profile.factor_sources.get_id(factor_source.id()).is_none() {
+                profile.factor_sources.append(factor_source.clone());
+            }
+            profile.networks.insert_mfa_factor_instances(
+                profile.current_network_id(),
+                MFAFactorInstances::just(MFAFactorInstance::new(mfa.clone())),
+            );
+            Ok(())
+        })
+        .await
+        .unwrap();
+
+        let own_key = NonFungibleGlobalId::from((
+            mfa.badge.try_non_fungible_global_id().unwrap(),
+            NetworkID::Mainnet,
+        ));
+        let other_key = NonFungibleGlobalId::from(
+            HierarchicalDeterministicPublicKey::sample_other(),
+        );
+        let key = |badge| AccessRequirementForDisplay::Badge {
+            badge: BadgeForDisplay::UnknownKey { badge },
+        };
+        let recovery =
+            |primary_role| DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: vec![AccessControllerAddress::sample()],
+                recovery_proposals: vec![AccessControllerRecoveryProposal {
+                    proposed_rules: AccessControllerRuleSetForDisplay {
+                        primary_role,
+                        recovery_role: key(other_key.clone()),
+                        confirmation_role: AccessRequirementForDisplay::NoOne,
+                    },
+                    ..AccessControllerRecoveryProposal::sample()
+                }],
+            };
+        let mut summary = ExecutionSummary::sample();
+        summary.detailed_classification = Some(recovery(key(own_key)));
+
+        let summary = with_own_factor_sources(&os, summary).unwrap();
+
+        assert_eq!(
+            summary.detailed_classification,
+            Some(recovery(AccessRequirementForDisplay::Badge {
+                badge: BadgeForDisplay::OwnFactor { factor_source }
+            }))
+        );
     }
 }

@@ -13,7 +13,12 @@ pub mod prelude {
     pub(crate) use manifests::prelude::*;
     pub use prelude::prelude::*;
     pub(crate) use profile_supporting_types::prelude::*;
+    pub(crate) use radix_engine_interface::prelude::AccessRule as ScryptoAccessRule;
     pub(crate) use sargon_os::prelude::*;
+    pub(crate) use sargon_os_factors::prelude::{
+        AccessControllerRuleSet, AccessRequirement, GatewayClient,
+        OsPreAuthorizationSigningKeys,
+    };
     pub(crate) use signatures_collector::prelude::*;
 
     pub(crate) use signing_traits::prelude::*;

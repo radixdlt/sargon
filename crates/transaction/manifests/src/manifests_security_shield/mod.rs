@@ -9,6 +9,8 @@ mod set_rola_key;
 mod top_up_access_controller_xrd_vault;
 mod transaction_manifest_unsecurified_entity_owner_badge_into_bucket_putting;
 
+#[cfg(test)]
+mod ledger_rules_for_display;
 mod stop_timed_recovery;
 #[cfg(test)]
 mod test_utils;

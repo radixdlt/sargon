@@ -10,6 +10,7 @@ mock = ["mockall"]
 # === SARGON CRATES ===
 prelude = { workspace = true }
 sargon-os = { path = "../../../system/os/os" }
+sargon-os-factors = { workspace = true }
 error = { workspace = true }
 signatures-collector = { workspace = true }
 signing-traits = { workspace = true }

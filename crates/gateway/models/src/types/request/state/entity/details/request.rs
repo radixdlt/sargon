@@ -23,6 +23,18 @@ pub struct StateEntityDetailsRequest {
     /// The opt-ins for the request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub opt_ins: Option<StateEntityDetailsOptIns>,
+
+    /// Whether resources are summed up per entity (the default) or listed
+    /// per vault.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub aggregation_level: Option<ResourceAggregationLevel>,
+}
+
+/// How the resources an entity holds are listed.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ResourceAggregationLevel {
+    Global,
+    Vault,
 }
 
 impl StateEntityDetailsRequest {
@@ -35,7 +47,18 @@ impl StateEntityDetailsRequest {
             addresses,
             at_ledger_state: at_ledger_state.into(),
             opt_ins: opt_ins.into(),
+            aggregation_level: None,
         }
+    }
+
+    /// Lists resources per vault, with the ids of the non-fungibles in them.
+    pub fn per_vault_with_non_fungible_ids(mut self) -> Self {
+        self.aggregation_level = Some(ResourceAggregationLevel::Vault);
+        self.opt_ins = Some(StateEntityDetailsOptIns {
+            non_fungible_include_nfids: Some(true),
+            ..self.opt_ins.unwrap_or_default()
+        });
+        self
     }
 
     pub fn addresses_only<A: Into<Address>>(

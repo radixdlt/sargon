@@ -4,7 +4,10 @@ use time_utils::now;
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug, Hash)]
 #[serde(rename_all = "camelCase")]
 pub struct AddressBookEntry {
-    pub address: Address,
+    /// What the entry names, written as the key it is under: `address` or
+    /// `nonFungibleGlobalID`.
+    #[serde(flatten)]
+    pub target: AddressBookEntryTarget,
     pub name: DisplayName,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub note: Option<String>,
@@ -16,23 +19,23 @@ impl AddressBookEntry {
     pub const NOTE_MAX_LEN: usize = 140;
 
     pub fn new(
-        address: impl Into<Address>,
+        target: impl Into<AddressBookEntryTarget>,
         name: DisplayName,
         note: Option<String>,
     ) -> Self {
         let timestamp = now();
-        Self::with_timestamps(address, name, note, timestamp, timestamp)
+        Self::with_timestamps(target, name, note, timestamp, timestamp)
     }
 
     pub fn with_timestamps(
-        address: impl Into<Address>,
+        target: impl Into<AddressBookEntryTarget>,
         name: DisplayName,
         note: Option<String>,
         created_at: Timestamp,
         updated_at: Timestamp,
     ) -> Self {
         Self {
-            address: address.into(),
+            target: target.into(),
             name,
             note: Self::normalize_note(note),
             created_at,
@@ -58,16 +61,16 @@ impl AddressBookEntry {
 }
 
 impl Identifiable for AddressBookEntry {
-    type ID = Address;
+    type ID = AddressBookEntryTarget;
 
     fn id(&self) -> Self::ID {
-        self.address
+        self.target.clone()
     }
 }
 
 impl IsNetworkAware for AddressBookEntry {
     fn network_id(&self) -> NetworkID {
-        self.address.network_id()
+        self.target.network_id()
     }
 }
 
@@ -156,5 +159,43 @@ mod tests {
     fn json_roundtrip() {
         let sut = SUT::sample();
         assert_json_roundtrip(&sut);
+    }
+
+    #[test]
+    fn entry_for_an_address_is_written_as_before() {
+        assert_eq_after_json_roundtrip(
+            &SUT::sample(),
+            r#"
+            {
+              "address": "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr",
+              "name": "Spending Account",
+              "note": "Exchange address",
+              "createdAt": "2023-09-11T16:05:56.000Z",
+              "updatedAt": "2023-09-11T16:05:56.000Z"
+            }
+            "#,
+        );
+    }
+
+    #[test]
+    fn entry_for_a_non_fungible_names_it() {
+        let sut = SUT::with_timestamps(
+            NonFungibleGlobalId::sample(),
+            DisplayName::sample(),
+            None,
+            Timestamp::sample(),
+            Timestamp::sample(),
+        );
+        assert_eq_after_json_roundtrip(
+            &sut,
+            r#"
+            {
+              "nonFungibleGlobalID": "resource_rdx1nfyg2f68jw7hfdlg5hzvd8ylsa7e0kjl68t5t62v3ttamtejc9wlxa:<Member_237>",
+              "name": "Spending Account",
+              "createdAt": "2023-09-11T16:05:56.000Z",
+              "updatedAt": "2023-09-11T16:05:56.000Z"
+            }
+            "#,
+        );
     }
 }

@@ -105,6 +105,9 @@ pub enum DetailedManifestClass {
     /// the difference is not important.
     AccessControllerRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        /// The recoveries proposed in the manifest, with the rules they
+        /// propose.
+        recovery_proposals: Vec<AccessControllerRecoveryProposal>,
     },
     /// A manifest that stops the timed recovery.
     /// It can as well contain instructions to cancel the given recovery proposal.
