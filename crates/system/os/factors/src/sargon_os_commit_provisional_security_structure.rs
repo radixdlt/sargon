@@ -21,16 +21,12 @@ impl OsCommitProvisionalSecurityState for SargonOS {
     ) -> Result<()> {
         let gateway_client = self.gateway_client();
 
-        // Fetch ancestor addresses
-        let badge_owner_per_entity = gateway_client
-            .fetch_entities_badge_owners(vec![entity_address])
+        let access_controller_per_entity = gateway_client
+            .fetch_access_controllers_of_entities([entity_address])
             .await?;
 
-        let maybe_badge_owner =
-            badge_owner_per_entity.get(&entity_address).unwrap_or(&None);
-
         let Some(access_controller_address) =
-            maybe_badge_owner.and_then(|a| a.as_access_controller().cloned())
+            access_controller_per_entity.get(&entity_address).cloned()
         else {
             return Err(CommonError::EntityIsNotControlledByAnAccessControllerOnLedger {
                     entity_bech32m_encoded_address: entity_address.to_string(),

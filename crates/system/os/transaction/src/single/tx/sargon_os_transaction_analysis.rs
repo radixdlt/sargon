@@ -85,6 +85,19 @@ pub trait OsExecutionSummary {
         manifest_summary: &ManifestSummary,
     ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>;
 
+    /// Resolves the access controllers for which a `create_proof` needs to be
+    /// added to the manifest, for every entity requiring auth.
+    ///
+    /// Unlike [`Self::extract_proofs`], which only knows about the entities in
+    /// the Profile, this also looks up on ledger the access controllers of
+    /// accounts requiring auth that are NOT in the Profile (external accounts),
+    /// so that their signatures (collected via external signing) are backed by
+    /// the matching access controller proof.
+    async fn resolve_proofs(
+        &self,
+        manifest_summary: &ManifestSummary,
+    ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>;
+
     fn extract_execution_summary(
         &self,
         manifest: &dyn DynamicallyAnalyzableManifest,
@@ -126,7 +139,7 @@ impl OsExecutionSummary for SargonOS {
             }
             Err(err) => return Err(err),
         };
-        let proofs = self.extract_proofs(&summary)?;
+        let proofs = self.resolve_proofs(&summary).await?;
 
         let gateway_client = self.gateway_client();
 
@@ -203,6 +216,37 @@ impl OsExecutionSummary for SargonOS {
                 proofs.insert(e.address(), control.access_controller_address);
             }
         });
+
+        Ok(proofs)
+    }
+
+    async fn resolve_proofs(
+        &self,
+        manifest_summary: &ManifestSummary,
+    ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>
+    {
+        let mut proofs = self.extract_proofs(manifest_summary)?;
+
+        let external_accounts = manifest_summary
+            .addresses_of_accounts_requiring_auth
+            .iter()
+            .filter(|address| self.account_by_address(**address).is_err())
+            .map(|address| AddressOfAccountOrPersona::from(*address))
+            .collect_vec();
+
+        if external_accounts.is_empty() {
+            return Ok(proofs);
+        }
+
+        let external_proofs = self
+            .gateway_client()
+            .fetch_access_controllers_of_entities(external_accounts)
+            .await?;
+        debug!(
+            "Resolved access controllers of external accounts requiring auth: {:?}",
+            external_proofs
+        );
+        proofs.extend(external_proofs);
 
         Ok(proofs)
     }

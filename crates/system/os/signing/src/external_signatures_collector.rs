@@ -242,7 +242,8 @@ async fn fetch_owner_requirements(
 /// per entity:
 /// - for each account it needs to authorize that isn't in the Profile, those
 ///   its owner role names, and if an access controller holds its owner badge,
-///   those any of its roles names;
+///   those its primary role names: the account then acts through the
+///   `create_proof` the wallet adds, which needs the primary role;
 /// - for each access controller it calls, e.g. to propose a recovery of a
 ///   shared account, those any of its roles names, under the entity it
 ///   controls.
@@ -339,7 +340,8 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .unwrap_or_default();
         if let Some(access_controller) = access_controller_of(account) {
             match rules_of(&access_controller) {
-                Some(rules) => required_nft_ids.extend(rules.non_fungibles()),
+                Some(rules) => required_nft_ids
+                    .extend(rules.primary_role.non_fungibles()),
                 None => debug!(
                     "No rules read for access controller {}",
                     access_controller
@@ -612,10 +614,12 @@ mod tests {
 
     /// The chain against Stokenet's answers for a shared account: it isn't in
     /// the Profile, its owner badge is in an access controller, and so it
-    /// requires the account owner badge (its owner role) and every key the
-    /// access controller's roles name.
+    /// requires the account owner badge (its owner role) and the keys the
+    /// access controller's primary role names, which `create_proof` needs.
+    /// The keys only its recovery and confirmation roles name aren't asked
+    /// for.
     #[actix_rt::test]
-    async fn external_account_requires_its_owner_badge_and_its_access_controllers_keys(
+    async fn external_account_requires_its_owner_badge_and_its_access_controllers_primary_keys(
     ) {
         use prelude::fixture_gw_model;
 
@@ -698,8 +702,6 @@ mod tests {
             HashSet::from([
                 id("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk:[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"),
                 key("b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"),
-                key("fd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4"),
-                key("76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111"),
             ])
         );
     }

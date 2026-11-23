@@ -11,8 +11,12 @@ impl SargonOS {
         self.wrapped
             .modify_subintent_manifest(
                 subintent_manifest.into_internal(),
-                guarantees.iter().map(|g| g.into_internal()),
+                guarantees
+                    .iter()
+                    .map(|g| g.into_internal())
+                    .collect::<Vec<_>>(),
             )
+            .await
             .into_result()
     }
 }
