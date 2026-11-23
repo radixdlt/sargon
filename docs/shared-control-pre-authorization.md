@@ -56,8 +56,9 @@ hold:
 
 Every rejection is the reserved instructions error.
 
-The keys the wallet signs with are, for now, **only its MFA factor
-instances**, so the last check compares those keys' badges with each role.
+The keys the wallet signs with are, for now, **only its MFA signing keys**
+(its MFA factor instances), so the last check compares those keys' badges
+with each role.
 
 The classes a pre-authorization may be of, each showing all it does:
 
@@ -80,11 +81,49 @@ judged by the rules, not by the Profile.
 
 ![The keys the wallet signs a subintent with](shared-control-pre-authorization/signing.svg)
 
+The wallet signs with its **MFA signing keys**: its MFA factor instances on
+the network, each with the badge its signature proves. From these it takes
+the keys the rules below name:
+
+- **Profile entities** the subintent needs: their own factors, as in any
+  transaction.
+- **Accounts it needs that aren't in the Profile**: their owner role. If an
+  access controller holds the owner badge, the wallet adds a `create_proof`
+  on it, which needs its **primary role**, so the primary role's keys too.
+- **Access controllers it calls**: only the roles its calls need, read from
+  the classification the review showed. The host passes the reviewed
+  execution summary to `sign_subintent`.
+
+| Class | Roles signed for, per access controller |
+|---|---|
+| Recovery (proposed and confirmed at once) | every role: the proposing one, and either other for the confirmation |
+| Timed recovery, with or without a lock | recovery |
+| Confirm recovery, quickly | the two roles other than the proposing one |
+| Confirm recovery, after the wait | none: anyone may, so nothing is signed |
+| Cancel recovery | stopping alone: every role; with a cancel or an unlock, the role they need (the proposing role, recovery to unlock), which stops the timer too |
+| Primary role lock | recovery |
+
+So, per access controller: a role a call can only be made with is signed
+for; a call that accepts any of several roles, such as a quick
+confirmation, adds them all, as the wallet can't see which one the other
+members complete; unless it accepts a role another call on the same access
+controller requires, which completes it too. Every signature goes into the
+subintent's one auth zone, so the members' signatures together pass
+whichever role they complete, and the dApp may drop the ones it doesn't need
+before submitting. Signing for a role that isn't used is harmless: the
+signature only counts for this subintent, whose class allows nothing but
+the reviewed calls, and the check above already counts every key.
+
+Without a classification, e.g. a host that doesn't pass the summary yet,
+the wallet signs with every role's keys, as before.
+
 An access controller's rules come from one place, the same for signing and
-for the gate: `fetch_access_controllers_details`, which reads its current
+for the check: `fetch_access_controllers_details`, which reads its current
 rules (from its role assignments) and the entity it controls (the owner badge
-in its vault) in one Gateway call. An account's owner role is read from the
-account's own role assignments.
+in its vault) in one Gateway call. The review reads them once, both to show
+the controlled account and the current delay and for the check; signing,
+which comes later, reads them again. An account's owner role is read from
+the account's own role assignments.
 
 ## What the user reviews
 
@@ -121,6 +160,19 @@ older wallets still load the Profile:
   error.
 - Depends on RET's access controller classes, on the
   `ac_manifest_clasification_improved` branch, not yet merged upstream.
+- When a call accepts several roles, the wallet signs for every one the
+  user's keys are in: an extra prompt when those keys come from different
+  factors, and the dApp learns they belong to the same person. An optional
+  hint in the request, naming the role the group completes, would let the
+  wallet narrow it; it isn't part of the request yet.
+- The wallet's own access controller transactions have signing flows only
+  for updating a shield and stopping a timed recovery. Locking or unlocking
+  the primary role, cancelling without stopping, and quick-confirming a
+  primary role's proposal would be signed with the wrong role; the wallet
+  doesn't make them yet.
+- Which role proposes and which may confirm is known in two places: the
+  roles pre-authorizations sign for, and the role combinations of the
+  shield update flow.
 
 ---
 
