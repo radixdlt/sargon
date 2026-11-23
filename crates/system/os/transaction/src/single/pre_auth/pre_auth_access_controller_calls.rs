@@ -41,8 +41,8 @@ fn can_pass_any_role_alone(
 }
 
 /// What the user can prove alone in a pre-authorization: the signatures of
-/// the keys it is signed with, see [`OsPreAuthorizationSigningKeys`].
-fn auth_zone_of(keys: Vec<PreAuthorizationSigningKey>) -> AuthZone {
+/// the keys it is signed with, see [`OsMfaSigningKeys`].
+fn auth_zone_of(keys: Vec<MfaSigningKey>) -> AuthZone {
     AuthZone {
         implicit_non_fungibles: keys.into_iter().map(|key| key.badge).collect(),
         proofs: Vec::new(),
@@ -130,7 +130,7 @@ impl OsValidatePreAuthAccessControllerCalls for SargonOS {
                 Some((details.address, (rule_set, network_id).into()))
             })
             .collect();
-        let auth_zone = auth_zone_of(self.pre_authorization_signing_keys()?);
+        let auth_zone = auth_zone_of(self.mfa_signing_keys()?);
         if can_pass_any_role_alone(&access_controllers, &rule_sets, &auth_zone)
         {
             return reject("the user's signing keys alone pass a role");

@@ -34,7 +34,7 @@ impl FactorInstanceLookupByNftIds for SargonOS {
             required_ids.len()
         );
         let instances = self
-            .pre_authorization_signing_keys()?
+            .mfa_signing_keys()?
             .into_iter()
             .filter(|key| required_ids.contains(&key.badge))
             .map(|key| key.factor_instance)

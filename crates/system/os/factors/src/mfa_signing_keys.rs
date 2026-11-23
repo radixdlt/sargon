@@ -1,29 +1,25 @@
 use crate::prelude::*;
 
-/// A key a pre-authorization can be signed with, and the badge its signature
-/// proves.
+/// A key the wallet can sign with for access rules it doesn't own, e.g. a
+/// shared account's, and the badge its signature proves.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PreAuthorizationSigningKey {
+pub struct MfaSigningKey {
     pub badge: NonFungibleGlobalId,
     pub factor_instance: HierarchicalDeterministicFactorInstance,
 }
 
-pub trait OsPreAuthorizationSigningKeys {
-    /// The keys a pre-authorization is signed with for access rules it
-    /// doesn't own: the MFA factor instances on the current network.
+pub trait OsMfaSigningKeys {
+    /// The keys the wallet signs with for access rules it doesn't own: the
+    /// MFA factor instances on the current network.
     ///
     /// Signing picks from these the keys a rule names, and checks of what
-    /// the user can authorize alone in a pre-authorization count all of
-    /// them, so that the two never disagree.
-    fn pre_authorization_signing_keys(
-        &self,
-    ) -> Result<Vec<PreAuthorizationSigningKey>>;
+    /// the user can authorize alone, e.g. in a pre-authorization, count all
+    /// of them, so that the two never disagree.
+    fn mfa_signing_keys(&self) -> Result<Vec<MfaSigningKey>>;
 }
 
-impl OsPreAuthorizationSigningKeys for SargonOS {
-    fn pre_authorization_signing_keys(
-        &self,
-    ) -> Result<Vec<PreAuthorizationSigningKey>> {
+impl OsMfaSigningKeys for SargonOS {
+    fn mfa_signing_keys(&self) -> Result<Vec<MfaSigningKey>> {
         let profile = self.profile()?;
         let network = match profile.current_network() {
             Ok(network) => network,
@@ -38,7 +34,7 @@ impl OsPreAuthorizationSigningKeys for SargonOS {
             .map(|mfa| {
                 let badge =
                     mfa.factor_instance.badge.try_non_fungible_global_id()?;
-                Ok(PreAuthorizationSigningKey {
+                Ok(MfaSigningKey {
                     badge: NonFungibleGlobalId::from((badge, network.id)),
                     factor_instance: mfa
                         .factor_instance

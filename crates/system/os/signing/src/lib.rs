@@ -17,7 +17,7 @@ pub mod prelude {
     pub(crate) use sargon_os::prelude::*;
     pub(crate) use sargon_os_factors::prelude::{
         AccessControllerRuleSet, AccessRequirement, GatewayClient,
-        OsPreAuthorizationSigningKeys,
+        OsMfaSigningKeys,
     };
     pub(crate) use signatures_collector::prelude::*;
 
