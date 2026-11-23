@@ -20,10 +20,15 @@ pub trait OsSigning {
         execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent>;
 
+    /// Signs `subintent`. `execution_summary` is the one its review showed,
+    /// if it was previewed: for the access controllers it calls, it decides
+    /// which roles, and so which of the wallet's keys, the signatures are
+    /// for. Without it, every role the wallet has keys in.
     async fn sign_subintent(
         &self,
         subintent: Subintent,
         role_kind: RoleKind,
+        execution_summary: Option<ExecutionSummary>,
     ) -> Result<SignedSubintent>;
 }
 
@@ -129,6 +134,7 @@ impl OsSigning for SargonOS {
         &self,
         subintent: Subintent,
         role_kind: RoleKind,
+        execution_summary: Option<ExecutionSummary>,
     ) -> Result<SignedSubintent> {
         info!(
             "External signing: begin for subintent {:?} (role: {:?})",
@@ -154,8 +160,14 @@ impl OsSigning for SargonOS {
 
         let mut signatures = outcome.signatures_of_successful_transactions();
 
-        let external_accounts =
-            resolve_external_accounts_for_subintent(self, &subintent).await?;
+        let external_accounts = resolve_external_accounts_for_subintent(
+            self,
+            &subintent,
+            execution_summary
+                .as_ref()
+                .and_then(|summary| summary.detailed_classification.as_ref()),
+        )
+        .await?;
         info!(
             "External signing: external accounts resolved: {}",
             external_accounts.len()
@@ -368,7 +380,7 @@ mod test {
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let signed = sut
-            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .sign_subintent(signable.clone(), RoleKind::Primary, None)
             .await
             .unwrap();
 
@@ -540,7 +552,7 @@ mod test {
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let outcome = sut
-            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .sign_subintent(signable.clone(), RoleKind::Primary, None)
             .await;
 
         assert_eq!(
@@ -588,7 +600,7 @@ mod test {
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let outcome = sut
-            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .sign_subintent(signable.clone(), RoleKind::Primary, None)
             .await;
 
         assert_eq!(outcome, Err(CommonError::HostInteractionAborted));

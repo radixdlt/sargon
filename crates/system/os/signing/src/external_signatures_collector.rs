@@ -238,6 +238,18 @@ async fn fetch_owner_requirements(
         .collect()
 }
 
+/// What `role` of an access controller requires.
+fn role_requirement(
+    rules: &AccessControllerRuleSet,
+    role: RoleKind,
+) -> &AccessRequirement {
+    match role {
+        RoleKind::Primary => &rules.primary_role,
+        RoleKind::Recovery => &rules.recovery_role,
+        RoleKind::Confirmation => &rules.confirmation_role,
+    }
+}
+
 /// The badges that can authorize what the subintent does outside the Profile,
 /// per entity:
 /// - for each account it needs to authorize that isn't in the Profile, those
@@ -245,8 +257,10 @@ async fn fetch_owner_requirements(
 ///   those its primary role names: the account then acts through the
 ///   `create_proof` the wallet adds, which needs the primary role;
 /// - for each access controller it calls, e.g. to propose a recovery of a
-///   shared account, those any of its roles names, under the entity it
-///   controls.
+///   shared account, those the roles its calls need name, read from the
+///   subintent's `classification` (see [`pre_authorization_access_controller_roles`]),
+///   under the entity it controls. Without a classification, those any of its
+///   roles names.
 ///
 /// Signing with them can't hand over an entity on its own: pre-authorizations
 /// calling an access controller are rejected if the wallet's keys alone pass
@@ -254,6 +268,7 @@ async fn fetch_owner_requirements(
 pub(crate) async fn resolve_external_accounts_for_subintent(
     os: &SargonOS,
     subintent: &Subintent,
+    classification: Option<&DetailedManifestClass>,
 ) -> Result<Vec<ExternalAccountNftRequirements>> {
     let summary = subintent.manifest.summary()?;
     let profile = os.profile()?;
@@ -340,8 +355,9 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .unwrap_or_default();
         if let Some(access_controller) = access_controller_of(account) {
             match rules_of(&access_controller) {
-                Some(rules) => required_nft_ids
-                    .extend(rules.primary_role.non_fungibles()),
+                Some(rules) => {
+                    required_nft_ids.extend(rules.primary_role.non_fungibles())
+                }
                 None => debug!(
                     "No rules read for access controller {}",
                     access_controller
@@ -353,15 +369,29 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .or_default()
             .extend(required_nft_ids);
     }
+    let roles_to_sign_for =
+        classification.and_then(pre_authorization_access_controller_roles);
     for access_controller in called_access_controllers {
         let controlled = access_controller_details
             .get(&access_controller)
             .and_then(|details| details.controlled_entity);
+        let roles = roles_to_sign_for
+            .as_ref()
+            .and_then(|roles| roles.get(&access_controller).cloned())
+            .unwrap_or_else(|| {
+                IndexSet::from([
+                    RoleKind::Primary,
+                    RoleKind::Recovery,
+                    RoleKind::Confirmation,
+                ])
+            });
         match (controlled, rules_of(&access_controller)) {
             (Some(entity), Some(rules)) => requirements
                 .entry(entity)
                 .or_default()
-                .extend(rules.non_fungibles()),
+                .extend(roles.iter().flat_map(|role| {
+                    role_requirement(&rules, *role).non_fungibles()
+                })),
             _ => debug!(
                 "No controlled entity or rules read for called access controller {}",
                 access_controller
@@ -681,9 +711,10 @@ mod tests {
         )
         .unwrap();
 
-        let resolved = resolve_external_accounts_for_subintent(&os, &subintent)
-            .await
-            .unwrap();
+        let resolved =
+            resolve_external_accounts_for_subintent(&os, &subintent, None)
+                .await
+                .unwrap();
 
         let id =
             |global_id: &str| NonFungibleGlobalId::from_str(global_id).unwrap();
@@ -706,12 +737,13 @@ mod tests {
         );
     }
 
-    /// A subintent calling an access controller directly, e.g. to propose a
-    /// recovery of the shared account it controls, touches no account, yet
-    /// needs the keys the access controller's roles name: those are what the
-    /// wallet signs with, under the account it controls.
-    #[actix_rt::test]
-    async fn called_access_controller_requires_the_keys_its_roles_name() {
+    /// The keys the wallet signs with for a subintent making `call` on the
+    /// shared account's access controller, against Stokenet's answers: its
+    /// primary and confirmation roles name one key, its recovery role three.
+    async fn keys_signed_for_call_on_access_controller(
+        call: &str,
+        classification: Option<DetailedManifestClass>,
+    ) -> HashSet<NonFungibleGlobalId> {
         use prelude::fixture_gw_model;
 
         let os = SargonOS::boot_test_with_networking_driver(Arc::new(
@@ -735,15 +767,18 @@ mod tests {
         .unwrap();
 
         let manifest = SubintentManifest::new(
-            r#"
-            ASSERT_WORKTOP_IS_EMPTY;
-            CALL_METHOD
-                Address("accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz")
-                "initiate_recovery_as_recovery"
-                Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>())
-                Enum<0u8>();
-            YIELD_TO_PARENT;
-            "#,
+            format!(
+                r#"
+                ASSERT_WORKTOP_IS_EMPTY;
+                CALL_METHOD
+                    Address("{}")
+                    "{call}"
+                    Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>())
+                    Enum<0u8>();
+                YIELD_TO_PARENT;
+                "#,
+                shared_access_controller()
+            ),
             NetworkID::Stokenet,
             Blobs::default(),
             ChildSubintentSpecifiers::default(),
@@ -759,16 +794,14 @@ mod tests {
         )
         .unwrap();
 
-        let resolved = resolve_external_accounts_for_subintent(&os, &subintent)
-            .await
-            .unwrap();
+        let resolved = resolve_external_accounts_for_subintent(
+            &os,
+            &subintent,
+            classification.as_ref(),
+        )
+        .await
+        .unwrap();
 
-        let key = |hex: &str| {
-            NonFungibleGlobalId::from_str(&format!(
-                "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa:[{hex}]"
-            ))
-            .unwrap()
-        };
         assert_eq!(resolved.len(), 1);
         assert_eq!(
             resolved[0].owner,
@@ -779,13 +812,71 @@ mod tests {
                 .unwrap()
             )
         );
+        resolved[0].required_nft_ids.iter().cloned().collect()
+    }
+
+    fn shared_access_controller() -> AccessControllerAddress {
+        AccessControllerAddress::from_str(
+            "accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz",
+        )
+        .unwrap()
+    }
+
+    fn shared_account_key(hex: &str) -> NonFungibleGlobalId {
+        NonFungibleGlobalId::from_str(&format!(
+            "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa:[{hex}]"
+        ))
+        .unwrap()
+    }
+
+    /// A subintent calling an access controller directly, e.g. to propose a
+    /// recovery of the shared account it controls, touches no account, yet
+    /// needs the keys the access controller's roles name: those are what the
+    /// wallet signs with, under the account it controls. Without a
+    /// classification saying which roles its calls need, every role's.
+    #[actix_rt::test]
+    async fn called_access_controller_without_classification_requires_every_roles_keys(
+    ) {
         assert_eq!(
-            resolved[0].required_nft_ids.iter().cloned().collect::<HashSet<_>>(),
+            keys_signed_for_call_on_access_controller(
+                "initiate_recovery_as_recovery",
+                None
+            )
+            .await,
             HashSet::from([
-                key("b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"),
-                key("fd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4"),
-                key("76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111"),
+                shared_account_key("b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"),
+                shared_account_key("fd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4"),
+                shared_account_key("76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111"),
             ])
+        );
+    }
+
+    /// Quick confirming the recovery role's proposal needs the primary or
+    /// the confirmation role: the keys only the recovery role names aren't
+    /// asked for.
+    #[actix_rt::test]
+    async fn called_access_controller_requires_the_keys_of_the_roles_its_calls_need(
+    ) {
+        let ac = shared_access_controller();
+        let classification =
+            DetailedManifestClass::AccessControllerConfirmRecovery {
+                ac_addresses: vec![ac],
+                confirmations: vec![AccessControllerRecoveryConfirmation {
+                    access_controller: ac,
+                    proposer: RecoveryProposer::Recovery,
+                    kind: RecoveryConfirmationKind::Quick,
+                    ..AccessControllerRecoveryConfirmation::sample()
+                }],
+            };
+        assert_eq!(
+            keys_signed_for_call_on_access_controller(
+                "quick_confirm_recovery_role_recovery_proposal",
+                Some(classification)
+            )
+            .await,
+            HashSet::from([shared_account_key(
+                "b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"
+            )])
         );
     }
 }
