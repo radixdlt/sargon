@@ -49,17 +49,19 @@ fn auth_zone_of(keys: Vec<PreAuthorizationSigningKey>) -> AuthZone {
     }
 }
 
-#[async_trait::async_trait]
 pub(crate) trait OsValidatePreAuthAccessControllerCalls {
-    async fn validate_pre_auth_access_controller_calls(
+    fn validate_pre_auth_access_controller_calls(
         &self,
         manifest: &SubintentManifest,
         summary: &ManifestSummary,
         execution_summary: &ExecutionSummary,
+        access_controllers_on_ledger: &IndexMap<
+            AccessControllerAddress,
+            AccessControllerStateDetails,
+        >,
     ) -> Result<()>;
 }
 
-#[async_trait::async_trait]
 impl OsValidatePreAuthAccessControllerCalls for SargonOS {
     /// Access controller methods are reserved: a dApp may call them in a
     /// pre-authorization only on an access controller the user controls
@@ -73,14 +75,19 @@ impl OsValidatePreAuthAccessControllerCalls for SargonOS {
     /// * the keys the pre-authorization is signed with alone pass no role of
     ///   the access controllers called. Whether an access controller's
     ///   entity is in the user's Profile doesn't matter: a shared account
-    ///   can be there too.
+    ///   can be there too. Their current rules come from
+    ///   `access_controllers_on_ledger`, as read for the review.
     ///
     /// Errors with the reserved instructions otherwise.
-    async fn validate_pre_auth_access_controller_calls(
+    fn validate_pre_auth_access_controller_calls(
         &self,
         manifest: &SubintentManifest,
         summary: &ManifestSummary,
         execution_summary: &ExecutionSummary,
+        access_controllers_on_ledger: &IndexMap<
+            AccessControllerAddress,
+            AccessControllerStateDetails,
+        >,
     ) -> Result<()> {
         let reject = |reason: &str| {
             warn!("Pre-auth access controller calls rejected: {reason}");
@@ -114,15 +121,10 @@ impl OsValidatePreAuthAccessControllerCalls for SargonOS {
             .collect::<IndexSet<_>>();
 
         let network_id = manifest.network_id();
-        // An access controller whose rules can't be read is left out, which
+        // An access controller whose rules weren't read is left out, which
         // counts as the user passing its roles alone.
-        let rule_sets = self
-            .gateway_client()
-            .fetch_access_controllers_details(
-                access_controllers.iter().copied().collect(),
-            )
-            .await?
-            .into_iter()
+        let rule_sets = access_controllers_on_ledger
+            .values()
             .filter_map(|details| {
                 let rule_set = details.rule_set().ok()?;
                 Some((details.address, (rule_set, network_id).into()))

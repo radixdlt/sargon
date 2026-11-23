@@ -75,6 +75,24 @@ pub trait OsExecutionSummary {
         allow_disable_auth_checks: bool,
     ) -> Result<ExecutionSummary>;
 
+    /// As [`Self::get_execution_summary`], also returning the details of the
+    /// access controllers its class operates on, as read from the ledger to
+    /// complete the class, so checks on them needn't read them again. Empty
+    /// when it isn't an access controller class or they couldn't be read.
+    async fn get_execution_summary_and_access_controllers<
+        T: PreviewableManifest + Send + Sync,
+    >(
+        &self,
+        manifest: T,
+        nonce: Nonce,
+        notary_public_key: PublicKey,
+        are_instructions_originating_from_host: bool,
+        allow_disable_auth_checks: bool,
+    ) -> Result<(
+        ExecutionSummary,
+        IndexMap<AccessControllerAddress, AccessControllerStateDetails>,
+    )>;
+
     fn extract_signer_public_keys(
         &self,
         manifest_summary: &ManifestSummary,
@@ -120,6 +138,30 @@ impl OsExecutionSummary for SargonOS {
         are_instructions_originating_from_host: bool,
         allow_disable_auth_checks: bool,
     ) -> Result<ExecutionSummary> {
+        self.get_execution_summary_and_access_controllers(
+            manifest,
+            nonce,
+            notary_public_key,
+            are_instructions_originating_from_host,
+            allow_disable_auth_checks,
+        )
+        .await
+        .map(|(execution_summary, _)| execution_summary)
+    }
+
+    async fn get_execution_summary_and_access_controllers<
+        T: PreviewableManifest + Send + Sync,
+    >(
+        &self,
+        manifest: T,
+        nonce: Nonce,
+        notary_public_key: PublicKey,
+        are_instructions_originating_from_host: bool,
+        allow_disable_auth_checks: bool,
+    ) -> Result<(
+        ExecutionSummary,
+        IndexMap<AccessControllerAddress, AccessControllerStateDetails>,
+    )> {
         let summary = manifest.summary()?;
 
         // A pre-authorization calling access controllers is signed by others
@@ -162,7 +204,18 @@ impl OsExecutionSummary for SargonOS {
             receipts,
             are_instructions_originating_from_host,
         )?;
-        with_controlled_entities(&gateway_client, execution_summary).await
+        let access_controllers = fetch_access_controllers_operated_on(
+            &gateway_client,
+            &execution_summary,
+        )
+        .await;
+        Ok((
+            with_access_controllers_on_ledger(
+                execution_summary,
+                &access_controllers,
+            ),
+            access_controllers,
+        ))
     }
 
     fn extract_signer_public_keys(
@@ -327,55 +380,62 @@ fn with_own_factor_sources(
     Ok(execution_summary)
 }
 
-/// Sets what an access controller class can't know about the access
-/// controllers it operates on, read from the ledger: the account or persona
-/// each controls and its timed recovery delay. It is shown only, so when it
-/// can't be read the class is shown without it.
-async fn with_controlled_entities(
+/// The access controllers an access controller class operates on, read from
+/// the ledger. Empty when it isn't an access controller class, or when they
+/// can't be read: the class is then shown without what only the ledger knows.
+async fn fetch_access_controllers_operated_on(
     gateway_client: &GatewayClient,
-    mut execution_summary: ExecutionSummary,
-) -> Result<ExecutionSummary> {
+    execution_summary: &ExecutionSummary,
+) -> IndexMap<AccessControllerAddress, AccessControllerStateDetails> {
     let Some(ac_addresses) = execution_summary
         .detailed_classification
         .as_ref()
         .and_then(DetailedManifestClass::access_controllers)
         .map(<[AccessControllerAddress]>::to_vec)
     else {
-        return Ok(execution_summary);
+        return IndexMap::new();
     };
-    let on_ledger = gateway_client
+    gateway_client
         .fetch_access_controllers_details(ac_addresses)
         .await
         .map(|details| {
             details
                 .into_iter()
-                .map(|details| {
-                    (
-                        details.address,
-                        AccessControllerOnLedger {
-                            controlled_entity: details.controlled_entity,
-                            timed_recovery_delay_in_minutes: details
-                                .state
-                                .timed_recovery_delay_minutes,
-                        },
-                    )
-                })
-                .collect::<IndexMap<_, _>>()
+                .map(|details| (details.address, details))
+                .collect()
         })
         .unwrap_or_else(|error| {
             warn!("Failed to read the access controllers operated on: {error}");
             IndexMap::new()
-        });
+        })
+}
+
+/// Sets what an access controller class can't know about the access
+/// controllers it operates on, from `access_controllers` as read from the
+/// ledger: the account or persona each controls and its timed recovery
+/// delay. It is shown only, so one missing is shown without it.
+fn with_access_controllers_on_ledger(
+    mut execution_summary: ExecutionSummary,
+    access_controllers: &IndexMap<
+        AccessControllerAddress,
+        AccessControllerStateDetails,
+    >,
+) -> ExecutionSummary {
     execution_summary.detailed_classification =
         execution_summary.detailed_classification.map(|class| {
             class.with_access_controllers_on_ledger(&|access_controller| {
-                on_ledger
+                access_controllers
                     .get(access_controller)
-                    .cloned()
+                    .map(|details| AccessControllerOnLedger {
+                        controlled_entity: details.controlled_entity,
+                        timed_recovery_delay_in_minutes: details
+                            .state
+                            .timed_recovery_delay_minutes,
+                    })
                     .unwrap_or_default()
             })
         });
-    Ok(execution_summary)
+    execution_summary
 }
 
 #[async_trait::async_trait]

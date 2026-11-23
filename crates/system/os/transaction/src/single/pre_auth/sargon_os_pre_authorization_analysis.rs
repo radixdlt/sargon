@@ -77,8 +77,8 @@ impl OsAnalysePreAuthPreview for SargonOS {
             }
             Some(manifest) => {
                 debug!("Pre-auth review: enclosed subintent manifest detected");
-                let execution_summary = self
-                    .get_execution_summary(
+                let (execution_summary, access_controllers) = self
+                    .get_execution_summary_and_access_controllers(
                         manifest,
                         nonce,
                         notary_public_key,
@@ -93,8 +93,8 @@ impl OsAnalysePreAuthPreview for SargonOS {
                         &subintent_manifest,
                         &summary,
                         &execution_summary,
-                    )
-                    .await?;
+                        &access_controllers,
+                    )?;
                 }
 
                 PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
