@@ -292,37 +292,35 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
     );
 
     let gateway_client = os.gateway_client();
-    let (badge_owners, owner_requirements) = if external_accounts.is_empty() {
-        (HashMap::new(), IndexMap::new())
-    } else {
-        let badge_owners = gateway_client
-            .fetch_entities_badge_owners(
-                external_accounts
-                    .iter()
-                    .map(|address| AddressOfAccountOrPersona::Account(*address))
-                    .collect_vec(),
+    let (access_controllers_of_accounts, owner_requirements) =
+        if external_accounts.is_empty() {
+            (IndexMap::new(), IndexMap::new())
+        } else {
+            let access_controllers_of_accounts = gateway_client
+                .fetch_access_controllers_of_entities(
+                    external_accounts.iter().map(|address| {
+                        AddressOfAccountOrPersona::from(*address)
+                    }),
+                )
+                .await?;
+            let owner_requirements = fetch_owner_requirements(
+                &gateway_client,
+                &external_accounts,
+                network_id,
             )
             .await?;
-        let owner_requirements = fetch_owner_requirements(
-            &gateway_client,
-            &external_accounts,
-            network_id,
-        )
-        .await?;
-        (badge_owners, owner_requirements)
-    };
+            (access_controllers_of_accounts, owner_requirements)
+        };
     let access_controller_of = |account: AccountAddress| {
-        badge_owners
-            .get(&AddressOfAccountOrPersona::Account(account))
-            .cloned()
-            .flatten()
-            .and_then(|owner| owner.as_access_controller().cloned())
+        access_controllers_of_accounts
+            .get(&AddressOfAccountOrPersona::from(account))
+            .copied()
     };
 
-    let access_controllers = external_accounts
-        .iter()
-        .filter_map(|account| access_controller_of(*account))
-        .chain(called_access_controllers.iter().cloned())
+    let access_controllers = access_controllers_of_accounts
+        .values()
+        .chain(called_access_controllers.iter())
+        .copied()
         .collect::<IndexSet<_>>();
     let access_controller_details = if access_controllers.is_empty() {
         IndexMap::new()
@@ -377,21 +375,21 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .and_then(|details| details.controlled_entity);
         let roles = roles_to_sign_for
             .as_ref()
-            .and_then(|roles| roles.get(&access_controller).cloned())
-            .unwrap_or_else(|| {
-                IndexSet::from([
-                    RoleKind::Primary,
-                    RoleKind::Recovery,
-                    RoleKind::Confirmation,
-                ])
-            });
+            .and_then(|roles| roles.get(&access_controller));
         match (controlled, rules_of(&access_controller)) {
-            (Some(entity), Some(rules)) => requirements
-                .entry(entity)
-                .or_default()
-                .extend(roles.iter().flat_map(|role| {
-                    role_requirement(&rules, *role).non_fungibles()
-                })),
+            (Some(entity), Some(rules)) => {
+                // Without a classification describing it, every role's.
+                let badges = match roles {
+                    Some(roles) => roles
+                        .iter()
+                        .flat_map(|role| {
+                            role_requirement(&rules, *role).non_fungibles()
+                        })
+                        .collect(),
+                    None => rules.non_fungibles(),
+                };
+                requirements.entry(entity).or_default().extend(badges);
+            }
             _ => debug!(
                 "No controlled entity or rules read for called access controller {}",
                 access_controller
