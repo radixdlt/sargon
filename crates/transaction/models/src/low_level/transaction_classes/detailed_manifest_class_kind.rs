@@ -38,11 +38,20 @@ pub enum DetailedManifestClassKind {
     #[display("AccessControllerRecovery")]
     AccessControllerRecovery,
 
-    #[display("AccessControllerConfirmTimedRecovery")]
-    AccessControllerConfirmTimedRecovery,
+    #[display("AccessControllerTimedRecovery")]
+    AccessControllerTimedRecovery,
 
-    #[display("AccessControllerStopTimedRecovery")]
-    AccessControllerStopTimedRecovery,
+    #[display("AccessControllerConfirmRecovery")]
+    AccessControllerConfirmRecovery,
+
+    #[display("AccessControllerCancelRecovery")]
+    AccessControllerCancelRecovery,
+
+    #[display("AccessControllerPrimaryRoleLock")]
+    AccessControllerPrimaryRoleLock,
+
+    #[display("AccessControllerRecoveryFee")]
+    AccessControllerRecoveryFee,
 }
 
 impl DetailedManifestClassKind {

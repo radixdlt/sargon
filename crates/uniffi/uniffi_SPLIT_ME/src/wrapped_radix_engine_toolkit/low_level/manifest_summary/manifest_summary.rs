@@ -81,14 +81,24 @@ pub enum ManifestClass {
     ValidatorClaimXrd,
     /// A manifest that updated the deposit settings of the account.
     AccountDepositSettingsUpdate,
+    /// A manifest that securifies entities by moving their badge to a newly
+    /// created access controller, and nothing else.
     EntitySecurify,
-    /// A manifest that starts the access controller recovery, it is either
-    /// confirmed in the same transaction, or it is a timed recovery, currently
-    /// the difference is not important.
+    /// A manifest that proposes new rules for access controllers and confirms
+    /// them in the same transaction.
     AccessControllerRecovery,
-    /// A manifest that stops the timed recovery.
-    /// It can as well contain instructions to cancel the given recovery proposal.
-    AccessControllerStopTimedRecovery,
-    /// A manifest that confirms the timed recovery.
-    AccessControllerConfirmTimedRecovery,
+    /// A manifest that starts a timed recovery of access controllers.
+    AccessControllerTimedRecovery,
+    /// A manifest that confirms recoveries already proposed on access
+    /// controllers.
+    AccessControllerConfirmRecovery,
+    /// A manifest that stops or cancels recoveries already proposed on access
+    /// controllers.
+    AccessControllerCancelRecovery,
+    /// A manifest that locks or unlocks the primary role of access
+    /// controllers.
+    AccessControllerPrimaryRoleLock,
+    /// A manifest that tops up or withdraws from the recovery fee vaults of
+    /// access controllers.
+    AccessControllerRecoveryFee,
 }

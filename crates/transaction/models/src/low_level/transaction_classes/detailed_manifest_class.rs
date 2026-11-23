@@ -100,22 +100,49 @@ pub enum DetailedManifestClass {
         /// The entity address that is about to be securified
         entities: Vec<AddressOfAccountOrPersona>,
     },
-    /// A manifest that starts the access controller recovery, it is either
-    /// confirmed in the same transaction, or it is a timed recovery, currently
-    /// the difference is not important.
+    /// A manifest that proposes new rules for access controllers and confirms
+    /// them in the same transaction: the rules change once it's committed.
     AccessControllerRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
-        /// The recoveries proposed in the manifest, with the rules they
-        /// propose.
+        /// The recoveries proposed and confirmed in the manifest, with the
+        /// rules they enact.
         recovery_proposals: Vec<AccessControllerRecoveryProposal>,
     },
-    /// A manifest that stops the timed recovery.
-    /// It can as well contain instructions to cancel the given recovery proposal.
-    AccessControllerStopTimedRecovery {
+    /// A manifest that starts a timed recovery of access controllers: the
+    /// recovery role proposes rules without confirming them.
+    AccessControllerTimedRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        timed_recoveries: Vec<AccessControllerTimedRecoveryProposal>,
     },
-    AccessControllerConfirmTimedRecovery {
+    /// A manifest that confirms recoveries already proposed on access
+    /// controllers.
+    AccessControllerConfirmRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        confirmations: Vec<AccessControllerRecoveryConfirmation>,
+    },
+    /// A manifest that stops or cancels recoveries already proposed on access
+    /// controllers.
+    AccessControllerCancelRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
+        cancellations: Vec<AccessControllerRecoveryCancellation>,
+    },
+    /// A manifest that locks or unlocks the primary role of access
+    /// controllers.
+    AccessControllerPrimaryRoleLock {
+        ac_addresses: Vec<AccessControllerAddress>,
+        operations: Vec<AccessControllerPrimaryRoleLockOperation>,
+    },
+    /// A manifest that tops up the recovery fee vaults of access controllers
+    /// with XRD withdrawn from accounts, or withdraws XRD from them into
+    /// accounts. Only one side is filled: `contributions` and
+    /// `account_withdrawals` for a top-up, `withdrawals` and
+    /// `account_deposits` for a withdrawal.
+    AccessControllerRecoveryFee {
+        ac_addresses: Vec<AccessControllerAddress>,
+        contributions: Vec<AccessControllerXrdTransfer>,
+        withdrawals: Vec<AccessControllerXrdTransfer>,
+        account_withdrawals: Vec<AccountXrdTransfer>,
+        account_deposits: Vec<AccountXrdTransfer>,
     },
 }
 
@@ -151,12 +178,37 @@ impl DetailedManifestClass {
             Self::AccessControllerRecovery { .. } => {
                 DetailedManifestClassKind::AccessControllerRecovery
             }
-            Self::AccessControllerConfirmTimedRecovery { .. } => {
-                DetailedManifestClassKind::AccessControllerConfirmTimedRecovery
+            Self::AccessControllerTimedRecovery { .. } => {
+                DetailedManifestClassKind::AccessControllerTimedRecovery
             }
-            Self::AccessControllerStopTimedRecovery { .. } => {
-                DetailedManifestClassKind::AccessControllerStopTimedRecovery
+            Self::AccessControllerConfirmRecovery { .. } => {
+                DetailedManifestClassKind::AccessControllerConfirmRecovery
             }
+            Self::AccessControllerCancelRecovery { .. } => {
+                DetailedManifestClassKind::AccessControllerCancelRecovery
+            }
+            Self::AccessControllerPrimaryRoleLock { .. } => {
+                DetailedManifestClassKind::AccessControllerPrimaryRoleLock
+            }
+            Self::AccessControllerRecoveryFee { .. } => {
+                DetailedManifestClassKind::AccessControllerRecoveryFee
+            }
+        }
+    }
+
+    /// The access controllers an access controller class operates on, or
+    /// `None` for other classes.
+    pub fn access_controllers(&self) -> Option<&[AccessControllerAddress]> {
+        match self {
+            Self::AccessControllerRecovery { ac_addresses, .. }
+            | Self::AccessControllerTimedRecovery { ac_addresses, .. }
+            | Self::AccessControllerConfirmRecovery { ac_addresses, .. }
+            | Self::AccessControllerCancelRecovery { ac_addresses, .. }
+            | Self::AccessControllerPrimaryRoleLock { ac_addresses, .. }
+            | Self::AccessControllerRecoveryFee { ac_addresses, .. } => {
+                Some(ac_addresses)
+            }
+            _ => None,
         }
     }
 
@@ -227,13 +279,25 @@ impl DetailedManifestClass {
                 Some(Self::from((output, network_id)))
             }
 
-            RetDetailedManifestClass::AccessControllerConfirmTimedRecovery(
+            RetDetailedManifestClass::AccessControllerTimedRecovery(output) => {
+                Some(Self::from((output, network_id)))
+            }
+
+            RetDetailedManifestClass::AccessControllerConfirmRecovery(
                 output,
             ) => Some(Self::from((output, network_id))),
 
-            RetDetailedManifestClass::AccessControllerStopTimedRecovery(
+            RetDetailedManifestClass::AccessControllerCancelRecovery(
                 output,
             ) => Some(Self::from((output, network_id))),
+
+            RetDetailedManifestClass::AccessControllerPrimaryRoleLock(
+                output,
+            ) => Some(Self::from((output, network_id))),
+
+            RetDetailedManifestClass::AccessControllerRecoveryFee(output) => {
+                Some(Self::from((output, network_id)))
+            }
         }
     }
 }
@@ -429,13 +493,16 @@ impl From<(RetEntitySecurifyOutput, NetworkID)> for DetailedManifestClass {
 }
 
 impl DetailedManifestClass {
-    /// Marks the user's keys in the proposed rules of recovery proposals,
+    /// Marks the user's keys in the rules an access controller class shows,
     /// which the classification shows as unknown, see
     /// [`AccessControllerRuleSetForDisplay::with_own_factor_sources`].
     pub fn with_own_factor_sources(
         self,
         own_factor_source: &impl Fn(&NonFungibleGlobalId) -> Option<FactorSource>,
     ) -> Self {
+        let mark = |rules: AccessControllerRuleSetForDisplay| {
+            rules.with_own_factor_sources(own_factor_source)
+        };
         match self {
             Self::AccessControllerRecovery {
                 ac_addresses,
@@ -445,10 +512,49 @@ impl DetailedManifestClass {
                 recovery_proposals: recovery_proposals
                     .into_iter()
                     .map(|proposal| AccessControllerRecoveryProposal {
-                        proposed_rules: proposal
-                            .proposed_rules
-                            .with_own_factor_sources(own_factor_source),
+                        proposed_rules: mark(proposal.proposed_rules),
                         ..proposal
+                    })
+                    .collect(),
+            },
+            Self::AccessControllerTimedRecovery {
+                ac_addresses,
+                timed_recoveries,
+            } => Self::AccessControllerTimedRecovery {
+                ac_addresses,
+                timed_recoveries: timed_recoveries
+                    .into_iter()
+                    .map(|recovery| AccessControllerTimedRecoveryProposal {
+                        proposed_rules: mark(recovery.proposed_rules),
+                        ..recovery
+                    })
+                    .collect(),
+            },
+            Self::AccessControllerConfirmRecovery {
+                ac_addresses,
+                confirmations,
+            } => Self::AccessControllerConfirmRecovery {
+                ac_addresses,
+                confirmations: confirmations
+                    .into_iter()
+                    .map(|confirmation| AccessControllerRecoveryConfirmation {
+                        proposed_rules: mark(confirmation.proposed_rules),
+                        ..confirmation
+                    })
+                    .collect(),
+            },
+            Self::AccessControllerCancelRecovery {
+                ac_addresses,
+                cancellations,
+            } => Self::AccessControllerCancelRecovery {
+                ac_addresses,
+                cancellations: cancellations
+                    .into_iter()
+                    .map(|cancellation| AccessControllerRecoveryCancellation {
+                        stopped_timed_recovery: cancellation
+                            .stopped_timed_recovery
+                            .map(mark),
+                        ..cancellation
                     })
                     .collect(),
             },
@@ -457,15 +563,27 @@ impl DetailedManifestClass {
     }
 }
 
+/// What the OS reads from the ledger about an access controller an access
+/// controller class operates on.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct AccessControllerOnLedger {
+    /// The account or persona the access controller controls.
+    pub controlled_entity: Option<AddressOfAccountOrPersona>,
+    /// The access controller's timed recovery delay.
+    pub timed_recovery_delay_in_minutes: Option<u32>,
+}
+
 impl DetailedManifestClass {
-    /// Sets the entity each recovery proposal's access controller controls,
-    /// which the classification doesn't know, from `controlled_entity`.
-    pub fn with_controlled_entities(
+    /// Sets what the classification doesn't know about the access controllers
+    /// an access controller class operates on, from `on_ledger`: the entity
+    /// each controls and, for timed recoveries, its current delay.
+    pub fn with_access_controllers_on_ledger(
         self,
-        controlled_entity: &impl Fn(
-            &AccessControllerAddress,
-        ) -> Option<AddressOfAccountOrPersona>,
+        on_ledger: &impl Fn(&AccessControllerAddress) -> AccessControllerOnLedger,
     ) -> Self {
+        let entity = |access_controller: &AccessControllerAddress| {
+            on_ledger(access_controller).controlled_entity
+        };
         match self {
             Self::AccessControllerRecovery {
                 ac_addresses,
@@ -475,16 +593,113 @@ impl DetailedManifestClass {
                 recovery_proposals: recovery_proposals
                     .into_iter()
                     .map(|proposal| AccessControllerRecoveryProposal {
-                        controlled_entity: controlled_entity(
-                            &proposal.access_controller,
-                        ),
+                        controlled_entity: entity(&proposal.access_controller),
                         ..proposal
                     })
                     .collect(),
             },
+            Self::AccessControllerTimedRecovery {
+                ac_addresses,
+                timed_recoveries,
+            } => Self::AccessControllerTimedRecovery {
+                ac_addresses,
+                timed_recoveries: timed_recoveries
+                    .into_iter()
+                    .map(|recovery| {
+                        let AccessControllerOnLedger {
+                            controlled_entity,
+                            timed_recovery_delay_in_minutes,
+                        } = on_ledger(&recovery.access_controller);
+                        AccessControllerTimedRecoveryProposal {
+                            controlled_entity,
+                            current_timed_recovery_delay_in_minutes:
+                                timed_recovery_delay_in_minutes,
+                            ..recovery
+                        }
+                    })
+                    .collect(),
+            },
+            Self::AccessControllerConfirmRecovery {
+                ac_addresses,
+                confirmations,
+            } => Self::AccessControllerConfirmRecovery {
+                ac_addresses,
+                confirmations: confirmations
+                    .into_iter()
+                    .map(|confirmation| AccessControllerRecoveryConfirmation {
+                        controlled_entity: entity(
+                            &confirmation.access_controller,
+                        ),
+                        ..confirmation
+                    })
+                    .collect(),
+            },
+            Self::AccessControllerCancelRecovery {
+                ac_addresses,
+                cancellations,
+            } => Self::AccessControllerCancelRecovery {
+                ac_addresses,
+                cancellations: cancellations
+                    .into_iter()
+                    .map(|cancellation| AccessControllerRecoveryCancellation {
+                        controlled_entity: entity(
+                            &cancellation.access_controller,
+                        ),
+                        ..cancellation
+                    })
+                    .collect(),
+            },
+            Self::AccessControllerPrimaryRoleLock {
+                ac_addresses,
+                operations,
+            } => Self::AccessControllerPrimaryRoleLock {
+                ac_addresses,
+                operations: operations
+                    .into_iter()
+                    .map(|operation| AccessControllerPrimaryRoleLockOperation {
+                        controlled_entity: entity(&operation.access_controller),
+                        ..operation
+                    })
+                    .collect(),
+            },
+            Self::AccessControllerRecoveryFee {
+                ac_addresses,
+                contributions,
+                withdrawals,
+                account_withdrawals,
+                account_deposits,
+            } => {
+                let with_entities =
+                    |transfers: Vec<AccessControllerXrdTransfer>| {
+                        transfers
+                            .into_iter()
+                            .map(|transfer| AccessControllerXrdTransfer {
+                                controlled_entity: entity(
+                                    &transfer.access_controller,
+                                ),
+                                ..transfer
+                            })
+                            .collect()
+                    };
+                Self::AccessControllerRecoveryFee {
+                    ac_addresses,
+                    contributions: with_entities(contributions),
+                    withdrawals: with_entities(withdrawals),
+                    account_withdrawals,
+                    account_deposits,
+                }
+            }
             class => class,
         }
     }
+}
+
+/// The distinct access controllers of `items`, in order.
+fn distinct_access_controllers<T>(
+    items: &[T],
+    access_controller: impl Fn(&T) -> AccessControllerAddress,
+) -> Vec<AccessControllerAddress> {
+    items.iter().map(access_controller).unique().collect()
 }
 
 impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
@@ -500,13 +715,10 @@ impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
                 AccessControllerRecoveryProposal::from((proposal, n))
             })
             .collect_vec();
-        // An access controller can have both a primary and a recovery role
-        // proposal in the same manifest, so deduplicate.
-        let ac_addresses = recovery_proposals
-            .iter()
-            .map(|proposal| proposal.access_controller)
-            .unique()
-            .collect();
+        let ac_addresses =
+            distinct_access_controllers(&recovery_proposals, |proposal| {
+                proposal.access_controller
+            });
 
         Self::AccessControllerRecovery {
             ac_addresses,
@@ -515,26 +727,130 @@ impl From<(RetAccessControllerRecoveryOutput, NetworkID)>
     }
 }
 
-impl From<(RetAccessControllerConfirmTimedRecoveryOutput, NetworkID)>
+impl From<(RetAccessControllerTimedRecoveryOutput, NetworkID)>
     for DetailedManifestClass
 {
     fn from(
-        (output, n): (RetAccessControllerConfirmTimedRecoveryOutput, NetworkID),
+        (output, n): (RetAccessControllerTimedRecoveryOutput, NetworkID),
     ) -> Self {
-        Self::AccessControllerConfirmTimedRecovery {
-            ac_addresses: to_vec_network_aware(output.access_controllers, n),
+        let timed_recoveries = output
+            .timed_recoveries
+            .into_iter()
+            .map(|recovery| {
+                AccessControllerTimedRecoveryProposal::from((recovery, n))
+            })
+            .collect_vec();
+        Self::AccessControllerTimedRecovery {
+            ac_addresses: distinct_access_controllers(
+                &timed_recoveries,
+                |recovery| recovery.access_controller,
+            ),
+            timed_recoveries,
         }
     }
 }
 
-impl From<(RetAccessControllerStopTimedRecoveryOutput, NetworkID)>
+impl From<(RetAccessControllerConfirmRecoveryOutput, NetworkID)>
     for DetailedManifestClass
 {
     fn from(
-        (output, n): (RetAccessControllerStopTimedRecoveryOutput, NetworkID),
+        (output, n): (RetAccessControllerConfirmRecoveryOutput, NetworkID),
     ) -> Self {
-        Self::AccessControllerStopTimedRecovery {
-            ac_addresses: to_vec_network_aware(output.access_controllers, n),
+        let confirmations = output
+            .confirmations
+            .into_iter()
+            .map(|confirmation| {
+                AccessControllerRecoveryConfirmation::from((confirmation, n))
+            })
+            .collect_vec();
+        Self::AccessControllerConfirmRecovery {
+            ac_addresses: distinct_access_controllers(
+                &confirmations,
+                |confirmation| confirmation.access_controller,
+            ),
+            confirmations,
+        }
+    }
+}
+
+impl From<(RetAccessControllerCancelRecoveryOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from(
+        (output, n): (RetAccessControllerCancelRecoveryOutput, NetworkID),
+    ) -> Self {
+        let cancellations = output
+            .cancellations
+            .into_iter()
+            .map(|cancellation| {
+                AccessControllerRecoveryCancellation::from((cancellation, n))
+            })
+            .collect_vec();
+        Self::AccessControllerCancelRecovery {
+            ac_addresses: distinct_access_controllers(
+                &cancellations,
+                |cancellation| cancellation.access_controller,
+            ),
+            cancellations,
+        }
+    }
+}
+
+impl From<(RetAccessControllerPrimaryRoleLockOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from(
+        (output, n): (RetAccessControllerPrimaryRoleLockOutput, NetworkID),
+    ) -> Self {
+        let operations = output
+            .operations
+            .into_iter()
+            .map(|operation| {
+                AccessControllerPrimaryRoleLockOperation::from((operation, n))
+            })
+            .collect_vec();
+        Self::AccessControllerPrimaryRoleLock {
+            ac_addresses: distinct_access_controllers(
+                &operations,
+                |operation| operation.access_controller,
+            ),
+            operations,
+        }
+    }
+}
+
+impl From<(RetAccessControllerRecoveryFeeOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from(
+        (output, n): (RetAccessControllerRecoveryFeeOutput, NetworkID),
+    ) -> Self {
+        let access_controller_transfers = |transfers: Vec<_>| {
+            transfers
+                .into_iter()
+                .map(|transfer| {
+                    AccessControllerXrdTransfer::from((transfer, n))
+                })
+                .collect_vec()
+        };
+        let account_transfers = |transfers: Vec<_>| {
+            transfers
+                .into_iter()
+                .map(|transfer| AccountXrdTransfer::from((transfer, n)))
+                .collect_vec()
+        };
+        let contributions = access_controller_transfers(output.contributions);
+        let withdrawals = access_controller_transfers(output.withdrawals);
+        let ac_addresses = distinct_access_controllers(
+            &[contributions.as_slice(), withdrawals.as_slice()].concat(),
+            |transfer| transfer.access_controller,
+        );
+        Self::AccessControllerRecoveryFee {
+            ac_addresses,
+            contributions,
+            withdrawals,
+            account_withdrawals: account_transfers(output.account_withdrawals),
+            account_deposits: account_transfers(output.account_deposits),
         }
     }
 }
@@ -648,16 +964,50 @@ mod tests {
             DetailedManifestClassKind::AccessControllerRecovery,
         );
         test(
-            SUT::AccessControllerConfirmTimedRecovery {
+            SUT::AccessControllerTimedRecovery {
                 ac_addresses: Vec::<_>::sample(),
+                timed_recoveries: vec![
+                    AccessControllerTimedRecoveryProposal::sample(),
+                ],
             },
-            DetailedManifestClassKind::AccessControllerConfirmTimedRecovery,
+            DetailedManifestClassKind::AccessControllerTimedRecovery,
         );
         test(
-            SUT::AccessControllerStopTimedRecovery {
+            SUT::AccessControllerConfirmRecovery {
                 ac_addresses: Vec::<_>::sample(),
+                confirmations: vec![
+                    AccessControllerRecoveryConfirmation::sample(),
+                ],
             },
-            DetailedManifestClassKind::AccessControllerStopTimedRecovery,
+            DetailedManifestClassKind::AccessControllerConfirmRecovery,
+        );
+        test(
+            SUT::AccessControllerCancelRecovery {
+                ac_addresses: Vec::<_>::sample(),
+                cancellations: vec![
+                    AccessControllerRecoveryCancellation::sample(),
+                ],
+            },
+            DetailedManifestClassKind::AccessControllerCancelRecovery,
+        );
+        test(
+            SUT::AccessControllerPrimaryRoleLock {
+                ac_addresses: Vec::<_>::sample(),
+                operations: vec![
+                    AccessControllerPrimaryRoleLockOperation::sample(),
+                ],
+            },
+            DetailedManifestClassKind::AccessControllerPrimaryRoleLock,
+        );
+        test(
+            SUT::AccessControllerRecoveryFee {
+                ac_addresses: Vec::<_>::sample(),
+                contributions: vec![AccessControllerXrdTransfer::sample()],
+                withdrawals: vec![],
+                account_withdrawals: vec![AccountXrdTransfer::sample()],
+                account_deposits: vec![],
+            },
+            DetailedManifestClassKind::AccessControllerRecoveryFee,
         );
     }
 
@@ -718,6 +1068,175 @@ mod tests {
                         controlled_entity: None,
                     },
                 ],
+            }
+        );
+    }
+
+    #[test]
+    fn timed_recovery_shows_the_current_delay_and_the_entity_on_ledger() {
+        let timed_recovery = AccessControllerTimedRecoveryProposal {
+            current_timed_recovery_delay_in_minutes: None,
+            controlled_entity: None,
+            ..AccessControllerTimedRecoveryProposal::sample()
+        };
+        let class = SUT::AccessControllerTimedRecovery {
+            ac_addresses: vec![timed_recovery.access_controller],
+            timed_recoveries: vec![timed_recovery.clone()],
+        };
+        let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
+
+        let class = class.with_access_controllers_on_ledger(&|_| {
+            AccessControllerOnLedger {
+                controlled_entity: Some(entity),
+                timed_recovery_delay_in_minutes: Some(42),
+            }
+        });
+
+        assert_eq!(
+            class.access_controllers(),
+            Some([timed_recovery.access_controller].as_slice())
+        );
+        assert_eq!(
+            class,
+            SUT::AccessControllerTimedRecovery {
+                ac_addresses: vec![timed_recovery.access_controller],
+                timed_recoveries: vec![AccessControllerTimedRecoveryProposal {
+                    current_timed_recovery_delay_in_minutes: Some(42),
+                    controlled_entity: Some(entity),
+                    ..timed_recovery
+                }],
+            }
+        );
+    }
+
+    #[test]
+    fn every_access_controller_class_shows_the_entity_on_ledger() {
+        let entity = AddressOfAccountOrPersona::from(AccountAddress::sample());
+        let on_ledger =
+            |_: &AccessControllerAddress| AccessControllerOnLedger {
+                controlled_entity: Some(entity),
+                timed_recovery_delay_in_minutes: None,
+            };
+        let classes = [
+            SUT::AccessControllerRecovery {
+                ac_addresses: Vec::new(),
+                recovery_proposals: vec![AccessControllerRecoveryProposal {
+                    controlled_entity: None,
+                    ..AccessControllerRecoveryProposal::sample()
+                }],
+            },
+            SUT::AccessControllerConfirmRecovery {
+                ac_addresses: Vec::new(),
+                confirmations: vec![AccessControllerRecoveryConfirmation {
+                    controlled_entity: None,
+                    ..AccessControllerRecoveryConfirmation::sample()
+                }],
+            },
+            SUT::AccessControllerCancelRecovery {
+                ac_addresses: Vec::new(),
+                cancellations: vec![AccessControllerRecoveryCancellation {
+                    controlled_entity: None,
+                    ..AccessControllerRecoveryCancellation::sample()
+                }],
+            },
+            SUT::AccessControllerPrimaryRoleLock {
+                ac_addresses: Vec::new(),
+                operations: vec![AccessControllerPrimaryRoleLockOperation {
+                    controlled_entity: None,
+                    ..AccessControllerPrimaryRoleLockOperation::sample()
+                }],
+            },
+            SUT::AccessControllerRecoveryFee {
+                ac_addresses: Vec::new(),
+                contributions: vec![AccessControllerXrdTransfer {
+                    controlled_entity: None,
+                    ..AccessControllerXrdTransfer::sample()
+                }],
+                withdrawals: Vec::new(),
+                account_withdrawals: vec![AccountXrdTransfer::sample()],
+                account_deposits: Vec::new(),
+            },
+        ];
+        for class in classes {
+            let entities = match class
+                .with_access_controllers_on_ledger(&on_ledger)
+            {
+                SUT::AccessControllerRecovery {
+                    recovery_proposals, ..
+                } => recovery_proposals
+                    .into_iter()
+                    .map(|x| x.controlled_entity)
+                    .collect_vec(),
+                SUT::AccessControllerConfirmRecovery {
+                    confirmations, ..
+                } => confirmations
+                    .into_iter()
+                    .map(|x| x.controlled_entity)
+                    .collect_vec(),
+                SUT::AccessControllerCancelRecovery {
+                    cancellations, ..
+                } => cancellations
+                    .into_iter()
+                    .map(|x| x.controlled_entity)
+                    .collect_vec(),
+                SUT::AccessControllerPrimaryRoleLock { operations, .. } => {
+                    operations
+                        .into_iter()
+                        .map(|x| x.controlled_entity)
+                        .collect_vec()
+                }
+                SUT::AccessControllerRecoveryFee { contributions, .. } => {
+                    contributions
+                        .into_iter()
+                        .map(|x| x.controlled_entity)
+                        .collect_vec()
+                }
+                class => panic!("Unexpected {class:?}"),
+            };
+            assert_eq!(entities, vec![Some(entity)]);
+        }
+    }
+
+    #[test]
+    fn recovery_fee_lists_each_access_controller_once() {
+        use radix_engine_interface::prelude::ComponentAddress as ScryptoComponentAddress;
+
+        let access_controller = AccessControllerAddress::sample();
+        let scrypto_access_controller = ScryptoComponentAddress::new_or_panic(
+            access_controller.scrypto().as_node_id().0,
+        );
+        let account = AccountAddress::sample();
+        let scrypto_account = ScryptoComponentAddress::new_or_panic(
+            account.scrypto().as_node_id().0,
+        );
+        let output = RetAccessControllerRecoveryFeeOutput {
+            contributions: vec![RetAccessControllerRecoveryFeeTransfer {
+                access_controller: scrypto_access_controller,
+                xrd_amount: 10.into(),
+            }],
+            withdrawals: Vec::new(),
+            account_withdrawals: vec![RetAccountRecoveryFeeTransfer {
+                account: scrypto_account,
+                xrd_amount: 10.into(),
+            }],
+            account_deposits: Vec::new(),
+        };
+
+        assert_eq!(
+            SUT::from((output, NetworkID::Mainnet)),
+            SUT::AccessControllerRecoveryFee {
+                ac_addresses: vec![access_controller],
+                contributions: vec![AccessControllerXrdTransfer {
+                    access_controller,
+                    xrd_amount: Decimal192::ten(),
+                    controlled_entity: None,
+                }],
+                withdrawals: Vec::new(),
+                account_withdrawals: vec![AccountXrdTransfer {
+                    account,
+                    xrd_amount: Decimal192::ten(),
+                }],
+                account_deposits: Vec::new(),
             }
         );
     }

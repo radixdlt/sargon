@@ -11,6 +11,20 @@ pub trait SargonOsTransactionManifestModify {
     where
         G: IntoIterator<Item = TransactionGuarantee>;
 
+    /// Locks the fee against the XRD vault of `access_controller`, which the
+    /// user picked as the fee payer, instead of an account: e.g. to recover
+    /// an account whose primary role is lost. It's added the same way as an
+    /// account's fee lock, so the review shows who pays.
+    fn modify_transaction_manifest_with_access_controller_fee_payer<G>(
+        &self,
+        manifest: TransactionManifest,
+        access_controller: AccessControllerAddress,
+        fee: Decimal192,
+        guarantees: G,
+    ) -> Result<TransactionManifest>
+    where
+        G: IntoIterator<Item = TransactionGuarantee>;
+
     fn modify_transaction_manifest_without_fee_payer<G>(
         &self,
         manifest: TransactionManifest,
@@ -92,6 +106,32 @@ impl SargonOsTransactionManifestModify for SargonOS {
         ))
     }
 
+    fn modify_transaction_manifest_with_access_controller_fee_payer<G>(
+        &self,
+        manifest: TransactionManifest,
+        access_controller: AccessControllerAddress,
+        fee: Decimal192,
+        guarantees: G,
+    ) -> Result<TransactionManifest>
+    where
+        G: IntoIterator<Item = TransactionGuarantee>,
+    {
+        // Only the fee lock is added before the manifest's instructions, so
+        // the guarantees are offset by one, as for an unsecurified account.
+        let with_proofs =
+            self.modify_transaction_manifest_without_fee_payer(manifest, [])?;
+        let with_fee = TransactionManifest::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(
+            with_proofs,
+            fee,
+            access_controller,
+        );
+        with_fee.modify_add_guarantees(
+            guarantees
+                .into_iter()
+                .map(|g| g.offset_instruction_index_by(1)),
+        )
+    }
+
     fn modify_transaction_manifest_without_fee_payer<G>(
         &self,
         manifest: TransactionManifest,
@@ -121,6 +161,47 @@ mod tests {
     use crate::single::support::prepare_xrd_transfer_transaction;
 
     type SUT = SargonOS;
+
+    #[actix_rt::test]
+    async fn access_controller_pays_the_fee_when_picked() {
+        let account = SecurifiedAccount::sample();
+        let access_controller = account.access_controller_address();
+        let manifest =
+            TransactionManifest::apply_security_shield_for_securified_entity(
+                account,
+                SecurityStructureOfFactorInstances::sample(),
+                RolesExercisableInTransactionManifestCombination::InitiateWithRecoveryDelayedCompletion,
+            );
+        let os = prepare_os([], []).await;
+
+        let paid = os
+            .modify_transaction_manifest_with_access_controller_fee_payer(
+                manifest.clone(),
+                access_controller,
+                Decimal192::five(),
+                [],
+            )
+            .unwrap();
+
+        assert_eq!(
+            paid.extract_fee_payer(),
+            Some(FeePayerOfManifest::AccessController {
+                address: access_controller,
+                fee: Decimal192::five(),
+            })
+        );
+        // Only the fee lock is added, before the recovery.
+        assert_eq!(
+            paid.instructions().len(),
+            manifest.instructions().len() + 1
+        );
+        assert_eq!(paid.instructions()[1..], manifest.instructions()[..]);
+        assert!(paid
+            .summary()
+            .unwrap()
+            .classification
+            .contains(&ManifestClassification::AccessControllerTimedRecovery));
+    }
 
     #[actix_rt::test]
     async fn test_involved_entities_not_included_in_profile() {

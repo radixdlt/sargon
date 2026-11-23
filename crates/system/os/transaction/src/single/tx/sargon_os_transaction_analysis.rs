@@ -283,41 +283,52 @@ fn with_own_factor_sources(
     Ok(execution_summary)
 }
 
-/// Sets the account or persona each recovery proposal's access controller
-/// controls, read from the ledger. It is shown only, so when it can't be read
-/// the proposals are shown without it.
+/// Sets what an access controller class can't know about the access
+/// controllers it operates on, read from the ledger: the account or persona
+/// each controls and its timed recovery delay. It is shown only, so when it
+/// can't be read the class is shown without it.
 async fn with_controlled_entities(
     gateway_client: &GatewayClient,
     mut execution_summary: ExecutionSummary,
 ) -> Result<ExecutionSummary> {
-    let Some(DetailedManifestClass::AccessControllerRecovery {
-        ac_addresses,
-        ..
-    }) = &execution_summary.detailed_classification
+    let Some(ac_addresses) = execution_summary
+        .detailed_classification
+        .as_ref()
+        .and_then(DetailedManifestClass::access_controllers)
+        .map(<[AccessControllerAddress]>::to_vec)
     else {
         return Ok(execution_summary);
     };
-    let controlled = gateway_client
-        .fetch_access_controllers_details(ac_addresses.clone())
+    let on_ledger = gateway_client
+        .fetch_access_controllers_details(ac_addresses)
         .await
         .map(|details| {
             details
                 .into_iter()
-                .filter_map(|details| {
-                    Some((details.address, details.controlled_entity?))
+                .map(|details| {
+                    (
+                        details.address,
+                        AccessControllerOnLedger {
+                            controlled_entity: details.controlled_entity,
+                            timed_recovery_delay_in_minutes: details
+                                .state
+                                .timed_recovery_delay_minutes,
+                        },
+                    )
                 })
                 .collect::<IndexMap<_, _>>()
         })
         .unwrap_or_else(|error| {
-            warn!(
-                "Failed to read the entities access controllers control: {error}"
-            );
+            warn!("Failed to read the access controllers operated on: {error}");
             IndexMap::new()
         });
     execution_summary.detailed_classification =
         execution_summary.detailed_classification.map(|class| {
-            class.with_controlled_entities(&|access_controller| {
-                controlled.get(access_controller).cloned()
+            class.with_access_controllers_on_ledger(&|access_controller| {
+                on_ledger
+                    .get(access_controller)
+                    .cloned()
+                    .unwrap_or_default()
             })
         });
     Ok(execution_summary)

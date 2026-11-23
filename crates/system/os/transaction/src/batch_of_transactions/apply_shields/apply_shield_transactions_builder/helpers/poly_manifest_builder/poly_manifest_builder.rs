@@ -3,8 +3,6 @@ use crate::prelude::*;
 use super::{
     ApplyShieldTransactionsManifestTxFeeModifier,
     ApplyShieldTransactionsManifestTxFeeModifierImpl,
-    ApplyShieldTransactionsManifestXrdVaultContributor,
-    ApplyShieldTransactionsManifestXrdVaultContributorImpl,
 };
 
 pub trait ApplyShieldTransactionsPolyManifestBuilder: Send + Sync {
@@ -16,8 +14,6 @@ pub trait ApplyShieldTransactionsPolyManifestBuilder: Send + Sync {
 
 pub struct ApplyShieldTransactionsPolyManifestBuilderImpl {
     fee_adder: Arc<dyn ApplyShieldTransactionsManifestTxFeeModifier>,
-    xrd_vault_contributor:
-        Arc<dyn ApplyShieldTransactionsManifestXrdVaultContributor>,
 }
 
 impl Default for ApplyShieldTransactionsPolyManifestBuilderImpl {
@@ -32,10 +28,6 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
             fee_adder: Arc::new(
                 ApplyShieldTransactionsManifestTxFeeModifierImpl::default(),
             ),
-            xrd_vault_contributor: Arc::new(
-                ApplyShieldTransactionsManifestXrdVaultContributorImpl::default(
-                ),
-            ),
         }
     }
 
@@ -43,10 +35,9 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
         &self,
         input: ApplicationInputForUnsecurifiedAccount,
     ) -> Result<SecurityShieldApplicationForUnsecurifiedAccount> {
+        // The new access controller's XRD vault is topped up in a transaction
+        // of its own once it exists, not in the one that securifies.
         let input = self.fee_adder.add_fee_for_unsecurified_account(input)?;
-        let input = self
-            .xrd_vault_contributor
-            .add_xrd_vault_contribution_for_unsecurified_account(input)?;
         let fee_tip_percentage = input.fee_tip_percentage();
         Ok(SecurityShieldApplicationForUnsecurifiedAccount::with_modified_manifest(
             input.entity_input.unsecurified_entity.clone(),
@@ -61,9 +52,7 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
         input: ApplicationInputForUnsecurifiedPersona,
     ) -> Result<SecurityShieldApplicationForUnsecurifiedPersona> {
         let input = self.fee_adder.add_fee_for_unsecurified_persona(input)?;
-        let (input, paying_account) = self
-            .xrd_vault_contributor
-            .add_xrd_vault_contribution_for_unsecurified_persona(input)?;
+        let paying_account = input.paying_account.clone();
 
         let fee_tip_percentage = input.fee_tip_percentage();
         Ok(SecurityShieldApplicationForUnsecurifiedPersona::with_modified_manifest(
@@ -99,13 +88,6 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
                 let manifest_with = self
                     .fee_adder
                     .add_fee_securified_account(manifest_with, variant)?;
-
-                let manifest_with = self
-                    .xrd_vault_contributor
-                    .add_xrd_vault_contribution_for_securified_account(
-                        manifest_with,
-                        variant,
-                    )?;
 
                 Ok(manifest_with.reviewed_manifest)
             };
@@ -149,13 +131,6 @@ impl ApplyShieldTransactionsPolyManifestBuilderImpl {
                 let manifest_with = self
                     .fee_adder
                     .add_fee_for_securified_persona(manifest_with, variant)?;
-
-                let manifest_with = self
-                    .xrd_vault_contributor
-                    .add_xrd_vault_contribution_for_securified_persona(
-                        manifest_with,
-                        variant,
-                    )?;
 
                 Ok(manifest_with.reviewed_manifest)
             };

@@ -320,7 +320,7 @@ radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "628e709c9e0b99b715126af319ea2a83c4b37015" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "884247cf1d9a55daf36a1d66ab1c9f7368db77c4" }
 radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
 radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f", features = [
     "serde",

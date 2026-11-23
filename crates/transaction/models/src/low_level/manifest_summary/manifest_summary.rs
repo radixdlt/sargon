@@ -260,18 +260,25 @@ pub enum ManifestClassification {
     AccountDepositSettingsUpdate,
     /// A manifest that securifies entities by moving their badge
     /// to a newly created access controller. In this manifest class the entity
-    /// is securified, its owner_keys is updated and an access controller is
-    /// created.
+    /// is securified and an access controller is created; nothing else.
     EntitySecurify,
-    /// A manifest that starts the access controller recovery, it is either
-    /// confirmed in the same transaction, or it is a timed recovery, currently
-    /// the difference is not important.
+    /// A manifest that proposes new rules for access controllers and confirms
+    /// them in the same transaction.
     AccessControllerRecovery,
-    /// A manifest that stops the timed recovery.
-    /// It can as well contain instructions to cancel the given recovery proposal.
-    AccessControllerStopTimedRecovery,
-    /// A manifest that confirms the timed recovery.
-    AccessControllerConfirmTimedRecovery,
+    /// A manifest that starts a timed recovery of access controllers.
+    AccessControllerTimedRecovery,
+    /// A manifest that confirms recoveries already proposed on access
+    /// controllers.
+    AccessControllerConfirmRecovery,
+    /// A manifest that stops or cancels recoveries already proposed on access
+    /// controllers.
+    AccessControllerCancelRecovery,
+    /// A manifest that locks or unlocks the primary role of access
+    /// controllers.
+    AccessControllerPrimaryRoleLock,
+    /// A manifest that tops up or withdraws from the recovery fee vaults of
+    /// access controllers.
+    AccessControllerRecoveryFee,
 }
 
 impl From<RetManifestClass> for ManifestClassification {
@@ -292,11 +299,20 @@ impl From<RetManifestClass> for ManifestClassification {
             RetManifestClass::AccessControllerRecovery => {
                 Self::AccessControllerRecovery
             }
-            RetManifestClass::AccessControllerConfirmTimedRecovery => {
-                Self::AccessControllerConfirmTimedRecovery
+            RetManifestClass::AccessControllerTimedRecovery => {
+                Self::AccessControllerTimedRecovery
             }
-            RetManifestClass::AccessControllerStopTimedRecovery => {
-                Self::AccessControllerStopTimedRecovery
+            RetManifestClass::AccessControllerConfirmRecovery => {
+                Self::AccessControllerConfirmRecovery
+            }
+            RetManifestClass::AccessControllerCancelRecovery => {
+                Self::AccessControllerCancelRecovery
+            }
+            RetManifestClass::AccessControllerPrimaryRoleLock => {
+                Self::AccessControllerPrimaryRoleLock
+            }
+            RetManifestClass::AccessControllerRecoveryFee => {
+                Self::AccessControllerRecoveryFee
             }
         }
     }

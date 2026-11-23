@@ -1,12 +1,21 @@
 use crate::prelude::*;
 
-/// The access controller operations a pre-authorization may make. For now
-/// only recoveries; others, such as confirming or stopping a timed recovery,
-/// are to be added as the wallet supports them.
+/// The access controller operations a pre-authorization may make: changing,
+/// confirming or cancelling an access controller's rules, and locking or
+/// unlocking its primary role. Each class shows everything its manifest does,
+/// and the checks below make sure the user alone passes none of the roles
+/// needed, so others sharing control must sign too.
+///
+/// Moving XRD out of an access controller's recovery fee vault isn't allowed:
+/// it can deposit into any account, which needs no authorization of its own.
 fn is_allowed_in_pre_authorizations(class: &DetailedManifestClass) -> bool {
     matches!(
         class,
         DetailedManifestClass::AccessControllerRecovery { .. }
+            | DetailedManifestClass::AccessControllerTimedRecovery { .. }
+            | DetailedManifestClass::AccessControllerConfirmRecovery { .. }
+            | DetailedManifestClass::AccessControllerCancelRecovery { .. }
+            | DetailedManifestClass::AccessControllerPrimaryRoleLock { .. }
     )
 }
 
@@ -179,6 +188,47 @@ mod tests {
 
     fn called() -> IndexSet<AccessControllerAddress> {
         IndexSet::from([AccessControllerAddress::sample_stokenet()])
+    }
+
+    #[test]
+    fn access_controller_operations_are_allowed_but_not_moving_xrd() {
+        let allowed = [
+            DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: Vec::new(),
+                recovery_proposals: Vec::new(),
+            },
+            DetailedManifestClass::AccessControllerTimedRecovery {
+                ac_addresses: Vec::new(),
+                timed_recoveries: Vec::new(),
+            },
+            DetailedManifestClass::AccessControllerConfirmRecovery {
+                ac_addresses: Vec::new(),
+                confirmations: Vec::new(),
+            },
+            DetailedManifestClass::AccessControllerCancelRecovery {
+                ac_addresses: Vec::new(),
+                cancellations: Vec::new(),
+            },
+            DetailedManifestClass::AccessControllerPrimaryRoleLock {
+                ac_addresses: Vec::new(),
+                operations: Vec::new(),
+            },
+        ];
+        let not_allowed = [
+            DetailedManifestClass::AccessControllerRecoveryFee {
+                ac_addresses: Vec::new(),
+                contributions: Vec::new(),
+                withdrawals: Vec::new(),
+                account_withdrawals: Vec::new(),
+                account_deposits: Vec::new(),
+            },
+            DetailedManifestClass::SecurifyEntity {
+                entities: Vec::new(),
+            },
+            DetailedManifestClass::General,
+        ];
+        assert!(allowed.iter().all(is_allowed_in_pre_authorizations));
+        assert!(!not_allowed.iter().any(is_allowed_in_pre_authorizations));
     }
 
     #[test]

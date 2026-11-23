@@ -16,23 +16,14 @@ pub async fn sign_access_controller_stop_timed_recovery_transaction(
     let profile = os.profile()?;
     let gw_client = os.gateway_client();
 
-    let (fee_paying_account_address, fee) = base_transaction_intent
-        .extract_fee_payer_info()
-        .expect("Should have a fee payer configured");
-
-    let fee_payer_xrd_balance = gw_client
-        .xrd_balance_of_account_or_zero(fee_paying_account_address)
-        .await?;
-    let fee_payer_account =
-        profile.account_by_address(fee_paying_account_address)?;
-    let lock_fee_data = LockFeeDataWithResolvedAccount::new(
-        fee_payer_account.clone(),
-        LockFeeData::new_with_account(
-            fee_payer_account,
-            fee,
-            fee_payer_xrd_balance,
-        ),
-    );
+    let fee_payer = AccessControllerTransactionFeePayer::of(
+        &base_transaction_intent,
+        &profile,
+    )?;
+    let fee_payer_account = fee_payer
+        .account()
+        .map(|address| profile.account_by_address(address))
+        .transpose()?;
 
     let ac_state_details = gw_client
         .fetch_access_controller_details(ac_address)
@@ -44,7 +35,8 @@ pub async fn sign_access_controller_stop_timed_recovery_transaction(
     let factory = StopTimedRecoverySignaturesCollectorFactory::new(
         base_transaction_intent,
         AnySecurifiedEntity::new(securified_entity)?,
-        lock_fee_data,
+        fee_payer,
+        fee_payer_account,
         ac_state_details,
         Arc::new(DefaultTransactionIntentSignaturesCollectorBuilder::new(
             os.sign_transactions_interactor(),

@@ -4,20 +4,22 @@ pub struct StopTimedRecoverySignaturesCollectorFactory {
     pub(crate) intents: AccessControllerStopTimedRecoveryIntents,
     collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder>,
     securified_entity: AnySecurifiedEntity,
-    lock_fee_data: LockFeeDataWithResolvedAccount,
+    /// The account that pays the fee, unless the access controller does.
+    fee_payer_account: Option<Account>,
 }
 
 impl StopTimedRecoverySignaturesCollectorFactory {
     pub fn new(
         base_intent: TransactionIntent,
         securified_entity: AnySecurifiedEntity,
-        lock_fee_data: LockFeeDataWithResolvedAccount,
+        fee_payer: AccessControllerTransactionFeePayer,
+        fee_payer_account: Option<Account>,
         ac_state_details: AccessControllerStateDetails,
         collector_builder: Arc<dyn TransactionIntentSignaturesCollectorBuilder>,
     ) -> Result<Self> {
         let intents = AccessControllerStopTimedRecoveryIntentsBuilder::new(
             base_intent,
-            lock_fee_data.lock_fee_data.clone(),
+            fee_payer,
             securified_entity.clone(),
             ac_state_details,
         )
@@ -27,7 +29,7 @@ impl StopTimedRecoverySignaturesCollectorFactory {
             intents,
             collector_builder,
             securified_entity,
-            lock_fee_data,
+            fee_payer_account,
         })
     }
 
@@ -46,8 +48,12 @@ impl StopTimedRecoverySignaturesCollectorFactory {
         &self,
         intent_hash: &TransactionIntentHash,
     ) -> Result<Option<Box<dyn TransactionIntentSignaturesCollector>>> {
+        // The access controller pays: no account needs to sign for it.
+        let Some(fee_payer_account) = &self.fee_payer_account else {
+            return Ok(None);
+        };
         let fee_payer_is_securified_account =
-            self.lock_fee_data.account.address().scrypto()
+            fee_payer_account.address().scrypto()
                 == self.securified_entity.address().scrypto();
         let used_role_combination =
             self.intents.role_kind_for_intent_hash(intent_hash);
@@ -63,10 +69,8 @@ impl StopTimedRecoverySignaturesCollectorFactory {
             return Ok(None);
         };
 
-        let fee_payer_signable = SignableWithEntities::with(
-            intent,
-            vec![self.lock_fee_data.account.clone()],
-        );
+        let fee_payer_signable =
+            SignableWithEntities::with(intent, vec![fee_payer_account.clone()]);
 
         Ok(Some(self.collector_builder.build(
             IdentifiedVecOf::from(vec![fee_payer_signable]),

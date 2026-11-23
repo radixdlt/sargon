@@ -20,6 +20,25 @@ impl SargonOS {
             .into_result()
     }
 
+    /// Locks the fee against the XRD vault of `access_controller`, which the
+    /// user picked as the fee payer instead of an account.
+    pub async fn modify_transaction_manifest_with_access_controller_fee_payer(
+        &self,
+        transaction_manifest: TransactionManifest,
+        access_controller: AccessControllerAddress,
+        fee: Decimal192,
+        guarantees: Vec<TransactionGuarantee>,
+    ) -> Result<TransactionManifest> {
+        self.wrapped
+            .modify_transaction_manifest_with_access_controller_fee_payer(
+                transaction_manifest.into_internal(),
+                access_controller.into_internal(),
+                fee.into_internal(),
+                guarantees.iter().map(|g| g.into_internal()),
+            )
+            .into_result()
+    }
+
     pub async fn modify_transaction_manifest_without_fee_payer(
         &self,
         transaction_manifest: TransactionManifest,

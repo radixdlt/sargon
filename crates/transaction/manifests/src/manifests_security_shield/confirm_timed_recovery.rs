@@ -96,17 +96,20 @@ mod tests {
         manifest_eq(manifest.clone(), expected_manifest_str);
         assert!(expected_manifest_str.contains("accesscontroller_rdx1cdgcq7yqee9uhyqrsp9kgud3a7h4dvz3dqmx26ws5dmjsu7g3zg23g"));
 
-        let manifest = SUT::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(securified_account.clone(), securified_account.clone(), manifest.clone(), Decimal192::ten(), RolesExercisableInTransactionManifestCombination::manifest_end_user_gets_to_preview()).unwrap();
-
-        let expected_manifest_str =
-            fixture_rtm!("confirm_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery");
-        manifest_eq(manifest.clone(), expected_manifest_str);
-
-        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), securified_account.access_controller_address().clone());
-
-        let expected_manifest_str =
-            fixture_rtm!("confirm_account_shield_timed_recovery_with_top_up_where_payer_is_entity_confirming_recovery_with_xrd_lock");
-        manifest_eq(manifest, expected_manifest_str);
+        // The access controller pays only when the user picks it, and its
+        // vault is topped up in a transaction of its own.
+        let access_controller = securified_account.access_controller_address();
+        let manifest = SUT::modify_manifest_add_lock_fee_against_xrd_vault_of_access_controller(manifest, Decimal192::nine(), access_controller);
+        assert_eq!(
+            manifest.extract_fee_payer(),
+            Some(FeePayerOfManifest::AccessController {
+                address: access_controller,
+                fee: Decimal192::nine(),
+            })
+        );
+        assert!(!manifest
+            .manifest_string()
+            .contains("contribute_recovery_fee"));
     }
 
     #[test]

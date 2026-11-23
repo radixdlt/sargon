@@ -45,15 +45,25 @@ hold:
 | Rule | Why |
 |---|---|
 | **Enclosed** | The subintent takes nothing from its parent, so the wallet can preview it alone, and what the user reviews is all it does. |
-| **Classified** | RET's classifier is a strict allowlist: the manifest contains access controller recovery calls and nothing else. Sargon relies on it rather than re-checking instructions. |
+| **Classified** | RET's classifiers are strict allowlists, and the manifest must be of one of the access controller classes below. Each requires exact calls on every access controller and nothing else besides: a subintent may not even pay the fee, and may only yield to its parent at the end. Sargon relies on them rather than re-checking instructions. |
 | **No account or persona authorizes it** | The only authority the user adds is the keys of the next check. A dApp can't bundle the call with anything that spends from or acts as the user's own entities. |
 | **The user's keys alone pass no role** | A pre-authorization is by definition **shared** signing. If the user could pass a role alone, the call would act on an access controller they control alone, and a malicious dApp could get them to give up their own account. This is checked against every role (not only the ones the calls need), with the controllers' current rules read from the ledger. An access controller whose rules can't be read counts as passed, so the request is rejected. |
 
 The keys the wallet signs with are, for now, **only its MFA factor
 instances**, so the last check compares those keys' badges with each role.
-These rules are deliberately strict; they can be relaxed once the need is
-clear, and other access controller operations (confirm or stop a timed
-recovery, lock the primary role, …) can be allowed case by case.
+
+The classes a pre-authorization may be of, each showing all it does:
+
+| Class | What it does on each access controller |
+|---|---|
+| Recovery | proposes rules and quick-confirms the same ones: the change is made |
+| Timed recovery | the recovery role proposes rules, optionally locking the primary role; anyone can confirm them once the access controller's delay has passed |
+| Confirm recovery | confirms a proposal already made, quickly or after the delay |
+| Cancel recovery | stops a timed recovery and/or cancels proposals, optionally unlocking the primary role |
+| Primary role lock | locks or unlocks the primary role |
+
+Moving XRD out of an access controller's recovery fee vault isn't allowed: it
+can deposit into any account, which needs no authorization of its own.
 
 Whether the controlled account is in the user's Profile doesn't matter: a
 shared account can be there too (e.g. after MFA rediscovery), so ownership is
@@ -82,6 +92,8 @@ The review shows the **proposed rules**, role by role, as an
   "Bob". A key without a name stands out.
 - The emergency fallback (timed recovery): the time after which a change
   proposed with the recovery role can be completed without being confirmed.
+  The engine doesn't apply the delay a proposal names, so a timed recovery
+  also carries the access controller's current delay, read from the ledger.
 
 Address book entries for non-fungibles are stored in a list of their own, so
 older wallets still load the Profile:
@@ -92,15 +104,16 @@ older wallets still load the Profile:
 
 - The review shows the proposed rules, not a comparison with the current
   ones; a lowered threshold isn't called out.
-- The proposal doesn't say whether it is also confirmed in the same
-  transaction.
+- A cancellation doesn't name the proposal it cancels: it's whichever is
+  pending when the transaction runs, so the review has to read it from the
+  ledger.
 - The Gateway's preview fails for proposed rules nested 4 or more levels
   deep, so such proposals can't be reviewed.
 - A dApp-supplied header without `max_proposer_timestamp_exclusive` makes
   `WalletToDappInteractionSubintentResponseItem::from` panic; it should be an
   error.
-- Depends on the RET classification of enclosed access controller
-  subintents, not yet merged upstream.
+- Depends on RET's access controller classes, on the
+  `ac_manifest_clasification_improved` branch, not yet merged upstream.
 
 ---
 

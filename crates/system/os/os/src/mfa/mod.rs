@@ -3,6 +3,7 @@ pub mod confirm_timed_recovery;
 pub mod factor_instances_derivation;
 mod sargon_os_access_controller_state;
 pub mod securify_unsecurified_entity;
+mod shield_follow_ups;
 mod stop_timed_recovery;
 pub mod update_securified_entity;
 

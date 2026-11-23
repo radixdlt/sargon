@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 pub struct AccessControllerRecoveryIntentsBuilder {
     base_intent: TransactionIntent,
-    // The lock fee data for the above intent
-    lock_fee_data: LockFeeData,
+    // Who pays the fee of the above intent
+    fee_payer: AccessControllerTransactionFeePayer,
     securified_entity: AnySecurifiedEntity,
     proposed_security_structure: SecurityStructureOfFactorInstances,
     ac_state_details: AccessControllerStateDetails,
@@ -12,14 +12,14 @@ pub struct AccessControllerRecoveryIntentsBuilder {
 impl AccessControllerRecoveryIntentsBuilder {
     pub fn new(
         base_intent: TransactionIntent,
-        lock_fee_data: LockFeeData,
+        fee_payer: AccessControllerTransactionFeePayer,
         securified_entity: AnySecurifiedEntity,
         proposed_security_structure: SecurityStructureOfFactorInstances,
         ac_state_details: AccessControllerStateDetails,
     ) -> Self {
         Self {
             base_intent,
-            lock_fee_data,
+            fee_payer,
             securified_entity,
             proposed_security_structure,
             ac_state_details,
@@ -66,16 +66,16 @@ impl AccessControllerRecoveryIntentsBuilder {
                 role_combination,
             );
 
-        manifest = manifest.apply_cancel_recovery_proposal_instruction(
-            &self.ac_state_details,
-            role_combination,
-        );
-        manifest = manifest.apply_lock_fee_instruction(
+        // A recovery already pending isn't cancelled here: the wallet shows it
+        // to the user to review and cancel first, in a transaction of its own.
+        let placement = FeeLockPlacement::new(
+            &self.fee_payer,
             self.securified_entity.address(),
-            &self.lock_fee_data,
-            &self.ac_state_details,
+            self.ac_state_details.state.is_primary_role_locked,
             role_combination,
         );
+        manifest =
+            manifest.apply_lock_fee_instruction(&self.fee_payer, placement)?;
 
         let intent = TransactionIntent::new(
             self.base_intent.header,

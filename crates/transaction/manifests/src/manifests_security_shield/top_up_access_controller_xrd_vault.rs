@@ -1,5 +1,3 @@
-use profile_supporting_types::{AnySecurifiedEntity, AnyUnsecurifiedEntity};
-use radix_common::prelude::ManifestGlobalAddress;
 use radix_engine_interface::blueprints::access_controller::{
     AccessControllerContributeRecoveryFeeManifestInput,
     ACCESS_CONTROLLER_CONTRIBUTE_RECOVERY_FEE_IDENT as SCRYPTO_ACCESS_CONTROLLER_CONTRIBUTE_RECOVERY_FEE_IDENT,
@@ -20,226 +18,45 @@ pub fn xrd_target_for_access_controller() -> Decimal192 {
     XRD_TO_AC_VAULT_FIRST_TOP_UP.into()
 }
 
-pub trait TransactionManifestAccessControllerXrdVaultToppingUp {
-    /// A method modifying manifests which applies security shield. We
-    /// The `manifest` which applies the security shield could not include
-    /// the instructions which we append in this method since the host did
-    /// not know the `payer` at the time of creating that manifest. The host
-    /// will call this method when the `payer` is known, which appends instructions
-    /// at the end of `manifest` for topping the XRD vault of the access controller
-    /// with `top_up_amount` many XRD.
+pub trait TransactionManifestTopUpAccessControllerXrdVault {
+    /// A transaction of its own that withdraws `amount` XRD from `payer` and
+    /// contributes it to the recovery fee vault of `access_controller`, which
+    /// must already exist. It's classified as an access controller recovery
+    /// fee transaction, which shows the XRD moved.
     ///
-    /// We will use the address reservation of `apply_security_shield_for_unsecurified_entity`
-    /// (`ACCESS_CONTROLLER_ADDRESS_RESERVATION_NAME`) which we cannot access by id
-    /// since Radix Engine discard those ids and uses internal ones, instead we need
-    /// to use `ManifestGlobalAddress::Named(ScryptoManifestNamedAddress(0))`.
-    ///
-    /// If `payer` is securified we will also add a `create_proof` instruction for
-    /// authenticating the withdrawal of XRD from the payer.
-    ///
-    /// If `top_up_amount` is `None` the `XRD_TO_AC_VAULT_FIRST_TOP_UP` will be used.
-    /// We allow to pass amount so that we can top of with more or less based on
-    /// token balance of `payer` and current balance of the access controller (when
-    /// we use this method for securified entities.)
-    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
-        payer: impl Into<Account>,
-        // TODO: remove `unsecurified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
-        unsecurified_entity_applying_shield: AnyUnsecurifiedEntity,
-        manifest: TransactionManifest,
-        top_up_amount: impl Into<Option<Decimal192>>,
+    /// If `payer` is securified, a proof of its access controller's badge
+    /// authorizes the withdrawal.
+    fn top_up_access_controller_xrd_vault(
+        access_controller: AccessControllerAddress,
+        payer: &Account,
+        amount: Decimal192,
     ) -> TransactionManifest {
-        Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
-            payer,
-            unsecurified_entity_applying_shield.entity,
-            manifest,
-            top_up_amount,
-            true, false
-        ).expect("Should never fail")
-    }
-
-    fn modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_securified_entity_paid_by_account(
-        payer: impl Into<Account>,
-        // TODO: remove `securified_entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
-        securified_entity_applying_shield: impl Into<AnySecurifiedEntity>,
-        manifest: TransactionManifest,
-        top_up_amount: impl Into<Option<Decimal192>>,
-        manifest_variant: RolesExercisableInTransactionManifestCombination,
-    ) -> Result<TransactionManifest> {
-        Self::_modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
-            payer,
-            securified_entity_applying_shield.into().entity,
-            manifest,
-            top_up_amount,
-            manifest_variant.can_exercise_primary_role(),
-            manifest_variant.can_quick_confirm(),
-        )
-    }
-
-    fn modify_manifest_top_up_ac_from_securified_account(
-        manifest: TransactionManifest,
-        ac_address_to_topup: ManifestGlobalAddress,
-        fee_payer_address: AccountAddress,
-        fee_payer_access_controller_address: Option<AccessControllerAddress>,
-        fee_amount: Decimal192,
-        can_exercise_primary_role: bool,
-    ) -> Result<TransactionManifest> {
-        let network_id = manifest.network_id();
         let mut builder = ScryptoTransactionManifestBuilder::new();
-
-        let top_up_amount = ScryptoDecimal192::from(fee_amount);
-
-        let add_withdraw_instruction = |builder: ScryptoTransactionManifestBuilder| -> ScryptoTransactionManifestBuilder {
-            let mut builder = builder;
-            if let Some(address_of_access_controller_of_payer) = fee_payer_access_controller_address
-            {
-                builder = builder.call_method(
-                    address_of_access_controller_of_payer.scrypto(),
-                    SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
-                    (),
-                );
-            }
-
-            // Add withdraw XRD instruction
-            builder.withdraw_from_account(
-                fee_payer_address.scrypto(),
-                XRD,
-                top_up_amount,
-            )
-        };
-
-        if can_exercise_primary_role {
-            builder = add_withdraw_instruction(builder);
-            builder = builder.extend_builder_with_manifest(manifest);
-        } else {
-            builder = builder.extend_builder_with_manifest(manifest);
-            builder = add_withdraw_instruction(builder);
-        }
-
-        // Deposit XRD into the access controllers XRD vault
-        // ... by first taking the XRD from the work top
-        let xrd_to_top_up_ac_vault_bucket_name =
-            "xrd_to_top_up_ac_vault_bucket";
-        builder = builder.take_from_worktop(
-            XRD,
-            top_up_amount,
-            xrd_to_top_up_ac_vault_bucket_name,
-        );
-        let xrd_to_top_up_ac_vault_bucket =
-            builder.bucket(xrd_to_top_up_ac_vault_bucket_name);
-
-        // ... then deposit to XRD vault of access controller
-        builder = builder.call_method(
-            ac_address_to_topup,
-            SCRYPTO_ACCESS_CONTROLLER_CONTRIBUTE_RECOVERY_FEE_IDENT,
-            AccessControllerContributeRecoveryFeeManifestInput {
-                bucket: xrd_to_top_up_ac_vault_bucket,
-            },
-        );
-
-        let manifest = TransactionManifest::sargon_built(builder, network_id);
-
-        Ok(manifest)
-    }
-
-    fn _modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_paid_by_account(
-        payer: impl Into<Account>,
-        // TODO: remove `entity_applying_shield`, this should be read out from the manifest in a throwing function, `manifest.get_address_of_entity_applying_shield()` or similar which Omar need to provide us with, oh well we need the account here, so elsewhere, in SargonOS where we have access to Profile we would call `manifest.get_address_of_entity_applying_shield` and then lookup the entity.
-        entity_applying_shield: AccountOrPersona,
-        manifest: TransactionManifest,
-        top_up_amount: impl Into<Option<Decimal192>>,
-        _can_exercise_primary_role: bool,
-        _can_quick_confirm: bool,
-    ) -> Result<TransactionManifest> {
-        let mut builder = ScryptoTransactionManifestBuilder::new();
-        let payer = payer.into();
-        let address_of_paying_account = payer.address();
-
-        let address_of_access_controller_to_top_up =
-            match entity_applying_shield.security_state() {
-                EntitySecurityState::Securified { value: sec } => {
-                    ManifestGlobalAddress::Static(
-                        sec.access_controller_address().scrypto(),
-                    )
-                }
-                EntitySecurityState::Unsecured { .. } => {
-                    // We are securifying an unsecurified account => use the
-                    // address reservation at index 0,
-                    // which `apply_security_shield_for_unsecurified_entity`
-                    // is using to create the access controller address
-                    ManifestGlobalAddress::Named(ScryptoManifestNamedAddress(0))
-                }
-            };
-
-        let address_of_access_controller_of_payer = {
-            match payer.security_state() {
-                EntitySecurityState::Securified { value: sec } => {
-                    Some(ManifestGlobalAddress::Static(
-                        sec.access_controller_address().scrypto(),
-                    ))
-                }
-                EntitySecurityState::Unsecured { .. } => {
-                    // No access controller to create proof for
-                    None
-                }
-            }
-        };
-
-        // Add `create_proof` instruction for the access controller
-        if let Some(address_of_access_controller_of_payer) =
-            address_of_access_controller_of_payer
+        if let EntitySecurityState::Securified { value } =
+            payer.security_state()
         {
             builder = builder.call_method(
-                address_of_access_controller_of_payer,
+                value.access_controller_address().scrypto(),
                 SCRYPTO_ACCESS_CONTROLLER_CREATE_PROOF_IDENT,
                 (),
             );
         }
-
-        let top_up_amount = top_up_amount
-            .into()
-            .map(ScryptoDecimal192::from)
-            .unwrap_or(XRD_TO_AC_VAULT_FIRST_TOP_UP);
-
-        // Add withdraw XRD instruction
-        builder = builder.withdraw_from_account(
-            address_of_paying_account.scrypto(),
-            XRD,
-            top_up_amount,
-        );
-
-        builder = builder.extend_builder_with_manifest(manifest);
-
-        // Deposit XRD into the access controllers XRD vault
-        // ... by first taking the XRD from the work top
-        let xrd_to_top_up_ac_vault_bucket_name =
-            "xrd_to_top_up_ac_vault_bucket";
-        builder = builder.take_from_worktop(
-            XRD,
-            top_up_amount,
-            xrd_to_top_up_ac_vault_bucket_name,
-        );
-        let xrd_to_top_up_ac_vault_bucket =
-            builder.bucket(xrd_to_top_up_ac_vault_bucket_name);
-
-        // ... then deposit to XRD vault of access controller
+        let amount = ScryptoDecimal192::from(amount);
+        let bucket = "xrd_to_top_up_ac_vault_bucket";
+        builder = builder
+            .withdraw_from_account(payer.address.scrypto(), XRD, amount)
+            .take_from_worktop(XRD, amount, bucket);
+        let xrd = builder.bucket(bucket);
         builder = builder.call_method(
-            address_of_access_controller_to_top_up,
+            access_controller.scrypto(),
             SCRYPTO_ACCESS_CONTROLLER_CONTRIBUTE_RECOVERY_FEE_IDENT,
-            AccessControllerContributeRecoveryFeeManifestInput {
-                bucket: xrd_to_top_up_ac_vault_bucket,
-            },
+            AccessControllerContributeRecoveryFeeManifestInput { bucket: xrd },
         );
-
-        let manifest = TransactionManifest::sargon_built(
+        TransactionManifest::sargon_built(
             builder,
-            address_of_paying_account.network_id(),
-        );
-
-        Ok(manifest)
+            access_controller.network_id(),
+        )
     }
 }
 
-impl TransactionManifestAccessControllerXrdVaultToppingUp
-    for TransactionManifest
-{
-}
+impl TransactionManifestTopUpAccessControllerXrdVault for TransactionManifest {}

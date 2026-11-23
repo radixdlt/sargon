@@ -7,6 +7,22 @@ impl SargonOS {
         entity: AccountOrPersona,
         entity_sec_structure: SecurityStructureOfFactorInstances,
     ) -> Result<TransactionManifest> {
+        let ac_address = entity
+            .security_state()
+            .as_securified()
+            .ok_or(CommonError::Unknown {
+                error_message: "The entity must be securified".to_owned(),
+            })?
+            .access_controller_address;
+        // Read from the ledger, not the cache: the user may just have
+        // cancelled the pending recovery.
+        ensure_no_recovery_is_pending(
+            &self
+                .gateway_client()
+                .fetch_access_controller_details(ac_address)
+                .await?,
+        )?;
+
         let profile_snapshot = self.profile()?;
 
         // Read the current configuration
@@ -100,15 +116,8 @@ impl SargonOS {
 
         let securified_entity_control =
             entity.security_state().into_securified().unwrap();
-        let ac_address = securified_entity_control.access_controller_address;
 
-        // Fetch the current Access Controller state to check for existing recovery attempts
-        let ac_state_details = self
-            .access_controller_state_repository_client
-            .get_cached_access_controller_details(&ac_address)
-            .await?;
-
-        let mut manifest =
+        Ok(
             TransactionManifest::apply_security_shield_for_securified_entity(
                 AnySecurifiedEntity::with_securified_entity_control(
                     entity.clone(),
@@ -116,14 +125,81 @@ impl SargonOS {
                 ),
                 security_structure_of_factor_instances,
                 role_combination,
-            );
+            ),
+        )
+    }
+}
 
-        // Cancel any existing recovery proposal before initiating a new one
-        manifest = manifest.apply_cancel_recovery_proposal_instruction(
-            &ac_state_details,
-            role_combination,
+/// New rules can't be proposed while a recovery is pending: a role can't
+/// propose while its own proposal is pending, and the wallet signs whichever
+/// role combination the user's factors can complete. The user reviews and
+/// cancels the pending recovery first, in a transaction of its own, rather
+/// than it being cancelled unseen in the one proposing new rules.
+fn ensure_no_recovery_is_pending(
+    access_controller: &AccessControllerStateDetails,
+) -> Result<()> {
+    let state = &access_controller.state;
+    if state.recovery_role_recovery_attempt.is_some()
+        || state.primary_role_recovery_attempt.is_some()
+    {
+        Err(CommonError::AccessControllerRecoveryProposalPending)
+    } else {
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn access_controller(
+        primary_role_proposal: bool,
+        recovery_role_proposal: bool,
+    ) -> AccessControllerStateDetails {
+        let proposal = || RecoveryProposal {
+            primary_role: AccessRule::AllowAll,
+            recovery_role: AccessRule::AllowAll,
+            confirmation_role: AccessRule::AllowAll,
+            timed_recovery_delay_minutes: None,
+        };
+        AccessControllerStateDetails::new(
+            AccessControllerAddress::sample(),
+            AccessControllerFieldStateValue {
+                primary_role_recovery_attempt: primary_role_proposal.then(
+                    || PrimaryRoleRecoveryAttempt {
+                        recovery_proposal: proposal(),
+                    },
+                ),
+                recovery_role_recovery_attempt: recovery_role_proposal.then(
+                    || RecoveryRoleRecoveryAttempt {
+                        recovery_proposal: proposal(),
+                        allow_timed_recovery_after: None,
+                    },
+                ),
+                ..AccessControllerFieldStateValue::sample()
+            },
+            Decimal192::zero(),
+        )
+    }
+
+    #[test]
+    fn new_rules_can_be_proposed_without_a_pending_recovery() {
+        assert_eq!(
+            ensure_no_recovery_is_pending(&access_controller(false, false)),
+            Ok(())
         );
+    }
 
-        Ok(manifest)
+    #[test]
+    fn a_pending_recovery_of_either_role_must_be_cancelled_first() {
+        for (primary, recovery) in [(true, false), (false, true), (true, true)]
+        {
+            assert_eq!(
+                ensure_no_recovery_is_pending(&access_controller(
+                    primary, recovery
+                )),
+                Err(CommonError::AccessControllerRecoveryProposalPending)
+            );
+        }
     }
 }

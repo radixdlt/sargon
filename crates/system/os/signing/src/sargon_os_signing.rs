@@ -27,6 +27,52 @@ pub trait OsSigning {
     ) -> Result<SignedSubintent>;
 }
 
+/// How a transaction is signed, by its class.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SigningFlow {
+    /// Updating a shield. The wallet reviews one role combination, a timed
+    /// recovery, but signs whichever combination the user's factors can
+    /// complete, which may confirm it at once.
+    AccessControllerRecovery(AccessControllerAddress),
+    /// Stopping a timed recovery, signed with whichever role is available,
+    /// cancelling the proposal too when it's the recovery role.
+    StopTimedRecovery(AccessControllerAddress),
+    /// Anything else, securifying included: signed with the primary role,
+    /// exactly as reviewed.
+    AsReviewed,
+}
+
+impl SigningFlow {
+    fn of(class: Option<&DetailedManifestClass>) -> Self {
+        match class {
+            Some(
+                DetailedManifestClass::AccessControllerRecovery {
+                    ac_addresses,
+                    ..
+                }
+                | DetailedManifestClass::AccessControllerTimedRecovery {
+                    ac_addresses,
+                    ..
+                },
+            ) => ac_addresses.first().map_or(Self::AsReviewed, |ac| {
+                Self::AccessControllerRecovery(*ac)
+            }),
+            Some(DetailedManifestClass::AccessControllerCancelRecovery {
+                ac_addresses,
+                cancellations,
+            }) if cancellations.iter().all(|cancellation| {
+                cancellation.stopped_timed_recovery.is_some()
+            }) =>
+            {
+                ac_addresses
+                    .first()
+                    .map_or(Self::AsReviewed, |ac| Self::StopTimedRecovery(*ac))
+            }
+            _ => Self::AsReviewed,
+        }
+    }
+}
+
 // ==================
 // Sign Signables
 // ==================
@@ -49,40 +95,26 @@ impl OsSigning for SargonOS {
         transaction_intent: TransactionIntent,
         execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent> {
-        match execution_summary.detailed_classification {
-            Some(DetailedManifestClass::AccessControllerRecovery {
-                ac_addresses,
-                ..
-            }) => {
-                return sign_access_controller_recovery_transaction(
+        match SigningFlow::of(
+            execution_summary.detailed_classification.as_ref(),
+        ) {
+            SigningFlow::AccessControllerRecovery(access_controller) => {
+                sign_access_controller_recovery_transaction(
                     self,
                     transaction_intent,
-                    ac_addresses[0],
+                    access_controller,
                 )
-                .await;
+                .await
             }
-            Some(
-                DetailedManifestClass::AccessControllerStopTimedRecovery {
-                    ac_addresses,
-                },
-            ) => {
-                return sign_access_controller_stop_timed_recovery_transaction(
+            SigningFlow::StopTimedRecovery(access_controller) => {
+                sign_access_controller_stop_timed_recovery_transaction(
                     self,
                     transaction_intent,
-                    ac_addresses[0],
+                    access_controller,
                 )
-                .await;
+                .await
             }
-            Some(DetailedManifestClass::SecurifyEntity { entities }) => {
-                let entity_address = entities.first().unwrap();
-                return sign_entity_securify(
-                    self,
-                    transaction_intent,
-                    *entity_address,
-                )
-                .await;
-            }
-            _ => {
+            SigningFlow::AsReviewed => {
                 self.sign(
                     transaction_intent.clone(),
                     self.sign_transactions_interactor(),
@@ -177,6 +209,73 @@ mod test {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    #[test]
+    fn shield_updates_go_through_the_recovery_flow() {
+        let ac = AccessControllerAddress::sample();
+        for class in [
+            DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: vec![ac],
+                recovery_proposals: vec![],
+            },
+            // The reviewed shield update is a timed recovery.
+            DetailedManifestClass::AccessControllerTimedRecovery {
+                ac_addresses: vec![ac],
+                timed_recoveries: vec![],
+            },
+        ] {
+            assert_eq!(
+                SigningFlow::of(Some(&class)),
+                SigningFlow::AccessControllerRecovery(ac)
+            );
+        }
+    }
+
+    #[test]
+    fn stopping_a_timed_recovery_goes_through_the_stop_flow() {
+        let ac = AccessControllerAddress::sample();
+        let cancellation =
+            |stopped: bool| AccessControllerRecoveryCancellation {
+                stopped_timed_recovery: stopped
+                    .then(AccessControllerRuleSetForDisplay::sample),
+                ..AccessControllerRecoveryCancellation::sample()
+            };
+        let class =
+            |stopped| DetailedManifestClass::AccessControllerCancelRecovery {
+                ac_addresses: vec![ac],
+                cancellations: vec![cancellation(stopped)],
+            };
+
+        assert_eq!(
+            SigningFlow::of(Some(&class(true))),
+            SigningFlow::StopTimedRecovery(ac)
+        );
+        assert_eq!(
+            SigningFlow::of(Some(&class(false))),
+            SigningFlow::AsReviewed
+        );
+    }
+
+    /// Securifying is signed exactly as reviewed: nothing is added to it.
+    #[test]
+    fn anything_else_is_signed_as_reviewed() {
+        for class in [
+            Some(DetailedManifestClass::SecurifyEntity {
+                entities: vec![AccountAddress::sample().into()],
+            }),
+            Some(DetailedManifestClass::General),
+            Some(DetailedManifestClass::AccessControllerConfirmRecovery {
+                ac_addresses: vec![AccessControllerAddress::sample()],
+                confirmations: vec![],
+            }),
+            None,
+        ] {
+            assert_eq!(
+                SigningFlow::of(class.as_ref()),
+                SigningFlow::AsReviewed
+            );
+        }
+    }
 
     #[actix_rt::test]
     async fn test_sign_auth_success() {
