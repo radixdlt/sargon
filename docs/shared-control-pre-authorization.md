@@ -6,9 +6,11 @@ control **together with others**, and why it is safe to do so.
 An account can hand its owner badge to an **access controller**. The access
 controller then holds the account, and its three roles say who may do what.
 When the roles name keys of several people, the account is under shared
-control: a DAO treasury, a family account, a team wallet.
+control: a DAO treasury, a family account, a team wallet. In the example
+below, each role names a different group, and the user's key is in two of
+them.
 
-![An account held by an access controller, whose three roles name the keys of seven members](shared-control-pre-authorization/shared-control.svg)
+![An account held by an access controller, whose three roles name the keys of three groups: operators, council and guardians](shared-control-pre-authorization/shared-control.svg)
 
 Changing the rules (adding or removing a member, changing a threshold) is,
 on the access controller, a *recovery*: a role proposes new rules and they
@@ -20,17 +22,20 @@ No member holds enough keys to act alone. Each approves their share with a
 **pre-authorization** (a signed subintent), and the group's dApp combines them
 into one transaction.
 
-![The group's dApp fixes the subintent, the other members sign it, the user's wallet reviews and signs its share, and the dApp submits](shared-control-pre-authorization/flow.svg)
+![The group's dApp fixes the subintent, a council member and an operator sign it, the user's wallet reviews and signs its share, and the dApp submits](shared-control-pre-authorization/flow.svg)
 
 Because the dApp fixes the header, every member signs the **same** subintent
 hash, so approvals can be collected before or after the user's. The wallet must
 therefore not alter the subintent: rebuilding a manifest now keeps its blobs
 exactly as they are (it used to add an empty blob, which changed the hash).
 
-A subintent can both **propose and confirm** the change. Here the roles name
-the same seven keys, so the approvals that pass the recovery role (5 of 7) also
-pass the primary role (4 of 7), which may quick-confirm a recovery-role
-proposal. The change is then made in one transaction.
+A subintent can both **propose and confirm** the change (the Recovery class
+below), so two groups must agree on it: the council proposes it with the
+recovery role, and the operators confirm it with the primary role, which may
+quick-confirm a recovery-role proposal (the guardians could instead, with the
+confirmation role). Here Dave signs for the council, Bob for the operators,
+and the user's key counts in both, so the change is made in one transaction
+once the three have signed. The user alone passes neither role.
 
 ## Security model
 
@@ -48,6 +53,8 @@ hold:
 | **Classified** | RET's classifiers are strict allowlists, and the manifest must be of one of the access controller classes below. Each requires exact calls on every access controller and nothing else besides: a subintent may not even pay the fee, and may only yield to its parent at the end. Sargon relies on them rather than re-checking instructions. |
 | **No account or persona authorizes it** | The only authority the user adds is the keys of the next check. A dApp can't bundle the call with anything that spends from or acts as the user's own entities. |
 | **The user's keys alone pass no role** | A pre-authorization is by definition **shared** signing. If the user could pass a role alone, the call would act on an access controller they control alone, and a malicious dApp could get them to give up their own account. This is checked against every role (not only the ones the calls need), with the controllers' current rules read from the ledger. An access controller whose rules can't be read counts as passed, so the request is rejected. |
+
+Every rejection is the reserved instructions error.
 
 The keys the wallet signs with are, for now, **only its MFA factor
 instances**, so the last check compares those keys' badges with each role.
