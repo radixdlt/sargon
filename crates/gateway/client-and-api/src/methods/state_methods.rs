@@ -261,6 +261,42 @@ impl GatewayClient {
 
         Ok(result)
     }
+
+    /// Fetches, for each of the given entities, the access controller that
+    /// controls it on ledger, if any.
+    ///
+    /// Entities that are not securified (their owner badge is not held by an
+    /// access controller) are omitted from the result. The result preserves
+    /// the order of `entity_addresses`.
+    pub async fn fetch_access_controllers_of_entities(
+        &self,
+        entity_addresses: impl IntoIterator<Item = AddressOfAccountOrPersona>,
+    ) -> Result<IndexMap<AddressOfAccountOrPersona, AccessControllerAddress>>
+    {
+        let requested_addresses = entity_addresses
+            .into_iter()
+            .collect::<IndexSet<_>>()
+            .into_iter()
+            .collect_vec();
+        if requested_addresses.is_empty() {
+            return Ok(IndexMap::new());
+        }
+
+        let badge_owners = self
+            .fetch_entities_badge_owners(requested_addresses.clone())
+            .await?;
+
+        Ok(requested_addresses
+            .into_iter()
+            .filter_map(|address| {
+                badge_owners
+                    .get(&address)
+                    .and_then(|owner| owner.as_ref())
+                    .and_then(|owner| owner.as_access_controller().cloned())
+                    .map(|access_controller| (address, access_controller))
+            })
+            .collect())
+    }
 }
 
 impl GatewayClient {
