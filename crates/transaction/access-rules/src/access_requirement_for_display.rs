@@ -189,6 +189,79 @@ impl AccessRequirementForDisplay {
     }
 }
 
+impl AccessRequirementForDisplay {
+    /// Whether a group lists two entries the same holder passes together:
+    /// the same badge or the same factor of the user twice, or a resource
+    /// next to one of its own non-fungibles or amounts.
+    ///
+    /// The engine counts every entry, so such a group passes with fewer
+    /// holders than it lists: "any 2 of these 3" is passed alone by the key
+    /// listed twice. A rule that names each holder once never has them, so
+    /// one that does must not be shown as if it were shared.
+    pub fn has_overlapping_entries(&self) -> bool {
+        match self {
+            Self::Anyone
+            | Self::NoOne
+            | Self::Badge { .. }
+            | Self::AmountOf { .. } => false,
+            Self::AnyOf { requirements } | Self::AllOf { requirements } => {
+                any_overlap(requirements.iter().filter_map(Self::passed_with))
+                    || requirements.iter().any(Self::has_overlapping_entries)
+            }
+            Self::CountOf { badges, .. } => {
+                any_overlap(badges.iter().map(BadgeForDisplay::passed_with))
+            }
+        }
+    }
+
+    /// What passes this entry of a group, unless it is a group itself.
+    fn passed_with(&self) -> Option<PassedWith<'_>> {
+        match self {
+            Self::Badge { badge } => Some(badge.passed_with()),
+            Self::AmountOf { resource, .. } => {
+                Some(PassedWith::Resource(resource))
+            }
+            _ => None,
+        }
+    }
+}
+
+/// What passes a single entry of a group.
+enum PassedWith<'a> {
+    /// A signature with this factor of the user, whichever of its keys.
+    OwnFactor(FactorSourceID),
+    NonFungible(&'a NonFungibleGlobalId),
+    /// Any proof of the resource, or one of an amount of it.
+    Resource(&'a ResourceAddress),
+}
+
+/// Whether two of `entries` are passed with the same thing: the same factor
+/// or non-fungible, or a resource and itself or one of its non-fungibles.
+fn any_overlap<'a>(entries: impl Iterator<Item = PassedWith<'a>>) -> bool {
+    let mut factors = HashSet::new();
+    let mut non_fungibles = HashSet::new();
+    let mut resources = HashSet::new();
+    let mut resources_of_non_fungibles = HashSet::new();
+    for entry in entries {
+        let overlaps = match entry {
+            PassedWith::OwnFactor(factor) => !factors.insert(factor),
+            PassedWith::NonFungible(id) => {
+                resources_of_non_fungibles.insert(id.resource_address);
+                !non_fungibles.insert(id)
+                    || resources.contains(&id.resource_address)
+            }
+            PassedWith::Resource(resource) => {
+                !resources.insert(*resource)
+                    || resources_of_non_fungibles.contains(resource)
+            }
+        };
+        if overlaps {
+            return true;
+        }
+    }
+    false
+}
+
 impl From<ResourceOrNonFungible> for BadgeForDisplay {
     fn from(badge: ResourceOrNonFungible) -> Self {
         match badge {
@@ -218,6 +291,18 @@ impl BadgeForDisplay {
                 None => Self::UnknownKey { badge },
             },
             badge => badge,
+        }
+    }
+
+    fn passed_with(&self) -> PassedWith<'_> {
+        match self {
+            Self::OwnFactor { factor_source } => {
+                PassedWith::OwnFactor(factor_source.factor_source_id())
+            }
+            Self::UnknownKey { badge } | Self::NonFungible { badge } => {
+                PassedWith::NonFungible(badge)
+            }
+            Self::Resource { resource } => PassedWith::Resource(resource),
         }
     }
 }
@@ -399,6 +484,104 @@ mod tests {
                 ],
             }
         );
+    }
+
+    /// "2 of a, a, b" reads as shared, but `a` alone passes it.
+    #[test]
+    fn a_badge_counted_twice_is_an_overlap() {
+        let [a, b, c] = nfts();
+        let alone = AuthZone {
+            implicit_non_fungibles: [a.clone()].into(),
+            proofs: vec![],
+        };
+
+        let counted_twice = at_least(2, [badge(&a), badge(&a), badge(&b)]);
+        assert!(counted_twice.is_satisfied_by(&alone));
+        assert_eq!(
+            counted_twice.clone().for_display(),
+            SUT::CountOf {
+                count: 2,
+                badges: vec![shown(&a), shown(&a), shown(&b)],
+            }
+        );
+        assert!(counted_twice.for_display().has_overlapping_entries());
+
+        // "All of a, a": `a` alone.
+        let all_of_one = at_least(2, [badge(&a), badge(&a)]);
+        assert!(all_of_one.is_satisfied_by(&alone));
+        assert!(all_of_one.for_display().has_overlapping_entries());
+
+        // At any depth.
+        assert!(at_least(
+            1,
+            [badge(&c), at_least(2, [badge(&a), badge(&a), badge(&b)])]
+        )
+        .for_display()
+        .has_overlapping_entries());
+    }
+
+    #[test]
+    fn each_holder_named_once_is_no_overlap() {
+        let [a, b, c] = nfts();
+        let badges = [badge(&a), badge(&b), badge(&c)];
+
+        assert!(!badge(&a).for_display().has_overlapping_entries());
+        assert!(!at_least(2, badges.clone())
+            .for_display()
+            .has_overlapping_entries());
+        assert!(!at_least(3, badges.clone())
+            .for_display()
+            .has_overlapping_entries());
+        // The same badge in two groups is shown as what it is: an
+        // alternative to the group.
+        assert!(!at_least(1, [at_least(2, badges), badge(&a)])
+            .for_display()
+            .has_overlapping_entries());
+    }
+
+    /// A proof of a non-fungible is also a proof of its resource, and of an
+    /// amount of it.
+    #[test]
+    fn a_resource_overlaps_its_own_non_fungibles_and_amounts() {
+        let [a, b, _] = nfts();
+        let resource = a.resource_address;
+        let any_of_resource = AccessRequirement::Badge {
+            badge: ResourceOrNonFungible::Resource { value: resource },
+        };
+        let amount_of_resource = AccessRequirement::AmountOf {
+            amount: Decimal192::one(),
+            resource,
+        };
+
+        assert!(at_least(2, [badge(&a), any_of_resource.clone(), badge(&b)])
+            .for_display()
+            .has_overlapping_entries());
+        assert!(at_least(2, [amount_of_resource, badge(&a)])
+            .for_display()
+            .has_overlapping_entries());
+        assert!(at_least(2, [any_of_resource.clone(), any_of_resource])
+            .for_display()
+            .has_overlapping_entries());
+    }
+
+    /// Two keys of one factor are signed for together.
+    #[test]
+    fn a_factor_of_the_user_listed_twice_is_an_overlap() {
+        let own_key = NonFungibleGlobalId::from(
+            HierarchicalDeterministicPublicKey::sample(),
+        );
+        let other_own_key = NonFungibleGlobalId::from(
+            HierarchicalDeterministicPublicKey::sample_other(),
+        );
+        let [a, _, _] = nfts();
+        let requirement =
+            at_least(2, [badge(&own_key), badge(&other_own_key), badge(&a)])
+                .for_display();
+
+        assert!(!requirement.has_overlapping_entries());
+        assert!(requirement
+            .with_own_factor_sources(&|_| Some(FactorSource::sample()))
+            .has_overlapping_entries());
     }
 
     /// Only for requirements not converted from the engine.

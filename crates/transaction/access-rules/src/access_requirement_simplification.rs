@@ -13,7 +13,9 @@ impl AccessRequirement {
     /// * "At least 1 of" doesn't directly contain another "at least 1 of", and
     ///   "all of" doesn't directly contain another "all of": they are merged.
     ///
-    /// Duplicated requirements are kept, since each one counts.
+    /// Duplicated requirements are kept, since each one counts: a group
+    /// that lists a badge twice passes with fewer holders than it lists, see
+    /// [`AccessRequirementForDisplay::has_overlapping_entries`].
     ///
     /// The result is `Anyone` exactly when the requirement passes without any
     /// proof, and `NoOne` exactly when no proofs can pass it. So an open or a

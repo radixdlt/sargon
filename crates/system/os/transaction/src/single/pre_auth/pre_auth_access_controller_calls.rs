@@ -19,6 +19,49 @@ fn is_allowed_in_pre_authorizations(class: &DetailedManifestClass) -> bool {
     )
 }
 
+/// The rules `class` makes the rules of access controllers, or lets become
+/// them, as the review shows them. Not those of a timed recovery it stops:
+/// stopping enacts nothing, and it must stay possible whatever was proposed.
+fn rules_to_enact(
+    class: &DetailedManifestClass,
+) -> Vec<&AccessControllerRuleSetForDisplay> {
+    match class {
+        DetailedManifestClass::AccessControllerRecovery {
+            recovery_proposals,
+            ..
+        } => recovery_proposals
+            .iter()
+            .map(|proposal| &proposal.proposed_rules)
+            .collect(),
+        DetailedManifestClass::AccessControllerTimedRecovery {
+            timed_recoveries,
+            ..
+        } => timed_recoveries
+            .iter()
+            .map(|recovery| &recovery.proposed_rules)
+            .collect(),
+        DetailedManifestClass::AccessControllerConfirmRecovery {
+            confirmations,
+            ..
+        } => confirmations
+            .iter()
+            .map(|confirmation| &confirmation.proposed_rules)
+            .collect(),
+        _ => Vec::new(),
+    }
+}
+
+/// Whether `class` enacts rules that count a holder more than once, e.g.
+/// "any 2 of these 3" with one key listed twice, which that key passes
+/// alone: the review would show control as shared when it isn't.
+fn enacts_rules_with_overlapping_entries(
+    class: &DetailedManifestClass,
+) -> bool {
+    rules_to_enact(class)
+        .into_iter()
+        .any(AccessControllerRuleSetForDisplay::has_overlapping_entries)
+}
+
 /// Whether `auth_zone` alone passes any role of any of `access_controllers`,
 /// with their current `rule_sets`. An access controller without known rules
 /// counts as passed.
@@ -70,6 +113,9 @@ impl OsValidatePreAuthAccessControllerCalls for SargonOS {
     /// * the manifest is classified as an access controller operation allowed
     ///   in pre-authorizations, see [`is_allowed_in_pre_authorizations`], so
     ///   it makes no other calls;
+    /// * the rules it enacts name each holder once per group, see
+    ///   [`enacts_rules_with_overlapping_entries`], so they read as what
+    ///   they are;
     /// * no account or persona needs to authorize it, so the keys below are
     ///   the only authority the user adds;
     /// * the keys the pre-authorization is signed with alone pass no role of
@@ -100,14 +146,17 @@ impl OsValidatePreAuthAccessControllerCalls for SargonOS {
             })
         };
 
-        if !execution_summary
+        let Some(class) = execution_summary
             .detailed_classification
             .as_ref()
-            .is_some_and(is_allowed_in_pre_authorizations)
-        {
+            .filter(|class| is_allowed_in_pre_authorizations(class))
+        else {
             return reject(
                 "not classified as an access controller operation allowed in pre-authorizations",
             );
+        };
+        if enacts_rules_with_overlapping_entries(class) {
+            return reject("the rules to enact count a holder more than once");
         }
         if !summary.addresses_of_accounts_requiring_auth.is_empty()
             || !summary.addresses_of_personas_requiring_auth.is_empty()
@@ -231,6 +280,80 @@ mod tests {
         ];
         assert!(allowed.iter().all(is_allowed_in_pre_authorizations));
         assert!(!not_allowed.iter().any(is_allowed_in_pre_authorizations));
+    }
+
+    /// "Any 2 of these 3" where one key is listed twice.
+    fn rules_counting_a_key_twice() -> AccessControllerRuleSetForDisplay {
+        let shared_rules = || -> AccessControllerRuleSet {
+            (
+                ScryptoRuleSet {
+                    primary_role: shared(),
+                    recovery_role: shared(),
+                    confirmation_role: shared(),
+                },
+                NETWORK,
+            )
+                .into()
+        };
+        let counted_twice = AccessRule::Protected(require_n_of(
+            2u8,
+            vec![badge(2), badge(2), badge(1)],
+        ));
+        assert!(!shared_rules().for_display().has_overlapping_entries());
+        AccessControllerRuleSet {
+            recovery_role: (counted_twice, NETWORK).into(),
+            ..shared_rules()
+        }
+        .for_display()
+    }
+
+    #[test]
+    fn rules_to_enact_must_not_count_a_key_twice() {
+        let proposed_rules = rules_counting_a_key_twice();
+        let enacting = [
+            DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: Vec::new(),
+                recovery_proposals: vec![AccessControllerRecoveryProposal {
+                    proposed_rules: proposed_rules.clone(),
+                    ..AccessControllerRecoveryProposal::sample()
+                }],
+            },
+            DetailedManifestClass::AccessControllerTimedRecovery {
+                ac_addresses: Vec::new(),
+                timed_recoveries: vec![AccessControllerTimedRecoveryProposal {
+                    proposed_rules: proposed_rules.clone(),
+                    ..AccessControllerTimedRecoveryProposal::sample()
+                }],
+            },
+            DetailedManifestClass::AccessControllerConfirmRecovery {
+                ac_addresses: Vec::new(),
+                confirmations: vec![AccessControllerRecoveryConfirmation {
+                    proposed_rules: proposed_rules.clone(),
+                    ..AccessControllerRecoveryConfirmation::sample()
+                }],
+            },
+        ];
+        assert!(enacting.iter().all(enacts_rules_with_overlapping_entries));
+
+        let not_enacting = [
+            DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: Vec::new(),
+                recovery_proposals: vec![
+                    AccessControllerRecoveryProposal::sample(),
+                ],
+            },
+            // Stopping such a proposal must stay possible.
+            DetailedManifestClass::AccessControllerCancelRecovery {
+                ac_addresses: Vec::new(),
+                cancellations: vec![AccessControllerRecoveryCancellation {
+                    stopped_timed_recovery: Some(proposed_rules),
+                    ..AccessControllerRecoveryCancellation::sample()
+                }],
+            },
+        ];
+        assert!(!not_enacting
+            .iter()
+            .any(enacts_rules_with_overlapping_entries));
     }
 
     #[test]

@@ -54,6 +54,14 @@ hold:
 | **No account or persona authorizes it** | The only authority the user adds is the keys of the next check. A dApp can't bundle the call with anything that spends from or acts as the user's own entities. |
 | **The user's keys alone pass no role** | A pre-authorization is by definition **shared** signing. If the user could pass a role alone, the call would act on an access controller they control alone, and a malicious dApp could get them to give up their own account. This is checked against every role (not only the ones the calls need), with the controllers' current rules read from the ledger. An access controller whose rules can't be read counts as passed, so the request is rejected. |
 
+The rules a pre-authorization proposes or confirms must also **name each
+holder once per group**. The engine counts every entry of a list, so "any 2
+of these 3" with one key listed twice is passed by that key alone, while it
+reads as shared. The same goes for the same factor of the user twice, and for
+a resource next to one of its own non-fungibles or amounts. Such rules are
+rejected, as no rule that names each holder once needs them. Stopping or
+cancelling a proposal is never rejected for the rules it proposed.
+
 Every rejection is the reserved instructions error.
 
 The keys the wallet signs with are, for now, **only its MFA signing keys**

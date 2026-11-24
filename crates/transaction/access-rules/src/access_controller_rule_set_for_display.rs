@@ -40,6 +40,20 @@ impl AccessControllerRuleSetForDisplay {
     }
 }
 
+impl AccessControllerRuleSetForDisplay {
+    /// Whether any role counts a holder more than once, see
+    /// [`AccessRequirementForDisplay::has_overlapping_entries`].
+    pub fn has_overlapping_entries(&self) -> bool {
+        [
+            &self.primary_role,
+            &self.recovery_role,
+            &self.confirmation_role,
+        ]
+        .into_iter()
+        .any(AccessRequirementForDisplay::has_overlapping_entries)
+    }
+}
+
 impl HasSampleValues for AccessControllerRuleSetForDisplay {
     fn sample() -> Self {
         Self {
