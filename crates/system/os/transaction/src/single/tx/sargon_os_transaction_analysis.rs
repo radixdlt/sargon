@@ -164,12 +164,21 @@ impl OsExecutionSummary for SargonOS {
     )> {
         let summary = manifest.summary()?;
 
-        // A pre-authorization calling access controllers is signed by others
+        // A pre-authorization calling access controllers, or needing an
+        // account or persona that isn't in the Profile, is signed by others
         // too, so its preview can't pass their roles.
         let signed_by_others_too = allow_disable_auth_checks
-            && summary
+            && (summary
                 .reserved_instructions
-                .contains(&ReservedInstruction::AccessControllerMethod);
+                .contains(&ReservedInstruction::AccessControllerMethod)
+                || summary
+                    .addresses_of_accounts_requiring_auth
+                    .iter()
+                    .any(|address| self.account_by_address(*address).is_err())
+                || summary
+                    .addresses_of_personas_requiring_auth
+                    .iter()
+                    .any(|address| self.persona_by_address(*address).is_err()));
 
         let (signer_public_keys, disable_auth_checks) = match self
             .extract_signer_public_keys(&summary)

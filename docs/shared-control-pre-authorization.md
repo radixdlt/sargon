@@ -117,6 +117,12 @@ the reviewed calls, and the check above already counts every key.
 Without a classification, e.g. a host that doesn't pass the summary yet,
 the wallet signs with every role's keys, as before.
 
+The review's preview can't pass these roles: it presents only the user's
+keys, and the others sign later. So a pre-authorization that calls an access
+controller, or needs an account or persona that isn't in the Profile, is
+previewed with the Gateway's auth checks off. The preview shows what the
+subintent does, while the ledger checks every role when it's submitted.
+
 An access controller's rules come from one place, the same for signing and
 for the check: `fetch_access_controllers_details`, which reads its current
 rules (from its role assignments) and the entity it controls (the owner badge
