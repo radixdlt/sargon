@@ -24,9 +24,14 @@ pub struct AccessControllerRecoveryProposal {
     /// sources.
     pub proposed_rules: AccessControllerRuleSetForDisplay,
 
-    /// The proposed time after which a recovery can be confirmed without the
-    /// confirmation role, if any.
+    /// The delay the proposal names. The engine doesn't apply it: show
+    /// `current_timed_recovery_delay_in_minutes` instead.
     pub timed_recovery_delay_in_minutes: Option<u32>,
+
+    /// The access controller's current timed recovery delay, which it keeps
+    /// under the new rules: the time after which a recovery role proposal
+    /// can be confirmed without the confirmation role, if known.
+    pub current_timed_recovery_delay_in_minutes: Option<u32>,
 
     /// The account or persona the access controller controls, if known.
     pub controlled_entity: Option<AddressOfAccountOrPersona>,

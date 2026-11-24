@@ -576,7 +576,8 @@ pub struct AccessControllerOnLedger {
 impl DetailedManifestClass {
     /// Sets what the classification doesn't know about the access controllers
     /// an access controller class operates on, from `on_ledger`: the entity
-    /// each controls and, for timed recoveries, its current delay.
+    /// each controls and, where rules are proposed or confirmed, its current
+    /// delay, which it keeps whatever delay the manifest names.
     pub fn with_access_controllers_on_ledger(
         self,
         on_ledger: &impl Fn(&AccessControllerAddress) -> AccessControllerOnLedger,
@@ -592,9 +593,17 @@ impl DetailedManifestClass {
                 ac_addresses,
                 recovery_proposals: recovery_proposals
                     .into_iter()
-                    .map(|proposal| AccessControllerRecoveryProposal {
-                        controlled_entity: entity(&proposal.access_controller),
-                        ..proposal
+                    .map(|proposal| {
+                        let AccessControllerOnLedger {
+                            controlled_entity,
+                            timed_recovery_delay_in_minutes,
+                        } = on_ledger(&proposal.access_controller);
+                        AccessControllerRecoveryProposal {
+                            controlled_entity,
+                            current_timed_recovery_delay_in_minutes:
+                                timed_recovery_delay_in_minutes,
+                            ..proposal
+                        }
                     })
                     .collect(),
             },
@@ -626,11 +635,17 @@ impl DetailedManifestClass {
                 ac_addresses,
                 confirmations: confirmations
                     .into_iter()
-                    .map(|confirmation| AccessControllerRecoveryConfirmation {
-                        controlled_entity: entity(
-                            &confirmation.access_controller,
-                        ),
-                        ..confirmation
+                    .map(|confirmation| {
+                        let AccessControllerOnLedger {
+                            controlled_entity,
+                            timed_recovery_delay_in_minutes,
+                        } = on_ledger(&confirmation.access_controller);
+                        AccessControllerRecoveryConfirmation {
+                            controlled_entity,
+                            current_timed_recovery_delay_in_minutes:
+                                timed_recovery_delay_in_minutes,
+                            ..confirmation
+                        }
                     })
                     .collect(),
             },
@@ -1058,6 +1073,7 @@ mod tests {
                         proposer: RecoveryProposer::Primary,
                         proposed_rules: proposed_rules.clone(),
                         timed_recovery_delay_in_minutes: None,
+                        current_timed_recovery_delay_in_minutes: None,
                         controlled_entity: None,
                     },
                     AccessControllerRecoveryProposal {
@@ -1065,6 +1081,7 @@ mod tests {
                         proposer: RecoveryProposer::Recovery,
                         proposed_rules,
                         timed_recovery_delay_in_minutes: Some(10),
+                        current_timed_recovery_delay_in_minutes: None,
                         controlled_entity: None,
                     },
                 ],
@@ -1104,6 +1121,58 @@ mod tests {
                     current_timed_recovery_delay_in_minutes: Some(42),
                     controlled_entity: Some(entity),
                     ..timed_recovery
+                }],
+            }
+        );
+    }
+
+    /// The delay a recovery or a confirmation names isn't applied, so both
+    /// carry the one the access controller keeps.
+    #[test]
+    fn recovery_and_confirmation_show_the_current_delay_on_ledger() {
+        let on_ledger =
+            |_: &AccessControllerAddress| AccessControllerOnLedger {
+                controlled_entity: None,
+                timed_recovery_delay_in_minutes: Some(1),
+            };
+        let proposal = AccessControllerRecoveryProposal {
+            timed_recovery_delay_in_minutes: Some(20160),
+            current_timed_recovery_delay_in_minutes: None,
+            controlled_entity: None,
+            ..AccessControllerRecoveryProposal::sample()
+        };
+        let confirmation = AccessControllerRecoveryConfirmation {
+            timed_recovery_delay_in_minutes: Some(20160),
+            current_timed_recovery_delay_in_minutes: None,
+            controlled_entity: None,
+            ..AccessControllerRecoveryConfirmation::sample()
+        };
+
+        assert_eq!(
+            SUT::AccessControllerRecovery {
+                ac_addresses: Vec::new(),
+                recovery_proposals: vec![proposal.clone()],
+            }
+            .with_access_controllers_on_ledger(&on_ledger),
+            SUT::AccessControllerRecovery {
+                ac_addresses: Vec::new(),
+                recovery_proposals: vec![AccessControllerRecoveryProposal {
+                    current_timed_recovery_delay_in_minutes: Some(1),
+                    ..proposal
+                }],
+            }
+        );
+        assert_eq!(
+            SUT::AccessControllerConfirmRecovery {
+                ac_addresses: Vec::new(),
+                confirmations: vec![confirmation.clone()],
+            }
+            .with_access_controllers_on_ledger(&on_ledger),
+            SUT::AccessControllerConfirmRecovery {
+                ac_addresses: Vec::new(),
+                confirmations: vec![AccessControllerRecoveryConfirmation {
+                    current_timed_recovery_delay_in_minutes: Some(1),
+                    ..confirmation
                 }],
             }
         );

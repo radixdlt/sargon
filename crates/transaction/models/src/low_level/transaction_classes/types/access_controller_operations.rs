@@ -56,8 +56,16 @@ pub struct AccessControllerRecoveryConfirmation {
     /// ones.
     pub proposed_rules: AccessControllerRuleSetForDisplay,
 
-    /// The delay the confirmation names. The engine doesn't apply it.
+    /// The delay the confirmation names. The engine doesn't apply it: the
+    /// access controller keeps its own, see
+    /// `current_timed_recovery_delay_in_minutes`.
     pub timed_recovery_delay_in_minutes: Option<u32>,
+
+    /// The access controller's current timed recovery delay, which it keeps
+    /// under the new rules: the time after which a recovery role proposal
+    /// can be confirmed without the confirmation role. Read from the ledger
+    /// by the OS; `None` if it couldn't be read or there is none.
+    pub current_timed_recovery_delay_in_minutes: Option<u32>,
 
     /// The account or persona the access controller controls, if known.
     pub controlled_entity: Option<AddressOfAccountOrPersona>,
@@ -163,6 +171,7 @@ impl From<(RetAccessControllerRecoveryConfirmation, NetworkID)>
             proposed_rules: rules_for_display(confirmation.rule_set, n),
             timed_recovery_delay_in_minutes: confirmation
                 .timed_recovery_delay_in_minutes,
+            current_timed_recovery_delay_in_minutes: None,
             controlled_entity: None,
         }
     }
@@ -268,6 +277,7 @@ impl HasSampleValues for AccessControllerRecoveryConfirmation {
             kind: RecoveryConfirmationKind::Timed,
             proposed_rules: AccessControllerRuleSetForDisplay::sample(),
             timed_recovery_delay_in_minutes: Some(20160),
+            current_timed_recovery_delay_in_minutes: Some(20160),
             controlled_entity: Some(AccountAddress::sample().into()),
         }
     }
@@ -279,6 +289,7 @@ impl HasSampleValues for AccessControllerRecoveryConfirmation {
             kind: RecoveryConfirmationKind::Quick,
             proposed_rules: AccessControllerRuleSetForDisplay::sample_other(),
             timed_recovery_delay_in_minutes: None,
+            current_timed_recovery_delay_in_minutes: None,
             controlled_entity: None,
         }
     }

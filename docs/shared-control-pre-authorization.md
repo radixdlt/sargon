@@ -152,8 +152,10 @@ The review shows the **proposed rules**, role by role, as an
   "Bob". A key without a name stands out.
 - The emergency fallback (timed recovery): the time after which a change
   proposed with the recovery role can be completed without being confirmed.
-  The engine doesn't apply the delay a proposal names, so a timed recovery
-  also carries the access controller's current delay, read from the ledger.
+  The engine doesn't apply the delay a proposal or a confirmation names: the
+  access controller keeps the one it has. So every class that proposes or
+  confirms rules also carries the access controller's current delay, read
+  from the ledger, and that is the one to show.
 
 Address book entries for non-fungibles are stored in a list of their own, so
 older wallets still load the Profile:
