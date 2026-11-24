@@ -59,7 +59,7 @@ pub mod address_book_in_two_lists {
     {
         let (addresses, non_fungibles) =
             address_book.iter().partition(|entry| {
-                matches!(entry.target, AddressBookEntryTarget::Address { .. })
+                matches!(entry.target, AddressBookEntryTarget::GlobalAddress { .. })
             });
         Lists {
             address_book: addresses,

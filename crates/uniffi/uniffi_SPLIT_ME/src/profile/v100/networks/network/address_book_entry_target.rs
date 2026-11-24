@@ -5,7 +5,7 @@ use sargon::AddressBookEntryTarget as InternalAddressBookEntryTarget;
 /// non-fungible, e.g. the signature resource of someone's key.
 #[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Enum)]
 pub enum AddressBookEntryTarget {
-    Address { value: Address },
+    GlobalAddress { value: Address },
 
     NonFungible { value: NonFungibleGlobalId },
 }

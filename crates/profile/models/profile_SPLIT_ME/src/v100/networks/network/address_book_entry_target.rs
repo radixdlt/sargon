@@ -8,7 +8,7 @@ use crate::prelude::*;
     into = "AddressBookEntryTargetJson"
 )]
 pub enum AddressBookEntryTarget {
-    Address { value: Address },
+    GlobalAddress { value: Address },
     NonFungible { value: NonFungibleGlobalId },
 }
 
@@ -28,7 +28,7 @@ impl From<AddressBookEntryTargetJson> for AddressBookEntryTarget {
     fn from(value: AddressBookEntryTargetJson) -> Self {
         match value {
             AddressBookEntryTargetJson::Address(value) => {
-                Self::Address { value }
+                Self::GlobalAddress { value }
             }
             AddressBookEntryTargetJson::NonFungible(value) => {
                 Self::NonFungible { value }
@@ -40,7 +40,7 @@ impl From<AddressBookEntryTargetJson> for AddressBookEntryTarget {
 impl From<AddressBookEntryTarget> for AddressBookEntryTargetJson {
     fn from(value: AddressBookEntryTarget) -> Self {
         match value {
-            AddressBookEntryTarget::Address { value } => Self::Address(value),
+            AddressBookEntryTarget::GlobalAddress { value } => Self::Address(value),
             AddressBookEntryTarget::NonFungible { value } => {
                 Self::NonFungible(value)
             }
@@ -53,7 +53,7 @@ macro_rules! address_book_entry_target_from_address {
         $(
             impl From<$address> for AddressBookEntryTarget {
                 fn from(value: $address) -> Self {
-                    Self::Address {
+                    Self::GlobalAddress {
                         value: value.into(),
                     }
                 }
@@ -85,7 +85,7 @@ impl From<NonFungibleGlobalId> for AddressBookEntryTarget {
 impl AddressBookEntryTarget {
     pub fn as_address(&self) -> Option<&Address> {
         match self {
-            Self::Address { value } => Some(value),
+            Self::GlobalAddress { value } => Some(value),
             Self::NonFungible { .. } => None,
         }
     }
@@ -98,7 +98,7 @@ impl AddressBookEntryTarget {
 impl IsNetworkAware for AddressBookEntryTarget {
     fn network_id(&self) -> NetworkID {
         match self {
-            Self::Address { value } => value.network_id(),
+            Self::GlobalAddress { value } => value.network_id(),
             Self::NonFungible { value } => value.resource_address.network_id(),
         }
     }
