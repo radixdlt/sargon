@@ -67,11 +67,9 @@ pub mod prelude {
         Serializer,
     };
 
+    pub use radix_engine_interface::blueprints::access_controller::RuleSet as ScryptoRuleSet;
     pub(crate) use radix_engine_interface::{
-        blueprints::{
-            access_controller::RuleSet as ScryptoRuleSet,
-            resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
-        },
+        blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible,
         prelude::{
             AccessRule as ScryptoAccessRule,
             BasicRequirement as ScryptoBasicRequirement,

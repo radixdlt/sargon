@@ -9,7 +9,7 @@ pub enum StopTimedRecoveryIntentKind {
 
 pub struct AccessControllerStopTimedRecoveryIntentsBuilder {
     base_intent: TransactionIntent,
-    lock_fee_data: LockFeeData,
+    fee_payer: AccessControllerTransactionFeePayer,
     securified_entity: AnySecurifiedEntity,
     ac_state_details: AccessControllerStateDetails,
 }
@@ -17,13 +17,13 @@ pub struct AccessControllerStopTimedRecoveryIntentsBuilder {
 impl AccessControllerStopTimedRecoveryIntentsBuilder {
     pub fn new(
         base_intent: TransactionIntent,
-        lock_fee_data: LockFeeData,
+        fee_payer: AccessControllerTransactionFeePayer,
         securified_entity: AnySecurifiedEntity,
         ac_state_details: AccessControllerStateDetails,
     ) -> Self {
         Self {
             base_intent,
-            lock_fee_data,
+            fee_payer,
             securified_entity,
             ac_state_details,
         }
@@ -55,7 +55,8 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
             .state
             .recovery_role_recovery_attempt
             .clone()
-            .expect("The recovery proposal must be present")
+            // Gone if cancelled since the review.
+            .ok_or(CommonError::AccessControllerNotInRecoveryState)?
             .recovery_proposal;
 
         let manifest = match role_kind {
@@ -73,8 +74,12 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
             }
         };
 
-        let manifest_with_fee =
-            manifest.modify_add_lock_fee(self.lock_fee_data.clone())?;
+        // Stopping happens before any new rules, so the fee is locked first,
+        // from whoever the user picked.
+        let manifest_with_fee = manifest.apply_lock_fee_instruction(
+            &self.fee_payer,
+            FeeLockPlacement::BeforeRecovery,
+        )?;
 
         let intent = TransactionIntent::new(
             self.base_intent.header,

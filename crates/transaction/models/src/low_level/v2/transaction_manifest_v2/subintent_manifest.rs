@@ -1,4 +1,5 @@
 use prelude::fixture_rtm;
+use radix_engine_interface::blueprints::access_controller::ACCESS_CONTROLLER_CREATE_PROOF_IDENT;
 
 use crate::prelude::*;
 
@@ -132,6 +133,27 @@ impl SubintentManifest {
         self.instructions.instructions()
     }
 
+    /// Whether the only method this manifest calls on any of
+    /// `access_controllers` is `create_proof`, as the wallet adds for an
+    /// entity an access controller holds the owner badge of.
+    pub fn only_creates_proofs_on(
+        &self,
+        access_controllers: &[AccessControllerAddress],
+    ) -> bool {
+        let network_id = self.network_id();
+        self.instructions().iter().all(|instruction| match instruction {
+            ScryptoInstructionV2::CallMethod(call) => {
+                call.method_name == ACCESS_CONTROLLER_CREATE_PROOF_IDENT
+                    || !AccessControllerAddress::try_from((
+                        call.address,
+                        network_id,
+                    ))
+                    .is_ok_and(|address| access_controllers.contains(&address))
+            }
+            _ => true,
+        })
+    }
+
     pub fn blobs(&self) -> &Blobs {
         &self.blobs
     }
@@ -235,6 +257,52 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SubintentManifest;
+
+    /// The `create_proof` the wallet adds is the only access controller call
+    /// signed for outside shared control.
+    #[test]
+    fn only_creates_proofs_on_access_controllers() {
+        let access_controller = AccessControllerAddress::sample_mainnet();
+        let calling = |method: &str| {
+            SUT::new(
+                format!(
+                    r#"
+                    CALL_METHOD Address("{access_controller}") "{method}";
+                    YIELD_TO_PARENT;
+                    "#
+                ),
+                NetworkID::Mainnet,
+                Blobs::default(),
+                ChildSubintentSpecifiers::default(),
+            )
+            .unwrap()
+        };
+
+        assert!(calling("create_proof")
+            .only_creates_proofs_on(&[access_controller]));
+        assert!(!calling("lock_primary_role")
+            .only_creates_proofs_on(&[access_controller]));
+        // Another access controller's calls are someone else's to check.
+        assert!(calling("lock_primary_role").only_creates_proofs_on(&[
+            AccessControllerAddress::sample_mainnet_other()
+        ]));
+        // Calls on anything but an access controller aren't its concern.
+        let account_call = SUT::new(
+            format!(
+                r#"
+                CALL_METHOD Address("{}") "create_proof_of_amount" Address("{}") Decimal("1");
+                YIELD_TO_PARENT;
+                "#,
+                AccountAddress::sample_mainnet(),
+                ResourceAddress::sample_mainnet_xrd(),
+            ),
+            NetworkID::Mainnet,
+            Blobs::default(),
+            ChildSubintentSpecifiers::default(),
+        )
+        .unwrap();
+        assert!(account_call.only_creates_proofs_on(&[access_controller]));
+    }
 
     #[test]
     fn equality() {

@@ -7,6 +7,7 @@ mod transaction_status;
 mod unvalidated_transaction_manifest;
 
 pub mod prelude {
+    pub use access_rules::prelude::*;
     pub use addresses::prelude::*;
     pub use bytes::prelude::*;
     pub use core_collections::prelude::Just;
@@ -107,13 +108,24 @@ pub mod prelude {
             },
         },
         manifest_analysis::{
-            AccessControllerConfirmTimedRecoveryOutput as RetAccessControllerConfirmTimedRecoveryOutput,
+            AccessControllerCancelRecoveryOutput as RetAccessControllerCancelRecoveryOutput,
+            AccessControllerConfirmRecoveryOutput as RetAccessControllerConfirmRecoveryOutput,
+            AccessControllerPrimaryRoleLockOperation as RetAccessControllerPrimaryRoleLockOperation,
+            AccessControllerPrimaryRoleLockOutput as RetAccessControllerPrimaryRoleLockOutput,
+            AccessControllerRecoveryCancellation as RetAccessControllerRecoveryCancellation,
+            AccessControllerRecoveryConfirmation as RetAccessControllerRecoveryConfirmation,
+            AccessControllerRecoveryFeeOutput as RetAccessControllerRecoveryFeeOutput,
+            AccessControllerRecoveryFeeTransfer as RetAccessControllerRecoveryFeeTransfer,
             AccessControllerRecoveryOutput as RetAccessControllerRecoveryOutput,
-            AccessControllerStopTimedRecoveryAnalyzerOutput as RetAccessControllerStopTimedRecoveryOutput,
+            AccessControllerRecoveryProposal as RetAccessControllerRecoveryProposal,
+            AccessControllerTimedRecovery as RetAccessControllerTimedRecovery,
+            AccessControllerTimedRecoveryOutput as RetAccessControllerTimedRecoveryOutput,
+            AccountRecoveryFeeTransfer as RetAccountRecoveryFeeTransfer,
             AccountSettingsUpdateOutput as RetAccountSettingsUpdateOutput,
             AccountStaticResourceMovementsOutput as RetAccountStaticResourceMovementsOutput,
             DetailedManifestClassification as RetDetailedManifestClass,
             DynamicAnalysis as RetDynamicAnalysis,
+            CreatedSecurifiedEntity as RetCreatedSecurifiedEntity,
             EntitySecurifyOutput as RetEntitySecurifyOutput,
             FeeSummary as RetFeeSummary,
             ManifestAnalysisError as RetManifestAnalysisError,
@@ -123,7 +135,10 @@ pub mod prelude {
             PoolContributionOutput as RetPoolContributionOutput,
             PoolRedemptionOperation as RetPoolRedemptionOperation,
             PoolRedemptionOutput as RetPoolRedemptionOutput,
+            PrimaryRoleLockOperation as RetPrimaryRoleLockOperation,
+            RecoveryConfirmationKind as RetRecoveryConfirmationKind,
             ReservedInstructionsOutput as RetReservedInstructionsOutput,
+            SecurifiedEntityCreationOutput as RetSecurifiedEntityCreationOutput,
             StaticAnalysis as RetStaticAnalysis,
             ValidatorClaimOperation as RetValidatorClaimOperation,
             ValidatorClaimingXrdOutput as RetValidatorClaimingXrdOutput,

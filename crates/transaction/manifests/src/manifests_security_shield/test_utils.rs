@@ -94,13 +94,6 @@ where
             )
             .unwrap();
 
-        securify_account_manifest = TransactionManifest::modify_manifest_add_withdraw_of_xrd_for_access_controller_xrd_vault_top_up_of_unsecurified_entity_paid_by_account(
-            unsecurified_account.entity.clone(),
-            unsecurified_account.clone().into(),
-            securify_account_manifest,
-            Some(Decimal192::ten())
-        );
-
         securify_account_manifest = securify_account_manifest
             .modify_add_lock_fee(LockFeeData::new_with_unsecurified_fee_payer(
                 account_address,
@@ -130,6 +123,25 @@ where
             .unwrap();
         let ac_address: AccessControllerAddress =
             (scrypto_ac_address, NetworkID::Simulator).into();
+
+        // Securifying doesn't top up the access controller's XRD vault: fund
+        // it in a transaction of its own, from the faucet, so that the tests
+        // can pay fees from it.
+        let top_up = ScryptoTransactionManifestBuilder::new()
+            .lock_fee_from_faucet()
+            .get_free_xrd_from_faucet()
+            .take_all_from_worktop(XRD, "xrd")
+            .then(|builder| {
+                let bucket = builder.bucket("xrd");
+                builder.call_method(
+                    scrypto_ac_address,
+                    "contribute_recovery_fee",
+                    (bucket,),
+                )
+            })
+            .build();
+        self.execute_manifest(top_up, vec![])
+            .expect_commit_success();
 
         let secured_control =
             SecuredEntityControl::new(None, ac_address, security_structure)

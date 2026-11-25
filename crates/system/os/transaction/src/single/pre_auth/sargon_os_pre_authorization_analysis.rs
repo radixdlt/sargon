@@ -43,16 +43,42 @@ impl OsAnalysePreAuthPreview for SargonOS {
         )?;
         debug!("Pre-auth review: subintent manifest constructed");
 
-        let summary = subintent_manifest.validated_summary(
-            false, // PreAuth transaction cannot be sent by the Host itself
-        )?;
+        // Access controller calls are reserved, but validated further below:
+        // a pre-authorization may make them to share control with others.
+        let summary = subintent_manifest.summary()?;
+        let calls_only_access_controllers =
+            !summary.reserved_instructions.is_empty()
+                && summary.reserved_instructions.iter().all(|instruction| {
+                    *instruction == ReservedInstruction::AccessControllerMethod
+                });
+        let summary = if calls_only_access_controllers {
+            summary
+        } else {
+            subintent_manifest.validated_summary(
+                false, // PreAuth transaction cannot be sent by the Host itself
+            )?
+        };
         debug!("Pre-auth review: subintent manifest summary validated");
 
         let pre_auth_to_review = match subintent_manifest.as_enclosed() {
+            None if calls_only_access_controllers => {
+                warn!(
+                    "Pre-auth access controller calls rejected: open manifest"
+                );
+                return Err(
+                    CommonError::ReservedInstructionsNotAllowedInManifest {
+                        reserved_instructions: summary
+                            .reserved_instructions
+                            .iter()
+                            .map(|i| i.to_string())
+                            .collect(),
+                    },
+                );
+            }
             Some(manifest) => {
                 debug!("Pre-auth review: enclosed subintent manifest detected");
-                let execution_summary = self
-                    .get_execution_summary(
+                let (execution_summary, access_controllers) = self
+                    .get_execution_summary_and_access_controllers(
                         manifest,
                         nonce,
                         notary_public_key,
@@ -61,6 +87,15 @@ impl OsAnalysePreAuthPreview for SargonOS {
                     )
                     .await?;
                 debug!("Pre-auth review: enclosed preview execution summary computed");
+
+                if calls_only_access_controllers {
+                    self.validate_pre_auth_access_controller_calls(
+                        &subintent_manifest,
+                        &summary,
+                        &execution_summary,
+                        &access_controllers,
+                    )?;
+                }
 
                 PreAuthToReview::Enclosed(PreAuthEnclosedManifest {
                     manifest: subintent_manifest,
@@ -126,6 +161,43 @@ mod tests {
                 summary: subintent_manifest.summary().unwrap(),
             })
         )
+    }
+
+    /// Access controller calls are validated on enclosed manifests only.
+    #[actix_rt::test]
+    async fn access_controller_calls_in_an_open_manifest_are_reserved() {
+        let os = prepare_os(MockNetworkingDriver::new_always_failing()).await;
+
+        let subintent_manifest: SubintentManifest = (
+            ScryptoSubintentManifestV2Builder::new_subintent_v2()
+                .call_method(
+                    AccessControllerAddress::sample_mainnet().scrypto(),
+                    "lock_primary_role",
+                    (),
+                )
+                .yield_to_parent(())
+                .yield_to_parent(())
+                .build(),
+            NetworkID::Mainnet,
+        )
+            .try_into()
+            .unwrap();
+
+        let result = os
+            .analyse_pre_auth_preview(
+                subintent_manifest.manifest_string(),
+                Blobs::default(),
+                Nonce::sample(),
+                PublicKey::sample(),
+            )
+            .await;
+
+        assert_eq!(
+            result,
+            Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions: "AccessControllerMethod".to_string(),
+            })
+        );
     }
 
     #[actix_rt::test]

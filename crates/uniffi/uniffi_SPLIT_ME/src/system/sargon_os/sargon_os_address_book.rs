@@ -22,13 +22,14 @@ impl SargonOS {
         Ok(entries.into_iter().map(Into::into).collect())
     }
 
-    pub fn address_book_entry_by_address(
+    /// The entry naming `target`, an address or a non-fungible.
+    pub fn address_book_entry(
         &self,
-        address: Address,
+        target: AddressBookEntryTarget,
     ) -> Result<AddressBookEntry> {
         let entry: sargon::AddressBookEntry = self
             .wrapped
-            .address_book_entry_by_address(address.into_internal())
+            .address_book_entry(target.into_internal())
             .into_result()?;
         Ok(entry.into())
     }
@@ -38,13 +39,13 @@ impl SargonOS {
 impl SargonOS {
     pub async fn add_address_book_entry(
         &self,
-        address: Address,
+        target: AddressBookEntryTarget,
         name: DisplayName,
         note: Option<String>,
     ) -> Result<()> {
         self.wrapped
             .add_address_book_entry(
-                address.into_internal(),
+                target.into_internal(),
                 name.into_internal(),
                 note,
             )
@@ -54,13 +55,13 @@ impl SargonOS {
 
     pub async fn update_address_book_entry(
         &self,
-        address: Address,
+        target: AddressBookEntryTarget,
         name: DisplayName,
         note: Option<String>,
     ) -> Result<bool> {
         self.wrapped
             .update_address_book_entry(
-                address.into_internal(),
+                target.into_internal(),
                 name.into_internal(),
                 note,
             )
@@ -70,10 +71,10 @@ impl SargonOS {
 
     pub async fn delete_address_book_entry(
         &self,
-        address: Address,
+        target: AddressBookEntryTarget,
     ) -> Result<bool> {
         self.wrapped
-            .delete_address_book_entry(address.into_internal())
+            .delete_address_book_entry(target.into_internal())
             .await
             .into_result()
     }

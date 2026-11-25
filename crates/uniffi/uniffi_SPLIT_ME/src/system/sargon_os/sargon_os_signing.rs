@@ -17,13 +17,22 @@ impl SargonOS {
             .into_result()
     }
 
+    /// Signs a subintent. `execution_summary` is the one its review showed,
+    /// if it was previewed: for the access controllers it calls, it decides
+    /// which roles the wallet signs for.
+    #[uniffi::method(default(execution_summary = None))]
     pub async fn sign_subintent(
         &self,
         transaction_intent: Subintent,
         role_kind: RoleKind,
+        execution_summary: Option<ExecutionSummary>,
     ) -> Result<SignedSubintent> {
         self.wrapped
-            .sign_subintent(transaction_intent.into(), role_kind.into())
+            .sign_subintent(
+                transaction_intent.into(),
+                role_kind.into(),
+                execution_summary.map(Into::into),
+            )
             .await
             .into_result()
     }

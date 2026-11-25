@@ -58,7 +58,7 @@ impl ProfileStateHolder {
         self.address_book_on_current_network().map(|entries| {
             entries
                 .into_iter()
-                .filter(|entry| entry.address.is_account())
+                .filter(|entry| entry.target.is_account())
                 .collect()
         })
     }
@@ -71,15 +71,15 @@ impl ProfileStateHolder {
         })
     }
 
-    pub fn address_book_entry_by_address(
+    pub fn address_book_entry(
         &self,
-        address: Address,
+        target: AddressBookEntryTarget,
     ) -> Result<AddressBookEntry> {
         self.try_access_profile_with(|p| {
             let network = p.current_network()?;
             network
                 .address_book
-                .get_id(address)
+                .get_id(target.clone())
                 .cloned()
                 .ok_or(CommonError::EntityNotFound)
         })

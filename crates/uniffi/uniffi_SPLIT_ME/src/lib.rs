@@ -3,6 +3,7 @@
 #![allow(unused_imports)]
 #![allow(internal_features)]
 
+mod access_rules;
 mod core;
 mod discover;
 mod hierarchical_deterministic;
@@ -19,6 +20,7 @@ mod wrapped_radix_engine_toolkit;
 
 pub mod prelude {
 
+    pub use crate::access_rules::*;
     pub use crate::core::*;
     pub use crate::discover::*;
     pub use crate::hierarchical_deterministic::*;

@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use profile_logic::prelude::ProfileCurrentNetwork;
 
 #[derive(Clone, Debug)]
 pub struct ExternalAccountNftRequirements {
@@ -28,39 +27,18 @@ impl FactorInstanceLookupByNftIds for SargonOS {
             return Ok(Vec::new());
         }
 
-        let profile = self.profile()?;
-        let (network_id, mfa_instances) = match profile.current_network() {
-            Ok(network) => (network.id, network.mfa_factor_instances.clone()),
-            Err(CommonError::NoNetworkInProfile { .. }) => {
-                return Ok(Vec::new())
-            }
-            Err(err) => return Err(err),
-        };
-
-        if mfa_instances.is_empty() {
-            debug!(
-                "External signing: no MFA factor instances in current network"
-            );
-            return Ok(Vec::new());
-        }
-
         let required_ids: IndexSet<NonFungibleGlobalId> =
             nft_ids.into_iter().collect();
         debug!(
             "External signing: looking up factor instances for {} NFT ids",
             required_ids.len()
         );
-        let mut instances = Vec::new();
-
-        for mfafi in mfa_instances {
-            let badge_id =
-                mfafi.factor_instance.badge.try_non_fungible_global_id()?;
-            let badge_id = NonFungibleGlobalId::from((badge_id, network_id));
-            if required_ids.contains(&badge_id) {
-                instances
-                    .push(mfafi.factor_instance.try_as_hd_factor_instances()?);
-            }
-        }
+        let instances = self
+            .mfa_signing_keys()?
+            .into_iter()
+            .filter(|key| required_ids.contains(&key.badge))
+            .map(|key| key.factor_instance)
+            .collect::<Vec<_>>();
 
         debug!(
             "External signing: resolved {} factor instances from {} NFT ids",
@@ -214,336 +192,256 @@ fn signatures_from_response<ID: SignableID>(
         .collect()
 }
 
-pub fn extract_nft_ids_from_access_rule(
-    access_rule: &AccessRule,
-) -> Result<IndexSet<NonFungibleGlobalId>> {
-    match access_rule {
-        AccessRule::AllowAll | AccessRule::DenyAll => Ok(IndexSet::new()),
-        AccessRule::Protected { access_rule } => {
-            extract_nft_ids_from_composite_requirement(access_rule)
-        }
-    }
-}
-
-fn extract_nft_ids_from_composite_requirement(
-    requirement: &CompositeRequirement,
-) -> Result<IndexSet<NonFungibleGlobalId>> {
-    match requirement {
-        CompositeRequirement::ProofRule { proof_rule } => {
-            extract_nft_ids_from_basic_requirement(proof_rule)
-        }
-        CompositeRequirement::AnyOf { access_rules }
-        | CompositeRequirement::AllOf { access_rules } => {
-            let mut ids = IndexSet::new();
-            for rule in access_rules {
-                ids.extend(extract_nft_ids_from_composite_requirement(rule)?);
-            }
-            Ok(ids)
-        }
-    }
-}
-
-fn extract_nft_ids_from_basic_requirement(
-    requirement: &BasicRequirement,
-) -> Result<IndexSet<NonFungibleGlobalId>> {
-    match requirement {
-        BasicRequirement::Require { requirement } => {
-            extract_nft_ids_from_requirement(requirement)
-        }
-        BasicRequirement::AllOf { list }
-        | BasicRequirement::AnyOf { list }
-        | BasicRequirement::CountOf { list, .. } => {
-            let mut ids = IndexSet::new();
-            for requirement in list {
-                ids.extend(extract_nft_ids_from_requirement(requirement)?);
-            }
-            Ok(ids)
-        }
-        BasicRequirement::AmountOf { .. } => Ok(IndexSet::new()),
-    }
-}
-
-fn extract_nft_ids_from_requirement(
-    requirement: &Requirement,
-) -> Result<IndexSet<NonFungibleGlobalId>> {
-    match requirement {
-        Requirement::Resource { .. } => Ok(IndexSet::new()),
-        Requirement::NonFungible { non_fungible } => {
-            Ok(IndexSet::just(non_fungible_global_id(non_fungible)?))
-        }
-    }
-}
-
-fn non_fungible_global_id(
-    non_fungible: &NonFungible,
-) -> Result<NonFungibleGlobalId> {
-    let local_id =
-        NonFungibleLocalId::from_str(&non_fungible.local_id.simple_rep)?;
-    Ok(NonFungibleGlobalId::new_unchecked(
-        non_fungible.resource_address,
-        local_id,
-    ))
-}
-
 // ==================
 // External Account Resolution
 // ==================
 
-/// Only the access controller's primary role is used for external signing.
-///
-/// The only access controller method exercised in a pre-authorization today is
-/// the `create_proof` the wallet injects, which requires the primary role.
-/// Signing with recovery/confirmation factors would only cause needless
-/// prompts. Access controller operations (e.g. recovery) in subintents will
-/// require picking the roles based on the manifest classification.
-fn is_access_controller_primary_role_key(role_key: &RoleKey) -> bool {
-    role_key.module == ObjectModuleId::Main
-        && role_key.name == ACCESS_CONTROLLER_PRIMARY_ROLE_NAME
-}
-
-const ACCESS_CONTROLLER_PRIMARY_ROLE_NAME: &str = "primary";
-
-fn access_rule_from_explicit_rule(rule: &ExplicitRule) -> Option<AccessRule> {
-    Some(rule.clone())
-}
-
-fn role_assignments_from_details(
-    details: &StateEntityDetailsResponseItemDetails,
-) -> Option<ComponentEntityRoleAssignments> {
-    match details {
-        StateEntityDetailsResponseItemDetails::FungibleResource(details) => {
-            Some(details.role_assignments.clone())
-        }
-        StateEntityDetailsResponseItemDetails::NonFungibleResource(details) => {
-            Some(details.role_assignments.clone())
-        }
-        StateEntityDetailsResponseItemDetails::Package(details) => {
-            details.role_assignments.clone()
-        }
-        StateEntityDetailsResponseItemDetails::Component(details) => {
-            details.role_assignments.clone()
-        }
-        StateEntityDetailsResponseItemDetails::FungibleVault
-        | StateEntityDetailsResponseItemDetails::NonFungibleVault => None,
-    }
-}
-
-fn access_rule_from_role_assignment(
-    entry: &ComponentEntityRoleAssignmentEntry,
-    owner_rule: &ExplicitRule,
-) -> Option<AccessRule> {
-    match entry.assignment.resolution {
-        RoleAssignmentResolution::Owner => {
-            access_rule_from_explicit_rule(owner_rule)
-        }
-        RoleAssignmentResolution::Explicit => entry
-            .assignment
-            .explicit_rule
-            .as_ref()
-            .and_then(access_rule_from_explicit_rule),
-    }
-}
-
-pub(crate) async fn fetch_role_assignments_for_addresses(
-    os: &SargonOS,
-    addresses: Vec<Address>,
-) -> Result<IndexMap<Address, ComponentEntityRoleAssignments>> {
-    if addresses.is_empty() {
-        return Ok(IndexMap::new());
-    }
-
-    let gateway_client = os.gateway_client();
+/// What each account's owner role requires, read from the Gateway.
+async fn fetch_owner_requirements(
+    gateway_client: &GatewayClient,
+    accounts: &[AccountAddress],
+    network_id: NetworkID,
+) -> Result<IndexMap<AccountAddress, AccessRequirement>> {
     let ledger_state = gateway_client.gateway_status().await?.ledger_state;
-    let request = StateEntityDetailsRequest::new(
-        addresses.clone(),
-        Some(ledger_state.into()),
-        None,
-    );
-    let response = gateway_client.state_entity_details(request).await?;
+    let response = gateway_client
+        .state_entity_details(StateEntityDetailsRequest::new(
+            accounts.iter().map(|account| (*account).into()).collect(),
+            Some(ledger_state.into()),
+            None,
+        ))
+        .await?;
 
-    let mut assignments =
-        IndexMap::<Address, ComponentEntityRoleAssignments>::new();
-    for address in addresses {
-        let item = response
-            .items
-            .iter()
-            .find(|item| item.address == address)
-            .ok_or(CommonError::GWMissingResponseItem {
-            item: "StateEntityDetailsResponseItem".to_owned(),
-        })?;
-
-        let details = item.details.as_ref().ok_or(CommonError::Unknown {
-            error_message: format!(
-                "Missing entity details for address {}",
-                address
-            ),
-        })?;
-        let role_assignments = role_assignments_from_details(details).ok_or(
-            CommonError::Unknown {
-                error_message: format!(
-                    "Missing role assignments for address {}",
-                    address
-                ),
-            },
-        )?;
-        assignments.insert(address, role_assignments);
-    }
-
-    Ok(assignments)
-}
-
-fn access_rules_from_access_controller(
-    assignments: &ComponentEntityRoleAssignments,
-) -> Vec<AccessRule> {
-    let rules: Vec<AccessRule> = assignments
-        .entries
+    accounts
         .iter()
-        .filter(|entry| is_access_controller_primary_role_key(&entry.role_key))
-        .filter_map(|entry| {
-            access_rule_from_role_assignment(entry, &assignments.owner.rule)
+        .map(|account| {
+            let owner_rule = response
+                .items
+                .iter()
+                .find(|item| item.address == (*account).into())
+                .and_then(|item| item.details.clone())
+                .and_then(|details| details.as_component().cloned())
+                .and_then(|component| component.role_assignments)
+                .map(|assignments| assignments.owner.rule)
+                .ok_or_else(|| CommonError::Unknown {
+                    error_message: format!(
+                        "Missing owner role for account {account}"
+                    ),
+                })?;
+            Ok((
+                *account,
+                AccessRequirement::from((
+                    ScryptoAccessRule::from(owner_rule),
+                    network_id,
+                )),
+            ))
         })
-        .collect();
-    if rules.is_empty() {
-        debug!("No access controller role assignments matched the primary role key");
-    }
-    rules
+        .collect()
 }
 
+/// What `role` of an access controller requires.
+fn role_requirement(
+    rules: &AccessControllerRuleSet,
+    role: RoleKind,
+) -> &AccessRequirement {
+    match role {
+        RoleKind::Primary => &rules.primary_role,
+        RoleKind::Recovery => &rules.recovery_role,
+        RoleKind::Confirmation => &rules.confirmation_role,
+    }
+}
+
+/// The badges that can authorize what the subintent does outside the Profile,
+/// per entity:
+/// - for each account it needs to authorize that isn't in the Profile, those
+///   its owner role names, and if an access controller holds its owner badge,
+///   those its primary role names: the account then acts through the
+///   `create_proof` the wallet adds, which needs the primary role;
+/// - for each access controller it calls, e.g. to propose a recovery of a
+///   shared account, those the roles its calls need name, read from the
+///   subintent's `classification` (see [`pre_authorization_access_controller_roles`]),
+///   under the entity it controls. Unless the classification is shared
+///   control, the only calls allowed are the `create_proof`s the wallet adds,
+///   so those its primary role names.
+///
+/// Signing with them can't hand over an entity on its own: shared control is
+/// checked again here with the rules just read (see
+/// [`shared_control_refusal`]), and refused if the wallet's keys alone pass
+/// any role.
 pub(crate) async fn resolve_external_accounts_for_subintent(
     os: &SargonOS,
     subintent: &Subintent,
+    classification: Option<&DetailedManifestClass>,
 ) -> Result<Vec<ExternalAccountNftRequirements>> {
     let summary = subintent.manifest.summary()?;
     let profile = os.profile()?;
+    let network_id = subintent.manifest.network_id();
 
-    debug!(
-        "Resolving external accounts for subintent: {:?}",
-        subintent.get_id()
-    );
-    let external_account_addresses = summary
+    let external_accounts = summary
         .addresses_of_accounts_requiring_auth
-        .into_iter()
+        .iter()
+        .copied()
         .filter(|address| profile.account_by_address(*address).is_err())
         .collect_vec();
-
-    if external_account_addresses.is_empty() {
-        debug!("No external accounts detected for subintent");
+    let called_access_controllers = summary.access_controllers_called.clone();
+    if external_accounts.is_empty() && called_access_controllers.is_empty() {
+        debug!(
+            "No external accounts or access controllers detected for subintent"
+        );
         return Ok(Vec::new());
     }
-
     debug!(
-        "External accounts detected for subintent: {:?}",
-        external_account_addresses
+        "External accounts detected for subintent: {:?}, access controllers called: {:?}",
+        external_accounts, called_access_controllers
     );
+
     let gateway_client = os.gateway_client();
-    let access_controllers_of_accounts = gateway_client
-        .fetch_access_controllers_of_entities(
-            external_account_addresses
-                .iter()
-                .map(|address| AddressOfAccountOrPersona::Account(*address))
-                .collect_vec(),
-        )
-        .await?;
-
-    debug!(
-        "Resolved access controllers of external accounts: {:?}",
-        access_controllers_of_accounts
-    );
-    let account_role_assignments = fetch_role_assignments_for_addresses(
-        os,
-        external_account_addresses
-            .iter()
-            .map(|address| Address::from(*address))
-            .collect_vec(),
-    )
-    .await?;
-    let access_controller_addresses = access_controllers_of_accounts
-        .values()
-        .cloned()
-        .collect::<IndexSet<_>>();
-    debug!(
-        "Access controller addresses for external accounts: {:?}",
-        access_controller_addresses
-    );
-    let access_controller_role_assignments =
-        fetch_role_assignments_for_addresses(
-            os,
-            access_controller_addresses
-                .iter()
-                .map(|address| Address::from(*address))
-                .collect_vec(),
-        )
-        .await?;
-
-    let mut external_accounts = Vec::new();
-    for address in external_account_addresses {
-        let owner_address = AddressOfAccountOrPersona::Account(address);
-
-        let account_assignments = account_role_assignments
-            .get(&Address::from(address))
-            .ok_or(CommonError::Unknown {
-                error_message: format!(
-                    "Missing role assignments for account {}",
-                    address
-                ),
-            })?;
-        let account_rule =
-            access_rule_from_explicit_rule(&account_assignments.owner.rule)
-                .ok_or(CommonError::Unknown {
-                    error_message: format!(
-                        "Missing access rule for account {}",
-                        address
-                    ),
-                })?;
-
-        debug!(
-            "Account access rule for external account {}: {:?}",
-            address, account_rule
-        );
-        let mut required_nft_ids =
-            extract_nft_ids_from_access_rule(&account_rule)?;
-
-        if let Some(access_controller_address) =
-            access_controllers_of_accounts.get(&owner_address).cloned()
-        {
-            if let Some(assignments) = access_controller_role_assignments
-                .get(&Address::from(access_controller_address))
-            {
-                debug!(
-                    "Access controller role assignments for {}: {:?}",
-                    access_controller_address, assignments
-                );
-                for rule in access_rules_from_access_controller(assignments) {
-                    debug!(
-                        "Access controller rule for {}: {:?}",
-                        access_controller_address, rule
-                    );
-                    required_nft_ids
-                        .extend(extract_nft_ids_from_access_rule(&rule)?);
-                }
-            } else {
-                debug!(
-                    "No access controller role assignments found for {}",
-                    access_controller_address
-                );
-            }
+    let (access_controllers_of_accounts, owner_requirements) =
+        if external_accounts.is_empty() {
+            (IndexMap::new(), IndexMap::new())
         } else {
-            debug!(
-                    "External account {} has no access controller owner; using account access rule only",
-                    address
-                );
-        }
+            let access_controllers_of_accounts = gateway_client
+                .fetch_access_controllers_of_entities(
+                    external_accounts.iter().map(|address| {
+                        AddressOfAccountOrPersona::from(*address)
+                    }),
+                )
+                .await?;
+            let owner_requirements = fetch_owner_requirements(
+                &gateway_client,
+                &external_accounts,
+                network_id,
+            )
+            .await?;
+            (access_controllers_of_accounts, owner_requirements)
+        };
+    let access_controller_of = |account: AccountAddress| {
+        access_controllers_of_accounts
+            .get(&AddressOfAccountOrPersona::from(account))
+            .copied()
+    };
 
-        debug!(
-            "Required NFT ids for external account {}: {:?}",
-            address, required_nft_ids
-        );
-        external_accounts.push(ExternalAccountNftRequirements {
-            owner: owner_address,
-            required_nft_ids,
-        });
+    let access_controllers = access_controllers_of_accounts
+        .values()
+        .chain(called_access_controllers.iter())
+        .copied()
+        .collect::<IndexSet<_>>();
+    let access_controller_details = if access_controllers.is_empty() {
+        IndexMap::new()
+    } else {
+        gateway_client
+            .fetch_access_controllers_details(
+                access_controllers.into_iter().collect(),
+            )
+            .await?
+            .into_iter()
+            .map(|details| (details.address, details))
+            .collect::<IndexMap<_, _>>()
+    };
+    let rules_of = |access_controller: &AccessControllerAddress| {
+        let rule_set = access_controller_details
+            .get(access_controller)?
+            .rule_set()
+            .ok()?;
+        Some(AccessControllerRuleSet::from((rule_set, network_id)))
+    };
+
+    let mut requirements = IndexMap::<
+        AddressOfAccountOrPersona,
+        IndexSet<NonFungibleGlobalId>,
+    >::new();
+    for account in external_accounts {
+        let mut required_nft_ids = owner_requirements
+            .get(&account)
+            .map(AccessRequirement::non_fungibles)
+            .unwrap_or_default();
+        if let Some(access_controller) = access_controller_of(account) {
+            match rules_of(&access_controller) {
+                Some(rules) => {
+                    required_nft_ids.extend(rules.primary_role.non_fungibles())
+                }
+                None => debug!(
+                    "No rules read for access controller {}",
+                    access_controller
+                ),
+            }
+        }
+        requirements
+            .entry(AddressOfAccountOrPersona::Account(account))
+            .or_default()
+            .extend(required_nft_ids);
+    }
+    // Calls on access controllers are signed for only as shared control, which
+    // is checked again here with the rules just read, or, otherwise, only the
+    // `create_proof` the wallet adds for an entity an access controller holds,
+    // which needs its primary role.
+    let shared_control_class = classification
+        .filter(|class| is_allowed_in_pre_authorizations(class));
+    let reject = |reason: &str| {
+        warn!("Pre-auth access controller calls rejected at signing: {reason}");
+        Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+            reserved_instructions: summary
+                .reserved_instructions
+                .iter()
+                .map(|i| i.to_string())
+                .collect(),
+        })
+    };
+    let roles_to_sign_for = match shared_control_class {
+        Some(class) => {
+            if let Some(reason) = shared_control_refusal(
+                Some(class),
+                &summary,
+                &access_controller_details,
+                os.mfa_signing_keys()?,
+                network_id,
+            ) {
+                return reject(reason);
+            }
+            pre_authorization_access_controller_roles(class)
+        }
+        None if !subintent
+            .manifest
+            .only_creates_proofs_on(&called_access_controllers) =>
+        {
+            return reject("access controller calls without shared control");
+        }
+        None => None,
+    };
+    for access_controller in called_access_controllers {
+        let controlled = access_controller_details
+            .get(&access_controller)
+            .and_then(|details| details.controlled_entity);
+        let roles = roles_to_sign_for
+            .as_ref()
+            .and_then(|roles| roles.get(&access_controller));
+        match (controlled, rules_of(&access_controller)) {
+            (Some(entity), Some(rules)) => {
+                let badges = match roles {
+                    Some(roles) => roles
+                        .iter()
+                        .flat_map(|role| {
+                            role_requirement(&rules, *role).non_fungibles()
+                        })
+                        .collect(),
+                    // Only the wallet's `create_proof`.
+                    None => rules.primary_role.non_fungibles(),
+                };
+                requirements.entry(entity).or_default().extend(badges);
+            }
+            _ => debug!(
+                "No controlled entity or rules read for called access controller {}",
+                access_controller
+            ),
+        }
     }
 
+    let external_accounts = requirements
+        .into_iter()
+        .map(|(owner, required_nft_ids)| ExternalAccountNftRequirements {
+            owner,
+            required_nft_ids,
+        })
+        .collect_vec();
     debug!(
         "Resolved external account NFT requirements: {:?}",
         external_accounts
@@ -554,156 +452,7 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn nft(resource: ResourceAddress, simple_rep: &str) -> NonFungible {
-        NonFungible {
-            resource_address: resource,
-            local_id: NonFungibleLocalIdId {
-                id_type: "Integer".to_string(),
-                sbor_hex: "".to_string(),
-                simple_rep: simple_rep.to_string(),
-            },
-        }
-    }
-
-    #[test]
-    fn extracts_nft_ids_from_access_rule() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AnyOf {
-                access_rules: vec![
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::Require {
-                            requirement: Requirement::NonFungible {
-                                non_fungible: nft(resource, "#1#"),
-                            },
-                        },
-                    },
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::Require {
-                            requirement: Requirement::NonFungible {
-                                non_fungible: nft(resource, "#2#"),
-                            },
-                        },
-                    },
-                ],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        let expected: IndexSet<NonFungibleGlobalId> = IndexSet::from_iter([
-            NonFungibleGlobalId::new_unchecked(
-                resource,
-                NonFungibleLocalId::integer(1),
-            ),
-            NonFungibleGlobalId::new_unchecked(
-                resource,
-                NonFungibleLocalId::integer(2),
-            ),
-        ]);
-
-        assert_eq!(ids, expected);
-    }
-
-    #[test]
-    fn ignores_non_nft_requirements() {
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::AmountOf {
-                    amount: Decimal192::one(),
-                    resource: ResourceAddress::sample_other(),
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert!(ids.is_empty());
-    }
-
-    #[test]
-    fn access_controller_role_key_filtering() {
-        let primary = RoleKey::new("primary".to_string(), ObjectModuleId::Main);
-        let recovery =
-            RoleKey::new("recovery".to_string(), ObjectModuleId::Main);
-        let confirmation =
-            RoleKey::new("confirmation".to_string(), ObjectModuleId::Main);
-        let depositor =
-            RoleKey::new("depositor".to_string(), ObjectModuleId::Main);
-        let metadata_primary =
-            RoleKey::new("primary".to_string(), ObjectModuleId::Metadata);
-
-        assert!(is_access_controller_primary_role_key(&primary));
-        assert!(!is_access_controller_primary_role_key(&recovery));
-        assert!(!is_access_controller_primary_role_key(&confirmation));
-        assert!(!is_access_controller_primary_role_key(&depositor));
-        assert!(!is_access_controller_primary_role_key(&metadata_primary));
-    }
-
-    #[test]
-    fn role_assignments_from_details_component() {
-        let assignments = ComponentEntityRoleAssignments::sample();
-        let details = StateEntityDetailsResponseItemDetails::Component(
-            StateEntityDetailsResponseComponentDetails::new(
-                assignments.clone(),
-            ),
-        );
-
-        assert_eq!(role_assignments_from_details(&details), Some(assignments));
-
-        let vault_details =
-            StateEntityDetailsResponseItemDetails::FungibleVault;
-        assert!(role_assignments_from_details(&vault_details).is_none());
-    }
-
-    #[test]
-    fn access_rules_from_access_controller_collects_primary_roles() {
-        let owner_rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AnyOf {
-                access_rules: vec![],
-            },
-        };
-        let explicit_primary = AccessRule::AllowAll;
-        let explicit_recovery = AccessRule::DenyAll;
-
-        let entries = vec![
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("primary".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    explicit_primary.clone(),
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("recovery".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    explicit_recovery.clone(),
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("confirmation".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Owner,
-                    None,
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::main_depositor(),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    AccessRule::AllowAll,
-                ),
-            ),
-        ];
-
-        let assignments = ComponentEntityRoleAssignments::new(
-            ComponentEntityRoleAssignmentOwner::new(owner_rule.clone()),
-            entries,
-        );
-
-        let rules = access_rules_from_access_controller(&assignments);
-        assert_eq!(rules, vec![explicit_primary]);
-    }
+    use profile_logic::prelude::ProfileCurrentNetwork;
 
     #[actix_rt::test]
     async fn factor_instances_for_nfts_uses_profile_mfa_instances() {
@@ -806,392 +555,6 @@ mod tests {
         UserRejected,
     }
 
-    // ==================
-    // Additional Robustness Tests
-    // ==================
-
-    #[test]
-    fn extract_nft_ids_handles_allow_all() {
-        let rule = AccessRule::AllowAll;
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert!(ids.is_empty());
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_deny_all() {
-        let rule = AccessRule::DenyAll;
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert!(ids.is_empty());
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_nested_any_of() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AnyOf {
-                access_rules: vec![
-                    CompositeRequirement::AnyOf {
-                        access_rules: vec![
-                            CompositeRequirement::ProofRule {
-                                proof_rule: BasicRequirement::Require {
-                                    requirement: Requirement::NonFungible {
-                                        non_fungible: nft(resource, "#1#"),
-                                    },
-                                },
-                            },
-                            CompositeRequirement::ProofRule {
-                                proof_rule: BasicRequirement::Require {
-                                    requirement: Requirement::NonFungible {
-                                        non_fungible: nft(resource, "#2#"),
-                                    },
-                                },
-                            },
-                        ],
-                    },
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::Require {
-                            requirement: Requirement::NonFungible {
-                                non_fungible: nft(resource, "#3#"),
-                            },
-                        },
-                    },
-                ],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 3);
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_all_of() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AllOf {
-                access_rules: vec![
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::Require {
-                            requirement: Requirement::NonFungible {
-                                non_fungible: nft(resource, "#1#"),
-                            },
-                        },
-                    },
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::Require {
-                            requirement: Requirement::NonFungible {
-                                non_fungible: nft(resource, "#2#"),
-                            },
-                        },
-                    },
-                ],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 2);
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_count_of() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::CountOf {
-                    count: 2,
-                    list: vec![
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#1#"),
-                        },
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#2#"),
-                        },
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#3#"),
-                        },
-                    ],
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 3);
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_any_of_in_basic_requirement() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::AnyOf {
-                    list: vec![
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#1#"),
-                        },
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#2#"),
-                        },
-                    ],
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 2);
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_all_of_in_basic_requirement() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::AllOf {
-                    list: vec![
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#1#"),
-                        },
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#2#"),
-                        },
-                    ],
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 2);
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_mixed_requirements() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::AllOf {
-                    list: vec![
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#1#"),
-                        },
-                        Requirement::Resource {
-                            resource: ResourceAddress::sample_other(),
-                        },
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#2#"),
-                        },
-                    ],
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 2);
-    }
-
-    #[test]
-    fn extract_nft_ids_deduplicates_ids() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AnyOf {
-                access_rules: vec![
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::Require {
-                            requirement: Requirement::NonFungible {
-                                non_fungible: nft(resource, "#1#"),
-                            },
-                        },
-                    },
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::Require {
-                            requirement: Requirement::NonFungible {
-                                non_fungible: nft(resource, "#1#"),
-                            },
-                        },
-                    },
-                ],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 1);
-    }
-
-    #[test]
-    fn access_rule_from_role_assignment_owner_resolution() {
-        let owner_rule = AccessRule::AllowAll;
-        let entry = ComponentEntityRoleAssignmentEntry::new(
-            RoleKey::new("primary".to_string(), ObjectModuleId::Main),
-            ComponentEntityRoleAssignmentEntryAssignment::new(
-                RoleAssignmentResolution::Owner,
-                None,
-            ),
-        );
-
-        let rule = access_rule_from_role_assignment(&entry, &owner_rule);
-        assert_eq!(rule, Some(owner_rule));
-    }
-
-    #[test]
-    fn access_rule_from_role_assignment_explicit_resolution_with_rule() {
-        let owner_rule = AccessRule::AllowAll;
-        let explicit_rule = AccessRule::DenyAll;
-        let entry = ComponentEntityRoleAssignmentEntry::new(
-            RoleKey::new("primary".to_string(), ObjectModuleId::Main),
-            ComponentEntityRoleAssignmentEntryAssignment::new(
-                RoleAssignmentResolution::Explicit,
-                explicit_rule.clone(),
-            ),
-        );
-
-        let rule = access_rule_from_role_assignment(&entry, &owner_rule);
-        assert_eq!(rule, Some(explicit_rule));
-    }
-
-    #[test]
-    fn access_rule_from_role_assignment_explicit_resolution_without_rule() {
-        let owner_rule = AccessRule::AllowAll;
-        let entry = ComponentEntityRoleAssignmentEntry::new(
-            RoleKey::new("primary".to_string(), ObjectModuleId::Main),
-            ComponentEntityRoleAssignmentEntryAssignment::new(
-                RoleAssignmentResolution::Explicit,
-                None,
-            ),
-        );
-
-        let rule = access_rule_from_role_assignment(&entry, &owner_rule);
-        assert_eq!(rule, None);
-    }
-
-    #[test]
-    fn role_assignments_from_details_fungible_resource() {
-        let assignments = ComponentEntityRoleAssignments::sample();
-        let details = StateEntityDetailsResponseItemDetails::FungibleResource(
-            StateEntityDetailsResponseFungibleResourceDetails::new(
-                assignments.clone(),
-            ),
-        );
-
-        assert_eq!(role_assignments_from_details(&details), Some(assignments));
-    }
-
-    #[test]
-    fn role_assignments_from_details_non_fungible_resource() {
-        let assignments = ComponentEntityRoleAssignments::sample();
-        let details =
-            StateEntityDetailsResponseItemDetails::NonFungibleResource(
-                StateEntityDetailsResponseNonFungibleResourceDetails::new(
-                    assignments.clone(),
-                ),
-            );
-
-        assert_eq!(role_assignments_from_details(&details), Some(assignments));
-    }
-
-    #[test]
-    fn role_assignments_from_details_package_with_assignments() {
-        let assignments = ComponentEntityRoleAssignments::sample();
-        let details = StateEntityDetailsResponseItemDetails::Package(
-            StateEntityDetailsResponsePackageDetails::new(Some(
-                assignments.clone(),
-            )),
-        );
-
-        assert_eq!(role_assignments_from_details(&details), Some(assignments));
-    }
-
-    #[test]
-    fn role_assignments_from_details_package_without_assignments() {
-        let details = StateEntityDetailsResponseItemDetails::Package(
-            StateEntityDetailsResponsePackageDetails::new(None),
-        );
-
-        assert_eq!(role_assignments_from_details(&details), None);
-    }
-
-    #[test]
-    fn role_assignments_from_details_non_fungible_vault() {
-        let details = StateEntityDetailsResponseItemDetails::NonFungibleVault;
-        assert_eq!(role_assignments_from_details(&details), None);
-    }
-
-    #[test]
-    fn is_access_controller_primary_role_key_accepts_only_primary() {
-        let test_cases = vec![
-            ("primary", ObjectModuleId::Main, true),
-            ("recovery", ObjectModuleId::Main, false),
-            ("confirmation", ObjectModuleId::Main, false),
-            ("depositor", ObjectModuleId::Main, false),
-            ("withdrawer", ObjectModuleId::Main, false),
-            ("primary", ObjectModuleId::Metadata, false),
-            ("recovery", ObjectModuleId::RoleAssignment, false),
-        ];
-
-        for (name, module, expected) in test_cases {
-            let role_key = RoleKey::new(name.to_string(), module.clone());
-            assert_eq!(
-                is_access_controller_primary_role_key(&role_key),
-                expected,
-                "Failed for role: {}, module: {:?}",
-                name,
-                module
-            );
-        }
-    }
-
-    #[test]
-    fn access_rules_from_access_controller_returns_empty_for_no_matches() {
-        let owner_rule = AccessRule::AllowAll;
-        let entries = vec![ComponentEntityRoleAssignmentEntry::new(
-            RoleKey::main_depositor(),
-            ComponentEntityRoleAssignmentEntryAssignment::new(
-                RoleAssignmentResolution::Explicit,
-                AccessRule::AllowAll,
-            ),
-        )];
-
-        let assignments = ComponentEntityRoleAssignments::new(
-            ComponentEntityRoleAssignmentOwner::new(owner_rule),
-            entries,
-        );
-
-        let rules = access_rules_from_access_controller(&assignments);
-        assert!(rules.is_empty());
-    }
-
-    #[test]
-    fn access_rules_from_access_controller_filters_by_module() {
-        let owner_rule = AccessRule::AllowAll;
-        let explicit_rule = AccessRule::DenyAll;
-
-        let entries = vec![
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("primary".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    explicit_rule.clone(),
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("primary".to_string(), ObjectModuleId::Metadata),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    AccessRule::Protected {
-                        access_rule: CompositeRequirement::AnyOf {
-                            access_rules: vec![],
-                        },
-                    },
-                ),
-            ),
-        ];
-
-        let assignments = ComponentEntityRoleAssignments::new(
-            ComponentEntityRoleAssignmentOwner::new(owner_rule),
-            entries,
-        );
-
-        let rules = access_rules_from_access_controller(&assignments);
-        assert_eq!(rules.len(), 1);
-        assert_eq!(rules[0], explicit_rule);
-    }
-
     #[actix_rt::test]
     async fn factor_instances_for_nfts_empty_list_returns_empty() {
         let profile = Profile::sample();
@@ -1249,308 +612,6 @@ mod tests {
             sut.factor_instances_for_nfts(required_ids).await.unwrap();
 
         assert_eq!(instances.len(), mfa_instances.len());
-    }
-
-    #[test]
-    fn access_rule_from_explicit_rule_returns_some() {
-        let rule = AccessRule::AllowAll;
-        let result = access_rule_from_explicit_rule(&rule);
-        assert_eq!(result, Some(rule));
-    }
-
-    // ==================
-    // Error Handling Tests
-    // ==================
-
-    #[test]
-    fn non_fungible_global_id_handles_valid_integer_id() {
-        let nft_obj = nft(ResourceAddress::sample(), "#123#");
-        let result = non_fungible_global_id(&nft_obj);
-        assert!(result.is_ok());
-        let id = result.unwrap();
-        assert_eq!(
-            id,
-            NonFungibleGlobalId::new_unchecked(
-                ResourceAddress::sample(),
-                NonFungibleLocalId::integer(123)
-            )
-        );
-    }
-
-    #[test]
-    fn non_fungible_global_id_handles_invalid_local_id() {
-        let mut invalid_nft = nft(ResourceAddress::sample(), "#1#");
-        invalid_nft.local_id.simple_rep = "not_valid_format".to_string();
-
-        let result = non_fungible_global_id(&invalid_nft);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_deeply_nested_rules() {
-        let resource = ResourceAddress::sample();
-        // Create a 4-level nested structure
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AnyOf {
-                access_rules: vec![CompositeRequirement::AllOf {
-                    access_rules: vec![CompositeRequirement::AnyOf {
-                        access_rules: vec![CompositeRequirement::ProofRule {
-                            proof_rule: BasicRequirement::AllOf {
-                                list: vec![
-                                    Requirement::NonFungible {
-                                        non_fungible: nft(resource, "#1#"),
-                                    },
-                                    Requirement::NonFungible {
-                                        non_fungible: nft(resource, "#2#"),
-                                    },
-                                ],
-                            },
-                        }],
-                    }],
-                }],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 2);
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_empty_any_of() {
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AnyOf {
-                access_rules: vec![],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert!(ids.is_empty());
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_empty_all_of() {
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AllOf {
-                access_rules: vec![],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert!(ids.is_empty());
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_only_resource_requirements() {
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::AllOf {
-                    list: vec![
-                        Requirement::Resource {
-                            resource: ResourceAddress::sample(),
-                        },
-                        Requirement::Resource {
-                            resource: ResourceAddress::sample_other(),
-                        },
-                    ],
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert!(ids.is_empty());
-    }
-
-    #[test]
-    fn extract_nft_ids_handles_amount_of_requirement() {
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::AmountOf {
-                    amount: Decimal192::from(5),
-                    resource: ResourceAddress::sample(),
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert!(ids.is_empty());
-    }
-
-    #[test]
-    fn extract_nft_ids_from_count_of_with_mixed_requirements() {
-        let resource = ResourceAddress::sample();
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::CountOf {
-                    count: 1,
-                    list: vec![
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#1#"),
-                        },
-                        Requirement::Resource {
-                            resource: ResourceAddress::sample_other(),
-                        },
-                        Requirement::NonFungible {
-                            non_fungible: nft(resource, "#2#"),
-                        },
-                    ],
-                },
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 2);
-    }
-
-    // ==================
-    // Complex Integration Tests
-    // ==================
-
-    #[test]
-    fn access_rules_from_access_controller_ignores_non_primary_ac_roles() {
-        let owner_rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AnyOf {
-                access_rules: vec![],
-            },
-        };
-        let primary_rule = AccessRule::AllowAll;
-        let recovery_rule = AccessRule::DenyAll;
-        let confirmation_rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AllOf {
-                access_rules: vec![],
-            },
-        };
-
-        let entries = vec![
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("primary".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    primary_rule.clone(),
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("recovery".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    recovery_rule.clone(),
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("confirmation".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    confirmation_rule.clone(),
-                ),
-            ),
-        ];
-
-        let assignments = ComponentEntityRoleAssignments::new(
-            ComponentEntityRoleAssignmentOwner::new(owner_rule.clone()),
-            entries,
-        );
-
-        let rules = access_rules_from_access_controller(&assignments);
-        assert_eq!(rules, vec![primary_rule]);
-    }
-
-    #[test]
-    fn access_rules_from_access_controller_handles_mixed_resolution_types() {
-        let owner_rule = AccessRule::AllowAll;
-        let explicit_rule = AccessRule::DenyAll;
-
-        let entries = vec![
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("primary".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Owner,
-                    None,
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("recovery".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    explicit_rule.clone(),
-                ),
-            ),
-            ComponentEntityRoleAssignmentEntry::new(
-                RoleKey::new("confirmation".to_string(), ObjectModuleId::Main),
-                ComponentEntityRoleAssignmentEntryAssignment::new(
-                    RoleAssignmentResolution::Explicit,
-                    None,
-                ),
-            ),
-        ];
-
-        let assignments = ComponentEntityRoleAssignments::new(
-            ComponentEntityRoleAssignmentOwner::new(owner_rule.clone()),
-            entries,
-        );
-
-        let rules = access_rules_from_access_controller(&assignments);
-        // Primary resolves to the owner rule; recovery and confirmation are
-        // not used for external signing.
-        assert_eq!(rules, vec![owner_rule]);
-    }
-
-    #[test]
-    fn extract_nft_ids_from_complex_real_world_rule() {
-        let resource1 = ResourceAddress::sample();
-        let resource2 = ResourceAddress::sample_other();
-
-        // Simulate a real-world complex rule:
-        // "You need (NFT#1 OR NFT#2) AND (NFT#3 OR 5 of Resource)"
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::AllOf {
-                access_rules: vec![
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::AnyOf {
-                            list: vec![
-                                Requirement::NonFungible {
-                                    non_fungible: nft(resource1, "#1#"),
-                                },
-                                Requirement::NonFungible {
-                                    non_fungible: nft(resource1, "#2#"),
-                                },
-                            ],
-                        },
-                    },
-                    CompositeRequirement::ProofRule {
-                        proof_rule: BasicRequirement::AnyOf {
-                            list: vec![
-                                Requirement::NonFungible {
-                                    non_fungible: nft(resource1, "#3#"),
-                                },
-                                Requirement::Resource {
-                                    resource: resource2,
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-        };
-
-        let ids = extract_nft_ids_from_access_rule(&rule).unwrap();
-        assert_eq!(ids.len(), 3);
-
-        let expected_ids: IndexSet<NonFungibleGlobalId> =
-            IndexSet::from_iter([
-                NonFungibleGlobalId::new_unchecked(
-                    resource1,
-                    NonFungibleLocalId::integer(1),
-                ),
-                NonFungibleGlobalId::new_unchecked(
-                    resource1,
-                    NonFungibleLocalId::integer(2),
-                ),
-                NonFungibleGlobalId::new_unchecked(
-                    resource1,
-                    NonFungibleLocalId::integer(3),
-                ),
-            ]);
-
-        assert_eq!(ids, expected_ids);
     }
 
     #[actix_rt::test]
@@ -1615,5 +676,269 @@ mod tests {
             sut.factor_instances_for_nfts(vec![nft_id]).await.unwrap();
 
         assert!(instances.is_empty());
+    }
+
+    /// The chain against Stokenet's answers for a shared account: it isn't in
+    /// the Profile, its owner badge is in an access controller, and so it
+    /// requires the account owner badge (its owner role) and the keys the
+    /// access controller's primary role names, which `create_proof` needs.
+    /// The keys only its recovery and confirmation roles name aren't asked
+    /// for.
+    #[actix_rt::test]
+    async fn external_account_requires_its_owner_badge_and_its_access_controllers_primary_keys(
+    ) {
+        use prelude::fixture_gw_model;
+
+        let json = |fixture: &str| -> serde_json::Value {
+            serde_json::from_str(fixture).unwrap()
+        };
+        let gateway_status = || {
+            MockNetworkingDriverResponse::new_success(GatewayStatusResponse {
+                ledger_state: LedgerState::sample(),
+            })
+        };
+        let os = SargonOS::boot_test_with_networking_driver(Arc::new(
+            MockNetworkingDriver::new_with_responses(vec![
+                MockNetworkingDriverResponse::new_success(json(
+                    fixture_gw_model!(
+                        "state/shared_account_owner_badge_location"
+                    ),
+                )),
+                gateway_status(),
+                MockNetworkingDriverResponse::new_success(json(
+                    fixture_gw_model!("state/shared_account_details"),
+                )),
+                gateway_status(),
+                MockNetworkingDriverResponse::new_success(json(
+                    fixture_gw_model!(
+                        "state/shared_account_access_controller_details"
+                    ),
+                )),
+            ]),
+        ))
+        .await
+        .unwrap();
+
+        let account = AccountAddress::from_str(
+            "account_tdx_2_12xerddu2e5r8e3xyc06lk6rv0a98vhtvk0xjmh7j2vg0asdqqp8nq0",
+        )
+        .unwrap();
+        let manifest: SubintentManifest = (
+            ScryptoSubintentManifestV2Builder::new_subintent_v2()
+                .create_proof_from_account_of_amount(
+                    account.scrypto(),
+                    ResourceAddress::xrd_on_network(NetworkID::Stokenet)
+                        .scrypto(),
+                    1,
+                )
+                .yield_to_parent(())
+                .build(),
+            NetworkID::Stokenet,
+        )
+            .try_into()
+            .unwrap();
+        let subintent = Subintent::new(
+            IntentHeaderV2 {
+                network_id: NetworkID::Stokenet,
+                ..IntentHeaderV2::sample()
+            },
+            manifest,
+            MessageV2::sample(),
+        )
+        .unwrap();
+
+        let resolved =
+            resolve_external_accounts_for_subintent(&os, &subintent, None)
+                .await
+                .unwrap();
+
+        let id =
+            |global_id: &str| NonFungibleGlobalId::from_str(global_id).unwrap();
+        let key = |hex: &str| {
+            id(&format!(
+                "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa:[{hex}]"
+            ))
+        };
+        assert_eq!(resolved.len(), 1);
+        assert_eq!(
+            resolved[0].owner,
+            AddressOfAccountOrPersona::Account(account)
+        );
+        assert_eq!(
+            resolved[0].required_nft_ids.iter().cloned().collect::<HashSet<_>>(),
+            HashSet::from([
+                id("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk:[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"),
+                key("b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"),
+            ])
+        );
+    }
+
+    /// The keys the wallet signs with for a subintent making `call` on the
+    /// shared account's access controller, against Stokenet's answers: its
+    /// primary and confirmation roles name one key, its recovery role three.
+    async fn keys_signed_for_call_on_access_controller(
+        call: &str,
+        classification: Option<DetailedManifestClass>,
+    ) -> HashSet<NonFungibleGlobalId> {
+        keys_signed_for_call_with_args_on_access_controller(
+            call,
+            "Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>()) Enum<0u8>()",
+            classification,
+        )
+        .await
+        .unwrap()
+    }
+
+    async fn keys_signed_for_call_with_args_on_access_controller(
+        call: &str,
+        args: &str,
+        classification: Option<DetailedManifestClass>,
+    ) -> Result<HashSet<NonFungibleGlobalId>> {
+        use prelude::fixture_gw_model;
+
+        let os = SargonOS::boot_test_with_networking_driver(Arc::new(
+            MockNetworkingDriver::new_with_responses(vec![
+                MockNetworkingDriverResponse::new_success(
+                    GatewayStatusResponse {
+                        ledger_state: LedgerState::sample(),
+                    },
+                ),
+                MockNetworkingDriverResponse::new_success(
+                    serde_json::from_str::<serde_json::Value>(
+                        fixture_gw_model!(
+                            "state/shared_account_access_controller_details"
+                        ),
+                    )
+                    .unwrap(),
+                ),
+            ]),
+        ))
+        .await
+        .unwrap();
+
+        let manifest = SubintentManifest::new(
+            format!(
+                r#"
+                ASSERT_WORKTOP_IS_EMPTY;
+                CALL_METHOD
+                    Address("{}")
+                    "{call}"
+                    {args};
+                YIELD_TO_PARENT;
+                "#,
+                shared_access_controller()
+            ),
+            NetworkID::Stokenet,
+            Blobs::default(),
+            ChildSubintentSpecifiers::default(),
+        )
+        .unwrap();
+        let subintent = Subintent::new(
+            IntentHeaderV2 {
+                network_id: NetworkID::Stokenet,
+                ..IntentHeaderV2::sample()
+            },
+            manifest,
+            MessageV2::None,
+        )
+        .unwrap();
+
+        let resolved = resolve_external_accounts_for_subintent(
+            &os,
+            &subintent,
+            classification.as_ref(),
+        )
+        .await?;
+
+        assert_eq!(resolved.len(), 1);
+        assert_eq!(
+            resolved[0].owner,
+            AddressOfAccountOrPersona::Account(
+                AccountAddress::from_str(
+                    "account_tdx_2_12xerddu2e5r8e3xyc06lk6rv0a98vhtvk0xjmh7j2vg0asdqqp8nq0"
+                )
+                .unwrap()
+            )
+        );
+        Ok(resolved[0].required_nft_ids.iter().cloned().collect())
+    }
+
+    fn shared_access_controller() -> AccessControllerAddress {
+        AccessControllerAddress::from_str(
+            "accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz",
+        )
+        .unwrap()
+    }
+
+    fn shared_account_key(hex: &str) -> NonFungibleGlobalId {
+        NonFungibleGlobalId::from_str(&format!(
+            "resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa:[{hex}]"
+        ))
+        .unwrap()
+    }
+
+    /// A subintent calling an access controller directly, e.g. to propose a
+    /// recovery of the shared account it controls, is signed only as shared
+    /// control: without a classification saying so, it is refused.
+    #[actix_rt::test]
+    async fn called_access_controller_without_classification_is_refused() {
+        assert_eq!(
+            keys_signed_for_call_with_args_on_access_controller(
+                "initiate_recovery_as_recovery",
+                "Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>()) Enum<0u8>()",
+                None
+            )
+            .await,
+            Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions: "AccessControllerMethod".to_owned()
+            })
+        );
+    }
+
+    /// The `create_proof` the wallet adds for the account an access
+    /// controller holds needs only its primary role: an ordinary
+    /// pre-authorization isn't signed for the recovery or confirmation roles.
+    #[actix_rt::test]
+    async fn create_proof_without_classification_requires_only_primary_keys() {
+        assert_eq!(
+            keys_signed_for_call_with_args_on_access_controller(
+                "create_proof",
+                "",
+                Some(DetailedManifestClass::General)
+            )
+            .await,
+            Ok(HashSet::from([shared_account_key(
+                "b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"
+            )]))
+        );
+    }
+
+    /// Quick confirming the recovery role's proposal needs the primary or
+    /// the confirmation role: the keys only the recovery role names aren't
+    /// asked for.
+    #[actix_rt::test]
+    async fn called_access_controller_requires_the_keys_of_the_roles_its_calls_need(
+    ) {
+        let ac = shared_access_controller();
+        let classification =
+            DetailedManifestClass::AccessControllerConfirmRecovery {
+                ac_addresses: vec![ac],
+                confirmations: vec![AccessControllerRecoveryConfirmation {
+                    access_controller: ac,
+                    proposer: RecoveryProposer::Recovery,
+                    kind: RecoveryConfirmationKind::Quick,
+                    ..AccessControllerRecoveryConfirmation::sample()
+                }],
+            };
+        assert_eq!(
+            keys_signed_for_call_on_access_controller(
+                "quick_confirm_recovery_role_recovery_proposal",
+                Some(classification)
+            )
+            .await,
+            HashSet::from([shared_account_key(
+                "b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"
+            )])
+        );
     }
 }

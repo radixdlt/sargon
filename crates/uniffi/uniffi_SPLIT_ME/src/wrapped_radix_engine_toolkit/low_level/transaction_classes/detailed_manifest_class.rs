@@ -100,19 +100,55 @@ pub enum DetailedManifestClass {
         /// The entity address that is about to be securified
         entities: Vec<AddressOfAccountOrPersona>,
     },
-    /// A manifest that starts the access controller recovery, it is either
-    /// confirmed in the same transaction, or it is a timed recovery, currently
-    /// the difference is not important.
+    /// A manifest that creates accounts or personas, each with its owner
+    /// badge in a new access controller, so they're securified from the
+    /// start: e.g. a dApp setting up a shared account.
+    SecurifiedEntityCreation {
+        created_entities: Vec<CreatedSecurifiedEntity>,
+    },
+    /// A manifest that proposes new rules for access controllers and confirms
+    /// them in the same transaction: the rules change once it's committed.
     AccessControllerRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        /// The recoveries proposed and confirmed in the manifest, with the
+        /// rules they enact.
+        recovery_proposals: Vec<AccessControllerRecoveryProposal>,
     },
-    /// A manifest that stops the timed recovery.
-    /// It can as well contain instructions to cancel the given recovery proposal.
-    AccessControllerStopTimedRecovery {
+    /// A manifest that starts a timed recovery of access controllers: the
+    /// recovery role proposes rules without confirming them.
+    AccessControllerTimedRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        timed_recoveries: Vec<AccessControllerTimedRecoveryProposal>,
     },
-    AccessControllerConfirmTimedRecovery {
+    /// A manifest that confirms recoveries already proposed on access
+    /// controllers.
+    AccessControllerConfirmRecovery {
         ac_addresses: Vec<AccessControllerAddress>,
+        confirmations: Vec<AccessControllerRecoveryConfirmation>,
+    },
+    /// A manifest that stops or cancels recoveries already proposed on access
+    /// controllers.
+    AccessControllerCancelRecovery {
+        ac_addresses: Vec<AccessControllerAddress>,
+        cancellations: Vec<AccessControllerRecoveryCancellation>,
+    },
+    /// A manifest that locks or unlocks the primary role of access
+    /// controllers.
+    AccessControllerPrimaryRoleLock {
+        ac_addresses: Vec<AccessControllerAddress>,
+        operations: Vec<AccessControllerPrimaryRoleLockOperation>,
+    },
+    /// A manifest that tops up the recovery fee vaults of access controllers
+    /// with XRD withdrawn from accounts, or withdraws XRD from them into
+    /// accounts. Only one side is filled: `contributions` and
+    /// `account_withdrawals` for a top-up, `withdrawals` and
+    /// `account_deposits` for a withdrawal.
+    AccessControllerRecoveryFee {
+        ac_addresses: Vec<AccessControllerAddress>,
+        contributions: Vec<AccessControllerXrdTransfer>,
+        withdrawals: Vec<AccessControllerXrdTransfer>,
+        account_withdrawals: Vec<AccountXrdTransfer>,
+        account_deposits: Vec<AccountXrdTransfer>,
     },
 }
 

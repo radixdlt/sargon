@@ -86,6 +86,7 @@ members = [
     "crates/system/os/transaction",
 
     # === TRANSACTION ===
+    "crates/transaction/access-rules",
     "crates/transaction/foundation",
     "crates/transaction/manifests",
     "crates/transaction/models",
@@ -183,6 +184,7 @@ default-members = [
     "crates/system/os/transaction",
 
     # === TRANSACTION ===
+    "crates/transaction/access-rules",
     "crates/transaction/foundation",
     "crates/transaction/manifests",
     "crates/transaction/models",
@@ -297,6 +299,7 @@ sargon-os-signing = { path = "crates/system/os/signing" }
 sargon-os-transaction = { path = "crates/system/os/transaction" }
 
 # === TRANSACTION ===
+access-rules = { path = "crates/transaction/access-rules" }
 transaction-foundation = { path = "crates/transaction/foundation" }
 manifests = { path = "crates/transaction/manifests" }
 transaction-models = { path = "crates/transaction/models" }
@@ -317,7 +320,7 @@ radix-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c
 radix-common-derive = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
 radix-engine = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
 radix-engine-interface = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
-radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "655fca8e6b5d4438836de7e8d7a554575efb4964" }
+radix-engine-toolkit = { git = "https://github.com/radixdlt/radix-engine-toolkit", rev = "3775322401f978b9c618e1e8b0e6f7eca52268e0" }
 radix-engine-toolkit-common = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f" }
 radix-rust = { git = "https://github.com/radixdlt/radixdlt-scrypto", rev = "9c9c51021b7f04073e5d5685e1aa4113c425209f", features = [
     "serde",
@@ -386,6 +389,7 @@ iso8601-timestamp = { version = "0.2.16", default-features = false, features = [
 ] }
 
 itertools = { version = "0.12.0", default-features = true }
+proptest = { version = "~1.6.0" }
 either = { version = "1.13.0", default-features = false }
 k256 = { version = "=0.13.3", default-features = false }
 log = { version = "0.4.20", default-features = false }

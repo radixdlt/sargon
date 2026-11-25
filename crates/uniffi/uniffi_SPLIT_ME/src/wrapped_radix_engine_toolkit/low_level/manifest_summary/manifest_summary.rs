@@ -40,6 +40,9 @@ pub struct ManifestSummary {
     /// and can only be included in the manifest by the wallet itself.
     pub reserved_instructions: Vec<ReservedInstruction>,
 
+    /// The access controllers whose methods the manifest calls.
+    pub access_controllers_called: Vec<AccessControllerAddress>,
+
     /// The various classifications that this manifest matched against. Note
     /// that an empty set means that the manifest is non-conforming.
     pub classification: Vec<ManifestClass>,
@@ -78,14 +81,27 @@ pub enum ManifestClass {
     ValidatorClaimXrd,
     /// A manifest that updated the deposit settings of the account.
     AccountDepositSettingsUpdate,
+    /// A manifest that securifies entities by moving their badge to a newly
+    /// created access controller, and nothing else.
     EntitySecurify,
-    /// A manifest that starts the access controller recovery, it is either
-    /// confirmed in the same transaction, or it is a timed recovery, currently
-    /// the difference is not important.
+    /// A manifest that creates accounts or personas, each with its owner badge
+    /// in a new access controller, so they're securified from the start.
+    SecurifiedEntityCreation,
+    /// A manifest that proposes new rules for access controllers and confirms
+    /// them in the same transaction.
     AccessControllerRecovery,
-    /// A manifest that stops the timed recovery.
-    /// It can as well contain instructions to cancel the given recovery proposal.
-    AccessControllerStopTimedRecovery,
-    /// A manifest that confirms the timed recovery.
-    AccessControllerConfirmTimedRecovery,
+    /// A manifest that starts a timed recovery of access controllers.
+    AccessControllerTimedRecovery,
+    /// A manifest that confirms recoveries already proposed on access
+    /// controllers.
+    AccessControllerConfirmRecovery,
+    /// A manifest that stops or cancels recoveries already proposed on access
+    /// controllers.
+    AccessControllerCancelRecovery,
+    /// A manifest that locks or unlocks the primary role of access
+    /// controllers.
+    AccessControllerPrimaryRoleLock,
+    /// A manifest that tops up or withdraws from the recovery fee vaults of
+    /// access controllers.
+    AccessControllerRecoveryFee,
 }

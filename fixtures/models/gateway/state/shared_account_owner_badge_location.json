@@ -1,0 +1,20 @@
+{
+    "ledger_state": {
+        "network": "stokenet",
+        "state_version": 33948017,
+        "proposer_round_timestamp": "2026-11-20T11:32:36.377Z",
+        "epoch": 24188,
+        "round": 1115
+    },
+    "resource_address": "resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk",
+    "non_fungible_ids": [
+        {
+            "non_fungible_id": "[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]",
+            "owning_vault_address": "internal_vault_tdx_2_1nq3tpefhqyupldvxz8tedk0ymlu0eg5s46epes4gekt34zde570hhv",
+            "owning_vault_parent_ancestor_address": "accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz",
+            "owning_vault_global_ancestor_address": "accesscontroller_tdx_2_1c008swg6k6jh8t02cd25c40ggyfa3lptgkq7y8nrgld5xn6jjlp4rz",
+            "is_burned": false,
+            "last_updated_at_state_version": 33912113
+        }
+    ]
+}

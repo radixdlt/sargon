@@ -1,5 +1,4 @@
 mod access_controller_factors_and_time_input;
-mod cancel_recovery_proposal;
 mod confirm_timed_recovery;
 mod lock_fee_against_xrd_vault_of_access_controller;
 mod manifests_securify_shield_securified_entity;
@@ -9,12 +8,15 @@ mod set_rola_key;
 mod top_up_access_controller_xrd_vault;
 mod transaction_manifest_unsecurified_entity_owner_badge_into_bucket_putting;
 
+#[cfg(test)]
+mod classification_of_shield_transactions;
+#[cfg(test)]
+mod ledger_rules_for_display;
 mod stop_timed_recovery;
 #[cfg(test)]
 mod test_utils;
 
 pub use access_controller_factors_and_time_input::*;
-pub use cancel_recovery_proposal::*;
 pub use confirm_timed_recovery::*;
 pub use stop_timed_recovery::*;
 pub use lock_fee_against_xrd_vault_of_access_controller::*;

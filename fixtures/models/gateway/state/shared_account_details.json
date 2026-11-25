@@ -1,0 +1,210 @@
+{
+    "ledger_state": {
+        "network": "stokenet",
+        "state_version": 33948017,
+        "proposer_round_timestamp": "2026-11-20T11:32:36.377Z",
+        "epoch": 24188,
+        "round": 1115
+    },
+    "items": [
+        {
+            "address": "account_tdx_2_12xerddu2e5r8e3xyc06lk6rv0a98vhtvk0xjmh7j2vg0asdqqp8nq0",
+            "fungible_resources": {
+                "total_count": 1,
+                "items": [
+                    {
+                        "amount": "10000",
+                        "last_updated_at_state_version": 33912113,
+                        "aggregation_level": "Global",
+                        "resource_address": "resource_tdx_2_1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxtfd2jc"
+                    }
+                ]
+            },
+            "non_fungible_resources": {
+                "total_count": 0,
+                "items": []
+            },
+            "metadata": {
+                "total_count": 2,
+                "items": [
+                    {
+                        "key": "owner_keys",
+                        "value": {
+                            "raw_hex": "5c228f01202201010120071db236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                            "programmatic_json": {
+                                "variant_id": "143",
+                                "fields": [
+                                    {
+                                        "element_kind": "Enum",
+                                        "elements": [
+                                            {
+                                                "variant_id": "1",
+                                                "fields": [
+                                                    {
+                                                        "element_kind": "U8",
+                                                        "hex": "b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                                                        "kind": "Bytes"
+                                                    }
+                                                ],
+                                                "kind": "Enum"
+                                            }
+                                        ],
+                                        "kind": "Array"
+                                    }
+                                ],
+                                "kind": "Enum"
+                            },
+                            "typed": {
+                                "values": [
+                                    {
+                                        "hash_hex": "b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                                        "key_hash_type": "EddsaEd25519"
+                                    }
+                                ],
+                                "type": "PublicKeyHashArray"
+                            }
+                        },
+                        "is_locked": false,
+                        "last_updated_at_state_version": 33912113
+                    },
+                    {
+                        "key": "owner_badge",
+                        "value": {
+                            "raw_hex": "5c220b01c0021e51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                            "programmatic_json": {
+                                "variant_id": "11",
+                                "fields": [
+                                    {
+                                        "value": "[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]",
+                                        "kind": "NonFungibleLocalId"
+                                    }
+                                ],
+                                "kind": "Enum"
+                            },
+                            "typed": {
+                                "value": "[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]",
+                                "type": "NonFungibleLocalId"
+                            }
+                        },
+                        "is_locked": true,
+                        "last_updated_at_state_version": 33912113
+                    }
+                ]
+            },
+            "details": {
+                "package_address": "package_tdx_2_1pkgxxxxxxxxxaccntxxxxxxxxxx000929625493xxxxxxxxx9jat20",
+                "blueprint_name": "Account",
+                "blueprint_version": "1.0.0",
+                "state": {
+                    "default_deposit_rule": "Accept"
+                },
+                "role_assignments": {
+                    "owner": {
+                        "rule": {
+                            "type": "Protected",
+                            "access_rule": {
+                                "type": "ProofRule",
+                                "proof_rule": {
+                                    "type": "Require",
+                                    "requirement": {
+                                        "type": "NonFungible",
+                                        "non_fungible": {
+                                            "local_id": {
+                                                "id_type": "Bytes",
+                                                "sbor_hex": "5cc0021e51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0",
+                                                "simple_rep": "[51b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0]"
+                                            },
+                                            "resource_address": "resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "updater": "Object"
+                    },
+                    "entries": [
+                        {
+                            "role_key": {
+                                "module": "Main",
+                                "name": "securify"
+                            },
+                            "assignment": {
+                                "explicit_rule": {
+                                    "type": "DenyAll"
+                                },
+                                "resolution": "Explicit"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Main",
+                                    "name": "_self_"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_locker"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_locker_updater"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_locker_updater"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_locker_updater"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_setter"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_setter_updater"
+                                }
+                            ]
+                        },
+                        {
+                            "role_key": {
+                                "module": "Metadata",
+                                "name": "metadata_setter_updater"
+                            },
+                            "assignment": {
+                                "resolution": "Owner"
+                            },
+                            "updater_roles": [
+                                {
+                                    "module": "Metadata",
+                                    "name": "metadata_setter_updater"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "type": "Component"
+            }
+        }
+    ]
+}

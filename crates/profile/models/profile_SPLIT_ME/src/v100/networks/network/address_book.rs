@@ -7,8 +7,8 @@ decl_identified_vec_of!(
 );
 
 impl AddressBook {
-    pub fn contains_address(&self, address: &Address) -> bool {
-        self.contains_id(*address)
+    pub fn contains(&self, target: &AddressBookEntryTarget) -> bool {
+        self.contains_id(target.clone())
     }
 
     pub fn add_entry(&mut self, entry: AddressBookEntry) -> bool {
@@ -17,17 +17,67 @@ impl AddressBook {
 
     pub fn update_entry(
         &mut self,
-        address: Address,
+        target: AddressBookEntryTarget,
         name: DisplayName,
         note: Option<String>,
     ) -> bool {
-        self.update_with(address, |entry| {
+        self.update_with(target, |entry| {
             entry.update_name_and_note(name, note.clone())
         })
     }
 
-    pub fn remove_by_address(&mut self, address: &Address) -> bool {
-        self.remove_id(address).is_some()
+    pub fn remove(&mut self, target: &AddressBookEntryTarget) -> bool {
+        self.remove_id(target).is_some()
+    }
+}
+
+/// Writes an [`AddressBook`] as two lists in the Profile, flattened into its
+/// network: entries for addresses under `address_book`, as before
+/// non-fungibles could be named, and entries for non-fungibles under
+/// `address_book_non_fungibles`. Wallets from before can't read an entry for a
+/// non-fungible, and would fail to load the whole Profile if one were in
+/// `address_book`; a key they don't know they skip.
+pub mod address_book_in_two_lists {
+    use super::*;
+    use serde::{Deserializer, Serializer};
+
+    #[derive(Serialize, Deserialize, Default)]
+    struct Lists {
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        address_book: Vec<AddressBookEntry>,
+
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        address_book_non_fungibles: Vec<AddressBookEntry>,
+    }
+
+    pub fn serialize<S>(
+        address_book: &AddressBook,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let (addresses, non_fungibles) =
+            address_book.iter().partition(|entry| {
+                matches!(entry.target, AddressBookEntryTarget::GlobalAddress { .. })
+            });
+        Lists {
+            address_book: addresses,
+            address_book_non_fungibles: non_fungibles,
+        }
+        .serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<AddressBook, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let lists = Lists::deserialize(deserializer)?;
+        Ok(lists
+            .address_book
+            .into_iter()
+            .chain(lists.address_book_non_fungibles)
+            .collect())
     }
 }
 
@@ -58,10 +108,11 @@ mod tests {
     }
 
     #[test]
-    fn contains_address() {
+    fn contains() {
         let entry = AddressBookEntry::sample();
         let sut = SUT::just(entry.clone());
-        assert!(sut.contains_address(&entry.address));
+        assert!(sut.contains(&entry.target));
+        assert!(!sut.contains(&AddressBookEntryTarget::sample_other()));
     }
 
     #[test]
@@ -70,16 +121,16 @@ mod tests {
         let mut sut = SUT::just(entry.clone());
 
         assert!(sut.update_entry(
-            entry.address,
+            entry.target.clone(),
             DisplayName::sample_other(),
             Some("updated".to_owned())
         ));
         assert_eq!(
-            sut.get_id(entry.address).unwrap().name,
+            sut.get_id(entry.target.clone()).unwrap().name,
             DisplayName::sample_other()
         );
         assert_eq!(
-            sut.get_id(entry.address).unwrap().note,
+            sut.get_id(entry.target.clone()).unwrap().note,
             Some("updated".to_owned())
         );
     }
@@ -88,18 +139,18 @@ mod tests {
     fn update_missing_entry_returns_false() {
         let mut sut = SUT::new();
         assert!(!sut.update_entry(
-            Address::sample(),
+            AddressBookEntryTarget::sample(),
             DisplayName::sample(),
             None
         ));
     }
 
     #[test]
-    fn remove_by_address() {
+    fn remove() {
         let entry = AddressBookEntry::sample();
         let mut sut = SUT::just(entry.clone());
-        assert!(sut.remove_by_address(&entry.address));
-        assert!(!sut.contains_address(&entry.address));
-        assert!(!sut.remove_by_address(&entry.address));
+        assert!(sut.remove(&entry.target));
+        assert!(!sut.contains(&entry.target));
+        assert!(!sut.remove(&entry.target));
     }
 }

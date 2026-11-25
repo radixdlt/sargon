@@ -86,28 +86,6 @@ impl<T: ScryptoManifestEncode + ScryptoManifestSborTuple> CallMethodInput
 {
 }
 
-/// Depending on the role used to initiate recovery, and if we are quick confirming
-/// the recovery proposal we need to either place SET_METADATA instruction which
-/// updates the ROLA key with the new factors before the recovery proposal - requiring
-/// the OLD PrimaryRole factors to auth the transaction - or we can quick confirm
-/// we will place the SET_METADATA instruction after we have (quick) confirmed the
-/// recovery proposal.
-#[derive(Clone, Debug, PartialEq, Eq, EnumAsInner)]
-pub enum OrderOfInstructionSettingRolaKey {
-    /// Place SET_METADATA instruction before initiating recovery - so that
-    /// we can auth with the OLD factors of Primary role.
-    BeforeInitRecovery,
-    /// Place SET_METADATA instruction after quick confirming the recovery proposal
-    /// => requiring us to auth with the NEW factors of Primary role.
-    AfterQuickConfirm,
-
-    /// No need to set ROLA key
-    NotNeeded,
-
-    /// Cannot set ROLA key in this TX - must do it in a future TX when we confirm recovery
-    MustSetInFutureTxForConfirmRecovery,
-}
-
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum RoleInitiatingRecovery {
     Primary,
@@ -121,36 +99,6 @@ impl RolesExercisableInTransactionManifestCombination {
 
     pub fn all() -> IndexSet<Self> {
         enum_iterator::all::<Self>().collect()
-    }
-
-    pub fn order_of_instruction_setting_rola(
-        &self,
-        security_structure_of_factor_instances: &SecurityStructureOfFactorInstances,
-        entity: &AnySecurifiedEntity,
-    ) -> OrderOfInstructionSettingRolaKey {
-        if security_structure_of_factor_instances
-            .authentication_signing_factor_instance
-            == entity.current_authentication_signing_factor_instance()
-        {
-            // The factor of ROLA key is the same as the current factor of the entity
-            // => we can skip setting the ROLA key.
-            return OrderOfInstructionSettingRolaKey::NotNeeded;
-        }
-
-        if !self.can_quick_confirm() {
-            // N.B.
-            // In case of role initiating the recovery being `Primary` we CAN in fact
-            // set the ROLA key in the same transaction as we initiate recovery, however,
-            // if we CANCEL the recovery proposal (instead of CONFIRM) in the future
-            // transaction we would be in a bad state (not using the old nor the new shield).
-            return OrderOfInstructionSettingRolaKey::MustSetInFutureTxForConfirmRecovery;
-        }
-
-        if self.can_exercise_primary_role() {
-            OrderOfInstructionSettingRolaKey::BeforeInitRecovery
-        } else {
-            OrderOfInstructionSettingRolaKey::AfterQuickConfirm
-        }
     }
 
     pub fn can_exercise_primary_role(&self) -> bool {

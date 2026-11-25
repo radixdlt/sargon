@@ -71,17 +71,11 @@ impl NonFungibleLocalId {
         &self,
         account_address: AccountAddress,
     ) -> bool {
-        self.as_bytes()
-            .map(|local_id_bytes| {
-                let bytes = local_id_bytes.bag_of_bytes.bytes();
-                if bytes.len() == ScryptoNodeId::LENGTH {
-                    bytes[..ScryptoNodeId::LENGTH]
-                        == account_address.node_id().0
-                } else {
-                    false
-                }
-            })
-            .unwrap_or(false)
+        AddressOfAccountOrPersona::try_from((
+            self.clone(),
+            account_address.network_id(),
+        ))
+        .is_ok_and(|address| address == account_address.into())
     }
 }
 
@@ -128,6 +122,37 @@ impl From<AddressOfAccountOrPersona> for NonFungibleLocalId {
                 Self::from(identity_address)
             }
         }
+    }
+}
+
+/// The account or persona whose owner badge has this id, the reverse of
+/// `From<AddressOfAccountOrPersona> for NonFungibleLocalId`.
+impl TryFrom<(NonFungibleLocalId, NetworkID)> for AddressOfAccountOrPersona {
+    type Error = CommonError;
+
+    fn try_from(
+        (local_id, network_id): (NonFungibleLocalId, NetworkID),
+    ) -> Result<Self> {
+        let NonFungibleLocalId::Bytes { value } = local_id else {
+            return Err(CommonError::Unknown {
+                error_message: format!(
+                    "Owner badge ids are bytes, got: {local_id}"
+                ),
+            });
+        };
+        let node_id =
+            ScryptoNodeId(value.as_ref().try_into().map_err(|_| {
+                CommonError::InvalidNodeIdLength {
+                    expected: ScryptoNodeId::LENGTH,
+                    actual: value.as_ref().len(),
+                }
+            })?);
+        AccountAddress::new_from_node_id(node_id, network_id)
+            .map(Self::from)
+            .or_else(|_| {
+                IdentityAddress::new_from_node_id(node_id, network_id)
+                    .map(Self::from)
+            })
     }
 }
 
@@ -522,5 +547,30 @@ mod tests {
         ).unwrap();
 
         assert!(!local_id.derives_account_address(account_address));
+    }
+
+    #[test]
+    fn owner_badge_id_is_the_address_of_its_entity() {
+        for address in AddressOfAccountOrPersona::sample_values_all() {
+            assert_eq!(
+                AddressOfAccountOrPersona::try_from((
+                    SUT::from(address),
+                    address.network_id(),
+                )),
+                Ok(address)
+            );
+        }
+    }
+
+    #[test]
+    fn ids_of_other_entities_are_not_owner_badge_ids() {
+        let resource = ResourceAddress::sample();
+        let local_id = SUT::bytes(resource.node_id().0).unwrap();
+
+        assert!(AddressOfAccountOrPersona::try_from((
+            local_id,
+            resource.network_id()
+        ))
+        .is_err());
     }
 }

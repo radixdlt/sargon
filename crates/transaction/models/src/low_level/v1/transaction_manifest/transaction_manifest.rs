@@ -5,6 +5,7 @@ use radix_transactions::manifest::CallMethod;
 use radix_engine_interface::blueprints::access_controller::{
     ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_PRIMARY_IDENT,
     ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT as SCRYPTO_ACCESS_CONTROLLER_INITIATE_RECOVERY_AS_RECOVERY_IDENT,
+    ACCESS_CONTROLLER_LOCK_RECOVERY_FEE_IDENT as SCRYPTO_ACCESS_CONTROLLER_LOCK_RECOVERY_FEE_IDENT,
     ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_PRIMARY_ROLE_RECOVERY_PROPOSAL_IDENT,
     ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT as SCRYPTO_ACCESS_CONTROLLER_QUICK_CONFIRM_RECOVERY_ROLE_RECOVERY_PROPOSAL_IDENT,
 };
@@ -13,6 +14,20 @@ use radix_engine_interface::blueprints::account::ACCOUNT_LOCK_FEE_IDENT as SCRYP
 use sbor::Value;
 
 use crate::prelude::*;
+
+/// Who a manifest's fee is locked from: an account, or the XRD vault of an
+/// access controller, which the user picks as the fee payer explicitly.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FeePayerOfManifest {
+    Account {
+        address: AccountAddress,
+        fee: Decimal192,
+    },
+    AccessController {
+        address: AccessControllerAddress,
+        fee: Decimal192,
+    },
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, derive_more::Display)]
 #[display("{}", self.manifest_string())] // TODO add blobs to Display
@@ -60,37 +75,54 @@ impl TransactionManifest {
         has_initiate_recovery_method && !has_recovery_quick_confirmation
     }
 
+    /// The account the fee is locked from, and the fee, if it's locked from
+    /// an account.
     pub fn extract_fee_payer_info(
         &self,
     ) -> Option<(AccountAddress, Decimal192)> {
-        for instruction in self.instructions().iter() {
-            print!("{:?}", instruction.clone());
-            if let ScryptoInstruction::CallMethod(CallMethod {
+        match self.extract_fee_payer()? {
+            FeePayerOfManifest::Account { address, fee } => {
+                Some((address, fee))
+            }
+            FeePayerOfManifest::AccessController { .. } => None,
+        }
+    }
+
+    /// Who the fee is locked from, and the fee: the first `lock_fee` of an
+    /// account or `lock_recovery_fee` of an access controller.
+    pub fn extract_fee_payer(&self) -> Option<FeePayerOfManifest> {
+        let network_id = self.network_id();
+        self.instructions().iter().find_map(|instruction| {
+            let ScryptoInstruction::CallMethod(CallMethod {
                 address,
                 method_name,
                 args: Value::Tuple { fields },
             }) = instruction
+            else {
+                return None;
+            };
+            let Some(Value::Custom {
+                value: ManifestCustomValue::Decimal(decimal),
+            }) = fields.first()
+            else {
+                return None;
+            };
+            let fee = to_decimal(decimal.clone()).into();
+            if method_name == SCRYPTO_ACCOUNT_LOCK_FEE_IDENT {
+                let address =
+                    AccountAddress::try_from((*address, network_id)).ok()?;
+                Some(FeePayerOfManifest::Account { address, fee })
+            } else if method_name
+                == SCRYPTO_ACCESS_CONTROLLER_LOCK_RECOVERY_FEE_IDENT
             {
-                if method_name == SCRYPTO_ACCOUNT_LOCK_FEE_IDENT {
-                    if let Some(Value::Custom {
-                        value: ManifestCustomValue::Decimal(decimal),
-                    }) = fields.first()
-                    {
-                        return Some((
-                            AccountAddress::try_from((
-                                *address,
-                                self.network_id(),
-                            ))
-                            .expect(
-                                "Should be able decode the account address",
-                            ),
-                            to_decimal(decimal.clone()).into(),
-                        ));
-                    }
-                }
+                let address =
+                    AccessControllerAddress::try_from((*address, network_id))
+                        .ok()?;
+                Some(FeePayerOfManifest::AccessController { address, fee })
+            } else {
+                None
             }
-        }
-        None
+        })
     }
 
     fn has_method_for_ident(&self, ident: &str) -> bool {

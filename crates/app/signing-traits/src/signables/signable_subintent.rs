@@ -12,7 +12,7 @@ impl Signable for Subintent {
         &self,
         entity_querying: &impl GetEntityByAddress,
     ) -> Result<IndexSet<AccountOrPersona>> {
-        let summary = self.manifest.summary().unwrap();
+        let summary = self.manifest.summary()?;
 
         ExtractorOfEntitiesRequiringAuth::extract(entity_querying, summary)
     }

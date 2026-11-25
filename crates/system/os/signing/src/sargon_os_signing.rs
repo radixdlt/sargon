@@ -20,11 +20,71 @@ pub trait OsSigning {
         execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent>;
 
+    /// Signs `subintent`. `execution_summary` is the one its review showed,
+    /// if it was previewed: for the access controllers it calls, it decides
+    /// which roles, and so which of the wallet's keys, the signatures are
+    /// for. Calls on access controllers are signed only as the shared
+    /// control it classifies, checked again here; without it, only the
+    /// `create_proof`s the wallet adds, for their primary role.
     async fn sign_subintent(
         &self,
         subintent: Subintent,
         role_kind: RoleKind,
+        execution_summary: Option<ExecutionSummary>,
     ) -> Result<SignedSubintent>;
+}
+
+/// How a transaction is signed, by its class.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SigningFlow {
+    /// Updating a shield. The wallet reviews one role combination, a timed
+    /// recovery, but signs whichever combination the user's factors can
+    /// complete, which may confirm it at once.
+    AccessControllerRecovery(AccessControllerAddress),
+    /// Stopping a timed recovery, signed with whichever role is available,
+    /// cancelling the proposal too when it's the recovery role.
+    StopTimedRecovery(AccessControllerAddress),
+    /// Anything else, securifying included: signed with the primary role,
+    /// exactly as reviewed.
+    AsReviewed,
+}
+
+impl SigningFlow {
+    fn of(class: Option<&DetailedManifestClass>) -> Self {
+        match class {
+            Some(
+                DetailedManifestClass::AccessControllerRecovery {
+                    ac_addresses,
+                    ..
+                }
+                | DetailedManifestClass::AccessControllerTimedRecovery {
+                    ac_addresses,
+                    ..
+                },
+            ) => ac_addresses.first().map_or(Self::AsReviewed, |ac| {
+                Self::AccessControllerRecovery(*ac)
+            }),
+            // Only a stop, and cancelling the recovery role's proposal, which
+            // the stop flow rebuilds: anything else would be dropped.
+            Some(DetailedManifestClass::AccessControllerCancelRecovery {
+                ac_addresses,
+                cancellations,
+            }) if cancellations.iter().all(|cancellation| {
+                cancellation.stopped_timed_recovery.is_some()
+                    && !cancellation.unlocks_primary_role
+                    && cancellation
+                        .cancelled_proposers
+                        .iter()
+                        .all(|proposer| *proposer == RecoveryProposer::Recovery)
+            }) =>
+            {
+                ac_addresses
+                    .first()
+                    .map_or(Self::AsReviewed, |ac| Self::StopTimedRecovery(*ac))
+            }
+            _ => Self::AsReviewed,
+        }
+    }
 }
 
 // ==================
@@ -49,39 +109,26 @@ impl OsSigning for SargonOS {
         transaction_intent: TransactionIntent,
         execution_summary: ExecutionSummary,
     ) -> Result<SignedIntent> {
-        match execution_summary.detailed_classification {
-            Some(DetailedManifestClass::AccessControllerRecovery {
-                ac_addresses,
-            }) => {
-                return sign_access_controller_recovery_transaction(
+        match SigningFlow::of(
+            execution_summary.detailed_classification.as_ref(),
+        ) {
+            SigningFlow::AccessControllerRecovery(access_controller) => {
+                sign_access_controller_recovery_transaction(
                     self,
                     transaction_intent,
-                    ac_addresses[0],
+                    access_controller,
                 )
-                .await;
+                .await
             }
-            Some(
-                DetailedManifestClass::AccessControllerStopTimedRecovery {
-                    ac_addresses,
-                },
-            ) => {
-                return sign_access_controller_stop_timed_recovery_transaction(
+            SigningFlow::StopTimedRecovery(access_controller) => {
+                sign_access_controller_stop_timed_recovery_transaction(
                     self,
                     transaction_intent,
-                    ac_addresses[0],
+                    access_controller,
                 )
-                .await;
+                .await
             }
-            Some(DetailedManifestClass::SecurifyEntity { entities }) => {
-                let entity_address = entities.first().unwrap();
-                return sign_entity_securify(
-                    self,
-                    transaction_intent,
-                    *entity_address,
-                )
-                .await;
-            }
-            _ => {
+            SigningFlow::AsReviewed => {
                 self.sign(
                     transaction_intent.clone(),
                     self.sign_transactions_interactor(),
@@ -96,6 +143,7 @@ impl OsSigning for SargonOS {
         &self,
         subintent: Subintent,
         role_kind: RoleKind,
+        execution_summary: Option<ExecutionSummary>,
     ) -> Result<SignedSubintent> {
         info!(
             "External signing: begin for subintent {:?} (role: {:?})",
@@ -121,12 +169,39 @@ impl OsSigning for SargonOS {
 
         let mut signatures = outcome.signatures_of_successful_transactions();
 
-        let external_accounts =
-            resolve_external_accounts_for_subintent(self, &subintent).await?;
+        let classification = execution_summary
+            .as_ref()
+            .and_then(|summary| summary.detailed_classification.as_ref());
+        let external_accounts = resolve_external_accounts_for_subintent(
+            self,
+            &subintent,
+            classification,
+        )
+        .await?;
         info!(
             "External signing: external accounts resolved: {}",
             external_accounts.len()
         );
+        // Shared control whose calls need a role: the user must sign for it,
+        // rather than hand back a pre-authorization without their signature.
+        let needs_a_role = classification
+            .filter(|class| is_allowed_in_pre_authorizations(class))
+            .and_then(pre_authorization_access_controller_roles)
+            .is_some_and(|roles| roles.values().any(|roles| !roles.is_empty()));
+        if needs_a_role {
+            let mfa_badges = self
+                .mfa_signing_keys()?
+                .into_iter()
+                .map(|key| key.badge)
+                .collect::<std::collections::HashSet<_>>();
+            let has_a_key = external_accounts
+                .iter()
+                .flat_map(|account| account.required_nft_ids.iter())
+                .any(|badge| mfa_badges.contains(badge));
+            if !has_a_key {
+                return Err(CommonError::NoKeysForAccessControllerRoles);
+            }
+        }
         let external_signatures = collect_external_signatures(
             subintent.clone(),
             external_accounts,
@@ -138,6 +213,13 @@ impl OsSigning for SargonOS {
             "External signing: collected {} external signatures",
             external_signatures.len()
         );
+        // The user had a key, but no signature came back, e.g. the factor
+        // was skipped.
+        if needs_a_role && external_signatures.is_empty() {
+            return Err(
+                CommonError::SigningFailedTooManyFactorSourcesNeglected,
+            );
+        }
         signatures.extend(external_signatures);
 
         subintent.signed(signatures)
@@ -176,6 +258,93 @@ mod test {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = SargonOS;
+
+    #[test]
+    fn shield_updates_go_through_the_recovery_flow() {
+        let ac = AccessControllerAddress::sample();
+        for class in [
+            DetailedManifestClass::AccessControllerRecovery {
+                ac_addresses: vec![ac],
+                recovery_proposals: vec![],
+            },
+            // The reviewed shield update is a timed recovery.
+            DetailedManifestClass::AccessControllerTimedRecovery {
+                ac_addresses: vec![ac],
+                timed_recoveries: vec![],
+            },
+        ] {
+            assert_eq!(
+                SigningFlow::of(Some(&class)),
+                SigningFlow::AccessControllerRecovery(ac)
+            );
+        }
+    }
+
+    #[test]
+    fn stopping_a_timed_recovery_goes_through_the_stop_flow() {
+        let ac = AccessControllerAddress::sample();
+        let stop = AccessControllerRecoveryCancellation {
+            stopped_timed_recovery: Some(
+                AccessControllerRuleSetForDisplay::sample(),
+            ),
+            cancelled_proposers: vec![RecoveryProposer::Recovery],
+            unlocks_primary_role: false,
+            ..AccessControllerRecoveryCancellation::sample()
+        };
+        let class = |cancellation| {
+            DetailedManifestClass::AccessControllerCancelRecovery {
+                ac_addresses: vec![ac],
+                cancellations: vec![cancellation],
+            }
+        };
+
+        assert_eq!(
+            SigningFlow::of(Some(&class(stop.clone()))),
+            SigningFlow::StopTimedRecovery(ac)
+        );
+        // The stop flow rebuilds only a stop and cancelling the recovery
+        // role's proposal: anything else is signed as reviewed, not dropped.
+        for cancellation in [
+            AccessControllerRecoveryCancellation {
+                stopped_timed_recovery: None,
+                ..stop.clone()
+            },
+            AccessControllerRecoveryCancellation {
+                unlocks_primary_role: true,
+                ..stop.clone()
+            },
+            AccessControllerRecoveryCancellation {
+                cancelled_proposers: vec![RecoveryProposer::Primary],
+                ..stop.clone()
+            },
+        ] {
+            assert_eq!(
+                SigningFlow::of(Some(&class(cancellation))),
+                SigningFlow::AsReviewed
+            );
+        }
+    }
+
+    /// Securifying is signed exactly as reviewed: nothing is added to it.
+    #[test]
+    fn anything_else_is_signed_as_reviewed() {
+        for class in [
+            Some(DetailedManifestClass::SecurifyEntity {
+                entities: vec![AccountAddress::sample().into()],
+            }),
+            Some(DetailedManifestClass::General),
+            Some(DetailedManifestClass::AccessControllerConfirmRecovery {
+                ac_addresses: vec![AccessControllerAddress::sample()],
+                confirmations: vec![],
+            }),
+            None,
+        ] {
+            assert_eq!(
+                SigningFlow::of(class.as_ref()),
+                SigningFlow::AsReviewed
+            );
+        }
+    }
 
     #[actix_rt::test]
     async fn test_sign_auth_success() {
@@ -268,7 +437,7 @@ mod test {
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let signed = sut
-            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .sign_subintent(signable.clone(), RoleKind::Primary, None)
             .await
             .unwrap();
 
@@ -440,7 +609,7 @@ mod test {
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let outcome = sut
-            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .sign_subintent(signable.clone(), RoleKind::Primary, None)
             .await;
 
         assert_eq!(
@@ -488,7 +657,7 @@ mod test {
             get_signable_with_entities::<Subintent>(&sut.profile().unwrap());
 
         let outcome = sut
-            .sign_subintent(signable.clone(), RoleKind::Primary)
+            .sign_subintent(signable.clone(), RoleKind::Primary, None)
             .await;
 
         assert_eq!(outcome, Err(CommonError::HostInteractionAborted));

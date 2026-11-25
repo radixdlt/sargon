@@ -6,8 +6,7 @@ pub struct SignaturesCollectorFactory {
     interactor: Arc<dyn SignInteractor<TransactionIntent>>,
     recovery_intents: AccessControllerRecoveryIntents,
     securified_entity: AnySecurifiedEntity,
-    proposed_security_structure: SecurityStructureOfFactorInstances,
-    lock_fee_data: LockFeeData,
+    fee_payer: AccessControllerTransactionFeePayer,
     ac_state_details: AccessControllerStateDetails,
 }
 
@@ -16,7 +15,7 @@ impl SignaturesCollectorFactory {
         base_intent: TransactionIntent,
         interactor: Arc<dyn SignInteractor<TransactionIntent>>,
         profile: Profile,
-        lock_fee_data: LockFeeData,
+        fee_payer: AccessControllerTransactionFeePayer,
         ac_state_details: AccessControllerStateDetails,
     ) -> Result<Self> {
         let entity = profile
@@ -32,7 +31,7 @@ impl SignaturesCollectorFactory {
 
         let recovery_intents = AccessControllerRecoveryIntentsBuilder::new(
             base_intent,
-            lock_fee_data.clone(),
+            fee_payer.clone(),
             securified_entity.clone(),
             proposed_security_structure.clone(),
             ac_state_details.clone(),
@@ -45,8 +44,7 @@ impl SignaturesCollectorFactory {
             interactor,
             recovery_intents,
             securified_entity,
-            proposed_security_structure,
-            lock_fee_data,
+            fee_payer,
             ac_state_details,
         })
     }
@@ -125,13 +123,13 @@ impl SignaturesCollectorFactory {
         )
     }
 
+    /// The signatures needed besides the roles of the role combination used:
+    /// another account paying the fee, or the account being recovered paying
+    /// it with its new primary role after the recovery is confirmed.
     pub fn signature_collector_for_post_processing_signatures(
         &self,
         intent_hash: &TransactionIntentHash,
     ) -> Result<Option<SignaturesCollector<TransactionIntent>>> {
-        let fee_payer_is_securified_account =
-            self.lock_fee_data.fee_payer_address.scrypto()
-                == self.securified_entity.address().scrypto();
         let used_role_combination = self
             .recovery_intents
             .role_combination_used_for_transaction(intent_hash);
@@ -140,45 +138,45 @@ impl SignaturesCollectorFactory {
             .signable_for_hash(intent_hash)
             .expect("Programmer error: Signable should exist")
             .signable;
-        let authentication_role_is_updated = self
-            .securified_entity
-            .current_authentication_signing_factor_instance()
-            != self
-                .proposed_security_structure
-                .authentication_signing_factor_instance;
+        let placement = FeeLockPlacement::new(
+            &self.fee_payer,
+            self.securified_entity.address(),
+            self.ac_state_details.state.is_primary_role_locked,
+            used_role_combination,
+        );
 
         let mut signable_entities: Vec<Account> = Vec::<_>::new();
 
-        // First handle the the case when the fee payer is another account
-        if !fee_payer_is_securified_account {
-            // Fee payer is some other account;
-            let fee_payer_account = self
-                .profile
-                .account_by_address(self.lock_fee_data.fee_payer_address)?;
-            signable_entities.push(fee_payer_account);
-        }
-
-        // Second, handle the scenarios when it is needed to sign with the new Primary Role
-        if self.securified_entity.entity.is_account_entity()
-            && used_role_combination.can_quick_confirm()
-            && !used_role_combination.can_exercise_primary_role()
-        {
-            // The recovery was quick confirmed, but the current Primary role was not used, so try to use the new Primary role if needed.
-            if fee_payer_is_securified_account || authentication_role_is_updated
-            {
-                // Need to create a copy of the securified entity and commit the provisional security structure,
-                // so the SignaturesCollector can use it when signing with Primary role.
-                let mut securified_entity = self.securified_entity.clone();
-                securified_entity.commit_provisional()?;
-
-                signable_entities.push(
-                    securified_entity
-                    .entity
-                    .as_account_entity()
-                    .expect("Safey to unwrap, since we do check earlier if the entity is account")
-                    .clone()
+        match (self.fee_payer.account(), placement) {
+            (_, FeeLockPlacement::Impossible) => {
+                return Err(
+                    CommonError::AccessControllerRecoveryFeePayerNeedsPrimaryRole,
                 );
             }
+            (Some(fee_payer), FeeLockPlacement::AfterConfirmation) => {
+                // The account being recovered pays with its new primary role:
+                // sign with the proposed security structure, as if committed.
+                let mut securified_entity = self.securified_entity.clone();
+                securified_entity.commit_provisional()?;
+                let account = securified_entity
+                    .entity
+                    .as_account_entity()
+                    .cloned()
+                    .ok_or(CommonError::UnknownAccount)?;
+                debug_assert_eq!(account.address, fee_payer);
+                signable_entities.push(account);
+            }
+            (Some(fee_payer), FeeLockPlacement::BeforeRecovery)
+                if fee_payer.scrypto()
+                    != self.securified_entity.address().scrypto() =>
+            {
+                // Another account pays.
+                signable_entities
+                    .push(self.profile.account_by_address(fee_payer)?);
+            }
+            // The access controller pays, or the account being recovered
+            // with the primary role the combination already signed with.
+            _ => {}
         }
 
         if signable_entities.is_empty() {

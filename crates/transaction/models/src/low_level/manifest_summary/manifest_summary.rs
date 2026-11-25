@@ -39,6 +39,11 @@ pub struct ManifestSummary {
     /// and can only be included in the manifest by the wallet itself.
     pub reserved_instructions: Vec<ReservedInstruction>,
 
+    /// The access controllers whose methods the manifest calls, which are
+    /// reserved instructions. Access controllers named in the manifest
+    /// rather than on ledger are left out.
+    pub access_controllers_called: Vec<AccessControllerAddress>,
+
     /// The various classifications that this manifest matched against. Note
     /// that an empty set means that the manifest is non-conforming.
     pub classification: IndexSet<ManifestClassification>,
@@ -90,6 +95,7 @@ impl ManifestSummary {
                 .into_iter()
                 .collect_vec(),
             reserved_instructions: reserved_instructions.into_iter().collect(),
+            access_controllers_called: Vec::new(),
             classification: classification.into_iter().collect::<IndexSet<_>>(),
         }
     }
@@ -179,6 +185,12 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
             ret.entities_encountered_summary.entities,
             network_id,
         );
+        let access_controllers_called = filter_try_to_vec_network_aware(
+            ret.reserved_instructions_summary
+                .access_controller_invocations
+                .clone(),
+            network_id,
+        );
         let reserved_instructions =
             ReservedInstruction::from_ret_reserved_instructions_output(
                 ret.reserved_instructions_summary,
@@ -190,18 +202,21 @@ impl From<(RetStaticAnalysis, NetworkID)> for ManifestSummary {
             .map(Into::into)
             .collect::<Vec<ManifestClassification>>();
 
-        Self::new(
-            account_withdraws,
-            account_deposits,
-            presented_proofs,
-            addresses_of_accounts_withdrawn_from,
-            addresses_of_accounts_deposited_into,
-            encountered_entities,
-            addresses_of_accounts_requiring_auth,
-            addresses_of_personas_requiring_auth,
-            reserved_instructions,
-            classifications,
-        )
+        Self {
+            access_controllers_called,
+            ..Self::new(
+                account_withdraws,
+                account_deposits,
+                presented_proofs,
+                addresses_of_accounts_withdrawn_from,
+                addresses_of_accounts_deposited_into,
+                encountered_entities,
+                addresses_of_accounts_requiring_auth,
+                addresses_of_personas_requiring_auth,
+                reserved_instructions,
+                classifications,
+            )
+        }
     }
 }
 
@@ -245,18 +260,28 @@ pub enum ManifestClassification {
     AccountDepositSettingsUpdate,
     /// A manifest that securifies entities by moving their badge
     /// to a newly created access controller. In this manifest class the entity
-    /// is securified, its owner_keys is updated and an access controller is
-    /// created.
+    /// is securified and an access controller is created; nothing else.
     EntitySecurify,
-    /// A manifest that starts the access controller recovery, it is either
-    /// confirmed in the same transaction, or it is a timed recovery, currently
-    /// the difference is not important.
+    /// A manifest that creates accounts or personas, each with its owner badge
+    /// in a new access controller, so they're securified from the start.
+    SecurifiedEntityCreation,
+    /// A manifest that proposes new rules for access controllers and confirms
+    /// them in the same transaction.
     AccessControllerRecovery,
-    /// A manifest that stops the timed recovery.
-    /// It can as well contain instructions to cancel the given recovery proposal.
-    AccessControllerStopTimedRecovery,
-    /// A manifest that confirms the timed recovery.
-    AccessControllerConfirmTimedRecovery,
+    /// A manifest that starts a timed recovery of access controllers.
+    AccessControllerTimedRecovery,
+    /// A manifest that confirms recoveries already proposed on access
+    /// controllers.
+    AccessControllerConfirmRecovery,
+    /// A manifest that stops or cancels recoveries already proposed on access
+    /// controllers.
+    AccessControllerCancelRecovery,
+    /// A manifest that locks or unlocks the primary role of access
+    /// controllers.
+    AccessControllerPrimaryRoleLock,
+    /// A manifest that tops up or withdraws from the recovery fee vaults of
+    /// access controllers.
+    AccessControllerRecoveryFee,
 }
 
 impl From<RetManifestClass> for ManifestClassification {
@@ -274,14 +299,26 @@ impl From<RetManifestClass> for ManifestClassification {
                 Self::AccountDepositSettingsUpdate
             }
             RetManifestClass::EntitySecurify => Self::EntitySecurify,
+            RetManifestClass::SecurifiedEntityCreation => {
+                Self::SecurifiedEntityCreation
+            }
             RetManifestClass::AccessControllerRecovery => {
                 Self::AccessControllerRecovery
             }
-            RetManifestClass::AccessControllerConfirmTimedRecovery => {
-                Self::AccessControllerConfirmTimedRecovery
+            RetManifestClass::AccessControllerTimedRecovery => {
+                Self::AccessControllerTimedRecovery
             }
-            RetManifestClass::AccessControllerStopTimedRecovery => {
-                Self::AccessControllerStopTimedRecovery
+            RetManifestClass::AccessControllerConfirmRecovery => {
+                Self::AccessControllerConfirmRecovery
+            }
+            RetManifestClass::AccessControllerCancelRecovery => {
+                Self::AccessControllerCancelRecovery
+            }
+            RetManifestClass::AccessControllerPrimaryRoleLock => {
+                Self::AccessControllerPrimaryRoleLock
+            }
+            RetManifestClass::AccessControllerRecoveryFee => {
+                Self::AccessControllerRecoveryFee
             }
         }
     }
@@ -299,6 +336,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample(),
             reserved_instructions: Vec::<_>::sample(),
+            access_controllers_called: Vec::new(),
             classification: IndexSet::just(
                 ManifestClassification::GeneralSubintent,
             ),
@@ -316,6 +354,7 @@ impl HasSampleValues for ManifestSummary {
             addresses_of_accounts_requiring_auth: Vec::<_>::sample_other(),
             addresses_of_personas_requiring_auth: Vec::<_>::sample_other(),
             reserved_instructions: Vec::<_>::sample_other(),
+            access_controllers_called: vec![AccessControllerAddress::sample()],
             classification: IndexSet::just(ManifestClassification::Transfer),
         }
     }
