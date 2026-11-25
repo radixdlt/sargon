@@ -77,42 +77,79 @@ impl OsUsedMfaSignatureResourcesWithAccounts for SargonOS {
             .fetch_entities_by_role_requirement_lookup(requirements)
             .await?;
 
-        let used =
-            response
-                .items
+        // A key in an access controller's rules shows up as the access
+        // controller, e.g. a shared account's: show the account it controls.
+        let access_controllers = response
+            .items
+            .iter()
+            .flat_map(|item| item.entities.iter())
+            .filter_map(|entity| entity.entity_address)
+            .filter_map(|address| address.as_access_controller().cloned())
+            .collect::<IndexSet<_>>()
+            .into_iter()
+            .collect_vec();
+        let accounts_by_access_controller: IndexMap<
+            AccessControllerAddress,
+            AccountAddress,
+        > = if access_controllers.is_empty() {
+            IndexMap::new()
+        } else {
+            // A failure is reported, not read as "used by no account".
+            self.gateway_client()
+                .fetch_access_controllers_details(access_controllers)
+                .await?
                 .into_iter()
-                .filter_map(|item| {
-                    let (
-                        mfa_factor_instance,
-                        _requirement,
-                        non_fungible_global_id,
-                    ) = mapped
+                .filter_map(|details| {
+                    details
+                        .controlled_entity
+                        .and_then(|entity| entity.as_account().cloned())
+                        .map(|account| (details.address, account))
+                })
+                .collect()
+        };
+
+        let used = response
+            .items
+            .into_iter()
+            .filter_map(|item| {
+                let (mfa_factor_instance, _requirement, non_fungible_global_id) =
+                    mapped
                         .iter()
                         .find(|(_, requirement, _)| {
                             *requirement == item.requirement
                         })?
                         .clone();
 
-                    let account_addresses = item
-                        .entities
-                        .into_iter()
-                        .filter_map(|entity| entity.entity_address)
-                        .filter_map(|address| address.as_account().cloned())
-                        .collect::<IndexSet<_>>()
-                        .into_iter()
-                        .collect_vec();
-
-                    if account_addresses.is_empty() {
-                        return None;
-                    }
-
-                    Some(UsedMfaSignatureResourceWithAccounts {
-                        mfa_factor_instance,
-                        non_fungible_global_id,
-                        account_addresses,
+                let account_addresses = item
+                    .entities
+                    .into_iter()
+                    .filter_map(|entity| entity.entity_address)
+                    .filter_map(|address| {
+                        address.as_account().cloned().or_else(|| {
+                            address.as_access_controller().and_then(
+                                |access_controller| {
+                                    accounts_by_access_controller
+                                        .get(access_controller)
+                                        .cloned()
+                                },
+                            )
+                        })
                     })
+                    .collect::<IndexSet<_>>()
+                    .into_iter()
+                    .collect_vec();
+
+                if account_addresses.is_empty() {
+                    return None;
+                }
+
+                Some(UsedMfaSignatureResourceWithAccounts {
+                    mfa_factor_instance,
+                    non_fungible_global_id,
+                    account_addresses,
                 })
-                .collect_vec();
+            })
+            .collect_vec();
 
         Ok(used)
     }
