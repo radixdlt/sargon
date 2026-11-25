@@ -18,12 +18,35 @@ impl TokenPriceServices {
         self == &Self::default()
     }
 
+    /// The same services with the production one first, added if missing,
+    /// followed by the others in their order.
+    pub fn with_production_first(self) -> Self {
+        Self::from_iter(
+            std::iter::once(TokenPriceService::production()).chain(self),
+        )
+    }
+
+    /// Reads services stored in a Profile, putting the production one first
+    /// whatever was stored, so that Profiles saved before it became the
+    /// default, or with services the user added, still try it first.
+    pub fn deserialize_with_production_first<'de, D>(
+        deserializer: D,
+    ) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Self::deserialize(deserializer).map(Self::with_production_first)
+    }
+
     pub fn add(&mut self, service: TokenPriceService) -> bool {
         self.try_insert_unique(service).is_ok()
     }
 
+    /// Removes a service the user added. The production service always
+    /// stays, and so does the last one.
     pub fn remove_by_base_url(&mut self, base_url: &Url) -> bool {
-        if self.len() <= 1 {
+        if self.len() <= 1 || *base_url == TokenPriceService::production().id()
+        {
             return false;
         }
         self.remove_id(base_url).is_some()
@@ -93,6 +116,56 @@ mod tests {
         let to_remove = TokenPriceService::sample_other().base_url;
         assert!(sut.remove_by_base_url(&to_remove));
         assert_eq!(sut.len(), 1);
+    }
+
+    #[test]
+    fn remove_production_is_disallowed() {
+        let mut sut = SUT::sample_other();
+        let production = TokenPriceService::production().base_url;
+        assert!(!sut.remove_by_base_url(&production));
+        assert_eq!(sut, SUT::sample_other());
+    }
+
+    fn service(url: &str) -> TokenPriceService {
+        TokenPriceService::new(Url::parse(url).unwrap())
+    }
+
+    fn urls(sut: &SUT) -> Vec<String> {
+        sut.iter().map(|s| s.base_url.to_string()).collect_vec()
+    }
+
+    #[test]
+    fn with_production_first_adds_it_ahead_of_stored_services() {
+        let stored = SUT::from_iter([
+            service("https://token-price-service.radixdlt.com"),
+            service("https://custom.example"),
+        ]);
+        assert_eq!(
+            urls(&stored.with_production_first()),
+            vec![
+                "https://prices.radixdao.org/",
+                "https://token-price-service.radixdlt.com/",
+                "https://custom.example/",
+            ]
+        );
+    }
+
+    #[test]
+    fn with_production_first_moves_it_to_the_front() {
+        let stored = SUT::from_iter([
+            service("https://custom.example"),
+            TokenPriceService::production(),
+        ]);
+        assert_eq!(
+            urls(&stored.with_production_first()),
+            vec!["https://prices.radixdao.org/", "https://custom.example/"]
+        );
+    }
+
+    #[test]
+    fn with_production_first_keeps_default_as_is() {
+        assert_eq!(SUT::default().with_production_first(), SUT::default());
+        assert_eq!(SUT::new().with_production_first(), SUT::default());
     }
 
     #[test]

@@ -43,9 +43,11 @@ pub struct ProfileNetwork {
     #[serde(flatten, with = "address_book_in_two_lists")]
     pub address_book: AddressBook,
 
-    /// Ordered token price service endpoints used for failover.
+    /// Ordered token price service endpoints used for failover, the
+    /// production one always first.
     #[serde(
         default = "TokenPriceServices::default",
+        deserialize_with = "TokenPriceServices::deserialize_with_production_first",
         skip_serializing_if = "TokenPriceServices::is_default"
     )]
     pub token_price_services: TokenPriceServices,
@@ -421,6 +423,39 @@ mod tests {
             .address_book
             .contains(&AccountAddress::sample_mainnet().into()));
         assert_eq!(sut.address_book.len(), 1);
+    }
+
+    #[test]
+    fn deserialize_stored_token_price_services_puts_production_first() {
+        let sut: SUT = serde_json::from_str(
+            r#"
+            {
+              "networkID": 1,
+              "accounts": [],
+              "personas": [],
+              "authorizedDapps": [],
+              "resource_preferences": [],
+              "mfa_factor_instances": [],
+              "token_price_services": [
+                { "baseUrl": "https://token-price-service.radixdlt.com" },
+                { "baseUrl": "https://custom.example" }
+              ]
+            }
+            "#,
+        )
+        .unwrap();
+
+        assert_eq!(
+            sut.token_price_services
+                .iter()
+                .map(|s| s.base_url.to_string())
+                .collect_vec(),
+            vec![
+                "https://prices.radixdao.org/",
+                "https://token-price-service.radixdlt.com/",
+                "https://custom.example/",
+            ]
+        );
     }
 
     #[test]

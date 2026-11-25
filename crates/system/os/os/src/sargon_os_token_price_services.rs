@@ -130,6 +130,37 @@ mod tests {
     }
 
     #[actix_rt::test]
+    async fn delete_production_token_price_service_returns_false() {
+        let os = SUT::fast_boot().await;
+        let extra =
+            Url::parse("https://token-price-service-alt.example").unwrap();
+        let production = TokenPriceService::production().base_url;
+
+        os.with_timeout(|x| {
+            x.add_token_price_service_on_current_network(extra.clone())
+        })
+        .await
+        .unwrap();
+
+        let did_delete = os
+            .with_timeout(|x| {
+                x.delete_token_price_service_on_current_network(
+                    production.clone(),
+                )
+            })
+            .await
+            .unwrap();
+
+        assert!(!did_delete);
+        let stored = os.token_price_services_on_current_network().unwrap();
+        assert_eq!(
+            stored.first().map(|s| s.base_url.clone()),
+            Some(production)
+        );
+        assert!(stored.contains_id(extra));
+    }
+
+    #[actix_rt::test]
     async fn delete_token_price_service_when_more_than_one_returns_true() {
         let os = SUT::fast_boot().await;
         let extra =
