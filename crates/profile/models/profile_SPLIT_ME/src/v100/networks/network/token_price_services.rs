@@ -18,35 +18,38 @@ impl TokenPriceServices {
         self == &Self::default()
     }
 
-    /// The same services with the production one first, added if missing,
-    /// followed by the others in their order.
-    pub fn with_production_first(self) -> Self {
-        Self::from_iter(
-            std::iter::once(TokenPriceService::production()).chain(self),
-        )
+    /// The same services with the former production service replaced, in
+    /// its position, by the current one. When the current one is already
+    /// listed, the earlier of the two positions is kept.
+    pub fn replacing_legacy_production(self) -> Self {
+        let legacy = TokenPriceService::legacy_production();
+        Self::from_iter(self.into_iter().map(|service| {
+            if service == legacy {
+                TokenPriceService::production()
+            } else {
+                service
+            }
+        }))
     }
 
-    /// Reads services stored in a Profile, putting the production one first
-    /// whatever was stored, so that Profiles saved before it became the
-    /// default, or with services the user added, still try it first.
-    pub fn deserialize_with_production_first<'de, D>(
+    /// Reads services stored in a Profile. A list is stored only once the
+    /// user adds a service, and then still holds the default of that time,
+    /// so the former production service is swapped for the current one.
+    pub fn deserialize_replacing_legacy_production<'de, D>(
         deserializer: D,
     ) -> std::result::Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        Self::deserialize(deserializer).map(Self::with_production_first)
+        Self::deserialize(deserializer).map(Self::replacing_legacy_production)
     }
 
     pub fn add(&mut self, service: TokenPriceService) -> bool {
         self.try_insert_unique(service).is_ok()
     }
 
-    /// Removes a service the user added. The production service always
-    /// stays, and so does the last one.
     pub fn remove_by_base_url(&mut self, base_url: &Url) -> bool {
-        if self.len() <= 1 || *base_url == TokenPriceService::production().id()
-        {
+        if self.len() <= 1 {
             return false;
         }
         self.remove_id(base_url).is_some()
@@ -119,11 +122,11 @@ mod tests {
     }
 
     #[test]
-    fn remove_production_is_disallowed() {
+    fn remove_production_when_more_than_one_returns_true() {
         let mut sut = SUT::sample_other();
         let production = TokenPriceService::production().base_url;
-        assert!(!sut.remove_by_base_url(&production));
-        assert_eq!(sut, SUT::sample_other());
+        assert!(sut.remove_by_base_url(&production));
+        assert_eq!(sut, SUT::just(TokenPriceService::sample_other()));
     }
 
     fn service(url: &str) -> TokenPriceService {
@@ -135,37 +138,43 @@ mod tests {
     }
 
     #[test]
-    fn with_production_first_adds_it_ahead_of_stored_services() {
+    fn replacing_legacy_production_keeps_its_position() {
         let stored = SUT::from_iter([
-            service("https://token-price-service.radixdlt.com"),
             service("https://custom.example"),
+            service("https://token-price-service.radixdlt.com"),
+            service("https://other.example"),
         ]);
         assert_eq!(
-            urls(&stored.with_production_first()),
+            urls(&stored.replacing_legacy_production()),
             vec![
-                "https://prices.radixdao.org/",
-                "https://token-price-service.radixdlt.com/",
                 "https://custom.example/",
+                "https://prices.radixdao.org/",
+                "https://other.example/",
             ]
         );
     }
 
     #[test]
-    fn with_production_first_moves_it_to_the_front() {
+    fn replacing_legacy_production_when_current_is_listed_keeps_earlier() {
         let stored = SUT::from_iter([
+            service("https://token-price-service.radixdlt.com"),
             service("https://custom.example"),
             TokenPriceService::production(),
         ]);
         assert_eq!(
-            urls(&stored.with_production_first()),
+            urls(&stored.replacing_legacy_production()),
             vec!["https://prices.radixdao.org/", "https://custom.example/"]
         );
     }
 
     #[test]
-    fn with_production_first_keeps_default_as_is() {
-        assert_eq!(SUT::default().with_production_first(), SUT::default());
-        assert_eq!(SUT::new().with_production_first(), SUT::default());
+    fn replacing_legacy_production_leaves_lists_without_it() {
+        let stored = SUT::just(service("https://custom.example"));
+        assert_eq!(stored.clone().replacing_legacy_production(), stored);
+        assert_eq!(
+            SUT::default().replacing_legacy_production(),
+            SUT::default()
+        );
     }
 
     #[test]

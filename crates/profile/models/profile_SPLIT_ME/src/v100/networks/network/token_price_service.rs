@@ -9,6 +9,10 @@ pub struct TokenPriceService {
 impl TokenPriceService {
     pub const SCOPED_TOKENS_PATH: &str = "/price/tokens";
     pub const PRODUCTION_BASE_URL: &str = "https://prices.radixdao.org";
+    /// The production service before [`Self::PRODUCTION_BASE_URL`], which
+    /// Profiles loaded from storage have replaced by the current one.
+    pub const LEGACY_PRODUCTION_BASE_URL: &str =
+        "https://token-price-service.radixdlt.com";
 
     pub fn new(base_url: Url) -> Self {
         Self { base_url }
@@ -16,6 +20,12 @@ impl TokenPriceService {
 
     pub fn production() -> Self {
         Self::new(Url::parse(Self::PRODUCTION_BASE_URL).expect("valid URL"))
+    }
+
+    pub fn legacy_production() -> Self {
+        Self::new(
+            Url::parse(Self::LEGACY_PRODUCTION_BASE_URL).expect("valid URL"),
+        )
     }
 
     pub fn scoped_tokens_url(&self) -> Result<Url> {
