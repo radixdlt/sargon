@@ -78,7 +78,9 @@ fn make_client_with_responses(
                 let body =
                     serde_json::to_vec(&liquidity_receipts_clone).unwrap();
                 NetworkResponse::new(200, body)
-            } else if request.url.as_str().contains("token-price-service") {
+            } else if request.url.path()
+                == TokenPriceService::SCOPED_TOKENS_PATH
+            {
                 let body = serde_json::to_vec(&TokenPricesResponse {
                     tokens: token_prices_clone.clone(),
                     lsus: vec![],
@@ -518,7 +520,7 @@ async fn test_uses_cache_when_available() {
     let driver = Arc::new(MockNetworkingDriver::with_lazy_responses(
         move |request, _| {
             // Only succeed for token price requests, fail for liquidity receipts
-            if request.url.as_str().contains("token-price-service") {
+            if request.url.path() == TokenPriceService::SCOPED_TOKENS_PATH {
                 let body = serde_json::to_vec(&TokenPricesResponse {
                     tokens: token_prices.clone(),
                     lsus: vec![],

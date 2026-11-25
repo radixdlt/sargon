@@ -8,8 +8,7 @@ pub struct TokenPriceService {
 
 impl TokenPriceService {
     pub const SCOPED_TOKENS_PATH: &str = "/price/tokens";
-    pub const PRODUCTION_BASE_URL: &str =
-        "https://token-price-service.radixdlt.com";
+    pub const PRODUCTION_BASE_URL: &str = "https://prices.radixdao.org";
 
     pub fn new(base_url: Url) -> Self {
         Self { base_url }
@@ -77,7 +76,7 @@ mod tests {
         let sut = SUT::sample();
         assert_eq!(
             sut.scoped_tokens_url().unwrap().as_str(),
-            "https://token-price-service.radixdlt.com/price/tokens"
+            "https://prices.radixdao.org/price/tokens"
         );
     }
 

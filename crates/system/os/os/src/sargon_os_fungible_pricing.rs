@@ -129,7 +129,7 @@ mod tests {
         assert_eq!(
             attempted_hosts,
             vec![
-                "token-price-service.radixdlt.com".to_owned(),
+                "prices.radixdao.org".to_owned(),
                 "token-prices-primary.example".to_owned(),
                 "token-prices-secondary.example".to_owned(),
             ]
