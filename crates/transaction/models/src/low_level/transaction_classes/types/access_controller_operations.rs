@@ -124,6 +124,61 @@ pub struct AccountXrdTransfer {
     pub xrd_amount: Decimal192,
 }
 
+/// An account or persona a manifest creates with its owner badge in a new
+/// access controller, so it's securified from the start, and that access
+/// controller's rules.
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct CreatedSecurifiedEntity {
+    /// The entity created. Its address comes from the preview, so a
+    /// transaction committed later may create it at another address.
+    pub entity: AddressOfAccountOrPersona,
+    /// The rules of the access controller created to hold its owner badge.
+    pub rules: AccessControllerRuleSetForDisplay,
+    /// The access controller's timed recovery delay, if it has one.
+    pub timed_recovery_delay_in_minutes: Option<u32>,
+}
+
+impl CreatedSecurifiedEntity {
+    /// `None` if the entity is neither an account nor a persona.
+    pub(crate) fn new_from(
+        created: RetCreatedSecurifiedEntity,
+        network_id: NetworkID,
+    ) -> Option<Self> {
+        let node_id = *created.entity_address.as_node_id();
+        let entity = AccountAddress::new_from_node_id(node_id, network_id)
+            .map(AddressOfAccountOrPersona::from)
+            .or_else(|_| {
+                IdentityAddress::new_from_node_id(node_id, network_id)
+                    .map(AddressOfAccountOrPersona::from)
+            })
+            .ok()?;
+        Some(Self {
+            entity,
+            rules: rules_for_display(created.rule_set, network_id),
+            timed_recovery_delay_in_minutes: created
+                .timed_recovery_delay_in_minutes,
+        })
+    }
+}
+
+impl HasSampleValues for CreatedSecurifiedEntity {
+    fn sample() -> Self {
+        Self {
+            entity: AddressOfAccountOrPersona::sample(),
+            rules: AccessControllerRuleSetForDisplay::sample(),
+            timed_recovery_delay_in_minutes: Some(20160),
+        }
+    }
+
+    fn sample_other() -> Self {
+        Self {
+            entity: AddressOfAccountOrPersona::sample_other(),
+            rules: AccessControllerRuleSetForDisplay::sample_other(),
+            timed_recovery_delay_in_minutes: None,
+        }
+    }
+}
+
 fn rules_for_display(
     rule_set: ScryptoRuleSet,
     network_id: NetworkID,

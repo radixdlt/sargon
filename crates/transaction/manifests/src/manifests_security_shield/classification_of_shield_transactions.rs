@@ -163,3 +163,35 @@ fn setting_the_rola_key_is_a_transaction_of_its_own() {
             .contains(&PublicKeyHash::hash(rola_key.public_key()).to_string()));
     }
 }
+
+/// A dApp setting up a shared account, e.g. Signetix's Advanced Multisig: a
+/// new account with its owner badge in a new access controller whose roles
+/// each need two keys, with a 14-day timed recovery.
+#[test]
+fn creating_an_account_under_an_access_controller_is_securified_entity_creation(
+) {
+    let rule = r#"Enum<2u8>(
+            Enum<0u8>(
+                Enum<2u8>(
+                    2u8,
+                    Array<Enum>(
+                        Enum<0u8>(NonFungibleGlobalId("resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa:[36454148d521bae3a09eabb4de6b470f9924e898f8cfa4e3625fd5cb81]")),
+                        Enum<0u8>(NonFungibleGlobalId("resource_tdx_2_1nfxxxxxxxxxxed25sgxxxxxxxxx002236757237xxxxxxxxx3e2cpa:[7122c0a037fa42221ba40b7c624f4bd2afe9aadbab361c1d4df0f07c62]"))
+                    )
+                )
+            )
+        )"#;
+    let instructions = format!(
+        r#"
+CALL_METHOD Address("account_tdx_2_12xc7k3msxr8hjegk3784v3p3ld3ajkxv0axanp6g3uwsx35jya4wdp") "lock_fee" Decimal("1.18");
+CREATE_ACCOUNT;
+TAKE_ALL_FROM_WORKTOP Address("resource_tdx_2_1nfxxxxxxxxxxaccwnrxxxxxxxxx006664022062xxxxxxxxx4vczzk") Bucket("bucket1");
+CREATE_ACCESS_CONTROLLER Bucket("bucket1") Tuple({rule}, {rule}, {rule}) Enum<1u8>(20160u32) Enum<0u8>();
+"#
+    );
+    let manifest =
+        TransactionManifest::new(instructions, NetworkID::Stokenet, Blobs::default())
+            .unwrap();
+
+    assert_class(&manifest, ManifestClassification::SecurifiedEntityCreation);
+}

@@ -100,6 +100,12 @@ pub enum DetailedManifestClass {
         /// The entity address that is about to be securified
         entities: Vec<AddressOfAccountOrPersona>,
     },
+    /// A manifest that creates accounts or personas, each with its owner
+    /// badge in a new access controller, so they're securified from the
+    /// start: e.g. a dApp setting up a shared account.
+    SecurifiedEntityCreation {
+        created_entities: Vec<CreatedSecurifiedEntity>,
+    },
     /// A manifest that proposes new rules for access controllers and confirms
     /// them in the same transaction: the rules change once it's committed.
     AccessControllerRecovery {

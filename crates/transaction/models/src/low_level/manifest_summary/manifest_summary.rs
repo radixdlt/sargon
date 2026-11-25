@@ -262,6 +262,9 @@ pub enum ManifestClassification {
     /// to a newly created access controller. In this manifest class the entity
     /// is securified and an access controller is created; nothing else.
     EntitySecurify,
+    /// A manifest that creates accounts or personas, each with its owner badge
+    /// in a new access controller, so they're securified from the start.
+    SecurifiedEntityCreation,
     /// A manifest that proposes new rules for access controllers and confirms
     /// them in the same transaction.
     AccessControllerRecovery,
@@ -296,6 +299,9 @@ impl From<RetManifestClass> for ManifestClassification {
                 Self::AccountDepositSettingsUpdate
             }
             RetManifestClass::EntitySecurify => Self::EntitySecurify,
+            RetManifestClass::SecurifiedEntityCreation => {
+                Self::SecurifiedEntityCreation
+            }
             RetManifestClass::AccessControllerRecovery => {
                 Self::AccessControllerRecovery
             }

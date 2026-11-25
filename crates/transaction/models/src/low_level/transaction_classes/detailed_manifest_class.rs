@@ -100,6 +100,12 @@ pub enum DetailedManifestClass {
         /// The entity address that is about to be securified
         entities: Vec<AddressOfAccountOrPersona>,
     },
+    /// A manifest that creates accounts or personas, each with its owner
+    /// badge in a new access controller, so they're securified from the
+    /// start: e.g. a dApp setting up a shared account.
+    SecurifiedEntityCreation {
+        created_entities: Vec<CreatedSecurifiedEntity>,
+    },
     /// A manifest that proposes new rules for access controllers and confirms
     /// them in the same transaction: the rules change once it's committed.
     AccessControllerRecovery {
@@ -177,6 +183,9 @@ impl DetailedManifestClass {
             }
             Self::AccessControllerRecovery { .. } => {
                 DetailedManifestClassKind::AccessControllerRecovery
+            }
+            Self::SecurifiedEntityCreation { .. } => {
+                DetailedManifestClassKind::SecurifiedEntityCreation
             }
             Self::AccessControllerTimedRecovery { .. } => {
                 DetailedManifestClassKind::AccessControllerTimedRecovery
@@ -272,6 +281,10 @@ impl DetailedManifestClass {
             RetDetailedManifestClass::GeneralSubintent => None,
 
             RetDetailedManifestClass::EntitySecurify(output) => {
+                Some(Self::from((output, network_id)))
+            }
+
+            RetDetailedManifestClass::SecurifiedEntityCreation(output) => {
                 Some(Self::from((output, network_id)))
             }
 
@@ -492,6 +505,22 @@ impl From<(RetEntitySecurifyOutput, NetworkID)> for DetailedManifestClass {
     }
 }
 
+impl From<(RetSecurifiedEntityCreationOutput, NetworkID)>
+    for DetailedManifestClass
+{
+    fn from(
+        (output, n): (RetSecurifiedEntityCreationOutput, NetworkID),
+    ) -> Self {
+        Self::SecurifiedEntityCreation {
+            created_entities: output
+                .created_entities
+                .into_iter()
+                .filter_map(|created| CreatedSecurifiedEntity::new_from(created, n))
+                .collect(),
+        }
+    }
+}
+
 impl DetailedManifestClass {
     /// Marks the user's keys in the rules an access controller class shows,
     /// which the classification shows as unknown, see
@@ -504,6 +533,17 @@ impl DetailedManifestClass {
             rules.with_own_factor_sources(own_factor_source)
         };
         match self {
+            Self::SecurifiedEntityCreation { created_entities } => {
+                Self::SecurifiedEntityCreation {
+                    created_entities: created_entities
+                        .into_iter()
+                        .map(|created| CreatedSecurifiedEntity {
+                            rules: mark(created.rules),
+                            ..created
+                        })
+                        .collect(),
+                }
+            }
             Self::AccessControllerRecovery {
                 ac_addresses,
                 recovery_proposals,
@@ -1083,6 +1123,66 @@ mod tests {
                         timed_recovery_delay_in_minutes: Some(10),
                         current_timed_recovery_delay_in_minutes: None,
                         controlled_entity: None,
+                    },
+                ],
+            }
+        );
+    }
+
+    #[test]
+    fn securified_entity_creation_carries_each_entity_with_its_rules() {
+        use radix_engine_interface::blueprints::access_controller::RuleSet as ScryptoRuleSet;
+        use radix_engine_interface::prelude::{
+            AccessRule as ScryptoAccessRule, GlobalAddress as ScryptoGlobalAddress,
+        };
+
+        let account = AccountAddress::sample();
+        let persona = IdentityAddress::sample();
+        let rule_set = ScryptoRuleSet {
+            primary_role: ScryptoAccessRule::AllowAll,
+            recovery_role: ScryptoAccessRule::DenyAll,
+            confirmation_role: ScryptoAccessRule::AllowAll,
+        };
+        let created = |entity_address, delay| RetCreatedSecurifiedEntity {
+            entity_address,
+            rule_set: rule_set.clone(),
+            timed_recovery_delay_in_minutes: delay,
+        };
+        let output = RetSecurifiedEntityCreationOutput {
+            created_entities: vec![
+                created(
+                    ScryptoGlobalAddress::new_or_panic(
+                        account.scrypto().as_node_id().0,
+                    ),
+                    Some(20160),
+                ),
+                created(
+                    ScryptoGlobalAddress::new_or_panic(
+                        persona.scrypto().as_node_id().0,
+                    ),
+                    None,
+                ),
+            ],
+        };
+
+        let rules = AccessControllerRuleSetForDisplay {
+            primary_role: AccessRequirementForDisplay::Anyone,
+            recovery_role: AccessRequirementForDisplay::NoOne,
+            confirmation_role: AccessRequirementForDisplay::Anyone,
+        };
+        assert_eq!(
+            SUT::from((output, NetworkID::Mainnet)),
+            SUT::SecurifiedEntityCreation {
+                created_entities: vec![
+                    CreatedSecurifiedEntity {
+                        entity: account.into(),
+                        rules: rules.clone(),
+                        timed_recovery_delay_in_minutes: Some(20160),
+                    },
+                    CreatedSecurifiedEntity {
+                        entity: persona.into(),
+                        rules,
+                        timed_recovery_delay_in_minutes: None,
                     },
                 ],
             }

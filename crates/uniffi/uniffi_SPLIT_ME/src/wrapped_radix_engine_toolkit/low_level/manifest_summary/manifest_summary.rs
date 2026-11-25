@@ -84,6 +84,9 @@ pub enum ManifestClass {
     /// A manifest that securifies entities by moving their badge to a newly
     /// created access controller, and nothing else.
     EntitySecurify,
+    /// A manifest that creates accounts or personas, each with its owner badge
+    /// in a new access controller, so they're securified from the start.
+    SecurifiedEntityCreation,
     /// A manifest that proposes new rules for access controllers and confirms
     /// them in the same transaction.
     AccessControllerRecovery,

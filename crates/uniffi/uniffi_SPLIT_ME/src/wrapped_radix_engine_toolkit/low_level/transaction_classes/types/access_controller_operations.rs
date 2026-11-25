@@ -5,6 +5,7 @@ use sargon::AccessControllerRecoveryConfirmation as InternalAccessControllerReco
 use sargon::AccessControllerTimedRecoveryProposal as InternalAccessControllerTimedRecoveryProposal;
 use sargon::AccessControllerXrdTransfer as InternalAccessControllerXrdTransfer;
 use sargon::AccountXrdTransfer as InternalAccountXrdTransfer;
+use sargon::CreatedSecurifiedEntity as InternalCreatedSecurifiedEntity;
 use sargon::PrimaryRoleLockOperation as InternalPrimaryRoleLockOperation;
 use sargon::RecoveryConfirmationKind as InternalRecoveryConfirmationKind;
 
@@ -128,6 +129,24 @@ pub struct AccountXrdTransfer {
     pub xrd_amount: Decimal192,
 }
 
+/// An account or persona a manifest creates with its owner badge in a new
+/// access controller, so it's securified from the start, and that access
+/// controller's rules.
+#[derive(Clone, PartialEq, Eq, Hash, InternalConversion, uniffi::Record)]
+pub struct CreatedSecurifiedEntity {
+    /// The entity created. Its address comes from the preview, so a
+    /// transaction committed later may create it at another address.
+    pub entity: AddressOfAccountOrPersona,
+
+    /// The rules of the access controller created to hold its owner badge,
+    /// with the user's keys shown as their factor sources.
+    pub rules: AccessControllerRuleSetForDisplay,
+
+    /// The access controller's timed recovery delay, if it has one.
+    pub timed_recovery_delay_in_minutes: Option<u32>,
+}
+
+decl_conversion_tests_for!(CreatedSecurifiedEntity);
 decl_conversion_tests_for!(AccessControllerTimedRecoveryProposal);
 decl_conversion_tests_for!(AccessControllerRecoveryConfirmation);
 decl_conversion_tests_for!(AccessControllerRecoveryCancellation);
