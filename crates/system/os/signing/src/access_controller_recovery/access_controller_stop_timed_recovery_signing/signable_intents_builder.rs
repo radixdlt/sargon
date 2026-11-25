@@ -55,7 +55,8 @@ impl AccessControllerStopTimedRecoveryIntentsBuilder {
             .state
             .recovery_role_recovery_attempt
             .clone()
-            .expect("The recovery proposal must be present")
+            // Gone if cancelled since the review.
+            .ok_or(CommonError::AccessControllerNotInRecoveryState)?
             .recovery_proposal;
 
         let manifest = match role_kind {

@@ -23,7 +23,9 @@ pub trait OsSigning {
     /// Signs `subintent`. `execution_summary` is the one its review showed,
     /// if it was previewed: for the access controllers it calls, it decides
     /// which roles, and so which of the wallet's keys, the signatures are
-    /// for. Without it, every role the wallet has keys in.
+    /// for. Calls on access controllers are signed only as the shared
+    /// control it classifies, checked again here; without it, only the
+    /// `create_proof`s the wallet adds, for their primary role.
     async fn sign_subintent(
         &self,
         subintent: Subintent,
@@ -62,11 +64,18 @@ impl SigningFlow {
             ) => ac_addresses.first().map_or(Self::AsReviewed, |ac| {
                 Self::AccessControllerRecovery(*ac)
             }),
+            // Only a stop, and cancelling the recovery role's proposal, which
+            // the stop flow rebuilds: anything else would be dropped.
             Some(DetailedManifestClass::AccessControllerCancelRecovery {
                 ac_addresses,
                 cancellations,
             }) if cancellations.iter().all(|cancellation| {
                 cancellation.stopped_timed_recovery.is_some()
+                    && !cancellation.unlocks_primary_role
+                    && cancellation
+                        .cancelled_proposers
+                        .iter()
+                        .all(|proposer| *proposer == RecoveryProposer::Recovery)
             }) =>
             {
                 ac_addresses
@@ -160,18 +169,39 @@ impl OsSigning for SargonOS {
 
         let mut signatures = outcome.signatures_of_successful_transactions();
 
+        let classification = execution_summary
+            .as_ref()
+            .and_then(|summary| summary.detailed_classification.as_ref());
         let external_accounts = resolve_external_accounts_for_subintent(
             self,
             &subintent,
-            execution_summary
-                .as_ref()
-                .and_then(|summary| summary.detailed_classification.as_ref()),
+            classification,
         )
         .await?;
         info!(
             "External signing: external accounts resolved: {}",
             external_accounts.len()
         );
+        // Shared control whose calls need a role: the user must sign for it,
+        // rather than hand back a pre-authorization without their signature.
+        let needs_a_role = classification
+            .filter(|class| is_allowed_in_pre_authorizations(class))
+            .and_then(pre_authorization_access_controller_roles)
+            .is_some_and(|roles| roles.values().any(|roles| !roles.is_empty()));
+        if needs_a_role {
+            let mfa_badges = self
+                .mfa_signing_keys()?
+                .into_iter()
+                .map(|key| key.badge)
+                .collect::<std::collections::HashSet<_>>();
+            let has_a_key = external_accounts
+                .iter()
+                .flat_map(|account| account.required_nft_ids.iter())
+                .any(|badge| mfa_badges.contains(badge));
+            if !has_a_key {
+                return Err(CommonError::NoKeysForAccessControllerRoles);
+            }
+        }
         let external_signatures = collect_external_signatures(
             subintent.clone(),
             external_accounts,
@@ -183,6 +213,13 @@ impl OsSigning for SargonOS {
             "External signing: collected {} external signatures",
             external_signatures.len()
         );
+        // The user had a key, but no signature came back, e.g. the factor
+        // was skipped.
+        if needs_a_role && external_signatures.is_empty() {
+            return Err(
+                CommonError::SigningFailedTooManyFactorSourcesNeglected,
+            );
+        }
         signatures.extend(external_signatures);
 
         subintent.signed(signatures)
@@ -246,26 +283,46 @@ mod test {
     #[test]
     fn stopping_a_timed_recovery_goes_through_the_stop_flow() {
         let ac = AccessControllerAddress::sample();
-        let cancellation =
-            |stopped: bool| AccessControllerRecoveryCancellation {
-                stopped_timed_recovery: stopped
-                    .then(AccessControllerRuleSetForDisplay::sample),
-                ..AccessControllerRecoveryCancellation::sample()
-            };
-        let class =
-            |stopped| DetailedManifestClass::AccessControllerCancelRecovery {
+        let stop = AccessControllerRecoveryCancellation {
+            stopped_timed_recovery: Some(
+                AccessControllerRuleSetForDisplay::sample(),
+            ),
+            cancelled_proposers: vec![RecoveryProposer::Recovery],
+            unlocks_primary_role: false,
+            ..AccessControllerRecoveryCancellation::sample()
+        };
+        let class = |cancellation| {
+            DetailedManifestClass::AccessControllerCancelRecovery {
                 ac_addresses: vec![ac],
-                cancellations: vec![cancellation(stopped)],
-            };
+                cancellations: vec![cancellation],
+            }
+        };
 
         assert_eq!(
-            SigningFlow::of(Some(&class(true))),
+            SigningFlow::of(Some(&class(stop.clone()))),
             SigningFlow::StopTimedRecovery(ac)
         );
-        assert_eq!(
-            SigningFlow::of(Some(&class(false))),
-            SigningFlow::AsReviewed
-        );
+        // The stop flow rebuilds only a stop and cancelling the recovery
+        // role's proposal: anything else is signed as reviewed, not dropped.
+        for cancellation in [
+            AccessControllerRecoveryCancellation {
+                stopped_timed_recovery: None,
+                ..stop.clone()
+            },
+            AccessControllerRecoveryCancellation {
+                unlocks_primary_role: true,
+                ..stop.clone()
+            },
+            AccessControllerRecoveryCancellation {
+                cancelled_proposers: vec![RecoveryProposer::Primary],
+                ..stop.clone()
+            },
+        ] {
+            assert_eq!(
+                SigningFlow::of(Some(&class(cancellation))),
+                SigningFlow::AsReviewed
+            );
+        }
     }
 
     /// Securifying is signed exactly as reviewed: nothing is added to it.

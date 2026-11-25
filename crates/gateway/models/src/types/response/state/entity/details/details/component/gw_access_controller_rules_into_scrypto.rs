@@ -103,6 +103,47 @@ impl From<NonFungibleLocalIdId> for ScryptoNonFungibleLocalId {
     }
 }
 
+/// Whether `rule` converts to the engine's without the conversions above
+/// panicking: every count fits the engine's, and every local id parses.
+fn is_convertible(rule: &AccessRule) -> bool {
+    fn requirement(requirement: &Requirement) -> bool {
+        match requirement {
+            Requirement::Resource { .. } => true,
+            Requirement::NonFungible { non_fungible } => {
+                ScryptoNonFungibleLocalId::from_str(
+                    &non_fungible.local_id.simple_rep,
+                )
+                .is_ok()
+            }
+        }
+    }
+    fn basic(rule: &BasicRequirement) -> bool {
+        match rule {
+            BasicRequirement::Require { requirement: r } => requirement(r),
+            BasicRequirement::AmountOf { .. } => true,
+            BasicRequirement::AllOf { list } | BasicRequirement::AnyOf { list } => {
+                list.iter().all(requirement)
+            }
+            BasicRequirement::CountOf { count, list } => {
+                u8::try_from(*count).is_ok() && list.iter().all(requirement)
+            }
+        }
+    }
+    fn composite(rule: &CompositeRequirement) -> bool {
+        match rule {
+            CompositeRequirement::ProofRule { proof_rule } => basic(proof_rule),
+            CompositeRequirement::AnyOf { access_rules }
+            | CompositeRequirement::AllOf { access_rules } => {
+                access_rules.iter().all(composite)
+            }
+        }
+    }
+    match rule {
+        AccessRule::AllowAll | AccessRule::DenyAll => true,
+        AccessRule::Protected { access_rule } => composite(access_rule),
+    }
+}
+
 /// The current rules of an access controller, read from its role assignments.
 impl TryFrom<ComponentEntityRoleAssignments> for ScryptoRuleSet {
     type Error = CommonError;
@@ -116,11 +157,19 @@ impl TryFrom<ComponentEntityRoleAssignments> for ScryptoRuleSet {
                     entry.role_key.module == ObjectModuleId::Main
                         && entry.role_key.name == role
                 })
+                // An access controller's roles are always assigned
+                // explicitly; any other resolution isn't its rule.
+                .filter(|entry| {
+                    entry.assignment.resolution
+                        == RoleAssignmentResolution::Explicit
+                })
                 .and_then(|entry| entry.assignment.explicit_rule.clone())
+                // Unreadable data is an error, not a panic.
+                .filter(is_convertible)
                 .map(ScryptoAccessRule::from)
                 .ok_or_else(|| CommonError::Unknown {
                     error_message: format!(
-                        "Access controller role '{role}' has no explicit rule"
+                        "Access controller role '{role}' has no explicit rule that can be read"
                     ),
                 })
         };
@@ -135,6 +184,7 @@ impl TryFrom<ComponentEntityRoleAssignments> for ScryptoRuleSet {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::prelude::AccessRule as AccessRuleGw;
     use prelude::fixture_gw_model;
     use radix_engine_interface::prelude::{require, require_n_of, AccessRule};
 
@@ -189,6 +239,38 @@ mod tests {
         assignments
             .entries
             .retain(|entry| entry.role_key.name != "confirmation");
+
+        assert!(ScryptoRuleSet::try_from(assignments).is_err());
+    }
+
+    #[test]
+    fn a_role_not_assigned_explicitly_is_an_error() {
+        let mut assignments = assignments();
+        for entry in assignments.entries.iter_mut() {
+            if entry.role_key.name == "recovery" {
+                entry.assignment.resolution = RoleAssignmentResolution::Owner;
+            }
+        }
+
+        assert!(ScryptoRuleSet::try_from(assignments).is_err());
+    }
+
+    /// The engine's counts fit a byte; a larger one from the Gateway is an
+    /// error rather than a panic.
+    #[test]
+    fn a_count_the_engine_cant_have_is_an_error() {
+        let mut assignments = assignments();
+        for entry in assignments.entries.iter_mut() {
+            if let Some(AccessRuleGw::Protected {
+                access_rule:
+                    CompositeRequirement::ProofRule {
+                        proof_rule: BasicRequirement::CountOf { count, .. },
+                    },
+            }) = entry.assignment.explicit_rule.as_mut()
+            {
+                *count = 256;
+            }
+        }
 
         assert!(ScryptoRuleSet::try_from(assignments).is_err());
     }

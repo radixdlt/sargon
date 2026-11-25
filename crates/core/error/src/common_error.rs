@@ -1111,6 +1111,12 @@ pub enum CommonError {
 
     #[error("The account being recovered can't pay the fee without its primary role: pay it from another account or from the access controller")]
     AccessControllerRecoveryFeePayerNeedsPrimaryRole = 10325,
+
+    #[error("None of the wallet's keys are in the roles the access controller calls need")]
+    NoKeysForAccessControllerRoles = 10326,
+
+    #[error("The access rules count a holder more than once, so one holder passes a group that reads as shared")]
+    AccessRulesCountAHolderTwice = 10327,
 }
 
 impl CommonError {

@@ -52,15 +52,32 @@ hold:
 | **Enclosed** | The subintent takes nothing from its parent, so the wallet can preview it alone, and what the user reviews is all it does. |
 | **Classified** | RET's classifiers are strict allowlists, and the manifest must be of one of the access controller classes below. Each requires exact calls on every access controller and nothing else besides: a subintent may not even pay the fee, and may only yield to its parent at the end. Sargon relies on them rather than re-checking instructions. |
 | **No account or persona authorizes it** | The only authority the user adds is the keys of the next check. A dApp can't bundle the call with anything that spends from or acts as the user's own entities. |
-| **The user's keys alone pass no role** | A pre-authorization is by definition **shared** signing. If the user could pass a role alone, the call would act on an access controller they control alone, and a malicious dApp could get them to give up their own account. This is checked against every role (not only the ones the calls need), with the controllers' current rules read from the ledger. An access controller whose rules can't be read counts as passed, so the request is rejected. |
+| **The user's keys alone pass no role** | A pre-authorization is by definition **shared** signing. If the user could pass a role alone, the call would act on an access controller they control alone, and a malicious dApp could get them to give up their own account. This is checked against every role (not only the ones the calls need), of every access controller the summary or the class names, with the controllers' current rules read from the ledger. An access controller whose rules can't be read counts as passed, so the request is rejected, and so is one that calls none. |
+
+Each access controller called must also hold the owner badge of **exactly
+one** account or persona: the one the review names. One holding none or
+several governs what the review doesn't show.
 
 The rules a pre-authorization proposes or confirms must also **name each
-holder once per group**. The engine counts every entry of a list, so "any 2
-of these 3" with one key listed twice is passed by that key alone, while it
-reads as shared. The same goes for the same factor of the user twice, and for
-a resource next to one of its own non-fungibles or amounts. Such rules are
-rejected, as no rule that names each holder once needs them. Stopping or
-cancelling a proposal is never rejected for the rules it proposed.
+holder once per group**. The engine counts every entry, so "any 2 of these
+3" with one key listed twice is passed by that key alone, while it reads as
+shared; so is "all of (A or B) and (A or C)", by A. A group that needs
+several holders but that one holder named in it passes alone is rejected:
+the same key or factor of the user listed twice in one group, a resource
+next to one of its own non-fungibles or amounts, or one holder in every part
+of an "all of". So a dApp creating a "shared" account whose keys all come
+from one of the user's factors is refused too: that factor passes it alone. No
+rule that names each holder once needs them. Stopping or cancelling a
+proposal is never rejected for the rules it proposed. A transaction creating
+accounts or personas under new access controllers, e.g. a dApp setting up a
+shared account, is held to the same rule.
+
+A rule requiring the transaction processor's caller badges is passed by
+anyone calling the method from their own manifest, so it is read as
+"Anyone".
+
+Signing checks all of this again, with the rules read again from the ledger,
+so it holds even if they changed since the review.
 
 Every rejection is the reserved instructions error.
 
@@ -122,8 +139,12 @@ before submitting. Signing for a role that isn't used is harmless: the
 signature only counts for this subintent, whose class allows nothing but
 the reviewed calls, and the check above already counts every key.
 
-Without a classification, e.g. a host that doesn't pass the summary yet,
-the wallet signs with every role's keys, as before.
+Without a shared-control classification, e.g. an ordinary pre-authorization
+from an account an access controller holds, the only access controller call
+signed for is the `create_proof` the wallet adds, so only the primary role's
+keys sign; any other call is refused. If a call needs a role and none of the
+wallet's keys is in one, signing fails rather than return the subintent
+unsigned.
 
 The review's preview can't pass these roles: it presents only the user's
 keys, and the others sign later. So a pre-authorization that calls an access
@@ -146,7 +167,8 @@ The review shows the **proposed rules**, role by role, as an
 "at least n of these keys", which the wallet draws as e.g. "Any 4 of these 7".
 
 - The controlled account, read from the ledger.
-- The user's own factor, recognised by its badge.
+- The user's own factor, recognised by its badge among the wallet's MFA
+  signing keys on the current network, the keys it can sign with there.
 - Every other key by its **address book name**, if the user gave it one.
   The address book can now name non-fungibles, so a co-signer's key reads
   "Bob". A key without a name stands out.
@@ -171,6 +193,9 @@ older wallets still load the Profile:
   ledger.
 - The Gateway's preview fails for proposed rules nested 4 or more levels
   deep, so such proposals can't be reviewed.
+- A dApp-supplied header is signed as it is: its network and validity
+  aren't checked against the request's, so the review's expiry may not be
+  the signed one.
 - A dApp-supplied header without `max_proposer_timestamp_exclusive` makes
   `WalletToDappInteractionSubintentResponseItem::from` panic; it should be an
   error.

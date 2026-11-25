@@ -13,10 +13,17 @@ pub struct AccessControllerStateDetails {
     pub role_assignments: Option<ComponentEntityRoleAssignments>,
 
     /// The account or persona whose owner badge is in the access
-    /// controller's vault, i.e. the one it controls. `None` in details cached
+    /// controller's vault, i.e. the one it controls. `None` when it holds
+    /// none or several, see `controlled_entities`, and in details cached
     /// before it was read.
     #[serde(default)]
     pub controlled_entity: Option<AddressOfAccountOrPersona>,
+
+    /// Every account or persona whose owner badge is in the access
+    /// controller's vault. Usually one, but an access controller can be
+    /// created holding several.
+    #[serde(default)]
+    pub controlled_entities: Vec<AddressOfAccountOrPersona>,
 }
 
 impl AccessControllerStateDetails {
@@ -31,6 +38,7 @@ impl AccessControllerStateDetails {
             xrd_balance: xrd_balance.into(),
             role_assignments: None,
             controlled_entity: None,
+            controlled_entities: Vec::new(),
         }
     }
 

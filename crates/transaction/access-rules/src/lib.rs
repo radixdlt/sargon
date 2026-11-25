@@ -31,7 +31,13 @@ pub mod prelude {
 
     pub(crate) use radix_common::constants::{
         ED25519_SIGNATURE_RESOURCE, SECP256K1_SIGNATURE_RESOURCE,
+        TRANSACTION_PROCESSOR_PACKAGE,
     };
+    pub(crate) use radix_common::prelude::{
+        BlueprintId as ScryptoBlueprintId,
+        NonFungibleGlobalId as ScryptoNonFungibleGlobalId,
+    };
+    pub(crate) use radix_engine_interface::blueprints::transaction_processor::TRANSACTION_PROCESSOR_BLUEPRINT;
     pub(crate) use radix_engine_interface::blueprints::access_controller::RuleSet as ScryptoRuleSet;
     pub(crate) use radix_engine_interface::blueprints::resource::ResourceOrNonFungible as ScryptoResourceOrNonFungible;
     pub(crate) use radix_engine_interface::prelude::{

@@ -1,97 +1,5 @@
 use crate::prelude::*;
 
-/// The access controller operations a pre-authorization may make: changing,
-/// confirming or cancelling an access controller's rules, and locking or
-/// unlocking its primary role. Each class shows everything its manifest does,
-/// and the checks below make sure the user alone passes none of the roles
-/// needed, so others sharing control must sign too.
-///
-/// Moving XRD out of an access controller's recovery fee vault isn't allowed:
-/// it can deposit into any account, which needs no authorization of its own.
-fn is_allowed_in_pre_authorizations(class: &DetailedManifestClass) -> bool {
-    matches!(
-        class,
-        DetailedManifestClass::AccessControllerRecovery { .. }
-            | DetailedManifestClass::AccessControllerTimedRecovery { .. }
-            | DetailedManifestClass::AccessControllerConfirmRecovery { .. }
-            | DetailedManifestClass::AccessControllerCancelRecovery { .. }
-            | DetailedManifestClass::AccessControllerPrimaryRoleLock { .. }
-    )
-}
-
-/// The rules `class` makes the rules of access controllers, or lets become
-/// them, as the review shows them. Not those of a timed recovery it stops:
-/// stopping enacts nothing, and it must stay possible whatever was proposed.
-fn rules_to_enact(
-    class: &DetailedManifestClass,
-) -> Vec<&AccessControllerRuleSetForDisplay> {
-    match class {
-        DetailedManifestClass::AccessControllerRecovery {
-            recovery_proposals,
-            ..
-        } => recovery_proposals
-            .iter()
-            .map(|proposal| &proposal.proposed_rules)
-            .collect(),
-        DetailedManifestClass::AccessControllerTimedRecovery {
-            timed_recoveries,
-            ..
-        } => timed_recoveries
-            .iter()
-            .map(|recovery| &recovery.proposed_rules)
-            .collect(),
-        DetailedManifestClass::AccessControllerConfirmRecovery {
-            confirmations,
-            ..
-        } => confirmations
-            .iter()
-            .map(|confirmation| &confirmation.proposed_rules)
-            .collect(),
-        _ => Vec::new(),
-    }
-}
-
-/// Whether `class` enacts rules that count a holder more than once, e.g.
-/// "any 2 of these 3" with one key listed twice, which that key passes
-/// alone: the review would show control as shared when it isn't.
-fn enacts_rules_with_overlapping_entries(
-    class: &DetailedManifestClass,
-) -> bool {
-    rules_to_enact(class)
-        .into_iter()
-        .any(AccessControllerRuleSetForDisplay::has_overlapping_entries)
-}
-
-/// Whether `auth_zone` alone passes any role of any of `access_controllers`,
-/// with their current `rule_sets`. An access controller without known rules
-/// counts as passed.
-fn can_pass_any_role_alone(
-    access_controllers: &IndexSet<AccessControllerAddress>,
-    rule_sets: &IndexMap<AccessControllerAddress, AccessControllerRuleSet>,
-    auth_zone: &AuthZone,
-) -> bool {
-    access_controllers.iter().any(|access_controller| {
-        rule_sets.get(access_controller).is_none_or(|rule_set| {
-            [
-                &rule_set.primary_role,
-                &rule_set.recovery_role,
-                &rule_set.confirmation_role,
-            ]
-            .into_iter()
-            .any(|role| role.is_satisfied_by(auth_zone))
-        })
-    })
-}
-
-/// What the user can prove alone in a pre-authorization: the signatures of
-/// the keys it is signed with, see [`OsMfaSigningKeys`].
-fn auth_zone_of(keys: Vec<MfaSigningKey>) -> AuthZone {
-    AuthZone {
-        implicit_non_fungibles: keys.into_iter().map(|key| key.badge).collect(),
-        proofs: Vec::new(),
-    }
-}
-
 pub(crate) trait OsValidatePreAuthAccessControllerCalls {
     fn validate_pre_auth_access_controller_calls(
         &self,
@@ -106,23 +14,11 @@ pub(crate) trait OsValidatePreAuthAccessControllerCalls {
 }
 
 impl OsValidatePreAuthAccessControllerCalls for SargonOS {
-    /// Access controller methods are reserved: a dApp may call them in a
-    /// pre-authorization only on an access controller the user controls
-    /// together with others, never one they control alone. So the calls are
-    /// allowed only when:
-    /// * the manifest is classified as an access controller operation allowed
-    ///   in pre-authorizations, see [`is_allowed_in_pre_authorizations`], so
-    ///   it makes no other calls;
-    /// * the rules it enacts name each holder once per group, see
-    ///   [`enacts_rules_with_overlapping_entries`], so they read as what
-    ///   they are;
-    /// * no account or persona needs to authorize it, so the keys below are
-    ///   the only authority the user adds;
-    /// * the keys the pre-authorization is signed with alone pass no role of
-    ///   the access controllers called. Whether an access controller's
-    ///   entity is in the user's Profile doesn't matter: a shared account
-    ///   can be there too. Their current rules come from
-    ///   `access_controllers_on_ledger`, as read for the review.
+    /// Allows the access controller calls of a pre-authorization only on
+    /// access controllers the user controls together with others, see
+    /// [`shared_control_refusal`], with their current rules from
+    /// `access_controllers_on_ledger`, as read for the review. Signing checks
+    /// the same again.
     ///
     /// Errors with the reserved instructions otherwise.
     fn validate_pre_auth_access_controller_calls(
@@ -135,56 +31,23 @@ impl OsValidatePreAuthAccessControllerCalls for SargonOS {
             AccessControllerStateDetails,
         >,
     ) -> Result<()> {
-        let reject = |reason: &str| {
-            warn!("Pre-auth access controller calls rejected: {reason}");
-            Err(CommonError::ReservedInstructionsNotAllowedInManifest {
-                reserved_instructions: summary
-                    .reserved_instructions
-                    .iter()
-                    .map(|i| i.to_string())
-                    .collect(),
-            })
+        let Some(reason) = shared_control_refusal(
+            execution_summary.detailed_classification.as_ref(),
+            summary,
+            access_controllers_on_ledger,
+            self.mfa_signing_keys()?,
+            manifest.network_id(),
+        ) else {
+            return Ok(());
         };
-
-        let Some(class) = execution_summary
-            .detailed_classification
-            .as_ref()
-            .filter(|class| is_allowed_in_pre_authorizations(class))
-        else {
-            return reject(
-                "not classified as an access controller operation allowed in pre-authorizations",
-            );
-        };
-        if enacts_rules_with_overlapping_entries(class) {
-            return reject("the rules to enact count a holder more than once");
-        }
-        if !summary.addresses_of_accounts_requiring_auth.is_empty()
-            || !summary.addresses_of_personas_requiring_auth.is_empty()
-        {
-            return reject("an account or persona needs to authorize it");
-        }
-        let access_controllers = summary
-            .access_controllers_called
-            .iter()
-            .copied()
-            .collect::<IndexSet<_>>();
-
-        let network_id = manifest.network_id();
-        // An access controller whose rules weren't read is left out, which
-        // counts as the user passing its roles alone.
-        let rule_sets = access_controllers_on_ledger
-            .values()
-            .filter_map(|details| {
-                let rule_set = details.rule_set().ok()?;
-                Some((details.address, (rule_set, network_id).into()))
-            })
-            .collect();
-        let auth_zone = auth_zone_of(self.mfa_signing_keys()?);
-        if can_pass_any_role_alone(&access_controllers, &rule_sets, &auth_zone)
-        {
-            return reject("the user's signing keys alone pass a role");
-        }
-        Ok(())
+        warn!("Pre-auth access controller calls rejected: {reason}");
+        Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+            reserved_instructions: summary
+                .reserved_instructions
+                .iter()
+                .map(|i| i.to_string())
+                .collect(),
+        })
     }
 }
 

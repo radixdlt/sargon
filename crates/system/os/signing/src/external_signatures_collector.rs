@@ -259,12 +259,14 @@ fn role_requirement(
 /// - for each access controller it calls, e.g. to propose a recovery of a
 ///   shared account, those the roles its calls need name, read from the
 ///   subintent's `classification` (see [`pre_authorization_access_controller_roles`]),
-///   under the entity it controls. Without a classification, those any of its
-///   roles names.
+///   under the entity it controls. Unless the classification is shared
+///   control, the only calls allowed are the `create_proof`s the wallet adds,
+///   so those its primary role names.
 ///
-/// Signing with them can't hand over an entity on its own: pre-authorizations
-/// calling an access controller are rejected if the wallet's keys alone pass
-/// any of its roles.
+/// Signing with them can't hand over an entity on its own: shared control is
+/// checked again here with the rules just read (see
+/// [`shared_control_refusal`]), and refused if the wallet's keys alone pass
+/// any role.
 pub(crate) async fn resolve_external_accounts_for_subintent(
     os: &SargonOS,
     subintent: &Subintent,
@@ -276,10 +278,11 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
 
     let external_accounts = summary
         .addresses_of_accounts_requiring_auth
-        .into_iter()
+        .iter()
+        .copied()
         .filter(|address| profile.account_by_address(*address).is_err())
         .collect_vec();
-    let called_access_controllers = summary.access_controllers_called;
+    let called_access_controllers = summary.access_controllers_called.clone();
     if external_accounts.is_empty() && called_access_controllers.is_empty() {
         debug!(
             "No external accounts or access controllers detected for subintent"
@@ -367,8 +370,43 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .or_default()
             .extend(required_nft_ids);
     }
-    let roles_to_sign_for =
-        classification.and_then(pre_authorization_access_controller_roles);
+    // Calls on access controllers are signed for only as shared control, which
+    // is checked again here with the rules just read, or, otherwise, only the
+    // `create_proof` the wallet adds for an entity an access controller holds,
+    // which needs its primary role.
+    let shared_control_class = classification
+        .filter(|class| is_allowed_in_pre_authorizations(class));
+    let reject = |reason: &str| {
+        warn!("Pre-auth access controller calls rejected at signing: {reason}");
+        Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+            reserved_instructions: summary
+                .reserved_instructions
+                .iter()
+                .map(|i| i.to_string())
+                .collect(),
+        })
+    };
+    let roles_to_sign_for = match shared_control_class {
+        Some(class) => {
+            if let Some(reason) = shared_control_refusal(
+                Some(class),
+                &summary,
+                &access_controller_details,
+                os.mfa_signing_keys()?,
+                network_id,
+            ) {
+                return reject(reason);
+            }
+            pre_authorization_access_controller_roles(class)
+        }
+        None if !subintent
+            .manifest
+            .only_creates_proofs_on(&called_access_controllers) =>
+        {
+            return reject("access controller calls without shared control");
+        }
+        None => None,
+    };
     for access_controller in called_access_controllers {
         let controlled = access_controller_details
             .get(&access_controller)
@@ -378,7 +416,6 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
             .and_then(|roles| roles.get(&access_controller));
         match (controlled, rules_of(&access_controller)) {
             (Some(entity), Some(rules)) => {
-                // Without a classification describing it, every role's.
                 let badges = match roles {
                     Some(roles) => roles
                         .iter()
@@ -386,7 +423,8 @@ pub(crate) async fn resolve_external_accounts_for_subintent(
                             role_requirement(&rules, *role).non_fungibles()
                         })
                         .collect(),
-                    None => rules.non_fungibles(),
+                    // Only the wallet's `create_proof`.
+                    None => rules.primary_role.non_fungibles(),
                 };
                 requirements.entry(entity).or_default().extend(badges);
             }
@@ -742,6 +780,20 @@ mod tests {
         call: &str,
         classification: Option<DetailedManifestClass>,
     ) -> HashSet<NonFungibleGlobalId> {
+        keys_signed_for_call_with_args_on_access_controller(
+            call,
+            "Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>()) Enum<0u8>()",
+            classification,
+        )
+        .await
+        .unwrap()
+    }
+
+    async fn keys_signed_for_call_with_args_on_access_controller(
+        call: &str,
+        args: &str,
+        classification: Option<DetailedManifestClass>,
+    ) -> Result<HashSet<NonFungibleGlobalId>> {
         use prelude::fixture_gw_model;
 
         let os = SargonOS::boot_test_with_networking_driver(Arc::new(
@@ -771,8 +823,7 @@ mod tests {
                 CALL_METHOD
                     Address("{}")
                     "{call}"
-                    Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>())
-                    Enum<0u8>();
+                    {args};
                 YIELD_TO_PARENT;
                 "#,
                 shared_access_controller()
@@ -797,8 +848,7 @@ mod tests {
             &subintent,
             classification.as_ref(),
         )
-        .await
-        .unwrap();
+        .await?;
 
         assert_eq!(resolved.len(), 1);
         assert_eq!(
@@ -810,7 +860,7 @@ mod tests {
                 .unwrap()
             )
         );
-        resolved[0].required_nft_ids.iter().cloned().collect()
+        Ok(resolved[0].required_nft_ids.iter().cloned().collect())
     }
 
     fn shared_access_controller() -> AccessControllerAddress {
@@ -828,24 +878,38 @@ mod tests {
     }
 
     /// A subintent calling an access controller directly, e.g. to propose a
-    /// recovery of the shared account it controls, touches no account, yet
-    /// needs the keys the access controller's roles name: those are what the
-    /// wallet signs with, under the account it controls. Without a
-    /// classification saying which roles its calls need, every role's.
+    /// recovery of the shared account it controls, is signed only as shared
+    /// control: without a classification saying so, it is refused.
     #[actix_rt::test]
-    async fn called_access_controller_without_classification_requires_every_roles_keys(
-    ) {
+    async fn called_access_controller_without_classification_is_refused() {
         assert_eq!(
-            keys_signed_for_call_on_access_controller(
+            keys_signed_for_call_with_args_on_access_controller(
                 "initiate_recovery_as_recovery",
+                "Tuple(Enum<1u8>(), Enum<1u8>(), Enum<1u8>()) Enum<0u8>()",
                 None
             )
             .await,
-            HashSet::from([
-                shared_account_key("b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"),
-                shared_account_key("fd1fdc334ff599f43da12459e733579c74a8797e92161a7e8847a8eea4"),
-                shared_account_key("76541ca712dcdccc5f176a50d7f90b3cf560124e69d5062974a1dd7111"),
-            ])
+            Err(CommonError::ReservedInstructionsNotAllowedInManifest {
+                reserved_instructions: "AccessControllerMethod".to_owned()
+            })
+        );
+    }
+
+    /// The `create_proof` the wallet adds for the account an access
+    /// controller holds needs only its primary role: an ordinary
+    /// pre-authorization isn't signed for the recovery or confirmation roles.
+    #[actix_rt::test]
+    async fn create_proof_without_classification_requires_only_primary_keys() {
+        assert_eq!(
+            keys_signed_for_call_with_args_on_access_controller(
+                "create_proof",
+                "",
+                Some(DetailedManifestClass::General)
+            )
+            .await,
+            Ok(HashSet::from([shared_account_key(
+                "b236b78acd067cc4c4c3f5fb686c7f4a765d6cb3cd2ddfd25310fec1a0"
+            )]))
         );
     }
 

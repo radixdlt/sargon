@@ -16,6 +16,7 @@ pub mod prelude {
     pub(crate) use radix_engine_interface::prelude::AccessRule as ScryptoAccessRule;
     pub(crate) use sargon_os::prelude::*;
     pub(crate) use sargon_os_factors::prelude::{
+        is_allowed_in_pre_authorizations, shared_control_refusal,
         AccessControllerRuleSet, AccessRequirement, GatewayClient,
         OsMfaSigningKeys,
     };

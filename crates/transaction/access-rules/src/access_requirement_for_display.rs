@@ -190,26 +190,81 @@ impl AccessRequirementForDisplay {
 }
 
 impl AccessRequirementForDisplay {
-    /// Whether a group lists two entries the same holder passes together:
-    /// the same badge or the same factor of the user twice, or a resource
-    /// next to one of its own non-fungibles or amounts.
+    /// Whether a group is passed by a single holder although it reads as
+    /// needing several, or lists the same holder twice.
     ///
-    /// The engine counts every entry, so such a group passes with fewer
-    /// holders than it lists: "any 2 of these 3" is passed alone by the key
-    /// listed twice. A rule that names each holder once never has them, so
-    /// one that does must not be shown as if it were shared.
+    /// The engine counts every entry, so a group that names a holder more
+    /// than once passes with fewer holders than it lists: "any 2 of these 3"
+    /// is passed alone by the key listed twice, and "all of (A or B) and
+    /// (A or C)" by A alone. A holder is a factor of the user, a non-fungible,
+    /// or a resource with its non-fungibles and amounts. A rule that names
+    /// each holder once per group never has them, so one that does must not
+    /// be shown as if it were shared.
     pub fn has_overlapping_entries(&self) -> bool {
         match self {
             Self::Anyone
             | Self::NoOne
             | Self::Badge { .. }
             | Self::AmountOf { .. } => false,
-            Self::AnyOf { requirements } | Self::AllOf { requirements } => {
+            Self::AnyOf { requirements } => {
                 any_overlap(requirements.iter().filter_map(Self::passed_with))
+                    || requirements.iter().any(Self::has_overlapping_entries)
+            }
+            Self::AllOf { requirements } => {
+                any_overlap(requirements.iter().filter_map(Self::passed_with))
+                    || self.is_passed_by_one_holder()
                     || requirements.iter().any(Self::has_overlapping_entries)
             }
             Self::CountOf { badges, .. } => {
                 any_overlap(badges.iter().map(BadgeForDisplay::passed_with))
+                    || self.is_passed_by_one_holder()
+            }
+        }
+    }
+
+    /// Whether a holder named in this group passes it alone.
+    fn is_passed_by_one_holder(&self) -> bool {
+        self.holders()
+            .into_iter()
+            .any(|holder| self.is_passed_by(&holder))
+    }
+
+    /// Every holder this requirement names, at any depth.
+    fn holders(&self) -> Vec<PassedWith<'_>> {
+        match self {
+            Self::Anyone | Self::NoOne => Vec::new(),
+            Self::Badge { .. } | Self::AmountOf { .. } => {
+                self.passed_with().into_iter().collect()
+            }
+            Self::AnyOf { requirements } | Self::AllOf { requirements } => {
+                requirements.iter().flat_map(Self::holders).collect()
+            }
+            Self::CountOf { badges, .. } => {
+                badges.iter().map(BadgeForDisplay::passed_with).collect()
+            }
+        }
+    }
+
+    /// Whether `holder` alone passes this requirement.
+    fn is_passed_by(&self, holder: &PassedWith<'_>) -> bool {
+        match self {
+            Self::Anyone => true,
+            Self::NoOne => false,
+            Self::Badge { .. } | Self::AmountOf { .. } => self
+                .passed_with()
+                .is_some_and(|entry| holder.passes(&entry)),
+            Self::AnyOf { requirements } => requirements
+                .iter()
+                .any(|requirement| requirement.is_passed_by(holder)),
+            Self::AllOf { requirements } => requirements
+                .iter()
+                .all(|requirement| requirement.is_passed_by(holder)),
+            Self::CountOf { count, badges } => {
+                badges
+                    .iter()
+                    .filter(|badge| holder.passes(&badge.passed_with()))
+                    .count()
+                    >= *count as usize
             }
         }
     }
@@ -233,6 +288,30 @@ enum PassedWith<'a> {
     NonFungible(&'a NonFungibleGlobalId),
     /// Any proof of the resource, or one of an amount of it.
     Resource(&'a ResourceAddress),
+}
+
+impl PassedWith<'_> {
+    /// Whether a holder of `self` passes `entry`: the same factor or
+    /// non-fungible, or a resource, which a holder of one of its
+    /// non-fungibles also passes. Holding "any of a resource" doesn't say
+    /// which non-fungibles, so it passes no non-fungible entry.
+    fn passes(&self, entry: &PassedWith<'_>) -> bool {
+        match (self, entry) {
+            (Self::OwnFactor(holder), PassedWith::OwnFactor(entry)) => {
+                holder == entry
+            }
+            (Self::NonFungible(holder), PassedWith::NonFungible(entry)) => {
+                holder == entry
+            }
+            (Self::NonFungible(holder), PassedWith::Resource(entry)) => {
+                holder.resource_address == **entry
+            }
+            (Self::Resource(holder), PassedWith::Resource(entry)) => {
+                holder == entry
+            }
+            _ => false,
+        }
+    }
 }
 
 /// Whether two of `entries` are passed with the same thing: the same factor
@@ -515,6 +594,124 @@ mod tests {
         assert!(at_least(
             1,
             [badge(&c), at_least(2, [badge(&a), badge(&a), badge(&b)])]
+        )
+        .for_display()
+        .has_overlapping_entries());
+    }
+
+    /// "All of (a or b) and (a or c)" reads as two groups agreeing, but `a`
+    /// alone passes both.
+    #[test]
+    fn a_holder_in_every_group_of_an_all_of_is_an_overlap() {
+        let [a, b, c] = nfts();
+        let alone = AuthZone {
+            implicit_non_fungibles: [a.clone()].into(),
+            proofs: vec![],
+        };
+        let resource = a.resource_address;
+        let any_of_resource = AccessRequirement::Badge {
+            badge: ResourceOrNonFungible::Resource { value: resource },
+        };
+        let other = NonFungibleGlobalId::sample_other();
+
+        for (requirement, passed_alone) in [
+            (
+                at_least(
+                    2,
+                    [
+                        at_least(1, [badge(&a), badge(&b)]),
+                        at_least(1, [badge(&a), badge(&c)]),
+                    ],
+                ),
+                true,
+            ),
+            (at_least(2, [badge(&a), at_least(1, [badge(&a), badge(&b)])]), true),
+            // A proof of `a` is also one of its resource.
+            (
+                at_least(
+                    2,
+                    [any_of_resource, at_least(1, [badge(&a), badge(&other)])],
+                ),
+                false,
+            ),
+            // Deeper: the all-of sits in an any-of.
+            (
+                at_least(
+                    1,
+                    [
+                        badge(&other),
+                        at_least(
+                            2,
+                            [
+                                at_least(1, [badge(&a), badge(&b)]),
+                                at_least(1, [badge(&a), badge(&c)]),
+                            ],
+                        ),
+                    ],
+                ),
+                true,
+            ),
+        ] {
+            assert_eq!(requirement.is_satisfied_by(&alone), passed_alone);
+            assert!(requirement.for_display().has_overlapping_entries());
+        }
+    }
+
+    /// "Any 3 of a, a, b, c": `a` alone doesn't pass it, but `a` and `b`
+    /// do, while it reads as needing three.
+    #[test]
+    fn a_badge_listed_twice_in_a_larger_group_is_an_overlap() {
+        let [a, b, c] = nfts();
+        assert!(at_least(3, [badge(&a), badge(&a), badge(&b), badge(&c)])
+            .for_display()
+            .has_overlapping_entries());
+        assert!(at_least(3, [badge(&a), badge(&b), badge(&a)])
+            .for_display()
+            .has_overlapping_entries());
+    }
+
+    /// "All of (any of the resource) and (any 2 of 3 of its NFTs)" needs a
+    /// proof of the resource and two NFTs: no single NFT holder passes it.
+    #[test]
+    fn a_resource_and_a_count_of_its_nfts_is_no_overlap() {
+        let [a, b, c] = nfts();
+        let any_of_resource = AccessRequirement::Badge {
+            badge: ResourceOrNonFungible::Resource {
+                value: a.resource_address,
+            },
+        };
+        assert!(!at_least(
+            2,
+            [
+                any_of_resource,
+                at_least(2, [badge(&a), badge(&b), badge(&c)])
+            ]
+        )
+        .for_display()
+        .has_overlapping_entries());
+    }
+
+    /// Each group needs two different holders.
+    #[test]
+    fn groups_sharing_no_holder_alone_are_no_overlap() {
+        let [a, b, c] = nfts();
+        let other = NonFungibleGlobalId::sample_other();
+        assert!(!at_least(
+            2,
+            [
+                at_least(1, [badge(&a), badge(&b)]),
+                at_least(1, [badge(&c), badge(&other)]),
+            ],
+        )
+        .for_display()
+        .has_overlapping_entries());
+        // `a` is in both "all of" groups, but alone passes neither.
+        assert!(!at_least(
+            1,
+            [
+                at_least(2, [badge(&a), badge(&b)]),
+                at_least(2, [badge(&a), badge(&c)]),
+            ],
         )
         .for_display()
         .has_overlapping_entries());

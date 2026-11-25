@@ -2,7 +2,10 @@ use crate::prelude::*;
 use std::collections::HashMap;
 
 /// The user's factor sources by the signature badge of each key in the
-/// Profile's MFA factor instances, on any network.
+/// Profile's MFA factor instances on the current network: the keys the wallet
+/// signs with there, see [`OsMfaSigningKeys`]. A key used on another network
+/// has the same badge, but the wallet never signs with it here, so it must
+/// not be shown as the user's.
 ///
 /// The MFA factor instances are the Profile's registry of keys: the keys in
 /// an entity's security state describe a structure the ledger may no longer
@@ -27,8 +30,9 @@ impl From<&Profile> for OwnFactorSources {
     fn from(profile: &Profile) -> Self {
         Self(
             profile
-                .networks
-                .iter()
+                .current_network()
+                .ok()
+                .into_iter()
                 .flat_map(|network| {
                     network.mfa_factor_instances.iter().collect_vec()
                 })

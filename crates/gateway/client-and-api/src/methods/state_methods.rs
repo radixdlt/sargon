@@ -618,33 +618,52 @@ impl GatewayClient {
         &self,
         ac_addresses: Vec<AccessControllerAddress>,
     ) -> Result<Vec<AccessControllerStateDetails>> {
-        let ledger_state = self.gateway_status().await?.ledger_state;
-        let request = StateEntityDetailsRequest::new(
-            ac_addresses
-                .clone()
-                .into_iter()
-                .map(|ac| ac.into())
-                .collect(),
-            Some(ledger_state.into()),
-            None,
-        )
-        // The owner badge's id says which entity the access controller
-        // controls.
-        .per_vault_with_non_fungible_ids();
+        let ledger_state: LedgerStateSelector =
+            self.gateway_status().await?.ledger_state.into();
+        let items = self
+            .batch_fetch_chunking(
+                GATEWAY_ENTITY_DETAILS_CHUNK_ADDRESSES,
+                ac_addresses.clone(),
+                |chunk: Vec<AccessControllerAddress>| {
+                    StateEntityDetailsRequest::new(
+                        chunk.into_iter().map(Into::into).collect(),
+                        Some(ledger_state.clone()),
+                        None,
+                    )
+                    // The owner badge's id says which entity the access
+                    // controller controls.
+                    .per_vault_with_non_fungible_ids()
+                },
+                |request| self.state_entity_details(request),
+                |responses| {
+                    Ok(responses
+                        .into_iter()
+                        .flat_map(|response| response.items)
+                        .collect_vec())
+                },
+            )
+            .await?;
 
-        let response = self.state_entity_details(request).await?;
+        ac_addresses
+            .into_iter()
+            .map(|ac_address| {
+                let item = Self::access_controller_item(&items, ac_address)?;
+                Self::parse_access_controller_item(item, ac_address)
+            })
+            .collect()
+    }
 
-        let mut result = Vec::with_capacity(ac_addresses.len());
-        for ac_address in ac_addresses.into_iter() {
-            let item = response
-                .items
-                .iter()
-                .find(|item| item.address == ac_address.into())
-                .unwrap();
-            result.push(Self::parse_access_controller_item(item, ac_address)?);
-        }
-
-        Ok(result)
+    /// The item of `ac_address` in a Gateway response.
+    fn access_controller_item(
+        items: &[StateEntityDetailsResponseItem],
+        ac_address: AccessControllerAddress,
+    ) -> Result<&StateEntityDetailsResponseItem> {
+        items
+            .iter()
+            .find(|item| item.address == ac_address.into())
+            .ok_or(CommonError::GWMissingResponseItem {
+                item: format!("StateEntityDetailsResponseItem {ac_address}"),
+            })
     }
 
     pub async fn fetch_access_controller_details(
@@ -659,12 +678,7 @@ impl GatewayClient {
         .per_vault_with_non_fungible_ids();
 
         let response = self.state_entity_details(request).await?;
-
-        let item = response
-            .items
-            .iter()
-            .find(|item| item.address == ac_address.into())
-            .unwrap();
+        let item = Self::access_controller_item(&response.items, ac_address)?;
 
         Self::parse_access_controller_item(item, ac_address)
     }
@@ -678,7 +692,9 @@ impl GatewayClient {
             .clone()
             .and_then(|detail| detail.as_component().cloned())
             .and_then(|component| component.state.clone())
-            .unwrap();
+            .ok_or(CommonError::GWMissingResponseItem {
+                item: format!("Access controller state of {ac_address}"),
+            })?;
 
         let ac_state: AccessControllerFieldStateValue =
             serde_json::from_str(&raw_maybe_ac_state).map_err(|e| {
@@ -725,7 +741,9 @@ impl GatewayClient {
                     ResourceAddress::new_from_node_id(badge, network_id).ok()
                 })
                 .collect_vec();
-        let controlled_entity = item
+        // `AccessController::create` takes any bucket, so it may hold the
+        // owner badges of several entities.
+        let controlled_entities = item
             .non_fungible_resources
             .iter()
             .flat_map(|resources| resources.items.iter())
@@ -734,16 +752,22 @@ impl GatewayClient {
                 owner_badges.contains(&resource.resource_address)
             })
             .flat_map(|resource| resource.non_fungible_ids())
-            .find_map(|local_id| {
+            .filter_map(|local_id| {
                 AddressOfAccountOrPersona::try_from((local_id, network_id)).ok()
-            });
+            })
+            .unique()
+            .collect_vec();
 
         Ok(AccessControllerStateDetails {
             address: ac_address,
             state: ac_state,
             xrd_balance: xrd_amount,
             role_assignments,
-            controlled_entity,
+            controlled_entity: match controlled_entities.as_slice() {
+                [entity] => Some(*entity),
+                _ => None,
+            },
+            controlled_entities,
         })
     }
 }

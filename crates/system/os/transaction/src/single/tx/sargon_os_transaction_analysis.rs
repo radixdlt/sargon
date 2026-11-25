@@ -257,13 +257,13 @@ impl OsExecutionSummary for SargonOS {
             .iter()
             .filter_map(|a| self.account_by_address(*a).ok())
             .map(AccountOrPersona::from)
+            // A persona not in the Profile is others' to prove, as an
+            // account is.
             .chain(
                 manifest_summary
                     .addresses_of_personas_requiring_auth
                     .iter()
-                    .map(|i| self.persona_by_address(*i))
-                    .collect::<Result<Vec<_>>>()?
-                    .into_iter()
+                    .filter_map(|i| self.persona_by_address(*i).ok())
                     .map(AccountOrPersona::from),
             )
             .collect::<Vec<_>>();
@@ -347,7 +347,19 @@ impl OsExecutionSummary for SargonOS {
             });
         }
 
-        with_own_factor_sources(self, execution_summary)
+        let execution_summary = with_own_factor_sources(self, execution_summary)?;
+
+        // A dApp may create a shared account; its rules must read as what
+        // they are, as those a pre-authorization enacts must.
+        if let Some(
+            class @ DetailedManifestClass::SecurifiedEntityCreation { .. },
+        ) = &execution_summary.detailed_classification
+            && enacts_rules_with_overlapping_entries(class)
+        {
+            return Err(CommonError::AccessRulesCountAHolderTwice);
+        }
+
+        Ok(execution_summary)
     }
 
     fn map_failed_transaction_preview(
