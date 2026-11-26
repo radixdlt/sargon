@@ -8,8 +8,9 @@ pub const MAX_EPOCH_DIFF: u64 = 30 * 24 * 60 * 60 / EPOCH_DURATION_IN_SECONDS;
 /// 1 more for the fact that we might be very close to the end of the epoch already
 pub const MIN_EPOCH_DIFF: u64 = 2;
 
-/// Amount of items that should be requested on each page.
-pub const GATEWAY_PAGE_REQUEST_LIMIT: u64 = 25;
+/// Amount of items that should be requested on each page: the Gateway's maximum (and default)
+/// page size, as used by the wallets.
+pub const GATEWAY_PAGE_REQUEST_LIMIT: u64 = 100;
 
 /// Max amount of transfers that can be included in one single transaction.
 pub const MAX_TRANSFERS_PER_TRANSACTION: u64 = 50;
