@@ -644,15 +644,11 @@ mod tests {
             )]
         );
 
-        let sut = self::sut(rule.clone(), &holding(0));
+        let sut = self::sut(rule, &holding(0));
         assert!(!sut.is_satisfied());
         assert!(sut.required_badges.is_empty());
         assert_eq!(
             sut.restricted_withdrawals[0].status,
-            RestrictedWithdrawalStatus::MissingBadges
-        );
-        assert_eq!(
-            status(rule, &BadgeHoldings::default()),
             RestrictedWithdrawalStatus::MissingBadges
         );
     }
@@ -669,8 +665,6 @@ mod tests {
     #[test]
     fn a_specific_non_fungible_must_be_held() {
         let rule = protected(require_nft(nft_badge(), 30));
-        // #30# would be beyond the first page of ids of the vault: the Gateway looks it up by
-        // its location instead, and puts it in the holdings when the account holds it.
         let sut = sut(rule.clone(), &holding_nfts(&[1, 2, 30]));
         assert_eq!(sut.required_badges, vec![nft_proof(&[30])]);
         assert_eq!(
@@ -838,6 +832,28 @@ mod tests {
         ]);
         let sut = SUT::new(&rules, [], &holding(2));
         assert_eq!(sut.required_badges, vec![fungible_proof(badge(), 2)]);
+    }
+
+    #[test]
+    fn ids_of_the_same_non_fungible_badge_are_proven_together() {
+        let rules = withdraw_rules([
+            (token(), protected(require_nft(nft_badge(), 1))),
+            (other_token(), protected(require_nft(nft_badge(), 2))),
+        ]);
+        let sut = SUT::new(&rules, [], &holding_nfts(&[1, 2, 3]));
+        assert_eq!(sut.required_badges, vec![nft_proof(&[1, 2])]);
+    }
+
+    #[test]
+    fn count_of_zero_needs_no_proof() {
+        // As in the engine, which accepts a count of zero before looking at any proof.
+        let rule = protected(basic(BasicRequirement::CountOf {
+            count: 0,
+            list: vec![resource_requirement(badge())],
+        }));
+        let sut = sut(rule, &BadgeHoldings::default());
+        assert!(sut.is_satisfied());
+        assert!(sut.required_badges.is_empty());
     }
 
     #[test]

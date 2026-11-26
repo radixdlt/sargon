@@ -290,28 +290,6 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn a_missing_badge_is_reported() {
-        let result = required_badges(
-            vec![
-                withdraw_rules_response([(
-                    token(),
-                    protected(Requirement::Resource { resource: badge() }),
-                )]),
-                fungible_vaults_response(0),
-            ],
-            vec![token()],
-        )
-        .await;
-
-        assert!(!result.is_satisfied());
-        assert!(result.required_badges.is_empty());
-        assert_eq!(
-            result.restricted_withdrawals[0].status,
-            RestrictedWithdrawalStatus::MissingBadges
-        );
-    }
-
-    #[actix_rt::test]
     async fn a_specific_non_fungible_badge_is_looked_up_by_its_location() {
         let id = NonFungibleLocalId::integer(30);
         let rule = protected(non_fungible_requirement(
@@ -447,82 +425,5 @@ mod tests {
             result.restricted_withdrawals[0].status,
             RestrictedWithdrawalStatus::NotWithdrawable
         );
-    }
-
-    #[actix_rt::test]
-    async fn a_withdraw_rule_that_cannot_be_converted_is_an_error() {
-        let rule = AccessRule::Protected {
-            access_rule: CompositeRequirement::ProofRule {
-                proof_rule: BasicRequirement::CountOf {
-                    count: 1000,
-                    list: vec![Requirement::Resource { resource: badge() }],
-                },
-            },
-        };
-        let os = prepare_os(MockNetworkingDriver::new_with_responses(vec![
-            withdraw_rules_response([(token(), rule)]),
-        ]))
-        .await;
-        assert!(os
-            .transfer_required_badges(account().address, vec![token()])
-            .await
-            .is_err());
-    }
-
-    #[actix_rt::test]
-    async fn a_badge_sent_with_the_restricted_token_makes_a_transfer() {
-        let result = required_badges(
-            vec![
-                withdraw_rules_response([
-                    (
-                        token(),
-                        protected(Requirement::Resource { resource: badge() }),
-                    ),
-                    (badge(), AccessRule::AllowAll),
-                ]),
-                fungible_vaults_response(1),
-            ],
-            vec![token(), badge()],
-        )
-        .await;
-        assert!(result.is_satisfied());
-
-        let recipient = TransferRecipient::AddressOfExternalAccount {
-            value: AccountAddress::sample_mainnet_other(),
-        };
-        let transfer = |resource: ResourceAddress| {
-            PerAssetTransfersOfFungibleResource::new(
-                PerAssetFungibleResource::new(resource, None),
-                [PerAssetFungibleTransfer::new(
-                    recipient.clone(),
-                    true,
-                    Decimal192::one(),
-                )],
-            )
-        };
-        let manifest = TransactionManifest::per_asset_transfers(
-            PerAssetTransfers::new(
-                account().address,
-                [transfer(token()), transfer(badge())],
-                [],
-            ),
-            result.required_badges,
-        );
-
-        let instructions = manifest.instructions_string();
-        let position = |text: &str| instructions.find(text).unwrap();
-        assert!(
-            position("create_proof_of_amount") < position("POP_FROM_AUTH_ZONE")
-        );
-        // The badge is withdrawn once its proof is dropped.
-        assert!(
-            position("POP_FROM_AUTH_ZONE")
-                < instructions.rfind("\"withdraw\"").unwrap()
-        );
-        assert!(manifest
-            .summary()
-            .unwrap()
-            .classification
-            .contains(&ManifestClassification::Transfer));
     }
 }

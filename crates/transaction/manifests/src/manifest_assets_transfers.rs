@@ -668,6 +668,29 @@ mod tests {
     }
 
     #[test]
+    fn every_badge_proof_is_dropped_before_the_badges_are_sent() {
+        // Two badges proven, one of them sent: exactly the two proofs created here are popped.
+        let (transfers, mut required_badges) =
+            restricted_token_with_badge(true);
+        required_badges.push(ResourceSpecifier::fungible(
+            ResourceAddress::sample_mainnet_other(),
+            Decimal::one(),
+        ));
+        let instructions = SUT::per_asset_transfers(transfers, required_badges)
+            .instructions_string();
+        assert_eq!(instructions.matches("create_proof_of_amount").count(), 2);
+        assert_eq!(instructions.matches("POP_FROM_AUTH_ZONE").count(), 2);
+        assert_eq!(instructions.matches("DROP_PROOF").count(), 2);
+        // Only the badge moves after the drops.
+        let after_drops =
+            &instructions[instructions.rfind("DROP_PROOF").unwrap()..];
+        assert!(after_drops
+            .contains(&ResourceAddress::sample_mainnet_candy().to_string()));
+        assert!(!after_drops
+            .contains(&ResourceAddress::sample_mainnet_xrd().to_string()));
+    }
+
+    #[test]
     fn non_fungible_badges_are_proven_by_id() {
         let nft_badge = ResourceAddress::sample_mainnet_nft_other();
         let transfers = PerAssetTransfers::new(
@@ -921,6 +944,18 @@ mod ledger_tests {
         setup: &mut Setup,
         amounts: Vec<(ScryptoAddress, u64)>,
     ) -> (TransactionReceipt, TransactionManifest) {
+        let badge = ResourceSpecifier::fungible(
+            sargon::<_, ResourceAddress>(setup.badge),
+            Decimal192::one(),
+        );
+        transfer_proving(setup, amounts, vec![badge])
+    }
+
+    fn transfer_proving(
+        setup: &mut Setup,
+        amounts: Vec<(ScryptoAddress, u64)>,
+        required_badges: Vec<ResourceSpecifier>,
+    ) -> (TransactionReceipt, TransactionManifest) {
         let sender: AccountAddress = sargon(setup.sender);
         let recipient = TransferRecipient::AddressOfExternalAccount {
             value: sargon(setup.recipient),
@@ -937,10 +972,7 @@ mod ledger_tests {
         });
         let transfer = TransactionManifest::per_asset_transfers(
             PerAssetTransfers::new(sender, fungibles, []),
-            vec![ResourceSpecifier::fungible(
-                sargon::<_, ResourceAddress>(setup.badge),
-                Decimal192::one(),
-            )],
+            required_badges,
         );
 
         let fee_payer: AccountAddress = sargon(setup.fee_payer);
@@ -985,6 +1017,15 @@ mod ledger_tests {
                 .unwrap(),
             NetworkID::Simulator,
         ))
+    }
+
+    #[test]
+    fn without_the_badge_proof_the_restricted_token_is_not_transferred() {
+        let mut setup = setup(false);
+        let token = setup.token;
+        let (receipt, _) =
+            transfer_proving(&mut setup, vec![(token, 10)], vec![]);
+        receipt.expect_commit_failure();
     }
 
     #[test]
