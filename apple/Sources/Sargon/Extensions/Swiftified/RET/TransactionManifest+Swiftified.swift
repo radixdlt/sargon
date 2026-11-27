@@ -36,10 +36,16 @@ extension TransactionManifest {
 		)
 	}
 
+	/// The manifest of `transfers`, proving `requiredBadges` (see `SargonOS.transferRequiredBadges`)
+	/// for the withdrawals of restricted resources.
 	public static func assetsTransfers(
-		transfers: PerAssetTransfers
+		transfers: PerAssetTransfers,
+		requiredBadges: [ResourceSpecifier] = []
 	) -> Self {
-		manifestPerAssetTransfers(transfers: transfers)
+		manifestPerAssetTransfers(
+			transfers: transfers,
+			requiredBadges: requiredBadges
+		)
 	}
 
 	public static func markingAccountAsDappDefinitionType(

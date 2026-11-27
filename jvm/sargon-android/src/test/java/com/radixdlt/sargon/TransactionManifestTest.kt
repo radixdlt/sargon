@@ -367,6 +367,56 @@ class TransactionManifestTest : SampleTestable<TransactionManifest> {
     }
 
     @Test
+    fun testPerAssetTransfersWithRequiredBadges() {
+        val transfers = PerAssetTransfers.sample()
+        val manifest = TransactionManifest.perAssetTransfers(
+            transfers = transfers,
+            requiredBadges = listOf(
+                ResourceSpecifier.Fungible(ResourceAddress.sampleMainnet.xrd, 10.toDecimal192())
+            )
+        )
+
+        // The ordering of the proofs is tested in Rust: here, only that the badges get through.
+        assertTrue(manifest.instructionsString.contains("create_proof_of_amount"))
+    }
+
+    @Test
+    fun testPerRecipientTransfersWithRequiredBadges() {
+        val manifest = TransactionManifest.perRecipientTransfers(
+            transfers = PerRecipientAssetTransfers(
+                addressOfSender = AccountAddress.init(
+                    "account_rdx128y6j78mt0aqv6372evz28hrxp8mn06ccddkr7xppc88hyvynvjdwr"
+                ),
+                transfers = listOf(
+                    PerRecipientAssetTransfer(
+                        recipient = TransferRecipient.AddressOfExternalAccount(
+                            value = AccountAddress.init(
+                                "account_rdx12xkzynhzgtpnnd02tudw2els2g9xl73yk54ppw8xekt2sdrlaer264"
+                            )
+                        ),
+                        fungibles = listOf(
+                            PerRecipientFungibleTransfer(
+                                useTryDepositOrAbort = false,
+                                amount = 100.toDecimal192(),
+                                divisibility = 18.toUByte(),
+                                resourceAddress = ResourceAddress.init(
+                                    validatingAddress = "resource_rdx1t4dy69k6s0gv040xa64cyadyefwtett62ng6xfdnljyydnml7t6g3j"
+                                )
+                            )
+                        ),
+                        nonFungibles = emptyList()
+                    )
+                )
+            ),
+            requiredBadges = listOf(
+                ResourceSpecifier.Fungible(ResourceAddress.sampleMainnet.xrd, 1.toDecimal192())
+            )
+        )
+
+        assertTrue(manifest.instructionsString.contains("create_proof_of_amount"))
+    }
+
+    @Test
     fun testPerRecipientTransfers() {
         val manifest =
             TransactionManifest.perRecipientTransfers(

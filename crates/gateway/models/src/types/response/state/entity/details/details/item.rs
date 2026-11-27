@@ -57,6 +57,25 @@ impl StateEntityDetailsResponseItemDetails {
         depositor_allows_all && withdrawer_allows_all
     }
 
+    /// The rule of who may withdraw this resource from a vault: its ("Main", "withdrawer") role,
+    /// or the owner's rule when the role is assigned to the owner. `None` when the entity has no
+    /// such role (it is not a resource).
+    pub fn withdrawer_rule(&self) -> Option<ExplicitRule> {
+        let role_assignments = self.role_assignments()?;
+        let withdrawer = role_assignments
+            .entries
+            .into_iter()
+            .find(|entry| entry.role_key == RoleKey::main_withdrawer())?;
+        match withdrawer.assignment.resolution {
+            RoleAssignmentResolution::Owner => {
+                Some(role_assignments.owner.rule)
+            }
+            RoleAssignmentResolution::Explicit => {
+                withdrawer.assignment.explicit_rule
+            }
+        }
+    }
+
     fn role_assignments(&self) -> Option<ComponentEntityRoleAssignments> {
         match self {
             Self::FungibleResource(details) => {
@@ -81,6 +100,45 @@ mod tests {
 
     #[allow(clippy::upper_case_acronyms)]
     type SUT = StateEntityDetailsResponseItemDetails;
+
+    #[test]
+    fn withdrawer_rule() {
+        let resource = |assignments| {
+            SUT::FungibleResource(
+                StateEntityDetailsResponseFungibleResourceDetails::new(
+                    assignments,
+                ),
+            )
+        };
+
+        // Explicit
+        assert_eq!(
+            resource(ComponentEntityRoleAssignments::sample_deny_all())
+                .withdrawer_rule(),
+            Some(ExplicitRule::DenyAll)
+        );
+        assert_eq!(
+            resource(ComponentEntityRoleAssignments::sample_allow_all())
+                .withdrawer_rule(),
+            Some(ExplicitRule::AllowAll)
+        );
+
+        // Assigned to the owner
+        let owner = ComponentEntityRoleAssignmentOwner::sample_protected();
+        let sut = resource(ComponentEntityRoleAssignments::new(
+            owner.clone(),
+            [ComponentEntityRoleAssignmentEntry::sample_withdrawer_owner_allow_all()],
+        ));
+        assert_eq!(sut.withdrawer_rule(), Some(owner.rule));
+
+        // No withdrawer role
+        let sut = resource(ComponentEntityRoleAssignments::new(
+            ComponentEntityRoleAssignmentOwner::sample_allow_all(),
+            [ComponentEntityRoleAssignmentEntry::sample_depositor_explicit_allow_all()],
+        ));
+        assert_eq!(sut.withdrawer_rule(), None);
+        assert_eq!(SUT::FungibleVault.withdrawer_rule(), None);
+    }
 
     #[test]
     #[allow(non_snake_case)]
